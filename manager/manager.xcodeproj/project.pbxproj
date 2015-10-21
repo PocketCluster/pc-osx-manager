@@ -123,12 +123,17 @@
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
 		0486781D1BCF5FE20071594B /* managerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0486781C1BCF5FE20071594B /* managerTests.m */; };
 		048678281BCF5FE20071594B /* managerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 048678271BCF5FE20071594B /* managerUITests.m */; };
-		04F7055C1BD7A69100829651 /* TaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F7055A1BD7A69100829651 /* TaskOutputWindow.m */; settings = {ASSET_TAGS = (); }; };
-		04F7055D1BD7A69100829651 /* TaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F7055A1BD7A69100829651 /* TaskOutputWindow.m */; settings = {ASSET_TAGS = (); }; };
-		04F7055E1BD7A69100829651 /* TaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F7055A1BD7A69100829651 /* TaskOutputWindow.m */; settings = {ASSET_TAGS = (); }; };
-		04F7055F1BD7A69100829651 /* TaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04F7055B1BD7A69100829651 /* TaskOutputWindow.xib */; settings = {ASSET_TAGS = (); }; };
-		04F705601BD7A69100829651 /* TaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04F7055B1BD7A69100829651 /* TaskOutputWindow.xib */; settings = {ASSET_TAGS = (); }; };
-		04F705611BD7A69100829651 /* TaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04F7055B1BD7A69100829651 /* TaskOutputWindow.xib */; settings = {ASSET_TAGS = (); }; };
+		04F705691BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; settings = {ASSET_TAGS = (); }; };
+		04F7056A1BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; settings = {ASSET_TAGS = (); }; };
+		04F7056B1BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; settings = {ASSET_TAGS = (); }; };
+		04F7056C1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705681BD7A94300829651 /* GCDAsyncUdpSocket.m */; settings = {ASSET_TAGS = (); }; };
+		04F7056D1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705681BD7A94300829651 /* GCDAsyncUdpSocket.m */; settings = {ASSET_TAGS = (); }; };
+		04F7056E1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705681BD7A94300829651 /* GCDAsyncUdpSocket.m */; settings = {ASSET_TAGS = (); }; };
+		04F705701BD7A9B700829651 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04F7056F1BD7A9B700829651 /* IOKit.framework */; };
+		04F705721BD7A9BD00829651 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04F705711BD7A9BD00829651 /* CoreFoundation.framework */; };
+		04F705761BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */; settings = {ASSET_TAGS = (); }; };
+		04F705771BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */; settings = {ASSET_TAGS = (); }; };
+		04F705781BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -258,9 +263,14 @@
 		048678231BCF5FE20071594B /* managerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = managerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		048678271BCF5FE20071594B /* managerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = managerUITests.m; sourceTree = "<group>"; };
 		048678291BCF5FE20071594B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		04F705591BD7A69100829651 /* TaskOutputWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TaskOutputWindow.h; sourceTree = "<group>"; };
-		04F7055A1BD7A69100829651 /* TaskOutputWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TaskOutputWindow.m; sourceTree = "<group>"; };
-		04F7055B1BD7A69100829651 /* TaskOutputWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TaskOutputWindow.xib; sourceTree = "<group>"; };
+		04F705641BD7A94300829651 /* BSONSerialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSONSerialization.h; sourceTree = "<group>"; };
+		04F705651BD7A94300829651 /* BSONSerialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSONSerialization.m; sourceTree = "<group>"; };
+		04F705671BD7A94300829651 /* GCDAsyncUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncUdpSocket.h; sourceTree = "<group>"; };
+		04F705681BD7A94300829651 /* GCDAsyncUdpSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDAsyncUdpSocket.m; sourceTree = "<group>"; };
+		04F7056F1BD7A9B700829651 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		04F705711BD7A9BD00829651 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		04F705741BD7AA0D00829651 /* DeviceSerialNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceSerialNumber.h; sourceTree = "<group>"; };
+		04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceSerialNumber.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -277,6 +287,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04F705721BD7A9BD00829651 /* CoreFoundation.framework in Frameworks */,
+				04F705701BD7A9B700829651 /* IOKit.framework in Frameworks */,
 				046A36481BD79359004E0946 /* Cocoa.framework in Frameworks */,
 				046A36461BD7934D004E0946 /* Security.framework in Frameworks */,
 				046A36451BD79343004E0946 /* WebKit.framework in Frameworks */,
@@ -330,7 +342,6 @@
 			children = (
 				046A35B61BD783CE004E0946 /* BaseWindowController.h */,
 				046A35B71BD783CE004E0946 /* BaseWindowController.m */,
-				04F705581BD7A69100829651 /* TaskOutput */,
 				046A36781BD793F7004E0946 /* Setup */,
 				046A35BF1BD7871B004E0946 /* Preference */,
 				046A35C31BD7871B004E0946 /* About */,
@@ -364,6 +375,7 @@
 			children = (
 				046A36261BD78B39004E0946 /* Util.h */,
 				046A36271BD78B39004E0946 /* Util.m */,
+				04F705731BD7A9EE00829651 /* Serial */,
 				046A35DD1BD78AB8004E0946 /* Dictionary */,
 				046A35E01BD78AB8004E0946 /* DirectoryAddition */,
 				046A35E51BD78AB8004E0946 /* Drawing */,
@@ -503,8 +515,6 @@
 		046A36311BD78F52004E0946 /* Askpass */ = {
 			isa = PBXGroup;
 			children = (
-				046A36411BD791F8004E0946 /* Foundation.framework */,
-				046A363F1BD791F3004E0946 /* Security.framework */,
 				046A36371BD7915F004E0946 /* Askpass-Prefix.pch */,
 				046A36381BD7915F004E0946 /* Askpass.m */,
 				046A36391BD7915F004E0946 /* PasswordHelper.h */,
@@ -559,8 +569,7 @@
 		048677FC1BCF5FE20071594B = {
 			isa = PBXGroup;
 			children = (
-				046A36471BD79359004E0946 /* Cocoa.framework */,
-				046A36441BD79343004E0946 /* WebKit.framework */,
+				04F705621BD7A94300829651 /* Vendors */,
 				046A35D91BD78AB8004E0946 /* Common */,
 				046A36491BD793BB004E0946 /* ViewController */,
 				046A35B51BD783CE004E0946 /* WindowController */,
@@ -570,6 +579,12 @@
 				0486781B1BCF5FE20071594B /* managerTests */,
 				048678261BCF5FE20071594B /* managerUITests */,
 				046A36311BD78F52004E0946 /* Askpass */,
+				04F705711BD7A9BD00829651 /* CoreFoundation.framework */,
+				04F7056F1BD7A9B700829651 /* IOKit.framework */,
+				046A36471BD79359004E0946 /* Cocoa.framework */,
+				046A36441BD79343004E0946 /* WebKit.framework */,
+				046A36411BD791F8004E0946 /* Foundation.framework */,
+				046A363F1BD791F3004E0946 /* Security.framework */,
 				048678061BCF5FE20071594B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -626,14 +641,41 @@
 			path = managerUITests;
 			sourceTree = "<group>";
 		};
-		04F705581BD7A69100829651 /* TaskOutput */ = {
+		04F705621BD7A94300829651 /* Vendors */ = {
 			isa = PBXGroup;
 			children = (
-				04F705591BD7A69100829651 /* TaskOutputWindow.h */,
-				04F7055A1BD7A69100829651 /* TaskOutputWindow.m */,
-				04F7055B1BD7A69100829651 /* TaskOutputWindow.xib */,
+				04F705631BD7A94300829651 /* BSONObject */,
+				04F705661BD7A94300829651 /* GCDAsyncUdpSocket */,
 			);
-			path = TaskOutput;
+			name = Vendors;
+			path = manager/Vendors;
+			sourceTree = "<group>";
+		};
+		04F705631BD7A94300829651 /* BSONObject */ = {
+			isa = PBXGroup;
+			children = (
+				04F705641BD7A94300829651 /* BSONSerialization.h */,
+				04F705651BD7A94300829651 /* BSONSerialization.m */,
+			);
+			path = BSONObject;
+			sourceTree = "<group>";
+		};
+		04F705661BD7A94300829651 /* GCDAsyncUdpSocket */ = {
+			isa = PBXGroup;
+			children = (
+				04F705671BD7A94300829651 /* GCDAsyncUdpSocket.h */,
+				04F705681BD7A94300829651 /* GCDAsyncUdpSocket.m */,
+			);
+			path = GCDAsyncUdpSocket;
+			sourceTree = "<group>";
+		};
+		04F705731BD7A9EE00829651 /* Serial */ = {
+			isa = PBXGroup;
+			children = (
+				04F705741BD7AA0D00829651 /* DeviceSerialNumber.h */,
+				04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */,
+			);
+			path = Serial;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -761,7 +803,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				04F7055F1BD7A69100829651 /* TaskOutputWindow.xib in Resources */,
 				046A36431BD79321004E0946 /* Askpass in Resources */,
 				046A366F1BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
 				046A36751BD793BB004E0946 /* PCSetup4VC.xib in Resources */,
@@ -790,7 +831,6 @@
 				046A35D71BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A368E1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
-				04F705601BD7A69100829651 /* TaskOutputWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -807,7 +847,6 @@
 				046A35D81BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				041FB3B91BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A368F1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
-				04F705611BD7A69100829651 /* TaskOutputWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -829,6 +868,7 @@
 			files = (
 				046A361A1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				046A368A1BD795AC004E0946 /* DPSetupWC.m in Sources */,
+				04F7056C1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				046A367B1BD793F7004E0946 /* DPSetupWindow.m in Sources */,
 				041FB3B31BD0DF240027136F /* CustomCommandManager.m in Sources */,
 				046A36721BD793BB004E0946 /* PCSetup4VC.m in Sources */,
@@ -844,7 +884,7 @@
 				0486780D1BCF5FE20071594B /* main.m in Sources */,
 				046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				046A36081BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */,
-				04F7055C1BD7A69100829651 /* TaskOutputWindow.m in Sources */,
+				04F705761BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A36281BD78B39004E0946 /* Util.m in Sources */,
 				0486780A1BCF5FE20071594B /* AppDelegate.m in Sources */,
 				046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
@@ -854,6 +894,7 @@
 				046A35D31BD7871B004E0946 /* AboutWindow.m in Sources */,
 				046A35CD1BD7871B004E0946 /* PreferencesWindow.m in Sources */,
 				041FB3A81BD0DB830027136F /* NativeMenuItem.m in Sources */,
+				04F705691BD7A94300829651 /* BSONSerialization.m in Sources */,
 				041FB3A51BD0DB830027136F /* NativeMenu.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -864,9 +905,9 @@
 			files = (
 				046A36241BD78AB8004E0946 /* timeutil.m in Sources */,
 				046A360C1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
-				04F7055D1BD7A69100829651 /* TaskOutputWindow.m in Sources */,
 				041FB3B11BD0DF240027136F /* CustomCommand.m in Sources */,
 				046A36731BD793BB004E0946 /* PCSetup4VC.m in Sources */,
+				04F7056D1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				046A36671BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
 				046A361B1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				0486781D1BCF5FE20071594B /* managerTests.m in Sources */,
@@ -879,11 +920,13 @@
 				046A365B1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
 				046A35CE1BD7871B004E0946 /* PreferencesWindow.m in Sources */,
 				046A36291BD78B39004E0946 /* Util.m in Sources */,
+				04F7056A1BD7A94300829651 /* BSONSerialization.m in Sources */,
 				041FB3A91BD0DB830027136F /* NativeMenuItem.m in Sources */,
 				041FB3B41BD0DF240027136F /* CustomCommandManager.m in Sources */,
 				046A36121BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				046A36181BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				046A36211BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
+				04F705771BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A368B1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				046A361E1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				046A35B91BD783CE004E0946 /* BaseWindowController.m in Sources */,
@@ -898,9 +941,9 @@
 			files = (
 				046A36251BD78AB8004E0946 /* timeutil.m in Sources */,
 				046A360D1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
-				04F7055E1BD7A69100829651 /* TaskOutputWindow.m in Sources */,
 				041FB3B21BD0DF240027136F /* CustomCommand.m in Sources */,
 				046A36741BD793BB004E0946 /* PCSetup4VC.m in Sources */,
+				04F7056E1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				046A36681BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
 				046A361C1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				048678281BCF5FE20071594B /* managerUITests.m in Sources */,
@@ -913,11 +956,13 @@
 				046A365C1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
 				046A35CF1BD7871B004E0946 /* PreferencesWindow.m in Sources */,
 				046A362A1BD78B39004E0946 /* Util.m in Sources */,
+				04F7056B1BD7A94300829651 /* BSONSerialization.m in Sources */,
 				041FB3AA1BD0DB830027136F /* NativeMenuItem.m in Sources */,
 				041FB3B51BD0DF240027136F /* CustomCommandManager.m in Sources */,
 				046A36131BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				046A36191BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				046A36221BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
+				04F705781BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A368C1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				046A361F1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				046A35BA1BD783CE004E0946 /* BaseWindowController.m in Sources */,
