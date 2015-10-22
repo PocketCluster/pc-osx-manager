@@ -5,6 +5,7 @@
 //  Copyright (c) 2014 Lanayo. All rights reserved.
 //
 
+#include <Sparkle/Sparkle.h>
 #import "PreferencesWindow.h"
 #import "Util.h"
 
@@ -180,13 +181,13 @@
     [[NSUserDefaults standardUserDefaults] setValue:updateStability forKey:@"updateStability"];
     [[NSUserDefaults standardUserDefaults] synchronize];
 
-//[[SUUpdater sharedUpdater] checkForUpdateInformation];
+    [[SUUpdater sharedUpdater] checkForUpdateInformation];
 }
 
 - (IBAction)sendProfileDataCheckBoxClicked:(id)sender {
     [[NSUserDefaults standardUserDefaults] setBool:(self.sendProfileDataCheckBox.state == NSOnState) forKey:@"sendProfileData"];
     [[NSUserDefaults standardUserDefaults] synchronize];
-//[[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
+    [[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
 }
 
 - (IBAction)launchAtLoginCheckBoxClicked:(id)sender {

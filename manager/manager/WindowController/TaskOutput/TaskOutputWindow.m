@@ -7,6 +7,7 @@
 
 #import "TaskOutputWindow.h"
 #import "AppDelegate.h"
+#import "Util.h"
 
 @interface TaskOutputWindow () {
     BOOL _isClosed;

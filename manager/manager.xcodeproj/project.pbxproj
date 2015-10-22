@@ -52,6 +52,12 @@
 		0441A41A1BD8BFE200AABD7A /* GCDWebServers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */; settings = {ASSET_TAGS = (); }; };
 		0441A41B1BD8BFE200AABD7A /* GCDWebServers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */; settings = {ASSET_TAGS = (); }; };
 		0441A41C1BD8BFF200AABD7A /* GCDWebServers.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0441A4211BD8C20100AABD7A /* TaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A41F1BD8C20100AABD7A /* TaskOutputWindow.m */; settings = {ASSET_TAGS = (); }; };
+		0441A4221BD8C20100AABD7A /* TaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A41F1BD8C20100AABD7A /* TaskOutputWindow.m */; settings = {ASSET_TAGS = (); }; };
+		0441A4231BD8C20100AABD7A /* TaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A41F1BD8C20100AABD7A /* TaskOutputWindow.m */; settings = {ASSET_TAGS = (); }; };
+		0441A4241BD8C20100AABD7A /* TaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0441A4201BD8C20100AABD7A /* TaskOutputWindow.xib */; settings = {ASSET_TAGS = (); }; };
+		0441A4251BD8C20100AABD7A /* TaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0441A4201BD8C20100AABD7A /* TaskOutputWindow.xib */; settings = {ASSET_TAGS = (); }; };
+		0441A4261BD8C20100AABD7A /* TaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0441A4201BD8C20100AABD7A /* TaskOutputWindow.xib */; settings = {ASSET_TAGS = (); }; };
 		046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; settings = {ASSET_TAGS = (); }; };
 		046A35B91BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; settings = {ASSET_TAGS = (); }; };
 		046A35BA1BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; settings = {ASSET_TAGS = (); }; };
@@ -237,6 +243,9 @@
 		0441A4131BD8BEAA00AABD7A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		0441A4161BD8BF3E00AABD7A /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GCDWebServers.framework; path = Frameworks/GCDWebServers.framework; sourceTree = "<group>"; };
+		0441A41E1BD8C20100AABD7A /* TaskOutputWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TaskOutputWindow.h; sourceTree = "<group>"; };
+		0441A41F1BD8C20100AABD7A /* TaskOutputWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TaskOutputWindow.m; sourceTree = "<group>"; };
+		0441A4201BD8C20100AABD7A /* TaskOutputWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TaskOutputWindow.xib; sourceTree = "<group>"; };
 		046A35B61BD783CE004E0946 /* BaseWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseWindowController.h; sourceTree = "<group>"; };
 		046A35B71BD783CE004E0946 /* BaseWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseWindowController.m; sourceTree = "<group>"; };
 		046A35C01BD7871B004E0946 /* PreferencesWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesWindow.h; sourceTree = "<group>"; };
@@ -418,11 +427,22 @@
 			path = CustomCommand;
 			sourceTree = "<group>";
 		};
+		0441A41D1BD8C20100AABD7A /* TaskOutput */ = {
+			isa = PBXGroup;
+			children = (
+				0441A41E1BD8C20100AABD7A /* TaskOutputWindow.h */,
+				0441A41F1BD8C20100AABD7A /* TaskOutputWindow.m */,
+				0441A4201BD8C20100AABD7A /* TaskOutputWindow.xib */,
+			);
+			path = TaskOutput;
+			sourceTree = "<group>";
+		};
 		046A35B51BD783CE004E0946 /* WindowController */ = {
 			isa = PBXGroup;
 			children = (
 				046A35B61BD783CE004E0946 /* BaseWindowController.h */,
 				046A35B71BD783CE004E0946 /* BaseWindowController.m */,
+				0441A41D1BD8C20100AABD7A /* TaskOutput */,
 				046A36781BD793F7004E0946 /* Setup */,
 				046A35BF1BD7871B004E0946 /* Preference */,
 				046A35C31BD7871B004E0946 /* About */,
@@ -901,6 +921,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0441A4241BD8C20100AABD7A /* TaskOutputWindow.xib in Resources */,
 				046A36431BD79321004E0946 /* Askpass in Resources */,
 				046A366F1BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
 				046A36751BD793BB004E0946 /* PCSetup4VC.xib in Resources */,
@@ -929,6 +950,7 @@
 				046A35D71BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A368E1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
+				0441A4251BD8C20100AABD7A /* TaskOutputWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -945,6 +967,7 @@
 				046A35D81BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				041FB3B91BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A368F1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
+				0441A4261BD8C20100AABD7A /* TaskOutputWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1021,6 +1044,7 @@
 				046A367B1BD793F7004E0946 /* DPSetupWindow.m in Sources */,
 				046A36721BD793BB004E0946 /* PCSetup4VC.m in Sources */,
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
+				0441A4211BD8C20100AABD7A /* TaskOutputWindow.m in Sources */,
 				046A365A1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
 				046A36661BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
 				0441A3E61BD8904100AABD7A /* NativeMenu.m in Sources */,
@@ -1064,6 +1088,7 @@
 				046A367C1BD793F7004E0946 /* DPSetupWindow.m in Sources */,
 				0441A3EA1BD8904100AABD7A /* NativeMenuItem.m in Sources */,
 				046A36151BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
+				0441A4221BD8C20100AABD7A /* TaskOutputWindow.m in Sources */,
 				046A35D41BD7871B004E0946 /* AboutWindow.m in Sources */,
 				0441A3F51BD892A400AABD7A /* VersionComparison.m in Sources */,
 				046A365B1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
@@ -1103,6 +1128,7 @@
 				046A367D1BD793F7004E0946 /* DPSetupWindow.m in Sources */,
 				0441A3EB1BD8904100AABD7A /* NativeMenuItem.m in Sources */,
 				046A36161BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
+				0441A4231BD8C20100AABD7A /* TaskOutputWindow.m in Sources */,
 				046A35D51BD7871B004E0946 /* AboutWindow.m in Sources */,
 				0441A3F61BD892A400AABD7A /* VersionComparison.m in Sources */,
 				046A365C1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
