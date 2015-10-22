@@ -8,6 +8,7 @@
 
 #import "AppDelegate.h"
 #import <Sparkle/Sparkle.h>
+#import <Parse/Parse.h>
 
 #import "Util.h"
 #import "VersionComparison.h"
@@ -29,7 +30,12 @@
     self.nativeMenu = [[NativeMenu alloc] init];
     self.nativeMenu.delegate = self;
     
-    
+    // start parse analytics
+    [Parse
+     setApplicationId:@"HRUYcCC5BZwkUTzbEUmuyglSHzAVo6UpykuTUdqI"
+     clientKey:@"kq5pIivYkredAGJupKP5qWWhwD5JDxrncyHdh8pr"];
+
+    [PFAnalytics trackAppOpenedWithLaunchOptions:nil];
     
     
     //initialize updates
@@ -42,6 +48,8 @@
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
 }
+
+//- (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {[PFAnalytics trackAppOpenedWithRemoteNotificationPayload:userInfo];}
 
 
 #pragma mark - Window management
