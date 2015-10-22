@@ -2,7 +2,7 @@ platform :osx, '10.11'
 source 'https://github.com/CocoaPods/Specs.git'
 xcodeproj 'manager/manager.xcodeproj'
 
-# pod 'Sparkle'
+pod 'Sparkle'
 # pod 'ReactiveCocoa'
 # pod 'ReactiveViewModel'
 # pod 'AFNetworking'

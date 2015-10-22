@@ -7,10 +7,14 @@
 //
 
 #import "AppDelegate.h"
+#import <Sparkle/Sparkle.h>
+
+#import "Util.h"
+#import "VersionComparison.h"
 #import "NativeMenu.h"
 
 
-@interface AppDelegate ()<MenuDelegate>
+@interface AppDelegate ()<MenuDelegate, SUUpdaterDelegate>
 @property (weak) IBOutlet NSWindow *window;
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
 @property (nonatomic, strong) NSMutableArray *openWindows;
@@ -25,6 +29,14 @@
     self.nativeMenu = [[NativeMenu alloc] init];
     self.nativeMenu.delegate = self;
     
+    
+    
+    
+    //initialize updates
+    [[SUUpdater sharedUpdater] setDelegate:self];
+    [[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
+    [[SUUpdater sharedUpdater] checkForUpdateInformation];
+
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -253,5 +265,51 @@
     [self runTerminalCommand:taskCommand];
 }
 */
+
+
+#pragma mark - Sparkle updater delegates
+
+- (NSArray*)feedParametersForUpdater:(SUUpdater *)updater sendingSystemProfile:(BOOL)sendingProfile {
+    NSMutableArray *data = [[NSMutableArray alloc] init];
+    [data addObject:@{@"key": @"machineid", @"value": [Util getMachineId]}];
+    [data addObject:@{@"key": @"appversion", @"value": [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]}];
+    if(sendingProfile) {
+        [data addObject:@{@"key": @"profile", @"value": @"1"}];
+    }
+    
+    return data;
+}
+
+- (void)updater:(SUUpdater *)updater didFindValidUpdate:(SUAppcastItem *)update {
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:@"dontShowUpdateNotification"]) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.update-available" object:nil userInfo:@{@"is_update_available": [NSNumber numberWithBool:YES]}];
+    }
+}
+
+- (void)updaterDidNotFindUpdate:(SUUpdater *)update {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.update-available" object:nil userInfo:@{@"is_update_available": [NSNumber numberWithBool:NO]}];
+}
+
+- (id<SUVersionComparison>)versionComparatorForUpdater:(SUUpdater *)updater {
+    return [[VersionComparison alloc] init];
+}
+
+- (SUAppcastItem *)bestValidUpdateInAppcast:(SUAppcast *)appcast forUpdater:(SUUpdater *)bundle {
+    SUAppcastItem *bestItem = nil;
+    
+    NSString *appVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+    
+    for(SUAppcastItem *item in [appcast items]) {
+        if([Util compareVersion:appVersion toVersion:item.versionString] == NSOrderedAscending) {
+            if([Util getUpdateStabilityScore:[Util getVersionStability:item.versionString]] <= [Util getUpdateStabilityScore:[Util getUpdateStability]]) {
+                if(!bestItem || [Util compareVersion:bestItem.versionString toVersion:item.versionString] == NSOrderedAscending) {
+                    bestItem = item;
+                }
+            }
+        }
+    }
+    
+    return bestItem;
+}
 
 @end
