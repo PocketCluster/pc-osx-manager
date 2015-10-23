@@ -1,47 +1,35 @@
 //
-//  OutputWindow.m
-//  Vagrant Manager
+//  TaskOutputVC.m
+//  manager
 //
-//  Copyright (c) 2014 Lanayo. All rights reserved.
+//  Created by Almighty Kim on 10/23/15.
+//  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import "TaskOutputWindow.h"
+#import "TaskOutputVC.h"
 #import "AppDelegate.h"
 #import "Util.h"
 
-@interface TaskOutputWindow ()
-- (NSTask *)defaultTask;
+@interface TaskOutputVC ()
+
 @end
 
-@implementation TaskOutputWindow{
-    BOOL _isClosed;
-}
+@implementation TaskOutputVC
 
-- (id)initWithWindow:(NSWindow *)window {
-    self = [super initWithWindow:window];
-    
-    return self;
-}
+- (void)viewDidLoad {
+    [super viewDidLoad];
 
-- (void)windowDidLoad {
-    [super windowDidLoad];
-    
     CFUUIDRef uuid = CFUUIDCreate(NULL);
     self.windowUUID = (__bridge_transfer NSString *)CFUUIDCreateString(NULL, uuid);
     CFRelease(uuid);
     
-    if ([self task] == nil){
-        [self setTask:[self defaultTask]];
-    }
-    
-    
     NSPipe *taskOutputPipe = [NSPipe pipe];
-	[self.task setStandardInput:[NSFileHandle fileHandleWithNullDevice]];
+    [self.task setStandardInput:[NSFileHandle fileHandleWithNullDevice]];
     [self.task setStandardOutput:taskOutputPipe];
     [self.task setStandardError:taskOutputPipe];
-
+    
     //set up Askpass handler for sudo
-	NSString *askPassPath = [NSBundle pathForResource:@"Askpass" ofType:@"" inDirectory:[[NSBundle mainBundle] bundlePath]];
+    NSString *askPassPath = [NSBundle pathForResource:@"Askpass" ofType:@"" inDirectory:[[NSBundle mainBundle] bundlePath]];
     NSMutableDictionary *env = [[[NSProcessInfo processInfo] environment] mutableCopy];
     [env setObject:@"NONE" forKey:@"DISPLAY"];
     [env setObject:askPassPath forKey:@"SUDO_ASKPASS"];
@@ -52,29 +40,12 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedOutput:) name:NSFileHandleDataAvailableNotification object:fh];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(taskCompletion:) name: NSTaskDidTerminateNotification object:self.task];
-/*
-    NSString *name = [self.target isKindOfClass:[VagrantMachine class]] ?
-                        [NSString stringWithFormat:@"%@ - %@",((VagrantMachine*)self.target).instance.displayName, ((VagrantMachine*)self.target).name] :
-                        ((VagrantInstance*)self.target).displayName;
- 
-    self.window.title = [NSString stringWithFormat:@"%@ %@", name, self.taskAction];
-*/
-    
-    self.window.title = @"Task Window";
     
     self.taskCommandLabel.stringValue = self.taskCommand;
     self.taskStatusLabel.stringValue = @"Running task...";
     [self.progressBar startAnimation:self];
-
+    
     [self.task launch];
-}
-
-- (NSTask *)defaultTask
-{
-    NSTask *task = [[NSTask alloc] init];
-    [task setLaunchPath:@"/bin/bash"];
-    [task setArguments:@[@"-l", @"-c", self.taskCommand]];
-    return task;
 }
 
 - (void)taskCompletion:(NSNotification*)notif {
@@ -84,14 +55,14 @@
     [self.progressBar setIndeterminate:NO];
     [self.progressBar setDoubleValue:self.progressBar.maxValue];
     
-    NSButton *closeButton = [self.window standardWindowButton:NSWindowCloseButton];
+    NSButton *closeButton = [self.view.window standardWindowButton:NSWindowCloseButton];
     [closeButton setEnabled:YES];
     
     [self.closeWindowButton setEnabled:YES];
     [self.cancelButton setHidden:YES];
     
     NSString *notificationText;
-
+    
     if(task.terminationStatus != 0) {
         self.taskStatusLabel.stringValue = @"Completed with errors";
         notificationText = @"Task completed with errors";
@@ -100,24 +71,24 @@
         self.taskStatusLabel.stringValue = @"Completed successfully";
         notificationText = @"Task completed successfully";
     }
+    
+    
+//    [[Util getApp] showUserNotificationWithTitle:notificationText informativeText:[NSString stringWithFormat:@"%@ %@", name, self.taskAction] taskWindowUUID:self.windowUUID];
+    
+    //notify app task is complete
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.task-completed" object:nil userInfo:@{@"target": self.target}];
 
 /*
-    NSString *name = [self.target isKindOfClass:[VagrantMachine class]] ? [NSString stringWithFormat:@"%@ - %@",((VagrantMachine*)self.target).instance.displayName, ((VagrantMachine*)self.target).name] : ((VagrantInstance*)self.target).displayName;
-    
-    [[Util getApp] showUserNotificationWithTitle:notificationText informativeText:[NSString stringWithFormat:@"%@ %@", name, self.taskAction] taskWindowUUID:self.windowUUID];
-*/
-    //notify app task is complete
-    
-    if(self.target)
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.task-completed" object:nil userInfo:@{@"target": self.target}];
-    
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"autoCloseTaskWindows"] && task.terminationStatus == 0) {
         dispatch_async(dispatch_get_global_queue(0,0), ^{
             [self close];
         });
     }
+*/
+    
 }
 
+/*
 - (void)windowWillClose:(NSNotification *)notification {
     AppDelegate *app = [Util getApp];
     
@@ -127,6 +98,7 @@
     
     [app removeOpenWindow:self];
 }
+*/
 
 - (void)receivedOutput:(NSNotification*)notif {
     NSFileHandle *fh = [notif object];
@@ -134,7 +106,8 @@
     NSString *str = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
     
     @synchronized(self) {
-        if (!_isClosed) {
+        //if (!_isClosed) {
+        {
             //smart scrolling logic for command output
             BOOL scroll = (NSMaxY(self.outputTextView.visibleRect) == NSMaxY(self.outputTextView.bounds));
             [self.outputTextView.textStorage appendAttributedString:[[NSAttributedString alloc] initWithString:str]];
@@ -153,7 +126,7 @@
 }
 
 - (IBAction)closeButtonClicked:(id)sender {
-    [self close];
+//    [self close];
 }
 
 - (IBAction)cancelButtonClicked:(id)sender {
@@ -161,7 +134,7 @@
     NSInteger button = [confirmAlert runModal];
     
     if(button == NSAlertDefaultReturn) {
-        [self.task interrupt],[self.task terminate],self.task = nil;
+        [self.task interrupt];
     }
 }
 

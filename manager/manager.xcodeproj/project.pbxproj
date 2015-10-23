@@ -7,164 +7,173 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; settings = {ASSET_TAGS = (); }; };
-		041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; settings = {ASSET_TAGS = (); }; };
-		041FB3B91BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; settings = {ASSET_TAGS = (); }; };
+		041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
+		041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
+		041FB3B91BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
+		0422D4E01BDA04A500C5CB33 /* TaskOutputVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4DE1BDA04A500C5CB33 /* TaskOutputVC.m */; };
+		0422D4E11BDA04A500C5CB33 /* TaskOutputVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4DE1BDA04A500C5CB33 /* TaskOutputVC.m */; };
+		0422D4E21BDA04A500C5CB33 /* TaskOutputVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4DE1BDA04A500C5CB33 /* TaskOutputVC.m */; };
+		0422D4E31BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0422D4DF1BDA04A500C5CB33 /* TaskOutputVC.xib */; };
+		0422D4E41BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0422D4DF1BDA04A500C5CB33 /* TaskOutputVC.xib */; };
+		0422D4E51BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0422D4DF1BDA04A500C5CB33 /* TaskOutputVC.xib */; };
+		0422D4EA1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4E81BDA067100C5CB33 /* TaskOutputWindow.m */; };
+		0422D4EB1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4E81BDA067100C5CB33 /* TaskOutputWindow.m */; };
+		0422D4EC1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4E81BDA067100C5CB33 /* TaskOutputWindow.m */; };
+		0422D4ED1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0422D4E91BDA067100C5CB33 /* TaskOutputWindow.xib */; };
+		0422D4EE1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0422D4E91BDA067100C5CB33 /* TaskOutputWindow.xib */; };
+		0422D4EF1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0422D4E91BDA067100C5CB33 /* TaskOutputWindow.xib */; };
+		0422D4F61BDA0C2700C5CB33 /* PCTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4F51BDA0C2700C5CB33 /* PCTask.m */; };
+		0422D4F71BDA0C2700C5CB33 /* PCTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4F51BDA0C2700C5CB33 /* PCTask.m */; };
+		0422D4F81BDA0C2700C5CB33 /* PCTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4F51BDA0C2700C5CB33 /* PCTask.m */; };
 		0441A3D01BD88DDC00AABD7A /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */; };
-		0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3E11BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3E21BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3E31BD8904100AABD7A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D81BD8904100AABD7A /* main.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3E41BD8904100AABD7A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D81BD8904100AABD7A /* main.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3E51BD8904100AABD7A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D81BD8904100AABD7A /* main.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3E61BD8904100AABD7A /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DC1BD8904100AABD7A /* NativeMenu.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3E71BD8904100AABD7A /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DC1BD8904100AABD7A /* NativeMenu.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3E81BD8904100AABD7A /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DC1BD8904100AABD7A /* NativeMenu.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3E91BD8904100AABD7A /* NativeMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DE1BD8904100AABD7A /* NativeMenuItem.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3EA1BD8904100AABD7A /* NativeMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DE1BD8904100AABD7A /* NativeMenuItem.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3EB1BD8904100AABD7A /* NativeMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DE1BD8904100AABD7A /* NativeMenuItem.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3EF1BD8921600AABD7A /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3EE1BD8921600AABD7A /* Util.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3F01BD8921600AABD7A /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3EE1BD8921600AABD7A /* Util.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3F11BD8921600AABD7A /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3EE1BD8921600AABD7A /* Util.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3F41BD892A400AABD7A /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F31BD892A400AABD7A /* VersionComparison.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3F51BD892A400AABD7A /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F31BD892A400AABD7A /* VersionComparison.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3F61BD892A400AABD7A /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F31BD892A400AABD7A /* VersionComparison.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3FC1BD8981400AABD7A /* CustomCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F91BD8981400AABD7A /* CustomCommand.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3FD1BD8981400AABD7A /* CustomCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F91BD8981400AABD7A /* CustomCommand.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3FE1BD8981400AABD7A /* CustomCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F91BD8981400AABD7A /* CustomCommand.m */; settings = {ASSET_TAGS = (); }; };
-		0441A3FF1BD8981400AABD7A /* CustomCommandManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3FB1BD8981400AABD7A /* CustomCommandManager.m */; settings = {ASSET_TAGS = (); }; };
-		0441A4001BD8981400AABD7A /* CustomCommandManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3FB1BD8981400AABD7A /* CustomCommandManager.m */; settings = {ASSET_TAGS = (); }; };
-		0441A4011BD8981400AABD7A /* CustomCommandManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3FB1BD8981400AABD7A /* CustomCommandManager.m */; settings = {ASSET_TAGS = (); }; };
+		0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; };
+		0441A3E11BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; };
+		0441A3E21BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; };
+		0441A3E31BD8904100AABD7A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D81BD8904100AABD7A /* main.m */; };
+		0441A3E41BD8904100AABD7A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D81BD8904100AABD7A /* main.m */; };
+		0441A3E51BD8904100AABD7A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D81BD8904100AABD7A /* main.m */; };
+		0441A3E61BD8904100AABD7A /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DC1BD8904100AABD7A /* NativeMenu.m */; };
+		0441A3E71BD8904100AABD7A /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DC1BD8904100AABD7A /* NativeMenu.m */; };
+		0441A3E81BD8904100AABD7A /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DC1BD8904100AABD7A /* NativeMenu.m */; };
+		0441A3E91BD8904100AABD7A /* NativeMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DE1BD8904100AABD7A /* NativeMenuItem.m */; };
+		0441A3EA1BD8904100AABD7A /* NativeMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DE1BD8904100AABD7A /* NativeMenuItem.m */; };
+		0441A3EB1BD8904100AABD7A /* NativeMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DE1BD8904100AABD7A /* NativeMenuItem.m */; };
+		0441A3EF1BD8921600AABD7A /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3EE1BD8921600AABD7A /* Util.m */; };
+		0441A3F01BD8921600AABD7A /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3EE1BD8921600AABD7A /* Util.m */; };
+		0441A3F11BD8921600AABD7A /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3EE1BD8921600AABD7A /* Util.m */; };
+		0441A3F41BD892A400AABD7A /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F31BD892A400AABD7A /* VersionComparison.m */; };
+		0441A3F51BD892A400AABD7A /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F31BD892A400AABD7A /* VersionComparison.m */; };
+		0441A3F61BD892A400AABD7A /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F31BD892A400AABD7A /* VersionComparison.m */; };
+		0441A3FC1BD8981400AABD7A /* CustomCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F91BD8981400AABD7A /* CustomCommand.m */; };
+		0441A3FD1BD8981400AABD7A /* CustomCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F91BD8981400AABD7A /* CustomCommand.m */; };
+		0441A3FE1BD8981400AABD7A /* CustomCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F91BD8981400AABD7A /* CustomCommand.m */; };
+		0441A3FF1BD8981400AABD7A /* CustomCommandManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3FB1BD8981400AABD7A /* CustomCommandManager.m */; };
+		0441A4001BD8981400AABD7A /* CustomCommandManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3FB1BD8981400AABD7A /* CustomCommandManager.m */; };
+		0441A4011BD8981400AABD7A /* CustomCommandManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3FB1BD8981400AABD7A /* CustomCommandManager.m */; };
 		0441A4021BD8987100AABD7A /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		0441A4061BD8B99600AABD7A /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4051BD8B99600AABD7A /* Parse.framework */; settings = {ASSET_TAGS = (); }; };
-		0441A4071BD8B99600AABD7A /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4051BD8B99600AABD7A /* Parse.framework */; settings = {ASSET_TAGS = (); }; };
-		0441A4081BD8B99600AABD7A /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4051BD8B99600AABD7A /* Parse.framework */; settings = {ASSET_TAGS = (); }; };
+		0441A4061BD8B99600AABD7A /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4051BD8B99600AABD7A /* Parse.framework */; };
+		0441A4071BD8B99600AABD7A /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4051BD8B99600AABD7A /* Parse.framework */; };
+		0441A4081BD8B99600AABD7A /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4051BD8B99600AABD7A /* Parse.framework */; };
 		0441A4091BD8B9BD00AABD7A /* Parse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0441A4051BD8B99600AABD7A /* Parse.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		0441A40B1BD8BBB200AABD7A /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A40A1BD8BBB200AABD7A /* Bolts.framework */; settings = {ASSET_TAGS = (); }; };
-		0441A40C1BD8BBB200AABD7A /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A40A1BD8BBB200AABD7A /* Bolts.framework */; settings = {ASSET_TAGS = (); }; };
-		0441A40D1BD8BBB200AABD7A /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A40A1BD8BBB200AABD7A /* Bolts.framework */; settings = {ASSET_TAGS = (); }; };
+		0441A40B1BD8BBB200AABD7A /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A40A1BD8BBB200AABD7A /* Bolts.framework */; };
+		0441A40C1BD8BBB200AABD7A /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A40A1BD8BBB200AABD7A /* Bolts.framework */; };
+		0441A40D1BD8BBB200AABD7A /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A40A1BD8BBB200AABD7A /* Bolts.framework */; };
 		0441A40E1BD8BBB900AABD7A /* Bolts.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0441A40A1BD8BBB200AABD7A /* Bolts.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0441A4121BD8BEA200AABD7A /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4111BD8BEA200AABD7A /* CFNetwork.framework */; };
 		0441A4141BD8BEAA00AABD7A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4131BD8BEAA00AABD7A /* SystemConfiguration.framework */; };
 		0441A4151BD8BEF100AABD7A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36411BD791F8004E0946 /* Foundation.framework */; };
 		0441A4171BD8BF3E00AABD7A /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4161BD8BF3E00AABD7A /* CoreServices.framework */; };
-		0441A4191BD8BFE200AABD7A /* GCDWebServers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */; settings = {ASSET_TAGS = (); }; };
-		0441A41A1BD8BFE200AABD7A /* GCDWebServers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */; settings = {ASSET_TAGS = (); }; };
-		0441A41B1BD8BFE200AABD7A /* GCDWebServers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */; settings = {ASSET_TAGS = (); }; };
+		0441A4191BD8BFE200AABD7A /* GCDWebServers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */; };
+		0441A41A1BD8BFE200AABD7A /* GCDWebServers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */; };
+		0441A41B1BD8BFE200AABD7A /* GCDWebServers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */; };
 		0441A41C1BD8BFF200AABD7A /* GCDWebServers.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		0441A4211BD8C20100AABD7A /* TaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A41F1BD8C20100AABD7A /* TaskOutputWindow.m */; settings = {ASSET_TAGS = (); }; };
-		0441A4221BD8C20100AABD7A /* TaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A41F1BD8C20100AABD7A /* TaskOutputWindow.m */; settings = {ASSET_TAGS = (); }; };
-		0441A4231BD8C20100AABD7A /* TaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A41F1BD8C20100AABD7A /* TaskOutputWindow.m */; settings = {ASSET_TAGS = (); }; };
-		0441A4241BD8C20100AABD7A /* TaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0441A4201BD8C20100AABD7A /* TaskOutputWindow.xib */; settings = {ASSET_TAGS = (); }; };
-		0441A4251BD8C20100AABD7A /* TaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0441A4201BD8C20100AABD7A /* TaskOutputWindow.xib */; settings = {ASSET_TAGS = (); }; };
-		0441A4261BD8C20100AABD7A /* TaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0441A4201BD8C20100AABD7A /* TaskOutputWindow.xib */; settings = {ASSET_TAGS = (); }; };
-		046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; settings = {ASSET_TAGS = (); }; };
-		046A35B91BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; settings = {ASSET_TAGS = (); }; };
-		046A35BA1BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; settings = {ASSET_TAGS = (); }; };
-		046A35CD1BD7871B004E0946 /* PreferencesWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C11BD7871B004E0946 /* PreferencesWindow.m */; settings = {ASSET_TAGS = (); }; };
-		046A35CE1BD7871B004E0946 /* PreferencesWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C11BD7871B004E0946 /* PreferencesWindow.m */; settings = {ASSET_TAGS = (); }; };
-		046A35CF1BD7871B004E0946 /* PreferencesWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C11BD7871B004E0946 /* PreferencesWindow.m */; settings = {ASSET_TAGS = (); }; };
-		046A35D01BD7871B004E0946 /* PreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C21BD7871B004E0946 /* PreferencesWindow.xib */; settings = {ASSET_TAGS = (); }; };
-		046A35D11BD7871B004E0946 /* PreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C21BD7871B004E0946 /* PreferencesWindow.xib */; settings = {ASSET_TAGS = (); }; };
-		046A35D21BD7871B004E0946 /* PreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C21BD7871B004E0946 /* PreferencesWindow.xib */; settings = {ASSET_TAGS = (); }; };
-		046A35D31BD7871B004E0946 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C51BD7871B004E0946 /* AboutWindow.m */; settings = {ASSET_TAGS = (); }; };
-		046A35D41BD7871B004E0946 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C51BD7871B004E0946 /* AboutWindow.m */; settings = {ASSET_TAGS = (); }; };
-		046A35D51BD7871B004E0946 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C51BD7871B004E0946 /* AboutWindow.m */; settings = {ASSET_TAGS = (); }; };
-		046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; settings = {ASSET_TAGS = (); }; };
-		046A35D71BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; settings = {ASSET_TAGS = (); }; };
-		046A35D81BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; settings = {ASSET_TAGS = (); }; };
-		046A36081BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35DF1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m */; settings = {ASSET_TAGS = (); }; };
-		046A36091BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35DF1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m */; settings = {ASSET_TAGS = (); }; };
-		046A360A1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35DF1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m */; settings = {ASSET_TAGS = (); }; };
-		046A360B1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E21BD78AB8004E0946 /* NSBundle+DirectoryPath.m */; settings = {ASSET_TAGS = (); }; };
-		046A360C1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E21BD78AB8004E0946 /* NSBundle+DirectoryPath.m */; settings = {ASSET_TAGS = (); }; };
-		046A360D1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E21BD78AB8004E0946 /* NSBundle+DirectoryPath.m */; settings = {ASSET_TAGS = (); }; };
-		046A360E1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E41BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m */; settings = {ASSET_TAGS = (); }; };
-		046A360F1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E41BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m */; settings = {ASSET_TAGS = (); }; };
-		046A36101BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E41BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m */; settings = {ASSET_TAGS = (); }; };
-		046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E71BD78AB8004E0946 /* DrawingUtils.m */; settings = {ASSET_TAGS = (); }; };
-		046A36121BD78AB8004E0946 /* DrawingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E71BD78AB8004E0946 /* DrawingUtils.m */; settings = {ASSET_TAGS = (); }; };
-		046A36131BD78AB8004E0946 /* DrawingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E71BD78AB8004E0946 /* DrawingUtils.m */; settings = {ASSET_TAGS = (); }; };
-		046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35EF1BD78AB8004E0946 /* NSDateAdditions.m */; settings = {ASSET_TAGS = (); }; };
-		046A36151BD78AB8004E0946 /* NSDateAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35EF1BD78AB8004E0946 /* NSDateAdditions.m */; settings = {ASSET_TAGS = (); }; };
-		046A36161BD78AB8004E0946 /* NSDateAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35EF1BD78AB8004E0946 /* NSDateAdditions.m */; settings = {ASSET_TAGS = (); }; };
-		046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35F81BD78AB8004E0946 /* NSString+Random.m */; settings = {ASSET_TAGS = (); }; };
-		046A36181BD78AB8004E0946 /* NSString+Random.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35F81BD78AB8004E0946 /* NSString+Random.m */; settings = {ASSET_TAGS = (); }; };
-		046A36191BD78AB8004E0946 /* NSString+Random.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35F81BD78AB8004E0946 /* NSString+Random.m */; settings = {ASSET_TAGS = (); }; };
-		046A361A1BD78AB8004E0946 /* NSString+Encoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FB1BD78AB8004E0946 /* NSString+Encoding.m */; settings = {ASSET_TAGS = (); }; };
-		046A361B1BD78AB8004E0946 /* NSString+Encoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FB1BD78AB8004E0946 /* NSString+Encoding.m */; settings = {ASSET_TAGS = (); }; };
-		046A361C1BD78AB8004E0946 /* NSString+Encoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FB1BD78AB8004E0946 /* NSString+Encoding.m */; settings = {ASSET_TAGS = (); }; };
-		046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FE1BD78AB8004E0946 /* NSString+Contain.m */; settings = {ASSET_TAGS = (); }; };
-		046A361E1BD78AB8004E0946 /* NSString+Contain.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FE1BD78AB8004E0946 /* NSString+Contain.m */; settings = {ASSET_TAGS = (); }; };
-		046A361F1BD78AB8004E0946 /* NSString+Contain.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FE1BD78AB8004E0946 /* NSString+Contain.m */; settings = {ASSET_TAGS = (); }; };
-		046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36011BD78AB8004E0946 /* MSWeakTimer.m */; settings = {ASSET_TAGS = (); }; };
-		046A36211BD78AB8004E0946 /* MSWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36011BD78AB8004E0946 /* MSWeakTimer.m */; settings = {ASSET_TAGS = (); }; };
-		046A36221BD78AB8004E0946 /* MSWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36011BD78AB8004E0946 /* MSWeakTimer.m */; settings = {ASSET_TAGS = (); }; };
-		046A36231BD78AB8004E0946 /* timeutil.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36041BD78AB8004E0946 /* timeutil.m */; settings = {ASSET_TAGS = (); }; };
-		046A36241BD78AB8004E0946 /* timeutil.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36041BD78AB8004E0946 /* timeutil.m */; settings = {ASSET_TAGS = (); }; };
-		046A36251BD78AB8004E0946 /* timeutil.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36041BD78AB8004E0946 /* timeutil.m */; settings = {ASSET_TAGS = (); }; };
-		046A363B1BD7915F004E0946 /* Askpass.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36381BD7915F004E0946 /* Askpass.m */; settings = {ASSET_TAGS = (); }; };
-		046A363C1BD7915F004E0946 /* PasswordHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A363A1BD7915F004E0946 /* PasswordHelper.m */; settings = {ASSET_TAGS = (); }; };
+		046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
+		046A35B91BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
+		046A35BA1BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
+		046A35CD1BD7871B004E0946 /* PreferencesWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C11BD7871B004E0946 /* PreferencesWindow.m */; };
+		046A35CE1BD7871B004E0946 /* PreferencesWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C11BD7871B004E0946 /* PreferencesWindow.m */; };
+		046A35CF1BD7871B004E0946 /* PreferencesWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C11BD7871B004E0946 /* PreferencesWindow.m */; };
+		046A35D01BD7871B004E0946 /* PreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C21BD7871B004E0946 /* PreferencesWindow.xib */; };
+		046A35D11BD7871B004E0946 /* PreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C21BD7871B004E0946 /* PreferencesWindow.xib */; };
+		046A35D21BD7871B004E0946 /* PreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C21BD7871B004E0946 /* PreferencesWindow.xib */; };
+		046A35D31BD7871B004E0946 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C51BD7871B004E0946 /* AboutWindow.m */; };
+		046A35D41BD7871B004E0946 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C51BD7871B004E0946 /* AboutWindow.m */; };
+		046A35D51BD7871B004E0946 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C51BD7871B004E0946 /* AboutWindow.m */; };
+		046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
+		046A35D71BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
+		046A35D81BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
+		046A36081BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35DF1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m */; };
+		046A36091BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35DF1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m */; };
+		046A360A1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35DF1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m */; };
+		046A360B1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E21BD78AB8004E0946 /* NSBundle+DirectoryPath.m */; };
+		046A360C1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E21BD78AB8004E0946 /* NSBundle+DirectoryPath.m */; };
+		046A360D1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E21BD78AB8004E0946 /* NSBundle+DirectoryPath.m */; };
+		046A360E1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E41BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m */; };
+		046A360F1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E41BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m */; };
+		046A36101BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E41BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m */; };
+		046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E71BD78AB8004E0946 /* DrawingUtils.m */; };
+		046A36121BD78AB8004E0946 /* DrawingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E71BD78AB8004E0946 /* DrawingUtils.m */; };
+		046A36131BD78AB8004E0946 /* DrawingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E71BD78AB8004E0946 /* DrawingUtils.m */; };
+		046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35EF1BD78AB8004E0946 /* NSDateAdditions.m */; };
+		046A36151BD78AB8004E0946 /* NSDateAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35EF1BD78AB8004E0946 /* NSDateAdditions.m */; };
+		046A36161BD78AB8004E0946 /* NSDateAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35EF1BD78AB8004E0946 /* NSDateAdditions.m */; };
+		046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35F81BD78AB8004E0946 /* NSString+Random.m */; };
+		046A36181BD78AB8004E0946 /* NSString+Random.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35F81BD78AB8004E0946 /* NSString+Random.m */; };
+		046A36191BD78AB8004E0946 /* NSString+Random.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35F81BD78AB8004E0946 /* NSString+Random.m */; };
+		046A361A1BD78AB8004E0946 /* NSString+Encoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FB1BD78AB8004E0946 /* NSString+Encoding.m */; };
+		046A361B1BD78AB8004E0946 /* NSString+Encoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FB1BD78AB8004E0946 /* NSString+Encoding.m */; };
+		046A361C1BD78AB8004E0946 /* NSString+Encoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FB1BD78AB8004E0946 /* NSString+Encoding.m */; };
+		046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FE1BD78AB8004E0946 /* NSString+Contain.m */; };
+		046A361E1BD78AB8004E0946 /* NSString+Contain.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FE1BD78AB8004E0946 /* NSString+Contain.m */; };
+		046A361F1BD78AB8004E0946 /* NSString+Contain.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FE1BD78AB8004E0946 /* NSString+Contain.m */; };
+		046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36011BD78AB8004E0946 /* MSWeakTimer.m */; };
+		046A36211BD78AB8004E0946 /* MSWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36011BD78AB8004E0946 /* MSWeakTimer.m */; };
+		046A36221BD78AB8004E0946 /* MSWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36011BD78AB8004E0946 /* MSWeakTimer.m */; };
+		046A36231BD78AB8004E0946 /* timeutil.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36041BD78AB8004E0946 /* timeutil.m */; };
+		046A36241BD78AB8004E0946 /* timeutil.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36041BD78AB8004E0946 /* timeutil.m */; };
+		046A36251BD78AB8004E0946 /* timeutil.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36041BD78AB8004E0946 /* timeutil.m */; };
+		046A363B1BD7915F004E0946 /* Askpass.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36381BD7915F004E0946 /* Askpass.m */; };
+		046A363C1BD7915F004E0946 /* PasswordHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A363A1BD7915F004E0946 /* PasswordHelper.m */; };
 		046A36401BD791F3004E0946 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A363F1BD791F3004E0946 /* Security.framework */; };
 		046A36421BD791F8004E0946 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36411BD791F8004E0946 /* Foundation.framework */; };
 		046A36431BD79321004E0946 /* Askpass in Resources */ = {isa = PBXBuildFile; fileRef = 046A36301BD78F52004E0946 /* Askpass */; };
 		046A36451BD79343004E0946 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36441BD79343004E0946 /* WebKit.framework */; };
 		046A36461BD7934D004E0946 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A363F1BD791F3004E0946 /* Security.framework */; };
 		046A36481BD79359004E0946 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36471BD79359004E0946 /* Cocoa.framework */; };
-		046A365A1BD793BB004E0946 /* PCSetup1VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A364C1BD793BB004E0946 /* PCSetup1VC.m */; settings = {ASSET_TAGS = (); }; };
-		046A365B1BD793BB004E0946 /* PCSetup1VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A364C1BD793BB004E0946 /* PCSetup1VC.m */; settings = {ASSET_TAGS = (); }; };
-		046A365C1BD793BB004E0946 /* PCSetup1VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A364C1BD793BB004E0946 /* PCSetup1VC.m */; settings = {ASSET_TAGS = (); }; };
-		046A365D1BD793BB004E0946 /* PCSetup1VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A364D1BD793BB004E0946 /* PCSetup1VC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A365E1BD793BB004E0946 /* PCSetup1VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A364D1BD793BB004E0946 /* PCSetup1VC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A365F1BD793BB004E0946 /* PCSetup1VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A364D1BD793BB004E0946 /* PCSetup1VC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A36601BD793BB004E0946 /* PCSetup2RPVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A364F1BD793BB004E0946 /* PCSetup2RPVC.m */; settings = {ASSET_TAGS = (); }; };
-		046A36611BD793BB004E0946 /* PCSetup2RPVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A364F1BD793BB004E0946 /* PCSetup2RPVC.m */; settings = {ASSET_TAGS = (); }; };
-		046A36621BD793BB004E0946 /* PCSetup2RPVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A364F1BD793BB004E0946 /* PCSetup2RPVC.m */; settings = {ASSET_TAGS = (); }; };
-		046A36631BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36501BD793BB004E0946 /* PCSetup2RPVC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A36641BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36501BD793BB004E0946 /* PCSetup2RPVC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A36651BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36501BD793BB004E0946 /* PCSetup2RPVC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A36661BD793BB004E0946 /* PCSetup2VVVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36521BD793BB004E0946 /* PCSetup2VVVC.m */; settings = {ASSET_TAGS = (); }; };
-		046A36671BD793BB004E0946 /* PCSetup2VVVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36521BD793BB004E0946 /* PCSetup2VVVC.m */; settings = {ASSET_TAGS = (); }; };
-		046A36681BD793BB004E0946 /* PCSetup2VVVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36521BD793BB004E0946 /* PCSetup2VVVC.m */; settings = {ASSET_TAGS = (); }; };
-		046A36691BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36531BD793BB004E0946 /* PCSetup2VVVC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A366A1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36531BD793BB004E0946 /* PCSetup2VVVC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A366B1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36531BD793BB004E0946 /* PCSetup2VVVC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A366C1BD793BB004E0946 /* PCSetup3VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36551BD793BB004E0946 /* PCSetup3VC.m */; settings = {ASSET_TAGS = (); }; };
-		046A366D1BD793BB004E0946 /* PCSetup3VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36551BD793BB004E0946 /* PCSetup3VC.m */; settings = {ASSET_TAGS = (); }; };
-		046A366E1BD793BB004E0946 /* PCSetup3VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36551BD793BB004E0946 /* PCSetup3VC.m */; settings = {ASSET_TAGS = (); }; };
-		046A366F1BD793BB004E0946 /* PCSetup3VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36561BD793BB004E0946 /* PCSetup3VC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A36701BD793BB004E0946 /* PCSetup3VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36561BD793BB004E0946 /* PCSetup3VC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A36711BD793BB004E0946 /* PCSetup3VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36561BD793BB004E0946 /* PCSetup3VC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A36721BD793BB004E0946 /* PCSetup4VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36581BD793BB004E0946 /* PCSetup4VC.m */; settings = {ASSET_TAGS = (); }; };
-		046A36731BD793BB004E0946 /* PCSetup4VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36581BD793BB004E0946 /* PCSetup4VC.m */; settings = {ASSET_TAGS = (); }; };
-		046A36741BD793BB004E0946 /* PCSetup4VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36581BD793BB004E0946 /* PCSetup4VC.m */; settings = {ASSET_TAGS = (); }; };
-		046A36751BD793BB004E0946 /* PCSetup4VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36591BD793BB004E0946 /* PCSetup4VC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A36761BD793BB004E0946 /* PCSetup4VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36591BD793BB004E0946 /* PCSetup4VC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A36771BD793BB004E0946 /* PCSetup4VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36591BD793BB004E0946 /* PCSetup4VC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A367B1BD793F7004E0946 /* DPSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A367A1BD793F7004E0946 /* DPSetupWindow.m */; settings = {ASSET_TAGS = (); }; };
-		046A367C1BD793F7004E0946 /* DPSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A367A1BD793F7004E0946 /* DPSetupWindow.m */; settings = {ASSET_TAGS = (); }; };
-		046A367D1BD793F7004E0946 /* DPSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A367A1BD793F7004E0946 /* DPSetupWindow.m */; settings = {ASSET_TAGS = (); }; };
-		046A368A1BD795AC004E0946 /* DPSetupWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36881BD795AC004E0946 /* DPSetupWC.m */; settings = {ASSET_TAGS = (); }; };
-		046A368B1BD795AC004E0946 /* DPSetupWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36881BD795AC004E0946 /* DPSetupWC.m */; settings = {ASSET_TAGS = (); }; };
-		046A368C1BD795AC004E0946 /* DPSetupWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36881BD795AC004E0946 /* DPSetupWC.m */; settings = {ASSET_TAGS = (); }; };
-		046A368D1BD795AC004E0946 /* DPSetupWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36891BD795AC004E0946 /* DPSetupWC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A368E1BD795AC004E0946 /* DPSetupWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36891BD795AC004E0946 /* DPSetupWC.xib */; settings = {ASSET_TAGS = (); }; };
-		046A368F1BD795AC004E0946 /* DPSetupWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36891BD795AC004E0946 /* DPSetupWC.xib */; settings = {ASSET_TAGS = (); }; };
+		046A365A1BD793BB004E0946 /* PCSetup1VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A364C1BD793BB004E0946 /* PCSetup1VC.m */; };
+		046A365B1BD793BB004E0946 /* PCSetup1VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A364C1BD793BB004E0946 /* PCSetup1VC.m */; };
+		046A365C1BD793BB004E0946 /* PCSetup1VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A364C1BD793BB004E0946 /* PCSetup1VC.m */; };
+		046A365D1BD793BB004E0946 /* PCSetup1VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A364D1BD793BB004E0946 /* PCSetup1VC.xib */; };
+		046A365E1BD793BB004E0946 /* PCSetup1VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A364D1BD793BB004E0946 /* PCSetup1VC.xib */; };
+		046A365F1BD793BB004E0946 /* PCSetup1VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A364D1BD793BB004E0946 /* PCSetup1VC.xib */; };
+		046A36601BD793BB004E0946 /* PCSetup2RPVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A364F1BD793BB004E0946 /* PCSetup2RPVC.m */; };
+		046A36611BD793BB004E0946 /* PCSetup2RPVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A364F1BD793BB004E0946 /* PCSetup2RPVC.m */; };
+		046A36621BD793BB004E0946 /* PCSetup2RPVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A364F1BD793BB004E0946 /* PCSetup2RPVC.m */; };
+		046A36631BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36501BD793BB004E0946 /* PCSetup2RPVC.xib */; };
+		046A36641BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36501BD793BB004E0946 /* PCSetup2RPVC.xib */; };
+		046A36651BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36501BD793BB004E0946 /* PCSetup2RPVC.xib */; };
+		046A36661BD793BB004E0946 /* PCSetup2VVVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36521BD793BB004E0946 /* PCSetup2VVVC.m */; };
+		046A36671BD793BB004E0946 /* PCSetup2VVVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36521BD793BB004E0946 /* PCSetup2VVVC.m */; };
+		046A36681BD793BB004E0946 /* PCSetup2VVVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36521BD793BB004E0946 /* PCSetup2VVVC.m */; };
+		046A36691BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36531BD793BB004E0946 /* PCSetup2VVVC.xib */; };
+		046A366A1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36531BD793BB004E0946 /* PCSetup2VVVC.xib */; };
+		046A366B1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36531BD793BB004E0946 /* PCSetup2VVVC.xib */; };
+		046A366C1BD793BB004E0946 /* PCSetup3VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36551BD793BB004E0946 /* PCSetup3VC.m */; };
+		046A366D1BD793BB004E0946 /* PCSetup3VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36551BD793BB004E0946 /* PCSetup3VC.m */; };
+		046A366E1BD793BB004E0946 /* PCSetup3VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36551BD793BB004E0946 /* PCSetup3VC.m */; };
+		046A366F1BD793BB004E0946 /* PCSetup3VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36561BD793BB004E0946 /* PCSetup3VC.xib */; };
+		046A36701BD793BB004E0946 /* PCSetup3VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36561BD793BB004E0946 /* PCSetup3VC.xib */; };
+		046A36711BD793BB004E0946 /* PCSetup3VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36561BD793BB004E0946 /* PCSetup3VC.xib */; };
+		046A36721BD793BB004E0946 /* PCSetup4VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36581BD793BB004E0946 /* PCSetup4VC.m */; };
+		046A36731BD793BB004E0946 /* PCSetup4VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36581BD793BB004E0946 /* PCSetup4VC.m */; };
+		046A36741BD793BB004E0946 /* PCSetup4VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36581BD793BB004E0946 /* PCSetup4VC.m */; };
+		046A36751BD793BB004E0946 /* PCSetup4VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36591BD793BB004E0946 /* PCSetup4VC.xib */; };
+		046A36761BD793BB004E0946 /* PCSetup4VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36591BD793BB004E0946 /* PCSetup4VC.xib */; };
+		046A36771BD793BB004E0946 /* PCSetup4VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36591BD793BB004E0946 /* PCSetup4VC.xib */; };
+		046A367B1BD793F7004E0946 /* DPSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A367A1BD793F7004E0946 /* DPSetupWindow.m */; };
+		046A367C1BD793F7004E0946 /* DPSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A367A1BD793F7004E0946 /* DPSetupWindow.m */; };
+		046A367D1BD793F7004E0946 /* DPSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A367A1BD793F7004E0946 /* DPSetupWindow.m */; };
+		046A368A1BD795AC004E0946 /* DPSetupWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36881BD795AC004E0946 /* DPSetupWC.m */; };
+		046A368B1BD795AC004E0946 /* DPSetupWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36881BD795AC004E0946 /* DPSetupWC.m */; };
+		046A368C1BD795AC004E0946 /* DPSetupWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36881BD795AC004E0946 /* DPSetupWC.m */; };
+		046A368D1BD795AC004E0946 /* DPSetupWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36891BD795AC004E0946 /* DPSetupWC.xib */; };
+		046A368E1BD795AC004E0946 /* DPSetupWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36891BD795AC004E0946 /* DPSetupWC.xib */; };
+		046A368F1BD795AC004E0946 /* DPSetupWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36891BD795AC004E0946 /* DPSetupWC.xib */; };
 		0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0486780E1BCF5FE20071594B /* Assets.xcassets */; };
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
 		0486781D1BCF5FE20071594B /* managerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0486781C1BCF5FE20071594B /* managerTests.m */; };
 		048678281BCF5FE20071594B /* managerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 048678271BCF5FE20071594B /* managerUITests.m */; };
-		04F705691BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; settings = {ASSET_TAGS = (); }; };
-		04F7056A1BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; settings = {ASSET_TAGS = (); }; };
-		04F7056B1BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; settings = {ASSET_TAGS = (); }; };
-		04F7056C1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705681BD7A94300829651 /* GCDAsyncUdpSocket.m */; settings = {ASSET_TAGS = (); }; };
-		04F7056D1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705681BD7A94300829651 /* GCDAsyncUdpSocket.m */; settings = {ASSET_TAGS = (); }; };
-		04F7056E1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705681BD7A94300829651 /* GCDAsyncUdpSocket.m */; settings = {ASSET_TAGS = (); }; };
+		04F705691BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; };
+		04F7056A1BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; };
+		04F7056B1BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; };
+		04F7056C1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705681BD7A94300829651 /* GCDAsyncUdpSocket.m */; };
+		04F7056D1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705681BD7A94300829651 /* GCDAsyncUdpSocket.m */; };
+		04F7056E1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705681BD7A94300829651 /* GCDAsyncUdpSocket.m */; };
 		04F705701BD7A9B700829651 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04F7056F1BD7A9B700829651 /* IOKit.framework */; };
 		04F705721BD7A9BD00829651 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04F705711BD7A9BD00829651 /* CoreFoundation.framework */; };
-		04F705761BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */; settings = {ASSET_TAGS = (); }; };
-		04F705771BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */; settings = {ASSET_TAGS = (); }; };
-		04F705781BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */; settings = {ASSET_TAGS = (); }; };
+		04F705761BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */; };
+		04F705771BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */; };
+		04F705781BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */; };
 		17AD2F8B8B46CBD4DBC9D0FE /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FC3F6C0E3E0FA36FEB0C4F78 /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -219,6 +228,14 @@
 
 /* Begin PBXFileReference section */
 		041FB3B61BD0F3FA0027136F /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
+		0422D4DD1BDA04A500C5CB33 /* TaskOutputVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TaskOutputVC.h; sourceTree = "<group>"; };
+		0422D4DE1BDA04A500C5CB33 /* TaskOutputVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TaskOutputVC.m; sourceTree = "<group>"; };
+		0422D4DF1BDA04A500C5CB33 /* TaskOutputVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TaskOutputVC.xib; sourceTree = "<group>"; };
+		0422D4E71BDA067100C5CB33 /* TaskOutputWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TaskOutputWindow.h; sourceTree = "<group>"; };
+		0422D4E81BDA067100C5CB33 /* TaskOutputWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TaskOutputWindow.m; sourceTree = "<group>"; };
+		0422D4E91BDA067100C5CB33 /* TaskOutputWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TaskOutputWindow.xib; sourceTree = "<group>"; };
+		0422D4F41BDA0C2700C5CB33 /* PCTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCTask.h; sourceTree = "<group>"; };
+		0422D4F51BDA0C2700C5CB33 /* PCTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCTask.m; sourceTree = "<group>"; };
 		0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = ../Pods/Sparkle/Sparkle.framework; sourceTree = "<group>"; };
 		0441A3D61BD8904100AABD7A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0441A3D71BD8904100AABD7A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -243,9 +260,6 @@
 		0441A4131BD8BEAA00AABD7A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		0441A4161BD8BF3E00AABD7A /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GCDWebServers.framework; path = Frameworks/GCDWebServers.framework; sourceTree = "<group>"; };
-		0441A41E1BD8C20100AABD7A /* TaskOutputWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TaskOutputWindow.h; sourceTree = "<group>"; };
-		0441A41F1BD8C20100AABD7A /* TaskOutputWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TaskOutputWindow.m; sourceTree = "<group>"; };
-		0441A4201BD8C20100AABD7A /* TaskOutputWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TaskOutputWindow.xib; sourceTree = "<group>"; };
 		046A35B61BD783CE004E0946 /* BaseWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseWindowController.h; sourceTree = "<group>"; };
 		046A35B71BD783CE004E0946 /* BaseWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseWindowController.m; sourceTree = "<group>"; };
 		046A35C01BD7871B004E0946 /* PreferencesWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesWindow.h; sourceTree = "<group>"; };
@@ -387,6 +401,60 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0422D4DC1BDA048D00C5CB33 /* TaskOutput */ = {
+			isa = PBXGroup;
+			children = (
+				0422D4DD1BDA04A500C5CB33 /* TaskOutputVC.h */,
+				0422D4DE1BDA04A500C5CB33 /* TaskOutputVC.m */,
+				0422D4DF1BDA04A500C5CB33 /* TaskOutputVC.xib */,
+			);
+			path = TaskOutput;
+			sourceTree = "<group>";
+		};
+		0422D4E61BDA067100C5CB33 /* TaskOutput */ = {
+			isa = PBXGroup;
+			children = (
+				0422D4E71BDA067100C5CB33 /* TaskOutputWindow.h */,
+				0422D4E81BDA067100C5CB33 /* TaskOutputWindow.m */,
+				0422D4E91BDA067100C5CB33 /* TaskOutputWindow.xib */,
+			);
+			path = TaskOutput;
+			sourceTree = "<group>";
+		};
+		0422D4F01BDA0C1400C5CB33 /* Management */ = {
+			isa = PBXGroup;
+			children = (
+				0422D4F11BDA0C1400C5CB33 /* Raspberry */,
+				0422D4F21BDA0C1400C5CB33 /* Task */,
+				0422D4F31BDA0C1400C5CB33 /* Vagrant */,
+			);
+			name = Management;
+			path = manager/Management;
+			sourceTree = "<group>";
+		};
+		0422D4F11BDA0C1400C5CB33 /* Raspberry */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Raspberry;
+			sourceTree = "<group>";
+		};
+		0422D4F21BDA0C1400C5CB33 /* Task */ = {
+			isa = PBXGroup;
+			children = (
+				0422D4F41BDA0C2700C5CB33 /* PCTask.h */,
+				0422D4F51BDA0C2700C5CB33 /* PCTask.m */,
+			);
+			path = Task;
+			sourceTree = "<group>";
+		};
+		0422D4F31BDA0C1400C5CB33 /* Vagrant */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Vagrant;
+			sourceTree = "<group>";
+		};
 		0441A3D51BD8904100AABD7A /* Application */ = {
 			isa = PBXGroup;
 			children = (
@@ -427,22 +495,12 @@
 			path = CustomCommand;
 			sourceTree = "<group>";
 		};
-		0441A41D1BD8C20100AABD7A /* TaskOutput */ = {
-			isa = PBXGroup;
-			children = (
-				0441A41E1BD8C20100AABD7A /* TaskOutputWindow.h */,
-				0441A41F1BD8C20100AABD7A /* TaskOutputWindow.m */,
-				0441A4201BD8C20100AABD7A /* TaskOutputWindow.xib */,
-			);
-			path = TaskOutput;
-			sourceTree = "<group>";
-		};
 		046A35B51BD783CE004E0946 /* WindowController */ = {
 			isa = PBXGroup;
 			children = (
 				046A35B61BD783CE004E0946 /* BaseWindowController.h */,
 				046A35B71BD783CE004E0946 /* BaseWindowController.m */,
-				0441A41D1BD8C20100AABD7A /* TaskOutput */,
+				0422D4E61BDA067100C5CB33 /* TaskOutput */,
 				046A36781BD793F7004E0946 /* Setup */,
 				046A35BF1BD7871B004E0946 /* Preference */,
 				046A35C31BD7871B004E0946 /* About */,
@@ -625,6 +683,7 @@
 		046A36491BD793BB004E0946 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
+				0422D4DC1BDA048D00C5CB33 /* TaskOutput */,
 				046A364A1BD793BB004E0946 /* Setup */,
 			);
 			name = ViewController;
@@ -672,6 +731,7 @@
 				046A35D91BD78AB8004E0946 /* Common */,
 				046A36491BD793BB004E0946 /* ViewController */,
 				046A35B51BD783CE004E0946 /* WindowController */,
+				0422D4F01BDA0C1400C5CB33 /* Management */,
 				0441A3D51BD8904100AABD7A /* Application */,
 				048678071BCF5FE20071594B /* manager */,
 				0486781B1BCF5FE20071594B /* managerTests */,
@@ -921,7 +981,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0441A4241BD8C20100AABD7A /* TaskOutputWindow.xib in Resources */,
 				046A36431BD79321004E0946 /* Askpass in Resources */,
 				046A366F1BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
 				046A36751BD793BB004E0946 /* PCSetup4VC.xib in Resources */,
@@ -931,7 +990,9 @@
 				041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				046A35D01BD7871B004E0946 /* PreferencesWindow.xib in Resources */,
+				0422D4E31BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */,
 				048678121BCF5FE20071594B /* MainMenu.xib in Resources */,
+				0422D4ED1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */,
 				046A365D1BD793BB004E0946 /* PCSetup1VC.xib in Resources */,
 				046A36691BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */,
 			);
@@ -946,11 +1007,12 @@
 				046A35D11BD7871B004E0946 /* PreferencesWindow.xib in Resources */,
 				046A366A1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */,
 				046A36701BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
+				0422D4EE1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */,
 				046A365E1BD793BB004E0946 /* PCSetup1VC.xib in Resources */,
 				046A35D71BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A368E1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
-				0441A4251BD8C20100AABD7A /* TaskOutputWindow.xib in Resources */,
+				0422D4E41BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -963,11 +1025,12 @@
 				046A35D21BD7871B004E0946 /* PreferencesWindow.xib in Resources */,
 				046A366B1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */,
 				046A36711BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
+				0422D4EF1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */,
 				046A365F1BD793BB004E0946 /* PCSetup1VC.xib in Resources */,
 				046A35D81BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				041FB3B91BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A368F1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
-				0441A4261BD8C20100AABD7A /* TaskOutputWindow.xib in Resources */,
+				0422D4E51BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1044,12 +1107,12 @@
 				046A367B1BD793F7004E0946 /* DPSetupWindow.m in Sources */,
 				046A36721BD793BB004E0946 /* PCSetup4VC.m in Sources */,
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
-				0441A4211BD8C20100AABD7A /* TaskOutputWindow.m in Sources */,
 				046A365A1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
 				046A36661BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
 				0441A3E61BD8904100AABD7A /* NativeMenu.m in Sources */,
 				046A360E1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
+				0422D4EA1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */,
 				0441A3EF1BD8921600AABD7A /* Util.m in Sources */,
 				0441A3E91BD8904100AABD7A /* NativeMenuItem.m in Sources */,
 				046A360B1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
@@ -1057,6 +1120,7 @@
 				046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
 				046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				046A36081BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */,
+				0422D4E01BDA04A500C5CB33 /* TaskOutputVC.m in Sources */,
 				04F705761BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				0441A3FF1BD8981400AABD7A /* CustomCommandManager.m in Sources */,
 				046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
@@ -1067,6 +1131,7 @@
 				046A35CD1BD7871B004E0946 /* PreferencesWindow.m in Sources */,
 				0441A3E31BD8904100AABD7A /* main.m in Sources */,
 				04F705691BD7A94300829651 /* BSONSerialization.m in Sources */,
+				0422D4F61BDA0C2700C5CB33 /* PCTask.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1088,13 +1153,15 @@
 				046A367C1BD793F7004E0946 /* DPSetupWindow.m in Sources */,
 				0441A3EA1BD8904100AABD7A /* NativeMenuItem.m in Sources */,
 				046A36151BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
-				0441A4221BD8C20100AABD7A /* TaskOutputWindow.m in Sources */,
+				0422D4E11BDA04A500C5CB33 /* TaskOutputVC.m in Sources */,
 				046A35D41BD7871B004E0946 /* AboutWindow.m in Sources */,
 				0441A3F51BD892A400AABD7A /* VersionComparison.m in Sources */,
+				0422D4EB1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */,
 				046A365B1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
 				046A35CE1BD7871B004E0946 /* PreferencesWindow.m in Sources */,
 				04F7056A1BD7A94300829651 /* BSONSerialization.m in Sources */,
 				046A36121BD78AB8004E0946 /* DrawingUtils.m in Sources */,
+				0422D4F71BDA0C2700C5CB33 /* PCTask.m in Sources */,
 				046A36181BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				0441A3E11BD8904100AABD7A /* AppDelegate.m in Sources */,
 				046A36211BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
@@ -1128,13 +1195,15 @@
 				046A367D1BD793F7004E0946 /* DPSetupWindow.m in Sources */,
 				0441A3EB1BD8904100AABD7A /* NativeMenuItem.m in Sources */,
 				046A36161BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
-				0441A4231BD8C20100AABD7A /* TaskOutputWindow.m in Sources */,
+				0422D4E21BDA04A500C5CB33 /* TaskOutputVC.m in Sources */,
 				046A35D51BD7871B004E0946 /* AboutWindow.m in Sources */,
 				0441A3F61BD892A400AABD7A /* VersionComparison.m in Sources */,
+				0422D4EC1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */,
 				046A365C1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
 				046A35CF1BD7871B004E0946 /* PreferencesWindow.m in Sources */,
 				04F7056B1BD7A94300829651 /* BSONSerialization.m in Sources */,
 				046A36131BD78AB8004E0946 /* DrawingUtils.m in Sources */,
+				0422D4F81BDA0C2700C5CB33 /* PCTask.m in Sources */,
 				046A36191BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				0441A3E21BD8904100AABD7A /* AppDelegate.m in Sources */,
 				046A36221BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
