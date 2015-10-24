@@ -163,6 +163,27 @@
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
 		0486781D1BCF5FE20071594B /* managerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0486781C1BCF5FE20071594B /* managerTests.m */; };
 		048678281BCF5FE20071594B /* managerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 048678271BCF5FE20071594B /* managerUITests.m */; };
+		04A858601BDB31C400435545 /* icon_128x128.png in Resources */ = {isa = PBXBuildFile; fileRef = 04A8585E1BDB31C400435545 /* icon_128x128.png */; };
+		04A858611BDB31C400435545 /* icon_128x128.png in Resources */ = {isa = PBXBuildFile; fileRef = 04A8585E1BDB31C400435545 /* icon_128x128.png */; };
+		04A858621BDB31C400435545 /* icon_128x128.png in Resources */ = {isa = PBXBuildFile; fileRef = 04A8585E1BDB31C400435545 /* icon_128x128.png */; };
+		04A858631BDB31C400435545 /* icon_128x128@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 04A8585F1BDB31C400435545 /* icon_128x128@2x.png */; };
+		04A858641BDB31C400435545 /* icon_128x128@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 04A8585F1BDB31C400435545 /* icon_128x128@2x.png */; };
+		04A858651BDB31C400435545 /* icon_128x128@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 04A8585F1BDB31C400435545 /* icon_128x128@2x.png */; };
+		04D407361BDBC51F00625AD7 /* LinkInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D4072D1BDBC51F00625AD7 /* LinkInterface.m */; };
+		04D407371BDBC51F00625AD7 /* LinkInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D4072D1BDBC51F00625AD7 /* LinkInterface.m */; };
+		04D407381BDBC51F00625AD7 /* LinkInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D4072D1BDBC51F00625AD7 /* LinkInterface.m */; };
+		04D407391BDBC51F00625AD7 /* LinkInterfaces.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D4072F1BDBC51F00625AD7 /* LinkInterfaces.m */; };
+		04D4073A1BDBC51F00625AD7 /* LinkInterfaces.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D4072F1BDBC51F00625AD7 /* LinkInterfaces.m */; };
+		04D4073B1BDBC51F00625AD7 /* LinkInterfaces.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D4072F1BDBC51F00625AD7 /* LinkInterfaces.m */; };
+		04D4073C1BDBC51F00625AD7 /* LinkMACAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407311BDBC51F00625AD7 /* LinkMACAddress.m */; };
+		04D4073D1BDBC51F00625AD7 /* LinkMACAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407311BDBC51F00625AD7 /* LinkMACAddress.m */; };
+		04D4073E1BDBC51F00625AD7 /* LinkMACAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407311BDBC51F00625AD7 /* LinkMACAddress.m */; };
+		04D4073F1BDBC51F00625AD7 /* LinkMACVendors.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407331BDBC51F00625AD7 /* LinkMACVendors.m */; };
+		04D407401BDBC51F00625AD7 /* LinkMACVendors.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407331BDBC51F00625AD7 /* LinkMACVendors.m */; };
+		04D407411BDBC51F00625AD7 /* LinkMACVendors.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407331BDBC51F00625AD7 /* LinkMACVendors.m */; };
+		04D407421BDBC51F00625AD7 /* PCInterfaceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407351BDBC51F00625AD7 /* PCInterfaceList.m */; };
+		04D407431BDBC51F00625AD7 /* PCInterfaceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407351BDBC51F00625AD7 /* PCInterfaceList.m */; };
+		04D407441BDBC51F00625AD7 /* PCInterfaceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407351BDBC51F00625AD7 /* PCInterfaceList.m */; };
 		04F705691BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; };
 		04F7056A1BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; };
 		04F7056B1BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; };
@@ -334,6 +355,18 @@
 		048678231BCF5FE20071594B /* managerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = managerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		048678271BCF5FE20071594B /* managerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = managerUITests.m; sourceTree = "<group>"; };
 		048678291BCF5FE20071594B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		04A8585E1BDB31C400435545 /* icon_128x128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_128x128.png; sourceTree = "<group>"; };
+		04A8585F1BDB31C400435545 /* icon_128x128@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_128x128@2x.png"; sourceTree = "<group>"; };
+		04D4072C1BDBC51F00625AD7 /* LinkInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkInterface.h; sourceTree = "<group>"; };
+		04D4072D1BDBC51F00625AD7 /* LinkInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkInterface.m; sourceTree = "<group>"; };
+		04D4072E1BDBC51F00625AD7 /* LinkInterfaces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkInterfaces.h; sourceTree = "<group>"; };
+		04D4072F1BDBC51F00625AD7 /* LinkInterfaces.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkInterfaces.m; sourceTree = "<group>"; };
+		04D407301BDBC51F00625AD7 /* LinkMACAddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkMACAddress.h; sourceTree = "<group>"; };
+		04D407311BDBC51F00625AD7 /* LinkMACAddress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkMACAddress.m; sourceTree = "<group>"; };
+		04D407321BDBC51F00625AD7 /* LinkMACVendors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkMACVendors.h; sourceTree = "<group>"; };
+		04D407331BDBC51F00625AD7 /* LinkMACVendors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkMACVendors.m; sourceTree = "<group>"; };
+		04D407341BDBC51F00625AD7 /* PCInterfaceList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCInterfaceList.h; sourceTree = "<group>"; };
+		04D407351BDBC51F00625AD7 /* PCInterfaceList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCInterfaceList.m; sourceTree = "<group>"; };
 		04F705641BD7A94300829651 /* BSONSerialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSONSerialization.h; sourceTree = "<group>"; };
 		04F705651BD7A94300829651 /* BSONSerialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSONSerialization.m; sourceTree = "<group>"; };
 		04F705671BD7A94300829651 /* GCDAsyncUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncUdpSocket.h; sourceTree = "<group>"; };
@@ -424,6 +457,7 @@
 		0422D4F01BDA0C1400C5CB33 /* Management */ = {
 			isa = PBXGroup;
 			children = (
+				04D4072B1BDBC51F00625AD7 /* NetworkStatus */,
 				0422D4F11BDA0C1400C5CB33 /* Raspberry */,
 				0422D4F21BDA0C1400C5CB33 /* Task */,
 				0422D4F31BDA0C1400C5CB33 /* Vagrant */,
@@ -758,6 +792,8 @@
 			isa = PBXGroup;
 			children = (
 				0486780E1BCF5FE20071594B /* Assets.xcassets */,
+				04A8585E1BDB31C400435545 /* icon_128x128.png */,
+				04A8585F1BDB31C400435545 /* icon_128x128@2x.png */,
 				0441A3EC1BD8907800AABD7A /* PrefixHeader.pch */,
 				048678101BCF5FE20071594B /* MainMenu.xib */,
 				048678131BCF5FE20071594B /* Info.plist */,
@@ -782,6 +818,23 @@
 				048678291BCF5FE20071594B /* Info.plist */,
 			);
 			path = managerUITests;
+			sourceTree = "<group>";
+		};
+		04D4072B1BDBC51F00625AD7 /* NetworkStatus */ = {
+			isa = PBXGroup;
+			children = (
+				04D4072C1BDBC51F00625AD7 /* LinkInterface.h */,
+				04D4072D1BDBC51F00625AD7 /* LinkInterface.m */,
+				04D4072E1BDBC51F00625AD7 /* LinkInterfaces.h */,
+				04D4072F1BDBC51F00625AD7 /* LinkInterfaces.m */,
+				04D407301BDBC51F00625AD7 /* LinkMACAddress.h */,
+				04D407311BDBC51F00625AD7 /* LinkMACAddress.m */,
+				04D407321BDBC51F00625AD7 /* LinkMACVendors.h */,
+				04D407331BDBC51F00625AD7 /* LinkMACVendors.m */,
+				04D407341BDBC51F00625AD7 /* PCInterfaceList.h */,
+				04D407351BDBC51F00625AD7 /* PCInterfaceList.m */,
+			);
+			path = NetworkStatus;
 			sourceTree = "<group>";
 		};
 		04F705621BD7A94300829651 /* Vendors */ = {
@@ -983,9 +1036,11 @@
 			files = (
 				046A36431BD79321004E0946 /* Askpass in Resources */,
 				046A366F1BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
+				04A858601BDB31C400435545 /* icon_128x128.png in Resources */,
 				046A36751BD793BB004E0946 /* PCSetup4VC.xib in Resources */,
 				0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */,
 				046A36631BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */,
+				04A858631BDB31C400435545 /* icon_128x128@2x.png in Resources */,
 				046A368D1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
 				041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */,
@@ -1007,12 +1062,14 @@
 				046A35D11BD7871B004E0946 /* PreferencesWindow.xib in Resources */,
 				046A366A1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */,
 				046A36701BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
+				04A858611BDB31C400435545 /* icon_128x128.png in Resources */,
 				0422D4EE1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */,
 				046A365E1BD793BB004E0946 /* PCSetup1VC.xib in Resources */,
 				046A35D71BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A368E1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
 				0422D4E41BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */,
+				04A858641BDB31C400435545 /* icon_128x128@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1025,12 +1082,14 @@
 				046A35D21BD7871B004E0946 /* PreferencesWindow.xib in Resources */,
 				046A366B1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */,
 				046A36711BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
+				04A858621BDB31C400435545 /* icon_128x128.png in Resources */,
 				0422D4EF1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */,
 				046A365F1BD793BB004E0946 /* PCSetup1VC.xib in Resources */,
 				046A35D81BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				041FB3B91BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A368F1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
 				0422D4E51BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */,
+				04A858651BDB31C400435545 /* icon_128x128@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1107,9 +1166,12 @@
 				046A367B1BD793F7004E0946 /* DPSetupWindow.m in Sources */,
 				046A36721BD793BB004E0946 /* PCSetup4VC.m in Sources */,
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
+				04D407421BDBC51F00625AD7 /* PCInterfaceList.m in Sources */,
 				046A365A1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
 				046A36661BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
 				0441A3E61BD8904100AABD7A /* NativeMenu.m in Sources */,
+				04D407361BDBC51F00625AD7 /* LinkInterface.m in Sources */,
+				04D4073C1BDBC51F00625AD7 /* LinkMACAddress.m in Sources */,
 				046A360E1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
 				0422D4EA1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */,
@@ -1126,6 +1188,8 @@
 				046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
 				046A366C1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
+				04D407391BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
+				04D4073F1BDBC51F00625AD7 /* LinkMACVendors.m in Sources */,
 				046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				046A35D31BD7871B004E0946 /* AboutWindow.m in Sources */,
 				046A35CD1BD7871B004E0946 /* PreferencesWindow.m in Sources */,
@@ -1143,6 +1207,7 @@
 				046A360C1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
 				0441A3FD1BD8981400AABD7A /* CustomCommand.m in Sources */,
 				046A36731BD793BB004E0946 /* PCSetup4VC.m in Sources */,
+				04D4073D1BDBC51F00625AD7 /* LinkMACAddress.m in Sources */,
 				04F7056D1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				0441A3E41BD8904100AABD7A /* main.m in Sources */,
 				046A36671BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
@@ -1164,7 +1229,10 @@
 				0422D4F71BDA0C2700C5CB33 /* PCTask.m in Sources */,
 				046A36181BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				0441A3E11BD8904100AABD7A /* AppDelegate.m in Sources */,
+				04D407371BDBC51F00625AD7 /* LinkInterface.m in Sources */,
 				046A36211BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
+				04D407431BDBC51F00625AD7 /* PCInterfaceList.m in Sources */,
+				04D407401BDBC51F00625AD7 /* LinkMACVendors.m in Sources */,
 				04F705771BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A368B1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				046A361E1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
@@ -1173,6 +1241,7 @@
 				046A36611BD793BB004E0946 /* PCSetup2RPVC.m in Sources */,
 				046A360F1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
 				0441A3E71BD8904100AABD7A /* NativeMenu.m in Sources */,
+				04D4073A1BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
 				0441A3F01BD8921600AABD7A /* Util.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1185,6 +1254,7 @@
 				046A360D1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
 				0441A3FE1BD8981400AABD7A /* CustomCommand.m in Sources */,
 				046A36741BD793BB004E0946 /* PCSetup4VC.m in Sources */,
+				04D4073E1BDBC51F00625AD7 /* LinkMACAddress.m in Sources */,
 				04F7056E1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				0441A3E51BD8904100AABD7A /* main.m in Sources */,
 				046A36681BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
@@ -1206,7 +1276,10 @@
 				0422D4F81BDA0C2700C5CB33 /* PCTask.m in Sources */,
 				046A36191BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				0441A3E21BD8904100AABD7A /* AppDelegate.m in Sources */,
+				04D407381BDBC51F00625AD7 /* LinkInterface.m in Sources */,
 				046A36221BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
+				04D407441BDBC51F00625AD7 /* PCInterfaceList.m in Sources */,
+				04D407411BDBC51F00625AD7 /* LinkMACVendors.m in Sources */,
 				04F705781BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A368C1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				046A361F1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
@@ -1215,6 +1288,7 @@
 				046A36621BD793BB004E0946 /* PCSetup2RPVC.m in Sources */,
 				046A36101BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
 				0441A3E81BD8904100AABD7A /* NativeMenu.m in Sources */,
+				04D4073B1BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
 				0441A3F11BD8921600AABD7A /* Util.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

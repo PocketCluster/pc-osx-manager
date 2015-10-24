@@ -11,6 +11,7 @@
 
 @interface TaskOutputWindow ()
 - (NSTask *)defaultTask;
+- (NSString *)sudoCommand;
 @end
 
 @implementation TaskOutputWindow{
@@ -19,6 +20,8 @@
 
 - (id)initWithWindow:(NSWindow *)window {
     self = [super initWithWindow:window];
+    
+    _isSudoCommand = false;
     
     return self;
 }
@@ -33,7 +36,6 @@
     if ([self task] == nil){
         [self setTask:[self defaultTask]];
     }
-    
     
     NSPipe *taskOutputPipe = [NSPipe pipe];
 	[self.task setStandardInput:[NSFileHandle fileHandleWithNullDevice]];
@@ -62,7 +64,7 @@
     
     self.window.title = @"Task Window";
     
-    self.taskCommandLabel.stringValue = self.taskCommand;
+    //self.taskCommandLabel.stringValue = self.taskCommand;
     self.taskStatusLabel.stringValue = @"Running task...";
     [self.progressBar startAnimation:self];
 
@@ -73,9 +75,21 @@
 {
     NSTask *task = [[NSTask alloc] init];
     [task setLaunchPath:@"/bin/bash"];
-    [task setArguments:@[@"-l", @"-c", self.taskCommand]];
+    
+    if(_isSudoCommand){
+        [task setArguments:@[@"-l", @"-c", [self sudoCommand]]];
+    }else{
+        [task setArguments:@[@"-l", @"-c", self.taskCommand]];
+    }
+
     return task;
 }
+
+- (NSString *)sudoCommand
+{
+    return [NSString stringWithFormat:@"sudo -A %@", self.taskCommand];
+}
+
 
 - (void)taskCompletion:(NSNotification*)notif {
     NSTask *task = [notif object];

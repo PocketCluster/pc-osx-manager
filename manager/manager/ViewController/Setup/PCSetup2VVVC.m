@@ -8,6 +8,7 @@
 
 #import "PCSetup2VVVC.h"
 #import "TaskOutputWindow.h"
+#import "Util.h"
 
 @interface PCSetup2VVVC ()
 @property (nonatomic, strong) TaskOutputWindow *task;
@@ -29,7 +30,7 @@
 //    task.target = machine;
 //    task.taskAction = command;
 
-    self.task = task;
+    task.isSudoCommand = YES;
     
     [[NSApplication sharedApplication]
      beginSheet:[task window]
@@ -37,6 +38,8 @@
      modalDelegate:nil
      didEndSelector:NULL
      contextInfo:NULL];
+    
+    [[Util getApp] addOpenWindow:task];
     
     
 }

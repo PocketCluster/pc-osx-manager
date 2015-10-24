@@ -6,7 +6,7 @@
 //
 
 #import "NativeMenu.h"
-//#import "BookmarkManager.h"
+#import <Sparkle/Sparkle.h>
 #import "AppDelegate.h"
 #import "Util.h"
 
@@ -402,15 +402,12 @@
     }
 }
 
-/*
+
 - (void)checkForUpdatesMenuItemClicked:(id)sender {
     [[SUUpdater sharedUpdater] checkForUpdates:self];
 }
 
-- (void)checkForVagrantUpdatesMenuItemClicked:(id)sender {
-    [self.delegate checkForVagrantUpdates:YES];
-}
-
+/*
 #pragma mark - All machines actions
 
 - (IBAction)allUpMenuItemClicked:(NSMenuItem*)sender {

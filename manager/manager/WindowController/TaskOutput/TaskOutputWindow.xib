@@ -10,8 +10,6 @@
                 <outlet property="cancelButton" destination="hbl-VT-EZm" id="y4i-uN-2MO"/>
                 <outlet property="closeWindowButton" destination="L35-tt-XDn" id="1CK-wL-Pub"/>
                 <outlet property="outputTextView" destination="yGv-xC-aVr" id="Jmj-YV-czD"/>
-                <outlet property="progressBar" destination="Hgf-UO-j1p" id="jUn-8I-xti"/>
-                <outlet property="taskCommandLabel" destination="GMU-0g-Bph" id="9yC-Ra-u0a"/>
                 <outlet property="taskStatusLabel" destination="YfK-N0-5lw" id="6Vm-4A-pdh"/>
                 <outlet property="window" destination="1" id="3"/>
             </connections>
@@ -27,21 +25,6 @@
                 <rect key="frame" x="0.0" y="0.0" width="805" height="453"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <progressIndicator maxValue="100" indeterminate="YES" style="bar" id="Hgf-UO-j1p">
-                        <rect key="frame" x="20" y="407" width="765" height="20"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                        <animations/>
-                    </progressIndicator>
-                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="GMU-0g-Bph">
-                        <rect key="frame" x="20" y="379" width="765" height="20"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                        <animations/>
-                        <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="left" title="Task Command" drawsBackground="YES" usesSingleLineMode="YES" id="c1d-fd-4lg">
-                            <font key="font" size="14" name="CourierNewPSMT"/>
-                            <color key="textColor" red="0.24771750301885942" green="1" blue="0.28522159497353927" alpha="1" colorSpace="calibratedRGB"/>
-                            <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                        </textFieldCell>
-                    </textField>
                     <scrollView autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="iN4-Se-IjL">
                         <rect key="frame" x="20" y="49" width="765" height="377"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
