@@ -6,8 +6,6 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
-
 @interface AppDelegate : NSObject <NSApplicationDelegate, NSMenuDelegate, NSUserNotificationCenterDelegate>
 - (void)addOpenWindow:(id)window;
 - (void)removeOpenWindow:(id)window;

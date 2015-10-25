@@ -6,8 +6,6 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
-
 @interface DPSetupWC : NSWindowController
 
 @end

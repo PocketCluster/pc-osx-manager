@@ -6,7 +6,6 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
 #import "PCTask.h"
 
 @interface TaskOutputVC : NSViewController <PCTaskDelegate>

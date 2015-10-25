@@ -5,7 +5,6 @@
 //  Copyright (c) 2014 Lanayo. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
 #import "BaseWindowController.h"
 
 @interface PreferencesWindow : BaseWindowController {

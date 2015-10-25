@@ -6,7 +6,6 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
 #import "DPSetupWindow.h"
 
 @interface PCSetup2VVVC : NSViewController  <DPSetupWindowStageViewController>
