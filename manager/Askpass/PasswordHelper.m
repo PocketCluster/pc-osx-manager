@@ -19,10 +19,11 @@
 	NSMutableArray *returnArray = [NSMutableArray arrayWithObjects:@"PasswordString", [NSNumber numberWithInt:0], [NSNumber numberWithInt:1], nil];
 	
     NSURL * iconUrl =
-    [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@",
-                            [[[NSBundle mainBundle] executablePath] stringByDeletingLastPathComponent],
-                            @"icon_128x128.png"
-                            ]];
+#if 0
+        [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@",[[[NSBundle mainBundle] executablePath] stringByDeletingLastPathComponent],@"icon_128x128.png"]];
+#else
+        [NSURL fileURLWithPath:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/icons/icon_128x128.png"]];
+#endif
     
     NSDictionary *panelDict = [NSDictionary dictionaryWithObjectsAndKeys:
                                @"Enter Your Password", kCFUserNotificationAlertHeaderKey,

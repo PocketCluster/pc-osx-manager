@@ -10,22 +10,56 @@
 #import "Util.h"
 #import "AppDelegate.h"
 
+@interface PCTask()
+- (NSTask *)defaultTask;
+- (NSString *)sudoCommand;
+@end
 
 @implementation PCTask
 -(instancetype)init {
     self = [super init];
     
-
     if(self){
         CFUUIDRef uuid = CFUUIDCreate(NULL);
         self.taskUUID = (__bridge_transfer NSString *)CFUUIDCreateString(NULL, uuid);
         CFRelease(uuid);
+        
+        _sudoCommand = NO;
     }
 
     return self;
 }
 
+-(void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (NSTask *)defaultTask
+{
+    NSTask *task = [[NSTask alloc] init];
+    [task setLaunchPath:@"/bin/bash"];
+    
+    if(_sudoCommand){
+        [task setArguments:@[@"-l", @"-c", [self sudoCommand]]];
+    }else{
+        [task setArguments:@[@"-l", @"-c", self.taskCommand]];
+    }
+    
+    return task;
+}
+
+- (NSString *)sudoCommand
+{
+    return [NSString stringWithFormat:@"sudo -A %@", self.taskCommand];
+}
+
+
 -(void)launchTask {
+    
+    if (!self.task){
+        self.task = [self defaultTask];
+    }
     
     NSPipe *taskOutputPipe = [NSPipe pipe];
     [self.task setStandardInput:[NSFileHandle fileHandleWithNullDevice]];
@@ -51,43 +85,23 @@
 - (void)taskCompletion:(NSNotification*)notif {
     NSTask *task = [notif object];
     
-    
-    NSString *notificationText;
-    
-    if(task.terminationStatus != 0) {
-        notificationText = @"Task completed with errors";
-        
-    } else {
-        notificationText = @"Task completed successfully";
+    @synchronized(self) {
+        [self.delegate task:self taskCompletion:task];
     }
-    
-    /*
-     [[Util getApp] showUserNotificationWithTitle:notificationText informativeText:[NSString stringWithFormat:@"%@ %@", name, self.taskAction] taskWindowUUID:self.windowUUID];
-     */
-    
-    //notify app task is complete
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.task-completed" object:nil userInfo:@{@"target": self.target}];
-
-/*
-    if([[NSUserDefaults standardUserDefaults] boolForKey:@"autoCloseTaskWindows"] && task.terminationStatus == 0) {
-        dispatch_async(dispatch_get_global_queue(0,0), ^{
-            [self close];
-        });
-    }
- */
 }
 
 - (void)receivedOutput:(NSNotification*)notif {
     NSFileHandle *fh = [notif object];
-    //NSData *data = [fh availableData];
-    //NSString *str = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
     
     @synchronized(self) {
-  
-        if(self.task.isRunning) {
-            [fh waitForDataInBackgroundAndNotify];
-        }
+        if(self.delegate && ![self.delegate task:self isOutputClosed:self.delegate]){
+            
+            [self.delegate task:self recievedOutput:fh];
 
+            if(self.task.isRunning){
+                [fh waitForDataInBackgroundAndNotify];
+            }
+        }
     }
 }
 

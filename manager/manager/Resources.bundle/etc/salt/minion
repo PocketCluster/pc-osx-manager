@@ -1,0 +1,23 @@
+default_include: /pocket/salt/conf/minion.d/*.conf
+
+id: pc-master
+
+ipv6: False
+
+master: salt
+
+user: PC_USER
+
+sudo_user: ''
+
+root_dir: /pocket/salt
+
+pki_dir: /pki/minion
+
+cache_jobs: False
+
+cachedir: /cache/minion
+
+sock_dir: /run/minion
+
+pidfile: /var/run/salt-master.pid

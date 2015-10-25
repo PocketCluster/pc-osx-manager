@@ -23,14 +23,12 @@
 
 -(IBAction)vagrantUp:(id)sender
 {
+    NSString *basePath    = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
+    NSString *setupScript = [NSString stringWithFormat:@"%@/setup/setup_vagrant_base.sh",basePath];
     
     TaskOutputWindow *task = [[TaskOutputWindow alloc] initWithWindowNibName:@"TaskOutputWindow"];
-
-    task.taskCommand = @"ls /Users/almightykim/";
-//    task.target = machine;
-//    task.taskAction = command;
-
-    task.isSudoCommand = YES;
+    task.taskCommand = [NSString stringWithFormat:@"sh %@ %@", setupScript, basePath];
+    task.sudoCommand = YES;
     
     [[NSApplication sharedApplication]
      beginSheet:[task window]

@@ -1,0 +1,27 @@
+default_include: /pocket/salt/conf/master.d/*.conf
+
+ipv6: False
+
+interface: 10.211.55.1
+
+user: PC_USER
+
+root_dir: /pocket/salt
+
+pki_dir: /pki/master
+
+cache_jobs: False
+
+cachedir: /cache/master
+
+sock_dir: /run/master
+
+max_open_files: 8192
+
+pillar_roots:
+base:
+    - /pocket/salt/pillar
+
+file_roots:
+base:
+    - /pocket/salt/states

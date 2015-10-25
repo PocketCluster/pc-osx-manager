@@ -47,8 +47,9 @@
 
 - (NSDictionary*) all
 {
-  if (all) return all;
-  NSString *plistPath = [[NSBundle mainBundle] pathForResource:@"mac_vendors" ofType:@"plist"];
+  if (all) return all;  
+  //NSString *plistPath = [[NSBundle mainBundle] pathForResource:@"mac_vendors" ofType:@"plist"];
+  NSString *plistPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/mac_vendors.plist"];
   all = [[NSDictionary alloc] initWithContentsOfFile:plistPath];
   return all;
 }

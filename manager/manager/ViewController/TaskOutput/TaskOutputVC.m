@@ -11,45 +11,84 @@
 #import "Util.h"
 
 @interface TaskOutputVC ()
-
+@property (strong, nonatomic) PCTask *taskOperator;
 @end
 
 @implementation TaskOutputVC
+@dynamic target;
+@dynamic taskCommand;
+@dynamic taskAction;
+@dynamic task;
+@dynamic sudoCommand;
+
+-(instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    
+    if(self){
+        self.taskOperator = [PCTask new];
+        self.taskOperator.delegate = self;
+    }
+    
+    return self;
+}
+
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
-    CFUUIDRef uuid = CFUUIDCreate(NULL);
-    self.windowUUID = (__bridge_transfer NSString *)CFUUIDCreateString(NULL, uuid);
-    CFRelease(uuid);
     
-    NSPipe *taskOutputPipe = [NSPipe pipe];
-    [self.task setStandardInput:[NSFileHandle fileHandleWithNullDevice]];
-    [self.task setStandardOutput:taskOutputPipe];
-    [self.task setStandardError:taskOutputPipe];
-    
-    //set up Askpass handler for sudo
-    NSString *askPassPath = [NSBundle pathForResource:@"Askpass" ofType:@"" inDirectory:[[NSBundle mainBundle] bundlePath]];
-    NSMutableDictionary *env = [[[NSProcessInfo processInfo] environment] mutableCopy];
-    [env setObject:@"NONE" forKey:@"DISPLAY"];
-    [env setObject:askPassPath forKey:@"SUDO_ASKPASS"];
-    [self.task setEnvironment:env];
-    
-    NSFileHandle *fh = [taskOutputPipe fileHandleForReading];
-    [fh waitForDataInBackgroundAndNotify];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedOutput:) name:NSFileHandleDataAvailableNotification object:fh];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(taskCompletion:) name: NSTaskDidTerminateNotification object:self.task];
+    /*
+     NSString *name = [self.target isKindOfClass:[VagrantMachine class]] ?
+     [NSString stringWithFormat:@"%@ - %@",((VagrantMachine*)self.target).instance.displayName, ((VagrantMachine*)self.target).name] :
+     ((VagrantInstance*)self.target).displayName;
+     
+     self.window.title = [NSString stringWithFormat:@"%@ %@", name, self.taskAction];
+     */
     
     self.taskCommandLabel.stringValue = self.taskCommand;
     self.taskStatusLabel.stringValue = @"Running task...";
     [self.progressBar startAnimation:self];
     
-    [self.task launch];
+    [self.taskOperator launchTask];
 }
 
-- (void)taskCompletion:(NSNotification*)notif {
-    NSTask *task = [notif object];
+- (IBAction)closeButtonClicked:(id)sender {
+//    [self close];
+}
+
+- (IBAction)cancelButtonClicked:(id)sender {
+    NSAlert *confirmAlert = [NSAlert alertWithMessageText:@"Are you sure you want to cancel the running task?" defaultButton:@"Confirm" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@""];
+    NSInteger button = [confirmAlert runModal];
+    
+    if(button == NSAlertDefaultReturn) {
+        [self.taskOperator cancelTask];
+    }
+}
+
+
+
+#pragma mark - PCTaskDelegate
+-(void)setTarget:(id)aTarget {
+    [self.taskOperator setTarget:aTarget];
+}
+
+-(void)setTaskCommand:(NSString *)aTaskCommand {
+    [self.taskOperator setTaskCommand:aTaskCommand];
+}
+
+-(void)setTaskAction:(NSString *)aTaskAction {
+    [self.taskOperator setTaskAction:aTaskAction];
+}
+
+-(void)setTask:(NSTask *)aTask {
+    [self.taskOperator setTask:aTask];
+}
+
+-(void)setSudoCommand:(BOOL)aSudoCommand {
+    [self.taskOperator setSudoCommand:aSudoCommand];
+}
+
+-(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
     
     [self.progressBar stopAnimation:self];
     [self.progressBar setIndeterminate:NO];
@@ -63,7 +102,7 @@
     
     NSString *notificationText;
     
-    if(task.terminationStatus != 0) {
+    if(aTask.terminationStatus != 0) {
         self.taskStatusLabel.stringValue = @"Completed with errors";
         notificationText = @"Task completed with errors";
         
@@ -72,70 +111,53 @@
         notificationText = @"Task completed successfully";
     }
     
-    
-//    [[Util getApp] showUserNotificationWithTitle:notificationText informativeText:[NSString stringWithFormat:@"%@ %@", name, self.taskAction] taskWindowUUID:self.windowUUID];
-    
+    /*
+     NSString *name = [self.target isKindOfClass:[VagrantMachine class]] ? [NSString stringWithFormat:@"%@ - %@",((VagrantMachine*)self.target).instance.displayName, ((VagrantMachine*)self.target).name] : ((VagrantInstance*)self.target).displayName;
+     
+     [[Util getApp] showUserNotificationWithTitle:notificationText informativeText:[NSString stringWithFormat:@"%@ %@", name, self.taskAction] taskWindowUUID:self.taskOperator.taskUUID];
+     */
     //notify app task is complete
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.task-completed" object:nil userInfo:@{@"target": self.target}];
-
-/*
-    if([[NSUserDefaults standardUserDefaults] boolForKey:@"autoCloseTaskWindows"] && task.terminationStatus == 0) {
+    
+    if(self.taskOperator.target)
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.task-completed" object:nil userInfo:@{@"target": self.taskOperator.target}];
+#if 0
+    if([[NSUserDefaults standardUserDefaults] boolForKey:@"autoCloseTaskWindows"] && aTask.terminationStatus == 0) {
         dispatch_async(dispatch_get_global_queue(0,0), ^{
             [self close];
         });
     }
-*/
-    
+#endif
 }
 
-/*
-- (void)windowWillClose:(NSNotification *)notification {
-    AppDelegate *app = [Util getApp];
+-(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
+    
+    NSData *data = [aFileHandler availableData];
+    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
     @synchronized(self) {
-        _isClosed = YES;
-    }
-    
-    [app removeOpenWindow:self];
-}
-*/
-
-- (void)receivedOutput:(NSNotification*)notif {
-    NSFileHandle *fh = [notif object];
-    NSData *data = [fh availableData];
-    NSString *str = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-    
-    @synchronized(self) {
-        //if (!_isClosed) {
+        //if (!_isClosed)
         {
             //smart scrolling logic for command output
             BOOL scroll = (NSMaxY(self.outputTextView.visibleRect) == NSMaxY(self.outputTextView.bounds));
+            
             [self.outputTextView.textStorage appendAttributedString:[[NSAttributedString alloc] initWithString:str]];
-            if([NSFont fontWithName:@"Menlo" size:11]) {
+            
+            if([NSFont fontWithName:@"Menlo" size:11])
+            {
                 [self.outputTextView.textStorage setFont:[NSFont fontWithName:@"Menlo" size:11]];
             }
-            if (scroll) {
-                [self.outputTextView scrollRangeToVisible: NSMakeRange(self.outputTextView.string.length, 0)];
-            }
             
-            if(self.task.isRunning) {
-                [fh waitForDataInBackgroundAndNotify];
+            if (scroll)
+            {
+                [self.outputTextView scrollRangeToVisible: NSMakeRange(self.outputTextView.string.length, 0)];
             }
         }
     }
 }
 
-- (IBAction)closeButtonClicked:(id)sender {
-//    [self close];
-}
-
-- (IBAction)cancelButtonClicked:(id)sender {
-    NSAlert *confirmAlert = [NSAlert alertWithMessageText:@"Are you sure you want to cancel the running task?" defaultButton:@"Confirm" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@""];
-    NSInteger button = [confirmAlert runModal];
-    
-    if(button == NSAlertDefaultReturn) {
-        [self.task interrupt];
-    }
+-(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
+//    return _isClosed;
+    return NO;
 }
 
 @end

@@ -163,12 +163,6 @@
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
 		0486781D1BCF5FE20071594B /* managerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0486781C1BCF5FE20071594B /* managerTests.m */; };
 		048678281BCF5FE20071594B /* managerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 048678271BCF5FE20071594B /* managerUITests.m */; };
-		04A858601BDB31C400435545 /* icon_128x128.png in Resources */ = {isa = PBXBuildFile; fileRef = 04A8585E1BDB31C400435545 /* icon_128x128.png */; };
-		04A858611BDB31C400435545 /* icon_128x128.png in Resources */ = {isa = PBXBuildFile; fileRef = 04A8585E1BDB31C400435545 /* icon_128x128.png */; };
-		04A858621BDB31C400435545 /* icon_128x128.png in Resources */ = {isa = PBXBuildFile; fileRef = 04A8585E1BDB31C400435545 /* icon_128x128.png */; };
-		04A858631BDB31C400435545 /* icon_128x128@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 04A8585F1BDB31C400435545 /* icon_128x128@2x.png */; };
-		04A858641BDB31C400435545 /* icon_128x128@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 04A8585F1BDB31C400435545 /* icon_128x128@2x.png */; };
-		04A858651BDB31C400435545 /* icon_128x128@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 04A8585F1BDB31C400435545 /* icon_128x128@2x.png */; };
 		04D407361BDBC51F00625AD7 /* LinkInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D4072D1BDBC51F00625AD7 /* LinkInterface.m */; };
 		04D407371BDBC51F00625AD7 /* LinkInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D4072D1BDBC51F00625AD7 /* LinkInterface.m */; };
 		04D407381BDBC51F00625AD7 /* LinkInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D4072D1BDBC51F00625AD7 /* LinkInterface.m */; };
@@ -184,6 +178,9 @@
 		04D407421BDBC51F00625AD7 /* PCInterfaceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407351BDBC51F00625AD7 /* PCInterfaceList.m */; };
 		04D407431BDBC51F00625AD7 /* PCInterfaceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407351BDBC51F00625AD7 /* PCInterfaceList.m */; };
 		04D407441BDBC51F00625AD7 /* PCInterfaceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407351BDBC51F00625AD7 /* PCInterfaceList.m */; };
+		04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
+		04E51DC11BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
+		04E51DC21BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
 		04F705691BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; };
 		04F7056A1BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; };
 		04F7056B1BD7A94300829651 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705651BD7A94300829651 /* BSONSerialization.m */; };
@@ -355,8 +352,6 @@
 		048678231BCF5FE20071594B /* managerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = managerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		048678271BCF5FE20071594B /* managerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = managerUITests.m; sourceTree = "<group>"; };
 		048678291BCF5FE20071594B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		04A8585E1BDB31C400435545 /* icon_128x128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_128x128.png; sourceTree = "<group>"; };
-		04A8585F1BDB31C400435545 /* icon_128x128@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_128x128@2x.png"; sourceTree = "<group>"; };
 		04D4072C1BDBC51F00625AD7 /* LinkInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkInterface.h; sourceTree = "<group>"; };
 		04D4072D1BDBC51F00625AD7 /* LinkInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkInterface.m; sourceTree = "<group>"; };
 		04D4072E1BDBC51F00625AD7 /* LinkInterfaces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkInterfaces.h; sourceTree = "<group>"; };
@@ -367,6 +362,7 @@
 		04D407331BDBC51F00625AD7 /* LinkMACVendors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkMACVendors.m; sourceTree = "<group>"; };
 		04D407341BDBC51F00625AD7 /* PCInterfaceList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCInterfaceList.h; sourceTree = "<group>"; };
 		04D407351BDBC51F00625AD7 /* PCInterfaceList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCInterfaceList.m; sourceTree = "<group>"; };
+		04E51DBF1BDC88E3001F1F22 /* Resources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Resources.bundle; sourceTree = "<group>"; };
 		04F705641BD7A94300829651 /* BSONSerialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSONSerialization.h; sourceTree = "<group>"; };
 		04F705651BD7A94300829651 /* BSONSerialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSONSerialization.m; sourceTree = "<group>"; };
 		04F705671BD7A94300829651 /* GCDAsyncUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncUdpSocket.h; sourceTree = "<group>"; };
@@ -791,9 +787,8 @@
 		048678071BCF5FE20071594B /* manager */ = {
 			isa = PBXGroup;
 			children = (
+				04E51DBF1BDC88E3001F1F22 /* Resources.bundle */,
 				0486780E1BCF5FE20071594B /* Assets.xcassets */,
-				04A8585E1BDB31C400435545 /* icon_128x128.png */,
-				04A8585F1BDB31C400435545 /* icon_128x128@2x.png */,
 				0441A3EC1BD8907800AABD7A /* PrefixHeader.pch */,
 				048678101BCF5FE20071594B /* MainMenu.xib */,
 				048678131BCF5FE20071594B /* Info.plist */,
@@ -1036,16 +1031,15 @@
 			files = (
 				046A36431BD79321004E0946 /* Askpass in Resources */,
 				046A366F1BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
-				04A858601BDB31C400435545 /* icon_128x128.png in Resources */,
 				046A36751BD793BB004E0946 /* PCSetup4VC.xib in Resources */,
 				0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */,
 				046A36631BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */,
-				04A858631BDB31C400435545 /* icon_128x128@2x.png in Resources */,
 				046A368D1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
 				041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				046A35D01BD7871B004E0946 /* PreferencesWindow.xib in Resources */,
 				0422D4E31BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */,
+				04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */,
 				048678121BCF5FE20071594B /* MainMenu.xib in Resources */,
 				0422D4ED1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */,
 				046A365D1BD793BB004E0946 /* PCSetup1VC.xib in Resources */,
@@ -1062,14 +1056,13 @@
 				046A35D11BD7871B004E0946 /* PreferencesWindow.xib in Resources */,
 				046A366A1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */,
 				046A36701BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
-				04A858611BDB31C400435545 /* icon_128x128.png in Resources */,
 				0422D4EE1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */,
 				046A365E1BD793BB004E0946 /* PCSetup1VC.xib in Resources */,
+				04E51DC11BDC88E3001F1F22 /* Resources.bundle in Resources */,
 				046A35D71BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A368E1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
 				0422D4E41BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */,
-				04A858641BDB31C400435545 /* icon_128x128@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1082,14 +1075,13 @@
 				046A35D21BD7871B004E0946 /* PreferencesWindow.xib in Resources */,
 				046A366B1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */,
 				046A36711BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
-				04A858621BDB31C400435545 /* icon_128x128.png in Resources */,
 				0422D4EF1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */,
 				046A365F1BD793BB004E0946 /* PCSetup1VC.xib in Resources */,
+				04E51DC21BDC88E3001F1F22 /* Resources.bundle in Resources */,
 				046A35D81BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				041FB3B91BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A368F1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
 				0422D4E51BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */,
-				04A858651BDB31C400435545 /* icon_128x128@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
