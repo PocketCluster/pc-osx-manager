@@ -88,10 +88,10 @@ cp -f $HOME/.ssh/* /pocket/salt/states/base/ssh/
 
 echo "USER_SETUP_STEP_2"
 
-salt-key -a "pc-master"
-salt-key -a "pc-node1"
-salt-key -a "pc-node2"
-salt-key -a "pc-node3"
+salt-key -y --accept="pc-master"
+salt-key -y --accept="pc-node1"
+salt-key -y --accept="pc-node2"
+salt-key -y --accept="pc-node3"
 
 echo "USER_SETUP_DONE"
 
