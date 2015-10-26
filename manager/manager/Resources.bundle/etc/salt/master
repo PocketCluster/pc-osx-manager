@@ -6,22 +6,22 @@ interface: 10.211.55.1
 
 user: PC_USER
 
+max_open_files: 8192
+
+cache_jobs: False
+
 root_dir: /pocket/salt
 
 pki_dir: /pki/master
-
-cache_jobs: False
 
 cachedir: /cache/master
 
 sock_dir: /run/master
 
-max_open_files: 8192
+file_roots:
+    base:
+        - /pocket/salt/states
 
 pillar_roots:
-base:
-    - /pocket/salt/pillar
-
-file_roots:
-base:
-    - /pocket/salt/states
+    base:
+        - /pocket/salt/pillar

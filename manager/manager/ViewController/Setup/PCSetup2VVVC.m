@@ -52,7 +52,8 @@
     [tow launchTask];
     
     //[[Util getApp] addOpenWindow:tow];
-#elif 0
+    
+#elif 1
     
     PCTask *sudoTask = [PCTask new];
     sudoTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", sudoSetup, basePath];
