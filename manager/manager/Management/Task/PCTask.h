@@ -12,15 +12,17 @@
 
 @protocol PCTaskDelegate <NSObject>
 
+@required
+-(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask;
+-(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler;
+-(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate;
+
+@optional
 -(void)setTarget:(id)aTarget;
 -(void)setTaskCommand:(NSString *)aTaskCommand;
 -(void)setTaskAction:(NSString *)aTaskAction;
 -(void)setTask:(NSTask *)aTask;
 -(void)setSudoCommand:(BOOL)aSudoCommand;
-
--(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask;
--(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler;
--(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate;
 @end
 
 @interface PCTask : NSObject

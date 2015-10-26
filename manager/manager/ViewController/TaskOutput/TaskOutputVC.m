@@ -116,10 +116,7 @@
      
      [[Util getApp] showUserNotificationWithTitle:notificationText informativeText:[NSString stringWithFormat:@"%@ %@", name, self.taskAction] taskWindowUUID:self.taskOperator.taskUUID];
      */
-    //notify app task is complete
     
-    if(self.taskOperator.target)
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.task-completed" object:nil userInfo:@{@"target": self.taskOperator.target}];
 #if 0
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"autoCloseTaskWindows"] && aTask.terminationStatus == 0) {
         dispatch_async(dispatch_get_global_queue(0,0), ^{

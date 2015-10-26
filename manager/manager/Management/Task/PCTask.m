@@ -86,6 +86,15 @@
     NSTask *task = [notif object];
     
     @synchronized(self) {
+        
+        if(self.target)
+        {
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:@"vagrant-manager.task-completed"
+             object:nil
+             userInfo:@{@"target": self.target}];
+        }
+        
         [self.delegate task:self taskCompletion:task];
     }
 }

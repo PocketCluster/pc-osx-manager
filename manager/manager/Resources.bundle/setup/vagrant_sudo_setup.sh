@@ -1,12 +1,9 @@
 #!/bin/bash
 
-# 1. create /bigpkg, /pocket dir
-# 2. set permission to current user
-
 BASE_BUNDLE_PATH=$1
-VAGRANT_PATH="$(which vagrant)"
+#VAGRANT_PATH="$(which vagrant)"
 
-echo "Setting up base configuration..."
+echo "SUDO_SETUP_STEP_0"
 
 # setup root directories
 mkdir -p /{pocket,bigpkg}
@@ -33,8 +30,8 @@ sed -i '' 's|PC_USER|'$SUDO_USER'|g' /etc/salt/*
 # change hosts
 python "${BASE_BUNDLE_PATH}"/setup/host_setup.py salt 10.211.55.1 pc-master 10.211.55.1 pc-node1 10.211.55.201 pc-node2 10.211.55.202 pc-node3 10.211.55.203
 
-echo "Initiating Vagrant..."
-# vagrant up
-cd /pocket/boxes && sudo -u $SUDO_USER $VAGRANT_PATH up 2>&1
+# cd /pocket/boxes && sudo -u $SUDO_USER $VAGRANT_PATH up 2>&1
 
-echo "Vagrant step completed."
+echo "SUDO_SETUP_DONE"
+
+exit 0
