@@ -34,7 +34,8 @@ function setupAccount {
     # Set up default user
     adduser --gecos "Pocket Cluster User" --add_extra_groups --disabled-password pocket
     usermod -a -G sudo,adm -p $(echo "pocket" | openssl passwd -1 -stdin) pocket
-    echo "pocket ALL=(ALL) NOPASSWD:ALL" | tee "${R}/etc/sudoers.d/pocket"
+    echo "pocket ALL=(ALL) NOPASSWD:ALL" | tee "/etc/sudoers.d/pocket"
+    chmod 440 /etc/sudoers.d/pocket
 }
 
 echo "setup node's hosts file..."

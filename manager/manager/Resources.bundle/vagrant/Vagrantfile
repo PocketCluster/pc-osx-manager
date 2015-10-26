@@ -12,7 +12,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	numNodes = 3
 	r = numNodes..1
 	(r.first).downto(r.last).each do |i|
-		config.vm.define "node#{i}" do |node|
+		config.vm.define "pc-node#{i}" do |node|
 			node.vm.box = "precise64"
 			node.vm.provider "virtualbox" do |v|
 			  v.name = "pc-node#{i}"

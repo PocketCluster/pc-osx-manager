@@ -156,12 +156,18 @@
 		046A368D1BD795AC004E0946 /* DPSetupWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36891BD795AC004E0946 /* DPSetupWC.xib */; };
 		046A368E1BD795AC004E0946 /* DPSetupWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36891BD795AC004E0946 /* DPSetupWC.xib */; };
 		046A368F1BD795AC004E0946 /* DPSetupWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36891BD795AC004E0946 /* DPSetupWC.xib */; };
-		046F95F31BDD9AD9006AA8EE /* PCSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F95F21BDD9AD9006AA8EE /* PCSetupWindow.m */; };
-		046F95F41BDD9AD9006AA8EE /* PCSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F95F21BDD9AD9006AA8EE /* PCSetupWindow.m */; };
-		046F95F51BDD9AD9006AA8EE /* PCSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F95F21BDD9AD9006AA8EE /* PCSetupWindow.m */; };
 		046F95FE1BDDA275006AA8EE /* DPSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F95FD1BDDA275006AA8EE /* DPSetupWindow.m */; };
 		046F95FF1BDDA275006AA8EE /* DPSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F95FD1BDDA275006AA8EE /* DPSetupWindow.m */; };
 		046F96001BDDA275006AA8EE /* DPSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F95FD1BDDA275006AA8EE /* DPSetupWindow.m */; };
+		046F96041BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96031BDDBB65006AA8EE /* PCTaskOutputWindow.m */; };
+		046F96051BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96031BDDBB65006AA8EE /* PCTaskOutputWindow.m */; };
+		046F96061BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96031BDDBB65006AA8EE /* PCTaskOutputWindow.m */; };
+		046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96081BDDBBBC006AA8EE /* BaseWindow.m */; };
+		046F960A1BDDBBBC006AA8EE /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96081BDDBBBC006AA8EE /* BaseWindow.m */; };
+		046F960B1BDDBBBC006AA8EE /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96081BDDBBBC006AA8EE /* BaseWindow.m */; };
+		046F960D1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046F960C1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib */; };
+		046F960E1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046F960C1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib */; };
+		046F960F1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046F960C1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib */; };
 		0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0486780E1BCF5FE20071594B /* Assets.xcassets */; };
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
 		0486781D1BCF5FE20071594B /* managerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0486781C1BCF5FE20071594B /* managerTests.m */; };
@@ -343,10 +349,13 @@
 		046A36871BD795AC004E0946 /* DPSetupWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DPSetupWC.h; sourceTree = "<group>"; };
 		046A36881BD795AC004E0946 /* DPSetupWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DPSetupWC.m; sourceTree = "<group>"; };
 		046A36891BD795AC004E0946 /* DPSetupWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DPSetupWC.xib; sourceTree = "<group>"; };
-		046F95F11BDD9AD9006AA8EE /* PCSetupWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetupWindow.h; sourceTree = "<group>"; };
-		046F95F21BDD9AD9006AA8EE /* PCSetupWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetupWindow.m; sourceTree = "<group>"; };
 		046F95FC1BDDA275006AA8EE /* DPSetupWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DPSetupWindow.h; sourceTree = "<group>"; };
 		046F95FD1BDDA275006AA8EE /* DPSetupWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DPSetupWindow.m; sourceTree = "<group>"; };
+		046F96021BDDBB65006AA8EE /* PCTaskOutputWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCTaskOutputWindow.h; sourceTree = "<group>"; };
+		046F96031BDDBB65006AA8EE /* PCTaskOutputWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCTaskOutputWindow.m; sourceTree = "<group>"; };
+		046F96071BDDBBBC006AA8EE /* BaseWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseWindow.h; sourceTree = "<group>"; };
+		046F96081BDDBBBC006AA8EE /* BaseWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseWindow.m; sourceTree = "<group>"; };
+		046F960C1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCTaskOutputWindow.xib; sourceTree = "<group>"; };
 		048678051BCF5FE20071594B /* manager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = manager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0486780E1BCF5FE20071594B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		048678111BCF5FE20071594B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -760,19 +769,12 @@
 		046F95EF1BDD9AA9006AA8EE /* Window */ = {
 			isa = PBXGroup;
 			children = (
-				046F95F01BDD9AA9006AA8EE /* Setup */,
+				046F96071BDDBBBC006AA8EE /* BaseWindow.h */,
+				046F96081BDDBBBC006AA8EE /* BaseWindow.m */,
+				046F96011BDDBB55006AA8EE /* TaskOutput */,
 			);
 			name = Window;
 			path = manager/Window;
-			sourceTree = "<group>";
-		};
-		046F95F01BDD9AA9006AA8EE /* Setup */ = {
-			isa = PBXGroup;
-			children = (
-				046F95F11BDD9AD9006AA8EE /* PCSetupWindow.h */,
-				046F95F21BDD9AD9006AA8EE /* PCSetupWindow.m */,
-			);
-			path = Setup;
 			sourceTree = "<group>";
 		};
 		046F95FB1BDDA275006AA8EE /* DPSetupWindow */ = {
@@ -782,6 +784,16 @@
 				046F95FD1BDDA275006AA8EE /* DPSetupWindow.m */,
 			);
 			path = DPSetupWindow;
+			sourceTree = "<group>";
+		};
+		046F96011BDDBB55006AA8EE /* TaskOutput */ = {
+			isa = PBXGroup;
+			children = (
+				046F96021BDDBB65006AA8EE /* PCTaskOutputWindow.h */,
+				046F96031BDDBB65006AA8EE /* PCTaskOutputWindow.m */,
+				046F960C1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib */,
+			);
+			path = TaskOutput;
 			sourceTree = "<group>";
 		};
 		048677FC1BCF5FE20071594B = {
@@ -1067,6 +1079,7 @@
 				0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */,
 				046A36631BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */,
 				046A368D1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
+				046F960D1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib in Resources */,
 				041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				046A35D01BD7871B004E0946 /* PreferencesWindow.xib in Resources */,
@@ -1095,6 +1108,7 @@
 				041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A368E1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
 				0422D4E41BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */,
+				046F960E1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1114,6 +1128,7 @@
 				041FB3B91BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A368F1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
 				0422D4E51BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */,
+				046F960F1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1187,7 +1202,6 @@
 				04F7056C1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				0441A3FC1BD8981400AABD7A /* CustomCommand.m in Sources */,
 				0441A3F41BD892A400AABD7A /* VersionComparison.m in Sources */,
-				046F95F31BDD9AD9006AA8EE /* PCSetupWindow.m in Sources */,
 				046A36721BD793BB004E0946 /* PCSetup4VC.m in Sources */,
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				04D407421BDBC51F00625AD7 /* PCInterfaceList.m in Sources */,
@@ -1202,6 +1216,7 @@
 				0441A3EF1BD8921600AABD7A /* Util.m in Sources */,
 				0441A3E91BD8904100AABD7A /* NativeMenuItem.m in Sources */,
 				046A360B1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
+				046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				046A36601BD793BB004E0946 /* PCSetup2RPVC.m in Sources */,
 				046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
 				046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */,
@@ -1212,6 +1227,7 @@
 				046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				046F95FE1BDDA275006AA8EE /* DPSetupWindow.m in Sources */,
 				046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
+				046F96041BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
 				046A366C1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
 				04D407391BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
 				04D4073F1BDBC51F00625AD7 /* LinkMACVendors.m in Sources */,
@@ -1251,7 +1267,6 @@
 				046A35CE1BD7871B004E0946 /* PreferencesWindow.m in Sources */,
 				04F7056A1BD7A94300829651 /* BSONSerialization.m in Sources */,
 				046A36121BD78AB8004E0946 /* DrawingUtils.m in Sources */,
-				046F95F41BDD9AD9006AA8EE /* PCSetupWindow.m in Sources */,
 				0422D4F71BDA0C2700C5CB33 /* PCTask.m in Sources */,
 				046A36181BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				0441A3E11BD8904100AABD7A /* AppDelegate.m in Sources */,
@@ -1263,9 +1278,11 @@
 				046A368B1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				046A361E1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				0441A4001BD8981400AABD7A /* CustomCommandManager.m in Sources */,
+				046F96051BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
 				046A35B91BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				046A36611BD793BB004E0946 /* PCSetup2RPVC.m in Sources */,
 				046A360F1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
+				046F960A1BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				0441A3E71BD8904100AABD7A /* NativeMenu.m in Sources */,
 				04D4073A1BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
 				0441A3F01BD8921600AABD7A /* Util.m in Sources */,
@@ -1299,7 +1316,6 @@
 				046A35CF1BD7871B004E0946 /* PreferencesWindow.m in Sources */,
 				04F7056B1BD7A94300829651 /* BSONSerialization.m in Sources */,
 				046A36131BD78AB8004E0946 /* DrawingUtils.m in Sources */,
-				046F95F51BDD9AD9006AA8EE /* PCSetupWindow.m in Sources */,
 				0422D4F81BDA0C2700C5CB33 /* PCTask.m in Sources */,
 				046A36191BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				0441A3E21BD8904100AABD7A /* AppDelegate.m in Sources */,
@@ -1311,9 +1327,11 @@
 				046A368C1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				046A361F1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				0441A4011BD8981400AABD7A /* CustomCommandManager.m in Sources */,
+				046F96061BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
 				046A35BA1BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				046A36621BD793BB004E0946 /* PCSetup2RPVC.m in Sources */,
 				046A36101BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
+				046F960B1BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				0441A3E81BD8904100AABD7A /* NativeMenu.m in Sources */,
 				04D4073B1BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
 				0441A3F11BD8921600AABD7A /* Util.m in Sources */,
