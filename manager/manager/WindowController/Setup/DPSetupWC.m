@@ -56,7 +56,10 @@
          bundle:[NSBundle mainBundle]];
     
     [setupFlow
-     initWithViewControllers:@[vc1, vc2v, vc2r, vc3, vc4]
+     initWithViewControllers:@[vc1,
+                               //vc2v,
+                               vc2r, vc3, vc4]
+
      completionHandler:^(BOOL completed) {
          if (!completed) {
              NSLog(@"Cancelled setup process");

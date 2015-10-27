@@ -14,21 +14,12 @@
 //#import "PCTaskOutputWindow.h"
 
 @interface PCSetup2VVVC ()<PCTaskDelegate>
-@property (nonatomic, strong) NSMutableArray *taskQueue;
+@property (strong, nonatomic) PCTask *sudoTask;
+@property (strong, nonatomic) PCTask *userTask;
 @end
 
 @implementation PCSetup2VVVC
 
--(instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    
-    if(self){
-        self.taskQueue = [NSMutableArray arrayWithCapacity:0];
-    }
-    
-    return self;
-}
 
 -(IBAction)vagrantUp:(id)sender
 {
@@ -60,8 +51,8 @@
     sudoTask.sudoCommand = YES;
     sudoTask.delegate = self;
     
-    [self.taskQueue addObject:sudoTask];
-
+    self.sudoTask = sudoTask;
+    
     [sudoTask launchTask];
 #else
     
@@ -81,8 +72,21 @@
 
     Log(@"%s",__PRETTY_FUNCTION__);
     
-    [self.taskQueue removeObject:aPCTask];
-    
+    if(self.sudoTask){
+        self.sudoTask = nil;
+
+        NSString *basePath    = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
+        NSString *userSetup = [NSString stringWithFormat:@"%@/setup/vagrant_user_setup.sh",basePath];
+        
+        PCTask *userTask = [PCTask new];
+        userTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", userSetup, basePath];
+        userTask.delegate = self;
+        
+        self.userTask = userTask;
+        [userTask launchTask];
+    }else{
+        self.userTask = nil;
+    }
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {

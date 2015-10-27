@@ -6,7 +6,7 @@ VAGRANT_PATH="$(which vagrant)"
 echo "USER_SETUP_STEP_0"
 
 # vagrant up
-#cd /pocket/boxes && $USER $VAGRANT_PATH up 2>&1
+cd /pocket/boxes && $VAGRANT_PATH up 2>&1
 
 echo "USER_SETUP_STEP_1"
 

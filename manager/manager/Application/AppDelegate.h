@@ -12,5 +12,9 @@
 - (void)updateProcessType;
 - (NSImage*)getThemedImage:(NSString*)imageName;
 - (NSString*)getCurrentTheme;
+
+
+- (void)startPCMultSrv;
+- (void)stopPCMultSrv;
 @end
 

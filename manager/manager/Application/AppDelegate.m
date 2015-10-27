@@ -14,11 +14,15 @@
 #import "VersionComparison.h"
 #import "NativeMenu.h"
 
+#import "GCDAsyncUdpSocket.h"
 
-@interface AppDelegate ()<MenuDelegate, SUUpdaterDelegate>
+@interface AppDelegate ()<MenuDelegate, SUUpdaterDelegate, GCDAsyncUdpSocketDelegate>
 @property (weak) IBOutlet NSWindow *window;
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
 @property (nonatomic, strong) NSMutableArray *openWindows;
+
+
+@property (nonatomic, strong) GCDAsyncUdpSocket *multSocket;
 @end
 
 @implementation AppDelegate
@@ -34,15 +38,17 @@
     [Parse
      setApplicationId:@"HRUYcCC5BZwkUTzbEUmuyglSHzAVo6UpykuTUdqI"
      clientKey:@"kq5pIivYkredAGJupKP5qWWhwD5JDxrncyHdh8pr"];
-
     [PFAnalytics trackAppOpenedWithLaunchOptions:nil];
-    
     
     //initialize updates
     [[SUUpdater sharedUpdater] setDelegate:self];
     [[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
     [[SUUpdater sharedUpdater] checkForUpdateInformation];
 
+    self.multSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
+    [self.multSocket setIPv6Enabled:NO];
+
+    
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -50,6 +56,100 @@
 }
 
 //- (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {[PFAnalytics trackAppOpenedWithRemoteNotificationPayload:userInfo];}
+
+
+
+#pragma mark - GCDAsyncUdpSocket
+-(void)startPCMultSrv
+{
+    // START udp echo server
+    NSError *error = nil;
+    if (![self.multSocket bindToPort:10060 error:&error])
+    {
+        NSLog(@"Error starting server (bind): %@", error);
+        return;
+    }
+
+    [self.multSocket joinMulticastGroup:@"239.193.127.127" error:&error];
+    
+    if (![self.multSocket beginReceiving:&error])
+    {
+        [self.multSocket close];
+        return;
+    }
+}
+
+- (void)stopPCMultSrv
+{
+    [self.multSocket closeAfterSending];
+}
+
+/**
+ * By design, UDP is a connectionless protocol, and connecting is not needed.
+ * However, you may optionally choose to connect to a particular host for reasons
+ * outlined in the documentation for the various connect methods listed above.
+ *
+ * This method is called if one of the connect methods are invoked, and the connection is successful.
+ **/
+- (void)udpSocket:(GCDAsyncUdpSocket *)sock
+didConnectToAddress:(NSData *)address
+{
+    
+}
+
+/**
+ * By design, UDP is a connectionless protocol, and connecting is not needed.
+ * However, you may optionally choose to connect to a particular host for reasons
+ * outlined in the documentation for the various connect methods listed above.
+ *
+ * This method is called if one of the connect methods are invoked, and the connection fails.
+ * This may happen, for example, if a domain name is given for the host and the domain name is unable to be resolved.
+ **/
+- (void)udpSocket:(GCDAsyncUdpSocket *)sock
+    didNotConnect:(NSError *)error
+{
+    
+}
+
+/**
+ * Called when the datagram with the given tag has been sent.
+ **/
+- (void)udpSocket:(GCDAsyncUdpSocket *)sock
+didSendDataWithTag:(long)tag
+{
+    
+}
+
+/**
+ * Called if an error occurs while trying to send a datagram.
+ * This could be due to a timeout, or something more serious such as the data being too large to fit in a sigle packet.
+ **/
+- (void)udpSocket:(GCDAsyncUdpSocket *)sock
+didNotSendDataWithTag:(long)tag dueToError:(NSError *)error
+{
+    
+}
+
+/**
+ * Called when the socket has received the requested datagram.
+ **/
+- (void)udpSocket:(GCDAsyncUdpSocket *)sock
+   didReceiveData:(NSData *)data
+      fromAddress:(NSData *)address
+withFilterContext:(id)filterContext
+{
+    
+}
+
+/**
+ * Called when the socket is closed.
+ **/
+- (void)udpSocketDidClose:(GCDAsyncUdpSocket *)sock withError:(NSError *)error
+{
+    
+}
+
+
 
 
 #pragma mark - Window management
@@ -319,5 +419,15 @@
     
     return bestItem;
 }
+
+
+- (void)startPCMultSrv {
+    
+}
+
+- (void)stopPCMultSrv {
+    
+}
+
 
 @end

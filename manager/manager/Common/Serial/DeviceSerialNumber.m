@@ -25,3 +25,11 @@ CFTypeRef CopySerialNumber()
     
     return serialNumberCFString;
 }
+
+@implementation DeviceSerialNumber
++ (NSString *)deviceSerialNumber
+{
+    NSString *sn = [(__bridge NSString*)((CFStringRef)CopySerialNumber()) lowercaseString];
+    return sn;
+}
+@end
