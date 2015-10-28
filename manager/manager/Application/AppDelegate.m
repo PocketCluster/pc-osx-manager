@@ -23,6 +23,7 @@
 
 
 @property (nonatomic, strong) GCDAsyncUdpSocket *multSocket;
+@property (nonatomic, strong) NSMutableArray<GCDAsyncUdpSocketDelegate> *multSockDelegates;
 @end
 
 @implementation AppDelegate
@@ -47,8 +48,8 @@
 
     self.multSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
     [self.multSocket setIPv6Enabled:NO];
-
     
+    self.multSockDelegates = [NSMutableArray arrayWithCapacity:0];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -58,15 +59,27 @@
 //- (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {[PFAnalytics trackAppOpenedWithRemoteNotificationPayload:userInfo];}
 
 
-
 #pragma mark - GCDAsyncUdpSocket
--(void)startPCMultSrv
+
+- (void)addMultDelegateToQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate {
+    @synchronized(self.multSockDelegates) {
+        [self.multSockDelegates addObject:aDelegate];
+    }
+}
+
+- (void)removeMultDelegateFromQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate {
+    @synchronized(self.multSockDelegates) {
+        [self.multSockDelegates removeObject:aDelegate];
+    }
+}
+
+-(void)startMulticastSocket
 {
     // START udp echo server
     NSError *error = nil;
     if (![self.multSocket bindToPort:10060 error:&error])
     {
-        NSLog(@"Error starting server (bind): %@", error);
+        Log(@"Error starting server (bind): %@", error);
         return;
     }
 
@@ -79,7 +92,7 @@
     }
 }
 
-- (void)stopPCMultSrv
+- (void)stopMulticastSocket
 {
     [self.multSocket closeAfterSending];
 }
@@ -91,10 +104,14 @@
  *
  * This method is called if one of the connect methods are invoked, and the connection is successful.
  **/
-- (void)udpSocket:(GCDAsyncUdpSocket *)sock
-didConnectToAddress:(NSData *)address
-{
-    
+- (void)udpSocket:(GCDAsyncUdpSocket *)sock didConnectToAddress:(NSData *)address {
+    @synchronized(self.multSockDelegates) {
+        [self.multSockDelegates enumerateObjectsUsingBlock:^(id<GCDAsyncUdpSocketDelegate> _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([obj respondsToSelector:@selector(udpSocket:didConnectToAddress:)]){
+                [obj udpSocket:sock didConnectToAddress:address];
+            }
+        }];
+    }
 }
 
 /**
@@ -105,51 +122,66 @@ didConnectToAddress:(NSData *)address
  * This method is called if one of the connect methods are invoked, and the connection fails.
  * This may happen, for example, if a domain name is given for the host and the domain name is unable to be resolved.
  **/
-- (void)udpSocket:(GCDAsyncUdpSocket *)sock
-    didNotConnect:(NSError *)error
-{
-    
+- (void)udpSocket:(GCDAsyncUdpSocket *)sock didNotConnect:(NSError *)error {
+    @synchronized(self.multSockDelegates) {
+        [self.multSockDelegates enumerateObjectsUsingBlock:^(id<GCDAsyncUdpSocketDelegate> _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [obj udpSocket:sock didNotConnect:error];
+        }];
+    }
 }
 
 /**
  * Called when the datagram with the given tag has been sent.
  **/
-- (void)udpSocket:(GCDAsyncUdpSocket *)sock
-didSendDataWithTag:(long)tag
-{
-    
+- (void)udpSocket:(GCDAsyncUdpSocket *)sock didSendDataWithTag:(long)tag {
+    @synchronized(self.multSockDelegates) {
+        [self.multSockDelegates enumerateObjectsUsingBlock:^(id<GCDAsyncUdpSocketDelegate> _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([obj respondsToSelector:@selector(udpSocket:didSendDataWithTag:)]){
+                [obj udpSocket:sock didSendDataWithTag:tag];
+            }
+        }];
+    }
 }
 
 /**
  * Called if an error occurs while trying to send a datagram.
  * This could be due to a timeout, or something more serious such as the data being too large to fit in a sigle packet.
  **/
-- (void)udpSocket:(GCDAsyncUdpSocket *)sock
-didNotSendDataWithTag:(long)tag dueToError:(NSError *)error
-{
-    
+- (void)udpSocket:(GCDAsyncUdpSocket *)sock didNotSendDataWithTag:(long)tag dueToError:(NSError *)error {
+    @synchronized(self.multSockDelegates) {
+        [self.multSockDelegates enumerateObjectsUsingBlock:^(id<GCDAsyncUdpSocketDelegate> _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([obj respondsToSelector:@selector(udpSocket:didNotSendDataWithTag:dueToError:)]){
+                [obj udpSocket:sock didNotSendDataWithTag:tag dueToError:error];
+            }
+        }];
+    }
 }
 
 /**
  * Called when the socket has received the requested datagram.
  **/
-- (void)udpSocket:(GCDAsyncUdpSocket *)sock
-   didReceiveData:(NSData *)data
-      fromAddress:(NSData *)address
-withFilterContext:(id)filterContext
-{
-    
+- (void)udpSocket:(GCDAsyncUdpSocket *)sock didReceiveData:(NSData *)data fromAddress:(NSData *)address withFilterContext:(id)filterContext {
+    @synchronized(self.multSockDelegates) {
+        [self.multSockDelegates enumerateObjectsUsingBlock:^(id<GCDAsyncUdpSocketDelegate> _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([obj respondsToSelector:@selector(udpSocket:didReceiveData:fromAddress:withFilterContext:)]){
+                [obj udpSocket:sock didReceiveData:data fromAddress:address withFilterContext:filterContext];
+            }
+        }];
+    }
 }
 
 /**
  * Called when the socket is closed.
  **/
-- (void)udpSocketDidClose:(GCDAsyncUdpSocket *)sock withError:(NSError *)error
-{
-    
+- (void)udpSocketDidClose:(GCDAsyncUdpSocket *)sock withError:(NSError *)error {
+    @synchronized(self.multSockDelegates) {
+        [self.multSockDelegates enumerateObjectsUsingBlock:^(id<GCDAsyncUdpSocketDelegate> _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([obj respondsToSelector:@selector(udpSocketDidClose:withError:)]){
+                [obj udpSocketDidClose:sock withError:error];
+            }
+        }];
+    }
 }
-
-
 
 
 #pragma mark - Window management
@@ -418,15 +450,6 @@ withFilterContext:(id)filterContext
     }
     
     return bestItem;
-}
-
-
-- (void)startPCMultSrv {
-    
-}
-
-- (void)stopPCMultSrv {
-    
 }
 
 

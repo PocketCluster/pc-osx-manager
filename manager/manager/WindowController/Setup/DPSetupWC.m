@@ -15,6 +15,8 @@
 #import "PCSetup3VC.h"
 #import "PCSetup4VC.h"
 
+#import "Util.h"
+
 @interface DPSetupWC ()
 @end
 
@@ -73,6 +75,8 @@
     
     [setupFlow resetToZeroStage];
     [setupFlow makeKeyAndOrderFront:self];
+    
+    [[Util getApp] startMulticastSocket];
 }
 
 @end

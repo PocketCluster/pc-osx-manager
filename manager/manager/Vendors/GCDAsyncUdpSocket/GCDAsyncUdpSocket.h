@@ -945,7 +945,7 @@ typedef BOOL (^GCDAsyncUdpSocketSendFilterBlock)(NSData *data, NSData *address, 
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@protocol GCDAsyncUdpSocketDelegate
+@protocol GCDAsyncUdpSocketDelegate <NSObject>
 @optional
 
 /**

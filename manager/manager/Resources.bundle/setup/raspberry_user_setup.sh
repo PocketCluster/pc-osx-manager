@@ -1,14 +1,9 @@
 #!/bin/bash
 
 BASE_BUNDLE_PATH=$1
-VAGRANT_PATH="$(which vagrant)"
+NUM_NODES=$2
 
 echo "USER_SETUP_STEP_0"
-
-# vagrant up
-cd /pocket/boxes && $VAGRANT_PATH up 2>&1
-
-echo "USER_SETUP_STEP_1"
 
 # setup ssh login
 if [ ! -d "$HOME/.ssh" ]; then
@@ -21,7 +16,6 @@ if [[ ! -f "$HOME/.ssh/id_rsa" ]] && [[ ! -f "$HOME/.ssh/id_rsa.pub" ]];then
 fi
 
 PK=$(<"$HOME/.ssh/id_rsa.pub")
-
 if ! grep -Fxq "$PK" $HOME/.ssh/authorized_keys
 then
     cat $HOME/.ssh/id_rsa.pub >> $HOME/.ssh/authorized_keys
@@ -34,9 +28,9 @@ then
     echo "${LOC}" >> $HOME/.ssh/known_hosts
 fi
 
-# pc-node{1..3} key
-for i in {1..3}
+for i in {1..NUM_NODES}
 do
+    # pc-node# key
     PN="$(ssh-keyscan -t rsa pc-node${i})"
     if ! grep -Fxq "${PN}" $HOME/.ssh/known_hosts
     then
@@ -77,8 +71,10 @@ cp -f $HOME/.ssh/* /pocket/salt/states/base/ssh/
 
 echo "USER_SETUP_STEP_2"
 
+
 salt-key -y --accept="pc-master"
-for i in {1..3}
+
+for i in {1..NUM_NODES}
 do
     salt-key -y --accept="pc-node${i}"
 done

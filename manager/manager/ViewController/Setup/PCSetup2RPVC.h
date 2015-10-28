@@ -9,6 +9,7 @@
 
 #import "DPSetupWindow.h"
 
-@interface PCSetup2RPVC : NSViewController <DPSetupWindowStageViewController>
-
+@interface PCSetup2RPVC : NSViewController
+<DPSetupWindowStageViewController, NSTableViewDataSource, NSTableViewDelegate>
+@property (nonatomic, weak) IBOutlet NSTableView *nodeTable;
 @end

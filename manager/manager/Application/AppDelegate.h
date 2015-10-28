@@ -6,6 +6,8 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
+@protocol GCDAsyncUdpSocketDelegate;
+
 @interface AppDelegate : NSObject <NSApplicationDelegate, NSMenuDelegate, NSUserNotificationCenterDelegate>
 - (void)addOpenWindow:(id)window;
 - (void)removeOpenWindow:(id)window;
@@ -14,7 +16,9 @@
 - (NSString*)getCurrentTheme;
 
 
-- (void)startPCMultSrv;
-- (void)stopPCMultSrv;
+- (void)addMultDelegateToQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
+- (void)removeMultDelegateFromQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
+- (void)startMulticastSocket;
+- (void)stopMulticastSocket;
 @end
 

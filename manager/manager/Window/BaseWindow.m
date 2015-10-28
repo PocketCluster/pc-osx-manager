@@ -51,10 +51,10 @@
 
 - (void)windowWillClose:(NSNotification *)notification {
     
-    if(self.actionDelegate != nil && [self.actionDelegate respondsToSelector:@selector(windowWillClose:)]){
+    if(CHECK_DELEGATE_EXECUTION(self.actionDelegate, @selector(windowWillClose:))){
         [self.actionDelegate windowWillClose:notification];
     }
-    
+
     [[Util getApp] removeOpenWindow:self];
 }
 
