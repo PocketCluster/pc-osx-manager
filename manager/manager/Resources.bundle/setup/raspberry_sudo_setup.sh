@@ -1,7 +1,13 @@
 #!/bin/bash
 
 BASE_BUNDLE_PATH=$1
-#VAGRANT_PATH="$(which vagrant)"
+
+
+echo $1 $2 $3 $4
+
+exit 0
+
+
 
 echo "SUDO_SETUP_STEP_0"
 

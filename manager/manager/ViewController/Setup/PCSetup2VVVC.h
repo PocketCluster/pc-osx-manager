@@ -9,5 +9,5 @@
 #import "DPSetupWindow.h"
 
 @interface PCSetup2VVVC : NSViewController  <DPSetupWindowStageViewController>
--(IBAction)vagrantUp:(id)sender;
+-(IBAction)build:(id)sender;
 @end

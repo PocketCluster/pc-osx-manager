@@ -97,6 +97,16 @@
     [self.multSocket closeAfterSending];
 }
 
+- (void)multicastData:(NSData *)aData
+{
+    [self.multSocket
+     sendData:aData 
+     toHost:@"239.193.127.127"
+     port:10061
+     withTimeout:-1
+     tag:0];
+}
+
 /**
  * By design, UDP is a connectionless protocol, and connecting is not needed.
  * However, you may optionally choose to connect to a particular host for reasons

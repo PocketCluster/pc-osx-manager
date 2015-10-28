@@ -12,4 +12,6 @@
 @interface PCSetup2RPVC : NSViewController
 <DPSetupWindowStageViewController, NSTableViewDataSource, NSTableViewDelegate>
 @property (nonatomic, weak) IBOutlet NSTableView *nodeTable;
+
+-(IBAction)build:(id)sender;
 @end

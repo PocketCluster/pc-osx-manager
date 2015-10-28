@@ -17,14 +17,14 @@
             <rect key="frame" x="0.0" y="0.0" width="415" height="345"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ctH-Dy-Lxn">
-                    <rect key="frame" x="20" y="142" width="375" height="176"/>
+                <scrollView fixedFrame="YES" borderType="none" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ctH-Dy-Lxn">
+                    <rect key="frame" x="20" y="48" width="375" height="140"/>
                     <clipView key="contentView" ambiguous="YES" id="vCA-oM-Tkz">
-                        <rect key="frame" x="1" y="0.0" width="373" height="175"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="140"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="jxa-Ax-Pl7" viewBased="YES" id="FgY-4m-zjw">
-                                <rect key="frame" x="0.0" y="0.0" width="373" height="152"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="117"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <animations/>
                                 <size key="intercellSpacing" width="3" height="2"/>
@@ -65,7 +65,7 @@
                                             </tableCellView>
                                         </prototypeCellViews>
                                     </tableColumn>
-                                    <tableColumn identifier="ipaddress" width="251" minWidth="40" maxWidth="1000" id="hru-kT-TCO">
+                                    <tableColumn identifier="ipaddress" width="253" minWidth="40" maxWidth="1000" id="hru-kT-TCO">
                                         <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="IP Address">
                                             <font key="font" metaFont="smallSystem"/>
                                             <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -79,7 +79,7 @@
                                         <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                         <prototypeCellViews>
                                             <tableCellView id="32P-XX-z2l">
-                                                <rect key="frame" x="120" y="1" width="251" height="17"/>
+                                                <rect key="frame" x="120" y="1" width="253" height="17"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
                                                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FkH-Jh-k8x">
@@ -111,7 +111,7 @@
                     </clipView>
                     <animations/>
                     <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="vhs-ua-dWZ">
-                        <rect key="frame" x="1" y="7" width="0.0" height="16"/>
+                        <rect key="frame" x="0.0" y="7" width="0.0" height="16"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <animations/>
                     </scroller>
@@ -121,19 +121,43 @@
                         <animations/>
                     </scroller>
                     <tableHeaderView key="headerView" id="jxa-Ax-Pl7">
-                        <rect key="frame" x="0.0" y="0.0" width="373" height="23"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="23"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <animations/>
                     </tableHeaderView>
                 </scrollView>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fgx-9I-dxe">
-                    <rect key="frame" x="167" y="87" width="81" height="32"/>
+                    <rect key="frame" x="167" y="13" width="81" height="32"/>
                     <animations/>
-                    <buttonCell key="cell" type="push" title="Button" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="73h-45-Ug1">
+                    <buttonCell key="cell" type="push" title="Build" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="73h-45-Ug1">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
+                    <connections>
+                        <action selector="build:" target="-2" id="Pb2-xK-owV"/>
+                    </connections>
                 </button>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4q5-4H-kzc">
+                    <rect key="frame" x="52" y="281" width="311" height="44"/>
+                    <animations/>
+                    <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" title="Raspberry Cluster" id="fZV-PK-kPP">
+                        <font key="font" metaFont="systemMedium" size="32"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oVy-pZ-aHc">
+                    <rect key="frame" x="18" y="196" width="379" height="85"/>
+                    <animations/>
+                    <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" id="fYy-n7-At6">
+                        <font key="font" metaFont="system"/>
+                        <string key="title">This step creates a Raspberry Pi 2 cluster up to 6 nodes. It requires an Ethernet adapter to proceed. 
+
+Please connect an Ethernet adapter, power up Raspberry Pis and click Build.</string>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
             </subviews>
             <animations/>
             <point key="canvasLocation" x="486.5" y="229.5"/>

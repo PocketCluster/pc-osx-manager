@@ -45,7 +45,7 @@ This step may take a while to complete.</string>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
                     <connections>
-                        <action selector="vagrantUp:" target="-2" id="v3n-yj-Typ"/>
+                        <action selector="build:" target="-2" id="Oof-RI-7ug"/>
                     </connections>
                 </button>
             </subviews>

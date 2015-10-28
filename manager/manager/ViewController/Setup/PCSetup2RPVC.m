@@ -45,13 +45,6 @@
     [[Util getApp] removeMultDelegateFromQueue:self];
 }
 
-
--(IBAction)startBulding:(id)sender
-{
-    
-}
-
-
 #pragma mark - GCDAsyncUdpSocketDelegate
 - (void)udpSocket:(GCDAsyncUdpSocket *)sock
    didReceiveData:(NSData *)data
@@ -63,13 +56,12 @@ withFilterContext:(id)filterContext
     BOOL doesNodeExist = false;
     for (NSDictionary *node in self.nodeList){
         if([[node valueForKey:@"pc_sl_ma"] isEqualToString:[m valueForKey:@"pc_sl_ma"]]){
-//            Log(@"same mac address found! %@ %@",[node valueForKey:@"pc_sl_ma"], [m valueForKey:@"pc_sl_ma"]);
             doesNodeExist = true;
             break;
         }
     }
 
-    if (!doesNodeExist){
+    if (!doesNodeExist && self.nodeList.count <= 6){
         
         NSString *sn = [[DeviceSerialNumber deviceSerialNumber] lowercaseString];
         NSString *hn = [[[NSHost currentHost] localizedName] lowercaseString];
@@ -96,73 +88,6 @@ withFilterContext:(id)filterContext
         
         [self.nodeTable reloadData];
     }
-
-    
-
-#if 0
-    NSString *sn = [[DeviceSerialNumber deviceSerialNumber] lowercaseString];
-    
-    NSString *hn = [[[NSHost currentHost] localizedName] lowercaseString];
-    
-    NSString *ha = [[NSHost currentHost] address];
-    
-    NSMutableDictionary* n = [NSMutableDictionary dictionaryWithDictionary:m];
-    [n setValuesForKeysWithDictionary:
-     @{@"pc_ma_ct":@"ct_fix_bound",
-       @"pc_ma_hn":hn,
-       @"pc_ma_ba":sn,
-       
-#warning fix!
-       //@"pc_ma_i4":ha,
-       @"pc_ma_i4":@"192.168.1.152",
-       @"pc_ma_i6":@""}];
-    
-    [n setValue:@"rpi-node1" forKey:@"pc_sl_nm"];
-    
-    if (n)
-    {
-        NSLog(@"%@",[m description]);
-    }
-    else
-    {
-        NSLog(@"Error converting received data into UTF-8 String");
-    }
-    
-    [self.udpSocket sendData:[n BSONRepresentation] toHost:@"239.193.127.127" port:10061 withTimeout:-1 tag:0];
-#endif
-
-}
-
-#pragma mark - PCTaskDelegate
--(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
-    
-    if(self.sudoTask){
-        self.sudoTask = nil;
-        
-        NSString *basePath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
-        NSString *userSetup = [NSString stringWithFormat:@"%@/setup/vagrant_user_setup.sh",basePath];
-        
-        PCTask *userTask = [PCTask new];
-        userTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", userSetup, basePath];
-        userTask.delegate = self;
-        
-        self.userTask = userTask;
-        [userTask launchTask];
-    }else{
-        self.userTask = nil;
-    }
-}
-
--(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
-    
-    NSData *data = [aFileHandler availableData];
-    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    
-    Log(@"%@",str);
-}
-
--(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
-    return NO;
 }
 
 
@@ -196,6 +121,87 @@ withFilterContext:(id)filterContext
 
 - (BOOL)tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row {
     return NO;
+}
+
+#pragma mark - PCTaskDelegate
+-(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
+    
+
+    self.sudoTask = nil;
+    return;
+    
+    
+    
+    
+    
+    if(self.sudoTask){
+        self.sudoTask = nil;
+        
+        NSString *basePath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
+        NSString *userSetup = [NSString stringWithFormat:@"%@/setup/raspberry_user_setup.sh",basePath];
+        
+        PCTask *userTask = [PCTask new];
+        userTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", userSetup, basePath];
+        userTask.delegate = self;
+        
+        self.userTask = userTask;
+        [userTask launchTask];
+    }else{
+        self.userTask = nil;
+    }
+}
+
+-(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
+    
+    NSData *data = [aFileHandler availableData];
+    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    
+    Log(@"%@",str);
+}
+
+-(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
+    return NO;
+}
+
+
+#pragma mark - IBACTION
+-(IBAction)build:(id)sender
+{
+    
+    // return if there is no node
+    
+    
+    // setup only six nodes
+    
+
+#if 0
+    
+    // save to local configuration
+    for (NSDictionary *node in self.nodeList){
+        [[Util getApp] multicastData:[node BSONRepresentation]];
+        sleep(1);
+    }
+#endif
+
+    NSMutableString *nodeip = [NSMutableString new];
+    for (NSDictionary *node in self.nodeList){
+        [nodeip appendString:[NSString stringWithFormat:@"%@ %@ ", [node valueForKey:@"pc_sl_nm"], [node valueForKey:@"address"]]];
+    }
+    
+    NSString *basePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
+    NSString *sudoSetup = [NSString stringWithFormat:@"%@/setup/raspberry_sudo_setup.sh %@",basePath, nodeip];
+
+    Log(@"sudoSetup %@", sudoSetup);
+
+    
+    PCTask *sudoTask = [PCTask new];
+    sudoTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", sudoSetup, basePath];
+    sudoTask.sudoCommand = YES;
+    sudoTask.delegate = self;
+    
+    self.sudoTask = sudoTask;
+    
+    [sudoTask launchTask];
 }
 
 @end

@@ -20,5 +20,7 @@
 - (void)removeMultDelegateFromQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
 - (void)startMulticastSocket;
 - (void)stopMulticastSocket;
+
+- (void)multicastData:(NSData *)aData;
 @end
 

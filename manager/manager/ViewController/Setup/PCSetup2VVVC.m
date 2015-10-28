@@ -21,56 +21,9 @@
 @implementation PCSetup2VVVC
 
 
--(IBAction)vagrantUp:(id)sender
-{
-
-    NSString *basePath    = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
-    NSString *sudoSetup = [NSString stringWithFormat:@"%@/setup/vagrant_sudo_setup.sh",basePath];
-    NSString *userSetup = [NSString stringWithFormat:@"%@/setup/vagrant_user_setup.sh",basePath];
-
-#if 0
-    __block PCTaskOutputWindow *tow = [[PCTaskOutputWindow alloc] initWithNibName:nil bundle:nil];
-    tow.taskCommand = [NSString stringWithFormat:@"sh %@ %@", setupScript, basePath];
-    tow.sudoCommand = YES;
-    
-    WEAK_SELF(self);
-    [belf.view.window
-     beginSheet:tow
-     completionHandler:^(NSModalResponse returnCode) {
-         [belf.view.window endSheet:tow];
-     }];
-    
-    [tow launchTask];
-    
-    //[[Util getApp] addOpenWindow:tow];
-    
-#elif 1
-    
-    PCTask *sudoTask = [PCTask new];
-    sudoTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", sudoSetup, basePath];
-    sudoTask.sudoCommand = YES;
-    sudoTask.delegate = self;
-    
-    self.sudoTask = sudoTask;
-    
-    [sudoTask launchTask];
-#else
-    
-    
-    PCTask *userTask = [PCTask new];
-    userTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", userSetup, basePath];
-    userTask.delegate = self;
-    
-    [self.taskQueue addObject:userTask];
-    
-    [userTask launchTask];
-
-#endif
-}
+#pragma mark - PCTaskDelegate
 
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
-
-    Log(@"%s",__PRETTY_FUNCTION__);
     
     if(self.sudoTask){
         self.sudoTask = nil;
@@ -101,6 +54,20 @@
     return false;
 }
 
-
+#pragma mark - IBACTION
+-(IBAction)build:(id)sender
+{
+    NSString *basePath    = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
+    NSString *sudoSetup = [NSString stringWithFormat:@"%@/setup/vagrant_sudo_setup.sh",basePath];
+    
+    PCTask *sudoTask = [PCTask new];
+    sudoTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", sudoSetup, basePath];
+    sudoTask.sudoCommand = YES;
+    sudoTask.delegate = self;
+    
+    self.sudoTask = sudoTask;
+    
+    [sudoTask launchTask];
+}
 
 @end
