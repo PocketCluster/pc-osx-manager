@@ -82,4 +82,8 @@
   return [[self.BSDName stringByReplacingOccurrencesOfString:@"en" withString:@""] intValue];
 }
 
+-(NSString *)description{
+    return [NSString stringWithFormat:@"%@ %@ %@", [self BSDName], [self ip4Address], [self kind]];
+}
+
 @end

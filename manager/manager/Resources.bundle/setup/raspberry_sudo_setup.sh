@@ -1,13 +1,17 @@
 #!/bin/bash
 
 BASE_BUNDLE_PATH=$1
+MASTER_ADDRESS=$2
+ARGV=("${@}")
+# ARGV=("${BASH_ARGV[*]}")
+ARGC=$#
+NODELIST=""
 
-
-echo $1 $2 $3 $4
-
-exit 0
-
-
+for (( i=2; i<$ARGC; i++ ));
+do
+    NODENUM=$(( $i - 1 ))
+    NODELIST+=" pc-node${NODENUM} "${ARGV[$i]}
+done
 
 echo "SUDO_SETUP_STEP_0"
 
@@ -16,14 +20,10 @@ mkdir -p /{pocket,bigpkg}
 
 # setup basic directories
 mkdir -p /etc/salt
-mkdir -p /pocket/{boxes,conf,hdfs,log,nodes,salt}
-mkdir -p /pocket/nodes/pc-node{1..3}
+mkdir -p /pocket/{conf,hdfs,log,salt}
 
 # copy salt essential files
 cp -Rf "${BASE_BUNDLE_PATH}"/saltstack/* /pocket/salt/
-
-# copy vagrant essential fils
-cp -Rf "${BASE_BUNDLE_PATH}"/vagrant/* /pocket/boxes/
 
 # copy vagrant files & modify
 chown -R $SUDO_USER:staff /pocket
@@ -33,8 +33,11 @@ chown -R $SUDO_USER:staff /bigpkg
 cp -f "${BASE_BUNDLE_PATH}"/etc/salt/* /etc/salt/
 sed -i '' 's|PC_USER|'$SUDO_USER'|g' /etc/salt/*
 
+# check if this really works!
+sed -i '' 's|10.211.55.1|0.0.0.0|g' /etc/salt/master
+
 # change hosts
-python "${BASE_BUNDLE_PATH}"/setup/host_setup.py salt 10.211.55.1 pc-master 10.211.55.1 pc-node1 10.211.55.201 pc-node2 10.211.55.202 pc-node3 10.211.55.203
+python "${BASE_BUNDLE_PATH}"/setup/host_setup.py salt ${MASTER_ADDRESS} pc-master ${MASTER_ADDRESS} ${NODELIST}
 
 echo "SUDO_SETUP_DONE"
 

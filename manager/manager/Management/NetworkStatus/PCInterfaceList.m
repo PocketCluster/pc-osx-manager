@@ -68,7 +68,6 @@
                     rface.kind = (__bridge NSString*)SCNetworkInterfaceGetInterfaceType(interfaceRef);
                     break;
                 }
-                
             }
         }
         

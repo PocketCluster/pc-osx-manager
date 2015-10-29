@@ -23,14 +23,21 @@ fi
 
 # localhost key
 LOC="$(ssh-keyscan -t rsa localhost)"
-if ! grep -Fxq "$LOC" $HOME/.ssh/known_hosts
+if ! grep -Fxq "${LOC}" $HOME/.ssh/known_hosts
 then
     echo "${LOC}" >> $HOME/.ssh/known_hosts
 fi
 
-for i in {1..NUM_NODES}
+# pc-master key
+PM="$(ssh-keyscan -t rsa pc-master)"
+if ! grep -Fxq "${PM}" $HOME/.ssh/known_hosts
+then
+    echo "${PM}" >> $HOME/.ssh/known_hosts
+fi
+
+# pc-node# key
+for ((i=1;i<=${NUM_NODES};i++));
 do
-    # pc-node# key
     PN="$(ssh-keyscan -t rsa pc-node${i})"
     if ! grep -Fxq "${PN}" $HOME/.ssh/known_hosts
     then
@@ -52,8 +59,8 @@ then
     echo "\tIdentityFile ~/.ssh/id_rsa" >> $HOME/.ssh/config
 fi
 
-# pc-node{1..3}
-for i in {1..3}
+# pc-node{1..${NUM_NODES}}
+for ((i=1;i<=${NUM_NODES};i++));
 do
     if ! grep -q "Host pc-node${i}" $HOME/.ssh/config
     then
@@ -72,9 +79,13 @@ cp -f $HOME/.ssh/* /pocket/salt/states/base/ssh/
 echo "USER_SETUP_STEP_2"
 
 
+
+exit 0
+
+
 salt-key -y --accept="pc-master"
 
-for i in {1..NUM_NODES}
+for ((i=1;i<=${NUM_NODES};i++));
 do
     salt-key -y --accept="pc-node${i}"
 done

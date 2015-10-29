@@ -14,14 +14,21 @@
 #import "BSONSerialization.h"
 #import "Util.h"
 #import "PCTask.h"
+#import "NullStringChecker.h"
+#import <SystemConfiguration/SCNetworkConfiguration.h>
 
+
+#define MAX_SUPPORTED_NODE (6)
 
 @interface PCSetup2RPVC ()<PCTaskDelegate, GCDAsyncUdpSocketDelegate>
+-(void)refreshInterface;
+
 @property (strong, nonatomic) PCTask *sudoTask;
 @property (strong, nonatomic) PCTask *userTask;
 @property (nonatomic, strong) GCDAsyncUdpSocket *udpSocket;
-@property (nonatomic, strong) NSMutableArray<LinkInterface *> *localInterfaces;
+//@property (nonatomic, strong) NSMutableArray<LinkInterface *> *localInterfaces;
 @property (atomic, strong) NSMutableArray *nodeList;
+@property (nonatomic, strong) LinkInterface *interface;
 @end
 
 @implementation PCSetup2RPVC
@@ -32,17 +39,44 @@
     
     if(self){
         [[Util getApp] addMultDelegateToQueue:self];
-        self.localInterfaces = [NSMutableArray arrayWithCapacity:0];
-        [self.localInterfaces addObjectsFromArray: [PCInterfaceList all]];
-        
         self.nodeList = [NSMutableArray arrayWithCapacity:0];
+        
+        [self refreshInterface];
     }
     
     return self;
 }
 
+-(void)viewDidAppear {
+    if (self.interface){
+        [self.warningLabel setHidden:YES];
+    }else{
+        [self.warningLabel setHidden:NO];
+    }
+}
+
+
 -(void)dealloc {
     [[Util getApp] removeMultDelegateFromQueue:self];
+}
+
+
+-(void)refreshInterface {
+#if 0
+    self.localInterfaces = [NSMutableArray arrayWithCapacity:0];
+    for (LinkInterface *iface in [PCInterfaceList all]){
+        if ([iface.kind isEqualToString:(__bridge NSString *)kSCNetworkInterfaceTypeEthernet]){
+            Log(@"%@-%@ %@", [iface BSDName],[iface ip4Address],[iface kind]);
+        }
+    }
+#endif
+    
+    for (LinkInterface *iface in [PCInterfaceList all]){
+        if (!ISNULL_STRING(iface.ip4Address) && [iface.kind isEqualToString:(__bridge NSString *)kSCNetworkInterfaceTypeEthernet]){
+            self.interface = iface;
+            return;
+        }
+    }
 }
 
 #pragma mark - GCDAsyncUdpSocketDelegate
@@ -126,14 +160,6 @@ withFilterContext:(id)filterContext
 #pragma mark - PCTaskDelegate
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
     
-
-    self.sudoTask = nil;
-    return;
-    
-    
-    
-    
-    
     if(self.sudoTask){
         self.sudoTask = nil;
         
@@ -141,7 +167,7 @@ withFilterContext:(id)filterContext
         NSString *userSetup = [NSString stringWithFormat:@"%@/setup/raspberry_user_setup.sh",basePath];
         
         PCTask *userTask = [PCTask new];
-        userTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", userSetup, basePath];
+        userTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@ %ld", userSetup, basePath, [self.nodeList count]];
         userTask.delegate = self;
         
         self.userTask = userTask;
@@ -167,35 +193,45 @@ withFilterContext:(id)filterContext
 #pragma mark - IBACTION
 -(IBAction)build:(id)sender
 {
+    // update interface status
+    [self refreshInterface];
     
-    // return if there is no node
-    
-    
-    // setup only six nodes
-    
+    // if there is no Ethernet, do not proceed.
+    if (self.interface){
+        [self.warningLabel setHidden:YES];
+    }else{
+        [self.warningLabel setHidden:NO];
+        return;
+    }
 
+    // return if there is no node
+    NSUInteger nodeCount = MIN([self.nodeList count], MAX_SUPPORTED_NODE);
+    if (nodeCount <= 0){
+        // NSAlert
+        return;
+    }
+
+    // setup only six nodes
 #if 0
-    
     // save to local configuration
-    for (NSDictionary *node in self.nodeList){
+    for (NSUInteger i = 0; i < nodeCount; ++i){
+        NSDictionary *node = [self.nodeList objectAtIndex:i];
         [[Util getApp] multicastData:[node BSONRepresentation]];
         sleep(1);
     }
 #endif
 
     NSMutableString *nodeip = [NSMutableString new];
-    for (NSDictionary *node in self.nodeList){
-        [nodeip appendString:[NSString stringWithFormat:@"%@ %@ ", [node valueForKey:@"pc_sl_nm"], [node valueForKey:@"address"]]];
+    for (NSUInteger i = 0; i < nodeCount; ++i){
+        NSDictionary *node = [self.nodeList objectAtIndex:i];
+        [nodeip appendString:[NSString stringWithFormat:@"%@ ", [node valueForKey:@"address"]]];
     }
     
     NSString *basePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
-    NSString *sudoSetup = [NSString stringWithFormat:@"%@/setup/raspberry_sudo_setup.sh %@",basePath, nodeip];
-
-    Log(@"sudoSetup %@", sudoSetup);
-
+    NSString *sudoSetup = [NSString stringWithFormat:@"%@/setup/raspberry_sudo_setup.sh %@ %@ %@",basePath, basePath, self.interface.ip4Address, nodeip];
     
     PCTask *sudoTask = [PCTask new];
-    sudoTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", sudoSetup, basePath];
+    sudoTask.taskCommand = [NSString stringWithFormat:@"sh %@",sudoSetup];
     sudoTask.sudoCommand = YES;
     sudoTask.delegate = self;
     

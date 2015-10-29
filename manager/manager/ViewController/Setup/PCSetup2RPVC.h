@@ -12,6 +12,6 @@
 @interface PCSetup2RPVC : NSViewController
 <DPSetupWindowStageViewController, NSTableViewDataSource, NSTableViewDelegate>
 @property (nonatomic, weak) IBOutlet NSTableView *nodeTable;
-
+@property (nonatomic, weak) IBOutlet NSTextField *warningLabel;
 -(IBAction)build:(id)sender;
 @end
