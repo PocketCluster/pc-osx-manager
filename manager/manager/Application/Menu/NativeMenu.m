@@ -5,16 +5,30 @@
 //  Copyright (c) 2014 Lanayo. All rights reserved.
 //
 
-#import "NativeMenu.h"
 #import <Sparkle/Sparkle.h>
 #import "AppDelegate.h"
 #import "Util.h"
 
 #import "DPSetupWC.h"
+#import "PCPrefWC.h"
+#import "AboutWindow.h"
+/*
+ #import "ManageBookmarksWindow.h"
+ #import "ManageCustomCommandsWindow.h"
+ */
 
+#import "NativeMenu.h"
 
 @implementation NativeMenu
 {
+    DPSetupWC *setupWindow;
+    PCPrefWC *preferencesWindow;
+    AboutWindow *aboutWindow;
+    /*
+     ManageBookmarksWindow *manageBookmarksWindow;
+     ManageCustomCommandsWindow *manageCustomCommandsWindow;
+     */
+
     
     NSStatusItem        *_statusItem;
     NSMenu              *_menu;
@@ -371,7 +385,7 @@
         [NSApp activateIgnoringOtherApps:YES];
         [preferencesWindow showWindow:self];
     } else {
-        preferencesWindow = [[PreferencesWindow alloc] initWithWindowNibName:@"PreferencesWindow"];
+        preferencesWindow = [[PCPrefWC alloc] initWithWindowNibName:@"PCPrefWC"];
         [NSApp activateIgnoringOtherApps:YES];
         [preferencesWindow showWindow:self];
         [[Util getApp] addOpenWindow:preferencesWindow];
@@ -384,10 +398,15 @@
 
 - (void)showSetupWindow:(id)sender
 {
-    NSWindowController *wc = [[DPSetupWC alloc] initWithWindowNibName:@"DPSetupWC"];
-    [NSApp activateIgnoringOtherApps:YES];
-    [wc showWindow:self];
-    [[Util getApp] addOpenWindow:wc];
+    if(setupWindow && !setupWindow.isClosed) {
+        [NSApp activateIgnoringOtherApps:YES];
+        [setupWindow showWindow:self];
+    } else {
+        setupWindow = [[DPSetupWC alloc] initWithWindowNibName:@"DPSetupWC"];
+        [NSApp activateIgnoringOtherApps:YES];
+        [setupWindow showWindow:self];
+        [[Util getApp] addOpenWindow:setupWindow];
+    }
 }
 
 - (void)aboutMenuItemClicked:(id)sender {

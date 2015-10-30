@@ -7,7 +7,10 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="PCSetup2RPVC">
             <connections>
+                <outlet property="buildBtn" destination="fgx-9I-dxe" id="MB4-Pz-6Dh"/>
                 <outlet property="nodeTable" destination="FgY-4m-zjw" id="bqI-TW-87s"/>
+                <outlet property="progressBar" destination="t6E-yx-PXz" id="YBU-5O-8Q8"/>
+                <outlet property="progressLabel" destination="sQg-zq-gxW" id="gNq-MY-PUm"/>
                 <outlet property="view" destination="1QC-ha-GCj" id="Mhm-Kx-GEo"/>
                 <outlet property="warningLabel" destination="2KP-9J-KgE" id="xLF-80-c8g"/>
             </connections>
@@ -19,7 +22,7 @@
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <scrollView fixedFrame="YES" borderType="none" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ctH-Dy-Lxn">
-                    <rect key="frame" x="20" y="48" width="375" height="140"/>
+                    <rect key="frame" x="20" y="90" width="375" height="140"/>
                     <clipView key="contentView" ambiguous="YES" id="vCA-oM-Tkz">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="140"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -127,6 +130,10 @@
                         <animations/>
                     </tableHeaderView>
                 </scrollView>
+                <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="t6E-yx-PXz">
+                    <rect key="frame" x="20" y="43" width="375" height="20"/>
+                    <animations/>
+                </progressIndicator>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fgx-9I-dxe">
                     <rect key="frame" x="167" y="13" width="81" height="32"/>
                     <animations/>
@@ -139,7 +146,7 @@
                     </connections>
                 </button>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4q5-4H-kzc">
-                    <rect key="frame" x="52" y="281" width="311" height="44"/>
+                    <rect key="frame" x="52" y="288" width="311" height="44"/>
                     <animations/>
                     <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" title="Raspberry Cluster" id="fZV-PK-kPP">
                         <font key="font" metaFont="systemMedium" size="32"/>
@@ -148,23 +155,31 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oVy-pZ-aHc">
-                    <rect key="frame" x="18" y="196" width="379" height="85"/>
+                    <rect key="frame" x="18" y="237" width="379" height="51"/>
                     <animations/>
                     <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" id="fYy-n7-At6">
                         <font key="font" metaFont="system"/>
-                        <string key="title">This step creates a Raspberry Pi 2 cluster up to 6 nodes. It requires an Ethernet adapter to proceed. 
-
+                        <string key="title">This step creates a Raspberry Pi 2 cluster up to 6 nodes. 
 Please connect an Ethernet adapter, power up Raspberry Pis and click Build.</string>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
                 <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2KP-9J-KgE">
-                    <rect key="frame" x="18" y="319" width="379" height="17"/>
+                    <rect key="frame" x="18" y="326" width="379" height="17"/>
                     <animations/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Ethernet adapter not detected" id="t8i-3B-UWU">
                         <font key="font" metaFont="systemSemibold" size="13"/>
                         <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sQg-zq-gxW">
+                    <rect key="frame" x="23" y="60" width="374" height="24"/>
+                    <animations/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" id="sKz-m6-EkN">
+                        <font key="font" metaFont="systemLight" size="16"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>

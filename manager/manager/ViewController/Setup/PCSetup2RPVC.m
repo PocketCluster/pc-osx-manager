@@ -28,6 +28,7 @@
 @property (nonatomic, strong) GCDAsyncUdpSocket *udpSocket;
 //@property (nonatomic, strong) NSMutableArray<LinkInterface *> *localInterfaces;
 @property (atomic, strong) NSMutableArray *nodeList;
+@property (strong, nonatomic) NSDictionary *progDict;
 @property (nonatomic, strong) LinkInterface *interface;
 @end
 
@@ -41,6 +42,13 @@
         [[Util getApp] addMultDelegateToQueue:self];
         self.nodeList = [NSMutableArray arrayWithCapacity:0];
         
+        self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Base config done...",@10.0]
+                          ,@"SUDO_SETUP_DONE":@[@"Start setting up Vagrant",@20.0]
+                          ,@"USER_SETUP_STEP_0":@[@"USER_SETUP_STEP_0",@30.0]
+                          ,@"USER_SETUP_STEP_1":@[@"USER_SETUP_STEP_1",@50.0]
+                          ,@"USER_SETUP_STEP_2":@[@"USER_SETUP_STEP_2",@90.0]
+                          ,@"USER_SETUP_DONE":@[@"USER_SETUP_DONE",@100.0]};
+
         [self refreshInterface];
     }
     
@@ -54,7 +62,6 @@
         [self.warningLabel setHidden:NO];
     }
 }
-
 
 -(void)dealloc {
     [[Util getApp] removeMultDelegateFromQueue:self];
@@ -95,19 +102,19 @@ withFilterContext:(id)filterContext
         }
     }
 
-    if (!doesNodeExist && self.nodeList.count <= 6){
+    if (!doesNodeExist && self.nodeList.count <= MAX_SUPPORTED_NODE){
         
         NSString *sn = [[DeviceSerialNumber deviceSerialNumber] lowercaseString];
         NSString *hn = [[[NSHost currentHost] localizedName] lowercaseString];
-        NSString *ha = [[NSHost currentHost] address];
-
+        //NSString *ha = [[NSHost currentHost] address];
+        NSString *ha = [self.interface ip4Address];
+        
         NSMutableDictionary* n = [NSMutableDictionary dictionaryWithDictionary:m];
         [n setValuesForKeysWithDictionary:
          @{@"pc_ma_ct":@"ct_fix_bound",
            @"pc_ma_hn":hn,
            @"pc_ma_ba":sn,
-           //@"pc_ma_i4":ha,
-           @"pc_ma_i4":@"192.168.1.152",
+           @"pc_ma_i4":ha,
            @"pc_ma_i6":@""}];
 
         [self.nodeList addObject:n];
@@ -161,7 +168,10 @@ withFilterContext:(id)filterContext
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
     
     if(self.sudoTask){
-        self.sudoTask = nil;
+        /*
+         [[Util getApp] startSalt];
+         sleep(4);
+         */
         
         NSString *basePath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
         NSString *userSetup = [NSString stringWithFormat:@"%@/setup/raspberry_user_setup.sh",basePath];
@@ -172,17 +182,34 @@ withFilterContext:(id)filterContext
         
         self.userTask = userTask;
         [userTask launchTask];
+        
+        self.sudoTask = nil;
     }else{
         self.userTask = nil;
+        [self.progressBar stopAnimation:self];
     }
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
     
     NSData *data = [aFileHandler availableData];
-    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    __block NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
-    Log(@"%@",str);
+    Log(@"STR %@",str);
+    
+    NSArray *p = nil;
+    for (NSString *key in self.progDict) {
+        if ([str containsString:key]){
+            p = [self.progDict valueForKey:key];
+            break;
+        }
+    }
+
+    if(p != nil){
+        [self.progressLabel setStringValue:[p objectAtIndex:0]];
+        [self.progressBar setDoubleValue:[[p objectAtIndex:1] doubleValue]];
+        [self.progressBar displayIfNeeded];
+    }
 }
 
 -(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
@@ -238,6 +265,9 @@ withFilterContext:(id)filterContext
     self.sudoTask = sudoTask;
     
     [sudoTask launchTask];
+    
+    [self.progressBar startAnimation:self];
+    [self.buildBtn setEnabled:NO];
 }
 
 @end

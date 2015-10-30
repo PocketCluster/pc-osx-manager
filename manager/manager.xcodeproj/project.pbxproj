@@ -7,6 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		041C469A1BE3674C000D1521 /* Changelog.md in Sources */ = {isa = PBXBuildFile; fileRef = 041C468E1BE3674C000D1521 /* Changelog.md */; };
+		041C469B1BE3674C000D1521 /* Changelog.md in Sources */ = {isa = PBXBuildFile; fileRef = 041C468E1BE3674C000D1521 /* Changelog.md */; };
+		041C469C1BE3674C000D1521 /* HockeySDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 041C468F1BE3674C000D1521 /* HockeySDK.framework */; };
+		041C469D1BE3674C000D1521 /* HockeySDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 041C468F1BE3674C000D1521 /* HockeySDK.framework */; };
+		041C469E1BE3674C000D1521 /* HockeySDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 041C468F1BE3674C000D1521 /* HockeySDK.framework */; };
+		041C469F1BE3674C000D1521 /* HockeySDK.framework.dSYM in Resources */ = {isa = PBXBuildFile; fileRef = 041C46901BE3674C000D1521 /* HockeySDK.framework.dSYM */; };
+		041C46A01BE3674C000D1521 /* HockeySDK.framework.dSYM in Resources */ = {isa = PBXBuildFile; fileRef = 041C46901BE3674C000D1521 /* HockeySDK.framework.dSYM */; };
+		041C46A11BE3674C000D1521 /* HockeySDK.framework.dSYM in Resources */ = {isa = PBXBuildFile; fileRef = 041C46901BE3674C000D1521 /* HockeySDK.framework.dSYM */; };
+		041C46A21BE3674C000D1521 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 041C46911BE3674C000D1521 /* LICENSE.txt */; };
+		041C46A31BE3674C000D1521 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 041C46911BE3674C000D1521 /* LICENSE.txt */; };
+		041C46A41BE3674C000D1521 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 041C46911BE3674C000D1521 /* LICENSE.txt */; };
+		041C46A61BE3674C000D1521 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 041C46921BE3674C000D1521 /* README.md */; };
+		041C46A71BE3674C000D1521 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 041C46921BE3674C000D1521 /* README.md */; };
+		041C46A81BE3674C000D1521 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 041C46941BE3674C000D1521 /* README */; };
+		041C46A91BE3674C000D1521 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 041C46941BE3674C000D1521 /* README */; };
+		041C46AA1BE3674C000D1521 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 041C46941BE3674C000D1521 /* README */; };
+		041C46AB1BE3674C000D1521 /* SSSelectableToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 041C46961BE3674C000D1521 /* SSSelectableToolbar.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		041C46AC1BE3674C000D1521 /* SSSelectableToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 041C46961BE3674C000D1521 /* SSSelectableToolbar.m */; };
+		041C46AD1BE3674C000D1521 /* SSSelectableToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 041C46961BE3674C000D1521 /* SSSelectableToolbar.m */; };
+		041C46AE1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 041C46981BE3674C000D1521 /* SSSelectableToolbarItem.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		041C46AF1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 041C46981BE3674C000D1521 /* SSSelectableToolbarItem.m */; };
+		041C46B01BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 041C46981BE3674C000D1521 /* SSSelectableToolbarItem.m */; };
+		041C46B11BE367F2000D1521 /* HockeySDK.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 041C468F1BE3674C000D1521 /* HockeySDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
 		041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
 		041FB3B91BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
@@ -70,12 +93,6 @@
 		046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
 		046A35B91BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
 		046A35BA1BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
-		046A35CD1BD7871B004E0946 /* PreferencesWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C11BD7871B004E0946 /* PreferencesWindow.m */; };
-		046A35CE1BD7871B004E0946 /* PreferencesWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C11BD7871B004E0946 /* PreferencesWindow.m */; };
-		046A35CF1BD7871B004E0946 /* PreferencesWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C11BD7871B004E0946 /* PreferencesWindow.m */; };
-		046A35D01BD7871B004E0946 /* PreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C21BD7871B004E0946 /* PreferencesWindow.xib */; };
-		046A35D11BD7871B004E0946 /* PreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C21BD7871B004E0946 /* PreferencesWindow.xib */; };
-		046A35D21BD7871B004E0946 /* PreferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C21BD7871B004E0946 /* PreferencesWindow.xib */; };
 		046A35D31BD7871B004E0946 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C51BD7871B004E0946 /* AboutWindow.m */; };
 		046A35D41BD7871B004E0946 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C51BD7871B004E0946 /* AboutWindow.m */; };
 		046A35D51BD7871B004E0946 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C51BD7871B004E0946 /* AboutWindow.m */; };
@@ -172,6 +189,12 @@
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
 		0486781D1BCF5FE20071594B /* managerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0486781C1BCF5FE20071594B /* managerTests.m */; };
 		048678281BCF5FE20071594B /* managerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 048678271BCF5FE20071594B /* managerUITests.m */; };
+		04C09D611BE35EDF009E074D /* PCPrefWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C09D5F1BE35EDF009E074D /* PCPrefWC.m */; };
+		04C09D621BE35EDF009E074D /* PCPrefWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C09D5F1BE35EDF009E074D /* PCPrefWC.m */; };
+		04C09D631BE35EDF009E074D /* PCPrefWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C09D5F1BE35EDF009E074D /* PCPrefWC.m */; };
+		04C09D641BE35EDF009E074D /* PCPrefWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C09D601BE35EDF009E074D /* PCPrefWC.xib */; };
+		04C09D651BE35EDF009E074D /* PCPrefWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C09D601BE35EDF009E074D /* PCPrefWC.xib */; };
+		04C09D661BE35EDF009E074D /* PCPrefWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C09D601BE35EDF009E074D /* PCPrefWC.xib */; };
 		04D407361BDBC51F00625AD7 /* LinkInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D4072D1BDBC51F00625AD7 /* LinkInterface.m */; };
 		04D407371BDBC51F00625AD7 /* LinkInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D4072D1BDBC51F00625AD7 /* LinkInterface.m */; };
 		04D407381BDBC51F00625AD7 /* LinkInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D4072D1BDBC51F00625AD7 /* LinkInterface.m */; };
@@ -235,6 +258,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				041C46B11BE367F2000D1521 /* HockeySDK.framework in CopyFiles */,
 				0441A41C1BD8BFF200AABD7A /* GCDWebServers.framework in CopyFiles */,
 				0441A40E1BD8BBB900AABD7A /* Bolts.framework in CopyFiles */,
 				0441A4091BD8B9BD00AABD7A /* Parse.framework in CopyFiles */,
@@ -254,6 +278,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		041C468E1BE3674C000D1521 /* Changelog.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Changelog.md; sourceTree = "<group>"; };
+		041C468F1BE3674C000D1521 /* HockeySDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = HockeySDK.framework; sourceTree = "<group>"; };
+		041C46901BE3674C000D1521 /* HockeySDK.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = HockeySDK.framework.dSYM; sourceTree = "<group>"; };
+		041C46911BE3674C000D1521 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		041C46921BE3674C000D1521 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		041C46941BE3674C000D1521 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		041C46951BE3674C000D1521 /* SSSelectableToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSSelectableToolbar.h; sourceTree = "<group>"; };
+		041C46961BE3674C000D1521 /* SSSelectableToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSSelectableToolbar.m; sourceTree = "<group>"; };
+		041C46971BE3674C000D1521 /* SSSelectableToolbarItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSSelectableToolbarItem.h; sourceTree = "<group>"; };
+		041C46981BE3674C000D1521 /* SSSelectableToolbarItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSSelectableToolbarItem.m; sourceTree = "<group>"; };
 		041FB3B61BD0F3FA0027136F /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
 		0422D4DD1BDA04A500C5CB33 /* TaskOutputVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TaskOutputVC.h; sourceTree = "<group>"; };
 		0422D4DE1BDA04A500C5CB33 /* TaskOutputVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TaskOutputVC.m; sourceTree = "<group>"; };
@@ -289,9 +323,6 @@
 		0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GCDWebServers.framework; path = Frameworks/GCDWebServers.framework; sourceTree = "<group>"; };
 		046A35B61BD783CE004E0946 /* BaseWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseWindowController.h; sourceTree = "<group>"; };
 		046A35B71BD783CE004E0946 /* BaseWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseWindowController.m; sourceTree = "<group>"; };
-		046A35C01BD7871B004E0946 /* PreferencesWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesWindow.h; sourceTree = "<group>"; };
-		046A35C11BD7871B004E0946 /* PreferencesWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferencesWindow.m; sourceTree = "<group>"; };
-		046A35C21BD7871B004E0946 /* PreferencesWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PreferencesWindow.xib; sourceTree = "<group>"; };
 		046A35C41BD7871B004E0946 /* AboutWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutWindow.h; sourceTree = "<group>"; };
 		046A35C51BD7871B004E0946 /* AboutWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AboutWindow.m; sourceTree = "<group>"; };
 		046A35C61BD7871B004E0946 /* AboutWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AboutWindow.xib; sourceTree = "<group>"; };
@@ -366,6 +397,9 @@
 		048678231BCF5FE20071594B /* managerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = managerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		048678271BCF5FE20071594B /* managerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = managerUITests.m; sourceTree = "<group>"; };
 		048678291BCF5FE20071594B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		04C09D5E1BE35EDF009E074D /* PCPrefWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPrefWC.h; sourceTree = "<group>"; };
+		04C09D5F1BE35EDF009E074D /* PCPrefWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPrefWC.m; sourceTree = "<group>"; };
+		04C09D601BE35EDF009E074D /* PCPrefWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCPrefWC.xib; sourceTree = "<group>"; };
 		04D4072C1BDBC51F00625AD7 /* LinkInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkInterface.h; sourceTree = "<group>"; };
 		04D4072D1BDBC51F00625AD7 /* LinkInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkInterface.m; sourceTree = "<group>"; };
 		04D4072E1BDBC51F00625AD7 /* LinkInterfaces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkInterfaces.h; sourceTree = "<group>"; };
@@ -404,6 +438,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				041C469C1BE3674C000D1521 /* HockeySDK.framework in Frameworks */,
 				0441A4171BD8BF3E00AABD7A /* CoreServices.framework in Frameworks */,
 				0441A4191BD8BFE200AABD7A /* GCDWebServers.framework in Frameworks */,
 				0441A4151BD8BEF100AABD7A /* Foundation.framework in Frameworks */,
@@ -425,6 +460,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				041C469D1BE3674C000D1521 /* HockeySDK.framework in Frameworks */,
 				0441A41A1BD8BFE200AABD7A /* GCDWebServers.framework in Frameworks */,
 				0441A4071BD8B99600AABD7A /* Parse.framework in Frameworks */,
 				0441A40C1BD8BBB200AABD7A /* Bolts.framework in Frameworks */,
@@ -435,6 +471,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				041C469E1BE3674C000D1521 /* HockeySDK.framework in Frameworks */,
 				0441A41B1BD8BFE200AABD7A /* GCDWebServers.framework in Frameworks */,
 				0441A4081BD8B99600AABD7A /* Parse.framework in Frameworks */,
 				0441A40D1BD8BBB200AABD7A /* Bolts.framework in Frameworks */,
@@ -444,6 +481,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		041C468D1BE3674C000D1521 /* HockeySDK-Mac */ = {
+			isa = PBXGroup;
+			children = (
+				041C468E1BE3674C000D1521 /* Changelog.md */,
+				041C468F1BE3674C000D1521 /* HockeySDK.framework */,
+				041C46901BE3674C000D1521 /* HockeySDK.framework.dSYM */,
+				041C46911BE3674C000D1521 /* LICENSE.txt */,
+				041C46921BE3674C000D1521 /* README.md */,
+			);
+			path = "HockeySDK-Mac";
+			sourceTree = "<group>";
+		};
+		041C46931BE3674C000D1521 /* SSSelectableToolbar */ = {
+			isa = PBXGroup;
+			children = (
+				041C46941BE3674C000D1521 /* README */,
+				041C46951BE3674C000D1521 /* SSSelectableToolbar.h */,
+				041C46961BE3674C000D1521 /* SSSelectableToolbar.m */,
+				041C46971BE3674C000D1521 /* SSSelectableToolbarItem.h */,
+				041C46981BE3674C000D1521 /* SSSelectableToolbarItem.m */,
+			);
+			path = SSSelectableToolbar;
+			sourceTree = "<group>";
+		};
 		0422D4DC1BDA048D00C5CB33 /* TaskOutput */ = {
 			isa = PBXGroup;
 			children = (
@@ -546,21 +607,11 @@
 				046A35B71BD783CE004E0946 /* BaseWindowController.m */,
 				0422D4E61BDA067100C5CB33 /* TaskOutput */,
 				046A36781BD793F7004E0946 /* Setup */,
-				046A35BF1BD7871B004E0946 /* Preference */,
+				04C09D5D1BE35EBE009E074D /* Preferences */,
 				046A35C31BD7871B004E0946 /* About */,
 			);
 			name = WindowController;
 			path = manager/WindowController;
-			sourceTree = "<group>";
-		};
-		046A35BF1BD7871B004E0946 /* Preference */ = {
-			isa = PBXGroup;
-			children = (
-				046A35C01BD7871B004E0946 /* PreferencesWindow.h */,
-				046A35C11BD7871B004E0946 /* PreferencesWindow.m */,
-				046A35C21BD7871B004E0946 /* PreferencesWindow.xib */,
-			);
-			path = Preference;
 			sourceTree = "<group>";
 		};
 		046A35C31BD7871B004E0946 /* About */ = {
@@ -858,6 +909,16 @@
 			path = managerUITests;
 			sourceTree = "<group>";
 		};
+		04C09D5D1BE35EBE009E074D /* Preferences */ = {
+			isa = PBXGroup;
+			children = (
+				04C09D5E1BE35EDF009E074D /* PCPrefWC.h */,
+				04C09D5F1BE35EDF009E074D /* PCPrefWC.m */,
+				04C09D601BE35EDF009E074D /* PCPrefWC.xib */,
+			);
+			path = Preferences;
+			sourceTree = "<group>";
+		};
 		04D4072B1BDBC51F00625AD7 /* NetworkStatus */ = {
 			isa = PBXGroup;
 			children = (
@@ -878,6 +939,8 @@
 		04F705621BD7A94300829651 /* Vendors */ = {
 			isa = PBXGroup;
 			children = (
+				041C468D1BE3674C000D1521 /* HockeySDK-Mac */,
+				041C46931BE3674C000D1521 /* SSSelectableToolbar */,
 				046F95FB1BDDA275006AA8EE /* DPSetupWindow */,
 				04F705631BD7A94300829651 /* BSONObject */,
 				04F705661BD7A94300829651 /* GCDAsyncUdpSocket */,
@@ -1073,16 +1136,19 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				041C46A81BE3674C000D1521 /* README in Resources */,
 				046A36431BD79321004E0946 /* Askpass in Resources */,
 				046A366F1BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
 				046A36751BD793BB004E0946 /* PCSetup4VC.xib in Resources */,
 				0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */,
+				041C46A21BE3674C000D1521 /* LICENSE.txt in Resources */,
 				046A36631BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */,
 				046A368D1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
+				041C469F1BE3674C000D1521 /* HockeySDK.framework.dSYM in Resources */,
 				046F960D1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib in Resources */,
 				041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */,
+				04C09D641BE35EDF009E074D /* PCPrefWC.xib in Resources */,
 				046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */,
-				046A35D01BD7871B004E0946 /* PreferencesWindow.xib in Resources */,
 				0422D4E31BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */,
 				04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */,
 				048678121BCF5FE20071594B /* MainMenu.xib in Resources */,
@@ -1098,15 +1164,18 @@
 			files = (
 				046A36761BD793BB004E0946 /* PCSetup4VC.xib in Resources */,
 				046A36641BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */,
-				046A35D11BD7871B004E0946 /* PreferencesWindow.xib in Resources */,
+				04C09D651BE35EDF009E074D /* PCPrefWC.xib in Resources */,
 				046A366A1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */,
 				046A36701BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
 				0422D4EE1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */,
 				046A365E1BD793BB004E0946 /* PCSetup1VC.xib in Resources */,
+				041C46A91BE3674C000D1521 /* README in Resources */,
 				04E51DC11BDC88E3001F1F22 /* Resources.bundle in Resources */,
 				046A35D71BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A368E1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
+				041C46A31BE3674C000D1521 /* LICENSE.txt in Resources */,
+				041C46A01BE3674C000D1521 /* HockeySDK.framework.dSYM in Resources */,
 				0422D4E41BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */,
 				046F960E1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib in Resources */,
 			);
@@ -1118,15 +1187,18 @@
 			files = (
 				046A36771BD793BB004E0946 /* PCSetup4VC.xib in Resources */,
 				046A36651BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */,
-				046A35D21BD7871B004E0946 /* PreferencesWindow.xib in Resources */,
+				04C09D661BE35EDF009E074D /* PCPrefWC.xib in Resources */,
 				046A366B1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */,
 				046A36711BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
 				0422D4EF1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */,
 				046A365F1BD793BB004E0946 /* PCSetup1VC.xib in Resources */,
+				041C46AA1BE3674C000D1521 /* README in Resources */,
 				04E51DC21BDC88E3001F1F22 /* Resources.bundle in Resources */,
 				046A35D81BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				041FB3B91BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A368F1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
+				041C46A41BE3674C000D1521 /* LICENSE.txt in Resources */,
+				041C46A11BE3674C000D1521 /* HockeySDK.framework.dSYM in Resources */,
 				0422D4E51BDA04A500C5CB33 /* TaskOutputVC.xib in Resources */,
 				046F960F1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib in Resources */,
 			);
@@ -1199,6 +1271,7 @@
 				046A361A1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				046A368A1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */,
+				04C09D611BE35EDF009E074D /* PCPrefWC.m in Sources */,
 				04F7056C1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				0441A3FC1BD8981400AABD7A /* CustomCommand.m in Sources */,
 				0441A3F41BD892A400AABD7A /* VersionComparison.m in Sources */,
@@ -1230,10 +1303,11 @@
 				046F96041BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
 				046A366C1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
 				04D407391BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
+				041C46AE1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
+				041C46AB1BE3674C000D1521 /* SSSelectableToolbar.m in Sources */,
 				04D4073F1BDBC51F00625AD7 /* LinkMACVendors.m in Sources */,
 				046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				046A35D31BD7871B004E0946 /* AboutWindow.m in Sources */,
-				046A35CD1BD7871B004E0946 /* PreferencesWindow.m in Sources */,
 				0441A3E31BD8904100AABD7A /* main.m in Sources */,
 				04F705691BD7A94300829651 /* BSONSerialization.m in Sources */,
 				0422D4F61BDA0C2700C5CB33 /* PCTask.m in Sources */,
@@ -1253,6 +1327,7 @@
 				04F7056D1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				0441A3E41BD8904100AABD7A /* main.m in Sources */,
 				046A36671BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
+				041C46AF1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
 				046A361B1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				0486781D1BCF5FE20071594B /* managerTests.m in Sources */,
 				046A366D1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
@@ -1264,7 +1339,6 @@
 				0441A3F51BD892A400AABD7A /* VersionComparison.m in Sources */,
 				0422D4EB1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */,
 				046A365B1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
-				046A35CE1BD7871B004E0946 /* PreferencesWindow.m in Sources */,
 				04F7056A1BD7A94300829651 /* BSONSerialization.m in Sources */,
 				046A36121BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				0422D4F71BDA0C2700C5CB33 /* PCTask.m in Sources */,
@@ -1277,6 +1351,8 @@
 				04F705771BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A368B1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				046A361E1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
+				041C46AC1BE3674C000D1521 /* SSSelectableToolbar.m in Sources */,
+				04C09D621BE35EDF009E074D /* PCPrefWC.m in Sources */,
 				0441A4001BD8981400AABD7A /* CustomCommandManager.m in Sources */,
 				046F96051BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
 				046A35B91BD783CE004E0946 /* BaseWindowController.m in Sources */,
@@ -1285,7 +1361,9 @@
 				046F960A1BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				0441A3E71BD8904100AABD7A /* NativeMenu.m in Sources */,
 				04D4073A1BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
+				041C46A61BE3674C000D1521 /* README.md in Sources */,
 				0441A3F01BD8921600AABD7A /* Util.m in Sources */,
+				041C469A1BE3674C000D1521 /* Changelog.md in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1302,6 +1380,7 @@
 				04F7056E1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				0441A3E51BD8904100AABD7A /* main.m in Sources */,
 				046A36681BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
+				041C46B01BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
 				046A361C1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				048678281BCF5FE20071594B /* managerUITests.m in Sources */,
 				046A366E1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
@@ -1313,7 +1392,6 @@
 				0441A3F61BD892A400AABD7A /* VersionComparison.m in Sources */,
 				0422D4EC1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */,
 				046A365C1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
-				046A35CF1BD7871B004E0946 /* PreferencesWindow.m in Sources */,
 				04F7056B1BD7A94300829651 /* BSONSerialization.m in Sources */,
 				046A36131BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				0422D4F81BDA0C2700C5CB33 /* PCTask.m in Sources */,
@@ -1326,6 +1404,8 @@
 				04F705781BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A368C1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				046A361F1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
+				041C46AD1BE3674C000D1521 /* SSSelectableToolbar.m in Sources */,
+				04C09D631BE35EDF009E074D /* PCPrefWC.m in Sources */,
 				0441A4011BD8981400AABD7A /* CustomCommandManager.m in Sources */,
 				046F96061BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
 				046A35BA1BD783CE004E0946 /* BaseWindowController.m in Sources */,
@@ -1334,7 +1414,9 @@
 				046F960B1BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				0441A3E81BD8904100AABD7A /* NativeMenu.m in Sources */,
 				04D4073B1BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
+				041C46A71BE3674C000D1521 /* README.md in Sources */,
 				0441A3F11BD8921600AABD7A /* Util.m in Sources */,
+				041C469B1BE3674C000D1521 /* Changelog.md in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1485,6 +1567,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
+					"$(PROJECT_DIR)/manager/Vendors/HockeySDK-Mac",
 				);
 				INFOPLIST_FILE = manager/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -1503,6 +1586,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
+					"$(PROJECT_DIR)/manager/Vendors/HockeySDK-Mac",
 				);
 				INFOPLIST_FILE = manager/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -1519,6 +1603,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
+					"$(PROJECT_DIR)/manager/Vendors/HockeySDK-Mac",
 				);
 				INFOPLIST_FILE = managerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
@@ -1536,6 +1621,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
+					"$(PROJECT_DIR)/manager/Vendors/HockeySDK-Mac",
 				);
 				INFOPLIST_FILE = managerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
@@ -1552,6 +1638,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
+					"$(PROJECT_DIR)/manager/Vendors/HockeySDK-Mac",
 				);
 				INFOPLIST_FILE = managerUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
@@ -1569,6 +1656,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
+					"$(PROJECT_DIR)/manager/Vendors/HockeySDK-Mac",
 				);
 				INFOPLIST_FILE = managerUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";

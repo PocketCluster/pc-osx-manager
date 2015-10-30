@@ -15,12 +15,14 @@
 #import "NativeMenu.h"
 
 #import "GCDAsyncUdpSocket.h"
+#import "PCTask.h"
 
 @interface AppDelegate ()<MenuDelegate, SUUpdaterDelegate, GCDAsyncUdpSocketDelegate>
 @property (weak) IBOutlet NSWindow *window;
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
 @property (nonatomic, strong) NSMutableArray *openWindows;
-
+@property (nonatomic, strong) PCTask *saltMinion;
+@property (nonatomic, strong) PCTask *saltMaster;
 
 @property (nonatomic, strong) GCDAsyncUdpSocket *multSocket;
 @property (nonatomic, strong) NSMutableArray<GCDAsyncUdpSocketDelegate> *multSockDelegates;
@@ -49,11 +51,15 @@
     self.multSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
     [self.multSocket setIPv6Enabled:NO];
     
-    self.multSockDelegates = [NSMutableArray arrayWithCapacity:0];
+    self.multSockDelegates = [NSMutableArray<GCDAsyncUdpSocketDelegate> arrayWithCapacity:0];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
+    
+
+    [self stopMulticastSocket];
+    [self stopSalt];
 }
 
 //- (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {[PFAnalytics trackAppOpenedWithRemoteNotificationPayload:userInfo];}
@@ -193,9 +199,33 @@
     }
 }
 
+#pragma mark - SALT
+- (void)startSalt {
+    if(!self.saltMinion){
+        PCTask *minion = [[PCTask alloc] init];
+        minion.taskCommand = @"salt-minion";
+        self.saltMinion = minion;
+        [minion launchTask];
+    }
+    
+    if(!self.saltMaster){
+        PCTask *master = [[PCTask alloc] init];
+        master.taskCommand = @"salt-master";
+        self.saltMaster = master;
+        [master launchTask];
+    }
+}
+
+- (void)stopSalt {
+    [self.saltMinion cancelTask];
+    self.saltMinion = nil;
+    
+    [self.saltMaster cancelTask];
+    self.saltMaster = nil;
+}
+
 
 #pragma mark - Window management
-
 - (void)addOpenWindow:(id)window {
     @synchronized(_openWindows) {
         [_openWindows addObject:window];

@@ -29,6 +29,8 @@
 
 @property (weak, nonatomic) id<PCTaskDelegate> delegate;
 
+@property (readonly) BOOL isRunning;
+
 @property (strong, nonatomic) id target;
 @property (strong, nonatomic) NSString *taskCommand;
 @property (strong, nonatomic) NSString *taskAction;
@@ -38,4 +40,6 @@
 
 - (void)launchTask;
 - (void)cancelTask;
+
+- (void)runTaskWithProgressBlock:(void (^)(NSString *output))progress;
 @end

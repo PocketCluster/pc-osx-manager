@@ -6,6 +6,8 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-@interface DPSetupWC : NSWindowController
+#import "BaseWindowController.h"
+
+@interface DPSetupWC : BaseWindowController
 
 @end

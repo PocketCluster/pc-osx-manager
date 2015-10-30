@@ -16,6 +16,11 @@
 - (NSString*)getCurrentTheme;
 
 
+
+- (void)startSalt;
+- (void)stopSalt;
+
+
 - (void)addMultDelegateToQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
 - (void)removeMultDelegateFromQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
 - (void)startMulticastSocket;
