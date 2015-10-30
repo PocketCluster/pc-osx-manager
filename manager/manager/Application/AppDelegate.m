@@ -17,10 +17,23 @@
 #import "GCDAsyncUdpSocket.h"
 #import "PCTask.h"
 
-@interface AppDelegate ()<MenuDelegate, SUUpdaterDelegate, GCDAsyncUdpSocketDelegate>
-@property (weak) IBOutlet NSWindow *window;
+#import "VirtualBoxServiceProvider.h"
+#import "VagrantManager.h"
+#import "VagrantInstance.h"
+#import "BookmarkManager.h"
+#import "CustomCommandManager.h"
+
+@interface AppDelegate ()<SUUpdaterDelegate, GCDAsyncUdpSocketDelegate, VagrantManagerDelegate, NSUserNotificationCenterDelegate, MenuDelegate>
+
+- (void)updateRunningVmCount;
+- (void)updateProcessType;
+
+//@property (weak) IBOutlet NSWindow *window;
+
+@property (nonatomic, strong) VagrantManager *manager;
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
 @property (nonatomic, strong) NSMutableArray *openWindows;
+
 @property (nonatomic, strong) PCTask *saltMinion;
 @property (nonatomic, strong) PCTask *saltMaster;
 
@@ -28,15 +41,27 @@
 @property (nonatomic, strong) NSMutableArray<GCDAsyncUdpSocketDelegate> *multSockDelegates;
 @end
 
-@implementation AppDelegate
+@implementation AppDelegate {
+    BOOL isRefreshingVagrantMachines;
+    int queuedRefreshes;
+}
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     self.openWindows = [[NSMutableArray alloc] init];
     
+    //create vagrant manager
+    self.manager = [VagrantManager sharedManager];
+    self.manager.delegate = self;
+    [_manager registerServiceProvider:[[VirtualBoxServiceProvider alloc] init]];
+
     //create popup and status menu item
     self.nativeMenu = [[NativeMenu alloc] init];
     self.nativeMenu.delegate = self;
     
+    [[BookmarkManager sharedManager] loadBookmarks];
+//    [[CustomCommandManager sharedManager] loadCustomCommands];
+    
+
     // start parse analytics
     [Parse
      setApplicationId:@"HRUYcCC5BZwkUTzbEUmuyglSHzAVo6UpykuTUdqI"
@@ -52,6 +77,10 @@
     [self.multSocket setIPv6Enabled:NO];
     
     self.multSockDelegates = [NSMutableArray<GCDAsyncUdpSocketDelegate> arrayWithCapacity:0];
+    
+
+    //start initial vagrant machine detection
+    [self refreshVagrantMachines];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -251,37 +280,65 @@
     }
 }
 
-- (NSImage*)getThemedImage:(NSString*)imageName {
-    NSImage *image = [NSImage imageNamed:[NSString stringWithFormat:@"%@-%@", imageName, [self getCurrentTheme]]];
-    [image setTemplate:YES];
-    return image;
+#pragma mark - Vagrant Manager delegates
+
+- (void)vagrantManager:(VagrantManager *)vagrantManger instanceAdded:(VagrantInstance *)instance {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.instance-added" object:nil userInfo:@{@"instance": instance}];
+    });
 }
 
-- (NSString*)getCurrentTheme {
-    NSString *theme = [[NSUserDefaults standardUserDefaults] objectForKey:@"statusBarIconTheme"];
-    
-    NSArray *validThemes = @[@"clean",
-                             @"flat"];
-    
-    if(!theme) {
-        theme = @"clean";
-        [[NSUserDefaults standardUserDefaults] setValue:theme forKey:@"statusBarIconTheme"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-    } else if(![validThemes containsObject:theme]) {
-        theme = @"clean";
-    }
-    
-    return theme;
+- (void)vagrantManager:(VagrantManager *)vagrantManger instanceRemoved:(VagrantInstance *)instance {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.instance-removed" object:nil userInfo:@{@"instance": instance}];
+    });
 }
 
-/*
-- (void)updateRunningVmCount {
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.update-running-vm-count" object:nil userInfo:@{@"count": [NSNumber numberWithInt:[_manager getRunningVmCount]]}];
+- (void)vagrantManager:(VagrantManager *)vagrantManger instanceUpdated:(VagrantInstance *)oldInstance withInstance:(VagrantInstance *)newInstance {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.instance-updated" object:nil userInfo:@{@"old_instance":oldInstance, @"new_instance":newInstance}];
+    });
 }
-*/
 
 
 #pragma mark - Menu item handlers
+- (void)updateRunningVmCount {
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:@"vagrant-manager.update-running-vm-count"
+     object:nil
+     userInfo:@{@"count": [NSNumber numberWithInt:[_manager getRunningVmCount]]}];
+}
+
+- (void)refreshVagrantMachines {
+    //only run if not already refreshing
+    if(!isRefreshingVagrantMachines) {
+        isRefreshingVagrantMachines = YES;
+
+        WEAK_SELF(self);
+
+        //tell popup controller refreshing has started
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.refreshing-started" object:nil];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            //tell manager to refresh all instances
+            [belf.manager refreshInstances];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                //tell popup controller refreshing has ended
+                isRefreshingVagrantMachines = NO;
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.refreshing-ended" object:nil];
+                [belf updateRunningVmCount];
+                
+                if(queuedRefreshes > 0) {
+                    --queuedRefreshes;
+                    [belf refreshVagrantMachines];
+                }
+            });
+        });
+    } else {
+        ++queuedRefreshes;
+    }
+}
+
 /*
 - (void)performVagrantAction:(NSString *)action withInstance:(VagrantInstance *)instance {
     if([action isEqualToString:@"ssh"]) {
@@ -346,14 +403,6 @@
     }
 }
 
-- (void)editVagrantfile:(VagrantInstance *)instance {
-    //open Vagrantfile in default text editor
-    NSTask *task = [[NSTask alloc] init];
-    [task setLaunchPath:@"/bin/bash"];
-    [task setArguments:@[@"-l", @"-c", [NSString stringWithFormat:@"open -t %@", [Util escapeShellArg:[instance getVagrantfilePath]]]]];
-    [task launch];
-}
-
 - (void)addBookmarkWithInstance:(VagrantInstance *)instance {
     [[BookmarkManager sharedManager] addBookmarkWithPath:instance.path displayName:instance.displayName providerIdentifier:instance.providerIdentifier];
     [[BookmarkManager sharedManager] saveBookmarks];
@@ -364,85 +413,6 @@
     [[BookmarkManager sharedManager] removeBookmarkWithPath:instance.path];
     [[BookmarkManager sharedManager] saveBookmarks];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.bookmarks-updated" object:nil];
-}
-
-- (void)checkForVagrantUpdates:(BOOL)showAlert {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        //run vagrant command to check version
-        NSTask *task = [[NSTask alloc] init];
-        [task setLaunchPath:@"/bin/bash"];
-        [task setArguments:@[@"-l", @"-c", @"vagrant version --machine-readable"]];
-        
-        NSPipe *pipe = [NSPipe pipe];
-        [task setStandardInput:[NSPipe pipe]];
-        [task setStandardOutput:pipe];
-        
-        [task launch];
-        [task waitUntilExit];
-        
-        //parse version info from output
-        NSData *outputData = [[pipe fileHandleForReading] readDataToEndOfFile];
-        NSString *outputString = [[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding];
-        
-        NSArray *lines = [outputString componentsSeparatedByString:@"\n"];
-        
-        BOOL newVersionAvailable = NO;
-        BOOL invalidOutput = YES;
-        NSString *currentVersion;
-        NSString *latestVersion;
-        
-        
-        if([lines count] >= 2) {
-            NSArray *installedVersionParts = [[lines objectAtIndex:0] componentsSeparatedByString:@","];
-            NSArray *latestVersionParts = [[lines objectAtIndex:1] componentsSeparatedByString:@","];
-            
-            if([installedVersionParts count] >= 4 && [latestVersionParts count] >= 4) {
-                currentVersion = [installedVersionParts objectAtIndex:3];
-                latestVersion = [latestVersionParts objectAtIndex:3];
-                
-                if([Util compareVersion:currentVersion toVersion:latestVersion] == NSOrderedAscending) {
-                    newVersionAvailable = YES;
-                }
-                
-                invalidOutput = NO;
-            }
-        }
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.vagrant-update-available" object:nil userInfo:@{@"is_update_available": [NSNumber numberWithBool:newVersionAvailable]}];
-            
-            if(showAlert) {
-                if(invalidOutput) {
-                    [[NSAlert alertWithMessageText:@"There was a problem checking your Vagrant version" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@""] runModal];
-                } else if(newVersionAvailable) {
-                    NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"There is a newer version of Vagrant available.\n\nCurrent version: %@\nLatest version: %@", currentVersion, latestVersion] defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
-                    [alert addButtonWithTitle:@"Visit Vagrant Website"];
-                    
-                    long response = [alert runModal];
-                    
-                    if(response == NSAlertSecondButtonReturn) {
-                        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://www.vagrantup.com/"]];
-                    }
-                } else {
-                    [[NSAlert alertWithMessageText:@"You are running the latest version of Vagrant" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@""] runModal];
-                }
-            }
-        });
-    });
-}
-
-- (void)editHostsFile {
-    NSString *terminalEditorName = [[NSUserDefaults standardUserDefaults] valueForKey:@"terminalEditorPreference"];
-    
-    NSString *terminalEditor;
-    if([terminalEditorName isEqualToString:@"vim"]) {
-        terminalEditor = @"vim";
-    } else {
-        terminalEditor = @"nano";
-    }
-    
-    NSString *taskCommand = [NSString stringWithFormat:@"sudo %@ /etc/hosts", [Util escapeShellArg:terminalEditor]];
-    [self runTerminalCommand:taskCommand];
 }
 */
 

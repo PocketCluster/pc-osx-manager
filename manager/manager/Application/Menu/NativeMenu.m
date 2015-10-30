@@ -28,12 +28,10 @@
      ManageBookmarksWindow *manageBookmarksWindow;
      ManageCustomCommandsWindow *manageCustomCommandsWindow;
      */
-
     
     NSStatusItem        *_statusItem;
     NSMenu              *_menu;
     NSMenuItem          *_refreshMenuItem;
-    NSTimer             *_refreshTimer;
     int                 _refreshIconFrame;
     
     NSMutableArray      *_menuItems;
@@ -53,18 +51,17 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(instanceRemoved:) name:@"vagrant-manager.instance-removed" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(instanceUpdated:) name:@"vagrant-manager.instance-updated" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setUpdateAvailable:) name:@"vagrant-manager.update-available" object:nil];
-
- [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshingStarted:) name:@"vagrant-manager.refreshing-started" object:nil];
+*/
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshingStarted:) name:@"vagrant-manager.refreshing-started" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshingEnded:) name:@"vagrant-manager.refreshing-ended" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateRunningVmCount:) name:@"vagrant-manager.update-running-vm-count" object:nil];
-*/    
+ 
     _statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
     _menu = [[NSMenu alloc] init];
     [_menu setAutoenablesItems:NO];
     
     _menuItems = [[NSMutableArray alloc] init];
     
-    //_statusItem.image = [[Util getApp] getThemedImage:@"vagrant_logo_off"];
     _statusItem.button.image = [NSImage imageNamed:@"status-off"];
     _statusItem.highlightMode = YES;
     _statusItem.menu = _menu;
@@ -74,6 +71,7 @@
     [_menu addItem:_refreshMenuItem];
     
     _topMachineSeparator = [NSMenuItem separatorItem];
+    [_menu addItem:_topMachineSeparator];
     
     NSMenuItem *createInstance = [[NSMenuItem alloc] initWithTitle:@"New Cluster" action:@selector(showSetupWindow:) keyEquivalent:@""];
     createInstance.target = self;
@@ -82,8 +80,6 @@
     // instances here
     _bottomMachineSeparator = [NSMenuItem separatorItem];
     [_menu addItem:_bottomMachineSeparator];
-    
-    [_menu addItem:[NSMenuItem separatorItem]];
 
     NSMenuItem *preferencesMenuItem = [[NSMenuItem alloc] initWithTitle:@"Preferences" action:@selector(preferencesMenuItemClicked:) keyEquivalent:@""];
     preferencesMenuItem.target = self;
@@ -225,24 +221,9 @@
 - (void)setIsRefreshing:(BOOL)isRefreshing {
     [_refreshMenuItem setEnabled:!isRefreshing];
     _refreshMenuItem.title = isRefreshing ? @"Refreshing..." : @"Refresh";
-    
-    if(isRefreshing && ![[NSUserDefaults standardUserDefaults] boolForKey:@"dontAnimateStatusIcon"]) {
-        _refreshIconFrame = 1;
-        _refreshTimer = [NSTimer scheduledTimerWithTimeInterval:0.2f target:self selector:@selector(updateRefreshIcon:) userInfo:nil repeats:YES];
-        [[NSRunLoop currentRunLoop] addTimer:_refreshTimer forMode:NSEventTrackingRunLoopMode];
-    } else {
-        [_refreshTimer invalidate];
-        _refreshTimer = nil;
-    }
 }
 
 /*
-- (void)updateRefreshIcon:(id)sender {
-    _statusItem.image = [[Util getApp] getThemedImage:[NSString stringWithFormat:@"vagrant_logo_refresh_%d", _refreshIconFrame]];
-    if(++_refreshIconFrame > 5) {
-        _refreshIconFrame = 1;
-    }
-}
 
 #pragma mark - Native menu item delegate
 
@@ -349,12 +330,14 @@
 - (void)nativeMenuItemCustomCommandMachine:(VagrantMachine*)machine withCommand:(CustomCommand*)customCommand {
     [self performCustomCommand:customCommand withMachine:machine];
 }
+*/
 
 #pragma mark - Menu Item Click Handlers
 - (void)refreshMenuItemClicked:(id)sender {
-//    [[Util getApp] refreshVagrantMachines];
+    [[Util getApp] refreshVagrantMachines];
 }
 
+/*
  - (void)manageBookmarksMenuItemClicked:(id)sender {
     if(manageBookmarksWindow && !manageBookmarksWindow.isClosed) {
         [NSApp activateIgnoringOtherApps:YES];
@@ -519,23 +502,6 @@
     [self.delegate performCustomCommand:customCommand withMachine:machine];
 }
 
-
-- (void)updateRunningVmCount:(NSNotification*)notification {
-    int count = [[notification.userInfo objectForKey:@"count"] intValue];
-    
-    if (count) {
-        if(![[NSUserDefaults standardUserDefaults] boolForKey:@"dontShowRunningVmCount"]) {
-            [_statusItem setTitle:[@(count) stringValue]];
-        } else {
-            [_statusItem setTitle:@""];
-        }
-        _statusItem.image = [[Util getApp] getThemedImage:@"vagrant_logo_on"];
-    } else {
-        [_statusItem setTitle:@""];
-        _statusItem.image = [[Util getApp] getThemedImage:@"vagrant_logo_off"];
-    }
-}
-
 - (NativeMenuItem*)menuItemForInstance:(VagrantInstance*)instance {
     for (NativeMenuItem *nativeMenuItem in _menuItems) {
         if (nativeMenuItem.instance == instance) {
@@ -546,5 +512,18 @@
     return nil;
 }
 */
+
+- (void)updateRunningVmCount:(NSNotification*)notification {
+    int count = [[notification.userInfo objectForKey:@"count"] intValue];
+    
+    Log(@"count %d",count);
+    
+    if (count) {
+        _statusItem.button.image = [NSImage imageNamed:@"status-on"];
+    } else {
+        [_statusItem setTitle:@""];
+        _statusItem.button.image = [NSImage imageNamed:@"status-off"];
+    }
+}
 
 @end

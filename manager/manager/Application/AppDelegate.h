@@ -8,18 +8,12 @@
 
 @protocol GCDAsyncUdpSocketDelegate;
 
-@interface AppDelegate : NSObject <NSApplicationDelegate, NSMenuDelegate, NSUserNotificationCenterDelegate>
+@interface AppDelegate : NSObject <NSApplicationDelegate>
 - (void)addOpenWindow:(id)window;
 - (void)removeOpenWindow:(id)window;
-- (void)updateProcessType;
-- (NSImage*)getThemedImage:(NSString*)imageName;
-- (NSString*)getCurrentTheme;
-
-
 
 - (void)startSalt;
 - (void)stopSalt;
-
 
 - (void)addMultDelegateToQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
 - (void)removeMultDelegateFromQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
@@ -27,5 +21,7 @@
 - (void)stopMulticastSocket;
 
 - (void)multicastData:(NSData *)aData;
+
+- (void)refreshVagrantMachines;
 @end
 

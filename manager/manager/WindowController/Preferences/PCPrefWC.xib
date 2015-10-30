@@ -49,7 +49,7 @@
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <button id="481" userLabel="Check Box">
-                    <rect key="frame" x="18" y="133" width="451" height="17"/>
+                    <rect key="frame" x="18" y="96" width="451" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <animations/>
                     <buttonCell key="cell" type="check" title="Launch at login" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="482">
@@ -61,7 +61,7 @@
                     </connections>
                 </button>
                 <popUpButton verticalHuggingPriority="750" id="2jo-vD-Wh2">
-                    <rect key="frame" x="164" y="165" width="211" height="26"/>
+                    <rect key="frame" x="164" y="141" width="211" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <animations/>
                     <popUpButtonCell key="cell" type="push" title="iTerm/iTerm2" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="101" imageScaling="proportionallyDown" inset="2" selectedItem="B4S-P7-Kax" id="thi-We-iLc">
@@ -79,7 +79,7 @@
                     </connections>
                 </popUpButton>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="Fgp-D9-cWJ">
-                    <rect key="frame" x="18" y="172" width="142" height="17"/>
+                    <rect key="frame" x="18" y="148" width="142" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <animations/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="Terminal Preference:" id="xky-f0-z67">
@@ -90,7 +90,7 @@
                 </textField>
             </subviews>
             <animations/>
-            <point key="canvasLocation" x="1031.5" y="134.5"/>
+            <point key="canvasLocation" x="529.5" y="527.5"/>
         </customView>
         <userDefaultsController representsSharedInstance="YES" id="475"/>
     </objects>

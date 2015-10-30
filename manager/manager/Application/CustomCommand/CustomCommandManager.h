@@ -5,7 +5,6 @@
 //  Copyright (c) 2015 Lanayo. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
 #import "CustomCommand.h"
 
 @interface CustomCommandManager : NSObject {
