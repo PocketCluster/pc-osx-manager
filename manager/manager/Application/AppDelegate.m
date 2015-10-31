@@ -26,15 +26,16 @@
 #import "PCPrefWC.h"
 
 @interface AppDelegate ()<SUUpdaterDelegate, GCDAsyncUdpSocketDelegate, VagrantManagerDelegate, NSUserNotificationCenterDelegate, MenuDelegate>
-
+- (void)refreshTimerState;
 - (void)updateProcessType;
 - (void)updateRunningVmCount;
-
-//@property (weak) IBOutlet NSWindow *window;
 
 @property (nonatomic, strong) VagrantManager *manager;
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
 @property (nonatomic, strong) NSMutableArray *openWindows;
+
+@property (strong, nonatomic) NSTimer *refreshTimer;
+
 
 @property (nonatomic, strong) PCTask *saltMinion;
 @property (nonatomic, strong) PCTask *saltMaster;
@@ -77,9 +78,12 @@
     
     self.multSockDelegates = [NSMutableArray<GCDAsyncUdpSocketDelegate> arrayWithCapacity:0];
     
-
     //start initial vagrant machine detection
     [self refreshVagrantMachines];
+    
+    //start refresh timer if activated in preferences
+    [self refreshTimerState];
+
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -282,6 +286,62 @@
 
 #pragma mark - VAGRANT MACHINE CONTROL
 
+- (void)refreshTimerState {
+    if (self.refreshTimer) {
+        [self.refreshTimer invalidate];
+        self.refreshTimer = nil;
+    }
+
+    //if ([[NSUserDefaults standardUserDefaults] boolForKey:@"refreshEvery"])
+    {
+        self.refreshTimer =
+            [NSTimer
+             scheduledTimerWithTimeInterval:60//[[NSUserDefaults standardUserDefaults] integerForKey:@"refreshEveryInterval"]
+             target:self
+             selector:@selector(refreshVagrantMachines)
+             userInfo:nil
+             repeats:YES];
+    }
+}
+
+- (void)updateRunningVmCount {
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:@"vagrant-manager.update-running-vm-count"
+     object:nil
+     userInfo:@{@"count": [NSNumber numberWithInt:[_manager getRunningVmCount]]}];
+}
+
+- (void)refreshVagrantMachines {
+    //only run if not already refreshing
+    if(!isRefreshingVagrantMachines) {
+        isRefreshingVagrantMachines = YES;
+        
+        WEAK_SELF(self);
+        
+        //tell popup controller refreshing has started
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.refreshing-started" object:nil];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            //tell manager to refresh all instances
+            [belf.manager refreshInstances];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                //tell popup controller refreshing has ended
+                isRefreshingVagrantMachines = NO;
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.refreshing-ended" object:nil];
+                [belf updateRunningVmCount];
+                
+                if(queuedRefreshes > 0) {
+                    --queuedRefreshes;
+                    [belf refreshVagrantMachines];
+                }
+            });
+        });
+    } else {
+        ++queuedRefreshes;
+    }
+}
+
+
 - (void)runVagrantCustomCommand:(NSString*)command withMachine:(VagrantMachine*)machine {
     NSTask *task = [[NSTask alloc] init];
     [task setLaunchPath:@"/bin/bash"];
@@ -457,44 +517,7 @@
 }
 
 
-#pragma mark - VAGRANT ACTIONS -
-- (void)updateRunningVmCount {
-    [[NSNotificationCenter defaultCenter]
-     postNotificationName:@"vagrant-manager.update-running-vm-count"
-     object:nil
-     userInfo:@{@"count": [NSNumber numberWithInt:[_manager getRunningVmCount]]}];
-}
-
-- (void)refreshVagrantMachines {
-    //only run if not already refreshing
-    if(!isRefreshingVagrantMachines) {
-        isRefreshingVagrantMachines = YES;
-
-        WEAK_SELF(self);
-
-        //tell popup controller refreshing has started
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.refreshing-started" object:nil];
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            //tell manager to refresh all instances
-            [belf.manager refreshInstances];
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                //tell popup controller refreshing has ended
-                isRefreshingVagrantMachines = NO;
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.refreshing-ended" object:nil];
-                [belf updateRunningVmCount];
-                
-                if(queuedRefreshes > 0) {
-                    --queuedRefreshes;
-                    [belf refreshVagrantMachines];
-                }
-            });
-        });
-    } else {
-        ++queuedRefreshes;
-    }
-}
-
+#pragma mark - VAGRANT ACTIONS
 - (void)performVagrantAction:(NSString *)action withInstance:(VagrantInstance *)instance {
     if([action isEqualToString:@"ssh"]) {
         NSString *action = [NSString stringWithFormat:@"cd %@; vagrant ssh", [Util escapeShellArg:instance.path]];

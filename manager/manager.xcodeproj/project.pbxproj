@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		041023ED1BE434290083D62E /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 041023EC1BE434290083D62E /* AppKit.framework */; };
+		041023F01BE473370083D62E /* VagrantGlobalStatusScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 041023EE1BE473370083D62E /* VagrantGlobalStatusScanner.m */; };
+		041023F11BE473370083D62E /* VagrantGlobalStatusScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 041023EE1BE473370083D62E /* VagrantGlobalStatusScanner.m */; };
+		041023F21BE473370083D62E /* VagrantGlobalStatusScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 041023EE1BE473370083D62E /* VagrantGlobalStatusScanner.m */; };
 		041C46A81BE3674C000D1521 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 041C46941BE3674C000D1521 /* README */; };
 		041C46A91BE3674C000D1521 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 041C46941BE3674C000D1521 /* README */; };
 		041C46AA1BE3674C000D1521 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 041C46941BE3674C000D1521 /* README */; };
@@ -277,6 +280,8 @@
 
 /* Begin PBXFileReference section */
 		041023EC1BE434290083D62E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		041023EE1BE473370083D62E /* VagrantGlobalStatusScanner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VagrantGlobalStatusScanner.m; sourceTree = "<group>"; };
+		041023EF1BE473370083D62E /* VagrantGlobalStatusScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VagrantGlobalStatusScanner.h; sourceTree = "<group>"; };
 		041C46941BE3674C000D1521 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		041C46951BE3674C000D1521 /* SSSelectableToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSSelectableToolbar.h; sourceTree = "<group>"; };
 		041C46961BE3674C000D1521 /* SSSelectableToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSSelectableToolbar.m; sourceTree = "<group>"; };
@@ -546,6 +551,8 @@
 		0422D4F31BDA0C1400C5CB33 /* Vagrant */ = {
 			isa = PBXGroup;
 			children = (
+				041023EE1BE473370083D62E /* VagrantGlobalStatusScanner.m */,
+				041023EF1BE473370083D62E /* VagrantGlobalStatusScanner.h */,
 				04C6018C1BE3B040002389AB /* VagrantInstance.h */,
 				04C6018D1BE3B040002389AB /* VagrantInstance.m */,
 				04C601911BE3B040002389AB /* VagrantManager.h */,
@@ -1269,6 +1276,7 @@
 				04C601A11BE3B040002389AB /* VirtualMachineInfo.m in Sources */,
 				046A36721BD793BB004E0946 /* PCSetup4VC.m in Sources */,
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
+				041023F01BE473370083D62E /* VagrantGlobalStatusScanner.m in Sources */,
 				04D407421BDBC51F00625AD7 /* PCInterfaceList.m in Sources */,
 				046A365A1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
 				04C6019B1BE3B040002389AB /* VagrantManager.m in Sources */,
@@ -1319,6 +1327,7 @@
 				046A360C1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
 				04C601B81BE3B0FA002389AB /* VirtualBoxServiceProvider.m in Sources */,
 				04C601A21BE3B040002389AB /* VirtualMachineInfo.m in Sources */,
+				041023F11BE473370083D62E /* VagrantGlobalStatusScanner.m in Sources */,
 				04C601991BE3B040002389AB /* VagrantInstance.m in Sources */,
 				046A36731BD793BB004E0946 /* PCSetup4VC.m in Sources */,
 				04D4073D1BDBC51F00625AD7 /* LinkMACAddress.m in Sources */,
@@ -1374,6 +1383,7 @@
 				046A360D1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
 				04C601B91BE3B0FA002389AB /* VirtualBoxServiceProvider.m in Sources */,
 				04C601A31BE3B040002389AB /* VirtualMachineInfo.m in Sources */,
+				041023F21BE473370083D62E /* VagrantGlobalStatusScanner.m in Sources */,
 				04C6019A1BE3B040002389AB /* VagrantInstance.m in Sources */,
 				046A36741BD793BB004E0946 /* PCSetup4VC.m in Sources */,
 				04D4073E1BDBC51F00625AD7 /* LinkMACAddress.m in Sources */,

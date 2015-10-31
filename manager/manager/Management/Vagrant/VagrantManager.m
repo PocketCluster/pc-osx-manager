@@ -95,29 +95,33 @@
 
 //refresh list of instances by querying bookmarks, service providers, and NFS
 - (void)refreshInstances {
-    NSMutableArray *instances = [[NSMutableArray alloc] init];
+    
+    NSMutableArray<VagrantInstance*> *instances = [[NSMutableArray alloc] init];
     NSMutableArray *allPaths = [[NSMutableArray alloc] init];
 
-    //make sure it has not already been detected
-    NSString *path = @"/pocket/boxes";
-    [allPaths addObject:path];
-    [instances addObject:[[VagrantInstance alloc] initWithPath:path providerIdentifier:nil]];
-    
+    //scan vagrant global-status output
+    VagrantGlobalStatusScanner *globalStatusScanner = [[VagrantGlobalStatusScanner alloc] init];
+    for(NSString *path in [globalStatusScanner getInstancePaths]) {
+        if([path isEqualToString:@"/pocket/boxes"] && ![allPaths containsObject:path]) {
+            [allPaths addObject:path];
+            [instances addObject:[[VagrantInstance alloc] initWithPath:path providerIdentifier:nil]];
+        }
+    }
+
     //create instance for each detected path
     NSDictionary *detectedPaths = [self detectInstancePaths];
     for(NSString *providerIdentifier in [detectedPaths allKeys]) {
         NSArray *paths = [detectedPaths objectForKey:providerIdentifier];
         for(NSString *path in paths) {
             //make sure it has not already been detected
-            if(![allPaths containsObject:path]) {
+            if([path isEqualToString:@"/pocket/boxes"] && ![allPaths containsObject:path]) {
                 [allPaths addObject:path];
                 [instances addObject:[[VagrantInstance alloc] initWithPath:path providerIdentifier:providerIdentifier]];
             }
         }
     }
 
-    NSMutableArray *validPaths = [[NSMutableArray alloc] init];
-    
+    NSMutableArray *validPaths = [[NSMutableArray alloc] init];    
     //query all known instances for machines, process in parallel
     dispatch_group_t queryMachinesGroup = dispatch_group_create();
     dispatch_queue_t queryMachinesQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -129,13 +133,16 @@
             @synchronized(_instances) {
                 VagrantInstance *existingInstance = [self getInstanceForPath:instance.path];
                 if(existingInstance) {
+                    
                     //instance already exists, check for changes
                     int idx = (int)[_instances indexOfObject:existingInstance];
                     if(instance.machines.count != existingInstance.machines.count || ![existingInstance.displayName isEqualToString:instance.displayName] || ![existingInstance.providerIdentifier isEqualToString:instance.providerIdentifier]) {
                         //instance has updated
                         [_instances replaceObjectAtIndex:idx withObject:instance];
                         [self.delegate vagrantManager:self instanceUpdated:existingInstance withInstance:instance];
+                        
                     } else {
+                        
                         for(VagrantMachine *machine in instance.machines) {
                             VagrantMachine *existingMachine = [existingInstance getMachineWithName:machine.name];
                             
