@@ -8,10 +8,11 @@
 
 #import "BaseWindowController.h"
 
+extern NSString * const kPCPrefDefaultTerm;
+
 @interface PCPrefWC : BaseWindowController
 @property (nonatomic, weak) IBOutlet NSPopUpButton *terminalPreferencePopUpButton;
 @property (nonatomic, weak) IBOutlet NSButton *launchAtLoginCheckBox;
-
 
 - (IBAction)launchAtLoginCheckBoxClicked:(id)sender;
 - (IBAction)terminalPreferencePopUpButtonClicked:(id)sender;

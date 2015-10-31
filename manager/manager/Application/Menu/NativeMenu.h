@@ -5,13 +5,9 @@
 //  Copyright (c) 2014 Lanayo. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-
 #import "MenuDelegate.h"
-#import "NativeMenuItem.h"
-#import "CustomCommand.h"
 
-@interface NativeMenu : NSObject <NSMenuDelegate, NativeMenuItemDelegate> {
+@interface NativeMenu : NSObject {
 }
 
 @property (weak) id<MenuDelegate> delegate;

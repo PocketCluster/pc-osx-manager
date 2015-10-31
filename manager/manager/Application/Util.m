@@ -29,87 +29,6 @@
     }
 }
 
-+ (NSComparisonResult)compareVersion:(NSString*)version1 toVersion:(NSString*)version2 {
-    return [self compareVersion:version1 toVersion:version2 skipExpansion:NO];
-}
-
-+ (NSComparisonResult)compareVersion:(NSString*)version1 toVersion:(NSString*)version2 skipExpansion:(BOOL)skipExpansion {
-    NSMutableArray *version1parts = [[version1 componentsSeparatedByString:@"."] mutableCopy];
-    NSMutableArray *version2parts = [[version2 componentsSeparatedByString:@"."] mutableCopy];
-    
-    int partsCount = (version1parts.count > version2parts.count) ? (int)version1parts.count : (int)version2parts.count;
-    
-    while(version1parts.count < partsCount) {
-        [version1parts addObject:@"0"];
-    }
-    
-    while(version2parts.count < partsCount) {
-        [version2parts addObject:@"0"];
-    }
-    
-    for(int i=0; i<partsCount; ++i) {
-        NSComparisonResult res;
-        
-        if(skipExpansion) {
-            int p1 = [[version1parts objectAtIndex:i] intValue];
-            int p2 = [[version2parts objectAtIndex:i] intValue];
-            if(p1 > p2) {
-                res = NSOrderedDescending;
-            } else if(p1 < p2) {
-                res = NSOrderedAscending;
-            } else {
-                res = NSOrderedSame;
-            }
-        } else {
-            res = [self compareVersionPart:[version1parts objectAtIndex:i] toVersionPart:[version2parts objectAtIndex:i]];
-        }
-        
-        if(res != NSOrderedSame) {
-            return res;
-        }
-    }
-    
-    return NSOrderedSame;
-}
-
-+ (NSComparisonResult)compareVersionPart:(NSString*)part1 toVersionPart:(NSString*)part2 {
-    NSArray *alphas = @[
-                        @"RC",
-                        @"beta",
-                        @"b",
-                        @"alpha",
-                        @"a",
-                        @"debug",
-                        @"d"
-                       ];
-    
-    for(int i=0; i<alphas.count; ++i) {
-        part1 = [part1 stringByReplacingOccurrencesOfString:[alphas objectAtIndex:i] withString:[NSString stringWithFormat:@".%d.", -(i+1)]];
-        part2 = [part2 stringByReplacingOccurrencesOfString:[alphas objectAtIndex:i] withString:[NSString stringWithFormat:@".%d.", -(i+1)]];
-    }
-    
-    return [self compareVersion:part1 toVersion:part2 skipExpansion:YES];
-}
-
-+ (NSString*)getVersionStability:(NSString*)version {
-    NSDictionary *classes = @{
-                         @"rc": @[@"RC"],
-                         @"beta": @[@"beta", @"b"],
-                         @"alpha": @[@"alpha", @"a"],
-                         @"debug": @[@"debug", @"d"]
-                        };
-
-    for(NSString *class in [classes allKeys]) {
-        for(NSString *string in [classes objectForKey:class]) {
-            if([version rangeOfString:string].location != NSNotFound) {
-                return class;
-            }
-        }
-    }
-    
-    return @"stable";
-};
-
 + (void)redirectConsoleLogToDocumentFolder {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     
@@ -121,10 +40,6 @@
     freopen([logPath fileSystemRepresentation],"a+",stderr);
 }
 
-+ (void)log:(NSObject*)message {
-    NSLog(@"%@", message);
-}
-
 + (NSString*)getMachineId {
     NSString *uuid = [[NSUserDefaults standardUserDefaults] stringForKey:@"machineId"];
     if(!uuid) {
@@ -134,26 +49,6 @@
     }
     
     return uuid;
-}
-
-+ (NSString*)getUpdateStability {
-    return [[NSUserDefaults standardUserDefaults] stringForKey:@"updateStability"] ?: @"stable";
-}
-
-+ (int)getUpdateStabilityScore:(NSString*)updateStability {
-    if([updateStability isEqualToString:@"stable"]) {
-        return 0;
-    } else if([updateStability isEqualToString:@"rc"]) {
-        return 1;
-    } else if([updateStability isEqualToString:@"beta"]) {
-        return 2;
-    } else if([updateStability isEqualToString:@"alpha"]) {
-        return 3;
-    } else if([updateStability isEqualToString:@"debug"]) {
-        return 4;
-    } else {
-        return 5;
-    }
 }
 
 + (BOOL)shouldSendProfileData {

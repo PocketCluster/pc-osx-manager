@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		041023ED1BE434290083D62E /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 041023EC1BE434290083D62E /* AppKit.framework */; };
 		041C46A81BE3674C000D1521 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 041C46941BE3674C000D1521 /* README */; };
 		041C46A91BE3674C000D1521 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 041C46941BE3674C000D1521 /* README */; };
 		041C46AA1BE3674C000D1521 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 041C46941BE3674C000D1521 /* README */; };
@@ -53,12 +54,6 @@
 		0441A3F41BD892A400AABD7A /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F31BD892A400AABD7A /* VersionComparison.m */; };
 		0441A3F51BD892A400AABD7A /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F31BD892A400AABD7A /* VersionComparison.m */; };
 		0441A3F61BD892A400AABD7A /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F31BD892A400AABD7A /* VersionComparison.m */; };
-		0441A3FC1BD8981400AABD7A /* CustomCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F91BD8981400AABD7A /* CustomCommand.m */; };
-		0441A3FD1BD8981400AABD7A /* CustomCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F91BD8981400AABD7A /* CustomCommand.m */; };
-		0441A3FE1BD8981400AABD7A /* CustomCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3F91BD8981400AABD7A /* CustomCommand.m */; };
-		0441A3FF1BD8981400AABD7A /* CustomCommandManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3FB1BD8981400AABD7A /* CustomCommandManager.m */; };
-		0441A4001BD8981400AABD7A /* CustomCommandManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3FB1BD8981400AABD7A /* CustomCommandManager.m */; };
-		0441A4011BD8981400AABD7A /* CustomCommandManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3FB1BD8981400AABD7A /* CustomCommandManager.m */; };
 		0441A4021BD8987100AABD7A /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0441A4061BD8B99600AABD7A /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4051BD8B99600AABD7A /* Parse.framework */; };
 		0441A4071BD8B99600AABD7A /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4051BD8B99600AABD7A /* Parse.framework */; };
@@ -181,9 +176,6 @@
 		04C09D641BE35EDF009E074D /* PCPrefWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C09D601BE35EDF009E074D /* PCPrefWC.xib */; };
 		04C09D651BE35EDF009E074D /* PCPrefWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C09D601BE35EDF009E074D /* PCPrefWC.xib */; };
 		04C09D661BE35EDF009E074D /* PCPrefWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C09D601BE35EDF009E074D /* PCPrefWC.xib */; };
-		04C601951BE3B040002389AB /* VagrantGlobalStatusScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018B1BE3B040002389AB /* VagrantGlobalStatusScanner.m */; };
-		04C601961BE3B040002389AB /* VagrantGlobalStatusScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018B1BE3B040002389AB /* VagrantGlobalStatusScanner.m */; };
-		04C601971BE3B040002389AB /* VagrantGlobalStatusScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018B1BE3B040002389AB /* VagrantGlobalStatusScanner.m */; };
 		04C601981BE3B040002389AB /* VagrantInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018D1BE3B040002389AB /* VagrantInstance.m */; };
 		04C601991BE3B040002389AB /* VagrantInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018D1BE3B040002389AB /* VagrantInstance.m */; };
 		04C6019A1BE3B040002389AB /* VagrantInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018D1BE3B040002389AB /* VagrantInstance.m */; };
@@ -196,12 +188,6 @@
 		04C601A11BE3B040002389AB /* VirtualMachineInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C601931BE3B040002389AB /* VirtualMachineInfo.m */; };
 		04C601A21BE3B040002389AB /* VirtualMachineInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C601931BE3B040002389AB /* VirtualMachineInfo.m */; };
 		04C601A31BE3B040002389AB /* VirtualMachineInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C601931BE3B040002389AB /* VirtualMachineInfo.m */; };
-		04C601A91BE3B0A4002389AB /* Bookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C601A61BE3B0A4002389AB /* Bookmark.m */; };
-		04C601AA1BE3B0A4002389AB /* Bookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C601A61BE3B0A4002389AB /* Bookmark.m */; };
-		04C601AB1BE3B0A4002389AB /* Bookmark.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C601A61BE3B0A4002389AB /* Bookmark.m */; };
-		04C601AC1BE3B0A4002389AB /* BookmarkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C601A81BE3B0A4002389AB /* BookmarkManager.m */; };
-		04C601AD1BE3B0A4002389AB /* BookmarkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C601A81BE3B0A4002389AB /* BookmarkManager.m */; };
-		04C601AE1BE3B0A4002389AB /* BookmarkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C601A81BE3B0A4002389AB /* BookmarkManager.m */; };
 		04C601B41BE3B0FA002389AB /* VirtualBoxMachineInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C601B11BE3B0FA002389AB /* VirtualBoxMachineInfo.m */; };
 		04C601B51BE3B0FA002389AB /* VirtualBoxMachineInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C601B11BE3B0FA002389AB /* VirtualBoxMachineInfo.m */; };
 		04C601B61BE3B0FA002389AB /* VirtualBoxMachineInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C601B11BE3B0FA002389AB /* VirtualBoxMachineInfo.m */; };
@@ -290,6 +276,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		041023EC1BE434290083D62E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		041C46941BE3674C000D1521 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		041C46951BE3674C000D1521 /* SSSelectableToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSSelectableToolbar.h; sourceTree = "<group>"; };
 		041C46961BE3674C000D1521 /* SSSelectableToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSSelectableToolbar.m; sourceTree = "<group>"; };
@@ -318,10 +305,6 @@
 		0441A3EE1BD8921600AABD7A /* Util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Util.m; sourceTree = "<group>"; };
 		0441A3F21BD892A400AABD7A /* VersionComparison.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VersionComparison.h; path = manager/Application/VersionComparison.h; sourceTree = SOURCE_ROOT; };
 		0441A3F31BD892A400AABD7A /* VersionComparison.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VersionComparison.m; path = manager/Application/VersionComparison.m; sourceTree = SOURCE_ROOT; };
-		0441A3F81BD8981400AABD7A /* CustomCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomCommand.h; sourceTree = "<group>"; };
-		0441A3F91BD8981400AABD7A /* CustomCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomCommand.m; sourceTree = "<group>"; };
-		0441A3FA1BD8981400AABD7A /* CustomCommandManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomCommandManager.h; sourceTree = "<group>"; };
-		0441A3FB1BD8981400AABD7A /* CustomCommandManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomCommandManager.m; sourceTree = "<group>"; };
 		0441A4051BD8B99600AABD7A /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Parse.framework; path = Frameworks/Parse.framework; sourceTree = "<group>"; };
 		0441A40A1BD8BBB200AABD7A /* Bolts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Bolts.framework; path = Frameworks/Bolts.framework; sourceTree = "<group>"; };
 		0441A4111BD8BEA200AABD7A /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
@@ -407,8 +390,6 @@
 		04C09D5E1BE35EDF009E074D /* PCPrefWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPrefWC.h; sourceTree = "<group>"; };
 		04C09D5F1BE35EDF009E074D /* PCPrefWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPrefWC.m; sourceTree = "<group>"; };
 		04C09D601BE35EDF009E074D /* PCPrefWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCPrefWC.xib; sourceTree = "<group>"; };
-		04C6018A1BE3B040002389AB /* VagrantGlobalStatusScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VagrantGlobalStatusScanner.h; sourceTree = "<group>"; };
-		04C6018B1BE3B040002389AB /* VagrantGlobalStatusScanner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VagrantGlobalStatusScanner.m; sourceTree = "<group>"; };
 		04C6018C1BE3B040002389AB /* VagrantInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VagrantInstance.h; sourceTree = "<group>"; };
 		04C6018D1BE3B040002389AB /* VagrantInstance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VagrantInstance.m; sourceTree = "<group>"; };
 		04C6018E1BE3B040002389AB /* VagrantManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VagrantManager.m; sourceTree = "<group>"; };
@@ -418,10 +399,6 @@
 		04C601921BE3B040002389AB /* VirtualMachineInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VirtualMachineInfo.h; sourceTree = "<group>"; };
 		04C601931BE3B040002389AB /* VirtualMachineInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VirtualMachineInfo.m; sourceTree = "<group>"; };
 		04C601941BE3B040002389AB /* VirtualMachineServiceProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VirtualMachineServiceProvider.h; sourceTree = "<group>"; };
-		04C601A51BE3B0A4002389AB /* Bookmark.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bookmark.h; sourceTree = "<group>"; };
-		04C601A61BE3B0A4002389AB /* Bookmark.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Bookmark.m; sourceTree = "<group>"; };
-		04C601A71BE3B0A4002389AB /* BookmarkManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookmarkManager.h; sourceTree = "<group>"; };
-		04C601A81BE3B0A4002389AB /* BookmarkManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookmarkManager.m; sourceTree = "<group>"; };
 		04C601B01BE3B0FA002389AB /* VirtualBoxMachineInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VirtualBoxMachineInfo.h; sourceTree = "<group>"; };
 		04C601B11BE3B0FA002389AB /* VirtualBoxMachineInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VirtualBoxMachineInfo.m; sourceTree = "<group>"; };
 		04C601B21BE3B0FA002389AB /* VirtualBoxServiceProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VirtualBoxServiceProvider.h; sourceTree = "<group>"; };
@@ -464,6 +441,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				041023ED1BE434290083D62E /* AppKit.framework in Frameworks */,
 				0441A4171BD8BF3E00AABD7A /* CoreServices.framework in Frameworks */,
 				0441A4191BD8BFE200AABD7A /* GCDWebServers.framework in Frameworks */,
 				0441A4151BD8BEF100AABD7A /* Foundation.framework in Frameworks */,
@@ -540,7 +518,6 @@
 			isa = PBXGroup;
 			children = (
 				04C601AF1BE3B0FA002389AB /* Virtualbox */,
-				04C601A41BE3B0A4002389AB /* Bookmark */,
 				04D4072B1BDBC51F00625AD7 /* NetworkStatus */,
 				0422D4F11BDA0C1400C5CB33 /* Raspberry */,
 				0422D4F21BDA0C1400C5CB33 /* Task */,
@@ -569,8 +546,6 @@
 		0422D4F31BDA0C1400C5CB33 /* Vagrant */ = {
 			isa = PBXGroup;
 			children = (
-				04C6018A1BE3B040002389AB /* VagrantGlobalStatusScanner.h */,
-				04C6018B1BE3B040002389AB /* VagrantGlobalStatusScanner.m */,
 				04C6018C1BE3B040002389AB /* VagrantInstance.h */,
 				04C6018D1BE3B040002389AB /* VagrantInstance.m */,
 				04C601911BE3B040002389AB /* VagrantManager.h */,
@@ -587,7 +562,6 @@
 		0441A3D51BD8904100AABD7A /* Application */ = {
 			isa = PBXGroup;
 			children = (
-				0441A3F71BD8981400AABD7A /* CustomCommand */,
 				0441A3D91BD8904100AABD7A /* Menu */,
 				0441A3F21BD892A400AABD7A /* VersionComparison.h */,
 				0441A3F31BD892A400AABD7A /* VersionComparison.m */,
@@ -611,17 +585,6 @@
 				0441A3DE1BD8904100AABD7A /* NativeMenuItem.m */,
 			);
 			path = Menu;
-			sourceTree = "<group>";
-		};
-		0441A3F71BD8981400AABD7A /* CustomCommand */ = {
-			isa = PBXGroup;
-			children = (
-				0441A3F81BD8981400AABD7A /* CustomCommand.h */,
-				0441A3F91BD8981400AABD7A /* CustomCommand.m */,
-				0441A3FA1BD8981400AABD7A /* CustomCommandManager.h */,
-				0441A3FB1BD8981400AABD7A /* CustomCommandManager.m */,
-			);
-			path = CustomCommand;
 			sourceTree = "<group>";
 		};
 		046A35B51BD783CE004E0946 /* WindowController */ = {
@@ -943,17 +906,6 @@
 			path = Preferences;
 			sourceTree = "<group>";
 		};
-		04C601A41BE3B0A4002389AB /* Bookmark */ = {
-			isa = PBXGroup;
-			children = (
-				04C601A51BE3B0A4002389AB /* Bookmark.h */,
-				04C601A61BE3B0A4002389AB /* Bookmark.m */,
-				04C601A71BE3B0A4002389AB /* BookmarkManager.h */,
-				04C601A81BE3B0A4002389AB /* BookmarkManager.m */,
-			);
-			path = Bookmark;
-			sourceTree = "<group>";
-		};
 		04C601AF1BE3B0FA002389AB /* Virtualbox */ = {
 			isa = PBXGroup;
 			children = (
@@ -1024,6 +976,7 @@
 		3A1EA7B4E3AB3B354460F41A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				041023EC1BE434290083D62E /* AppKit.framework */,
 				0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */,
 				0441A4161BD8BF3E00AABD7A /* CoreServices.framework */,
 				0441A4131BD8BEAA00AABD7A /* SystemConfiguration.framework */,
@@ -1310,10 +1263,8 @@
 				046A361A1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				046A368A1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */,
-				04C601A91BE3B0A4002389AB /* Bookmark.m in Sources */,
 				04C09D611BE35EDF009E074D /* PCPrefWC.m in Sources */,
 				04F7056C1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
-				0441A3FC1BD8981400AABD7A /* CustomCommand.m in Sources */,
 				0441A3F41BD892A400AABD7A /* VersionComparison.m in Sources */,
 				04C601A11BE3B040002389AB /* VirtualMachineInfo.m in Sources */,
 				046A36721BD793BB004E0946 /* PCSetup4VC.m in Sources */,
@@ -1332,7 +1283,6 @@
 				0441A3E91BD8904100AABD7A /* NativeMenuItem.m in Sources */,
 				046A360B1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
 				046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
-				04C601AC1BE3B0A4002389AB /* BookmarkManager.m in Sources */,
 				046A36601BD793BB004E0946 /* PCSetup2RPVC.m in Sources */,
 				04C6019E1BE3B040002389AB /* VagrantMachine.m in Sources */,
 				046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
@@ -1340,13 +1290,11 @@
 				046A36081BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */,
 				0422D4E01BDA04A500C5CB33 /* TaskOutputVC.m in Sources */,
 				04F705761BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
-				0441A3FF1BD8981400AABD7A /* CustomCommandManager.m in Sources */,
 				046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				04C601981BE3B040002389AB /* VagrantInstance.m in Sources */,
 				046F95FE1BDDA275006AA8EE /* DPSetupWindow.m in Sources */,
 				046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
 				046F96041BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
-				04C601951BE3B040002389AB /* VagrantGlobalStatusScanner.m in Sources */,
 				046A366C1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
 				04C601B41BE3B0FA002389AB /* VirtualBoxMachineInfo.m in Sources */,
 				04D407391BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
@@ -1369,7 +1317,6 @@
 				046F95FF1BDDA275006AA8EE /* DPSetupWindow.m in Sources */,
 				046A36241BD78AB8004E0946 /* timeutil.m in Sources */,
 				046A360C1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
-				0441A3FD1BD8981400AABD7A /* CustomCommand.m in Sources */,
 				04C601B81BE3B0FA002389AB /* VirtualBoxServiceProvider.m in Sources */,
 				04C601A21BE3B040002389AB /* VirtualMachineInfo.m in Sources */,
 				04C601991BE3B040002389AB /* VagrantInstance.m in Sources */,
@@ -1381,7 +1328,6 @@
 				041C46AF1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
 				046A361B1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				0486781D1BCF5FE20071594B /* managerTests.m in Sources */,
-				04C601961BE3B040002389AB /* VagrantGlobalStatusScanner.m in Sources */,
 				046A366D1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
 				046A36091BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */,
 				0441A3EA1BD8904100AABD7A /* NativeMenuItem.m in Sources */,
@@ -1406,12 +1352,9 @@
 				046A361E1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				041C46AC1BE3674C000D1521 /* SSSelectableToolbar.m in Sources */,
 				04C09D621BE35EDF009E074D /* PCPrefWC.m in Sources */,
-				04C601AD1BE3B0A4002389AB /* BookmarkManager.m in Sources */,
-				0441A4001BD8981400AABD7A /* CustomCommandManager.m in Sources */,
 				046F96051BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
 				046A35B91BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				046A36611BD793BB004E0946 /* PCSetup2RPVC.m in Sources */,
-				04C601AA1BE3B0A4002389AB /* Bookmark.m in Sources */,
 				046A360F1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
 				046F960A1BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				04C601B51BE3B0FA002389AB /* VirtualBoxMachineInfo.m in Sources */,
@@ -1429,7 +1372,6 @@
 				046F96001BDDA275006AA8EE /* DPSetupWindow.m in Sources */,
 				046A36251BD78AB8004E0946 /* timeutil.m in Sources */,
 				046A360D1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
-				0441A3FE1BD8981400AABD7A /* CustomCommand.m in Sources */,
 				04C601B91BE3B0FA002389AB /* VirtualBoxServiceProvider.m in Sources */,
 				04C601A31BE3B040002389AB /* VirtualMachineInfo.m in Sources */,
 				04C6019A1BE3B040002389AB /* VagrantInstance.m in Sources */,
@@ -1441,7 +1383,6 @@
 				041C46B01BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
 				046A361C1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				048678281BCF5FE20071594B /* managerUITests.m in Sources */,
-				04C601971BE3B040002389AB /* VagrantGlobalStatusScanner.m in Sources */,
 				046A366E1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
 				046A360A1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */,
 				0441A3EB1BD8904100AABD7A /* NativeMenuItem.m in Sources */,
@@ -1466,12 +1407,9 @@
 				046A361F1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				041C46AD1BE3674C000D1521 /* SSSelectableToolbar.m in Sources */,
 				04C09D631BE35EDF009E074D /* PCPrefWC.m in Sources */,
-				04C601AE1BE3B0A4002389AB /* BookmarkManager.m in Sources */,
-				0441A4011BD8981400AABD7A /* CustomCommandManager.m in Sources */,
 				046F96061BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
 				046A35BA1BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				046A36621BD793BB004E0946 /* PCSetup2RPVC.m in Sources */,
-				04C601AB1BE3B0A4002389AB /* Bookmark.m in Sources */,
 				046A36101BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
 				046F960B1BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				04C601B61BE3B0FA002389AB /* VirtualBoxMachineInfo.m in Sources */,
