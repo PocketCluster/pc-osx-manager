@@ -5,9 +5,11 @@
 //  Copyright (c) 2014 Lanayo. All rights reserved.
 //
 
-#import "VagrantManager.h"
 #import "VagrantGlobalStatusScanner.h"
 #import "Util.h"
+
+#import "SynthesizeSingleton.h"
+#import "VagrantManager.h"
 
 @implementation VagrantManager {
     //all known vagrant instances
@@ -16,17 +18,7 @@
     //map provider identifiers to providers
     NSMutableDictionary *_providers;
 }
-
-+ (VagrantManager*)sharedManager {
-    static VagrantManager *manager;
-    @synchronized(self) {
-        if(manager == nil) {
-            manager = [[VagrantManager alloc] init];
-        }
-    }
-    
-    return manager;
-}
+SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(VagrantManager, sharedManager);
 
 - (id)init {
     self = [super init];

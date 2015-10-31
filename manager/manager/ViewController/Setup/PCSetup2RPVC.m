@@ -15,8 +15,8 @@
 #import "Util.h"
 #import "PCTask.h"
 #import "NullStringChecker.h"
+#import "RaspberryManager.h"
 #import <SystemConfiguration/SCNetworkConfiguration.h>
-
 
 #define MAX_SUPPORTED_NODE (6)
 
@@ -96,7 +96,7 @@ withFilterContext:(id)filterContext
     
     BOOL doesNodeExist = false;
     for (NSDictionary *node in self.nodeList){
-        if([[node valueForKey:@"pc_sl_ma"] isEqualToString:[m valueForKey:@"pc_sl_ma"]]){
+        if([[node valueForKey:SLAVE_NODE_MACADDR] isEqualToString:[m valueForKey:SLAVE_NODE_MACADDR]]){
             doesNodeExist = true;
             break;
         }
@@ -111,20 +111,20 @@ withFilterContext:(id)filterContext
         
         NSMutableDictionary* n = [NSMutableDictionary dictionaryWithDictionary:m];
         [n setValuesForKeysWithDictionary:
-         @{@"pc_ma_ct":@"ct_fix_bound",
-           @"pc_ma_hn":hn,
-           @"pc_ma_ba":sn,
-           @"pc_ma_i4":ha,
-           @"pc_ma_i6":@""}];
-
+         @{MASTER_COMMAND_TYPE:@"ct_fix_bound",
+           MASTER_HOSTNAME:hn,
+           MASTER_BOUND_AGENT:sn,
+           MASTER_IP4_ADDRESS:ha,
+           MASTER_IP6_ADDRESS:@""}];
+        
         [self.nodeList addObject:n];
         [self.nodeList sortUsingComparator:^NSComparisonResult(NSDictionary*  _Nonnull node1, NSDictionary* _Nonnull node2) {
-            return [[node1 valueForKey:@"address"] compare:[node2 valueForKey:@"address"] options:NSNumericSearch];
+            return [[node1 valueForKey:ADDRESS] compare:[node2 valueForKey:ADDRESS] options:NSNumericSearch];
         }];
         
         for (int i = 0; i < [self.nodeList count]; i++){
             NSMutableDictionary *nd = [self.nodeList objectAtIndex:i];
-            [nd setValue:[NSString stringWithFormat:@"pc-node%d",(i + 1)] forKey:@"pc_sl_nm"];
+            [nd setValue:[NSString stringWithFormat:@"pc-node%d",(i + 1)] forKey:SLAVE_NODE_NAME];
         }
         
         [self.nodeTable reloadData];

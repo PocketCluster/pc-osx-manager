@@ -20,6 +20,7 @@
 #import "VirtualBoxServiceProvider.h"
 #import "VagrantManager.h"
 #import "VagrantInstance.h"
+#import "RaspberryManager.h"
 
 #import "TaskOutputWindow.h"
 #import "PCPrefWC.h"
@@ -30,7 +31,8 @@
 - (void)updateRunningVmCount;
 - (void)updateInstancesCount;
 
-@property (nonatomic, strong) VagrantManager *manager;
+@property (nonatomic, strong) VagrantManager *vagManager;
+@property (nonatomic, strong) RaspberryManager *rpiManager;
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
 @property (nonatomic, strong) NSMutableArray *openWindows;
 
@@ -54,9 +56,12 @@
     self.openWindows = [[NSMutableArray alloc] init];
     
     //create vagrant manager
-    self.manager = [VagrantManager sharedManager];
-    self.manager.delegate = self;
-    [_manager registerServiceProvider:[[VirtualBoxServiceProvider alloc] init]];
+    self.vagManager = [VagrantManager sharedManager];
+    self.vagManager.delegate = self;
+    [_vagManager registerServiceProvider:[[VirtualBoxServiceProvider alloc] init]];
+    
+    // create raspberry manager
+    self.rpiManager = [RaspberryManager sharedManager];
 
     //create popup and status menu item
     self.nativeMenu = [[NativeMenu alloc] init];
@@ -114,13 +119,13 @@
 {
     // START udp echo server
     NSError *error = nil;
-    if (![self.multSocket bindToPort:10060 error:&error])
+    if (![self.multSocket bindToPort:PAGENT_SEND_PORT error:&error])
     {
         Log(@"Error starting server (bind): %@", error);
         return;
     }
 
-    [self.multSocket joinMulticastGroup:@"239.193.127.127" error:&error];
+    [self.multSocket joinMulticastGroup:POCKETCAST_GROUP error:&error];
     
     if (![self.multSocket beginReceiving:&error])
     {
@@ -138,8 +143,8 @@
 {
     [self.multSocket
      sendData:aData 
-     toHost:@"239.193.127.127"
-     port:10061
+     toHost:POCKETCAST_GROUP
+     port:PAGENT_RECV_PORT
      withTimeout:-1
      tag:0];
 }
@@ -308,14 +313,14 @@
     [[NSNotificationCenter defaultCenter]
      postNotificationName:@"vagrant-manager.update-running-vm-count"
      object:nil
-     userInfo:@{@"count": [NSNumber numberWithInt:[_manager getRunningVmCount]]}];
+     userInfo:@{@"count": [NSNumber numberWithInt:[_vagManager getRunningVmCount]]}];
 }
 
 - (void)updateInstancesCount {
     [[NSNotificationCenter defaultCenter]
      postNotificationName:@"vagrant-manager.update-instances-count"
      object:nil
-     userInfo:@{@"count": [NSNumber numberWithInteger:[[_manager getInstances] count]]}];
+     userInfo:@{@"count": [NSNumber numberWithInteger:[[_vagManager getInstances] count]]}];
 }
 
 - (void)refreshVagrantMachines {
@@ -329,7 +334,7 @@
         [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.refreshing-started" object:nil];
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             //tell manager to refresh all instances
-            [belf.manager refreshInstances];
+            [belf.vagManager refreshInstances];
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 //tell popup controller refreshing has ended

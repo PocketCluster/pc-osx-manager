@@ -326,6 +326,8 @@
 }
 
 -(void)updateInstancesCount:(NSNotification*)notification {
+    return;
+    
     int count = [[notification.userInfo objectForKey:@"count"] intValue];
     if (count) {
         [_newClusterMenuItem setHidden:YES];
