@@ -61,6 +61,7 @@
     [_vagManager registerServiceProvider:[[VirtualBoxServiceProvider alloc] init]];
     
     // create raspberry manager
+    [[RaspberryManager sharedManager] loadRaspberries];
     self.rpiManager = [RaspberryManager sharedManager];
 
     //create popup and status menu item
@@ -93,7 +94,6 @@
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
-    
 
     [self stopMulticastSocket];
     [self stopSalt];

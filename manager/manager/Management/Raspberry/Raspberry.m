@@ -49,6 +49,21 @@ const NSUInteger PAGENT_RECV_PORT    = 10061;
 
 @implementation Raspberry
 
+- (instancetype)initWithDictionary:(NSDictionary *)aDict {
+    
+    self = [super init];
+    if(self){
+        
+        self.masterBoundAgent   = [aDict objectForKey:MASTER_BOUND_AGENT];
+        self.slaveNodeName      = [aDict objectForKey:SLAVE_NODE_NAME];
+        self.slaveNodeMacAddr   = [aDict objectForKey:SLAVE_NODE_MACADDR];
+        self.address            = [aDict objectForKey:ADDRESS];
+        
+    }
+    
+    return self;
+}
+
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
 
     self = [super init];
@@ -56,10 +71,10 @@ const NSUInteger PAGENT_RECV_PORT    = 10061;
     if (self){
         
         __attribute__((unused)) NSString *pcVer = [aDecoder decodeObjectForKey:PC_PROTO];
-        self.masterBoundAgent = [aDecoder decodeObjectForKey:MASTER_BOUND_AGENT];
-        self.slaveNodeName = [aDecoder decodeObjectForKey:SLAVE_NODE_NAME];
-        self.slaveNodeMacAddr = [aDecoder decodeObjectForKey:SLAVE_NODE_MACADDR];
-        self.address = [aDecoder decodeObjectForKey:ADDRESS];
+        self.masterBoundAgent   = [aDecoder decodeObjectForKey:MASTER_BOUND_AGENT];
+        self.slaveNodeName      = [aDecoder decodeObjectForKey:SLAVE_NODE_NAME];
+        self.slaveNodeMacAddr   = [aDecoder decodeObjectForKey:SLAVE_NODE_MACADDR];
+        self.address            = [aDecoder decodeObjectForKey:ADDRESS];
 
     }
     
@@ -89,7 +104,10 @@ const NSUInteger PAGENT_RECV_PORT    = 10061;
     return rpi;
 }
 
-
+-(NSString *)description {
+    NSString *sd = [super description];
+    return [NSString stringWithFormat:@"%@ - %@ (%@) <%@> <- %@",sd, self.slaveNodeName, self.slaveNodeMacAddr, self.address, self.masterBoundAgent];
+}
 
 
 @end

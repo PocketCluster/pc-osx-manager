@@ -36,7 +36,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 - (void)loadRaspberries {
     @synchronized(_raspberries) {
         [_raspberries removeAllObjects];
-        id data = [[NSUserDefaults standardUserDefaults] arrayForKey:kRaspberryCollection];
+        id data = [[NSUserDefaults standardUserDefaults] dataForKey:kRaspberryCollection];
         if(data) {
             NSArray *saved = (NSArray *)[NSKeyedUnarchiver unarchiveObjectWithData:data];
             [_raspberries addObjectsFromArray:saved];

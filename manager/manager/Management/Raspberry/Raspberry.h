@@ -48,6 +48,8 @@ extern const NSUInteger PAGENT_RECV_PORT;
 
 @interface Raspberry : NSObject <NSCoding, NSCopying>
 
+-(instancetype)initWithDictionary:(NSDictionary *)aDict;
+
 @property (strong, nonatomic) NSString *masterBoundAgent;
 @property (strong, nonatomic) NSString *slaveNodeName;
 @property (strong, nonatomic) NSString *slaveNodeMacAddr;

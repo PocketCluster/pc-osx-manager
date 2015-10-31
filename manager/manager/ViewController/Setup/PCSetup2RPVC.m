@@ -239,15 +239,17 @@ withFilterContext:(id)filterContext
     }
 
     // setup only six nodes
-#if 0
+
     // save to local configuration
     for (NSUInteger i = 0; i < nodeCount; ++i){
         NSDictionary *node = [self.nodeList objectAtIndex:i];
-        [[Util getApp] multicastData:[node BSONRepresentation]];
+        [[RaspberryManager sharedManager] addRaspberry:[[Raspberry alloc] initWithDictionary:node]];
+        //[[Util getApp] multicastData:[node BSONRepresentation]];
         sleep(1);
     }
-#endif
 
+    [[RaspberryManager sharedManager] saveRaspberries];
+    
     NSMutableString *nodeip = [NSMutableString new];
     for (NSUInteger i = 0; i < nodeCount; ++i){
         NSDictionary *node = [self.nodeList objectAtIndex:i];
