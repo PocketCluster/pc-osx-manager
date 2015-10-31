@@ -25,7 +25,6 @@
 - (void)removeOpenWindow:(id)window;
 
 - (void)refreshVagrantMachines;
-
 - (void)runVagrantCustomCommand:(NSString*)command withMachine:(VagrantMachine*)machine;
 - (void)runVagrantAction:(NSString*)action withMachine:(VagrantMachine*)machine;
 - (void)runVagrantAction:(NSString*)action withInstance:(VagrantInstance*)instance;

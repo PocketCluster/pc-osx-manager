@@ -29,14 +29,13 @@
     
     NSStatusItem        *_statusItem;
     NSMenu              *_menu;
-    NSMenuItem          *_refreshMenuItem;
+    //NSMenuItem          *_refreshMenuItem;
+    NSMenuItem          *_newClusterMenuItem;
     int                 _refreshIconFrame;
     
     NSMutableArray      *_menuItems;
     
-    NSMenuItem          *_topMachineSeparator;
     NSMenuItem          *_bottomMachineSeparator;
-
     NSMenuItem          *_checkForUpdatesMenuItem;
 }
 
@@ -51,6 +50,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshingStarted:) name:@"vagrant-manager.refreshing-started" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshingEnded:) name:@"vagrant-manager.refreshing-ended" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateRunningVmCount:) name:@"vagrant-manager.update-running-vm-count" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateInstancesCount:) name:@"vagrant-manager.update-instances-count" object:nil];
  
     _statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
     _menu = [[NSMenu alloc] init];
@@ -62,16 +62,9 @@
     _statusItem.highlightMode = YES;
     _statusItem.menu = _menu;
 
-    _refreshMenuItem = [[NSMenuItem alloc] initWithTitle:@"Check Status" action:@selector(refreshMenuItemClicked:) keyEquivalent:@""];
-    _refreshMenuItem.target = self;
-    [_menu addItem:_refreshMenuItem];
-    
-    _topMachineSeparator = [NSMenuItem separatorItem];
-    [_menu addItem:_topMachineSeparator];
-    
-    NSMenuItem *createInstance = [[NSMenuItem alloc] initWithTitle:@"New Cluster" action:@selector(showSetupWindow:) keyEquivalent:@""];
-    createInstance.target = self;
-    [_menu addItem:createInstance];
+    _newClusterMenuItem = [[NSMenuItem alloc] initWithTitle:@"New Cluster" action:@selector(showSetupWindow:) keyEquivalent:@""];
+    _newClusterMenuItem.target = self;
+    [_menu addItem:_newClusterMenuItem];
     
     // instances here
     _bottomMachineSeparator = [NSMenuItem separatorItem];
@@ -173,13 +166,6 @@
     
     _menuItems = [sortedArray mutableCopy];
     
-    if ([_menu.itemArray containsObject:_topMachineSeparator]) {
-        [_menu removeItem:_topMachineSeparator];
-    }
-    
-    if (_menuItems.count > 0) {
-        [_menu insertItem:_topMachineSeparator atIndex:[_menu indexOfItem:_refreshMenuItem]+1];
-    }
 }
 
 - (void)setUpdatesAvailable:(BOOL)updatesAvailable {
@@ -187,8 +173,8 @@
 }
 
 - (void)setIsRefreshing:(BOOL)isRefreshing {
-    [_refreshMenuItem setEnabled:!isRefreshing];
-    _refreshMenuItem.title = isRefreshing ? @"Refreshing..." : @"Refresh";
+    [_newClusterMenuItem setEnabled:!isRefreshing];
+    _newClusterMenuItem.title = isRefreshing ? @"Checking..." : @"New Cluster";
 }
 
 
@@ -334,9 +320,20 @@
     if (count) {
         _statusItem.button.image = [NSImage imageNamed:@"status-on"];
     } else {
-        [_statusItem setTitle:@""];
+//        [_statusItem setTitle:@""];
         _statusItem.button.image = [NSImage imageNamed:@"status-off"];
     }
 }
+
+-(void)updateInstancesCount:(NSNotification*)notification {
+    int count = [[notification.userInfo objectForKey:@"count"] intValue];
+    if (count) {
+        [_newClusterMenuItem setHidden:YES];
+    } else {
+        [_newClusterMenuItem setHidden:NO];
+    }
+}
+
+
 
 @end

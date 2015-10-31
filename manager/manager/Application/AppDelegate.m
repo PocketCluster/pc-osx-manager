@@ -22,13 +22,13 @@
 #import "VagrantInstance.h"
 
 #import "TaskOutputWindow.h"
-
 #import "PCPrefWC.h"
 
 @interface AppDelegate ()<SUUpdaterDelegate, GCDAsyncUdpSocketDelegate, VagrantManagerDelegate, NSUserNotificationCenterDelegate, MenuDelegate>
 - (void)refreshTimerState;
 - (void)updateProcessType;
 - (void)updateRunningVmCount;
+- (void)updateInstancesCount;
 
 @property (nonatomic, strong) VagrantManager *manager;
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
@@ -311,6 +311,13 @@
      userInfo:@{@"count": [NSNumber numberWithInt:[_manager getRunningVmCount]]}];
 }
 
+- (void)updateInstancesCount {
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:@"vagrant-manager.update-instances-count"
+     object:nil
+     userInfo:@{@"count": [NSNumber numberWithInteger:[[_manager getInstances] count]]}];
+}
+
 - (void)refreshVagrantMachines {
     //only run if not already refreshing
     if(!isRefreshingVagrantMachines) {
@@ -328,6 +335,7 @@
                 //tell popup controller refreshing has ended
                 isRefreshingVagrantMachines = NO;
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.refreshing-ended" object:nil];
+                [belf updateInstancesCount];
                 [belf updateRunningVmCount];
                 
                 if(queuedRefreshes > 0) {

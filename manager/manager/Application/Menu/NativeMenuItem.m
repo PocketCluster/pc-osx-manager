@@ -13,7 +13,7 @@
 @implementation NativeMenuItem {
 
     NSMenuItem *_instanceUpMenuItem;
-    NSMenuItem *_instanceSuspendMenuItem;
+//    NSMenuItem *_instanceSuspendMenuItem;
     NSMenuItem *_instanceHaltMenuItem;
     NSMenuItem *_sshMenuItem;
 
@@ -44,13 +44,13 @@
         }
         
         if(!_instanceUpMenuItem) {
-            _instanceUpMenuItem = [[NSMenuItem alloc] initWithTitle:self.instance.machines.count > 1 ? @"Up All" : @"Up" action:@selector(upAllMachines:) keyEquivalent:@""];
+            _instanceUpMenuItem = [[NSMenuItem alloc] initWithTitle:self.instance.machines.count > 1 ? @"Start Cluster" : @"Up" action:@selector(upAllMachines:) keyEquivalent:@""];
             _instanceUpMenuItem.target = self;
             _instanceUpMenuItem.image = [NSImage imageNamed:@"up"];
             [_instanceUpMenuItem.image setTemplate:YES];
             [self.menuItem.submenu addItem:_instanceUpMenuItem];
         }
-        
+/*
         if(!_instanceSuspendMenuItem) {
             _instanceSuspendMenuItem = [[NSMenuItem alloc] initWithTitle:self.instance.machines.count > 1 ? @"Suspend All" : @"Suspend" action:@selector(suspendAllMachines:) keyEquivalent:@""];
             _instanceSuspendMenuItem.target = self;
@@ -58,9 +58,9 @@
             [_instanceSuspendMenuItem.image setTemplate:YES];
             [self.menuItem.submenu addItem:_instanceSuspendMenuItem];
         }
-        
+*/
         if(!_instanceHaltMenuItem) {
-            _instanceHaltMenuItem = [[NSMenuItem alloc] initWithTitle:self.instance.machines.count > 1 ? @"Halt All" : @"Halt" action:@selector(haltAllMachines:) keyEquivalent:@""];
+            _instanceHaltMenuItem = [[NSMenuItem alloc] initWithTitle:self.instance.machines.count > 1 ? @"Stop Cluster" : @"Halt" action:@selector(haltAllMachines:) keyEquivalent:@""];
             _instanceHaltMenuItem.target = self;
             _instanceHaltMenuItem.image = [NSImage imageNamed:@"halt"];
             [_instanceHaltMenuItem.image setTemplate:YES];
@@ -88,14 +88,14 @@
             
             if([self.instance getRunningMachineCount] < self.instance.machines.count) {
                 [_instanceUpMenuItem setHidden:NO];
-                [_instanceSuspendMenuItem setHidden:YES];
+//                [_instanceSuspendMenuItem setHidden:YES];
                 [_instanceHaltMenuItem setHidden:YES];
                 [_sshMenuItem setHidden:YES];
             }
             
             if([self.instance getRunningMachineCount] > 0) {
                 [_instanceUpMenuItem setHidden:YES];
-                [_instanceSuspendMenuItem setHidden:NO];
+//                [_instanceSuspendMenuItem setHidden:NO];
                 [_instanceHaltMenuItem setHidden:NO];
                 [_sshMenuItem setHidden:NO];
             }

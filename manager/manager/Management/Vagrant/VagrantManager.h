@@ -26,6 +26,7 @@
 - (void)registerServiceProvider:(id<VirtualMachineServiceProvider>)provider;
 - (void)refreshInstances;
 - (VagrantInstance*)getInstanceForPath:(NSString*)path;
+- (NSArray*)getInstances;
 - (int)getRunningVmCount;
 - (NSString*)detectVagrantProvider:(NSString*)path;
 - (NSArray*)getProviderIdentifiers;
