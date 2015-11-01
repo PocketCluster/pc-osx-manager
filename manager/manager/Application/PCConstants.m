@@ -83,7 +83,7 @@ NSString * const kRASPBERRY_MANAGER_NODE                             = @"raspber
 NSString * const kRASPBERRY_MANAGER_NOTIFICATION_PREFERENCE_CHANGED  = @"raspberry-manager.notification-preference-changed";
 NSString * const kRASPBERRY_MANAGER_REFRESHING_STARTED               = @"raspberry-manager.refreshing-started";
 NSString * const kRASPBERRY_MANAGER_REFRESHING_ENDED                 = @"raspberry-manager.refreshing-ended";
-NSString * const kRASPBERRY_MANAGER_UPDATE_RUNNING_NODE_COUNT        = @"raspberry-manager.update-running-node-count";
+NSString * const kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT           = @"raspberry-manager.update-running-node-count";
 NSString * const kRASPBERRY_MANAGER_UPDATE_NODE_COUNT                = @"raspberry-manager.update-node-count";
 // at least one node is up
 NSString * const kRASPBERRY_MANAGER_NODE_UP                          = @"raspberry-manager.node-up";

@@ -51,18 +51,6 @@
     
     self.openWindows = [[NSMutableArray alloc] init];
     
-    //create vagrant manager
-    self.vagManager = [VagrantManager sharedManager];
-    self.vagManager.delegate = self;
-    [_vagManager registerServiceProvider:[[VirtualBoxServiceProvider alloc] init]];
-    
-    // create raspberry manager
-    [[RaspberryManager sharedManager] loadRaspberries];
-    self.rpiManager = [RaspberryManager sharedManager];
-    
-
-    Log(@"live rpi count %ld", [self.rpiManager liveRaspberryCount]);
-
     //create popup and status menu item
     self.nativeMenu = [[NativeMenu alloc] init];
     self.nativeMenu.delegate = self;
@@ -78,12 +66,35 @@
     [[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
     [[SUUpdater sharedUpdater] checkForUpdateInformation];
     
-    //start initial vagrant machine detection
-    [self refreshVagrantMachines];
     
-    //start refresh timer if activated in preferences
-    [self refreshTimerState];
+    // raspberry cluster is built and running
+    if (true){
+        [self.nativeMenu raspberryRegisterNotifications];
+        
+        // create raspberry manager
+        self.rpiManager = [RaspberryManager sharedManager];
 
+        [self.rpiManager loadRaspberries];
+        
+        [self.rpiManager refreshRaspberryNodes];
+        
+        [self.rpiManager refreshTimerState];
+
+    // vagrant node is built
+    }else if(false){
+        [self.nativeMenu vagrantRegisterNotifications];
+        
+        //create vagrant manager
+        self.vagManager = [VagrantManager sharedManager];
+        self.vagManager.delegate = self;
+        [_vagManager registerServiceProvider:[[VirtualBoxServiceProvider alloc] init]];
+
+        //start initial vagrant machine detection
+        [self refreshVagrantMachines];
+        
+        //start refresh timer if activated in preferences
+        [self refreshTimerState];
+    }
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -171,14 +182,14 @@
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kVAGRANT_MANAGER_UPDATE_RUNNING_VM_COUNT
      object:nil
-     userInfo:@{@"count": [NSNumber numberWithInt:[_vagManager getRunningVmCount]]}];
+     userInfo:@{@"count": [NSNumber numberWithUnsignedInteger:[_vagManager getRunningVmCount]]}];
 }
 
 - (void)updateInstancesCount {
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kVAGRANT_MANAGER_UPDATE_INSTANCES_COUNT
      object:nil
-     userInfo:@{@"count": [NSNumber numberWithInteger:[[_vagManager getInstances] count]]}];
+     userInfo:@{@"count": [NSNumber numberWithUnsignedInteger:[[_vagManager getInstances] count]]}];
 }
 
 - (void)refreshVagrantMachines {

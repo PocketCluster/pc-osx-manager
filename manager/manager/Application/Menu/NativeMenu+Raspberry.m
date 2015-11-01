@@ -29,11 +29,8 @@
 @implementation NativeMenu(Raspberry)
 
 #pragma mark - Notification Handlers
--(void)raspberryNodeUp:(NSNotification *)aNotification {
-}
-
--(void)raspberryNodeDown:(NSNotification *)aNotification {
-}
+-(void)raspberryNodeUp:(NSNotification *)aNotification {}
+-(void)raspberryNodeDown:(NSNotification *)aNotification {}
 
 -(void)raspberryNodeAdded:(NSNotification *)aNotification {
     RaspberryMenuItem *item = [[RaspberryMenuItem alloc] init];
@@ -59,8 +56,10 @@
 -(void)raspberryRefreshingEnded:(NSNotification *)aNotification {}
 
 -(void)raspberryUpdateRunningNodeCount:(NSNotification *)aNotification {
-    int count = [[aNotification.userInfo objectForKey:@"count"] intValue];
+    NSUInteger count = [[aNotification.userInfo objectForKey:@"count"] unsignedIntegerValue];
 
+    Log(@"live node count %ld", count);
+    
     if (count) {
         _statusItem.button.image = [NSImage imageNamed:@"status-on"];
     } else {
@@ -70,9 +69,12 @@
 }
 
 -(void)raspberryUpdateNodeCount:(NSNotification *)aNotification {
+    NSUInteger count = [[aNotification.userInfo objectForKey:@"count"] unsignedIntegerValue];
+    
+    Log(@"node count %ld", count);
+    
     return;
-
-    int count = [[aNotification.userInfo objectForKey:@"count"] intValue];
+    
     if (count) {
         [_clusterSetupMenuItem setHidden:YES];
     } else {
@@ -119,17 +121,14 @@
 
 #pragma mark - RaspberryMenuItemDelegate
 -(void)raspberryMenuItemShutdownAll:(RaspberryMenuItem *)aMenuItem {
-    
 }
 
 -(void)raspberryMenuItemSSHNode:(RaspberryMenuItem *)aMenuItem {
-    
 }
 
 #pragma mark - MISC
 - (RaspberryMenuItem *)menuItemForNode:(Raspberry *)aNode {
     for (RaspberryMenuItem *rpiMenuItem in _menuItems) {
-        
         if(![rpiMenuItem isKindOfClass:[RaspberryMenuItem class]]){
             continue;
         }
@@ -138,11 +137,8 @@
             return rpiMenuItem;
         }
     }
-    
     return nil;
 }
-
-
 
 -(void)raspberryRegisterNotifications {
     
@@ -153,7 +149,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryNodeUpdated:)            name:kRASPBERRY_MANAGER_NODE_UPDATED                object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryRefreshingStarted:)      name:kRASPBERRY_MANAGER_REFRESHING_STARTED          object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryRefreshingEnded:)        name:kRASPBERRY_MANAGER_REFRESHING_ENDED            object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryUpdateRunningNodeCount:) name:kRASPBERRY_MANAGER_UPDATE_RUNNING_NODE_COUNT   object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryUpdateRunningNodeCount:) name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT      object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryUpdateNodeCount:)        name:kRASPBERRY_MANAGER_UPDATE_NODE_COUNT           object:nil];
     
 }

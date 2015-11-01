@@ -16,13 +16,14 @@
 - (void)saveRaspberries;
 - (void)clearRaspberries;
 
+- (void)refreshRaspberryNodes;
+- (void)refreshTimerState;
+
 - (NSUInteger)liveRaspberryCount;
 - (NSUInteger)raspberryCount;
 
 - (NSMutableArray<Raspberry *> *)getRaspberries;
 - (Raspberry *) addRaspberry:(Raspberry *)aRaspberry;
-
-
 
 - (void)addMultDelegateToQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
 - (void)removeMultDelegateFromQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;

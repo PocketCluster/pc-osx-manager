@@ -17,19 +17,27 @@
 @property (nonatomic, strong) GCDAsyncUdpSocket *multSocket;
 @property (nonatomic, strong) NSMutableArray<GCDAsyncUdpSocketDelegate> *multSockDelegates;
 @property (nonatomic, strong) NSString *deviceSerial;
+@property (strong, nonatomic) NSTimer *refreshTimer;
+
+- (void)updateliveRaspberryCount;
+- (void)updateRaspberryCount;
 
 - (void)removeRaspberryWithName:(NSString*)aName;
 - (Raspberry*)getRaspberryWithName:(NSString*)aName;
 - (int)getIndexOfRaspberryWithName:(NSString*)aName;
 @end
 
-@implementation RaspberryManager
+@implementation RaspberryManager {
+    BOOL isRefreshingRaspberryNodes;
+    int queuedRefreshes;
+}
 SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 
 - (id)init {
     self = [super init];
     
     if(self) {
+        isRefreshingRaspberryNodes = NO;
         self.raspberries = [[NSMutableArray alloc] init];
         self.multSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
         [self.multSocket setIPv6Enabled:NO];
@@ -71,6 +79,64 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
         [_raspberries removeAllObjects];
     }
 }
+
+
+#pragma mark - Monitoring
+- (void)updateliveRaspberryCount {
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT
+     object:nil
+     userInfo:@{@"count": [NSNumber numberWithUnsignedInteger:[self liveRaspberryCount]]}];
+}
+
+- (void)updateRaspberryCount {
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kRASPBERRY_MANAGER_UPDATE_NODE_COUNT
+     object:nil
+     userInfo:@{@"count": [NSNumber numberWithUnsignedInteger:[self raspberryCount]]}];
+}
+
+- (void)refreshRaspberryNodes {
+    //only run if not already refreshing
+    if(!isRefreshingRaspberryNodes) {
+        isRefreshingRaspberryNodes = YES;
+        
+        //tell popup controller refreshing has started
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:kRASPBERRY_MANAGER_REFRESHING_STARTED
+         object:nil];
+
+        WEAK_SELF(self);
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            //tell popup controller refreshing has ended
+            isRefreshingRaspberryNodes = NO;
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:kRASPBERRY_MANAGER_REFRESHING_ENDED
+             object:nil];
+            [belf updateRaspberryCount];
+            [belf updateliveRaspberryCount];
+        });
+
+    }
+}
+
+- (void)refreshTimerState {
+    if (self.refreshTimer) {
+        [self.refreshTimer invalidate];
+        self.refreshTimer = nil;
+    }
+    
+    self.refreshTimer =
+    [NSTimer
+     scheduledTimerWithTimeInterval:HEARTBEAT_CHECK_INTERVAL
+     target:self
+     selector:@selector(refreshRaspberryNodes)
+     userInfo:nil
+     repeats:YES];
+}
+
+#pragma mark - MANAGING RAPSBERRY NODES
 
 - (Raspberry*)addRaspberry:(Raspberry*)aRaspberry {
     Raspberry *existing = [self getRaspberryWithName:aRaspberry.slaveNodeName];
