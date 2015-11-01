@@ -6,10 +6,9 @@
 //
 
 #import "Raspberry.h"
+#import "GCDAsyncUdpSocket.h"
 
-@interface RaspberryManager : NSObject {
-    NSMutableArray *_raspberries;
-}
+@interface RaspberryManager : NSObject <GCDAsyncUdpSocketDelegate>
 
 + (RaspberryManager *)sharedManager;
 
@@ -17,8 +16,18 @@
 - (void)saveRaspberries;
 - (void)clearRaspberries;
 
+- (NSUInteger)liveRaspberryCount;
+- (NSUInteger)raspberryCount;
+
 - (NSMutableArray<Raspberry *> *)getRaspberries;
 - (Raspberry *) addRaspberry:(Raspberry *)aRaspberry;
 
+
+
+- (void)addMultDelegateToQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
+- (void)removeMultDelegateFromQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
+- (void)startMulticastSocket;
+- (void)stopMulticastSocket;
+- (void)multicastData:(NSData *)aData;
 
 @end

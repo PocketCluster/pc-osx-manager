@@ -6,17 +6,10 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-@protocol GCDAsyncUdpSocketDelegate;
 @class VagrantMachine;
 @class VagrantInstance;
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
-
-- (void)addMultDelegateToQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
-- (void)removeMultDelegateFromQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
-- (void)startMulticastSocket;
-- (void)stopMulticastSocket;
-- (void)multicastData:(NSData *)aData;
 
 - (void)startSalt;
 - (void)stopSalt;

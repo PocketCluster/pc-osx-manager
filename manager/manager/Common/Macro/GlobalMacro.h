@@ -27,8 +27,7 @@
 
 #define ASSURE_DEALLOC(__POINTER) { __POINTER = nil; }
 
-#define CHECK_DELEGATE_EXECUTION(__POINTER,__SELECTOR) \
-	((__POINTER != nil) && [__POINTER respondsToSelector:__SELECTOR])
-
+#define CHECK_DELEGATE_EXECUTION(__POINTER,__PROTOCOL,__SELECTOR) \
+    ((__POINTER != nil) && [__POINTER conformsToProtocol:__PROTOCOL] && [__POINTER respondsToSelector:__SELECTOR])
 
 #define CHECK_FUNCTION_EXEC() Log(@"%s",__PRETTY_FUNCTION__)

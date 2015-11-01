@@ -8,9 +8,9 @@
 
 #import "PCSetup2RPVC.h"
 
+#import "RaspberryManager.h"
 #import "PCInterfaceList.h"
 #import "DeviceSerialNumber.h"
-#import "GCDAsyncUdpSocket.h"
 #import "BSONSerialization.h"
 #import "Util.h"
 #import "PCTask.h"
@@ -39,7 +39,7 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     
     if(self){
-        [[Util getApp] addMultDelegateToQueue:self];
+        [[RaspberryManager sharedManager] addMultDelegateToQueue:self];
         self.nodeList = [NSMutableArray arrayWithCapacity:0];
         
         self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Base config done...",@10.0]
@@ -64,7 +64,7 @@
 }
 
 -(void)dealloc {
-    [[Util getApp] removeMultDelegateFromQueue:self];
+    [[RaspberryManager sharedManager] removeMultDelegateFromQueue:self];
 }
 
 

@@ -76,8 +76,7 @@
     
     [setupFlow resetToZeroStage];
     [setupFlow makeKeyAndOrderFront:self];
-    
-    [[Util getApp] startMulticastSocket];
+
 }
 
 @end

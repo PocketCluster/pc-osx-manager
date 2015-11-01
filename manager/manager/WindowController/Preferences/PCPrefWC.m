@@ -7,8 +7,7 @@
 //
 
 #import "PCPrefWC.h"
-
-NSString * const kPCPrefDefaultTerm  = @"default_terminal";
+#import "PCConstants.h"
 
 @interface PCPrefWC()
 - (void)setLaunchOnLogin:(BOOL)launchOnLogin;

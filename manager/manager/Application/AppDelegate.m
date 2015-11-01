@@ -14,7 +14,7 @@
 #import "VersionComparison.h"
 #import "NativeMenu.h"
 
-#import "GCDAsyncUdpSocket.h"
+
 #import "PCTask.h"
 
 #import "VirtualBoxServiceProvider.h"
@@ -25,7 +25,7 @@
 #import "TaskOutputWindow.h"
 #import "PCPrefWC.h"
 
-@interface AppDelegate ()<SUUpdaterDelegate, GCDAsyncUdpSocketDelegate, VagrantManagerDelegate, NSUserNotificationCenterDelegate, MenuDelegate>
+@interface AppDelegate ()<SUUpdaterDelegate, VagrantManagerDelegate, NSUserNotificationCenterDelegate, MenuDelegate>
 - (void)refreshTimerState;
 - (void)updateProcessType;
 - (void)updateRunningVmCount;
@@ -38,12 +38,9 @@
 
 @property (strong, nonatomic) NSTimer *refreshTimer;
 
-
 @property (nonatomic, strong) PCTask *saltMinion;
 @property (nonatomic, strong) PCTask *saltMaster;
 
-@property (nonatomic, strong) GCDAsyncUdpSocket *multSocket;
-@property (nonatomic, strong) NSMutableArray<GCDAsyncUdpSocketDelegate> *multSockDelegates;
 @end
 
 @implementation AppDelegate {
@@ -78,11 +75,6 @@
     [[SUUpdater sharedUpdater] setDelegate:self];
     [[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
     [[SUUpdater sharedUpdater] checkForUpdateInformation];
-
-    self.multSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
-    [self.multSocket setIPv6Enabled:NO];
-    
-    self.multSockDelegates = [NSMutableArray<GCDAsyncUdpSocketDelegate> arrayWithCapacity:0];
     
     //start initial vagrant machine detection
     [self refreshVagrantMachines];
@@ -95,147 +87,11 @@
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
 
-    [self stopMulticastSocket];
+    [[RaspberryManager sharedManager] stopMulticastSocket];
     [self stopSalt];
 }
 
 //- (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {[PFAnalytics trackAppOpenedWithRemoteNotificationPayload:userInfo];}
-
-#pragma mark - GCDAsyncUdpSocket MANAGEMENT
-
-- (void)addMultDelegateToQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate {
-    @synchronized(self.multSockDelegates) {
-        [self.multSockDelegates addObject:aDelegate];
-    }
-}
-
-- (void)removeMultDelegateFromQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate {
-    @synchronized(self.multSockDelegates) {
-        [self.multSockDelegates removeObject:aDelegate];
-    }
-}
-
--(void)startMulticastSocket
-{
-    // START udp echo server
-    NSError *error = nil;
-    if (![self.multSocket bindToPort:PAGENT_SEND_PORT error:&error])
-    {
-        Log(@"Error starting server (bind): %@", error);
-        return;
-    }
-
-    [self.multSocket joinMulticastGroup:POCKETCAST_GROUP error:&error];
-    
-    if (![self.multSocket beginReceiving:&error])
-    {
-        [self.multSocket close];
-        return;
-    }
-}
-
-- (void)stopMulticastSocket
-{
-    [self.multSocket closeAfterSending];
-}
-
-- (void)multicastData:(NSData *)aData
-{
-    [self.multSocket
-     sendData:aData 
-     toHost:POCKETCAST_GROUP
-     port:PAGENT_RECV_PORT
-     withTimeout:-1
-     tag:0];
-}
-
-
-#pragma mark - GCDAsyncUdpSocket DELEGATE
-/**
- * By design, UDP is a connectionless protocol, and connecting is not needed.
- * However, you may optionally choose to connect to a particular host for reasons
- * outlined in the documentation for the various connect methods listed above.
- *
- * This method is called if one of the connect methods are invoked, and the connection is successful.
- **/
-- (void)udpSocket:(GCDAsyncUdpSocket *)sock didConnectToAddress:(NSData *)address {
-    @synchronized(self.multSockDelegates) {
-        [self.multSockDelegates enumerateObjectsUsingBlock:^(id<GCDAsyncUdpSocketDelegate> _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if ([obj respondsToSelector:@selector(udpSocket:didConnectToAddress:)]){
-                [obj udpSocket:sock didConnectToAddress:address];
-            }
-        }];
-    }
-}
-
-/**
- * By design, UDP is a connectionless protocol, and connecting is not needed.
- * However, you may optionally choose to connect to a particular host for reasons
- * outlined in the documentation for the various connect methods listed above.
- *
- * This method is called if one of the connect methods are invoked, and the connection fails.
- * This may happen, for example, if a domain name is given for the host and the domain name is unable to be resolved.
- **/
-- (void)udpSocket:(GCDAsyncUdpSocket *)sock didNotConnect:(NSError *)error {
-    @synchronized(self.multSockDelegates) {
-        [self.multSockDelegates enumerateObjectsUsingBlock:^(id<GCDAsyncUdpSocketDelegate> _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [obj udpSocket:sock didNotConnect:error];
-        }];
-    }
-}
-
-/**
- * Called when the datagram with the given tag has been sent.
- **/
-- (void)udpSocket:(GCDAsyncUdpSocket *)sock didSendDataWithTag:(long)tag {
-    @synchronized(self.multSockDelegates) {
-        [self.multSockDelegates enumerateObjectsUsingBlock:^(id<GCDAsyncUdpSocketDelegate> _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if ([obj respondsToSelector:@selector(udpSocket:didSendDataWithTag:)]){
-                [obj udpSocket:sock didSendDataWithTag:tag];
-            }
-        }];
-    }
-}
-
-/**
- * Called if an error occurs while trying to send a datagram.
- * This could be due to a timeout, or something more serious such as the data being too large to fit in a sigle packet.
- **/
-- (void)udpSocket:(GCDAsyncUdpSocket *)sock didNotSendDataWithTag:(long)tag dueToError:(NSError *)error {
-    @synchronized(self.multSockDelegates) {
-        [self.multSockDelegates enumerateObjectsUsingBlock:^(id<GCDAsyncUdpSocketDelegate> _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if ([obj respondsToSelector:@selector(udpSocket:didNotSendDataWithTag:dueToError:)]){
-                [obj udpSocket:sock didNotSendDataWithTag:tag dueToError:error];
-            }
-        }];
-    }
-}
-
-/**
- * Called when the socket has received the requested datagram.
- **/
-- (void)udpSocket:(GCDAsyncUdpSocket *)sock didReceiveData:(NSData *)data fromAddress:(NSData *)address withFilterContext:(id)filterContext {
-    @synchronized(self.multSockDelegates) {
-        [self.multSockDelegates enumerateObjectsUsingBlock:^(id<GCDAsyncUdpSocketDelegate> _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if ([obj respondsToSelector:@selector(udpSocket:didReceiveData:fromAddress:withFilterContext:)]){
-                [obj udpSocket:sock didReceiveData:data fromAddress:address withFilterContext:filterContext];
-            }
-        }];
-    }
-}
-
-/**
- * Called when the socket is closed.
- **/
-- (void)udpSocketDidClose:(GCDAsyncUdpSocket *)sock withError:(NSError *)error {
-    @synchronized(self.multSockDelegates) {
-        [self.multSockDelegates enumerateObjectsUsingBlock:^(id<GCDAsyncUdpSocketDelegate> _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if ([obj respondsToSelector:@selector(udpSocketDidClose:withError:)]){
-                [obj udpSocketDidClose:sock withError:error];
-            }
-        }];
-    }
-}
 
 #pragma mark - SALT MANAGEMENT
 - (void)startSalt {

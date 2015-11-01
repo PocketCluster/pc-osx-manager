@@ -51,7 +51,7 @@
 
 - (void)windowWillClose:(NSNotification *)notification {
     
-    if(CHECK_DELEGATE_EXECUTION(self.actionDelegate, @selector(windowWillClose:))){
+    if(CHECK_DELEGATE_EXECUTION(self.actionDelegate, @protocol(PCWindowDelegate), @selector(windowWillClose:))){
         [self.actionDelegate windowWillClose:notification];
     }
 

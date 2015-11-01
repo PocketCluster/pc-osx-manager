@@ -185,6 +185,10 @@
 		04C09D641BE35EDF009E074D /* PCPrefWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C09D601BE35EDF009E074D /* PCPrefWC.xib */; };
 		04C09D651BE35EDF009E074D /* PCPrefWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C09D601BE35EDF009E074D /* PCPrefWC.xib */; };
 		04C09D661BE35EDF009E074D /* PCPrefWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C09D601BE35EDF009E074D /* PCPrefWC.xib */; };
+		04C585831BE5BCF4004B2839 /* RaspberryMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585821BE5BCF4004B2839 /* RaspberryMenuItem.m */; };
+		04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
+		04C585871BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
+		04C585881BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
 		04C601981BE3B040002389AB /* VagrantInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018D1BE3B040002389AB /* VagrantInstance.m */; };
 		04C601991BE3B040002389AB /* VagrantInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018D1BE3B040002389AB /* VagrantInstance.m */; };
 		04C6019A1BE3B040002389AB /* VagrantInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018D1BE3B040002389AB /* VagrantInstance.m */; };
@@ -405,6 +409,10 @@
 		04C09D5E1BE35EDF009E074D /* PCPrefWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPrefWC.h; sourceTree = "<group>"; };
 		04C09D5F1BE35EDF009E074D /* PCPrefWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPrefWC.m; sourceTree = "<group>"; };
 		04C09D601BE35EDF009E074D /* PCPrefWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCPrefWC.xib; sourceTree = "<group>"; };
+		04C585811BE5BCF4004B2839 /* RaspberryMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaspberryMenuItem.h; sourceTree = "<group>"; };
+		04C585821BE5BCF4004B2839 /* RaspberryMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RaspberryMenuItem.m; sourceTree = "<group>"; };
+		04C585841BE5BF3B004B2839 /* PCConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCConstants.h; sourceTree = "<group>"; };
+		04C585851BE5BF3B004B2839 /* PCConstants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCConstants.m; sourceTree = "<group>"; };
 		04C6018C1BE3B040002389AB /* VagrantInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VagrantInstance.h; sourceTree = "<group>"; };
 		04C6018D1BE3B040002389AB /* VagrantInstance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VagrantInstance.m; sourceTree = "<group>"; };
 		04C6018E1BE3B040002389AB /* VagrantManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VagrantManager.m; sourceTree = "<group>"; };
@@ -591,6 +599,8 @@
 				0441A3D61BD8904100AABD7A /* AppDelegate.h */,
 				0441A3D71BD8904100AABD7A /* AppDelegate.m */,
 				0441A3D81BD8904100AABD7A /* main.m */,
+				04C585841BE5BF3B004B2839 /* PCConstants.h */,
+				04C585851BE5BF3B004B2839 /* PCConstants.m */,
 			);
 			name = Application;
 			path = manager/Application;
@@ -604,6 +614,8 @@
 				0441A3DC1BD8904100AABD7A /* NativeMenu.m */,
 				0441A3DD1BD8904100AABD7A /* NativeMenuItem.h */,
 				0441A3DE1BD8904100AABD7A /* NativeMenuItem.m */,
+				04C585811BE5BCF4004B2839 /* RaspberryMenuItem.h */,
+				04C585821BE5BCF4004B2839 /* RaspberryMenuItem.m */,
 			);
 			path = Menu;
 			sourceTree = "<group>";
@@ -1293,6 +1305,7 @@
 				041023F01BE473370083D62E /* VagrantGlobalStatusScanner.m in Sources */,
 				04D407421BDBC51F00625AD7 /* PCInterfaceList.m in Sources */,
 				046A365A1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
+				04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */,
 				04C6019B1BE3B040002389AB /* VagrantManager.m in Sources */,
 				041024091BE4DA400083D62E /* Raspberry.m in Sources */,
 				046A36661BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
@@ -1321,6 +1334,7 @@
 				046F96041BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
 				046A366C1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
 				04C601B41BE3B0FA002389AB /* VirtualBoxMachineInfo.m in Sources */,
+				04C585831BE5BCF4004B2839 /* RaspberryMenuItem.m in Sources */,
 				04D407391BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
 				041C46AE1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
 				041C46AB1BE3674C000D1521 /* SSSelectableToolbar.m in Sources */,
@@ -1350,6 +1364,7 @@
 				04F7056D1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				0441A3E41BD8904100AABD7A /* main.m in Sources */,
 				046A36671BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
+				04C585871BE5BF3B004B2839 /* PCConstants.m in Sources */,
 				041C46AF1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
 				046A361B1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				0486781D1BCF5FE20071594B /* managerTests.m in Sources */,
@@ -1408,6 +1423,7 @@
 				04F7056E1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				0441A3E51BD8904100AABD7A /* main.m in Sources */,
 				046A36681BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
+				04C585881BE5BF3B004B2839 /* PCConstants.m in Sources */,
 				041C46B01BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
 				046A361C1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				048678281BCF5FE20071594B /* managerUITests.m in Sources */,
