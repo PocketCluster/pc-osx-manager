@@ -59,24 +59,30 @@ NSString * const MASTER_TIME_ZONE   = @"pc_ma_tz";
 NSString * const kRaspberryCollection   = @"raspberries";
 NSString * const kPCPrefDefaultTerm     = @"default_terminal";
 
+#pragma mark - NOTIFICATION KEY (APPLICATION)
+NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE                    = @"pocketcluster.update-available";
+NSString * const kPOCKET_CLUSTER_UPDATE_VALUE                        = @"pocketcluster.is_update_available";
+
 #pragma mark - NOTIFICATION KEY (VAGRANT)
+NSString * const kVAGRANT_MANAGER_INSTANCE                           = @"vagrant-manager.instance";
+NSString * const kVAGRANT_MANAGER_INSTANCE_OLD                       = @"vagrant-manager.instance.old";
+NSString * const kVAGRANT_MANAGER_INSTANCE_NEW                       = @"vagrant-manager.instance.new";
 NSString * const kVAGRANT_MANAGER_NOTIFICATION_PREFERENCE_CHANGED    = @"vagrant-manager.notification-preference-changed";
 NSString * const kVAGRANT_MANAGER_INSTANCE_ADDED                     = @"vagrant-manager.instance-added";
 NSString * const kVAGRANT_MANAGER_INSTANCE_REMOVED                   = @"vagrant-manager.instance-removed";
 NSString * const kVAGRANT_MANAGER_INSTANCE_UPDATED                   = @"vagrant-manager.instance-updated";
-NSString * const kVAGRANT_MANAGER_UPDATE_AVAILABLE                   = @"vagrant-manager.update-available";
 NSString * const kVAGRANT_MANAGER_REFRESHING_STARTED                 = @"vagrant-manager.refreshing-started";
 NSString * const kVAGRANT_MANAGER_REFRESHING_ENDED                   = @"vagrant-manager.refreshing-ended";
 NSString * const kVAGRANT_MANAGER_UPDATE_RUNNING_VM_COUNT            = @"vagrant-manager.update-running-vm-count";
 NSString * const kVAGRANT_MANAGER_UPDATE_INSTANCES_COUNT             = @"vagrant-manager.update-instances-count";
 
 #pragma mark - NOTIFICATION KEY (RASPBERRY)
+NSString * const kRASPBERRY_MANAGER_NODE                             = @"raspberry-manager.node";
 NSString * const kRASPBERRY_MANAGER_NOTIFICATION_PREFERENCE_CHANGED  = @"raspberry-manager.notification-preference-changed";
 NSString * const kRASPBERRY_MANAGER_REFRESHING_STARTED               = @"raspberry-manager.refreshing-started";
 NSString * const kRASPBERRY_MANAGER_REFRESHING_ENDED                 = @"raspberry-manager.refreshing-ended";
 NSString * const kRASPBERRY_MANAGER_UPDATE_RUNNING_NODE_COUNT        = @"raspberry-manager.update-running-node-count";
 NSString * const kRASPBERRY_MANAGER_UPDATE_NODE_COUNT                = @"raspberry-manager.update-node-count";
-
 // at least one node is up
 NSString * const kRASPBERRY_MANAGER_NODE_UP                          = @"raspberry-manager.node-up";
 // all nodes are down

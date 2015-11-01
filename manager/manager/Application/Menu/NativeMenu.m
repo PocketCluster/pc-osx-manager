@@ -12,13 +12,15 @@
 
 @interface NativeMenu()
 @property (nonatomic, strong, readwrite) NSMutableArray *menuItems;
+// Application update
+- (void)setUpdateAvailable: (NSNotification*)notification;
+
 // Notification Handlers
 - (void)vagrantRegisterNotifications;
 - (void)vagrantNotificationPreferenceChanged:(NSNotification*)notification;
 - (void)vagrantInstanceAdded: (NSNotification*)notification;
 - (void)vagrantInstanceRemoved: (NSNotification*)notification;
 - (void)vagrantInstanceUpdated: (NSNotification*)notification;
-- (void)vagrantSetUpdateAvailable: (NSNotification*)notification;
 - (void)vagrantRefreshingStarted: (NSNotification*)notification;
 - (void)vagrantRefreshingEnded: (NSNotification*)notification;
 
@@ -57,6 +59,17 @@
 @end
 
 @implementation NativeMenu
+@synthesize setupWindow = _setupWindow;
+@synthesize preferencesWindow = _preferencesWindow;
+@synthesize aboutWindow = _aboutWindow;
+
+@synthesize statusItem = _statusItem;
+@synthesize menu = _menu;
+
+@synthesize clusterSetupMenuItem = _clusterSetupMenuItem;
+@synthesize bottomMachineSeparator = _bottomMachineSeparator;
+@synthesize checkForUpdatesMenuItem = _checkForUpdatesMenuItem;
+@synthesize menuItems = _menuItems;
 
 - (id)init
 {
@@ -97,6 +110,13 @@
         NSMenuItem *quitMenuItem = [[NSMenuItem alloc] initWithTitle:@"Quit" action:@selector(quitMenuItemClicked:) keyEquivalent:@""];
         quitMenuItem.target = self;
         [_menu addItem:quitMenuItem];
+
+        // update availability
+        [[NSNotificationCenter defaultCenter]
+         addObserver:self
+         selector:@selector(setUpdateAvailable:)
+         name:kPOCKET_CLUSTER_UPDATE_AVAILABLE
+         object:nil];
     }
 
     return self;
@@ -113,7 +133,6 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantInstanceAdded:)                   name:kVAGRANT_MANAGER_INSTANCE_ADDED                      object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantInstanceRemoved:)                 name:kVAGRANT_MANAGER_INSTANCE_REMOVED                    object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantInstanceUpdated:)                 name:kVAGRANT_MANAGER_INSTANCE_UPDATED                    object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantSetUpdateAvailable:)              name:kVAGRANT_MANAGER_UPDATE_AVAILABLE                    object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantRefreshingStarted:)               name:kVAGRANT_MANAGER_REFRESHING_STARTED                  object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantRefreshingEnded:)                 name:kVAGRANT_MANAGER_REFRESHING_ENDED                    object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantUpdateRunningVmCount:)            name:kVAGRANT_MANAGER_UPDATE_RUNNING_VM_COUNT             object:nil];
@@ -128,28 +147,24 @@
     NativeMenuItem *item = [[NativeMenuItem alloc] init];
     [_menuItems addObject:item];
     item.delegate = self;
-    item.instance = [notification.userInfo objectForKey:@"instance"];
+    item.instance = [notification.userInfo objectForKey:kVAGRANT_MANAGER_INSTANCE];
     item.menuItem = [[NSMenuItem alloc] initWithTitle:item.instance.displayName action:nil keyEquivalent:@""];
     [item refresh];
     [self vagrantRebuildMenu];
 }
 
 - (void)vagrantInstanceRemoved: (NSNotification*)notification {
-    NativeMenuItem *item = [self menuItemForInstance:[notification.userInfo objectForKey:@"instance"]];
+    NativeMenuItem *item = [self menuItemForInstance:[notification.userInfo objectForKey:kVAGRANT_MANAGER_INSTANCE]];
     [_menuItems removeObject:item];
     [_menu removeItem:item.menuItem];
     [self vagrantRebuildMenu];
 }
 
 - (void)vagrantInstanceUpdated: (NSNotification*)notification {
-    NativeMenuItem *item = [self menuItemForInstance:[notification.userInfo objectForKey:@"old_instance"]];
-    item.instance = [notification.userInfo objectForKey:@"new_instance"];
+    NativeMenuItem *item = [self menuItemForInstance:[notification.userInfo objectForKey:kVAGRANT_MANAGER_INSTANCE_OLD]];
+    item.instance = [notification.userInfo objectForKey:kVAGRANT_MANAGER_INSTANCE_NEW];
     [item refresh];
     [self vagrantRebuildMenu];
-}
-
-- (void)vagrantSetUpdateAvailable: (NSNotification*)notification {
-    [self setUpdatesAvailable:[[notification.userInfo objectForKey:@"is_update_available"] boolValue]];
 }
 
 - (void)vagrantRefreshingStarted: (NSNotification*)notification {
@@ -158,6 +173,11 @@
 
 - (void)vagrantRefreshingEnded: (NSNotification*)notification {
     [self setIsRefreshing:NO];
+}
+
+# pragma mark - Application Update -
+- (void)setUpdateAvailable: (NSNotification*)notification {
+    [self setUpdatesAvailable:[[notification.userInfo objectForKey:kPOCKET_CLUSTER_UPDATE_VALUE] boolValue]];
 }
 
 #pragma mark - Control
@@ -336,6 +356,11 @@
 
 - (NativeMenuItem*)menuItemForInstance:(VagrantInstance*)instance {
     for (NativeMenuItem *nativeMenuItem in _menuItems) {
+        
+        if (![nativeMenuItem isKindOfClass:[NativeMenuItem class]]){
+            continue;
+        }
+        
         if (nativeMenuItem.instance == instance) {
             return nativeMenuItem;
         }

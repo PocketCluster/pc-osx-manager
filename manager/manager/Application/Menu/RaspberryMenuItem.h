@@ -22,4 +22,6 @@
 @property (nonatomic, weak) id<RaspberryMenuItemDelegate> delegate;
 @property (nonatomic, weak) Raspberry *rpiNode;
 @property (nonatomic, strong) NSMenuItem *menuItem;
+
+- (void)refresh;
 @end

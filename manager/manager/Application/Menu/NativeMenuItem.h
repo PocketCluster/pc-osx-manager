@@ -11,7 +11,6 @@
 @class NativeMenuItem;
 
 @protocol NativeMenuItemDelegate
-
 @optional
 - (void)nativeMenuItemUpAllMachines:(NativeMenuItem*)menuItem;
 - (void)nativeMenuItemSuspendAllMachines:(NativeMenuItem*)menuItem;

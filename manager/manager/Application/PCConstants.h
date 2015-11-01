@@ -56,17 +56,22 @@ extern NSString * const kRaspberryCollection;
 extern NSString * const kPCPrefDefaultTerm;
 
 //Notfication Key
+extern NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE;
+extern NSString * const kPOCKET_CLUSTER_UPDATE_VALUE;
+
+extern NSString * const kVAGRANT_MANAGER_INSTANCE;
+extern NSString * const kVAGRANT_MANAGER_INSTANCE_OLD;
+extern NSString * const kVAGRANT_MANAGER_INSTANCE_NEW;
 extern NSString * const kVAGRANT_MANAGER_NOTIFICATION_PREFERENCE_CHANGED;
 extern NSString * const kVAGRANT_MANAGER_INSTANCE_ADDED;
 extern NSString * const kVAGRANT_MANAGER_INSTANCE_REMOVED;
 extern NSString * const kVAGRANT_MANAGER_INSTANCE_UPDATED;
-extern NSString * const kVAGRANT_MANAGER_UPDATE_AVAILABLE;
 extern NSString * const kVAGRANT_MANAGER_REFRESHING_STARTED;
 extern NSString * const kVAGRANT_MANAGER_REFRESHING_ENDED;
 extern NSString * const kVAGRANT_MANAGER_UPDATE_RUNNING_VM_COUNT;
 extern NSString * const kVAGRANT_MANAGER_UPDATE_INSTANCES_COUNT;
 
-
+extern NSString * const kRASPBERRY_MANAGER_NODE;
 extern NSString * const kRASPBERRY_MANAGER_NOTIFICATION_PREFERENCE_CHANGED;
 extern NSString * const kRASPBERRY_MANAGER_REFRESHING_STARTED;
 extern NSString * const kRASPBERRY_MANAGER_REFRESHING_ENDED;

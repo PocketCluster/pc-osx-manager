@@ -14,7 +14,6 @@
 #import "VersionComparison.h"
 #import "NativeMenu+Raspberry.h"
 
-
 #import "PCTask.h"
 
 #import "VirtualBoxServiceProvider.h"
@@ -369,19 +368,19 @@
 
 - (void)vagrantManager:(VagrantManager *)vagrantManger instanceAdded:(VagrantInstance *)instance {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_INSTANCE_ADDED object:nil userInfo:@{@"instance": instance}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_INSTANCE_ADDED object:nil userInfo:@{kVAGRANT_MANAGER_INSTANCE: instance}];
     });
 }
 
 - (void)vagrantManager:(VagrantManager *)vagrantManger instanceRemoved:(VagrantInstance *)instance {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_INSTANCE_REMOVED object:nil userInfo:@{@"instance": instance}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_INSTANCE_REMOVED object:nil userInfo:@{kVAGRANT_MANAGER_INSTANCE: instance}];
     });
 }
 
 - (void)vagrantManager:(VagrantManager *)vagrantManger instanceUpdated:(VagrantInstance *)oldInstance withInstance:(VagrantInstance *)newInstance {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_INSTANCE_UPDATED object:nil userInfo:@{@"old_instance":oldInstance, @"new_instance":newInstance}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_INSTANCE_UPDATED object:nil userInfo:@{kVAGRANT_MANAGER_INSTANCE_OLD:oldInstance, kVAGRANT_MANAGER_INSTANCE_NEW:newInstance}];
     });
 }
 
@@ -441,11 +440,11 @@
 }
 
 - (void)updater:(SUUpdater *)updater didFindValidUpdate:(SUAppcastItem *)update {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_UPDATE_AVAILABLE object:nil userInfo:@{@"is_update_available": [NSNumber numberWithBool:YES]}];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kPOCKET_CLUSTER_UPDATE_AVAILABLE object:nil userInfo:@{kPOCKET_CLUSTER_UPDATE_VALUE: [NSNumber numberWithBool:YES]}];
 }
 
 - (void)updaterDidNotFindUpdate:(SUUpdater *)update {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_UPDATE_AVAILABLE object:nil userInfo:@{@"is_update_available": [NSNumber numberWithBool:NO]}];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kPOCKET_CLUSTER_UPDATE_AVAILABLE object:nil userInfo:@{kPOCKET_CLUSTER_UPDATE_VALUE: [NSNumber numberWithBool:NO]}];
 }
 
 - (id<SUVersionComparison>)versionComparatorForUpdater:(SUUpdater *)updater {

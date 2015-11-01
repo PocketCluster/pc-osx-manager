@@ -14,7 +14,20 @@
 #import "PCConstants.h"
 #import "Util.h"
 
-@interface NativeMenu : NSObject <NativeMenuItemDelegate,NSMenuDelegate>
+@interface NativeMenu : NSObject <NativeMenuItemDelegate,NSMenuDelegate>{
+@private
+    DPSetupWC *_setupWindow;
+    PCPrefWC *_preferencesWindow;
+    AboutWindow *_aboutWindow;
+
+    NSStatusItem *_statusItem;
+    NSMenu *_menu;
+
+    NSMenuItem *_clusterSetupMenuItem;
+    NSMenuItem *_bottomMachineSeparator;
+    NSMenuItem *_checkForUpdatesMenuItem;
+    NSMutableArray *_menuItems;
+}
 
 @property (nonatomic, strong) DPSetupWC *setupWindow;
 @property (nonatomic, strong) PCPrefWC *preferencesWindow;
