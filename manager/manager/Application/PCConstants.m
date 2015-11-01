@@ -48,6 +48,8 @@ NSString * const SLAVE_NODE_NAME     = @"pc_sl_nm";
 NSString * const POCKETCAST_GROUP    = @"239.193.127.127";
 const NSUInteger PAGENT_SEND_PORT    = 10060;
 const NSUInteger PAGENT_RECV_PORT    = 10061;
+const double UNBOUNDED_TIMEOUT       = 3.0;
+const double BOUNDED_TIMEOUT         = 10.0;
 
 //------ time settings ------
 NSString * const MASTER_TIME_STAMP  = @"pc_ma_ts";

@@ -7,15 +7,20 @@
 
 #import "VirtualMachineInfo.h"
 #import "PCConstants.h"
+#include <time.h>
+
+#define HEARTBEAT_CHECK_INTERVAL (30.0)
+
 
 @interface Raspberry : NSObject <NSCoding, NSCopying>
-
--(instancetype)initWithDictionary:(NSDictionary *)aDict;
 
 @property (strong, nonatomic) NSString *masterBoundAgent;
 @property (strong, nonatomic) NSString *slaveNodeName;
 @property (strong, nonatomic) NSString *slaveNodeMacAddr;
 @property (strong, nonatomic) NSString *address;
-@property (readwrite, getter=isAlive) BOOL alive;
+@property (nonatomic, readonly) BOOL isAlive;
+@property (nonatomic, assign) struct timeval heartbeat;	// seconds and microseconds
+
+-(instancetype)initWithDictionary:(NSDictionary *)aDict;
 
 @end

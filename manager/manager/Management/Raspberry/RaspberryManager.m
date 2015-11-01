@@ -8,12 +8,15 @@
 #import "SynthesizeSingleton.h"
 #import "RaspberryManager.h"
 #import "PCConstants.h"
-
+#import "BSONSerialization.h"
+#import "DeviceSerialNumber.h"
+#include <sys/time.h>
 
 @interface RaspberryManager()
 @property (nonatomic, strong) NSMutableArray *raspberries;
 @property (nonatomic, strong) GCDAsyncUdpSocket *multSocket;
 @property (nonatomic, strong) NSMutableArray<GCDAsyncUdpSocketDelegate> *multSockDelegates;
+@property (nonatomic, strong) NSString *deviceSerial;
 
 - (void)removeRaspberryWithName:(NSString*)aName;
 - (Raspberry*)getRaspberryWithName:(NSString*)aName;
@@ -31,7 +34,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
         self.multSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
         [self.multSocket setIPv6Enabled:NO];
         self.multSockDelegates = [NSMutableArray<GCDAsyncUdpSocketDelegate> arrayWithCapacity:0];
-
+        self.deviceSerial = [[DeviceSerialNumber deviceSerialNumber] lowercaseString];
     }
 
     return self;
@@ -83,9 +86,9 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     return aRaspberry;
 }
 
-#warning FIX to Actually live ones
 - (NSUInteger)liveRaspberryCount {
-    return [self.raspberries count];
+    NSArray *filtered = [_raspberries filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(SELF.isAlive == YES)"]];
+    return [filtered count];
 }
 
 - (NSUInteger)raspberryCount {
@@ -248,6 +251,23 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
  * Called when the socket has received the requested datagram.
  **/
 - (void)udpSocket:(GCDAsyncUdpSocket *)sock didReceiveData:(NSData *)data fromAddress:(NSData *)address withFilterContext:(id)filterContext {
+    
+    __block struct timeval tv;
+    gettimeofday(&tv, NULL);
+    
+    __block NSString * const sn = self.deviceSerial;
+    __block NSDictionary * const node =[NSDictionary dictionaryWithBSON:data];
+    
+    // check heartbeat
+    @synchronized(self.raspberries) {
+        [_raspberries enumerateObjectsUsingBlock:^(Raspberry*  _Nonnull rpi, NSUInteger idx, BOOL * _Nonnull stop) {
+            if([rpi.masterBoundAgent isEqualToString:sn] && [rpi.slaveNodeMacAddr isEqualToString:[node objectForKey:SLAVE_NODE_MACADDR]]){
+                rpi.heartbeat = tv;
+            }
+        }];
+        
+    }
+    
     @synchronized(self.multSockDelegates) {
         [self.multSockDelegates enumerateObjectsUsingBlock:^(id<GCDAsyncUdpSocketDelegate> _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             if ([obj respondsToSelector:@selector(udpSocket:didReceiveData:fromAddress:withFilterContext:)]){

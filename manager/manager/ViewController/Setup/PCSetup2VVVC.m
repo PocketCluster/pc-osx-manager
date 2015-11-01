@@ -27,11 +27,11 @@
     
     if(self){
         self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Base config done...",@10.0]
-                               ,@"SUDO_SETUP_DONE":@[@"Start setting up Vagrant",@20.0]
-                               ,@"USER_SETUP_STEP_0":@[@"USER_SETUP_STEP_0",@30.0]
-                               ,@"USER_SETUP_STEP_1":@[@"USER_SETUP_STEP_1",@50.0]
-                               ,@"USER_SETUP_STEP_2":@[@"USER_SETUP_STEP_2",@90.0]
-                               ,@"USER_SETUP_DONE":@[@"USER_SETUP_DONE",@100.0]};
+                           ,@"SUDO_SETUP_DONE":@[@"Start setting up Vagrant",@20.0]
+                           ,@"USER_SETUP_STEP_0":@[@"USER_SETUP_STEP_0",@30.0]
+                           ,@"USER_SETUP_STEP_1":@[@"USER_SETUP_STEP_1",@50.0]
+                           ,@"USER_SETUP_STEP_2":@[@"USER_SETUP_STEP_2",@90.0]
+                           ,@"USER_SETUP_DONE":@[@"USER_SETUP_DONE",@100.0]};
     }
 
     return self;

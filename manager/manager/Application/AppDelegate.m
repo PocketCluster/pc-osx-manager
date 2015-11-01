@@ -59,6 +59,9 @@
     // create raspberry manager
     [[RaspberryManager sharedManager] loadRaspberries];
     self.rpiManager = [RaspberryManager sharedManager];
+    
+
+    Log(@"live rpi count %ld", [self.rpiManager liveRaspberryCount]);
 
     //create popup and status menu item
     self.nativeMenu = [[NativeMenu alloc] init];

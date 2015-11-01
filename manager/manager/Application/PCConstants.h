@@ -46,6 +46,8 @@ extern NSString * const SLAVE_NODE_NAME;
 extern NSString * const POCKETCAST_GROUP;
 extern const NSUInteger PAGENT_SEND_PORT;
 extern const NSUInteger PAGENT_RECV_PORT;
+extern const double UNBOUNDED_TIMEOUT;
+extern const double BOUNDED_TIMEOUT;
 
 //------ time settings ------
 extern NSString * const MASTER_TIME_STAMP;

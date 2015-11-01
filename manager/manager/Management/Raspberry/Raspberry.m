@@ -4,10 +4,11 @@
 //
 //  Copyright (c) 2014 Lanayo. All rights reserved.
 //
-
+#include <sys/time.h>
 #import "Raspberry.h"
 
 @implementation Raspberry
+@dynamic isAlive;
 
 - (instancetype)initWithDictionary:(NSDictionary *)aDict {
     
@@ -18,6 +19,8 @@
         self.slaveNodeName      = [aDict objectForKey:SLAVE_NODE_NAME];
         self.slaveNodeMacAddr   = [aDict objectForKey:SLAVE_NODE_MACADDR];
         self.address            = [aDict objectForKey:ADDRESS];
+
+        memset(&_heartbeat,0,sizeof(struct timeval));
         
     }
     
@@ -36,6 +39,7 @@
         self.slaveNodeMacAddr   = [aDecoder decodeObjectForKey:SLAVE_NODE_MACADDR];
         self.address            = [aDecoder decodeObjectForKey:ADDRESS];
 
+        memset(&_heartbeat,0,sizeof(struct timeval));
     }
     
     return self;
@@ -68,6 +72,23 @@
     NSString *sd = [super description];
     return [NSString stringWithFormat:@"%@ - %@ (%@) <%@> <- %@",sd, self.slaveNodeName, self.slaveNodeMacAddr, self.address, self.masterBoundAgent];
 }
+
+- (BOOL) isAlive {
+    static struct timeval tv;
+
+    if (_heartbeat.tv_sec == 0){
+        return NO;
+    }
+
+    gettimeofday(&tv, NULL);
+    
+    if (HEARTBEAT_CHECK_INTERVAL < ABS(tv.tv_sec - _heartbeat.tv_sec)){
+        return NO;
+    }
+
+    return YES;
+}
+
 
 
 @end

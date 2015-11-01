@@ -416,6 +416,8 @@
 		04C585851BE5BF3B004B2839 /* PCConstants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCConstants.m; sourceTree = "<group>"; };
 		04C585891BE5E502004B2839 /* NativeMenu+Raspberry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NativeMenu+Raspberry.h"; sourceTree = "<group>"; };
 		04C5858A1BE5E502004B2839 /* NativeMenu+Raspberry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NativeMenu+Raspberry.m"; sourceTree = "<group>"; };
+		04C5858E1BE6357B004B2839 /* NSManagedObjectContext+FetchAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSManagedObjectContext+FetchAdditions.h"; sourceTree = "<group>"; };
+		04C5858F1BE6357B004B2839 /* NSManagedObjectContext+FetchAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObjectContext+FetchAdditions.m"; sourceTree = "<group>"; };
 		04C6018C1BE3B040002389AB /* VagrantInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VagrantInstance.h; sourceTree = "<group>"; };
 		04C6018D1BE3B040002389AB /* VagrantInstance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VagrantInstance.m; sourceTree = "<group>"; };
 		04C6018E1BE3B040002389AB /* VagrantManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VagrantManager.m; sourceTree = "<group>"; };
@@ -652,6 +654,7 @@
 		046A35D91BD78AB8004E0946 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				04C5858D1BE6357B004B2839 /* CoreData */,
 				04F705731BD7A9EE00829651 /* Serial */,
 				046A35DD1BD78AB8004E0946 /* Dictionary */,
 				046A35E01BD78AB8004E0946 /* DirectoryAddition */,
@@ -942,6 +945,15 @@
 				04C09D601BE35EDF009E074D /* PCPrefWC.xib */,
 			);
 			path = Preferences;
+			sourceTree = "<group>";
+		};
+		04C5858D1BE6357B004B2839 /* CoreData */ = {
+			isa = PBXGroup;
+			children = (
+				04C5858E1BE6357B004B2839 /* NSManagedObjectContext+FetchAdditions.h */,
+				04C5858F1BE6357B004B2839 /* NSManagedObjectContext+FetchAdditions.m */,
+			);
+			path = CoreData;
 			sourceTree = "<group>";
 		};
 		04C601AF1BE3B0FA002389AB /* Virtualbox */ = {

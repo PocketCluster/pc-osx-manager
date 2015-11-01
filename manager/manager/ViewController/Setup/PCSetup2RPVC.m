@@ -29,7 +29,12 @@
 //@property (nonatomic, strong) NSMutableArray<LinkInterface *> *localInterfaces;
 @property (atomic, strong) NSMutableArray *nodeList;
 @property (strong, nonatomic) NSDictionary *progDict;
+
+
+@property (nonatomic, strong) NSString *deviceSerial;
+@property (nonatomic, strong) NSString *hostName;
 @property (nonatomic, strong) LinkInterface *interface;
+
 @end
 
 @implementation PCSetup2RPVC
@@ -48,6 +53,10 @@
                           ,@"USER_SETUP_STEP_1":@[@"USER_SETUP_STEP_1",@50.0]
                           ,@"USER_SETUP_STEP_2":@[@"USER_SETUP_STEP_2",@90.0]
                           ,@"USER_SETUP_DONE":@[@"USER_SETUP_DONE",@100.0]};
+        
+        
+        self.deviceSerial = [[DeviceSerialNumber deviceSerialNumber] lowercaseString];
+        self.hostName = [[[NSHost currentHost] localizedName] lowercaseString];
 
         [self refreshInterface];
     }
@@ -104,8 +113,8 @@ withFilterContext:(id)filterContext
 
     if (!doesNodeExist && self.nodeList.count <= MAX_SUPPORTED_NODE){
         
-        NSString *sn = [[DeviceSerialNumber deviceSerialNumber] lowercaseString];
-        NSString *hn = [[[NSHost currentHost] localizedName] lowercaseString];
+        NSString *sn = self.deviceSerial;
+        NSString *hn = self.hostName;
         //NSString *ha = [[NSHost currentHost] address];
         NSString *ha = [self.interface ip4Address];
         
