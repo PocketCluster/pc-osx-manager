@@ -7,131 +7,161 @@
 
 #import <Sparkle/Sparkle.h>
 
-#import "DPSetupWC.h"
-#import "PCPrefWC.h"
-#import "AboutWindow.h"
-
-#import "VagrantManager.h"
-
-#import "Util.h"
-#import "NativeMenuItem.h"
-
 #import "NativeMenu.h"
+#import "NativeMenu+Raspberry.h"
 
-@interface NativeMenu()<NativeMenuItemDelegate,NSMenuDelegate>
+@interface NativeMenu()
+@property (nonatomic, strong, readwrite) NSMutableArray *menuItems;
+// Notification Handlers
+- (void)vagrantRegisterNotifications;
+- (void)vagrantNotificationPreferenceChanged:(NSNotification*)notification;
+- (void)vagrantInstanceAdded: (NSNotification*)notification;
+- (void)vagrantInstanceRemoved: (NSNotification*)notification;
+- (void)vagrantInstanceUpdated: (NSNotification*)notification;
+- (void)vagrantSetUpdateAvailable: (NSNotification*)notification;
+- (void)vagrantRefreshingStarted: (NSNotification*)notification;
+- (void)vagrantRefreshingEnded: (NSNotification*)notification;
+
+// Control
+- (void)vagrantRebuildMenu;
+- (void)setUpdatesAvailable:(BOOL)updatesAvailable;
+- (void)setIsRefreshing:(BOOL)isRefreshing;
+
+// Native menu item delegate
+- (void)nativeMenuItemUpAllMachines:(NativeMenuItem *)menuItem;
+- (void)nativeMenuItemHaltAllMachines:(NativeMenuItem *)menuItem;
+- (void)nativeMenuItemSuspendAllMachines:(NativeMenuItem*)menuItem;
+- (void)nativeMenuItemSSHInstance:(NativeMenuItem*)menuItem;
+- (void)nativeMenuItemUpMachine:(VagrantMachine *)machine;
+- (void)nativeMenuItemHaltMachine:(VagrantMachine *)machine;
+- (void)nativeMenuItemSuspendMachine:(VagrantMachine *)machine;
+
+// Menu Item Click Handlers
+- (void)refreshMenuItemClicked:(id)sender;
+- (void)showSetupWindow:(id)sender;
+- (void)preferencesMenuItemClicked:(id)sender;
+- (void)aboutMenuItemClicked:(id)sender;
+- (void)checkForUpdatesMenuItemClicked:(id)sender;
+
+// All machines actions
+- (IBAction)allUpMenuItemClicked:(NSMenuItem*)sender;
+- (IBAction)allSuspendMenuItemClicked:(NSMenuItem*)sender;
+- (IBAction)allHaltMenuItemClicked:(NSMenuItem*)sender;
+
+// MISC
+- (void)performAction:(NSString*)action withInstance:(VagrantInstance*)instance;
+- (void)performAction:(NSString*)action withMachine:(VagrantMachine *)machine;
+- (NativeMenuItem*)menuItemForInstance:(VagrantInstance*)instance;
+- (void)vagrantUpdateRunningVmCount:(NSNotification*)notification;
+- (void)vagrantUpdateInstancesCount:(NSNotification*)notification;
 @end
 
 @implementation NativeMenu
+
+- (id)init
 {
-    DPSetupWC           *setupWindow;
-    PCPrefWC            *preferencesWindow;
-    AboutWindow         *aboutWindow;
+    self = [super init];
     
-    NSStatusItem        *_statusItem;
-    NSMenu              *_menu;
-    //NSMenuItem          *_refreshMenuItem;
-    NSMenuItem          *_newClusterMenuItem;
-    int                 _refreshIconFrame;
-    
-    NSMutableArray      *_menuItems;
-    
-    NSMenuItem          *_bottomMachineSeparator;
-    NSMenuItem          *_checkForUpdatesMenuItem;
+    if(self) {
+        
+        self.statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
+        self.menu = [[NSMenu alloc] init];
+        [_menu setAutoenablesItems:NO];
+        
+        self.menuItems = [[NSMutableArray alloc] init];
+        
+        self.statusItem.button.image = [NSImage imageNamed:@"status-off"];
+        _statusItem.highlightMode = YES;
+        _statusItem.menu = _menu;
+        
+        self.clusterSetupMenuItem = [[NSMenuItem alloc] initWithTitle:@"New Cluster" action:@selector(showSetupWindow:) keyEquivalent:@""];
+        _clusterSetupMenuItem.target = self;
+        [_menu addItem:_clusterSetupMenuItem];
+        
+        // instances here
+        self.bottomMachineSeparator = [NSMenuItem separatorItem];
+        [_menu addItem:_bottomMachineSeparator];
+        
+        NSMenuItem *preferencesMenuItem = [[NSMenuItem alloc] initWithTitle:@"Preferences" action:@selector(preferencesMenuItemClicked:) keyEquivalent:@""];
+        preferencesMenuItem.target = self;
+        [_menu addItem:preferencesMenuItem];
+        
+        NSMenuItem *aboutMenuItem = [[NSMenuItem alloc] initWithTitle:@"About" action:@selector(aboutMenuItemClicked:) keyEquivalent:@""];
+        aboutMenuItem.target = self;
+        [_menu addItem:aboutMenuItem];
+        
+        self.checkForUpdatesMenuItem = [[NSMenuItem alloc] initWithTitle:@"Check For Updates" action:@selector(checkForUpdatesMenuItemClicked:) keyEquivalent:@""];
+        _checkForUpdatesMenuItem.target = self;
+        [_menu addItem:_checkForUpdatesMenuItem];
+        
+        NSMenuItem *quitMenuItem = [[NSMenuItem alloc] initWithTitle:@"Quit" action:@selector(quitMenuItemClicked:) keyEquivalent:@""];
+        quitMenuItem.target = self;
+        [_menu addItem:quitMenuItem];
+    }
+
+    return self;
 }
 
-- (id)init {
-    self = [super init];
-
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notificationPreferenceChanged:) name:@"vagrant-manager.notification-preference-changed" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(instanceAdded:) name:@"vagrant-manager.instance-added" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(instanceRemoved:) name:@"vagrant-manager.instance-removed" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(instanceUpdated:) name:@"vagrant-manager.instance-updated" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setUpdateAvailable:) name:@"vagrant-manager.update-available" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshingStarted:) name:@"vagrant-manager.refreshing-started" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshingEnded:) name:@"vagrant-manager.refreshing-ended" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateRunningVmCount:) name:@"vagrant-manager.update-running-vm-count" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateInstancesCount:) name:@"vagrant-manager.update-instances-count" object:nil];
- 
-    _statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
-    _menu = [[NSMenu alloc] init];
-    [_menu setAutoenablesItems:NO];
-    
-    _menuItems = [[NSMutableArray alloc] init];
-    
-    _statusItem.button.image = [NSImage imageNamed:@"status-off"];
-    _statusItem.highlightMode = YES;
-    _statusItem.menu = _menu;
-
-    _newClusterMenuItem = [[NSMenuItem alloc] initWithTitle:@"New Cluster" action:@selector(showSetupWindow:) keyEquivalent:@""];
-    _newClusterMenuItem.target = self;
-    [_menu addItem:_newClusterMenuItem];
-    
-    // instances here
-    _bottomMachineSeparator = [NSMenuItem separatorItem];
-    [_menu addItem:_bottomMachineSeparator];
-
-    NSMenuItem *preferencesMenuItem = [[NSMenuItem alloc] initWithTitle:@"Preferences" action:@selector(preferencesMenuItemClicked:) keyEquivalent:@""];
-    preferencesMenuItem.target = self;
-    [_menu addItem:preferencesMenuItem];
-    
-    NSMenuItem *aboutMenuItem = [[NSMenuItem alloc] initWithTitle:@"About" action:@selector(aboutMenuItemClicked:) keyEquivalent:@""];
-    aboutMenuItem.target = self;
-    [_menu addItem:aboutMenuItem];
-    
-    _checkForUpdatesMenuItem = [[NSMenuItem alloc] initWithTitle:@"Check For Updates" action:@selector(checkForUpdatesMenuItemClicked:) keyEquivalent:@""];
-    _checkForUpdatesMenuItem.target = self;
-    [_menu addItem:_checkForUpdatesMenuItem];
-    
-    NSMenuItem *quitMenuItem = [[NSMenuItem alloc] initWithTitle:@"Quit" action:@selector(quitMenuItemClicked:) keyEquivalent:@""];
-    quitMenuItem.target = self;
-    [_menu addItem:quitMenuItem];
-    
-    return self;
+-(void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark - Notification Handlers
 
-- (void)notificationPreferenceChanged: (NSNotification*)notification {
+- (void)vagrantRegisterNotifications {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantNotificationPreferenceChanged:)   name:kVAGRANT_MANAGER_NOTIFICATION_PREFERENCE_CHANGED     object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantInstanceAdded:)                   name:kVAGRANT_MANAGER_INSTANCE_ADDED                      object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantInstanceRemoved:)                 name:kVAGRANT_MANAGER_INSTANCE_REMOVED                    object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantInstanceUpdated:)                 name:kVAGRANT_MANAGER_INSTANCE_UPDATED                    object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantSetUpdateAvailable:)              name:kVAGRANT_MANAGER_UPDATE_AVAILABLE                    object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantRefreshingStarted:)               name:kVAGRANT_MANAGER_REFRESHING_STARTED                  object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantRefreshingEnded:)                 name:kVAGRANT_MANAGER_REFRESHING_ENDED                    object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantUpdateRunningVmCount:)            name:kVAGRANT_MANAGER_UPDATE_RUNNING_VM_COUNT             object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantUpdateInstancesCount:)            name:kVAGRANT_MANAGER_UPDATE_INSTANCES_COUNT              object:nil];
 }
 
-- (void)instanceAdded: (NSNotification*)notification {
+
+- (void)vagrantNotificationPreferenceChanged: (NSNotification*)notification {
+}
+
+- (void)vagrantInstanceAdded: (NSNotification*)notification {
     NativeMenuItem *item = [[NativeMenuItem alloc] init];
     [_menuItems addObject:item];
     item.delegate = self;
     item.instance = [notification.userInfo objectForKey:@"instance"];
     item.menuItem = [[NSMenuItem alloc] initWithTitle:item.instance.displayName action:nil keyEquivalent:@""];
     [item refresh];
-    [self rebuildMenu];
+    [self vagrantRebuildMenu];
 }
 
-- (void)instanceRemoved: (NSNotification*)notification {
+- (void)vagrantInstanceRemoved: (NSNotification*)notification {
     NativeMenuItem *item = [self menuItemForInstance:[notification.userInfo objectForKey:@"instance"]];
     [_menuItems removeObject:item];
     [_menu removeItem:item.menuItem];
-    [self rebuildMenu];
+    [self vagrantRebuildMenu];
 }
 
-- (void)instanceUpdated: (NSNotification*)notification {
+- (void)vagrantInstanceUpdated: (NSNotification*)notification {
     NativeMenuItem *item = [self menuItemForInstance:[notification.userInfo objectForKey:@"old_instance"]];
     item.instance = [notification.userInfo objectForKey:@"new_instance"];
     [item refresh];
-    [self rebuildMenu];
+    [self vagrantRebuildMenu];
 }
 
-- (void)setUpdateAvailable: (NSNotification*)notification {
+- (void)vagrantSetUpdateAvailable: (NSNotification*)notification {
     [self setUpdatesAvailable:[[notification.userInfo objectForKey:@"is_update_available"] boolValue]];
 }
 
-- (void)refreshingStarted: (NSNotification*)notification {
+- (void)vagrantRefreshingStarted: (NSNotification*)notification {
     [self setIsRefreshing:YES];
 }
 
-- (void)refreshingEnded: (NSNotification*)notification {
+- (void)vagrantRefreshingEnded: (NSNotification*)notification {
     [self setIsRefreshing:NO];
 }
 
 #pragma mark - Control
-- (void)rebuildMenu {
+- (void)vagrantRebuildMenu {
 
     for (NativeMenuItem *item in _menuItems) {
         [item refresh];
@@ -173,8 +203,8 @@
 }
 
 - (void)setIsRefreshing:(BOOL)isRefreshing {
-    [_newClusterMenuItem setEnabled:!isRefreshing];
-    _newClusterMenuItem.title = isRefreshing ? @"Checking..." : @"New Cluster";
+    [_clusterSetupMenuItem setEnabled:!isRefreshing];
+    _clusterSetupMenuItem.title = isRefreshing ? @"Checking..." : @"New Cluster";
 }
 
 
@@ -214,38 +244,38 @@
 
 - (void)showSetupWindow:(id)sender
 {
-    if(setupWindow && !setupWindow.isClosed) {
+    if(_setupWindow && !_setupWindow.isClosed) {
         [NSApp activateIgnoringOtherApps:YES];
-        [setupWindow showWindow:self];
+        [_setupWindow showWindow:self];
     } else {
-        setupWindow = [[DPSetupWC alloc] initWithWindowNibName:@"DPSetupWC"];
+        _setupWindow = [[DPSetupWC alloc] initWithWindowNibName:@"DPSetupWC"];
         [NSApp activateIgnoringOtherApps:YES];
-        [setupWindow showWindow:self];
-        [[Util getApp] addOpenWindow:setupWindow];
+        [_setupWindow showWindow:self];
+        [[Util getApp] addOpenWindow:_setupWindow];
     }
 }
 
 - (void)preferencesMenuItemClicked:(id)sender {
-    if(preferencesWindow && !preferencesWindow.isClosed) {
+    if(_preferencesWindow && !_preferencesWindow.isClosed) {
         [NSApp activateIgnoringOtherApps:YES];
-        [preferencesWindow showWindow:self];
+        [_preferencesWindow showWindow:self];
     } else {
-        preferencesWindow = [[PCPrefWC alloc] initWithWindowNibName:@"PCPrefWC"];
+        _preferencesWindow = [[PCPrefWC alloc] initWithWindowNibName:@"PCPrefWC"];
         [NSApp activateIgnoringOtherApps:YES];
-        [preferencesWindow showWindow:self];
-        [[Util getApp] addOpenWindow:preferencesWindow];
+        [_preferencesWindow showWindow:self];
+        [[Util getApp] addOpenWindow:_preferencesWindow];
     }
 }
 
 - (void)aboutMenuItemClicked:(id)sender {
-    if(aboutWindow && !aboutWindow.isClosed) {
+    if(_aboutWindow && !_aboutWindow.isClosed) {
         [NSApp activateIgnoringOtherApps:YES];
-        [aboutWindow showWindow:self];
+        [_aboutWindow showWindow:self];
     } else {
-        aboutWindow = [[AboutWindow alloc] initWithWindowNibName:@"AboutWindow"];
+        _aboutWindow = [[AboutWindow alloc] initWithWindowNibName:@"AboutWindow"];
         [NSApp activateIgnoringOtherApps:YES];
-        [aboutWindow showWindow:self];
-        [[Util getApp] addOpenWindow:aboutWindow];
+        [_aboutWindow showWindow:self];
+        [[Util getApp] addOpenWindow:_aboutWindow];
     }
 }
 
@@ -314,7 +344,7 @@
     return nil;
 }
 
-- (void)updateRunningVmCount:(NSNotification*)notification {
+- (void)vagrantUpdateRunningVmCount:(NSNotification*)notification {
     int count = [[notification.userInfo objectForKey:@"count"] intValue];
     
     if (count) {
@@ -325,14 +355,14 @@
     }
 }
 
--(void)updateInstancesCount:(NSNotification*)notification {
+- (void)vagrantUpdateInstancesCount:(NSNotification*)notification {
     return;
     
     int count = [[notification.userInfo objectForKey:@"count"] intValue];
     if (count) {
-        [_newClusterMenuItem setHidden:YES];
+        [_clusterSetupMenuItem setHidden:YES];
     } else {
-        [_newClusterMenuItem setHidden:NO];
+        [_clusterSetupMenuItem setHidden:NO];
     }
 }
 

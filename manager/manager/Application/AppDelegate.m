@@ -12,7 +12,7 @@
 
 #import "Util.h"
 #import "VersionComparison.h"
-#import "NativeMenu.h"
+#import "NativeMenu+Raspberry.h"
 
 
 #import "PCTask.h"
@@ -167,14 +167,14 @@
 
 - (void)updateRunningVmCount {
     [[NSNotificationCenter defaultCenter]
-     postNotificationName:@"vagrant-manager.update-running-vm-count"
+     postNotificationName:kVAGRANT_MANAGER_UPDATE_RUNNING_VM_COUNT
      object:nil
      userInfo:@{@"count": [NSNumber numberWithInt:[_vagManager getRunningVmCount]]}];
 }
 
 - (void)updateInstancesCount {
     [[NSNotificationCenter defaultCenter]
-     postNotificationName:@"vagrant-manager.update-instances-count"
+     postNotificationName:kVAGRANT_MANAGER_UPDATE_INSTANCES_COUNT
      object:nil
      userInfo:@{@"count": [NSNumber numberWithInteger:[[_vagManager getInstances] count]]}];
 }
@@ -187,7 +187,7 @@
         WEAK_SELF(self);
         
         //tell popup controller refreshing has started
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.refreshing-started" object:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_REFRESHING_STARTED object:nil];
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             //tell manager to refresh all instances
             [belf.vagManager refreshInstances];
@@ -195,7 +195,7 @@
             dispatch_async(dispatch_get_main_queue(), ^{
                 //tell popup controller refreshing has ended
                 isRefreshingVagrantMachines = NO;
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.refreshing-ended" object:nil];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_REFRESHING_ENDED object:nil];
                 [belf updateInstancesCount];
                 [belf updateRunningVmCount];
                 
@@ -369,19 +369,19 @@
 
 - (void)vagrantManager:(VagrantManager *)vagrantManger instanceAdded:(VagrantInstance *)instance {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.instance-added" object:nil userInfo:@{@"instance": instance}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_INSTANCE_ADDED object:nil userInfo:@{@"instance": instance}];
     });
 }
 
 - (void)vagrantManager:(VagrantManager *)vagrantManger instanceRemoved:(VagrantInstance *)instance {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.instance-removed" object:nil userInfo:@{@"instance": instance}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_INSTANCE_REMOVED object:nil userInfo:@{@"instance": instance}];
     });
 }
 
 - (void)vagrantManager:(VagrantManager *)vagrantManger instanceUpdated:(VagrantInstance *)oldInstance withInstance:(VagrantInstance *)newInstance {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.instance-updated" object:nil userInfo:@{@"old_instance":oldInstance, @"new_instance":newInstance}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_INSTANCE_UPDATED object:nil userInfo:@{@"old_instance":oldInstance, @"new_instance":newInstance}];
     });
 }
 
@@ -441,11 +441,11 @@
 }
 
 - (void)updater:(SUUpdater *)updater didFindValidUpdate:(SUAppcastItem *)update {
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.update-available" object:nil userInfo:@{@"is_update_available": [NSNumber numberWithBool:YES]}];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_UPDATE_AVAILABLE object:nil userInfo:@{@"is_update_available": [NSNumber numberWithBool:YES]}];
 }
 
 - (void)updaterDidNotFindUpdate:(SUUpdater *)update {
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"vagrant-manager.update-available" object:nil userInfo:@{@"is_update_available": [NSNumber numberWithBool:NO]}];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_UPDATE_AVAILABLE object:nil userInfo:@{@"is_update_available": [NSNumber numberWithBool:NO]}];
 }
 
 - (id<SUVersionComparison>)versionComparatorForUpdater:(SUUpdater *)updater {

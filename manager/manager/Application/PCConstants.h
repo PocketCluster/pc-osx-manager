@@ -47,7 +47,33 @@ extern NSString * const POCKETCAST_GROUP;
 extern const NSUInteger PAGENT_SEND_PORT;
 extern const NSUInteger PAGENT_RECV_PORT;
 
+//------ time settings ------
+extern NSString * const MASTER_TIME_STAMP;
+extern NSString * const MASTER_TIME_ZONE;
+
 //Raspberry collection
 extern NSString * const kRaspberryCollection;
-
 extern NSString * const kPCPrefDefaultTerm;
+
+//Notfication Key
+extern NSString * const kVAGRANT_MANAGER_NOTIFICATION_PREFERENCE_CHANGED;
+extern NSString * const kVAGRANT_MANAGER_INSTANCE_ADDED;
+extern NSString * const kVAGRANT_MANAGER_INSTANCE_REMOVED;
+extern NSString * const kVAGRANT_MANAGER_INSTANCE_UPDATED;
+extern NSString * const kVAGRANT_MANAGER_UPDATE_AVAILABLE;
+extern NSString * const kVAGRANT_MANAGER_REFRESHING_STARTED;
+extern NSString * const kVAGRANT_MANAGER_REFRESHING_ENDED;
+extern NSString * const kVAGRANT_MANAGER_UPDATE_RUNNING_VM_COUNT;
+extern NSString * const kVAGRANT_MANAGER_UPDATE_INSTANCES_COUNT;
+
+
+extern NSString * const kRASPBERRY_MANAGER_NOTIFICATION_PREFERENCE_CHANGED;
+extern NSString * const kRASPBERRY_MANAGER_REFRESHING_STARTED;
+extern NSString * const kRASPBERRY_MANAGER_REFRESHING_ENDED;
+extern NSString * const kRASPBERRY_MANAGER_UPDATE_RUNNING_NODE_COUNT;
+extern NSString * const kRASPBERRY_MANAGER_UPDATE_NODE_COUNT;
+extern NSString * const kRASPBERRY_MANAGER_NODE_UP;
+extern NSString * const kRASPBERRY_MANAGER_NODE_DOWN;
+extern NSString * const kRASPBERRY_MANAGER_NODE_ADDED;
+extern NSString * const kRASPBERRY_MANAGER_NODE_REMOVED;
+extern NSString * const kRASPBERRY_MANAGER_NODE_UPDATED;
