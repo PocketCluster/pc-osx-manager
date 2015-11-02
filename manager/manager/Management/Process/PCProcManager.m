@@ -26,7 +26,9 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
     if(!self.saltMinion){
         PCTask *minion = [[PCTask alloc] init];
         minion.taskCommand = @"salt-minion";
-        minion.delegate = self;
+        
+        //TODO: enabling delegate take 130% of CPU due to crazy # of invokation to NSNotificationCenter - ?
+        //minion.delegate = self;
         self.saltMinion = minion;
         [minion launchTask];
     }
@@ -34,7 +36,9 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
     if(!self.saltMaster){
         PCTask *master = [[PCTask alloc] init];
         master.taskCommand = @"salt-master";
-        master.delegate = self;
+
+        //TODO: enabling delegate take 130% of CPU due to crazy # of invokation to NSNotificationCenter - ?
+        //master.delegate = self;
         self.saltMaster = master;
         [master launchTask];
     }
