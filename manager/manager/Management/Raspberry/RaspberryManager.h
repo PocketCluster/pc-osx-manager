@@ -18,7 +18,7 @@
 - (void)saveClusters;
 - (void)clearClusters;
 
-- (void)refreshRaspberryNodes;
+- (void)refreshRaspberryClusters;
 - (void)refreshTimerState;
 
 - (NSUInteger)liveRaspberryCount;

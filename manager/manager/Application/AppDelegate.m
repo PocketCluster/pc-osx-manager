@@ -80,7 +80,7 @@
         
         [self.rpiManager loadClusters];
         
-        [self.rpiManager refreshRaspberryNodes];
+        [self.rpiManager refreshRaspberryClusters];
         
         [self.rpiManager refreshTimerState];
         

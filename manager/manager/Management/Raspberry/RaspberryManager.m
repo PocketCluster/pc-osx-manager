@@ -19,6 +19,7 @@
 @property (nonatomic, strong, readwrite) NSString *deviceSerial;
 @property (strong, nonatomic) NSTimer *refreshTimer;
 
+- (void)refreshClusters;
 - (void)updateliveRaspberryCount;
 - (void)updateRaspberryCount;
 
@@ -78,6 +79,33 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 }
 
 #pragma mark - Monitoring
+
+- (void)refreshClusters {
+    
+    NSArray *clusters = [self clusters];
+
+    //query all known instances for machines, process in parallel
+    dispatch_group_t queryClusterGroup = dispatch_group_create();
+    dispatch_queue_t queryClusterQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    
+    for(RaspberryCluster *rpic in clusters) {
+        dispatch_group_async(queryClusterGroup, queryClusterQueue, ^{
+            //query instance machines
+            [rpic checkCluster];
+
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter]
+                 postNotificationName:kRASPBERRY_MANAGER_NODE_UPDATED
+                 object:nil
+                 userInfo:@{kRASPBERRY_MANAGER_NODE:rpic}];
+            });
+        });
+    }
+
+    //wait for the machine queries to finish
+    dispatch_group_wait(queryClusterGroup, DISPATCH_TIME_FOREVER);
+}
+
 - (void)updateliveRaspberryCount {
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT
@@ -92,7 +120,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
      userInfo:@{@"count": [NSNumber numberWithUnsignedInteger:[self raspberryCount]]}];
 }
 
-- (void)refreshRaspberryNodes {
+- (void)refreshRaspberryClusters {
     //only run if not already refreshing
     if(!isRefreshingRaspberryNodes) {
         isRefreshingRaspberryNodes = YES;
@@ -103,15 +131,24 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
          object:nil];
 
         WEAK_SELF(self);
+        
+        //tell popup controller refreshing has started
+        [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_REFRESHING_STARTED object:nil];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
-        dispatch_async(dispatch_get_main_queue(), ^{
-            //tell popup controller refreshing has ended
-            isRefreshingRaspberryNodes = NO;
-            [[NSNotificationCenter defaultCenter]
-             postNotificationName:kRASPBERRY_MANAGER_REFRESHING_ENDED
-             object:nil];
-            [belf updateRaspberryCount];
-            [belf updateliveRaspberryCount];
+            //tell manager to refresh all clusters and nodes
+            [belf refreshClusters];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                //tell popup controller refreshing has ended
+                isRefreshingRaspberryNodes = NO;
+                [[NSNotificationCenter defaultCenter]
+                 postNotificationName:kRASPBERRY_MANAGER_REFRESHING_ENDED
+                 object:nil];
+                [belf updateRaspberryCount];
+                [belf updateliveRaspberryCount];
+            });
+            
         });
 
     }
@@ -127,7 +164,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     [NSTimer
      scheduledTimerWithTimeInterval:HEARTBEAT_CHECK_INTERVAL
      target:self
-     selector:@selector(refreshRaspberryNodes)
+     selector:@selector(refreshRaspberryClusters)
      userInfo:nil
      repeats:YES];
 }
@@ -163,6 +200,13 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     
     @synchronized(_clusters) {
         [_clusters addObject:aCluster];
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:kRASPBERRY_MANAGER_NODE_ADDED
+             object:nil
+             userInfo:@{kRASPBERRY_MANAGER_NODE: aCluster}];
+        });
     }
     
     return aCluster;

@@ -32,7 +32,7 @@
 
 - (void)refresh {
     
-    if(self.rpiNode) {
+    if(self.rpiCluster) {
         
         if(!self.menuItem.hasSubmenu) {
             [self.menuItem setSubmenu:[[NSMenu alloc] init]];
@@ -57,8 +57,8 @@
         }
 
         
-        NSUInteger runningCount = [[RaspberryManager sharedManager] liveRaspberryCount];
-        NSUInteger raspberryCount = [[RaspberryManager sharedManager] raspberryCount];
+        NSUInteger runningCount = [self.rpiCluster liveRaspberryCount];
+        NSUInteger raspberryCount = [self.rpiCluster raspberryCount];
         
         if(raspberryCount) {
 
@@ -83,7 +83,7 @@
             self.menuItem.submenu = nil;
         }
         
-        self.menuItem.title = @"Raspberry";
+        self.menuItem.title = self.rpiCluster.title;
         
         //destroy machine menu items
         for(NSMenuItem *machineItem in _nodeMenuItems) {

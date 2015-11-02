@@ -8,7 +8,7 @@
 
 
 #import <AppKit/AppKit.h>
-#import "Raspberry.h"
+#import "RaspberryManager.h"
 
 @class RaspberryMenuItem;
 
@@ -20,7 +20,7 @@
 
 @interface RaspberryMenuItem : NSObject <NSMenuDelegate>
 @property (nonatomic, weak) id<RaspberryMenuItemDelegate> delegate;
-@property (nonatomic, weak) Raspberry *rpiNode;
+@property (nonatomic, weak) RaspberryCluster *rpiCluster;
 @property (nonatomic, strong) NSMenuItem *menuItem;
 
 - (void)refresh;

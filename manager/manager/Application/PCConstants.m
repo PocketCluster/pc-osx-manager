@@ -69,10 +69,10 @@ NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE                    = @"pocketc
 NSString * const kPOCKET_CLUSTER_UPDATE_VALUE                        = @"pocketcluster.is_update_available";
 
 #pragma mark - NOTIFICATION KEY (VAGRANT)
+NSString * const kVAGRANT_MANAGER_NOTIFICATION_PREFERENCE_CHANGED    = @"vagrant-manager.notification-preference-changed";
 NSString * const kVAGRANT_MANAGER_INSTANCE                           = @"vagrant-manager.instance";
 NSString * const kVAGRANT_MANAGER_INSTANCE_OLD                       = @"vagrant-manager.instance.old";
 NSString * const kVAGRANT_MANAGER_INSTANCE_NEW                       = @"vagrant-manager.instance.new";
-NSString * const kVAGRANT_MANAGER_NOTIFICATION_PREFERENCE_CHANGED    = @"vagrant-manager.notification-preference-changed";
 NSString * const kVAGRANT_MANAGER_INSTANCE_ADDED                     = @"vagrant-manager.instance-added";
 NSString * const kVAGRANT_MANAGER_INSTANCE_REMOVED                   = @"vagrant-manager.instance-removed";
 NSString * const kVAGRANT_MANAGER_INSTANCE_UPDATED                   = @"vagrant-manager.instance-updated";
@@ -82,16 +82,12 @@ NSString * const kVAGRANT_MANAGER_UPDATE_RUNNING_VM_COUNT            = @"vagrant
 NSString * const kVAGRANT_MANAGER_UPDATE_INSTANCES_COUNT             = @"vagrant-manager.update-instances-count";
 
 #pragma mark - NOTIFICATION KEY (RASPBERRY)
-NSString * const kRASPBERRY_MANAGER_NODE                             = @"raspberry-manager.node";
 NSString * const kRASPBERRY_MANAGER_NOTIFICATION_PREFERENCE_CHANGED  = @"raspberry-manager.notification-preference-changed";
 NSString * const kRASPBERRY_MANAGER_REFRESHING_STARTED               = @"raspberry-manager.refreshing-started";
 NSString * const kRASPBERRY_MANAGER_REFRESHING_ENDED                 = @"raspberry-manager.refreshing-ended";
 NSString * const kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT           = @"raspberry-manager.update-running-node-count";
 NSString * const kRASPBERRY_MANAGER_UPDATE_NODE_COUNT                = @"raspberry-manager.update-node-count";
-// at least one node is up
-NSString * const kRASPBERRY_MANAGER_NODE_UP                          = @"raspberry-manager.node-up";
-// all nodes are down
-NSString * const kRASPBERRY_MANAGER_NODE_DOWN                        = @"raspberry-manager.node-down";
+NSString * const kRASPBERRY_MANAGER_NODE                             = @"raspberry-manager.node";
 NSString * const kRASPBERRY_MANAGER_NODE_ADDED                       = @"raspberry-manager.node-added";
 NSString * const kRASPBERRY_MANAGER_NODE_REMOVED                     = @"raspberry-manager.node-removed";
 NSString * const kRASPBERRY_MANAGER_NODE_UPDATED                     = @"raspberry-manager.node-updated";

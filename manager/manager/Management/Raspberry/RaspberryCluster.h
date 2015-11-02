@@ -24,5 +24,7 @@
 - (Raspberry*)getRaspberryWithName:(NSString*)aName;
 - (int)getIndexOfRaspberryWithName:(NSString*)aName;
 
+- (void)checkCluster;
+
 -(void)debugOutput;
 @end

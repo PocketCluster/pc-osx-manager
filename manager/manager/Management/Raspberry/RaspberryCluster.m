@@ -139,6 +139,10 @@
     return -1;
 }
 
+- (void)checkCluster {
+    
+}
+
 -(void)debugOutput {
     Log(@"TITLE %@ CID %@ ", _title, _clusterId);
     for (Raspberry *rpi in _raspberries){

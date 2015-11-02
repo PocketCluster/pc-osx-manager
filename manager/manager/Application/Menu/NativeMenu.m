@@ -12,8 +12,6 @@
 
 @interface NativeMenu()
 @property (nonatomic, strong, readwrite) NSMutableArray *menuItems;
-// Application update
-- (void)setUpdateAvailable: (NSNotification*)notification;
 
 // Notification Handlers
 - (void)vagrantRegisterNotifications;
@@ -26,8 +24,10 @@
 
 // Control
 - (void)vagrantRebuildMenu;
+
+// Application update
+- (void)setUpdateAvailable: (NSNotification*)notification;
 - (void)setUpdatesAvailable:(BOOL)updatesAvailable;
-- (void)setIsRefreshing:(BOOL)isRefreshing;
 
 // Native menu item delegate
 - (void)nativeMenuItemUpAllMachines:(NativeMenuItem *)menuItem;
@@ -139,7 +139,6 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantUpdateInstancesCount:)            name:kVAGRANT_MANAGER_UPDATE_INSTANCES_COUNT              object:nil];
 }
 
-
 - (void)vagrantNotificationPreferenceChanged: (NSNotification*)notification {
 }
 
@@ -173,11 +172,6 @@
 
 - (void)vagrantRefreshingEnded: (NSNotification*)notification {
     [self setIsRefreshing:NO];
-}
-
-# pragma mark - Application Update -
-- (void)setUpdateAvailable: (NSNotification*)notification {
-    [self setUpdatesAvailable:[[notification.userInfo objectForKey:kPOCKET_CLUSTER_UPDATE_VALUE] boolValue]];
 }
 
 #pragma mark - Control
@@ -216,6 +210,11 @@
     
     _menuItems = [sortedArray mutableCopy];
     
+}
+
+# pragma mark - Application Update -
+- (void)setUpdateAvailable: (NSNotification*)notification {
+    [self setUpdatesAvailable:[[notification.userInfo objectForKey:kPOCKET_CLUSTER_UPDATE_VALUE] boolValue]];
 }
 
 - (void)setUpdatesAvailable:(BOOL)updatesAvailable {

@@ -11,8 +11,6 @@
 #import "RaspberryMenuItem.h"
 
 @interface NativeMenu(RaspberryPrivate)<RaspberryMenuItemDelegate>
--(void)raspberryNodeUp:(NSNotification *)aNotification;
--(void)raspberryNodeDown:(NSNotification *)aNotification;
 -(void)raspberryNodeAdded:(NSNotification *)aNotification;
 -(void)raspberryNodeRemoved:(NSNotification *)aNotification;
 -(void)raspberryNodeUpdated:(NSNotification *)aNotification;
@@ -23,37 +21,52 @@
 
 -(void)raspberryRebuildMenu;
 
-- (RaspberryMenuItem *)menuItemForNode:(Raspberry *)aNode;
+- (RaspberryMenuItem *)menuItemForCluster:(RaspberryCluster *)aCluster;
 @end
 
 @implementation NativeMenu(Raspberry)
 
 #pragma mark - Notification Handlers
--(void)raspberryNodeUp:(NSNotification *)aNotification {}
--(void)raspberryNodeDown:(NSNotification *)aNotification {}
-
 -(void)raspberryNodeAdded:(NSNotification *)aNotification {
     RaspberryMenuItem *item = [[RaspberryMenuItem alloc] init];
-    [_menuItems addObject:item];
     item.delegate = self;
-    item.rpiNode = [aNotification.userInfo objectForKey:kRASPBERRY_MANAGER_NODE];
-    item.menuItem = [[NSMenuItem alloc] initWithTitle:@"Raspberry" action:nil keyEquivalent:@""];
+    item.rpiCluster = [aNotification.userInfo objectForKey:kRASPBERRY_MANAGER_NODE];
+    item.menuItem = [[NSMenuItem alloc] initWithTitle:item.rpiCluster.title action:nil keyEquivalent:@""];
+    [_menuItems addObject:item];
     [item refresh];
     [self raspberryRebuildMenu];
 }
 
 -(void)raspberryNodeRemoved:(NSNotification *)aNotification {
-    RaspberryMenuItem *item = [self menuItemForNode:[aNotification.userInfo objectForKey:kRASPBERRY_MANAGER_NODE]];
+    RaspberryMenuItem *item = [self menuItemForCluster:[aNotification.userInfo objectForKey:kRASPBERRY_MANAGER_NODE]];
+    if(item == nil){
+        return;
+    }
     [_menuItems removeObject:item];
     [_menu removeItem:item.menuItem];
     [self raspberryRebuildMenu];
 }
 
 -(void)raspberryNodeUpdated:(NSNotification *)aNotification {
+    RaspberryCluster *rpic = [aNotification.userInfo objectForKey:kRASPBERRY_MANAGER_NODE];
+    RaspberryMenuItem *item = [self menuItemForCluster:rpic];
+    if (item == nil) {
+        item = [[RaspberryMenuItem alloc] init];
+        item.delegate = self;
+        item.menuItem = [[NSMenuItem alloc] initWithTitle:rpic.title action:nil keyEquivalent:@""];
+        [_menuItems addObject:item];
+    }
+    item.rpiCluster = rpic;
+    [item refresh];
+    [self raspberryRebuildMenu];
 }
 
--(void)raspberryRefreshingStarted:(NSNotification *)aNotification {}
--(void)raspberryRefreshingEnded:(NSNotification *)aNotification {}
+-(void)raspberryRefreshingStarted:(NSNotification *)aNotification {
+    [self setIsRefreshing:YES];
+}
+-(void)raspberryRefreshingEnded:(NSNotification *)aNotification {
+    [self setIsRefreshing:NO];
+}
 
 -(void)raspberryUpdateRunningNodeCount:(NSNotification *)aNotification {
     NSUInteger count = [[aNotification.userInfo objectForKey:@"count"] unsignedIntegerValue];
@@ -127,13 +140,13 @@
 }
 
 #pragma mark - MISC
-- (RaspberryMenuItem *)menuItemForNode:(Raspberry *)aNode {
+- (RaspberryMenuItem *)menuItemForCluster:(RaspberryCluster *)aNode {
     for (RaspberryMenuItem *rpiMenuItem in _menuItems) {
         if(![rpiMenuItem isKindOfClass:[RaspberryMenuItem class]]){
             continue;
         }
         
-        if (rpiMenuItem.rpiNode == aNode) {
+        if (rpiMenuItem.rpiCluster == aNode) {
             return rpiMenuItem;
         }
     }
@@ -142,8 +155,6 @@
 
 -(void)raspberryRegisterNotifications {
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryNodeUp:)                 name:kRASPBERRY_MANAGER_NODE_UP                     object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryNodeDown:)               name:kRASPBERRY_MANAGER_NODE_DOWN                   object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryNodeAdded:)              name:kRASPBERRY_MANAGER_NODE_ADDED                  object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryNodeRemoved:)            name:kRASPBERRY_MANAGER_NODE_REMOVED                object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryNodeUpdated:)            name:kRASPBERRY_MANAGER_NODE_UPDATED                object:nil];
