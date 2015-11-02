@@ -53,6 +53,10 @@ extern const double BOUNDED_TIMEOUT;
 extern NSString * const MASTER_TIME_STAMP;
 extern NSString * const MASTER_TIME_ZONE;
 
+//------ Webserver path
+extern NSString * const WEB_SERVER_ROOT_PATH;
+extern const int WEB_SERVER_PORT;
+
 //NSUserDefault KEYS
 extern NSString * const kRaspberryCollection;
 extern NSString * const kPCPrefDefaultTerm;
@@ -60,14 +64,13 @@ extern NSString * const kRaspberryClusterArray;
 extern NSString * const kRaspberryClusterId;
 extern NSString * const kRaspberryClusterTitle;
 
+// --- MONITORING MANAGEMENT
 typedef enum PCClusterType {
     PC_CLUSTER_NONE = 0
     ,PC_CLUTER_VAGRANT
     ,PC_CLUSTER_RASPBERRY
     ,PC_CLUSTER_TYPE_SIZE
 } PCClusterType;
-
-// --- MONITORING MANAGEMENT
 extern NSString * const kPCClusterType;
 
 //Notfication Key

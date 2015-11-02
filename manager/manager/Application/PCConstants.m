@@ -55,6 +55,9 @@ const double BOUNDED_TIMEOUT         = 10.0;
 NSString * const MASTER_TIME_STAMP   = @"pc_ma_ts";
 NSString * const MASTER_TIME_ZONE    = @"pc_ma_tz";
 
+//------ Webserver path
+NSString * const WEB_SERVER_ROOT_PATH = @"/bigpkg/archive";
+const int WEB_SERVER_PORT            = 10120;
 
 #pragma mark - NSUserDefaults KEYS
 //Raspberry collection

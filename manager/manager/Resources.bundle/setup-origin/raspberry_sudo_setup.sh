@@ -17,6 +17,7 @@ echo "SUDO_SETUP_STEP_0"
 
 # setup root directories
 mkdir -p /{pocket,bigpkg}
+mkdir -p /bigpkg/archive
 
 # copy vagrant files & modify
 chown -R $SUDO_USER:staff /pocket

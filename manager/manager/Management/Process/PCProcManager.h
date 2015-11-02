@@ -6,12 +6,13 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-
 @interface PCProcManager : NSObject
 +(instancetype)sharedManager;
 
 - (void)startSalt;
 - (void)stopSalt;
 - (void)freshStart;
+
+- (void)startWebServer;
+- (void)stopWebServer;
 @end

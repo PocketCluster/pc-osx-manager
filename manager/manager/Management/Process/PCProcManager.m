@@ -9,8 +9,11 @@
 #import "SynthesizeSingleton.h"
 #import "PCProcManager.h"
 #import "PCTask.h"
+#import "PCConstants.h"
+#import <GCDWebServers/GCDWebServers.h>
 
-@interface PCProcManager()<PCTaskDelegate>
+@interface PCProcManager()<PCTaskDelegate, GCDWebServerDelegate>
+@property (nonatomic, strong) GCDWebServer *webServer;
 @property (nonatomic, strong) PCTask *saltMinion;
 @property (nonatomic, strong) PCTask *saltMaster;
 @property (nonatomic, strong) PCTask *saltClear;
@@ -19,7 +22,15 @@
 
 @implementation PCProcManager
 SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
-
+- (instancetype)init {
+    
+    self = [super init];
+    if (self){
+        self.webServer = [[GCDWebServer alloc] init];
+        self.webServer.delegate = self;
+    }
+    return self;
+}
 
 #pragma mark - SALT MANAGEMENT
 - (void)startSalt {
@@ -83,5 +94,44 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
     return NO;
 }
 
+
+#pragma mark - WebServer Control
+-(void)startWebServer {
+    [_webServer addGETHandlerForBasePath:@"/" directoryPath:WEB_SERVER_ROOT_PATH indexFilename:nil cacheAge:0 allowRangeRequests:YES];
+    
+    NSDictionary *options =
+        @{GCDWebServerOption_Port:@(WEB_SERVER_PORT)
+          ,GCDWebServerOption_RequestNATPortMapping:@(NO)
+          ,GCDWebServerOption_BindToLocalhost:@(NO)};
+
+    return;
+    
+    NSError *error;
+    [_webServer runWithOptions:options error:&error];
+
+}
+
+-(void)stopWebServer {
+    [_webServer stop];
+}
+
+#pragma mark - WebServer Delegates
+- (void)webServerDidStart:(GCDWebServer*)server {
+}
+
+- (void)webServerDidCompleteBonjourRegistration:(GCDWebServer*)server {
+}
+
+- (void)webServerDidUpdateNATPortMapping:(GCDWebServer*)server {
+}
+
+- (void)webServerDidConnect:(GCDWebServer*)server {
+}
+
+- (void)webServerDidDisconnect:(GCDWebServer*)server {
+}
+
+- (void)webServerDidStop:(GCDWebServer*)server {
+}
 
 @end

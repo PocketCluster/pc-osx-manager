@@ -6,25 +6,26 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import "AppDelegate.h"
+
 #import <Sparkle/Sparkle.h>
 #import <Parse/Parse.h>
 
-#import "Util.h"
+#import "PCPrefWC.h"
+#import "TaskOutputWindow.h"
+
 #import "VersionComparison.h"
 #import "NativeMenu+Raspberry.h"
 
-#import "PCTask.h"
-
 #import "VirtualBoxServiceProvider.h"
 #import "VagrantManager.h"
-#import "VagrantInstance.h"
 #import "RaspberryManager.h"
-
-#import "TaskOutputWindow.h"
-
 #import "PCProcManager.h"
-#import "PCPrefWC.h"
+
+#import "PCTask.h"
+#import "Util.h"
+
+#import "AppDelegate.h"
+
 
 @interface AppDelegate ()<SUUpdaterDelegate, VagrantManagerDelegate, NSUserNotificationCenterDelegate, MenuDelegate>
 
@@ -138,7 +139,7 @@
     
     [[PCProcManager sharedManager] freshStart];
     
-    // start webserver
+    [[PCProcManager sharedManager] startWebServer];
     
     [self.rpiManager startMulticastSocket];
     
@@ -176,6 +177,7 @@
     [self.rpiManager stopMulticastSocket];
     
     // stop webserver
+    [[PCProcManager sharedManager] stopWebServer];
 }
 //- (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {[PFAnalytics trackAppOpenedWithRemoteNotificationPayload:userInfo];}
 #pragma mark - WINDOW MANAGEMENT
@@ -504,11 +506,17 @@
 }
 
 - (void)updater:(SUUpdater *)updater didFindValidUpdate:(SUAppcastItem *)update {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kPOCKET_CLUSTER_UPDATE_AVAILABLE object:nil userInfo:@{kPOCKET_CLUSTER_UPDATE_VALUE: [NSNumber numberWithBool:YES]}];
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kPOCKET_CLUSTER_UPDATE_AVAILABLE
+     object:nil
+     userInfo:@{kPOCKET_CLUSTER_UPDATE_VALUE: @(YES)}];
 }
 
 - (void)updaterDidNotFindUpdate:(SUUpdater *)update {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kPOCKET_CLUSTER_UPDATE_AVAILABLE object:nil userInfo:@{kPOCKET_CLUSTER_UPDATE_VALUE: [NSNumber numberWithBool:NO]}];
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kPOCKET_CLUSTER_UPDATE_AVAILABLE
+     object:nil
+     userInfo:@{kPOCKET_CLUSTER_UPDATE_VALUE: @(NO)}];
 }
 
 - (id<SUVersionComparison>)versionComparatorForUpdater:(SUUpdater *)updater {
