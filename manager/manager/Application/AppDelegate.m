@@ -220,7 +220,7 @@
     {
         self.refreshTimer =
             [NSTimer
-             scheduledTimerWithTimeInterval:120//[[NSUserDefaults standardUserDefaults] integerForKey:@"refreshEveryInterval"]
+             scheduledTimerWithTimeInterval:30//[[NSUserDefaults standardUserDefaults] integerForKey:@"refreshEveryInterval"]
              target:self
              selector:@selector(refreshVagrantMachines)
              userInfo:nil
