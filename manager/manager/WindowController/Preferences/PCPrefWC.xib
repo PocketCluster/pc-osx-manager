@@ -16,7 +16,6 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <window title="Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" showsToolbarButton="NO" frameAutosaveName="" animationBehavior="default" id="222">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
-            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="599" y="731" width="487" height="209"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1440" height="877"/>
             <view key="contentView" id="223">
@@ -42,7 +41,7 @@
             <connections>
                 <outlet property="delegate" destination="-2" id="392"/>
             </connections>
-            <point key="canvasLocation" x="500.5" y="216.5"/>
+            <point key="canvasLocation" x="175.5" y="202.5"/>
         </window>
         <customView id="479" userLabel="General Prefs Panel">
             <rect key="frame" x="0.0" y="0.0" width="487" height="209"/>
@@ -90,7 +89,7 @@
                 </textField>
             </subviews>
             <animations/>
-            <point key="canvasLocation" x="529.5" y="527.5"/>
+            <point key="canvasLocation" x="175.5" y="477.5"/>
         </customView>
         <userDefaultsController representsSharedInstance="YES" id="475"/>
     </objects>

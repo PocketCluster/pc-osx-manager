@@ -47,6 +47,18 @@
 		044071561BE70122005B6E6D /* RaspberryCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071551BE70122005B6E6D /* RaspberryCluster.m */; };
 		044071571BE70122005B6E6D /* RaspberryCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071551BE70122005B6E6D /* RaspberryCluster.m */; };
 		044071581BE70122005B6E6D /* RaspberryCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071551BE70122005B6E6D /* RaspberryCluster.m */; };
+		044071631BE741A0005B6E6D /* NativeMenu+Raspberry.m in Sources */ = {isa = PBXBuildFile; fileRef = 0440715C1BE741A0005B6E6D /* NativeMenu+Raspberry.m */; };
+		044071641BE741A0005B6E6D /* NativeMenu+Raspberry.m in Sources */ = {isa = PBXBuildFile; fileRef = 0440715C1BE741A0005B6E6D /* NativeMenu+Raspberry.m */; };
+		044071651BE741A0005B6E6D /* NativeMenu+Raspberry.m in Sources */ = {isa = PBXBuildFile; fileRef = 0440715C1BE741A0005B6E6D /* NativeMenu+Raspberry.m */; };
+		044071661BE741A0005B6E6D /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0440715E1BE741A0005B6E6D /* NativeMenu.m */; };
+		044071671BE741A0005B6E6D /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0440715E1BE741A0005B6E6D /* NativeMenu.m */; };
+		044071681BE741A0005B6E6D /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0440715E1BE741A0005B6E6D /* NativeMenu.m */; };
+		044071691BE741A0005B6E6D /* NativeMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071601BE741A0005B6E6D /* NativeMenuItem.m */; };
+		0440716A1BE741A0005B6E6D /* NativeMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071601BE741A0005B6E6D /* NativeMenuItem.m */; };
+		0440716B1BE741A0005B6E6D /* NativeMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071601BE741A0005B6E6D /* NativeMenuItem.m */; };
+		0440716C1BE741A0005B6E6D /* RaspberryMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071621BE741A0005B6E6D /* RaspberryMenuItem.m */; };
+		0440716D1BE741A0005B6E6D /* RaspberryMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071621BE741A0005B6E6D /* RaspberryMenuItem.m */; };
+		0440716E1BE741A0005B6E6D /* RaspberryMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071621BE741A0005B6E6D /* RaspberryMenuItem.m */; };
 		0441A3D01BD88DDC00AABD7A /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */; };
 		0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; };
 		0441A3E11BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; };
@@ -54,12 +66,6 @@
 		0441A3E31BD8904100AABD7A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D81BD8904100AABD7A /* main.m */; };
 		0441A3E41BD8904100AABD7A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D81BD8904100AABD7A /* main.m */; };
 		0441A3E51BD8904100AABD7A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D81BD8904100AABD7A /* main.m */; };
-		0441A3E61BD8904100AABD7A /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DC1BD8904100AABD7A /* NativeMenu.m */; };
-		0441A3E71BD8904100AABD7A /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DC1BD8904100AABD7A /* NativeMenu.m */; };
-		0441A3E81BD8904100AABD7A /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DC1BD8904100AABD7A /* NativeMenu.m */; };
-		0441A3E91BD8904100AABD7A /* NativeMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DE1BD8904100AABD7A /* NativeMenuItem.m */; };
-		0441A3EA1BD8904100AABD7A /* NativeMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DE1BD8904100AABD7A /* NativeMenuItem.m */; };
-		0441A3EB1BD8904100AABD7A /* NativeMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3DE1BD8904100AABD7A /* NativeMenuItem.m */; };
 		0441A3EF1BD8921600AABD7A /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3EE1BD8921600AABD7A /* Util.m */; };
 		0441A3F01BD8921600AABD7A /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3EE1BD8921600AABD7A /* Util.m */; };
 		0441A3F11BD8921600AABD7A /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3EE1BD8921600AABD7A /* Util.m */; };
@@ -188,11 +194,9 @@
 		04C09D641BE35EDF009E074D /* PCPrefWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C09D601BE35EDF009E074D /* PCPrefWC.xib */; };
 		04C09D651BE35EDF009E074D /* PCPrefWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C09D601BE35EDF009E074D /* PCPrefWC.xib */; };
 		04C09D661BE35EDF009E074D /* PCPrefWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C09D601BE35EDF009E074D /* PCPrefWC.xib */; };
-		04C585831BE5BCF4004B2839 /* RaspberryMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585821BE5BCF4004B2839 /* RaspberryMenuItem.m */; };
 		04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
 		04C585871BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
 		04C585881BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
-		04C5858B1BE5E502004B2839 /* NativeMenu+Raspberry.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C5858A1BE5E502004B2839 /* NativeMenu+Raspberry.m */; };
 		04C601981BE3B040002389AB /* VagrantInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018D1BE3B040002389AB /* VagrantInstance.m */; };
 		04C601991BE3B040002389AB /* VagrantInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018D1BE3B040002389AB /* VagrantInstance.m */; };
 		04C6019A1BE3B040002389AB /* VagrantInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018D1BE3B040002389AB /* VagrantInstance.m */; };
@@ -316,15 +320,19 @@
 		0422D4F51BDA0C2700C5CB33 /* PCTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCTask.m; sourceTree = "<group>"; };
 		044071541BE70122005B6E6D /* RaspberryCluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaspberryCluster.h; sourceTree = "<group>"; };
 		044071551BE70122005B6E6D /* RaspberryCluster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RaspberryCluster.m; sourceTree = "<group>"; };
+		0440715A1BE741A0005B6E6D /* MenuDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MenuDelegate.h; sourceTree = "<group>"; };
+		0440715B1BE741A0005B6E6D /* NativeMenu+Raspberry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NativeMenu+Raspberry.h"; sourceTree = "<group>"; };
+		0440715C1BE741A0005B6E6D /* NativeMenu+Raspberry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NativeMenu+Raspberry.m"; sourceTree = "<group>"; };
+		0440715D1BE741A0005B6E6D /* NativeMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NativeMenu.h; sourceTree = "<group>"; };
+		0440715E1BE741A0005B6E6D /* NativeMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NativeMenu.m; sourceTree = "<group>"; };
+		0440715F1BE741A0005B6E6D /* NativeMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NativeMenuItem.h; sourceTree = "<group>"; };
+		044071601BE741A0005B6E6D /* NativeMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NativeMenuItem.m; sourceTree = "<group>"; };
+		044071611BE741A0005B6E6D /* RaspberryMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaspberryMenuItem.h; sourceTree = "<group>"; };
+		044071621BE741A0005B6E6D /* RaspberryMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RaspberryMenuItem.m; sourceTree = "<group>"; };
 		0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = ../Pods/Sparkle/Sparkle.framework; sourceTree = "<group>"; };
 		0441A3D61BD8904100AABD7A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0441A3D71BD8904100AABD7A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		0441A3D81BD8904100AABD7A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		0441A3DA1BD8904100AABD7A /* MenuDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MenuDelegate.h; sourceTree = "<group>"; };
-		0441A3DB1BD8904100AABD7A /* NativeMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NativeMenu.h; sourceTree = "<group>"; };
-		0441A3DC1BD8904100AABD7A /* NativeMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NativeMenu.m; sourceTree = "<group>"; };
-		0441A3DD1BD8904100AABD7A /* NativeMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NativeMenuItem.h; sourceTree = "<group>"; };
-		0441A3DE1BD8904100AABD7A /* NativeMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NativeMenuItem.m; sourceTree = "<group>"; };
 		0441A3EC1BD8907800AABD7A /* PrefixHeader.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
 		0441A3ED1BD8921600AABD7A /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Util.h; sourceTree = "<group>"; };
 		0441A3EE1BD8921600AABD7A /* Util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Util.m; sourceTree = "<group>"; };
@@ -415,12 +423,8 @@
 		04C09D5E1BE35EDF009E074D /* PCPrefWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPrefWC.h; sourceTree = "<group>"; };
 		04C09D5F1BE35EDF009E074D /* PCPrefWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPrefWC.m; sourceTree = "<group>"; };
 		04C09D601BE35EDF009E074D /* PCPrefWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCPrefWC.xib; sourceTree = "<group>"; };
-		04C585811BE5BCF4004B2839 /* RaspberryMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaspberryMenuItem.h; sourceTree = "<group>"; };
-		04C585821BE5BCF4004B2839 /* RaspberryMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RaspberryMenuItem.m; sourceTree = "<group>"; };
 		04C585841BE5BF3B004B2839 /* PCConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCConstants.h; sourceTree = "<group>"; };
 		04C585851BE5BF3B004B2839 /* PCConstants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCConstants.m; sourceTree = "<group>"; };
-		04C585891BE5E502004B2839 /* NativeMenu+Raspberry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NativeMenu+Raspberry.h"; sourceTree = "<group>"; };
-		04C5858A1BE5E502004B2839 /* NativeMenu+Raspberry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NativeMenu+Raspberry.m"; sourceTree = "<group>"; };
 		04C5858E1BE6357B004B2839 /* NSManagedObjectContext+FetchAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSManagedObjectContext+FetchAdditions.h"; sourceTree = "<group>"; };
 		04C5858F1BE6357B004B2839 /* NSManagedObjectContext+FetchAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObjectContext+FetchAdditions.m"; sourceTree = "<group>"; };
 		04C6018C1BE3B040002389AB /* VagrantInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VagrantInstance.h; sourceTree = "<group>"; };
@@ -550,6 +554,7 @@
 		0422D4F01BDA0C1400C5CB33 /* Management */ = {
 			isa = PBXGroup;
 			children = (
+				044071591BE741A0005B6E6D /* Menu */,
 				04C601AF1BE3B0FA002389AB /* Virtualbox */,
 				04D4072B1BDBC51F00625AD7 /* NetworkStatus */,
 				0422D4F11BDA0C1400C5CB33 /* Raspberry */,
@@ -600,10 +605,25 @@
 			path = Vagrant;
 			sourceTree = "<group>";
 		};
+		044071591BE741A0005B6E6D /* Menu */ = {
+			isa = PBXGroup;
+			children = (
+				0440715A1BE741A0005B6E6D /* MenuDelegate.h */,
+				0440715B1BE741A0005B6E6D /* NativeMenu+Raspberry.h */,
+				0440715C1BE741A0005B6E6D /* NativeMenu+Raspberry.m */,
+				0440715D1BE741A0005B6E6D /* NativeMenu.h */,
+				0440715E1BE741A0005B6E6D /* NativeMenu.m */,
+				0440715F1BE741A0005B6E6D /* NativeMenuItem.h */,
+				044071601BE741A0005B6E6D /* NativeMenuItem.m */,
+				044071611BE741A0005B6E6D /* RaspberryMenuItem.h */,
+				044071621BE741A0005B6E6D /* RaspberryMenuItem.m */,
+			);
+			path = Menu;
+			sourceTree = "<group>";
+		};
 		0441A3D51BD8904100AABD7A /* Application */ = {
 			isa = PBXGroup;
 			children = (
-				0441A3D91BD8904100AABD7A /* Menu */,
 				0441A3F21BD892A400AABD7A /* VersionComparison.h */,
 				0441A3F31BD892A400AABD7A /* VersionComparison.m */,
 				0441A3ED1BD8921600AABD7A /* Util.h */,
@@ -616,22 +636,6 @@
 			);
 			name = Application;
 			path = manager/Application;
-			sourceTree = "<group>";
-		};
-		0441A3D91BD8904100AABD7A /* Menu */ = {
-			isa = PBXGroup;
-			children = (
-				0441A3DA1BD8904100AABD7A /* MenuDelegate.h */,
-				0441A3DB1BD8904100AABD7A /* NativeMenu.h */,
-				0441A3DC1BD8904100AABD7A /* NativeMenu.m */,
-				04C585891BE5E502004B2839 /* NativeMenu+Raspberry.h */,
-				04C5858A1BE5E502004B2839 /* NativeMenu+Raspberry.m */,
-				0441A3DD1BD8904100AABD7A /* NativeMenuItem.h */,
-				0441A3DE1BD8904100AABD7A /* NativeMenuItem.m */,
-				04C585811BE5BCF4004B2839 /* RaspberryMenuItem.h */,
-				04C585821BE5BCF4004B2839 /* RaspberryMenuItem.m */,
-			);
-			path = Menu;
 			sourceTree = "<group>";
 		};
 		046A35B51BD783CE004E0946 /* WindowController */ = {
@@ -1319,6 +1323,7 @@
 			files = (
 				046A361A1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				046A368A1BD795AC004E0946 /* DPSetupWC.m in Sources */,
+				0440716C1BE741A0005B6E6D /* RaspberryMenuItem.m in Sources */,
 				0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */,
 				04C09D611BE35EDF009E074D /* PCPrefWC.m in Sources */,
 				04F7056C1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
@@ -1333,17 +1338,15 @@
 				04C6019B1BE3B040002389AB /* VagrantManager.m in Sources */,
 				041024091BE4DA400083D62E /* Raspberry.m in Sources */,
 				046A36661BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
-				0441A3E61BD8904100AABD7A /* NativeMenu.m in Sources */,
 				04D407361BDBC51F00625AD7 /* LinkInterface.m in Sources */,
 				04D4073C1BDBC51F00625AD7 /* LinkMACAddress.m in Sources */,
-				04C5858B1BE5E502004B2839 /* NativeMenu+Raspberry.m in Sources */,
 				0410240C1BE4DA400083D62E /* RaspberryManager.m in Sources */,
 				046A360E1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
 				0422D4EA1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */,
 				0441A3EF1BD8921600AABD7A /* Util.m in Sources */,
-				0441A3E91BD8904100AABD7A /* NativeMenuItem.m in Sources */,
 				046A360B1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
+				044071661BE741A0005B6E6D /* NativeMenu.m in Sources */,
 				046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				046A36601BD793BB004E0946 /* PCSetup2RPVC.m in Sources */,
 				04C6019E1BE3B040002389AB /* VagrantMachine.m in Sources */,
@@ -1359,18 +1362,19 @@
 				046F96041BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
 				046A366C1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
 				04C601B41BE3B0FA002389AB /* VirtualBoxMachineInfo.m in Sources */,
-				04C585831BE5BCF4004B2839 /* RaspberryMenuItem.m in Sources */,
 				04D407391BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
 				041C46AE1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
 				044071561BE70122005B6E6D /* RaspberryCluster.m in Sources */,
 				041C46AB1BE3674C000D1521 /* SSSelectableToolbar.m in Sources */,
 				04D4073F1BDBC51F00625AD7 /* LinkMACVendors.m in Sources */,
 				04C601B71BE3B0FA002389AB /* VirtualBoxServiceProvider.m in Sources */,
+				044071691BE741A0005B6E6D /* NativeMenuItem.m in Sources */,
 				046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				046A35D31BD7871B004E0946 /* AboutWindow.m in Sources */,
 				0441A3E31BD8904100AABD7A /* main.m in Sources */,
 				04F705691BD7A94300829651 /* BSONSerialization.m in Sources */,
 				0422D4F61BDA0C2700C5CB33 /* PCTask.m in Sources */,
+				044071631BE741A0005B6E6D /* NativeMenu+Raspberry.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1396,8 +1400,9 @@
 				046A361B1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				0486781D1BCF5FE20071594B /* managerTests.m in Sources */,
 				046A366D1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
+				044071641BE741A0005B6E6D /* NativeMenu+Raspberry.m in Sources */,
+				044071671BE741A0005B6E6D /* NativeMenu.m in Sources */,
 				046A36091BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */,
-				0441A3EA1BD8904100AABD7A /* NativeMenuItem.m in Sources */,
 				046A36151BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
 				0422D4E11BDA04A500C5CB33 /* TaskOutputVC.m in Sources */,
 				04C6019F1BE3B040002389AB /* VagrantMachine.m in Sources */,
@@ -1407,6 +1412,7 @@
 				0422D4EB1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */,
 				046A365B1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
 				04F7056A1BD7A94300829651 /* BSONSerialization.m in Sources */,
+				0440716D1BE741A0005B6E6D /* RaspberryMenuItem.m in Sources */,
 				046A36121BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				0422D4F71BDA0C2700C5CB33 /* PCTask.m in Sources */,
 				046A36181BD78AB8004E0946 /* NSString+Random.m in Sources */,
@@ -1426,10 +1432,10 @@
 				046A360F1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
 				046F960A1BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				04C601B51BE3B0FA002389AB /* VirtualBoxMachineInfo.m in Sources */,
-				0441A3E71BD8904100AABD7A /* NativeMenu.m in Sources */,
 				0410240D1BE4DA400083D62E /* RaspberryManager.m in Sources */,
 				04D4073A1BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
 				0441A3F01BD8921600AABD7A /* Util.m in Sources */,
+				0440716A1BE741A0005B6E6D /* NativeMenuItem.m in Sources */,
 				04C6019C1BE3B040002389AB /* VagrantManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1456,8 +1462,9 @@
 				046A361C1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				048678281BCF5FE20071594B /* managerUITests.m in Sources */,
 				046A366E1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
+				044071651BE741A0005B6E6D /* NativeMenu+Raspberry.m in Sources */,
+				044071681BE741A0005B6E6D /* NativeMenu.m in Sources */,
 				046A360A1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */,
-				0441A3EB1BD8904100AABD7A /* NativeMenuItem.m in Sources */,
 				046A36161BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
 				0422D4E21BDA04A500C5CB33 /* TaskOutputVC.m in Sources */,
 				04C601A01BE3B040002389AB /* VagrantMachine.m in Sources */,
@@ -1467,6 +1474,7 @@
 				0422D4EC1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */,
 				046A365C1BD793BB004E0946 /* PCSetup1VC.m in Sources */,
 				04F7056B1BD7A94300829651 /* BSONSerialization.m in Sources */,
+				0440716E1BE741A0005B6E6D /* RaspberryMenuItem.m in Sources */,
 				046A36131BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				0422D4F81BDA0C2700C5CB33 /* PCTask.m in Sources */,
 				046A36191BD78AB8004E0946 /* NSString+Random.m in Sources */,
@@ -1486,10 +1494,10 @@
 				046A36101BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
 				046F960B1BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				04C601B61BE3B0FA002389AB /* VirtualBoxMachineInfo.m in Sources */,
-				0441A3E81BD8904100AABD7A /* NativeMenu.m in Sources */,
 				0410240E1BE4DA400083D62E /* RaspberryManager.m in Sources */,
 				04D4073B1BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
 				0441A3F11BD8921600AABD7A /* Util.m in Sources */,
+				0440716B1BE741A0005B6E6D /* NativeMenuItem.m in Sources */,
 				04C6019D1BE3B040002389AB /* VagrantManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
