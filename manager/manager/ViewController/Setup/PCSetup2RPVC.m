@@ -10,7 +10,6 @@
 
 #import "RaspberryManager.h"
 #import "PCInterfaceList.h"
-#import "DeviceSerialNumber.h"
 #import "BSONSerialization.h"
 #import "Util.h"
 #import "PCTask.h"
@@ -30,8 +29,6 @@
 @property (atomic, strong) NSMutableArray *nodeList;
 @property (strong, nonatomic) NSDictionary *progDict;
 
-
-@property (nonatomic, strong) NSString *deviceSerial;
 @property (nonatomic, strong) NSString *hostName;
 @property (nonatomic, strong) LinkInterface *interface;
 
@@ -54,8 +51,6 @@
                           ,@"USER_SETUP_STEP_2":@[@"USER_SETUP_STEP_2",@90.0]
                           ,@"USER_SETUP_DONE":@[@"USER_SETUP_DONE",@100.0]};
         
-        
-        self.deviceSerial = [[DeviceSerialNumber deviceSerialNumber] lowercaseString];
         self.hostName = [[[NSHost currentHost] localizedName] lowercaseString];
 
         [self refreshInterface];
@@ -112,8 +107,8 @@ withFilterContext:(id)filterContext
     }
 
     if (!doesNodeExist && self.nodeList.count <= MAX_SUPPORTED_NODE){
-        
-        NSString *sn = self.deviceSerial;
+
+        NSString *sn = [[RaspberryManager sharedManager] deviceSerial];
         NSString *hn = self.hostName;
         //NSString *ha = [[NSHost currentHost] address];
         NSString *ha = [self.interface ip4Address];

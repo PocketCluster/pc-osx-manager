@@ -16,7 +16,7 @@
 @property (nonatomic, strong) NSMutableArray *clusters;
 @property (nonatomic, strong) GCDAsyncUdpSocket *multSocket;
 @property (nonatomic, strong) NSMutableArray<GCDAsyncUdpSocketDelegate> *multSockDelegates;
-@property (nonatomic, strong) NSString *deviceSerial;
+@property (nonatomic, strong, readwrite) NSString *deviceSerial;
 @property (strong, nonatomic) NSTimer *refreshTimer;
 
 - (void)updateliveRaspberryCount;
@@ -145,9 +145,6 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 - (NSUInteger)raspberryCount {
     NSUInteger totalCount = 0;
     for (RaspberryCluster *rpic in _clusters) {
-        
-    Log(@"%@",rpic);
-        
         totalCount += [rpic raspberryCount];
     }
     return totalCount;

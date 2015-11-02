@@ -54,7 +54,15 @@
     //create popup and status menu item
     self.nativeMenu = [[NativeMenu alloc] init];
     self.nativeMenu.delegate = self;
+    
+    // create raspberry manager
+    self.rpiManager = [RaspberryManager sharedManager];
 
+    //create vagrant manager
+    self.vagManager = [VagrantManager sharedManager];
+    self.vagManager.delegate = self;
+    [_vagManager registerServiceProvider:[[VirtualBoxServiceProvider alloc] init]];
+    
     // start parse analytics
     [Parse
      setApplicationId:@"HRUYcCC5BZwkUTzbEUmuyglSHzAVo6UpykuTUdqI"
@@ -70,9 +78,6 @@
     if (true){
         [self.nativeMenu raspberryRegisterNotifications];
         
-        // create raspberry manager
-        self.rpiManager = [RaspberryManager sharedManager];
-
         [self.rpiManager loadClusters];
         
         [self.rpiManager refreshRaspberryNodes];
@@ -83,11 +88,6 @@
     }else if(false){
         [self.nativeMenu vagrantRegisterNotifications];
         
-        //create vagrant manager
-        self.vagManager = [VagrantManager sharedManager];
-        self.vagManager.delegate = self;
-        [_vagManager registerServiceProvider:[[VirtualBoxServiceProvider alloc] init]];
-
         //start initial vagrant machine detection
         [self refreshVagrantMachines];
         

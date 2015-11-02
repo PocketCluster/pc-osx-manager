@@ -10,6 +10,7 @@
 #import "GCDAsyncUdpSocket.h"
 
 @interface RaspberryManager : NSObject <GCDAsyncUdpSocketDelegate>
+@property (nonatomic, strong, readonly) NSString *deviceSerial;
 
 + (RaspberryManager *)sharedManager;
 
