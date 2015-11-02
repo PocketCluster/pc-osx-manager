@@ -39,4 +39,6 @@
 - (void)stopMulticastSocket;
 - (void)multicastData:(NSData *)aData;
 
+
+-(void)debugOutput;
 @end

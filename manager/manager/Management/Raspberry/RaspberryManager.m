@@ -393,4 +393,9 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     }
 }
 
+#pragma mark - MISC
+-(void)debugOutput {
+    [_clusters makeObjectsPerformSelector:@selector(debugOutput)];
+}
+
 @end

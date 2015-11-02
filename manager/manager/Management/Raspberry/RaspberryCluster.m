@@ -139,4 +139,11 @@
     return -1;
 }
 
+-(void)debugOutput {
+    Log(@"TITLE %@ CID %@ ", _title, _clusterId);
+    for (Raspberry *rpi in _raspberries){
+        Log(@"\t%@", [rpi description]);
+    }
+}
+
 @end

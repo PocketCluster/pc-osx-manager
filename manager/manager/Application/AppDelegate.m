@@ -83,6 +83,8 @@
         [self.rpiManager refreshRaspberryNodes];
         
         [self.rpiManager refreshTimerState];
+        
+        [self.rpiManager debugOutput];
 
     // vagrant node is built
     }else if(false){

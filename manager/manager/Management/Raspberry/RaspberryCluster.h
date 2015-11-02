@@ -23,4 +23,6 @@
 - (void)removeRaspberryWithName:(NSString*)aName;
 - (Raspberry*)getRaspberryWithName:(NSString*)aName;
 - (int)getIndexOfRaspberryWithName:(NSString*)aName;
+
+-(void)debugOutput;
 @end
