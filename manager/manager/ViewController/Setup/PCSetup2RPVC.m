@@ -245,7 +245,7 @@ withFilterContext:(id)filterContext
     // setup only six nodes
 
     RaspberryCluster *rpic = [[RaspberryCluster alloc] init];
-    [rpic setTitle:@"Raspberries"];
+    [rpic setTitle:@"Cluster 1"];
 
     // save to local configuration
     for (NSUInteger i = 0; i < nodeCount; ++i){

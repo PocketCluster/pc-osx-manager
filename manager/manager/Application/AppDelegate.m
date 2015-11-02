@@ -74,6 +74,13 @@
     [[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
     [[SUUpdater sharedUpdater] checkForUpdateInformation];
     
+    
+    
+    
+    [[RaspberryManager sharedManager] startMulticastSocket];
+     
+    
+    
     // raspberry cluster is built and running
     if (true){
         [self.nativeMenu raspberryRegisterNotifications];

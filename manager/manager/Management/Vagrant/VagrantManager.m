@@ -96,7 +96,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(VagrantManager, sharedManager);
     for(NSString *path in [globalStatusScanner getInstancePaths]) {
         if([path isEqualToString:@"/pocket/boxes"] && ![allPaths containsObject:path]) {
             [allPaths addObject:path];
-            [instances addObject:[[VagrantInstance alloc] initWithPath:path providerIdentifier:nil]];
+            [instances addObject:[[VagrantInstance alloc] initWithPath:path displayName:@"Cluster 1" providerIdentifier:nil]];
         }
     }
 
@@ -108,7 +108,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(VagrantManager, sharedManager);
             //make sure it has not already been detected
             if([path isEqualToString:@"/pocket/boxes"] && ![allPaths containsObject:path]) {
                 [allPaths addObject:path];
-                [instances addObject:[[VagrantInstance alloc] initWithPath:path providerIdentifier:providerIdentifier]];
+                [instances addObject:[[VagrantInstance alloc] initWithPath:path displayName:@"Cluster 1" providerIdentifier:providerIdentifier]];
             }
         }
     }
