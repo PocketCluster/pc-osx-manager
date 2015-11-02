@@ -154,11 +154,16 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     }
 }
 
-- (void)refreshTimerState {
+- (void)haltRefreshTimer {
     if (self.refreshTimer) {
         [self.refreshTimer invalidate];
         self.refreshTimer = nil;
     }
+}
+
+- (void)refreshTimerState {
+
+    [self haltRefreshTimer];
     
     self.refreshTimer =
     [NSTimer

@@ -63,6 +63,7 @@ NSString * const kPCPrefDefaultTerm     = @"default_terminal";
 NSString * const kRaspberryClusterArray = @"raspberryclusterArray";
 NSString * const kRaspberryClusterId    = @"raspberryclusterId";
 NSString * const kRaspberryClusterTitle = @"raspberryclusterTitle";
+NSString * const kPCClusterType         = @"pocketcluster.cluster-type";
 
 #pragma mark - NOTIFICATION KEY (APPLICATION)
 NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE                    = @"pocketcluster.update-available";

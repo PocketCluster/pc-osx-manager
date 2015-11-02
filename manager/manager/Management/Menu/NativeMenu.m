@@ -303,6 +303,7 @@
 }
 
 - (void)quitMenuItemClicked:(id)sender {
+    [[Util getApp] stopMonitoring];
     [[NSApplication sharedApplication] terminate:self];
 }
 

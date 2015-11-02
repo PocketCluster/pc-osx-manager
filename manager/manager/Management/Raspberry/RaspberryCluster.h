@@ -10,12 +10,11 @@
 
 @interface RaspberryCluster : NSObject <NSCoding, NSCopying>
 @property (nonatomic, strong, readonly) NSString *clusterId;
-@property (nonatomic, strong) NSString *title;
+@property (nonatomic, strong, readonly) NSString *title;
 @property (nonatomic, strong, readonly) NSMutableArray *raspberries;
 
-
+- (instancetype)initWithTitle:(NSString *)aTitle;
 - (void)updateHeartBeats:(NSString *)aMasterId withSlaveMAC:(NSString *)aSlaveMac forTS:(struct timeval)heatbeat;
-
 - (Raspberry*)addRaspberry:(Raspberry*)aRaspberry;
 - (NSUInteger)liveRaspberryCount;
 - (NSUInteger)raspberryCount;

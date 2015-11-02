@@ -8,11 +8,19 @@
 
 @class VagrantMachine;
 @class VagrantInstance;
+@class NativeMenu;
+
+#import "PCConstants.h"
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
+@property (readonly) NativeMenu *nativeMenu;
 
-- (void)startSalt;
-- (void)stopSalt;
+- (PCClusterType)loadClusterType;
+- (void)setClusterType:(PCClusterType)aType;
+
+- (void)startRaspberryMonitoring;
+- (void)startVagrantMonitoring;
+- (void)stopMonitoring;
 
 - (void)addOpenWindow:(id)window;
 - (void)removeOpenWindow:(id)window;

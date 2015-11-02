@@ -60,6 +60,16 @@ extern NSString * const kRaspberryClusterArray;
 extern NSString * const kRaspberryClusterId;
 extern NSString * const kRaspberryClusterTitle;
 
+typedef enum PCClusterType {
+    PC_CLUSTER_NONE = 0
+    ,PC_CLUTER_VAGRANT
+    ,PC_CLUSTER_RASPBERRY
+    ,PC_CLUSTER_TYPE_SIZE
+} PCClusterType;
+
+// --- MONITORING MANAGEMENT
+extern NSString * const kPCClusterType;
+
 //Notfication Key
 extern NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE;
 extern NSString * const kPOCKET_CLUSTER_UPDATE_VALUE;

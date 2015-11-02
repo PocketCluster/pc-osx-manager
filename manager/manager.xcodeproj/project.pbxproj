@@ -188,6 +188,9 @@
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
 		0486781D1BCF5FE20071594B /* managerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0486781C1BCF5FE20071594B /* managerTests.m */; };
 		048678281BCF5FE20071594B /* managerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 048678271BCF5FE20071594B /* managerUITests.m */; };
+		049622F11BE778E200FD577A /* PCProcManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 049622F01BE778E200FD577A /* PCProcManager.m */; };
+		049622F21BE778E200FD577A /* PCProcManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 049622F01BE778E200FD577A /* PCProcManager.m */; };
+		049622F31BE778E200FD577A /* PCProcManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 049622F01BE778E200FD577A /* PCProcManager.m */; };
 		04C09D611BE35EDF009E074D /* PCPrefWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C09D5F1BE35EDF009E074D /* PCPrefWC.m */; };
 		04C09D621BE35EDF009E074D /* PCPrefWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C09D5F1BE35EDF009E074D /* PCPrefWC.m */; };
 		04C09D631BE35EDF009E074D /* PCPrefWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C09D5F1BE35EDF009E074D /* PCPrefWC.m */; };
@@ -420,6 +423,8 @@
 		048678231BCF5FE20071594B /* managerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = managerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		048678271BCF5FE20071594B /* managerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = managerUITests.m; sourceTree = "<group>"; };
 		048678291BCF5FE20071594B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		049622EF1BE778E200FD577A /* PCProcManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCProcManager.h; sourceTree = "<group>"; };
+		049622F01BE778E200FD577A /* PCProcManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCProcManager.m; sourceTree = "<group>"; };
 		04C09D5E1BE35EDF009E074D /* PCPrefWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPrefWC.h; sourceTree = "<group>"; };
 		04C09D5F1BE35EDF009E074D /* PCPrefWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPrefWC.m; sourceTree = "<group>"; };
 		04C09D601BE35EDF009E074D /* PCPrefWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCPrefWC.xib; sourceTree = "<group>"; };
@@ -554,6 +559,7 @@
 		0422D4F01BDA0C1400C5CB33 /* Management */ = {
 			isa = PBXGroup;
 			children = (
+				049622EE1BE778D700FD577A /* Process */,
 				044071591BE741A0005B6E6D /* Menu */,
 				04C601AF1BE3B0FA002389AB /* Virtualbox */,
 				04D4072B1BDBC51F00625AD7 /* NetworkStatus */,
@@ -946,6 +952,15 @@
 				048678291BCF5FE20071594B /* Info.plist */,
 			);
 			path = managerUITests;
+			sourceTree = "<group>";
+		};
+		049622EE1BE778D700FD577A /* Process */ = {
+			isa = PBXGroup;
+			children = (
+				049622EF1BE778E200FD577A /* PCProcManager.h */,
+				049622F01BE778E200FD577A /* PCProcManager.m */,
+			);
+			path = Process;
 			sourceTree = "<group>";
 		};
 		04C09D5D1BE35EBE009E074D /* Preferences */ = {
@@ -1362,6 +1377,7 @@
 				046F96041BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
 				046A366C1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
 				04C601B41BE3B0FA002389AB /* VirtualBoxMachineInfo.m in Sources */,
+				049622F11BE778E200FD577A /* PCProcManager.m in Sources */,
 				04D407391BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
 				041C46AE1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
 				044071561BE70122005B6E6D /* RaspberryCluster.m in Sources */,
@@ -1394,6 +1410,7 @@
 				04F7056D1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				0441A3E41BD8904100AABD7A /* main.m in Sources */,
 				046A36671BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
+				049622F21BE778E200FD577A /* PCProcManager.m in Sources */,
 				04C585871BE5BF3B004B2839 /* PCConstants.m in Sources */,
 				044071571BE70122005B6E6D /* RaspberryCluster.m in Sources */,
 				041C46AF1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
@@ -1456,6 +1473,7 @@
 				04F7056E1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				0441A3E51BD8904100AABD7A /* main.m in Sources */,
 				046A36681BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
+				049622F31BE778E200FD577A /* PCProcManager.m in Sources */,
 				04C585881BE5BF3B004B2839 /* PCConstants.m in Sources */,
 				044071581BE70122005B6E6D /* RaspberryCluster.m in Sources */,
 				041C46B01BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,

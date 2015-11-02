@@ -12,14 +12,16 @@
 
 @interface RaspberryCluster()
 @property (nonatomic, strong, readwrite) NSString *clusterId;
+@property (nonatomic, strong, readwrite) NSString *title;
 @property (nonatomic, strong, readwrite) NSMutableArray *raspberries;
 @end
 
 @implementation RaspberryCluster
 
-- (instancetype)init {
+- (instancetype)initWithTitle:(NSString *)aTitle {
     self = [super init];
     if(self){
+        self.title = aTitle;
         self.clusterId = [DeviceSerialNumber UUIDString];
         self.raspberries = [NSMutableArray arrayWithCapacity:0];
     }
@@ -49,7 +51,7 @@
 
     [anEncoder encodeObject:_clusterId forKey:kRaspberryClusterId];
     if(!ISNULL_STRING(_title)){
-        [anEncoder encodeObject:_title forKey:kRaspberryClusterId];
+        [anEncoder encodeObject:_title forKey:kRaspberryClusterTitle];
     }
     [anEncoder encodeObject:_raspberries forKey:kRaspberryClusterArray];
 }

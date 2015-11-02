@@ -22,24 +22,24 @@
 #import "RaspberryManager.h"
 
 #import "TaskOutputWindow.h"
+
+#import "PCProcManager.h"
 #import "PCPrefWC.h"
 
 @interface AppDelegate ()<SUUpdaterDelegate, VagrantManagerDelegate, NSUserNotificationCenterDelegate, MenuDelegate>
+
+- (void)haltRefreshTimer;
 - (void)refreshTimerState;
 - (void)updateProcessType;
 - (void)updateRunningVmCount;
 - (void)updateInstancesCount;
 
+@property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
 @property (nonatomic, strong) VagrantManager *vagManager;
 @property (nonatomic, strong) RaspberryManager *rpiManager;
-@property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
-@property (nonatomic, strong) NSMutableArray *openWindows;
-
 @property (strong, nonatomic) NSTimer *refreshTimer;
 
-@property (nonatomic, strong) PCTask *saltMinion;
-@property (nonatomic, strong) PCTask *saltMaster;
-
+@property (nonatomic, strong) NSMutableArray *openWindows;
 @end
 
 @implementation AppDelegate {
@@ -74,34 +74,27 @@
     [[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
     [[SUUpdater sharedUpdater] checkForUpdateInformation];
     
+#if 0
+    [[NSUserDefaults standardUserDefaults] setObject:nil forKey:kRaspberryCollection];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    [[NSApplication sharedApplication] terminate:self];
+    return;
+#endif
     
-    
-    
-    [[RaspberryManager sharedManager] startMulticastSocket];
-     
-    
-    
-    // raspberry cluster is built and running
-    if (true){
-        [self.nativeMenu raspberryRegisterNotifications];
-        
-        [self.rpiManager loadClusters];
-        
-        [self.rpiManager refreshRaspberryClusters];
-        
-        [self.rpiManager refreshTimerState];
-        
-        [self.rpiManager debugOutput];
+    PCClusterType t = [self loadClusterType];
+    t = PC_CLUSTER_RASPBERRY;
 
-    // vagrant node is built
-    }else if(false){
-        [self.nativeMenu vagrantRegisterNotifications];
-        
-        //start initial vagrant machine detection
-        [self refreshVagrantMachines];
-        
-        //start refresh timer if activated in preferences
-        [self refreshTimerState];
+    switch (t) {
+        case PC_CLUTER_VAGRANT:{
+            [self startVagrantMonitoring];
+            break;
+        }
+        case PC_CLUSTER_RASPBERRY: {
+            [self startRaspberryMonitoring];
+            break;
+        }
+        default:
+            break;
     }
 }
 
@@ -109,37 +102,82 @@
     // Insert code here to tear down your application
 
     [[RaspberryManager sharedManager] stopMulticastSocket];
-    [self stopSalt];
 }
 
+#pragma mark - Monitor Management 
+
+- (PCClusterType)loadClusterType {
+
+    NSNumber *type = nil;
+    @synchronized(self) {
+        type = (NSNumber *)[[NSUserDefaults standardUserDefaults] dataForKey:kPCClusterType];
+    }
+
+    if (type == nil){
+        return PC_CLUSTER_NONE;
+    }else {
+        return (PCClusterType)[type unsignedIntegerValue];
+    }
+}
+
+//save raspberries to shared preferences
+- (void)setClusterType:(PCClusterType)aType {
+    
+    if (aType == PC_CLUSTER_NONE || PC_CLUSTER_TYPE_SIZE <= aType ){
+        return;
+    }
+
+    @synchronized(self) {
+        [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithUnsignedInteger:aType] forKey:kPCClusterType];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+    }
+}
+
+- (void)startRaspberryMonitoring {
+    [self.nativeMenu raspberryRegisterNotifications];
+    
+    [[PCProcManager sharedManager] freshStart];
+    
+    // start webserver
+    
+    [self.rpiManager startMulticastSocket];
+    
+    [self.rpiManager loadClusters];
+    
+    [self.rpiManager refreshRaspberryClusters];
+    
+    [self.rpiManager refreshTimerState];
+    
+    [self.rpiManager debugOutput];
+}
+
+- (void)startVagrantMonitoring {
+    [self.nativeMenu vagrantRegisterNotifications];
+    
+    [[PCProcManager sharedManager] freshStart];
+    
+    //start initial vagrant machine detection
+    [self refreshVagrantMachines];
+    
+    //start refresh timer if activated in preferences
+    [self refreshTimerState];
+}
+
+- (void)stopMonitoring {
+    
+    // stop freshing everything
+    [self.rpiManager haltRefreshTimer];
+    [self haltRefreshTimer];
+    
+    // stop salt
+    [[PCProcManager sharedManager] stopSalt];
+    
+    // stop multicast
+    [self.rpiManager stopMulticastSocket];
+    
+    // stop webserver
+}
 //- (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {[PFAnalytics trackAppOpenedWithRemoteNotificationPayload:userInfo];}
-
-#pragma mark - SALT MANAGEMENT
-- (void)startSalt {
-    if(!self.saltMinion){
-        PCTask *minion = [[PCTask alloc] init];
-        minion.taskCommand = @"salt-minion";
-        self.saltMinion = minion;
-        [minion launchTask];
-    }
-    
-    if(!self.saltMaster){
-        PCTask *master = [[PCTask alloc] init];
-        master.taskCommand = @"salt-master";
-        self.saltMaster = master;
-        [master launchTask];
-    }
-}
-
-- (void)stopSalt {
-    [self.saltMinion cancelTask];
-    self.saltMinion = nil;
-    
-    [self.saltMaster cancelTask];
-    self.saltMaster = nil;
-}
-
-
 #pragma mark - WINDOW MANAGEMENT
 - (void)addOpenWindow:(id)window {
     @synchronized(_openWindows) {
@@ -167,18 +205,22 @@
 }
 
 #pragma mark - VAGRANT MACHINE CONTROL
-
-- (void)refreshTimerState {
+- (void)haltRefreshTimer {
     if (self.refreshTimer) {
         [self.refreshTimer invalidate];
         self.refreshTimer = nil;
     }
+}
 
+- (void)refreshTimerState {
+
+    [self haltRefreshTimer];
+    
     //if ([[NSUserDefaults standardUserDefaults] boolForKey:@"refreshEvery"])
     {
         self.refreshTimer =
             [NSTimer
-             scheduledTimerWithTimeInterval:60//[[NSUserDefaults standardUserDefaults] integerForKey:@"refreshEveryInterval"]
+             scheduledTimerWithTimeInterval:120//[[NSUserDefaults standardUserDefaults] integerForKey:@"refreshEveryInterval"]
              target:self
              selector:@selector(refreshVagrantMachines)
              userInfo:nil
