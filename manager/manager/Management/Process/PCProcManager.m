@@ -17,6 +17,9 @@
 @property (nonatomic, strong) PCTask *saltMinion;
 @property (nonatomic, strong) PCTask *saltMaster;
 @property (nonatomic, strong) PCTask *saltClear;
+
+-(void)_webServerStart;
+-(void)_webServerStop;
 @end
 
 
@@ -26,8 +29,10 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
     
     self = [super init];
     if (self){
-        self.webServer = [[GCDWebServer alloc] init];
-        self.webServer.delegate = self;
+        GCDWebServer *ws = [[GCDWebServer alloc] init];
+        [ws addGETHandlerForBasePath:@"/" directoryPath:WEB_SERVER_ROOT_PATH indexFilename:nil cacheAge:0 allowRangeRequests:YES];
+        [ws setDelegate:self];
+        self.webServer = ws;
     }
     return self;
 }
@@ -77,9 +82,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
 
 #pragma mark - PCTaskDelegate
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
-    
     if (aPCTask == self.saltClear){
-        Log(@"all salt processes killed");
         [self.saltClear cancelTask];
         self.saltClear = nil;
         [self startSalt];
@@ -96,23 +99,30 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
 
 
 #pragma mark - WebServer Control
--(void)startWebServer {
-    [_webServer addGETHandlerForBasePath:@"/" directoryPath:WEB_SERVER_ROOT_PATH indexFilename:nil cacheAge:0 allowRangeRequests:YES];
-    
-    NSDictionary *options =
+
+-(void)_webServerStart {
+    @autoreleasepool {
+        NSDictionary *options =
         @{GCDWebServerOption_Port:@(WEB_SERVER_PORT)
           ,GCDWebServerOption_RequestNATPortMapping:@(NO)
           ,GCDWebServerOption_BindToLocalhost:@(NO)};
+        NSError *error;
+        [self.webServer startWithOptions:options error:&error];
+    }
+}
 
-    return;
-    
-    NSError *error;
-    [_webServer runWithOptions:options error:&error];
+-(void)_webServerStop {
+    @autoreleasepool {
+        [_webServer stop];
+    }
+}
 
+-(void)startWebServer {
+    [self performSelectorInBackground:@selector(_webServerStart) withObject:nil];
 }
 
 -(void)stopWebServer {
-    [_webServer stop];
+    [self performSelectorInBackground:@selector(_webServerStop) withObject:nil];
 }
 
 #pragma mark - WebServer Delegates
