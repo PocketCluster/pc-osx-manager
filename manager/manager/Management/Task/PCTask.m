@@ -78,8 +78,10 @@
     NSFileHandle *fh = [taskOutputPipe fileHandleForReading];
     [fh waitForDataInBackgroundAndNotify];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedOutput:) name:NSFileHandleDataAvailableNotification object:fh];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(taskCompletion:) name: NSTaskDidTerminateNotification object:self.task];
+    if (self.delegate != nil){
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedOutput:) name:NSFileHandleDataAvailableNotification object:fh];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(taskCompletion:) name: NSTaskDidTerminateNotification object:self.task];
+    }
     
     [[self task] launch];
     _isRunning = YES;
@@ -92,8 +94,7 @@
         
         _isRunning = NO;
         
-        if(self.target)
-        {
+        if(self.target) {
             [[NSNotificationCenter defaultCenter]
              postNotificationName:@"vagrant-manager.task-completed"
              object:nil
@@ -109,9 +110,7 @@
     
     @synchronized(self) {
         if(self.delegate && ![self.delegate task:self isOutputClosed:self.delegate]){
-            
             [self.delegate task:self recievedOutput:fh];
-
             if(self.task.isRunning){
                 [fh waitForDataInBackgroundAndNotify];
             }
@@ -124,8 +123,7 @@
 }
 
 #pragma mark - BLOCK IMPLEMENTATION
-- (void)runTaskWithProgressBlock:(void (^)(NSString *output))progress
-{
+- (void)runTaskWithProgressBlock:(void (^)(NSString *output))progress done:(void (^)(NSString *doneMessage))done {
     
     if (!self.task){
         self.task = [self defaultTask];
@@ -153,7 +151,6 @@
     
     dispatch_queue_t taskQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
     dispatch_async(taskQueue, ^{
-        
 
         @try {
             
