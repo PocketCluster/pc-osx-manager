@@ -66,7 +66,6 @@
     [[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
     [[SUUpdater sharedUpdater] checkForUpdateInformation];
     
-    
     // raspberry cluster is built and running
     if (true){
         [self.nativeMenu raspberryRegisterNotifications];
@@ -74,7 +73,7 @@
         // create raspberry manager
         self.rpiManager = [RaspberryManager sharedManager];
 
-        [self.rpiManager loadRaspberries];
+        [self.rpiManager loadClusters];
         
         [self.rpiManager refreshRaspberryNodes];
         

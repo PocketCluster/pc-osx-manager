@@ -44,6 +44,9 @@
 		0422D4F61BDA0C2700C5CB33 /* PCTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4F51BDA0C2700C5CB33 /* PCTask.m */; };
 		0422D4F71BDA0C2700C5CB33 /* PCTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4F51BDA0C2700C5CB33 /* PCTask.m */; };
 		0422D4F81BDA0C2700C5CB33 /* PCTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4F51BDA0C2700C5CB33 /* PCTask.m */; };
+		044071561BE70122005B6E6D /* RaspberryCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071551BE70122005B6E6D /* RaspberryCluster.m */; };
+		044071571BE70122005B6E6D /* RaspberryCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071551BE70122005B6E6D /* RaspberryCluster.m */; };
+		044071581BE70122005B6E6D /* RaspberryCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071551BE70122005B6E6D /* RaspberryCluster.m */; };
 		0441A3D01BD88DDC00AABD7A /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */; };
 		0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; };
 		0441A3E11BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; };
@@ -311,6 +314,8 @@
 		0422D4E91BDA067100C5CB33 /* TaskOutputWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TaskOutputWindow.xib; sourceTree = "<group>"; };
 		0422D4F41BDA0C2700C5CB33 /* PCTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCTask.h; sourceTree = "<group>"; };
 		0422D4F51BDA0C2700C5CB33 /* PCTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCTask.m; sourceTree = "<group>"; };
+		044071541BE70122005B6E6D /* RaspberryCluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaspberryCluster.h; sourceTree = "<group>"; };
+		044071551BE70122005B6E6D /* RaspberryCluster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RaspberryCluster.m; sourceTree = "<group>"; };
 		0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = ../Pods/Sparkle/Sparkle.framework; sourceTree = "<group>"; };
 		0441A3D61BD8904100AABD7A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0441A3D71BD8904100AABD7A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -560,6 +565,8 @@
 			children = (
 				041024051BE4DA400083D62E /* Raspberry.h */,
 				041024061BE4DA400083D62E /* Raspberry.m */,
+				044071541BE70122005B6E6D /* RaspberryCluster.h */,
+				044071551BE70122005B6E6D /* RaspberryCluster.m */,
 				041024071BE4DA400083D62E /* RaspberryManager.h */,
 				041024081BE4DA400083D62E /* RaspberryManager.m */,
 			);
@@ -1355,6 +1362,7 @@
 				04C585831BE5BCF4004B2839 /* RaspberryMenuItem.m in Sources */,
 				04D407391BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
 				041C46AE1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
+				044071561BE70122005B6E6D /* RaspberryCluster.m in Sources */,
 				041C46AB1BE3674C000D1521 /* SSSelectableToolbar.m in Sources */,
 				04D4073F1BDBC51F00625AD7 /* LinkMACVendors.m in Sources */,
 				04C601B71BE3B0FA002389AB /* VirtualBoxServiceProvider.m in Sources */,
@@ -1383,6 +1391,7 @@
 				0441A3E41BD8904100AABD7A /* main.m in Sources */,
 				046A36671BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
 				04C585871BE5BF3B004B2839 /* PCConstants.m in Sources */,
+				044071571BE70122005B6E6D /* RaspberryCluster.m in Sources */,
 				041C46AF1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
 				046A361B1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				0486781D1BCF5FE20071594B /* managerTests.m in Sources */,
@@ -1442,6 +1451,7 @@
 				0441A3E51BD8904100AABD7A /* main.m in Sources */,
 				046A36681BD793BB004E0946 /* PCSetup2VVVC.m in Sources */,
 				04C585881BE5BF3B004B2839 /* PCConstants.m in Sources */,
+				044071581BE70122005B6E6D /* RaspberryCluster.m in Sources */,
 				041C46B01BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
 				046A361C1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				048678281BCF5FE20071594B /* managerUITests.m in Sources */,

@@ -6,24 +6,31 @@
 //
 
 #import "Raspberry.h"
+#import "RaspberryCluster.h"
 #import "GCDAsyncUdpSocket.h"
 
 @interface RaspberryManager : NSObject <GCDAsyncUdpSocketDelegate>
 
 + (RaspberryManager *)sharedManager;
 
-- (void)loadRaspberries;
-- (void)saveRaspberries;
-- (void)clearRaspberries;
+- (void)loadClusters;
+- (void)saveClusters;
+- (void)clearClusters;
 
 - (void)refreshRaspberryNodes;
 - (void)refreshTimerState;
 
 - (NSUInteger)liveRaspberryCount;
 - (NSUInteger)raspberryCount;
-
-- (NSMutableArray<Raspberry *> *)getRaspberries;
-- (Raspberry *) addRaspberry:(Raspberry *)aRaspberry;
+- (NSUInteger)clusterCount;
+- (RaspberryCluster *)addCluster:(RaspberryCluster *)aCluster;
+- (NSMutableArray *)clusters;
+- (void)removeClusterWithTitle:(NSString*)aTitle;
+- (void)removeClusterWithId:(NSString*)anId;
+- (RaspberryCluster *)clusterWithTitle:(NSString*)aTitle;
+- (RaspberryCluster *)clusterWithId:(NSString*)anId;
+- (int)getIndexOfClusterWithTitle:(NSString*)aTitle;
+- (int)getIndexOfClusterWithId:(NSString*)anId;
 
 - (void)addMultDelegateToQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
 - (void)removeMultDelegateFromQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;

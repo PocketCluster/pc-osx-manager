@@ -27,9 +27,24 @@ CFTypeRef CopySerialNumber()
 }
 
 @implementation DeviceSerialNumber
-+ (NSString *)deviceSerialNumber
-{
++ (NSString *)deviceSerialNumber {
     NSString *sn = [(__bridge NSString*)((CFStringRef)CopySerialNumber()) lowercaseString];
     return sn;
+}
+
++ (NSString *)UUIDString {
+    CFUUIDRef theUUID = CFUUIDCreate(NULL);
+    CFStringRef string = CFUUIDCreateString(NULL, theUUID);
+    CFRelease(theUUID);
+
+    // TODO: __bridge_transfer?
+    return (__bridge NSString*)string;
+}
+
++(CFUUIDBytes)UUIDBytes {
+    CFUUIDRef theUUID = CFUUIDCreate(NULL);
+    CFUUIDBytes bytes = CFUUIDGetUUIDBytes(theUUID);
+    CFRelease(theUUID);
+    return bytes;
 }
 @end

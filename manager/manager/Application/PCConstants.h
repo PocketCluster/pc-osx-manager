@@ -53,9 +53,12 @@ extern const double BOUNDED_TIMEOUT;
 extern NSString * const MASTER_TIME_STAMP;
 extern NSString * const MASTER_TIME_ZONE;
 
-//Raspberry collection
+//NSUserDefault KEYS
 extern NSString * const kRaspberryCollection;
 extern NSString * const kPCPrefDefaultTerm;
+extern NSString * const kRaspberryClusterArray;
+extern NSString * const kRaspberryClusterId;
+extern NSString * const kRaspberryClusterTitle;
 
 //Notfication Key
 extern NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE;

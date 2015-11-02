@@ -13,7 +13,7 @@
 #include <sys/time.h>
 
 @interface RaspberryManager()
-@property (nonatomic, strong) NSMutableArray *raspberries;
+@property (nonatomic, strong) NSMutableArray *clusters;
 @property (nonatomic, strong) GCDAsyncUdpSocket *multSocket;
 @property (nonatomic, strong) NSMutableArray<GCDAsyncUdpSocketDelegate> *multSockDelegates;
 @property (nonatomic, strong) NSString *deviceSerial;
@@ -22,9 +22,6 @@
 - (void)updateliveRaspberryCount;
 - (void)updateRaspberryCount;
 
-- (void)removeRaspberryWithName:(NSString*)aName;
-- (Raspberry*)getRaspberryWithName:(NSString*)aName;
-- (int)getIndexOfRaspberryWithName:(NSString*)aName;
 @end
 
 @implementation RaspberryManager {
@@ -38,7 +35,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     
     if(self) {
         isRefreshingRaspberryNodes = NO;
-        self.raspberries = [[NSMutableArray alloc] init];
+        self.clusters = [[NSMutableArray alloc] init];
         self.multSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
         [self.multSocket setIPv6Enabled:NO];
         self.multSockDelegates = [NSMutableArray<GCDAsyncUdpSocketDelegate> arrayWithCapacity:0];
@@ -48,23 +45,23 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     return self;
 }
 
-//load bookmarks from shared preferences
-- (void)loadRaspberries {
-    @synchronized(_raspberries) {
-        [_raspberries removeAllObjects];
+//load raspberries from shared preferences
+- (void)loadClusters {
+    @synchronized(_clusters) {
+        [_clusters removeAllObjects];
         id data = [[NSUserDefaults standardUserDefaults] dataForKey:kRaspberryCollection];
         if(data) {
             NSArray *saved = (NSArray *)[NSKeyedUnarchiver unarchiveObjectWithData:data];
-            [_raspberries addObjectsFromArray:saved];
+            [_clusters addObjectsFromArray:saved];
         }
     }
 }
 
-//save bookmarks to shared preferences
-- (void)saveRaspberries {
-    @synchronized(_raspberries) {
-        NSMutableArray *rpis = [self getRaspberries];
-        if(rpis && [rpis count]) {
+//save raspberries to shared preferences
+- (void)saveClusters {
+    @synchronized(_clusters) {
+        NSMutableArray *rpis = [self clusters];
+        if(rpis != nil && [self raspberryCount] != 0) {
             NSData *data = [NSKeyedArchiver archivedDataWithRootObject:rpis];
             if (data){
                 [[NSUserDefaults standardUserDefaults] setObject:data forKey:kRaspberryCollection];
@@ -74,12 +71,11 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     }
 }
 
-- (void)clearRaspberries {
-    @synchronized(_raspberries) {
-        [_raspberries removeAllObjects];
+- (void)clearClusters {
+    @synchronized(_clusters) {
+        [_clusters removeAllObjects];
     }
 }
-
 
 #pragma mark - Monitoring
 - (void)updateliveRaspberryCount {
@@ -138,51 +134,74 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 
 #pragma mark - MANAGING RAPSBERRY NODES
 
-- (Raspberry*)addRaspberry:(Raspberry*)aRaspberry {
-    Raspberry *existing = [self getRaspberryWithName:aRaspberry.slaveNodeName];
+- (NSUInteger)liveRaspberryCount {
+    NSUInteger totalLiveCount = 0;
+    for (RaspberryCluster *rpic in _clusters) {
+        totalLiveCount += [rpic liveRaspberryCount];
+    }
+    return totalLiveCount;
+}
+
+- (NSUInteger)raspberryCount {
+    NSUInteger totalCount = 0;
+    for (RaspberryCluster *rpic in _clusters) {
+        
+    Log(@"%@",rpic);
+        
+        totalCount += [rpic raspberryCount];
+    }
+    return totalCount;
+}
+
+- (NSUInteger)clusterCount {
+    return [_clusters count];
+}
+
+- (RaspberryCluster *)addCluster:(RaspberryCluster *)aCluster {
+    RaspberryCluster *existing = [self clusterWithId:aCluster.clusterId];
     
     if(existing) {
         return existing;
     }
     
-    @synchronized(_raspberries) {
-        [_raspberries addObject:aRaspberry];
+    @synchronized(_clusters) {
+        [_clusters addObject:aCluster];
     }
     
-    return aRaspberry;
+    return aCluster;
 }
 
-- (NSUInteger)liveRaspberryCount {
-    NSArray *filtered = [_raspberries filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(SELF.isAlive == YES)"]];
-    return [filtered count];
-}
-
-- (NSUInteger)raspberryCount {
-    return [self.raspberries count];
-}
-
-- (NSMutableArray*)getRaspberries {
-    NSMutableArray *bookmarks;
-    @synchronized(_raspberries) {
-        bookmarks = [NSMutableArray arrayWithArray:_raspberries];
+- (NSMutableArray*)clusters {
+    NSMutableArray *rpicluster;
+    @synchronized(_clusters) {
+        rpicluster = [NSMutableArray arrayWithArray:_clusters];
     }
-    return bookmarks;
+    return rpicluster;
 }
 
-- (void)removeRaspberryWithName:(NSString*)aName {
-    Raspberry *bookmark = [self getRaspberryWithName:aName];
-    if(bookmark) {
-        @synchronized(_raspberries) {
-            [_raspberries removeObject:bookmark];
+- (void)removeClusterWithTitle:(NSString*)aTitle {
+    RaspberryCluster *rpic = [self clusterWithTitle:aTitle];
+    if(rpic) {
+        @synchronized(_clusters) {
+            [_clusters removeObject:aTitle];
         }
     }
 }
 
-- (Raspberry*)getRaspberryWithName:(NSString*)aName {
-    @synchronized(_raspberries) {
-        for(Raspberry *rpi in _raspberries) {
-            if([rpi.slaveNodeName isEqualToString:aName]) {
-                return rpi;
+- (void)removeClusterWithId:(NSString*)anId {
+    RaspberryCluster *rpic = [self clusterWithId:anId];
+    if(rpic) {
+        @synchronized(_clusters) {
+            [_clusters removeObject:rpic];
+        }
+    }
+}
+
+- (RaspberryCluster *)clusterWithTitle:(NSString*)aTitle {
+    @synchronized(_clusters) {
+        for(RaspberryCluster *rpic in _clusters) {
+            if([rpic.title isEqualToString:aTitle]) {
+                return rpic;
             }
         }
     }
@@ -190,10 +209,23 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     return nil;
 }
 
-- (int)getIndexOfRaspberryWithName:(NSString*)aName {
-    for(int i=0; i<_raspberries.count; ++i) {
-        Raspberry *rpi = [_raspberries objectAtIndex:i];
-        if([rpi.slaveNodeName isEqualToString:aName]) {
+- (RaspberryCluster *)clusterWithId:(NSString*)anId {
+    @synchronized(_clusters) {
+        for(RaspberryCluster *rpic in _clusters) {
+            if([rpic.clusterId isEqualToString:anId]) {
+                return rpic;
+            }
+        }
+    }
+
+    return nil;
+}
+
+
+- (int)getIndexOfClusterWithTitle:(NSString*)aTitle {
+    for(int i=0; i<_clusters.count; ++i) {
+        RaspberryCluster *rpic = [_clusters objectAtIndex:i];
+        if([rpic.title isEqualToString:aTitle]) {
             return i;
         }
     }
@@ -201,6 +233,16 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     return -1;
 }
 
+- (int)getIndexOfClusterWithId:(NSString*)anId {
+    for(int i=0; i<_clusters.count; ++i) {
+        RaspberryCluster *rpic = [_clusters objectAtIndex:i];
+        if([rpic.clusterId isEqualToString:anId]) {
+            return i;
+        }
+    }
+    
+    return -1;
+}
 
 
 #pragma mark - GCDAsyncUdpSocket MANAGEMENT
@@ -323,15 +365,13 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     
     __block NSString * const sn = self.deviceSerial;
     __block NSDictionary * const node =[NSDictionary dictionaryWithBSON:data];
+    __block NSString *slaveMac = [node objectForKey:SLAVE_NODE_MACADDR];
     
     // check heartbeat
-    @synchronized(self.raspberries) {
-        [_raspberries enumerateObjectsUsingBlock:^(Raspberry*  _Nonnull rpi, NSUInteger idx, BOOL * _Nonnull stop) {
-            if([rpi.masterBoundAgent isEqualToString:sn] && [rpi.slaveNodeMacAddr isEqualToString:[node objectForKey:SLAVE_NODE_MACADDR]]){
-                rpi.heartbeat = tv;
-            }
+    @synchronized(_clusters) {
+        [_clusters enumerateObjectsUsingBlock:^(RaspberryCluster*  _Nonnull rpic, NSUInteger idx, BOOL * _Nonnull stop) {
+            [rpic updateHeartBeats:sn withSlaveMAC:slaveMac forTS:tv];
         }];
-        
     }
     
     @synchronized(self.multSockDelegates) {

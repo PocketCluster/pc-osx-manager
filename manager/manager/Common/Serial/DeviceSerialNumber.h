@@ -10,8 +10,9 @@
 
 extern CFTypeRef CopySerialNumber(void);
 
-
 @interface DeviceSerialNumber : NSObject
 + (NSString *)deviceSerialNumber;
++ (NSString *)UUIDString;
++ (CFUUIDBytes)UUIDBytes;
 @end
 

@@ -249,15 +249,19 @@ withFilterContext:(id)filterContext
 
     // setup only six nodes
 
+    RaspberryCluster *rpic = [[RaspberryCluster alloc] init];
+    
     // save to local configuration
     for (NSUInteger i = 0; i < nodeCount; ++i){
         NSDictionary *node = [self.nodeList objectAtIndex:i];
-        [[RaspberryManager sharedManager] addRaspberry:[[Raspberry alloc] initWithDictionary:node]];
+        [rpic addRaspberry:[[Raspberry alloc] initWithDictionary:node]];
         //[[Util getApp] multicastData:[node BSONRepresentation]];
         sleep(1);
     }
 
-    [[RaspberryManager sharedManager] saveRaspberries];
+    [[RaspberryManager sharedManager] addCluster:rpic];
+    [[RaspberryManager sharedManager] saveClusters];
+    
     
     NSMutableString *nodeip = [NSMutableString new];
     for (NSUInteger i = 0; i < nodeCount; ++i){

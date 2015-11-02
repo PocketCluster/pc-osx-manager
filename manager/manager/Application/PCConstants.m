@@ -52,14 +52,17 @@ const double UNBOUNDED_TIMEOUT       = 3.0;
 const double BOUNDED_TIMEOUT         = 10.0;
 
 //------ time settings ------
-NSString * const MASTER_TIME_STAMP  = @"pc_ma_ts";
-NSString * const MASTER_TIME_ZONE   = @"pc_ma_tz";
+NSString * const MASTER_TIME_STAMP   = @"pc_ma_ts";
+NSString * const MASTER_TIME_ZONE    = @"pc_ma_tz";
 
 
 #pragma mark - NSUserDefaults KEYS
 //Raspberry collection
 NSString * const kRaspberryCollection   = @"raspberries";
 NSString * const kPCPrefDefaultTerm     = @"default_terminal";
+NSString * const kRaspberryClusterArray = @"raspberryclusterArray";
+NSString * const kRaspberryClusterId    = @"raspberryclusterId";
+NSString * const kRaspberryClusterTitle = @"raspberryclusterTitle";
 
 #pragma mark - NOTIFICATION KEY (APPLICATION)
 NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE                    = @"pocketcluster.update-available";
