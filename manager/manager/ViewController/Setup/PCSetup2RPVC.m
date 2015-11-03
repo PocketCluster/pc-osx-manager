@@ -37,7 +37,8 @@
 @property (readwrite, nonatomic) BOOL canGoBack;
 
 -(void)refreshInterface;
--(void)setToNextStage;
+- (void)setToNextStage;
+- (void)removeViewControler;
 @end
 
 @implementation PCSetup2RPVC
@@ -307,12 +308,14 @@ withFilterContext:(id)filterContext
 }
 
 - (void)didRevertToPreviousStage {
-    
+    [self performSelector:@selector(removeViewControler) withObject:nil afterDelay:2.0];
+}
+
+- (void)removeViewControler {
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kDPNotification_deleteViewController
      object:self
      userInfo:@{kDPNotification_key_viewController:self}];
-    
 }
 
 @end

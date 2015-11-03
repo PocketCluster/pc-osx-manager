@@ -261,20 +261,11 @@
     [[Util getApp] refreshVagrantMachines];
 }
 
-- (void)showSetupWindow:(id)sender
-{
-    if(_setupWindow) {
-        if(_setupWindow.isClosed) {
-            [NSApp activateIgnoringOtherApps:YES];
-            [_setupWindow resetSetupStage];
-            [_setupWindow showWindow:[Util getApp]];
-            [_setupWindow bringToFront];
-            [[Util getApp] addOpenWindow:_setupWindow];
-        }else{
-            [NSApp activateIgnoringOtherApps:YES];
-            [_setupWindow showWindow:[Util getApp]];
-            [_setupWindow bringToFront];
-        }
+- (void)showSetupWindow:(id)sender {
+    if(_setupWindow && !_setupWindow.isClosed) {
+        [NSApp activateIgnoringOtherApps:YES];
+        [_setupWindow showWindow:[Util getApp]];
+        [_setupWindow bringToFront];
     } else {
         _setupWindow = [[DPSetupWC alloc] initWithWindowNibName:@"DPSetupWC"];
         [NSApp activateIgnoringOtherApps:YES];

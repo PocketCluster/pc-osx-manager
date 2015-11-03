@@ -20,7 +20,8 @@
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
 
--(void)setToNextStage;
+- (void)setToNextStage;
+- (void)removeViewControler;
 @end
 
 @implementation PCSetup2VVVC
@@ -109,7 +110,7 @@
     [self setToNextStage];
     return;
     
-    NSString *basePath    = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
+    NSString *basePath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
     NSString *sudoSetup = [NSString stringWithFormat:@"%@/setup/vagrant_sudo_setup.sh",basePath];
     
     PCTask *sudoTask = [PCTask new];
@@ -143,12 +144,14 @@
 }
 
 - (void)didRevertToPreviousStage {
-    
+    [self performSelector:@selector(removeViewControler) withObject:nil afterDelay:2.0];
+}
+
+- (void)removeViewControler {
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kDPNotification_deleteViewController
      object:self
      userInfo:@{kDPNotification_key_viewController:self}];
-
 }
 
 @end
