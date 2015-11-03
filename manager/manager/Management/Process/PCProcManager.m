@@ -12,6 +12,8 @@
 #import "PCConstants.h"
 #import <GCDWebServers/GCDWebServers.h>
 
+//#define THREADED_SERVER 1
+
 @interface PCProcManager()<PCTaskDelegate, GCDWebServerDelegate>
 @property (nonatomic, strong) GCDWebServer *webServer;
 @property (nonatomic, strong) PCTask *saltMinion;
@@ -132,8 +134,12 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
     if(_isWebServerRunning){
         return;
     }
-    
+
+#ifdef THREADED_SERVER
     [self performSelectorInBackground:@selector(_webServerStart) withObject:nil];
+#else
+    [self _webServerStart];
+#endif
 }
 
 -(void)stopWebServer {
@@ -141,8 +147,11 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
     if (!_isWebServerRunning){
         return;
     }
-    
+#ifdef THREADED_SERVER
     [self performSelectorInBackground:@selector(_webServerStop) withObject:nil];
+#else
+    [self _webServerStop];
+#endif
 }
 
 #pragma mark - WebServer Delegates
