@@ -28,6 +28,7 @@
 @implementation RaspberryManager {
     BOOL isRefreshingRaspberryNodes;
     int queuedRefreshes;
+    volatile bool _isMulticastSocketOpen;
 }
 SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 
@@ -41,6 +42,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
         [self.multSocket setIPv6Enabled:NO];
         self.multSockDelegates = [NSMutableArray<GCDAsyncUdpSocketDelegate> arrayWithCapacity:0];
         self.deviceSerial = [[DeviceSerialNumber deviceSerialNumber] lowercaseString];
+        _isMulticastSocketOpen = false;
     }
 
     return self;
@@ -305,28 +307,42 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     }
 }
 
--(void)startMulticastSocket
-{
+-(void)startMulticastSocket {
+    if(_isMulticastSocketOpen){
+        return;
+    }
+    
     // START udp echo server
     NSError *error = nil;
-    if (![self.multSocket bindToPort:PAGENT_SEND_PORT error:&error])
-    {
+    if (![self.multSocket bindToPort:PAGENT_SEND_PORT error:&error]) {
         Log(@"Error starting server (bind): %@", error);
+        _isMulticastSocketOpen = false;
         return;
     }
     
-    [self.multSocket joinMulticastGroup:POCKETCAST_GROUP error:&error];
+    if (![self.multSocket joinMulticastGroup:POCKETCAST_GROUP error:&error]) {
+        Log(@"Error start join muticast Group %@", error);
+        _isMulticastSocketOpen = false;
+        return;
+    }
     
-    if (![self.multSocket beginReceiving:&error])
-    {
+    if (![self.multSocket beginReceiving:&error]) {
         [self.multSocket close];
+        _isMulticastSocketOpen = false;
         return;
     }
+    
+    _isMulticastSocketOpen = true;
 }
 
-- (void)stopMulticastSocket
-{
+- (void)stopMulticastSocket {
+    
+    if(!_isMulticastSocketOpen){
+        return;
+    }
+    
     [self.multSocket closeAfterSending];
+    _isMulticastSocketOpen = false;
 }
 
 - (void)multicastData:(NSData *)aData

@@ -75,7 +75,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
     }
 }
 
-- (void)freshStart {
+- (void)freshSaltStart {
 
     if(self.saltMinion != nil && self.saltMaster != nil){
         return;
@@ -122,7 +122,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
 
 -(void)_webServerStop {
     @autoreleasepool {
-        [_webServer stop];
+        [self.webServer stop];
     }
     _isWebServerRunning = false;
 }
@@ -137,6 +137,11 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
 }
 
 -(void)stopWebServer {
+
+    if (!_isWebServerRunning){
+        return;
+    }
+    
     [self performSelectorInBackground:@selector(_webServerStop) withObject:nil];
 }
 

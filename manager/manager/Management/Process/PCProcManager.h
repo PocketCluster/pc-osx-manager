@@ -11,7 +11,7 @@
 
 - (void)startSalt;
 - (void)stopSalt;
-- (void)freshStart;
+- (void)freshSaltStart;
 
 - (void)startWebServer;
 - (void)stopWebServer;

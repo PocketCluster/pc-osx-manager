@@ -28,7 +28,6 @@
 
 
 @interface AppDelegate ()<SUUpdaterDelegate, VagrantManagerDelegate, NSUserNotificationCenterDelegate, MenuDelegate>
-
 - (void)haltRefreshTimer;
 - (void)refreshTimerState;
 - (void)updateProcessType;
@@ -94,15 +93,17 @@
             [self startRaspberryMonitoring];
             break;
         }
+        case PC_CLUSTER_NONE: {
+            [self startBasicServices];
+            break;
+        }
         default:
             break;
     }
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
-    // Insert code here to tear down your application
-
-    [[RaspberryManager sharedManager] stopMulticastSocket];
+    [self stopMonitoring];
 }
 
 #pragma mark - Monitor Management 
@@ -134,10 +135,21 @@
     }
 }
 
+// when there is no cluster registered, this basic service is there to provide basic server capacity
+- (void)startBasicServices {
+    [[PCProcManager sharedManager] startWebServer];
+    [self.rpiManager startMulticastSocket];
+}
+
+- (void)stopBasicServices {
+    [[PCProcManager sharedManager] stopWebServer];
+    [self.rpiManager stopMulticastSocket];
+}
+
 - (void)startRaspberryMonitoring {
     [self.nativeMenu raspberryRegisterNotifications];
     
-    [[PCProcManager sharedManager] freshStart];
+    [[PCProcManager sharedManager] freshSaltStart];
     
     [[PCProcManager sharedManager] startWebServer];
     
@@ -155,7 +167,7 @@
 - (void)startVagrantMonitoring {
     [self.nativeMenu vagrantRegisterNotifications];
     
-    [[PCProcManager sharedManager] freshStart];
+    [[PCProcManager sharedManager] freshSaltStart];
     
     //start initial vagrant machine detection
     [self refreshVagrantMachines];
@@ -178,7 +190,10 @@
     
     // stop webserver
     [[PCProcManager sharedManager] stopWebServer];
+    
+    [self.nativeMenu deregisterNotifications];
 }
+
 //- (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {[PFAnalytics trackAppOpenedWithRemoteNotificationPayload:userInfo];}
 #pragma mark - WINDOW MANAGEMENT
 - (void)addOpenWindow:(id)window {

@@ -123,10 +123,14 @@
 }
 
 -(void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self deregisterNotifications];
 }
 
 #pragma mark - Notification Handlers
+
+- (void)deregisterNotifications {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 
 - (void)vagrantRegisterNotifications {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(vagrantNotificationPreferenceChanged:)   name:kVAGRANT_MANAGER_NOTIFICATION_PREFERENCE_CHANGED     object:nil];

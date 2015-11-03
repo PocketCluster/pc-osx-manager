@@ -6,15 +6,10 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import "DPSetupWC.h"
-
 #import "DPSetupWindow.h"
+#import "DPSetupWC.h"
 #import "PCSetup1VC.h"
-
 #import "Util.h"
-
-@interface DPSetupWC ()
-@end
 
 @implementation DPSetupWC
 

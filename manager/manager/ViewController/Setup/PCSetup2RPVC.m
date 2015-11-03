@@ -78,6 +78,8 @@
 }
 
 -(void)dealloc {
+    Log(@"%s",__PRETTY_FUNCTION__);
+    
     [[RaspberryManager sharedManager] removeMultDelegateFromQueue:self];
 }
 
@@ -267,7 +269,6 @@ withFilterContext:(id)filterContext
     [[RaspberryManager sharedManager] addCluster:rpic];
     [[RaspberryManager sharedManager] saveClusters];
     
-    
     NSMutableString *nodeip = [NSMutableString new];
     for (NSUInteger i = 0; i < nodeCount; ++i){
         NSDictionary *node = [self.nodeList objectAtIndex:i];
@@ -308,6 +309,7 @@ withFilterContext:(id)filterContext
 }
 
 - (void)didRevertToPreviousStage {
+    [[RaspberryManager sharedManager] removeMultDelegateFromQueue:self];
     [self performSelector:@selector(removeViewControler) withObject:nil afterDelay:2.0];
 }
 

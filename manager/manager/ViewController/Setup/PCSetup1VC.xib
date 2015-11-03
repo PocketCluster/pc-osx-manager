@@ -55,7 +55,7 @@
                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4Es-Nc-GRF">
                     <rect key="frame" x="189" y="32" width="183" height="75"/>
                     <animations/>
-                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Setup a Raspberry Pi cluster of up to six nodes." id="Cwg-Qb-AJ8">
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Setup a Raspberry Pi 2 cluster of up to 6-nodes." id="Cwg-Qb-AJ8">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>

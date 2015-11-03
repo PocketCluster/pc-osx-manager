@@ -44,5 +44,6 @@
 @property (weak) id<MenuDelegate> delegate;
 
 - (void)vagrantRegisterNotifications;
+- (void)deregisterNotifications;
 - (void)setIsRefreshing:(BOOL)isRefreshing;
 @end
