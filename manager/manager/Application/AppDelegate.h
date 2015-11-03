@@ -18,8 +18,12 @@
 - (PCClusterType)loadClusterType;
 - (void)setClusterType:(PCClusterType)aType;
 
+// setup specific services
 - (void)startBasicServices;
 - (void)stopBasicServices;
+- (void)startRaspberrySetupService;
+- (void)startVagrantSetupService;
+
 - (void)startRaspberryMonitoring;
 - (void)startVagrantMonitoring;
 - (void)stopMonitoring;

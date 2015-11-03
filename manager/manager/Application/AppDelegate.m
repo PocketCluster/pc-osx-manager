@@ -106,7 +106,7 @@
     [self stopMonitoring];
 }
 
-#pragma mark - Monitor Management 
+#pragma mark - Cluster Type
 
 - (PCClusterType)loadClusterType {
 
@@ -135,6 +135,7 @@
     }
 }
 
+#pragma mark - Setup Services
 // when there is no cluster registered, this basic service is there to provide basic server capacity
 - (void)startBasicServices {
     [[PCProcManager sharedManager] startWebServer];
@@ -146,6 +147,31 @@
     [self.rpiManager stopMulticastSocket];
 }
 
+- (void)startRaspberrySetupService {
+    [self.nativeMenu raspberryRegisterNotifications];
+    
+//    [[PCProcManager sharedManager] freshSaltStart];
+    
+    [self.rpiManager refreshRaspberryClusters];
+    
+    [self.rpiManager refreshTimerState];
+    
+    [self.rpiManager debugOutput];
+}
+
+- (void)startVagrantSetupService {
+    [self.nativeMenu vagrantRegisterNotifications];
+    
+//    [[PCProcManager sharedManager] freshSaltStart];
+    
+    //start initial vagrant machine detection
+    [self refreshVagrantMachines];
+    
+    //start refresh timer if activated in preferences
+    [self refreshTimerState];
+}
+
+#pragma mark - Monitor Management
 - (void)startRaspberryMonitoring {
     [self.nativeMenu raspberryRegisterNotifications];
     

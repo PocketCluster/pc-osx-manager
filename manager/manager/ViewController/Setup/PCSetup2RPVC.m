@@ -234,6 +234,10 @@ withFilterContext:(id)filterContext
 #pragma mark - IBACTION
 -(IBAction)build:(id)sender
 {
+    
+    [self setToNextStage];
+    return;
+
     // update interface status
     [self refreshInterface];
     
