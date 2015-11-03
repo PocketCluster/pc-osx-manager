@@ -267,16 +267,21 @@
 
 - (void)showSetupWindow:(id)sender {
     if(_setupWindow && !_setupWindow.isClosed) {
+        Log(@"case #1");
         [NSApp activateIgnoringOtherApps:YES];
-        [_setupWindow showWindow:[Util getApp]];
+        [_setupWindow showWindow:self];
         [_setupWindow bringToFront];
     } else {
-        _setupWindow = [[DPSetupWC alloc] initWithWindowNibName:@"DPSetupWC"];
+        Log(@"case #2");
+        self.setupWindow = nil;
+        __strong DPSetupWC *sw = [[DPSetupWC alloc] initWithWindowNibName:@"DPSetupWC"];
         [NSApp activateIgnoringOtherApps:YES];
-        [_setupWindow resetSetupStage];
-        [_setupWindow showWindow:[Util getApp]];
-        [_setupWindow bringToFront];
-        [[Util getApp] addOpenWindow:_setupWindow];
+        [sw resetSetupStage];
+        [sw showWindow:self];
+        [sw bringToFront];
+        [[Util getApp] addOpenWindow:sw];
+        self.setupWindow = sw;
+        sw = nil;
     }
 }
 

@@ -198,15 +198,20 @@
 #pragma mark - WINDOW MANAGEMENT
 - (void)addOpenWindow:(id)window {
     @synchronized(_openWindows) {
+        Log(@"%s %@", __PRETTY_FUNCTION__, _openWindows);
         [_openWindows addObject:window];
         [self updateProcessType];
+        Log(@"%s %@", __PRETTY_FUNCTION__, _openWindows);
     }
 }
 
 - (void)removeOpenWindow:(id)window {
     @synchronized(_openWindows) {
+        Log(@"%s %@", __PRETTY_FUNCTION__, _openWindows);
         [_openWindows removeObject:window];
         [self updateProcessType];
+        Log(@"%s %@", __PRETTY_FUNCTION__, _openWindows);
+        
     }
 }
 

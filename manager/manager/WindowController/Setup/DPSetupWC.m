@@ -10,8 +10,14 @@
 #import "DPSetupWC.h"
 #import "PCSetup1VC.h"
 #import "Util.h"
+#import "PCSetup2RPVC.h"
+#import "RaspberryManager.h"
 
 @implementation DPSetupWC
+
+- (void)dealloc {
+    Log(@"%s",__PRETTY_FUNCTION__);
+}
 
 - (void)windowDidLoad {
     [super windowDidLoad];
@@ -53,4 +59,18 @@
 -(void)bringToFront {
     [self.window makeKeyAndOrderFront:[Util getApp]];
 }
+
+-(void)windowWillClose:(NSNotification *)notification {
+
+    DPSetupWindow *dsw = (DPSetupWindow *)self.window;
+    NSArray *dpwvc = [NSArray arrayWithArray:[dsw viewControllers]];
+    for(NSViewController *vc in dpwvc){
+        if([vc isKindOfClass:[PCSetup2RPVC class]]){
+            [[RaspberryManager sharedManager] removeMultDelegateFromQueue:vc];
+        }
+    }
+    [dsw removeNotifications];
+    [super windowWillClose:notification];
+}
+
 @end

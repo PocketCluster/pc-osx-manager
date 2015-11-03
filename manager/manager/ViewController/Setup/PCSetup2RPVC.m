@@ -79,8 +79,6 @@
 
 -(void)dealloc {
     Log(@"%s",__PRETTY_FUNCTION__);
-    
-    [[RaspberryManager sharedManager] removeMultDelegateFromQueue:self];
 }
 
 
@@ -309,15 +307,21 @@ withFilterContext:(id)filterContext
 }
 
 - (void)didRevertToPreviousStage {
+    WEAK_SELF(self);
     [[RaspberryManager sharedManager] removeMultDelegateFromQueue:self];
-    [self performSelector:@selector(removeViewControler) withObject:nil afterDelay:2.0];
+    [[NSOperationQueue mainQueue]
+     addOperationWithBlock:^{
+         if(belf){
+             [belf removeViewControler];
+         }
+     }];
 }
 
 - (void)removeViewControler {
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kDPNotification_deleteViewController
      object:self
-     userInfo:@{kDPNotification_key_viewController:self}];
+     userInfo:@{kDPNotification_key_viewControllerClass:[PCSetup2RPVC class]}];
 }
 
 @end

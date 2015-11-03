@@ -16,7 +16,7 @@
 
 @interface NativeMenu : NSObject <NativeMenuItemDelegate,NSMenuDelegate>{
 @private
-    DPSetupWC *_setupWindow;
+    __weak DPSetupWC *_setupWindow;
     PCPrefWC *_preferencesWindow;
     AboutWindow *_aboutWindow;
 
@@ -29,7 +29,7 @@
     NSMutableArray *_menuItems;
 }
 
-@property (nonatomic, strong) DPSetupWC *setupWindow;
+@property (nonatomic, weak) DPSetupWC *setupWindow;
 @property (nonatomic, strong) PCPrefWC *preferencesWindow;
 @property (nonatomic, strong) AboutWindow *aboutWindow;
 

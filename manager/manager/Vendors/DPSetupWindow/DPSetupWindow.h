@@ -94,12 +94,10 @@ extern NSString * const kDPNotification_key_viewControllerClass;
 //- (id)initWithViewControllers:(NSArray *)viewControllers completionHandler:(void (^)(BOOL completed))completionHandler;
 -(void)initWithViewControllers:(NSArray *)viewControllers completionHandler:(void (^)(BOOL completed))completionHandler;
 
-- (void)addNextViewController:(NSViewController<DPSetupWindowStageViewController> *)viewController;
-- (void)addFinalViewController:(NSViewController<DPSetupWindowStageViewController> *)viewController;
 - (void)progressToNextStage;
 - (void)revertToPreviousStage;
 - (void)resetToZeroStage;
-
+- (void)removeNotifications;
 @end
 
 @interface NSObject (PerformSelectorIfExists)

@@ -144,14 +144,20 @@
 }
 
 - (void)didRevertToPreviousStage {
-    [self performSelector:@selector(removeViewControler) withObject:nil afterDelay:2.0];
+    WEAK_SELF(self);
+    [[NSOperationQueue mainQueue]
+     addOperationWithBlock:^{
+         if(belf){
+             [belf removeViewControler];
+         }
+    }];
 }
 
 - (void)removeViewControler {
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kDPNotification_deleteViewController
      object:self
-     userInfo:@{kDPNotification_key_viewController:self}];
+     userInfo:@{kDPNotification_key_viewControllerClass:[PCSetup2VVVC class]}];
 }
 
 @end
