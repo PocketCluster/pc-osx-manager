@@ -70,9 +70,6 @@
 
 -(void)raspberryUpdateRunningNodeCount:(NSNotification *)aNotification {
     NSUInteger count = [[aNotification.userInfo objectForKey:@"count"] unsignedIntegerValue];
-
-    Log(@"live node count %ld", count);
-    
     if (count) {
         _statusItem.button.image = [NSImage imageNamed:@"status-on"];
     } else {
@@ -83,11 +80,6 @@
 
 -(void)raspberryUpdateNodeCount:(NSNotification *)aNotification {
     NSUInteger count = [[aNotification.userInfo objectForKey:@"count"] unsignedIntegerValue];
-    
-    Log(@"node count %ld", count);
-    
-    return;
-    
     if (count) {
         [_clusterSetupMenuItem setHidden:YES];
     } else {

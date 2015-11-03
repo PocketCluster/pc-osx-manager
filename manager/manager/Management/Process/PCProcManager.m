@@ -23,7 +23,9 @@
 @end
 
 
-@implementation PCProcManager
+@implementation PCProcManager{
+    volatile bool _isWebServerRunning;
+}
 SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
 - (instancetype)init {
     
@@ -33,6 +35,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
         [ws addGETHandlerForBasePath:@"/" directoryPath:WEB_SERVER_ROOT_PATH indexFilename:nil cacheAge:0 allowRangeRequests:YES];
         [ws setDelegate:self];
         self.webServer = ws;
+        _isWebServerRunning = false;
     }
     return self;
 }
@@ -73,6 +76,11 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
 }
 
 - (void)freshStart {
+
+    if(self.saltMinion != nil && self.saltMaster != nil){
+        return;
+    }
+    
     PCTask *t = [PCTask new];
     t.taskCommand = @"ps -efw | grep salt | grep -v grep | awk '{print $2}' | xargs kill";
     t.delegate = self;
@@ -101,6 +109,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
 #pragma mark - WebServer Control
 
 -(void)_webServerStart {
+    _isWebServerRunning = true;
     @autoreleasepool {
         NSDictionary *options =
         @{GCDWebServerOption_Port:@(WEB_SERVER_PORT)
@@ -115,9 +124,15 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
     @autoreleasepool {
         [_webServer stop];
     }
+    _isWebServerRunning = false;
 }
 
 -(void)startWebServer {
+    
+    if(_isWebServerRunning){
+        return;
+    }
+    
     [self performSelectorInBackground:@selector(_webServerStart) withObject:nil];
 }
 

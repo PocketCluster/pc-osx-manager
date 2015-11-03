@@ -8,6 +8,11 @@
 
 #import "DPSetupWindow.h"
 
+typedef enum {
+    DPSetupWindowNextDirection = 1,
+    DPSetupWindowBackDirection = -1
+} DPSetupWindowDirection;
+
 @interface DPSetupWindow ()
 
 @property (retain) NSImageView *imageView;
@@ -48,10 +53,6 @@
 }
 */
 
-- (void)dealloc{
-    [self removeNotifications];
-}
-
 -(void)initWithViewControllers:(NSArray *)viewControllers completionHandler:(void (^)(BOOL completed))completionHandler {
     
     NSRect contentRect = NSMakeRect(0, 0, 580, 420);
@@ -70,11 +71,12 @@
     [self addNotifications];
 }
 
+- (void)dealloc{
+    [self removeNotifications];
+}
 
-
-
-- (NSView *)initialiseContentViewForRect:(NSRect)contentRect
-{
+#pragma mark - VIEW MANAGEMENT
+- (NSView *)initialiseContentViewForRect:(NSRect)contentRect {
 	NSView *contentView = [[NSView alloc] initWithFrame:contentRect];
 	
 	_cancelButton = [[NSButton alloc] initWithFrame:NSMakeRect(145, 13, 97, 32)];
@@ -112,8 +114,20 @@
 	return contentView;
 }
 
-- (void) addNotifications
-{
+#pragma mark - Customisation
+- (void)setBackgroundImage:(NSImage *)backgroundImage {
+    _backgroundImage = backgroundImage;
+    [[self imageView] setImage:backgroundImage];
+}
+
+- (NSImage *)backgroundImage {
+    return _backgroundImage;
+}
+
+#pragma mark - NOTIFICATION
+- (void) addNotifications {
+    
+    WEAK_SELF(self);
     
     [[NSNotificationCenter defaultCenter]
      addObserverForName:kDPNotification_addNextViewController
@@ -124,9 +138,8 @@
          NSViewController<DPSetupWindowStageViewController> *viewController =
             [[note userInfo] objectForKey:kDPNotification_key_viewController];
 
-         if (viewController)
-         {
-             NSMutableArray *newViewControllers = [[self viewControllers] mutableCopy];
+         if (viewController) {
+             NSMutableArray *newViewControllers = [[belf viewControllers] mutableCopy];
              [newViewControllers insertObject:viewController atIndex:(currentStage + 1)];
              [self setViewControllers:[NSArray arrayWithArray:newViewControllers]];
          }
@@ -142,10 +155,9 @@
          NSViewController<DPSetupWindowStageViewController> *viewController =
             [[note userInfo] objectForKey:kDPNotification_key_viewController];
          
-         if (viewController)
-         {
-             NSArray *newViewControllers = [[self viewControllers] arrayByAddingObject:viewController];
-             [self setViewControllers:newViewControllers];
+         if (viewController) {
+             NSArray *newViewControllers = [[belf viewControllers] arrayByAddingObject:viewController];
+             [belf setViewControllers:newViewControllers];
          }
 
      }];
@@ -175,13 +187,12 @@
              @catch (NSException *exception) {}
              
              [viewControllers removeObject:mustDeleteController];
-             [self setViewControllers:[NSArray arrayWithArray:viewControllers]];
+             [belf setViewControllers:[NSArray arrayWithArray:viewControllers]];
          }
      }];
 }
 
-- (void) removeNotifications
-{
+- (void) removeNotifications {
     
     [[NSNotificationCenter defaultCenter]
      removeObserver:self
@@ -199,28 +210,11 @@
      object:nil];
 }
 
-#pragma mark - Customisation
-
-- (void)setBackgroundImage:(NSImage *)backgroundImage {
-	_backgroundImage = backgroundImage;
-	[[self imageView] setImage:backgroundImage];
-}
-
-- (NSImage *)backgroundImage {
-	return _backgroundImage;
-}
 
 #pragma mark - Flow Control
-
-typedef enum {
-	DPSetupWindowNextDirection = 1,
-	DPSetupWindowBackDirection = -1
-} DPSetupWindowDirection;
-
 - (void)progressToNextStage {
 	[self shift:DPSetupWindowNextDirection];
 }
-
 - (void)revertToPreviousStage {
 	[self shift:DPSetupWindowBackDirection];
 }
@@ -234,12 +228,9 @@ typedef enum {
     
     NSViewController<DPSetupWindowStageViewController> *previousViewController = nil;
 
-    if(currentStage > 0 && currentStage<=[[self viewControllers] count])
-    {
+    if(currentStage > 0 && currentStage<=[[self viewControllers] count]) {
         previousViewController = [[self viewControllers] objectAtIndex:currentStage];
-    }
-    else
-    {
+    } else {
         return;
     }
     
@@ -295,7 +286,7 @@ typedef enum {
 	
 	NSInteger nextStage = currentStage + direction;
 	if (nextStage == [[self viewControllers] count]) {
-        	//[self deregisterObserversForViewController:previousViewController];
+        //[self deregisterObserversForViewController:previousViewController];
 		[self completionHandler](YES);
 		return;
 	}
@@ -323,12 +314,10 @@ typedef enum {
 		[nextViewController setRepresentedObject:[previousViewController representedObject]];
 	}
 	
-	if ([self animates] && previousViewController)
-    {
+	if ([self animates] && previousViewController) {
 		[NSAnimationContext beginGrouping];
 		
-		if ([[NSApp currentEvent] modifierFlags] & NSShiftKeyMask)
-        {
+		if ([[NSApp currentEvent] modifierFlags] & NSShiftKeyMask) {
 			[[NSAnimationContext currentContext] setDuration:3.0];
 		}
         

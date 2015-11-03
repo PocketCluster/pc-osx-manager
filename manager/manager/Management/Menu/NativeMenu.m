@@ -212,7 +212,7 @@
     
 }
 
-# pragma mark - Application Update -
+# pragma mark - Application Update
 - (void)setUpdateAvailable: (NSNotification*)notification {
     [self setUpdatesAvailable:[[notification.userInfo objectForKey:kPOCKET_CLUSTER_UPDATE_VALUE] boolValue]];
 }
@@ -263,13 +263,24 @@
 
 - (void)showSetupWindow:(id)sender
 {
-    if(_setupWindow && !_setupWindow.isClosed) {
-        [NSApp activateIgnoringOtherApps:YES];
-        [_setupWindow showWindow:self];
+    if(_setupWindow) {
+        if(_setupWindow.isClosed) {
+            [NSApp activateIgnoringOtherApps:YES];
+            [_setupWindow resetSetupStage];
+            [_setupWindow showWindow:[Util getApp]];
+            [_setupWindow bringToFront];
+            [[Util getApp] addOpenWindow:_setupWindow];
+        }else{
+            [NSApp activateIgnoringOtherApps:YES];
+            [_setupWindow showWindow:[Util getApp]];
+            [_setupWindow bringToFront];
+        }
     } else {
         _setupWindow = [[DPSetupWC alloc] initWithWindowNibName:@"DPSetupWC"];
         [NSApp activateIgnoringOtherApps:YES];
-        [_setupWindow showWindow:self];
+        [_setupWindow resetSetupStage];
+        [_setupWindow showWindow:[Util getApp]];
+        [_setupWindow bringToFront];
         [[Util getApp] addOpenWindow:_setupWindow];
     }
 }

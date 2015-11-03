@@ -9,5 +9,6 @@
 #import "BaseWindowController.h"
 
 @interface DPSetupWC : BaseWindowController
-
+-(void)resetSetupStage;
+-(void)bringToFront;
 @end

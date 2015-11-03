@@ -79,4 +79,11 @@
 
 }
 
+-(void)resetSetupStage {
+    [(DPSetupWindow *)self.window resetToZeroStage];
+}
+
+-(void)bringToFront {
+    [self.window makeKeyAndOrderFront:[Util getApp]];
+}
 @end
