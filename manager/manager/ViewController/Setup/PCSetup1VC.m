@@ -7,17 +7,61 @@
 //
 
 #import "PCSetup1VC.h"
+#import "PCSetup2VVVC.h"
+#import "PCSetup2RPVC.h"
+
 
 @interface PCSetup1VC ()
+@property (readwrite, nonatomic) BOOL hideContinue;
+@property (readwrite, nonatomic) BOOL hideGoBack;
 
 @end
 
 @implementation PCSetup1VC
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    // Do view setup here.
+@synthesize hideContinue;
+@synthesize hideGoBack;
+
+-(instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if(self){
+        [self setHideContinue:YES];
+        [self setHideGoBack:YES];
+    }
+    return self;
 }
+
+#pragma mark - DPSetupWindowDelegate
+- (void)resetToInitialState {
+    [self setHideContinue:YES];
+    [self setHideGoBack:YES];
+}
+
+- (IBAction)setupVagrantCluster:(id)sender {
+    NSViewController *vc2v =
+        [[PCSetup2VVVC alloc]
+         initWithNibName:@"PCSetup2VVVC"
+         bundle:[NSBundle mainBundle]];
+    
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kDPNotification_addNextViewControllerAndProceed
+     object:self
+     userInfo:@{kDPNotification_key_viewController:vc2v}];
+}
+
+- (IBAction)setupRaspberryCluster:(id)sender {
+    NSViewController *vc2r =
+        [[PCSetup2RPVC alloc]
+         initWithNibName:@"PCSetup2RPVC"
+         bundle:[NSBundle mainBundle]];
+    
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kDPNotification_addNextViewControllerAndProceed
+     object:self
+     userInfo:@{kDPNotification_key_viewController:vc2r}];
+}
+
+
 
 
 @end

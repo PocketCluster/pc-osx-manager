@@ -10,10 +10,6 @@
 
 #import "DPSetupWindow.h"
 #import "PCSetup1VC.h"
-#import "PCSetup2VVVC.h"
-#import "PCSetup2RPVC.h"
-#import "PCSetup3VC.h"
-#import "PCSetup4VC.h"
 
 #import "Util.h"
 
@@ -28,7 +24,7 @@
     DPSetupWindow *setupFlow = (DPSetupWindow *)[self window];
     [setupFlow setTitle:@"New Cluster"];
 
-    if (setupFlow == nil){
+    if (setupFlow == nil || ![setupFlow isKindOfClass:[DPSetupWindow class]]){
         return;
     }
     
@@ -37,37 +33,13 @@
          initWithNibName:@"PCSetup1VC"
          bundle:[NSBundle mainBundle]];
     
-    NSViewController *vc2v =
-        [[PCSetup2VVVC alloc]
-         initWithNibName:@"PCSetup2VVVC"
-         bundle:[NSBundle mainBundle]];
-    
-    NSViewController *vc2r =
-        [[PCSetup2RPVC alloc]
-         initWithNibName:@"PCSetup2RPVC"
-         bundle:[NSBundle mainBundle]];
-    
-    NSViewController *vc3 =
-        [[PCSetup3VC alloc]
-         initWithNibName:@"PCSetup3VC"
-         bundle:[NSBundle mainBundle]];
-    
-    NSViewController *vc4 =
-        [[PCSetup4VC alloc]
-         initWithNibName:@"PCSetup4VC"
-         bundle:[NSBundle mainBundle]];
-
     [setupFlow
-     initWithViewControllers:@[vc1,
-                               //vc2v,
-                               vc2r,
-                               vc3,
-                               vc4]
+     initWithViewControllers:@[vc1]
      completionHandler:^(BOOL completed) {
          if (!completed) {
-             NSLog(@"Cancelled setup process");
+             Log(@"Cancelled setup process");
          } else {
-             NSLog(@"Completed setup process");
+             Log(@"Completed setup process");
          }
          [setupFlow orderOut:self];
      }];

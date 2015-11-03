@@ -9,5 +9,6 @@
 #import "DPSetupWindow.h"
 
 @interface PCSetup1VC : NSViewController  <DPSetupWindowStageViewController>
-
+- (IBAction)setupVagrantCluster:(id)sender;
+- (IBAction)setupRaspberryCluster:(id)sender;
 @end

@@ -8,6 +8,14 @@
 
 #import "DPSetupWindow.h"
 
+NSString * const kDPNotification_addNextViewController       = @"kDPNotification_addNextViewController";
+NSString * const kDPNotification_addNextViewControllerAndProceed = @"kDPNotification_addNextViewControllerAndProceed";
+NSString * const kDPNotification_addFinalViewController      = @"kDPNotification_addFinalViewController";
+NSString * const kDPNotification_deleteViewController        = @"kDPNotification_deleteViewController";
+NSString * const kDPNotification_key_viewController          = @"kDPNotification_key_viewController";
+NSString * const kDPNotification_key_viewControllerClass     = @"kDPNotification_key_viewControllerClass";
+
+
 typedef enum {
     DPSetupWindowNextDirection = 1,
     DPSetupWindowBackDirection = -1
@@ -146,6 +154,27 @@ typedef enum {
 
      }];
     
+
+    [[NSNotificationCenter defaultCenter]
+     addObserverForName:kDPNotification_addNextViewControllerAndProceed
+     object:nil
+     queue:[NSOperationQueue currentQueue]
+     usingBlock:^(NSNotification *note) {
+         
+         NSViewController<DPSetupWindowStageViewController> *viewController =
+         [[note userInfo] objectForKey:kDPNotification_key_viewController];
+         
+         if (viewController) {
+             NSMutableArray *newViewControllers = [[belf viewControllers] mutableCopy];
+             [newViewControllers insertObject:viewController atIndex:(currentStage + 1)];
+             [self setViewControllers:[NSArray arrayWithArray:newViewControllers]];
+             [self next:nil];
+         }
+         
+     }];
+    
+    
+    
     [[NSNotificationCenter defaultCenter]
      addObserverForName:kDPNotification_addFinalViewController
      object:nil
@@ -197,6 +226,11 @@ typedef enum {
     [[NSNotificationCenter defaultCenter]
      removeObserver:self
      name:kDPNotification_addNextViewController
+     object:nil];
+
+    [[NSNotificationCenter defaultCenter]
+     removeObserver:self
+     name:kDPNotification_addNextViewControllerAndProceed
      object:nil];
     
     [[NSNotificationCenter defaultCenter]
@@ -254,7 +288,8 @@ typedef enum {
     finished();
     
 	[self registerObserversForPreviousViewController:previousViewController nextViewController:nextViewController];
-	[self recalculateButtonEnabledStates];
+    [self recalculateButtonEnabledStates];
+    [self recalculateButtonHiddenStates];
 	[self resetButtonTitles];
 }
 
@@ -348,6 +383,7 @@ typedef enum {
 	currentStage = nextStage;
 	[self registerObserversForPreviousViewController:previousViewController nextViewController:nextViewController];
 	[self recalculateButtonEnabledStates];
+    [self recalculateButtonHiddenStates];
 	[self resetButtonTitles];
 }
 
@@ -357,11 +393,13 @@ typedef enum {
 
 - (void)cancel:(id)sender {
 	[[NSApplication sharedApplication] endSheet:self returnCode:0];
+    [self.windowController close];
 	[self completionHandler](NO);
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
 	[self recalculateButtonEnabledStates];
+    [self recalculateButtonHiddenStates];
 }
 
 - (void)recalculateButtonEnabledStates {
@@ -383,26 +421,45 @@ typedef enum {
 	}
 }
 
+- (void)recalculateButtonHiddenStates {
+    NSViewController<DPSetupWindowStageViewController> *currentViewController = [[self viewControllers] objectAtIndex:currentStage];
+    if ([currentViewController respondsToSelector:@selector(hideContinue)]) {
+        [[self nextButton] setHidden:[currentViewController hideContinue]];
+    } else {
+        [[self nextButton] setHidden:NO];
+    }
+
+    if ([currentViewController respondsToSelector:@selector(hideGoBack)]) {
+        [[self backButton] setHidden:[currentViewController hideGoBack]];
+    } else {
+        [[self backButton] setHidden:NO];
+    }
+}
+
 - (void)registerObserversForPreviousViewController:(NSViewController *)previousViewController
-                                nextViewController:(NSViewController *)nextViewController
-{
+                                nextViewController:(NSViewController *)nextViewController {
 	
 	[previousViewController removeObserver:self forKeyPath:@"canContinue"];
 	[previousViewController removeObserver:self forKeyPath:@"canGoBack"];
+    [previousViewController removeObserver:self forKeyPath:@"hideContinue"];
+    [previousViewController removeObserver:self forKeyPath:@"hideGoBack"];
     
 	[nextViewController addObserver:self forKeyPath:@"canContinue" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
 	[nextViewController addObserver:self forKeyPath:@"canGoBack" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
+    [nextViewController addObserver:self forKeyPath:@"hideContinue" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
+    [nextViewController addObserver:self forKeyPath:@"hideGoBack" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
 }
 
-- (void)deregisterObserversForViewController:(NSViewController *)viewController
-{
-    	[viewController removeObserver:self forKeyPath:@"canContinue"];
-    	[viewController removeObserver:self forKeyPath:@"canGoBack"];
+- (void)deregisterObserversForViewController:(NSViewController *)viewController {
+    [viewController removeObserver:self forKeyPath:@"canContinue"];
+    [viewController removeObserver:self forKeyPath:@"canGoBack"];
+    [viewController removeObserver:self forKeyPath:@"hideContinue"];
+    [viewController removeObserver:self forKeyPath:@"hideGoBack"];
+
 }
 
-- (void)resetButtonTitles
-{
-    
+- (void)resetButtonTitles {
+
 	NSViewController<DPSetupWindowStageViewController> *currentViewController = [[self viewControllers] objectAtIndex:currentStage];
 	if ([currentViewController respondsToSelector:@selector(continueButtonTitle)]) {
 		[[self nextButton] setTitle:[currentViewController continueButtonTitle]];

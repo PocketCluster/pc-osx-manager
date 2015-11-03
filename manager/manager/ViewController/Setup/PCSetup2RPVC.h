@@ -6,7 +6,6 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-
 #import "DPSetupWindow.h"
 
 @interface PCSetup2RPVC : NSViewController  <DPSetupWindowStageViewController, NSTableViewDataSource, NSTableViewDelegate>

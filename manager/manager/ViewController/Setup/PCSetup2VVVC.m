@@ -10,16 +10,23 @@
 
 #import "Util.h"
 #import "PCTask.h"
-
-//#import "PCTaskOutputWindow.h"
+#import "PCSetup3VC.h"
 
 @interface PCSetup2VVVC ()<PCTaskDelegate>
 @property (strong, nonatomic) PCTask *sudoTask;
 @property (strong, nonatomic) PCTask *userTask;
 @property (strong, nonatomic) NSDictionary *progDict;
+
+@property (readwrite, nonatomic) BOOL canContinue;
+@property (readwrite, nonatomic) BOOL canGoBack;
+
+-(void)setToNextStage;
 @end
 
 @implementation PCSetup2VVVC
+
+@synthesize canContinue;
+@synthesize canGoBack;
 
 -(instancetype)initWithNibName:(NSString *)aNibNameOrNil bundle:(NSBundle *)aNibBundleOrNil {
     
@@ -32,6 +39,8 @@
                            ,@"USER_SETUP_STEP_1":@[@"USER_SETUP_STEP_1",@50.0]
                            ,@"USER_SETUP_STEP_2":@[@"USER_SETUP_STEP_2",@90.0]
                            ,@"USER_SETUP_DONE":@[@"USER_SETUP_DONE",@100.0]};
+        
+        [self resetToInitialState];
     }
 
     return self;
@@ -59,6 +68,9 @@
         [userTask launchTask];
         
         self.sudoTask = nil;
+        
+        self.canContinue = NO;
+        self.canGoBack = YES;
 
     }else{
         self.userTask = nil;
@@ -94,6 +106,8 @@
 #pragma mark - IBACTION
 -(IBAction)build:(id)sender
 {
+    [self setToNextStage];
+    return;
     
     NSString *basePath    = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
     NSString *sudoSetup = [NSString stringWithFormat:@"%@/setup/vagrant_sudo_setup.sh",basePath];
@@ -109,6 +123,32 @@
     
     [self.progressBar startAnimation:self];
     [self.buildBtn setEnabled:NO];
+}
+
+#pragma mark - DPSetupWindowDelegate
+-(void)setToNextStage {
+    self.canContinue = YES;
+    self.canGoBack = NO;
+
+    NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kDPNotification_addFinalViewController
+     object:self
+     userInfo:@{kDPNotification_key_viewController:vc3}];
+}
+
+-(void)resetToInitialState {
+    self.canContinue = NO;
+    self.canGoBack = YES;
+}
+
+- (void)didRevertToPreviousStage {
+    
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kDPNotification_deleteViewController
+     object:self
+     userInfo:@{kDPNotification_key_viewController:self}];
+
 }
 
 @end

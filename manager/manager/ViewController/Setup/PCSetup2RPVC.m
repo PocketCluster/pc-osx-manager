@@ -6,6 +6,7 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
+
 #import "PCSetup2RPVC.h"
 
 #import "RaspberryManager.h"
@@ -17,11 +18,11 @@
 #import "RaspberryManager.h"
 #import <SystemConfiguration/SCNetworkConfiguration.h>
 
+#import "PCSetup3VC.h"
+
 #define MAX_SUPPORTED_NODE (6)
 
 @interface PCSetup2RPVC ()<PCTaskDelegate, GCDAsyncUdpSocketDelegate>
--(void)refreshInterface;
-
 @property (strong, nonatomic) PCTask *sudoTask;
 @property (strong, nonatomic) PCTask *userTask;
 @property (nonatomic, strong) GCDAsyncUdpSocket *udpSocket;
@@ -32,9 +33,16 @@
 @property (nonatomic, strong) NSString *hostName;
 @property (nonatomic, strong) LinkInterface *interface;
 
+@property (readwrite, nonatomic) BOOL canContinue;
+@property (readwrite, nonatomic) BOOL canGoBack;
+
+-(void)refreshInterface;
+-(void)setToNextStage;
 @end
 
 @implementation PCSetup2RPVC
+@synthesize canContinue;
+@synthesize canGoBack;
 
 -(instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
 
@@ -52,7 +60,8 @@
                           ,@"USER_SETUP_DONE":@[@"USER_SETUP_DONE",@100.0]};
         
         self.hostName = [[[NSHost currentHost] localizedName] lowercaseString];
-
+        
+        [self resetToInitialState];
         [self refreshInterface];
     }
     
@@ -278,6 +287,32 @@ withFilterContext:(id)filterContext
     
     [self.progressBar startAnimation:self];
     [self.buildBtn setEnabled:NO];
+}
+
+#pragma mark - DPSetupWindowDelegate
+-(void)setToNextStage {
+    self.canContinue = YES;
+    self.canGoBack = NO;
+    
+    NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kDPNotification_addFinalViewController
+     object:self
+     userInfo:@{kDPNotification_key_viewController:vc3}];
+}
+
+-(void)resetToInitialState {
+    self.canContinue = NO;
+    self.canGoBack = YES;
+}
+
+- (void)didRevertToPreviousStage {
+    
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kDPNotification_deleteViewController
+     object:self
+     userInfo:@{kDPNotification_key_viewController:self}];
+    
 }
 
 @end

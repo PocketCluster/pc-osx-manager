@@ -8,12 +8,14 @@
 
 #import <Cocoa/Cocoa.h>
 
-#define kDPNotification_addNextViewController       @"kDPNotification_addNextViewController"
-#define kDPNotification_addFinalViewController      @"kDPNotification_addFinalViewController"
-#define kDPNotification_deleteViewController        @"kDPNotification_deleteViewController"
+extern NSString * const kDPNotification_addNextViewController;
+extern NSString * const kDPNotification_addNextViewControllerAndProceed;
 
-#define kDPNotification_key_viewController          @"kDPNotification_key_viewController"
-#define kDPNotification_key_viewControllerClass     @"kDPNotification_key_viewControllerClass"
+extern NSString * const kDPNotification_addFinalViewController;
+
+extern NSString * const kDPNotification_deleteViewController;
+extern NSString * const kDPNotification_key_viewController;
+extern NSString * const kDPNotification_key_viewControllerClass;
 
 @class DPSetupWindow;
 
@@ -23,8 +25,12 @@
 /*
  Stage view controllers must implement these as they will be observed by the setup window to determine whether the interface buttons should be enabled.
  */
-@property (readonly) BOOL canContinue;
-@property (readonly) BOOL canGoBack;
+@property (readonly, nonatomic) BOOL canContinue;
+@property (readonly, nonatomic) BOOL canGoBack;
+
+@property (readonly, nonatomic) BOOL hideContinue;
+@property (readonly, nonatomic) BOOL hideGoBack;
+
 
 /*
  Each view controller will be given a reference to the setup window through this method so that it may add extra stages for a dynamic setup process.

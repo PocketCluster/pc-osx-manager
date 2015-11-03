@@ -160,12 +160,6 @@
 		046A366F1BD793BB004E0946 /* PCSetup3VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36561BD793BB004E0946 /* PCSetup3VC.xib */; };
 		046A36701BD793BB004E0946 /* PCSetup3VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36561BD793BB004E0946 /* PCSetup3VC.xib */; };
 		046A36711BD793BB004E0946 /* PCSetup3VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36561BD793BB004E0946 /* PCSetup3VC.xib */; };
-		046A36721BD793BB004E0946 /* PCSetup4VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36581BD793BB004E0946 /* PCSetup4VC.m */; };
-		046A36731BD793BB004E0946 /* PCSetup4VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36581BD793BB004E0946 /* PCSetup4VC.m */; };
-		046A36741BD793BB004E0946 /* PCSetup4VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36581BD793BB004E0946 /* PCSetup4VC.m */; };
-		046A36751BD793BB004E0946 /* PCSetup4VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36591BD793BB004E0946 /* PCSetup4VC.xib */; };
-		046A36761BD793BB004E0946 /* PCSetup4VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36591BD793BB004E0946 /* PCSetup4VC.xib */; };
-		046A36771BD793BB004E0946 /* PCSetup4VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A36591BD793BB004E0946 /* PCSetup4VC.xib */; };
 		046A368A1BD795AC004E0946 /* DPSetupWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36881BD795AC004E0946 /* DPSetupWC.m */; };
 		046A368B1BD795AC004E0946 /* DPSetupWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36881BD795AC004E0946 /* DPSetupWC.m */; };
 		046A368C1BD795AC004E0946 /* DPSetupWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36881BD795AC004E0946 /* DPSetupWC.m */; };
@@ -400,9 +394,6 @@
 		046A36541BD793BB004E0946 /* PCSetup3VC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup3VC.h; sourceTree = "<group>"; };
 		046A36551BD793BB004E0946 /* PCSetup3VC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetup3VC.m; sourceTree = "<group>"; };
 		046A36561BD793BB004E0946 /* PCSetup3VC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCSetup3VC.xib; sourceTree = "<group>"; };
-		046A36571BD793BB004E0946 /* PCSetup4VC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup4VC.h; sourceTree = "<group>"; };
-		046A36581BD793BB004E0946 /* PCSetup4VC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetup4VC.m; sourceTree = "<group>"; };
-		046A36591BD793BB004E0946 /* PCSetup4VC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCSetup4VC.xib; sourceTree = "<group>"; };
 		046A36871BD795AC004E0946 /* DPSetupWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DPSetupWC.h; sourceTree = "<group>"; };
 		046A36881BD795AC004E0946 /* DPSetupWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DPSetupWC.m; sourceTree = "<group>"; };
 		046A36891BD795AC004E0946 /* DPSetupWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DPSetupWC.xib; sourceTree = "<group>"; };
@@ -845,9 +836,6 @@
 				046A36541BD793BB004E0946 /* PCSetup3VC.h */,
 				046A36551BD793BB004E0946 /* PCSetup3VC.m */,
 				046A36561BD793BB004E0946 /* PCSetup3VC.xib */,
-				046A36571BD793BB004E0946 /* PCSetup4VC.h */,
-				046A36581BD793BB004E0946 /* PCSetup4VC.m */,
-				046A36591BD793BB004E0946 /* PCSetup4VC.xib */,
 			);
 			path = Setup;
 			sourceTree = "<group>";
@@ -1213,7 +1201,6 @@
 				041C46A81BE3674C000D1521 /* README in Resources */,
 				046A36431BD79321004E0946 /* Askpass in Resources */,
 				046A366F1BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
-				046A36751BD793BB004E0946 /* PCSetup4VC.xib in Resources */,
 				0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */,
 				046A36631BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */,
 				046A368D1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
@@ -1234,7 +1221,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				046A36761BD793BB004E0946 /* PCSetup4VC.xib in Resources */,
 				046A36641BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */,
 				04C09D651BE35EDF009E074D /* PCPrefWC.xib in Resources */,
 				046A366A1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */,
@@ -1255,7 +1241,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				046A36771BD793BB004E0946 /* PCSetup4VC.xib in Resources */,
 				046A36651BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */,
 				04C09D661BE35EDF009E074D /* PCPrefWC.xib in Resources */,
 				046A366B1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */,
@@ -1344,7 +1329,6 @@
 				04F7056C1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				0441A3F41BD892A400AABD7A /* VersionComparison.m in Sources */,
 				04C601A11BE3B040002389AB /* VirtualMachineInfo.m in Sources */,
-				046A36721BD793BB004E0946 /* PCSetup4VC.m in Sources */,
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				041023F01BE473370083D62E /* VagrantGlobalStatusScanner.m in Sources */,
 				04D407421BDBC51F00625AD7 /* PCInterfaceList.m in Sources */,
@@ -1405,7 +1389,6 @@
 				04C601A21BE3B040002389AB /* VirtualMachineInfo.m in Sources */,
 				041023F11BE473370083D62E /* VagrantGlobalStatusScanner.m in Sources */,
 				04C601991BE3B040002389AB /* VagrantInstance.m in Sources */,
-				046A36731BD793BB004E0946 /* PCSetup4VC.m in Sources */,
 				04D4073D1BDBC51F00625AD7 /* LinkMACAddress.m in Sources */,
 				04F7056D1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				0441A3E41BD8904100AABD7A /* main.m in Sources */,
@@ -1468,7 +1451,6 @@
 				04C601A31BE3B040002389AB /* VirtualMachineInfo.m in Sources */,
 				041023F21BE473370083D62E /* VagrantGlobalStatusScanner.m in Sources */,
 				04C6019A1BE3B040002389AB /* VagrantInstance.m in Sources */,
-				046A36741BD793BB004E0946 /* PCSetup4VC.m in Sources */,
 				04D4073E1BDBC51F00625AD7 /* LinkMACAddress.m in Sources */,
 				04F7056E1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				0441A3E51BD8904100AABD7A /* main.m in Sources */,
