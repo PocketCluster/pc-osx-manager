@@ -84,11 +84,6 @@ typedef enum {
     [self addNotifications];
 }
 
-- (void)dealloc {
-    Log(@"%s",__PRETTY_FUNCTION__);
-}
-
-
 #pragma mark - VIEW MANAGEMENT
 - (NSView *)initialiseContentViewForRect:(NSRect)contentRect {
 	NSView *contentView = [[NSView alloc] initWithFrame:contentRect];
@@ -194,9 +189,6 @@ typedef enum {
         
         [viewControllers removeObject:mustDeleteController];
         [self setViewControllers:[NSArray arrayWithArray:viewControllers]];
-        
-Log(@"Successfully removed target %@",mustDeleteController);
-        
     }
 }
 
