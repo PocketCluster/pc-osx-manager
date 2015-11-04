@@ -12,6 +12,7 @@
 
 @interface PCSetup3VC()
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
+@property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
 @end
 
 @implementation PCSetup3VC
@@ -20,6 +21,7 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if(self){
         self.packageList = [NSMutableArray arrayWithCapacity:0];
+        self.downloadFileList = [NSMutableArray arrayWithCapacity:0];
 
         WEAK_SELF(self);
         [PCPackageMeta metaPackageListWithBlock:^(NSArray<PCPackageMeta *> *packages, NSError *error) {
@@ -59,9 +61,10 @@
 
 
 -(IBAction)install:(id)sender {
+
+    WEAK_SELF(self);
     
     PCPackageMeta *meta = [self.packageList objectAtIndex:0];
-    
     __block NSString *mpath = [meta.masterFilePath objectAtIndex:0];
     [PCPackageMeta makeIntermediateDirectories:mpath];
     
@@ -69,14 +72,24 @@
      packageFileListOn:mpath
      WithBlock:^(NSArray<NSString *> *fileList, NSError *error) {
 
+         @synchronized(self.downloadFileList) {
+             [self.downloadFileList addObjectsFromArray:fileList];
+         }
+         
          for(NSString *file in fileList){
              [PCPackageMeta
               downloadFileFromURL:file
               basePath:[NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,mpath]
-              completion:^(NSURL *filePath) {
-                  Log(@"%@",filePath);
+              completion:^(NSString *URL, NSURL *filePath) {
+                  
+                  if(belf){
+                      @synchronized(self.downloadFileList) {
+                          [belf.downloadFileList removeObject:URL];
+                      }
+                      Log(@"%@ %ld",filePath, [belf.downloadFileList count]);
+                  }
               }
-              onError:^(NSError *error) {
+              onError:^(NSString *URL, NSError *error) {
                   Log(@"%@",[error description]);
               }];
          }
@@ -88,14 +101,24 @@
      packageFileListOn:npath
      WithBlock:^(NSArray<NSString *> *fileList, NSError *error) {
          
+         @synchronized(self.downloadFileList) {
+             [self.downloadFileList addObjectsFromArray:fileList];
+         }
+         
          for(NSString *file in fileList){
              [PCPackageMeta
               downloadFileFromURL:file
               basePath:[NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,npath]
-              completion:^(NSURL *filePath) {
-                  Log(@"%@",filePath);
+              completion:^(NSString *URL, NSURL *filePath) {
+                  
+                  if(belf){
+                      @synchronized(self.downloadFileList) {
+                          [belf.downloadFileList removeObject:URL];
+                      }
+                      Log(@"%@ %ld",filePath, [belf.downloadFileList count]);
+                  }
               }
-              onError:^(NSError *error) {
+              onError:^(NSString *URL, NSError *error) {
                   Log(@"%@",[error description]);
               }];
          }

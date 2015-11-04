@@ -37,8 +37,8 @@ extern NSString * const kPCPackageVersionNodePath;
 
 + (void)downloadFileFromURL:(NSString *)URL
                    basePath:(NSString *)aBasePath
-                 completion:(void (^)(NSURL *filePath))completionBlock
-                    onError:(void (^)(NSError *error))errorBlock;
+                 completion:(void (^)(NSString *URL, NSURL *filePath))completionBlock
+                    onError:(void (^)(NSString *URL, NSError *error))errorBlock;
 @end
 
 @interface PCPackageMeta (NSCoding) <NSCoding>

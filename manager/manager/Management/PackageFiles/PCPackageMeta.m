@@ -184,15 +184,13 @@ NSString * const kGithubRawFileLinkURL              = @"download_url";
 
 + (void) downloadFileFromURL:(NSString *)URL
                     basePath:(NSString *)aBasePath
-                  completion:(void (^)(NSURL *filePath))completionBlock
-                     onError:(void (^)(NSError *error))errorBlock {
+                  completion:(void (^)(NSString *URL, NSURL *filePath))completionBlock
+                     onError:(void (^)(NSString *URL, NSError *error))errorBlock {
     
-    //Configuring the session manager
-    __block AFURLSessionManager *manager = [PCFormulaClient sharedDownloadManager];
     __block NSString *fileName = [[URL componentsSeparatedByString:@"/"] lastObject];
     
     //Start the download
-    [[manager
+    [[[PCFormulaClient sharedDownloadManager]
       downloadTaskWithRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:URL]]
       progress:nil
       destination:^NSURL *(NSURL *targetPath, NSURLResponse *response) {
@@ -200,10 +198,10 @@ NSString * const kGithubRawFileLinkURL              = @"download_url";
       } completionHandler:^(NSURLResponse *response, NSURL *filePath, NSError *error) {
           if (!error) {
               //If there's no error, return the completion block
-              completionBlock(filePath);
+              completionBlock(URL, filePath);
           } else {
               //Otherwise return the error block
-              errorBlock(error);
+              errorBlock(URL, error);
           }
       }] resume];    
 }
