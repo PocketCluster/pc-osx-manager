@@ -8,6 +8,9 @@
 
 #import "PCFormulaClient.h"
 #import "PCPackageMeta.h"
+#import "AFHTTPRequestOperationManager.h"
+#import "AFURLSessionManager.h"
+#import "PCConstants.h"
 
 NSString * const kDescription                       = @"description";
 NSString * const kPCPackageName                     = @"name";
@@ -21,7 +24,6 @@ NSString * const kPCPackageVersionLibraryDep        = @"dep-lib";
 NSString * const kPCPackageVersionBigpkgDep         = @"dep-bigpkg";
 NSString * const kPCPackageVersionMasterPath        = @"masters-path";
 NSString * const kPCPackageVersionNodesPath         = @"nodes-path";
-
 
 NSString * const kGithubRawFileLinkURL              = @"download_url";
 
@@ -157,6 +159,48 @@ NSString * const kGithubRawFileLinkURL              = @"download_url";
 
 -(NSString *)description {
     return [NSString stringWithFormat:@"%@ - %@",[super description], [self packageDescription]];
+}
+
++ (BOOL)makeIntermediateDirectories:(NSString *)aPath {
+    NSString *targetPath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH, aPath];
+    NSError *error = nil;
+    BOOL isDirectory;
+    if([[NSFileManager defaultManager] fileExistsAtPath:targetPath isDirectory:&isDirectory]){
+        return YES;
+    }
+    
+    BOOL result = [[NSFileManager defaultManager] createDirectoryAtPath:targetPath withIntermediateDirectories:YES attributes:nil error:&error];
+    if(!result || error){
+        Log(@"Error: Create folder failed %@ %@", targetPath, [error debugDescription]);
+        return NO;
+    }
+    return YES;
+}
+
++ (void) downloadFileFromURL:(NSString *)URL
+                    basePath:(NSString *)aBasePath
+                  completion:(void (^)(NSURL *filePath))completionBlock
+                     onError:(void (^)(NSError *error))errorBlock {
+    
+    //Configuring the session manager
+    __block AFURLSessionManager *manager = [PCFormulaClient sharedDownloadManager];
+    __block NSString *fileName = [[URL componentsSeparatedByString:@"/"] lastObject];
+    
+    //Start the download
+    [[manager
+      downloadTaskWithRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:URL]]
+      progress:nil
+      destination:^NSURL *(NSURL *targetPath, NSURLResponse *response) {
+          return [NSURL URLWithString:[NSString stringWithFormat:@"file://%@/%@", aBasePath, fileName]];
+      } completionHandler:^(NSURLResponse *response, NSURL *filePath, NSError *error) {
+          if (!error) {
+              //If there's no error, return the completion block
+              completionBlock(filePath);
+          } else {
+              //Otherwise return the error block
+              errorBlock(error);
+          }
+      }] resume];    
 }
 
 @end

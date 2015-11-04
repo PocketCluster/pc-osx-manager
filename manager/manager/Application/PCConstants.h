@@ -98,3 +98,6 @@ extern NSString * const kRASPBERRY_MANAGER_NODE;
 extern NSString * const kRASPBERRY_MANAGER_NODE_ADDED;
 extern NSString * const kRASPBERRY_MANAGER_NODE_REMOVED;
 extern NSString * const kRASPBERRY_MANAGER_NODE_UPDATED;
+
+//Master Salt State Directory
+extern NSString * const kPOCKET_CLUSTER_SALT_STATE_PATH;

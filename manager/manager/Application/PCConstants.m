@@ -95,3 +95,5 @@ NSString * const kRASPBERRY_MANAGER_NODE                             = @"raspber
 NSString * const kRASPBERRY_MANAGER_NODE_ADDED                       = @"raspberry-manager.node-added";
 NSString * const kRASPBERRY_MANAGER_NODE_REMOVED                     = @"raspberry-manager.node-removed";
 NSString * const kRASPBERRY_MANAGER_NODE_UPDATED                     = @"raspberry-manager.node-updated";
+
+NSString * const kPOCKET_CLUSTER_SALT_STATE_PATH                     = @"/pocket/salt/states";

@@ -31,6 +31,12 @@ extern NSString * const kPCPackageVersionNodesPath;
 @property (nonatomic, readonly) NSArray<NSString *> *masterFilePath;
 @property (nonatomic, readonly) NSArray<NSString *> *nodeFilePath;
 
++ (BOOL)makeIntermediateDirectories:(NSString *)aPath;
+
++ (void)downloadFileFromURL:(NSString *)URL
+                   basePath:(NSString *)aBasePath
+                 completion:(void (^)(NSURL *filePath))completionBlock
+                    onError:(void (^)(NSError *error))errorBlock;
 @end
 
 @interface PCPackageMeta (NSCoding) <NSCoding>

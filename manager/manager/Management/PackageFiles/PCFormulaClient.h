@@ -26,4 +26,5 @@
 
 + (instancetype)sharedGithubAPIClient;
 + (instancetype)sharedGithubRawFileClient;
++ (AFURLSessionManager *)sharedDownloadManager;
 @end

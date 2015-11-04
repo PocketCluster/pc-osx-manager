@@ -8,6 +8,7 @@
 
 #import "PCSetup3VC.h"
 #import "PCPackageMeta.h"
+#import "PCConstants.h"
 
 @interface PCSetup3VC()
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
@@ -59,6 +60,48 @@
 
 -(IBAction)install:(id)sender {
     
+    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    
+    __block NSString *mpath = [meta.masterFilePath objectAtIndex:0];
+    [PCPackageMeta makeIntermediateDirectories:mpath];
+    
+    [PCPackageMeta
+     packageFileListOn:mpath
+     WithBlock:^(NSArray<NSString *> *fileList, NSError *error) {
+
+         for(NSString *file in fileList){
+             [PCPackageMeta
+              downloadFileFromURL:file
+              basePath:[NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,mpath]
+              completion:^(NSURL *filePath) {
+                  Log(@"%@",filePath);
+              }
+              onError:^(NSError *error) {
+                  Log(@"%@",[error description]);
+              }];
+         }
+     }];
+    
+    __block NSString *npath = [meta.nodeFilePath objectAtIndex:0];
+    [PCPackageMeta makeIntermediateDirectories:npath];
+    [PCPackageMeta
+     packageFileListOn:npath
+     WithBlock:^(NSArray<NSString *> *fileList, NSError *error) {
+         
+         for(NSString *file in fileList){
+             [PCPackageMeta
+              downloadFileFromURL:file
+              basePath:[NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,npath]
+              completion:^(NSURL *filePath) {
+                  Log(@"%@",filePath);
+              }
+              onError:^(NSError *error) {
+                  Log(@"%@",[error description]);
+              }];
+         }
+     }];
+
 }
+
 
 @end

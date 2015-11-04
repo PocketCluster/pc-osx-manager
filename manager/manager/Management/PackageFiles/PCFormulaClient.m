@@ -50,4 +50,13 @@ static NSString * const PCGithubRawFileURLString = @"https://raw.githubuserconte
     return _sharedGithubRawFileClient;
 }
 
++ (AFURLSessionManager *)sharedDownloadManager {
+    static AFURLSessionManager *_sharedDownloadManager = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _sharedDownloadManager = [[AFURLSessionManager alloc] initWithSessionConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
+    });
+    return _sharedDownloadManager;
+}
+
 @end
