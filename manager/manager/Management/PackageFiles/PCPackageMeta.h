@@ -14,7 +14,8 @@ extern NSString * const kPCPackageVersionNumber;
 extern NSString * const kPCPackageVersionModes;
 extern NSString * const kPCPackageVersionModesType;
 extern NSString * const kPCPackageVersionMasterPath;
-extern NSString * const kPCPackageVersionNodesPath;
+extern NSString * const kPCPackageVersionSecondaryPath;
+extern NSString * const kPCPackageVersionNodePath;
 
 @interface PCPackageMeta : NSObject
 + (NSURLSessionDataTask *)metaPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block;
@@ -29,6 +30,7 @@ extern NSString * const kPCPackageVersionNodesPath;
 @property (nonatomic, readonly) NSArray<NSString *> *libraryDependencies;
 @property (nonatomic, readonly) NSArray<NSString *> *bigPkgDependencies;
 @property (nonatomic, readonly) NSArray<NSString *> *masterFilePath;
+@property (nonatomic, readonly) NSArray<NSString *> *secondaryFilePath;
 @property (nonatomic, readonly) NSArray<NSString *> *nodeFilePath;
 
 + (BOOL)makeIntermediateDirectories:(NSString *)aPath;
