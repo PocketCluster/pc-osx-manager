@@ -81,10 +81,12 @@
 #pragma mark - IBACTION
 -(IBAction)install:(id)sender {
 
-//    [self.progressBar setIndeterminate:YES];
+//    [self.circularProgress setHidden:NO];
+    [self.circularProgress startAnimation:nil];
+
     [self.progressBar setDoubleValue:50.0];
-    [self.progressBar setUsesThreadedAnimation:YES];
-    [self.progressBar startAnimation:nil];
+//    [self.progressBar setUsesThreadedAnimation:YES];
+//    [self.progressBar startAnimation:nil];
     [self.progressBar displayIfNeeded];
     
     return;
@@ -166,8 +168,6 @@
              }
          }];
     }
-    
-    
 }
 
 

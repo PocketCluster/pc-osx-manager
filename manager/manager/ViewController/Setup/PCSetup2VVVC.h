@@ -10,6 +10,7 @@
 
 @interface PCSetup2VVVC : NSViewController  <DPSetupWindowStageViewController>
 
+@property (nonatomic, weak) IBOutlet NSProgressIndicator *circularProgress;
 @property (nonatomic, weak) IBOutlet NSProgressIndicator *progressBar;
 @property (nonatomic, weak) IBOutlet NSTextField *progressLabel;
 @property (nonatomic, weak) IBOutlet NSButton *buildBtn;

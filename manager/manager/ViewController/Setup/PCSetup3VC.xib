@@ -7,6 +7,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="PCSetup3VC">
             <connections>
+                <outlet property="circularProgress" destination="yJ8-o0-95a" id="aTX-Oo-Hmf"/>
                 <outlet property="installBtn" destination="Xon-Xe-TcG" id="K7q-yn-Yay"/>
                 <outlet property="packageTable" destination="AYe-3s-L1Q" id="Di6-2b-prT"/>
                 <outlet property="progressBar" destination="3rn-uc-5rZ" id="hQd-ZQ-XGv"/>
@@ -132,7 +133,7 @@ This process will take some time. Please be patient and do not close the window 
                     <animations/>
                 </progressIndicator>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rnA-nZ-9Nb">
-                    <rect key="frame" x="23" y="55" width="374" height="24"/>
+                    <rect key="frame" x="40" y="55" width="357" height="24"/>
                     <animations/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" id="5p7-G6-JsK">
                         <font key="font" metaFont="systemLight" size="16"/>
@@ -140,6 +141,10 @@ This process will take some time. Please be patient and do not close the window 
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
+                <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="yJ8-o0-95a">
+                    <rect key="frame" x="20" y="59" width="16" height="16"/>
+                    <animations/>
+                </progressIndicator>
             </subviews>
             <animations/>
         </customView>

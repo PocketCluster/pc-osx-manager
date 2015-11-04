@@ -9,6 +9,8 @@
 #import "DPSetupWindow.h"
 
 @interface PCSetup2RPVC : NSViewController  <DPSetupWindowStageViewController, NSTableViewDataSource, NSTableViewDelegate>
+
+@property (nonatomic, weak) IBOutlet NSProgressIndicator *circularProgress;
 @property (nonatomic, weak) IBOutlet NSTableView *nodeTable;
 @property (nonatomic, weak) IBOutlet NSTextField *warningLabel;
 @property (nonatomic, weak) IBOutlet NSProgressIndicator *progressBar;
