@@ -126,7 +126,10 @@ NSString * const kGithubRawFileLinkURL              = @"download_url";
             }];
 }
 
-
+/*
+ * check file list with following commands
+ * curl -i https://api.github.com/repos/pocketcluster/formulas/contents/hadoop/2-4-0/datanode/cluster
+ */
 + (NSURLSessionDataTask *)packageFileListOn:(NSString *)aPath WithBlock:(void (^)(NSArray<NSString *> *fileList, NSError *error))block {
 
     return [[PCFormulaClient sharedGithubAPIClient]
