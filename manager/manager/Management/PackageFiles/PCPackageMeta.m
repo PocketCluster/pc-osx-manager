@@ -27,7 +27,12 @@ NSString * const kPCPackageVersionMasterPath        = @"path-masters";
 NSString * const kPCPackageVersionSecondaryPath     = @"path-secondaries";
 NSString * const kPCPackageVersionNodePath          = @"path-nodes";
 
-NSString * const kGithubRawFileLinkURL              = @"download_url";
+NSString * const kPCPackageMetaMasterDownload       = @"meta-package.master.download";
+NSString * const kPCPackageMetaSecondaryDownload    = @"meta-package.secondary.download";
+NSString * const kPCPackageMetaNodeDownload         = @"meta-package.node.download";
+
+static NSString * const kGithubRawFileLinkURL              = @"download_url";
+
 
 @interface PCPackageMeta()
 @property (nonatomic, strong, readwrite) NSString *metaVersion;

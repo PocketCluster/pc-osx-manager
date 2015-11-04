@@ -18,6 +18,10 @@ extern NSString * const kPCPackageVersionMasterPath;
 extern NSString * const kPCPackageVersionSecondaryPath;
 extern NSString * const kPCPackageVersionNodePath;
 
+extern NSString * const kPCPackageMetaMasterDownload;
+extern NSString * const kPCPackageMetaSecondaryDownload;
+extern NSString * const kPCPackageMetaNodeDownload;
+
 @interface PCPackageMeta : NSObject
 
 @property (nonatomic, readonly) NSString *metaVersion;
