@@ -9,8 +9,10 @@
 #import "PCSetup3VC.h"
 #import "PCPackageMeta.h"
 #import "PCConstants.h"
+#import "Util.h"
+#import "PCTask.h"
 
-@interface PCSetup3VC()
+@interface PCSetup3VC()<PCTaskDelegate>
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
 @end
@@ -59,71 +61,104 @@
     return NO;
 }
 
+#pragma mark - PCTaskDelegate
+-(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
+    
+}
 
+-(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
+    
+    NSData *data = [aFileHandler availableData];
+    __block NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    
+    Log(@"STR %@",str);
+}
+
+-(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
+    return NO;
+}
+
+#pragma mark - IBACTION
 -(IBAction)install:(id)sender {
 
     WEAK_SELF(self);
-    
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
-    __block NSString *mpath = [meta.masterFilePath objectAtIndex:0];
-    [PCPackageMeta makeIntermediateDirectories:mpath];
-    
-    [PCPackageMeta
-     packageFileListOn:mpath
-     WithBlock:^(NSArray<NSString *> *fileList, NSError *error) {
 
-         @synchronized(self.downloadFileList) {
-             [self.downloadFileList addObjectsFromArray:fileList];
-         }
-         
-         for(NSString *file in fileList){
-             [PCPackageMeta
-              downloadFileFromURL:file
-              basePath:[NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,mpath]
-              completion:^(NSString *URL, NSURL *filePath) {
-                  
-                  if(belf){
-                      @synchronized(self.downloadFileList) {
-                          [belf.downloadFileList removeObject:URL];
-                      }
-                      Log(@"%@ %ld",filePath, [belf.downloadFileList count]);
-                  }
-              }
-              onError:^(NSString *URL, NSError *error) {
-                  Log(@"%@",[error description]);
-              }];
-         }
-     }];
+    // if there is no package to install, just don't do it.
+    if(![self.packageList count]){
+        return;
+    }
     
-    __block NSString *npath = [meta.nodeFilePath objectAtIndex:0];
-    [PCPackageMeta makeIntermediateDirectories:npath];
-    [PCPackageMeta
-     packageFileListOn:npath
-     WithBlock:^(NSArray<NSString *> *fileList, NSError *error) {
-         
-         @synchronized(self.downloadFileList) {
-             [self.downloadFileList addObjectsFromArray:fileList];
-         }
-         
-         for(NSString *file in fileList){
-             [PCPackageMeta
-              downloadFileFromURL:file
-              basePath:[NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,npath]
-              completion:^(NSString *URL, NSURL *filePath) {
-                  
-                  if(belf){
-                      @synchronized(self.downloadFileList) {
-                          [belf.downloadFileList removeObject:URL];
-                      }
-                      Log(@"%@ %ld",filePath, [belf.downloadFileList count]);
-                  }
-              }
-              onError:^(NSString *URL, NSError *error) {
-                  Log(@"%@",[error description]);
-              }];
-         }
-     }];
+    for(PCPackageMeta *meta in belf.packageList){
+        
+        if(!belf){
+            return;
+        }
 
+        __block NSString *mpath = [meta.masterFilePath objectAtIndex:0];
+        [PCPackageMeta makeIntermediateDirectories:mpath];
+        
+        [PCPackageMeta
+         packageFileListOn:mpath
+         WithBlock:^(NSArray<NSString *> *fileList, NSError *error) {
+             
+             if(belf){
+                 @synchronized(belf.downloadFileList) {
+                     [belf.downloadFileList addObjectsFromArray:fileList];
+                 }
+             }
+             
+             for(NSString *file in fileList){
+                 [PCPackageMeta
+                  downloadFileFromURL:file
+                  basePath:[NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,mpath]
+                  completion:^(NSString *URL, NSURL *filePath) {
+                      
+                      if(belf){
+                          @synchronized(belf.downloadFileList) {
+                              [belf.downloadFileList removeObject:URL];
+                          }
+                          Log(@"%@ %ld",filePath, [belf.downloadFileList count]);
+                      }
+                  }
+                  onError:^(NSString *URL, NSError *error) {
+                      Log(@"%@",[error description]);
+                  }];
+             }
+         }];
+        
+        __block NSString *npath = [meta.nodeFilePath objectAtIndex:0];
+        [PCPackageMeta makeIntermediateDirectories:npath];
+        [PCPackageMeta
+         packageFileListOn:npath
+         WithBlock:^(NSArray<NSString *> *fileList, NSError *error) {
+             
+             if(belf){
+                 @synchronized(belf.downloadFileList) {
+                     [belf.downloadFileList addObjectsFromArray:fileList];
+                 }
+             }
+             
+             for(NSString *file in fileList){
+                 [PCPackageMeta
+                  downloadFileFromURL:file
+                  basePath:[NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,npath]
+                  completion:^(NSString *URL, NSURL *filePath) {
+                      
+                      if(belf){
+                          @synchronized(belf.downloadFileList) {
+                              [belf.downloadFileList removeObject:URL];
+                          }
+                          Log(@"%@ %ld",filePath, [belf.downloadFileList count]);
+                      }
+                  }
+                  onError:^(NSString *URL, NSError *error) {
+                      Log(@"%@",[error description]);
+                  }];
+             }
+         }];
+    }
+    
+    
 }
 
 
