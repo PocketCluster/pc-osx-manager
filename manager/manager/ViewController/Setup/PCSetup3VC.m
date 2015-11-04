@@ -15,7 +15,8 @@
 @interface PCSetup3VC()<PCTaskDelegate>
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
-
+@property (nonatomic, strong) PCTask *saltMasterTask;
+@property (nonatomic, strong) PCTask *saltMinionTask;
 
 -(void)finalizePackageInstall;
 @end
@@ -66,7 +67,17 @@
 
 #pragma mark - PCTaskDelegate
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
-    
+    if(self.saltMasterTask){
+        PCTask *smt = [PCTask new];
+        smt.taskCommand = [NSString stringWithFormat:@"salt 'pc-node*' state.sls hadoop/2-4-0/datanode/cluster/init"];
+        smt.delegate = self;
+        self.saltMinionTask = smt;
+        [smt launchTask];
+
+        self.saltMasterTask = nil;
+    }else{
+        self.saltMinionTask = nil;
+    }
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
@@ -86,6 +97,15 @@
     [self.circularProgress stopAnimation:nil];
     [self.progressBar setDoubleValue:100.0];
     [self.progressBar displayIfNeeded];
+    
+    return;
+    
+    
+    PCTask *smt = [PCTask new];
+    smt.taskCommand = [NSString stringWithFormat:@"salt 'pc-master' state.sls hadoop/2-4-0/namenode/cluster/init"];
+    smt.delegate = self;
+    self.saltMasterTask = smt;
+    [smt launchTask];
 }
 
 -(void)failedPackageInstall {
