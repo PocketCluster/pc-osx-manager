@@ -185,6 +185,8 @@
 		049622F11BE778E200FD577A /* PCProcManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 049622F01BE778E200FD577A /* PCProcManager.m */; };
 		049622F21BE778E200FD577A /* PCProcManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 049622F01BE778E200FD577A /* PCProcManager.m */; };
 		049622F31BE778E200FD577A /* PCProcManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 049622F01BE778E200FD577A /* PCProcManager.m */; };
+		04A371DC1BEA10FE00554E80 /* PCFormulaClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 04A371D91BEA10FE00554E80 /* PCFormulaClient.m */; };
+		04A371DD1BEA10FE00554E80 /* PCPackageMeta.m in Sources */ = {isa = PBXBuildFile; fileRef = 04A371DB1BEA10FE00554E80 /* PCPackageMeta.m */; };
 		04C09D611BE35EDF009E074D /* PCPrefWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C09D5F1BE35EDF009E074D /* PCPrefWC.m */; };
 		04C09D621BE35EDF009E074D /* PCPrefWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C09D5F1BE35EDF009E074D /* PCPrefWC.m */; };
 		04C09D631BE35EDF009E074D /* PCPrefWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C09D5F1BE35EDF009E074D /* PCPrefWC.m */; };
@@ -416,6 +418,10 @@
 		048678291BCF5FE20071594B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		049622EF1BE778E200FD577A /* PCProcManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCProcManager.h; sourceTree = "<group>"; };
 		049622F01BE778E200FD577A /* PCProcManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCProcManager.m; sourceTree = "<group>"; };
+		04A371D81BEA10FE00554E80 /* PCFormulaClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCFormulaClient.h; sourceTree = "<group>"; };
+		04A371D91BEA10FE00554E80 /* PCFormulaClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCFormulaClient.m; sourceTree = "<group>"; };
+		04A371DA1BEA10FE00554E80 /* PCPackageMeta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPackageMeta.h; sourceTree = "<group>"; };
+		04A371DB1BEA10FE00554E80 /* PCPackageMeta.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPackageMeta.m; sourceTree = "<group>"; };
 		04C09D5E1BE35EDF009E074D /* PCPrefWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPrefWC.h; sourceTree = "<group>"; };
 		04C09D5F1BE35EDF009E074D /* PCPrefWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPrefWC.m; sourceTree = "<group>"; };
 		04C09D601BE35EDF009E074D /* PCPrefWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCPrefWC.xib; sourceTree = "<group>"; };
@@ -550,6 +556,7 @@
 		0422D4F01BDA0C1400C5CB33 /* Management */ = {
 			isa = PBXGroup;
 			children = (
+				04A371D71BEA10FE00554E80 /* PackageFiles */,
 				049622EE1BE778D700FD577A /* Process */,
 				044071591BE741A0005B6E6D /* Menu */,
 				04C601AF1BE3B0FA002389AB /* Virtualbox */,
@@ -951,6 +958,17 @@
 			path = Process;
 			sourceTree = "<group>";
 		};
+		04A371D71BEA10FE00554E80 /* PackageFiles */ = {
+			isa = PBXGroup;
+			children = (
+				04A371D81BEA10FE00554E80 /* PCFormulaClient.h */,
+				04A371D91BEA10FE00554E80 /* PCFormulaClient.m */,
+				04A371DA1BEA10FE00554E80 /* PCPackageMeta.h */,
+				04A371DB1BEA10FE00554E80 /* PCPackageMeta.m */,
+			);
+			path = PackageFiles;
+			sourceTree = "<group>";
+		};
 		04C09D5D1BE35EBE009E074D /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
@@ -1321,6 +1339,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04A371DD1BEA10FE00554E80 /* PCPackageMeta.m in Sources */,
 				046A361A1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				046A368A1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				0440716C1BE741A0005B6E6D /* RaspberryMenuItem.m in Sources */,
@@ -1329,6 +1348,7 @@
 				04F7056C1BD7A94300829651 /* GCDAsyncUdpSocket.m in Sources */,
 				0441A3F41BD892A400AABD7A /* VersionComparison.m in Sources */,
 				04C601A11BE3B040002389AB /* VirtualMachineInfo.m in Sources */,
+				04A371DC1BEA10FE00554E80 /* PCFormulaClient.m in Sources */,
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				041023F01BE473370083D62E /* VagrantGlobalStatusScanner.m in Sources */,
 				04D407421BDBC51F00625AD7 /* PCInterfaceList.m in Sources */,

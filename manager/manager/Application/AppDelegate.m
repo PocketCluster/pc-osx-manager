@@ -48,7 +48,17 @@
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+
+    // AFNetworking Preperation
+    NSURLCache *URLCache =
+    [[NSURLCache alloc]
+     initWithMemoryCapacity:4 * 1024 * 1024
+     diskCapacity:0
+     diskPath:nil];
     
+    [NSURLCache setSharedURLCache:URLCache];
+    
+    // opened window list
     self.openWindows = [[NSMutableArray alloc] init];
     
     //create popup and status menu item
