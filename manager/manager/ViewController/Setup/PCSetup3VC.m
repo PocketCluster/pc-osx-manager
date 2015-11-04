@@ -16,6 +16,7 @@
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
 
+
 -(void)finalizePackageInstall;
 @end
 
@@ -80,18 +81,16 @@
     return NO;
 }
 
-
-
 #pragma mark - Install Start
 -(void)finalizePackageInstall {
-    
     [self.circularProgress stopAnimation:nil];
     [self.progressBar setDoubleValue:100.0];
     [self.progressBar displayIfNeeded];
-
 }
 
-
+-(void)failedPackageInstall {
+    [self.circularProgress stopAnimation:nil];
+}
 
 #pragma mark - IBACTION
 -(IBAction)install:(id)sender {
@@ -118,8 +117,8 @@
         NSString *mBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,mpath];
         NSString *nBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,npath];
         
-        [PCPackageMeta makeIntermediateDirectories:mpath];
-        [PCPackageMeta makeIntermediateDirectories:npath];
+        [PCPackageMeta makeIntermediateDirectories:mBasePath];
+        [PCPackageMeta makeIntermediateDirectories:nBasePath];
         
         [PCPackageMeta
          packageFileListOn:mpath
@@ -158,6 +157,7 @@
                                }
                                onError:^(NSString *URL, NSError *error) {
                                    Log(@"Master - %@",[error description]);
+                                   [self failedPackageInstall];
                                }];
                           }
                           
@@ -180,6 +180,7 @@
                                }
                                onError:^(NSString *URL, NSError *error) {
                                    Log(@"Node - %@",[error description]);
+                                   [self failedPackageInstall];
                                }];
                           }
                       }

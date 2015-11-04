@@ -178,16 +178,15 @@ static NSString * const kGithubRawFileLinkURL              = @"download_url";
 }
 
 + (BOOL)makeIntermediateDirectories:(NSString *)aPath {
-    NSString *targetPath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH, aPath];
     NSError *error = nil;
     BOOL isDirectory;
-    if([[NSFileManager defaultManager] fileExistsAtPath:targetPath isDirectory:&isDirectory]){
+    if([[NSFileManager defaultManager] fileExistsAtPath:aPath isDirectory:&isDirectory]){
         return YES;
     }
-    
-    BOOL result = [[NSFileManager defaultManager] createDirectoryAtPath:targetPath withIntermediateDirectories:YES attributes:nil error:&error];
+
+    BOOL result = [[NSFileManager defaultManager] createDirectoryAtPath:aPath withIntermediateDirectories:YES attributes:nil error:&error];
     if(!result || error){
-        Log(@"Error: Create folder failed %@ %@", targetPath, [error debugDescription]);
+        Log(@"Error: Create folder failed %@ %@", aPath, [error debugDescription]);
         return NO;
     }
     return YES;
