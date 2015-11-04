@@ -12,6 +12,7 @@
 #import "AFURLSessionManager.h"
 #import "PCConstants.h"
 
+NSString * const kPCPackageMetaVersion              = @"pkg-ver";
 NSString * const kDescription                       = @"description";
 NSString * const kPCPackageName                     = @"name";
 NSString * const kPCPackageFamily                   = @"family";
@@ -29,6 +30,7 @@ NSString * const kPCPackageVersionNodePath          = @"path-nodes";
 NSString * const kGithubRawFileLinkURL              = @"download_url";
 
 @interface PCPackageMeta()
+@property (nonatomic, strong, readwrite) NSString *metaVersion;
 @property (nonatomic, strong, readwrite) NSString *packageName;
 @property (nonatomic, strong, readwrite) NSArray<NSString*> *family;
 @property (nonatomic, strong, readwrite) NSString *packageDescription;
@@ -46,6 +48,7 @@ NSString * const kGithubRawFileLinkURL              = @"download_url";
 #pragma mark - PCPACKAGEMETA NSCODING
 @implementation PCPackageMeta (NSCoding)
 - (void)encodeWithCoder:(NSCoder *)aCoder {
+    [aCoder encodeObject:self.metaVersion           forKey:kPCPackageMetaVersion];
     [aCoder encodeObject:self.packageName           forKey:kPCPackageName];
     [aCoder encodeObject:self.family                forKey:kPCPackageFamily];
     [aCoder encodeObject:self.packageDescription    forKey:kDescription];
@@ -63,6 +66,7 @@ NSString * const kGithubRawFileLinkURL              = @"download_url";
     self = [super init];
     if (self) {
 
+        self.metaVersion           = [aDecoder decodeObjectForKey:kPCPackageMetaVersion];
         self.packageName           = [aDecoder decodeObjectForKey:kPCPackageName];
         self.family                = [aDecoder decodeObjectForKey:kPCPackageFamily];
         self.packageDescription    = [aDecoder decodeObjectForKey:kDescription];
@@ -92,6 +96,7 @@ NSString * const kGithubRawFileLinkURL              = @"download_url";
                 NSArray *parray = (NSArray *)JSON;
                 for (NSDictionary *pi in parray){
                     
+                    NSString *pMeta = [pi objectForKey:kPCPackageMetaVersion];
                     NSString *pName = [pi objectForKey:kPCPackageName];
                     NSString *pDesc = [pi objectForKey:kDescription];
                     NSArray  *pFami = [pi objectForKey:kPCPackageFamily];
@@ -104,8 +109,9 @@ NSString * const kGithubRawFileLinkURL              = @"download_url";
                         
                         NSArray *vModes = [version objectForKey:kPCPackageVersionModes];
                         for (NSDictionary *mode in vModes){
-                            
+
                             PCPackageMeta *meta = [[PCPackageMeta alloc] init];
+                            meta.metaVersion        = pMeta;
                             meta.packageName        = pName;
                             meta.family             = pFami;
                             meta.packageDescription = [NSString stringWithFormat:@"%@ %@ %@", pDesc, vDesc, [mode objectForKey:kDescription]];

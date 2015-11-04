@@ -7,7 +7,10 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="PCSetup3VC">
             <connections>
+                <outlet property="installBtn" destination="Xon-Xe-TcG" id="K7q-yn-Yay"/>
                 <outlet property="packageTable" destination="AYe-3s-L1Q" id="Di6-2b-prT"/>
+                <outlet property="progressBar" destination="3rn-uc-5rZ" id="hQd-ZQ-XGv"/>
+                <outlet property="progressLabel" destination="rnA-nZ-9Nb" id="YvG-GV-Mu0"/>
                 <outlet property="view" destination="3Rc-Cp-oah" id="6xm-Mq-tN3"/>
             </connections>
         </customObject>
@@ -50,13 +53,13 @@ This process will take some time. Please be patient and do not close the window 
                     </textFieldCell>
                 </textField>
                 <scrollView fixedFrame="YES" borderType="none" autohidesScrollers="YES" horizontalLineScroll="42" horizontalPageScroll="10" verticalLineScroll="42" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4rB-Bg-mK2">
-                    <rect key="frame" x="20" y="49" width="375" height="172"/>
+                    <rect key="frame" x="20" y="80" width="375" height="141"/>
                     <clipView key="contentView" ambiguous="YES" id="H5i-6F-7WS">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="172"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="141"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="40" rowSizeStyle="automatic" headerView="Jb8-Vy-3hW" viewBased="YES" id="AYe-3s-L1Q">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="149"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="118"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <animations/>
                                 <size key="intercellSpacing" width="3" height="2"/>
@@ -124,6 +127,19 @@ This process will take some time. Please be patient and do not close the window 
                         <animations/>
                     </tableHeaderView>
                 </scrollView>
+                <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="3rn-uc-5rZ">
+                    <rect key="frame" x="20" y="42" width="375" height="20"/>
+                    <animations/>
+                </progressIndicator>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rnA-nZ-9Nb">
+                    <rect key="frame" x="23" y="55" width="374" height="24"/>
+                    <animations/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" id="5p7-G6-JsK">
+                        <font key="font" metaFont="systemLight" size="16"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
             </subviews>
             <animations/>
         </customView>

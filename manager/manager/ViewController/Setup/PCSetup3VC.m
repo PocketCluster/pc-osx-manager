@@ -81,6 +81,15 @@
 #pragma mark - IBACTION
 -(IBAction)install:(id)sender {
 
+//    [self.progressBar setIndeterminate:YES];
+    [self.progressBar setDoubleValue:50.0];
+    [self.progressBar setUsesThreadedAnimation:YES];
+    [self.progressBar startAnimation:nil];
+    [self.progressBar displayIfNeeded];
+    
+    return;
+    
+
     WEAK_SELF(self);
 
     // if there is no package to install, just don't do it.

@@ -6,9 +6,10 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
+extern NSString * const kPCPackageMetaVersion;
+extern NSString * const kDescription;
 extern NSString * const kPCPackageName;
 extern NSString * const kPCPackageFamily;
-extern NSString * const kDescription;
 extern NSString * const kPCPackageVersions;
 extern NSString * const kPCPackageVersionNumber;
 extern NSString * const kPCPackageVersionModes;
@@ -18,9 +19,8 @@ extern NSString * const kPCPackageVersionSecondaryPath;
 extern NSString * const kPCPackageVersionNodePath;
 
 @interface PCPackageMeta : NSObject
-+ (NSURLSessionDataTask *)metaPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block;
-+ (NSURLSessionDataTask *)packageFileListOn:(NSString *)aPath WithBlock:(void (^)(NSArray<NSString *> *fileList, NSError *error))block;
 
+@property (nonatomic, readonly) NSString *metaVersion;
 @property (nonatomic, readonly) NSString *packageName;
 @property (nonatomic, readonly) NSArray<NSString*> *family;
 @property (nonatomic, readonly) NSString *packageDescription;
@@ -33,8 +33,9 @@ extern NSString * const kPCPackageVersionNodePath;
 @property (nonatomic, readonly) NSArray<NSString *> *secondaryFilePath;
 @property (nonatomic, readonly) NSArray<NSString *> *nodeFilePath;
 
++ (NSURLSessionDataTask *)metaPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block;
++ (NSURLSessionDataTask *)packageFileListOn:(NSString *)aPath WithBlock:(void (^)(NSArray<NSString *> *fileList, NSError *error))block;
 + (BOOL)makeIntermediateDirectories:(NSString *)aPath;
-
 + (void)downloadFileFromURL:(NSString *)URL
                    basePath:(NSString *)aBasePath
                  completion:(void (^)(NSString *URL, NSURL *filePath))completionBlock

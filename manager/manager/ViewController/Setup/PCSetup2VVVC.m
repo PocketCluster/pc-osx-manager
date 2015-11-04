@@ -58,7 +58,7 @@
         [[Util getApp] startSalt];
         sleep(4);
 */
-        NSString *basePath    = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
+        NSString *basePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
         NSString *userSetup = [NSString stringWithFormat:@"%@/setup/vagrant_user_setup.sh",basePath];
         
         PCTask *userTask = [PCTask new];
