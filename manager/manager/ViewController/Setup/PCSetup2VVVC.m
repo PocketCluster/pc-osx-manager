@@ -131,6 +131,12 @@
     self.canContinue = YES;
     self.canGoBack = NO;
 
+/*
+    [[Util getApp] stopBasicServices];
+    [[Util getApp] setClusterType:PC_CLUTER_VAGRANT];
+    [[Util getApp] startVagrantSetupService];
+*/
+
     NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kDPNotification_addFinalViewController

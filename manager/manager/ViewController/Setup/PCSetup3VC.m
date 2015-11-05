@@ -17,17 +17,25 @@
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
 @property (nonatomic, strong) PCTask *saltMasterTask;
 @property (nonatomic, strong) PCTask *saltMinionTask;
+@property (readwrite, nonatomic) BOOL canContinue;
+@property (readwrite, nonatomic) BOOL canGoBack;
 
 -(void)finalizePackageInstall;
 @end
 
 @implementation PCSetup3VC
 
+@synthesize canContinue;
+@synthesize canGoBack;
+
 -(instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if(self){
         self.packageList = [NSMutableArray arrayWithCapacity:0];
         self.downloadFileList = [NSMutableArray arrayWithCapacity:0];
+        
+        self.canGoBack = NO;
+        self.canContinue = NO;
         
         WEAK_SELF(self);
         [PCPackageMeta metaPackageListWithBlock:^(NSArray<PCPackageMeta *> *packages, NSError *error) {
@@ -92,11 +100,18 @@
     return NO;
 }
 
+#pragma mark - DPSetupWindowDelegate
+- (NSString *)continueButtonTitle {
+    return @"Finish";
+}
+
 #pragma mark - Install Start
 -(void)finalizePackageInstall {
     [self.circularProgress stopAnimation:nil];
     [self.progressBar setDoubleValue:100.0];
     [self.progressBar displayIfNeeded];
+    
+    
     
     return;
     
@@ -110,6 +125,10 @@
 
 -(void)failedPackageInstall {
     [self.circularProgress stopAnimation:nil];
+}
+
+-(void)finalizeInstallProcess {
+    self.canContinue = YES;
 }
 
 #pragma mark - IBACTION
@@ -167,9 +186,15 @@
                                    if(belf){
                                        @synchronized(belf.downloadFileList) {
                                            [belf.downloadFileList removeObject:URL];
-                                       }
-                                       if(![belf.downloadFileList count]){
-                                           [belf finalizePackageInstall];
+                                           
+                                           if(![belf.downloadFileList count]){
+                                               [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                                                   if(belf){
+                                                       [belf finalizePackageInstall];
+                                                   }
+                                               }];
+                                           }
+
                                        }
                                        Log(@"%@ %ld",filePath, [belf.downloadFileList count]);
                                    }
@@ -190,9 +215,15 @@
                                    if(belf){
                                        @synchronized(belf.downloadFileList) {
                                            [belf.downloadFileList removeObject:URL];
-                                       }
-                                       if(![belf.downloadFileList count]){
-                                           [belf finalizePackageInstall];
+                                           
+                                           if(![belf.downloadFileList count]){
+                                               [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                                                   if(belf){
+                                                       [belf finalizePackageInstall];
+                                                   }
+                                               }];
+                                           }
+                                           
                                        }
                                        Log(@"%@ %ld",filePath, [belf.downloadFileList count]);
                                    }

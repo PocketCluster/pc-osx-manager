@@ -21,18 +21,6 @@
             <rect key="frame" x="0.0" y="0.0" width="415" height="345"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aEF-mV-1R2">
-                    <rect key="frame" x="18" y="229" width="379" height="68"/>
-                    <animations/>
-                    <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" id="s7S-NT-fXD">
-                        <font key="font" metaFont="system"/>
-                        <string key="title">Following packages will be installed.
-
-This process will take some time. Please be patient and do not close the window during installation.</string>
-                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                </textField>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Xon-Xe-TcG">
                     <rect key="frame" x="166" y="13" width="82" height="32"/>
                     <animations/>
@@ -145,6 +133,18 @@ This process will take some time. Please be patient and do not close the window 
                     <rect key="frame" x="20" y="59" width="16" height="16"/>
                     <animations/>
                 </progressIndicator>
+                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aEF-mV-1R2">
+                    <rect key="frame" x="18" y="229" width="379" height="68"/>
+                    <animations/>
+                    <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" id="s7S-NT-fXD">
+                        <font key="font" metaFont="system"/>
+                        <string key="title">Following packages will be installed.
+
+This process will take some time. Please be patient and do not cancel during installation.</string>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
             </subviews>
             <animations/>
         </customView>

@@ -230,7 +230,6 @@ withFilterContext:(id)filterContext
     return NO;
 }
 
-
 #pragma mark - IBACTION
 -(IBAction)build:(id)sender
 {
@@ -297,6 +296,9 @@ withFilterContext:(id)filterContext
 -(void)setToNextStage {
     self.canContinue = YES;
     self.canGoBack = NO;
+    
+    [[Util getApp] setClusterType:PC_CLUSTER_RASPBERRY];
+    [[Util getApp] startRaspberrySetupService];
     
     NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
     [[NSNotificationCenter defaultCenter]
