@@ -241,6 +241,7 @@
 }
 
 //- (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {[PFAnalytics trackAppOpenedWithRemoteNotificationPayload:userInfo];}
+
 #pragma mark - WINDOW MANAGEMENT
 - (void)addOpenWindow:(id)window {
     @synchronized(_openWindows) {

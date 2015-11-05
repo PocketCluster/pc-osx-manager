@@ -272,12 +272,10 @@
     }
 
     if(_setupWindow && !_setupWindow.isClosed) {
-        Log(@"case #1");
         [NSApp activateIgnoringOtherApps:YES];
         [_setupWindow showWindow:self];
         [_setupWindow bringToFront];
     } else {
-        Log(@"case #2");
         self.setupWindow = nil;
         __strong DPSetupWC *sw = [[DPSetupWC alloc] initWithWindowNibName:@"DPSetupWC"];
         [NSApp activateIgnoringOtherApps:YES];
