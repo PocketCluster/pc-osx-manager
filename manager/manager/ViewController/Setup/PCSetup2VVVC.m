@@ -11,6 +11,7 @@
 #import "Util.h"
 #import "PCTask.h"
 #import "PCSetup3VC.h"
+#import "PCProcManager.h"
 
 @interface PCSetup2VVVC ()<PCTaskDelegate>
 @property (strong, nonatomic) PCTask *sudoTask;
@@ -20,7 +21,10 @@
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
 
+- (void)setUIToProceedState;
+- (void)resetUIForFailure;
 - (void)setToNextStage;
+
 - (void)removeViewControler;
 @end
 
@@ -34,13 +38,13 @@
     self = [super initWithNibName:aNibNameOrNil bundle:aNibBundleOrNil];
     
     if(self){
-        self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Base config done...",@10.0]
-                           ,@"SUDO_SETUP_DONE":@[@"Start setting up Vagrant",@20.0]
-                           ,@"USER_SETUP_STEP_0":@[@"USER_SETUP_STEP_0",@30.0]
-                           ,@"USER_SETUP_STEP_1":@[@"USER_SETUP_STEP_1",@50.0]
-                           ,@"USER_SETUP_STEP_2":@[@"USER_SETUP_STEP_2",@90.0]
-                           ,@"USER_SETUP_DONE":@[@"USER_SETUP_DONE",@100.0]};
-        
+        self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Setting up base configuration.",@10.0]
+                           ,@"SUDO_SETUP_DONE":@[@"Finishing configuration.",@20.0]
+                           ,@"USER_SETUP_STEP_0":@[@"Starting Vagrant.",@30.0]
+                           ,@"USER_SETUP_STEP_1":@[@"Setting up connection.",@70.0]
+                           ,@"USER_SETUP_STEP_2":@[@"Finalizing...",@90.0]
+                           ,@"USER_SETUP_DONE":@[@"Done!",@100.0]};
+
         [self resetToInitialState];
     }
 
@@ -52,12 +56,18 @@
 #pragma mark - PCTaskDelegate
 
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
-    
     if(self.sudoTask){
-/*
-        [[Util getApp] startSalt];
-        sleep(4);
-*/
+        if(aTask.terminationStatus != 0) {
+            [self resetUIForFailure];
+            [self.progressLabel setStringValue:@"Installation Error. Please try again."];
+            self.sudoTask = nil;
+            return;
+        }
+
+        [self setUIToProceedState];
+        [[PCProcManager sharedManager] freshSaltStart];
+        sleep(3);
+
         NSString *basePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
         NSString *userSetup = [NSString stringWithFormat:@"%@/setup/vagrant_user_setup.sh",basePath];
         
@@ -70,12 +80,19 @@
         
         self.sudoTask = nil;
         
-        self.canContinue = NO;
-        self.canGoBack = YES;
-
     }else{
+        
+        if(aTask.terminationStatus != 0) {
+            [self resetUIForFailure];
+            [self.progressLabel setStringValue:@"Installation Error. Please try again."];
+            self.sudoTask = nil;
+            self.userTask = nil;
+            return;
+        }
+        
+        [self setToNextStage];
         self.userTask = nil;
-        [self.progressBar stopAnimation:self];
+        
     }
 }
 
@@ -84,6 +101,8 @@
     NSData *data = [aFileHandler availableData];
     __block NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 
+    Log(@"%@",str);
+    
     NSArray *p = nil;
     for (NSString *key in self.progDict) {
         if ([str containsString:key]){
@@ -105,10 +124,8 @@
 }
 
 #pragma mark - IBACTION
--(IBAction)build:(id)sender
-{
-    [self setToNextStage];
-    return;
+-(IBAction)build:(id)sender {
+    [self setUIToProceedState];
     
     NSString *basePath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
     NSString *sudoSetup = [NSString stringWithFormat:@"%@/setup/vagrant_sudo_setup.sh",basePath];
@@ -126,17 +143,35 @@
     [self.buildBtn setEnabled:NO];
 }
 
-#pragma mark - DPSetupWindowDelegate
+#pragma mark - Setup UI status
+- (void)setUIToProceedState {
+    self.canContinue = NO;
+    self.canGoBack = NO;
+    [self.buildBtn setEnabled:NO];
+    [self.circularProgress startAnimation:nil];
+}
+
+-(void)resetUIForFailure {
+    [self resetToInitialState];
+    [self.circularProgress stopAnimation:nil];
+    [self.progressBar setDoubleValue:0.0];
+    [self.progressBar displayIfNeeded];
+    [self.buildBtn setEnabled:YES];
+}
+
 -(void)setToNextStage {
     self.canContinue = YES;
     self.canGoBack = NO;
 
-/*
+    [self.circularProgress stopAnimation:nil];
+    [self.progressBar setDoubleValue:100.0];
+    [self.progressBar displayIfNeeded];
+    [self.buildBtn setEnabled:NO];
+    
     [[Util getApp] stopBasicServices];
     [[Util getApp] setClusterType:PC_CLUTER_VAGRANT];
     [[Util getApp] startVagrantSetupService];
-*/
-
+    
     NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kDPNotification_addFinalViewController
@@ -144,6 +179,7 @@
      userInfo:@{kDPNotification_key_viewController:vc3}];
 }
 
+#pragma mark - DPSetupWindowDelegate
 -(void)resetToInitialState {
     self.canContinue = NO;
     self.canGoBack = YES;

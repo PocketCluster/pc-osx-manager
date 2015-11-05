@@ -10,6 +10,8 @@
 #import "PCSetup2VVVC.h"
 #import "PCSetup2RPVC.h"
 
+#import "PCSetup3VC.h"
+
 
 @interface PCSetup1VC ()
 @property (readwrite, nonatomic) BOOL hideContinue;
@@ -38,6 +40,19 @@
 }
 
 - (IBAction)setupVagrantCluster:(id)sender {
+    
+    NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kDPNotification_addNextViewControllerAndProceed
+     object:self
+     userInfo:@{kDPNotification_key_viewController:vc3}];
+
+    
+    return;
+    
+    
+    
+    
     NSViewController *vc2v =
         [[PCSetup2VVVC alloc]
          initWithNibName:@"PCSetup2VVVC"

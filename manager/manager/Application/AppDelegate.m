@@ -92,7 +92,7 @@
 #endif
     
     PCClusterType t = [self loadClusterType];
-    t = PC_CLUSTER_NONE;
+    t = PC_CLUTER_VAGRANT;
 
     switch (t) {
         case PC_CLUTER_VAGRANT:{
@@ -160,8 +160,6 @@
 - (void)startRaspberrySetupService {
     [self.nativeMenu raspberryRegisterNotifications];
     
-//    [[PCProcManager sharedManager] freshSaltStart];
-    
     [self.rpiManager refreshRaspberryClusters];
     
     [self.rpiManager refreshTimerState];
@@ -171,8 +169,6 @@
 
 - (void)startVagrantSetupService {
     [self.nativeMenu vagrantRegisterNotifications];
-    
-//    [[PCProcManager sharedManager] freshSaltStart];
     
     //start initial vagrant machine detection
     [self refreshVagrantMachines];

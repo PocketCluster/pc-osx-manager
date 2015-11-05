@@ -17,6 +17,7 @@
 #import "NullStringChecker.h"
 #import "RaspberryManager.h"
 #import <SystemConfiguration/SCNetworkConfiguration.h>
+#import "PCProcManager.h"
 
 #import "PCSetup3VC.h"
 
@@ -36,7 +37,11 @@
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
 
--(void)refreshInterface;
+
+- (void)setUIToProceedState;
+- (void)resetUIForFailure;
+
+- (void)refreshInterface;
 - (void)setToNextStage;
 - (void)removeViewControler;
 @end
@@ -180,12 +185,19 @@ withFilterContext:(id)filterContext
 
 #pragma mark - PCTaskDelegate
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
-    
     if(self.sudoTask){
-        /*
-         [[Util getApp] startSalt];
-         sleep(4);
-         */
+
+        
+        if(aTask.terminationStatus != 0) {
+            [self resetUIForFailure];
+            [self.progressLabel setStringValue:@"Installation Error. Please try again."];
+            self.sudoTask = nil;
+            return;
+        }
+        
+        [self setUIToProceedState];
+        [[PCProcManager sharedManager] freshSaltStart];
+        sleep(5);
         
         NSString *basePath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
         NSString *userSetup = [NSString stringWithFormat:@"%@/setup/raspberry_user_setup.sh",basePath];
@@ -199,8 +211,18 @@ withFilterContext:(id)filterContext
         
         self.sudoTask = nil;
     }else{
+        
+        if(aTask.terminationStatus != 0) {
+            [self resetUIForFailure];
+            [self.progressLabel setStringValue:@"Installation Error. Please try again."];
+            self.sudoTask = nil;
+            self.userTask = nil;
+            return;
+        }
+
+        [self setToNextStage];
         self.userTask = nil;
-        [self.progressBar stopAnimation:self];
+
     }
 }
 
@@ -209,7 +231,7 @@ withFilterContext:(id)filterContext
     NSData *data = [aFileHandler availableData];
     __block NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
-    Log(@"STR %@",str);
+    Log(@"%@",str);
     
     NSArray *p = nil;
     for (NSString *key in self.progDict) {
@@ -234,9 +256,8 @@ withFilterContext:(id)filterContext
 -(IBAction)build:(id)sender
 {
     
-    [self setToNextStage];
-    return;
-
+    [self setUIToProceedState];
+    
     // update interface status
     [self refreshInterface];
     
@@ -292,10 +313,31 @@ withFilterContext:(id)filterContext
     [self.buildBtn setEnabled:NO];
 }
 
-#pragma mark - DPSetupWindowDelegate
+
+#pragma mark - Setup UI status
+- (void)setUIToProceedState {
+    self.canContinue = NO;
+    self.canGoBack = NO;
+    [self.buildBtn setEnabled:NO];
+    [self.circularProgress startAnimation:nil];
+}
+
+-(void)resetUIForFailure {
+    [self resetToInitialState];
+    [self.circularProgress stopAnimation:nil];
+    [self.progressBar setDoubleValue:0.0];
+    [self.progressBar displayIfNeeded];
+    [self.buildBtn setEnabled:YES];
+}
+
 -(void)setToNextStage {
     self.canContinue = YES;
     self.canGoBack = NO;
+    
+    [self.circularProgress stopAnimation:nil];
+    [self.progressBar setDoubleValue:100.0];
+    [self.progressBar displayIfNeeded];
+    [self.buildBtn setEnabled:NO];
     
     [[Util getApp] setClusterType:PC_CLUSTER_RASPBERRY];
     [[Util getApp] startRaspberrySetupService];
@@ -307,6 +349,7 @@ withFilterContext:(id)filterContext
      userInfo:@{kDPNotification_key_viewController:vc3}];
 }
 
+#pragma mark - DPSetupWindowDelegate
 -(void)resetToInitialState {
     self.canContinue = NO;
     self.canGoBack = YES;
