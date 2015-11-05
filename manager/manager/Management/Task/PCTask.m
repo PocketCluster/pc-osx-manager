@@ -80,7 +80,7 @@
     
     if (self.delegate != nil){
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedOutput:) name:NSFileHandleDataAvailableNotification object:fh];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(taskCompletion:) name: NSTaskDidTerminateNotification object:self.task];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(taskCompletion:) name:NSTaskDidTerminateNotification object:self.task];
     }
     
     [[self task] launch];
@@ -123,7 +123,7 @@
 }
 
 #pragma mark - BLOCK IMPLEMENTATION
-- (void)runTaskWithProgressBlock:(void (^)(NSString *output))progress done:(void (^)(NSString *doneMessage))done {
+- (void)runTaskWithProgressBlock:(void (^)(NSString *output))progress done:(void (^)(NSTask *task))done {
     
     if (!self.task){
         self.task = [self defaultTask];
@@ -146,42 +146,53 @@
     
     __block BOOL *isRunning = &_isRunning;
     
-    
     WEAK_SELF(self);
     
     dispatch_queue_t taskQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
     dispatch_async(taskQueue, ^{
 
         @try {
-            
+
+    
             [[NSNotificationCenter defaultCenter]
              addObserverForName:NSFileHandleDataAvailableNotification
-             object:[taskOutputPipe fileHandleForReading]
+             object:fh
              queue:nil
              usingBlock:^(NSNotification *notification){
-                 
-                 NSData *output = [[taskOutputPipe fileHandleForReading] availableData];
+                 NSData *output = [fh availableData];
                  NSString *outStr = [[NSString alloc] initWithData:output encoding:NSUTF8StringEncoding];
 
                  dispatch_sync(dispatch_get_main_queue(), ^{
-                     
                      if (!progress){
                          progress(outStr);
-                     }
-                     
+                     }        
                  });
-                 
                  [[taskOutputPipe fileHandleForReading] waitForDataInBackgroundAndNotify];
              }];
             
-            *isRunning = YES;
-            [belf.task launch];
-            [belf.task waitUntilExit];
-            *isRunning = NO;
 
-            int ts = [belf.task terminationStatus];
-            if (ts == 44){
-                NSLog(@"please install Java first!");
+            
+            [[NSNotificationCenter defaultCenter]
+             addObserverForName:NSTaskDidTerminateNotification
+             object:belf.task
+             queue:nil
+             usingBlock:^(NSNotification * _Nonnull note) {
+                 NSTask *task = [note object];
+                 dispatch_sync(dispatch_get_main_queue(), ^{
+                     if (!done){
+                         done(task);
+                     }
+                 });
+             }];
+            
+            if(belf){
+                *isRunning = YES;
+                [belf.task launch];
+                [belf.task waitUntilExit];
+            }
+
+            if(belf){
+                *isRunning = NO;
             }
             
         }

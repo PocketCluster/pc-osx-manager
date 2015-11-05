@@ -27,19 +27,23 @@
 #import "AppDelegate.h"
 
 
-@interface AppDelegate ()<SUUpdaterDelegate, VagrantManagerDelegate, NSUserNotificationCenterDelegate, MenuDelegate>
+@interface AppDelegate ()<SUUpdaterDelegate, VagrantManagerDelegate, NSUserNotificationCenterDelegate, MenuDelegate, PCTaskDelegate>
+
+@property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
+@property (nonatomic, strong) VagrantManager *vagManager;
+@property (nonatomic, strong) RaspberryManager *rpiManager;
+@property (strong, nonatomic) NSTimer *refreshTimer;
+@property (nonatomic, strong) NSMutableArray *openWindows;
+
+@property (nonatomic, strong) PCTask *taskLibChecker;
+@property (nonatomic, readwrite) int libraryCheckupResult;
+
 - (void)haltRefreshTimer;
 - (void)refreshTimerState;
 - (void)updateProcessType;
 - (void)updateRunningVmCount;
 - (void)updateInstancesCount;
 
-@property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
-@property (nonatomic, strong) VagrantManager *vagManager;
-@property (nonatomic, strong) RaspberryManager *rpiManager;
-@property (strong, nonatomic) NSTimer *refreshTimer;
-
-@property (nonatomic, strong) NSMutableArray *openWindows;
 @end
 
 @implementation AppDelegate {
@@ -110,6 +114,14 @@
         default:
             break;
     }
+    
+
+    // check basic libary status
+    PCTask *lc = [[PCTask alloc] init];
+    lc.taskCommand = [NSString stringWithFormat:@"sh %@/setup/check_base_library.sh",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
+    lc.delegate = self;
+    self.taskLibChecker = lc;
+    [lc launchTask];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -586,5 +598,19 @@
     return bestItem;
 }
 
+#pragma mark - PCTaskDelegate
+-(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
+    int term = [aTask terminationStatus];
+    [self setLibraryCheckupResult:term];
+    [self.nativeMenu alertBaseLibraryDeficiency];
+    [self setTaskLibChecker:nil];
+}
+
+-(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
+}
+
+-(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
+    return NO;
+}
 
 @end

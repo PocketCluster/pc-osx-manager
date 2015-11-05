@@ -46,4 +46,8 @@
 - (void)vagrantRegisterNotifications;
 - (void)deregisterNotifications;
 - (void)setIsRefreshing:(BOOL)isRefreshing;
+
+- (void)alertBaseLibraryDeficiency;
+- (void)alertBaseLibraryJava;
+- (void)alertBaseLibraryBrew;
 @end

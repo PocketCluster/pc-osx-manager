@@ -266,6 +266,11 @@
 }
 
 - (void)showSetupWindow:(id)sender {
+    if([[Util getApp] libraryCheckupResult] != 0){
+        [self alertBaseLibraryDeficiency];
+        return;
+    }
+
     if(_setupWindow && !_setupWindow.isClosed) {
         Log(@"case #1");
         [NSApp activateIgnoringOtherApps:YES];
@@ -402,6 +407,39 @@
     }
 }
 
+#pragma mark - Library Checker
+- (void)alertBaseLibraryDeficiency {
+    switch ([[Util getApp] libraryCheckupResult]) {
+        case PC_LIB_JAVA:{
+            [self alertBaseLibraryJava];
+            break;
+        }
+        case PC_LIB_BREW:{
+            [self alertBaseLibraryBrew];
+            break;
+        }
+        default:
+            break;
+    }
+}
 
+- (void)alertBaseLibraryJava {
+    [[NSAlert
+      alertWithMessageText:@"Java is not found in the system. Please install Java and restart."
+      defaultButton:@"OK"
+      alternateButton:nil
+      otherButton:nil
+      informativeTextWithFormat:@""] runModal];
+}
+
+- (void)alertBaseLibraryBrew {
+    [[NSAlert
+      alertWithMessageText:@"Homebrew is not found in the system. Please install Homebrew and restart."
+      defaultButton:@"OK"
+      alternateButton:nil
+      otherButton:nil
+      informativeTextWithFormat:@""] runModal];
+    
+}
 
 @end

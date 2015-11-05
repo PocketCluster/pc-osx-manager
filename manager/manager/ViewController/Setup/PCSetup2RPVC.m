@@ -343,6 +343,8 @@ withFilterContext:(id)filterContext
     [[Util getApp] startRaspberrySetupService];
     
     NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
+    [(PCSetup3VC *)vc3 setRaspberryProcess:YES];
+
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kDPNotification_addFinalViewController
      object:self

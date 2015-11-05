@@ -41,5 +41,5 @@
 - (void)launchTask;
 - (void)cancelTask;
 
-- (void)runTaskWithProgressBlock:(void (^)(NSString *output))progress done:(void (^)(NSString *doneMessage))done;
+- (void)runTaskWithProgressBlock:(void (^)(NSString *output))progress done:(void (^)(NSTask *task))done;
 @end

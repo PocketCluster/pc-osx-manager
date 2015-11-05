@@ -9,14 +9,19 @@
 #import "PCSetup1VC.h"
 #import "PCSetup2VVVC.h"
 #import "PCSetup2RPVC.h"
+#import "PCTask.h"
+#import "PCConstants.h"
 
 #import "PCSetup3VC.h"
 
-
-@interface PCSetup1VC ()
+@interface PCSetup1VC ()<PCTaskDelegate>
 @property (readwrite, nonatomic) BOOL hideContinue;
 @property (readwrite, nonatomic) BOOL hideGoBack;
 
+@property (nonatomic, strong) PCTask *taskLibChecker;
+@property (nonatomic, readwrite) int libraryCheckupResult;
+
+- (void)warnLibraryDeficiency;
 @end
 
 @implementation PCSetup1VC
@@ -29,6 +34,15 @@
     if(self){
         [self setHideContinue:YES];
         [self setHideGoBack:YES];
+        
+        
+        // check basic libary status
+        PCTask *lc = [[PCTask alloc] init];
+        lc.taskCommand = [NSString stringWithFormat:@"sh %@/setup/check_base_library.sh",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
+        lc.delegate = self;
+        self.taskLibChecker = lc;
+        [lc launchTask];
+
     }
     return self;
 }
@@ -40,6 +54,12 @@
 }
 
 - (IBAction)setupVagrantCluster:(id)sender {
+    
+    if(self.libraryCheckupResult != 0){
+        [self warnLibraryDeficiency];
+        return;
+    }
+
     
     NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
     [[NSNotificationCenter defaultCenter]
@@ -76,7 +96,49 @@
      userInfo:@{kDPNotification_key_viewController:vc2r}];
 }
 
+#pragma mark - Warning
+-(void)warnLibraryDeficiency {
+    switch (self.libraryCheckupResult) {
+        case PC_LIB_VAGRANT:{
+            
+            [[NSAlert
+              alertWithMessageText:@"Vagrant is not found in the system. Please install Vagrant and restart."
+              defaultButton:@"OK"
+              alternateButton:nil
+              otherButton:nil
+              informativeTextWithFormat:@""] runModal];
+            
+            break;
+        }
+        case PC_LIB_VIRTUABOX:{
+            
+            [[NSAlert
+              alertWithMessageText:@"Virtualbox is not found in the system. Please install Virtualbox and restart."
+              defaultButton:@"OK"
+              alternateButton:nil
+              otherButton:nil
+              informativeTextWithFormat:@""] runModal];
+            break;
+        }
+        default:{
+            break;
+        }
+    }
+}
 
+#pragma mark - PCTaskDelegate
+-(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
+    int term = [aTask terminationStatus];
+    [self setLibraryCheckupResult:term];
+    [self setTaskLibChecker:nil];
+}
+
+-(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
+}
+
+-(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
+    return NO;
+}
 
 
 @end

@@ -101,3 +101,12 @@ extern NSString * const kRASPBERRY_MANAGER_NODE_UPDATED;
 
 //Master Salt State Directory
 extern NSString * const kPOCKET_CLUSTER_SALT_STATE_PATH;
+
+
+typedef enum PCLibraryError {
+    PC_LIB_JAVA = 400
+    ,PC_LIB_BREW = 402
+    ,PC_LIB_VAGRANT = 404
+    ,PC_LIB_VIRTUABOX = 406
+} PCLibraryError;
+

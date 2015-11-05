@@ -14,6 +14,7 @@
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 @property (readonly) NativeMenu *nativeMenu;
+@property (nonatomic, readonly) int libraryCheckupResult;
 
 - (PCClusterType)loadClusterType;
 - (void)setClusterType:(PCClusterType)aType;

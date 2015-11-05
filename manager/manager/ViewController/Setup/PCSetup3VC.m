@@ -33,7 +33,8 @@
     if(self){
         self.packageList = [NSMutableArray arrayWithCapacity:0];
         self.downloadFileList = [NSMutableArray arrayWithCapacity:0];
-        
+
+        self.raspberryProcess = YES;
         self.canGoBack = NO;
         self.canContinue = NO;
         
