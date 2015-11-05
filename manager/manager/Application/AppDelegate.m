@@ -192,10 +192,6 @@
 - (void)startRaspberryMonitoring {
     [self.nativeMenu raspberryRegisterNotifications];
     
-    [[PCProcManager sharedManager] freshSaltStart];
-    
-    [[PCProcManager sharedManager] startWebServer];
-    
     [self.rpiManager startMulticastSocket];
     
     [self.rpiManager loadClusters];
@@ -204,22 +200,26 @@
     
     [self.rpiManager refreshTimerState];
     
+    [[PCProcManager sharedManager] freshSaltStart];
+    
+    [[PCProcManager sharedManager] startWebServer];
+    
     [self.rpiManager debugOutput];
 }
 
 - (void)startVagrantMonitoring {
-    [self.nativeMenu vagrantRegisterNotifications];
-
     // load virtualbox environment
     [self reloadVboxNetinterfaceTask];
     
-    [[PCProcManager sharedManager] freshSaltStart];
+    [self.nativeMenu vagrantRegisterNotifications];
     
     //start initial vagrant machine detection
     [self refreshVagrantMachines];
     
     //start refresh timer if activated in preferences
     [self refreshTimerState];
+    
+    [[PCProcManager sharedManager] freshSaltStart];
 }
 
 - (void)stopMonitoring {
