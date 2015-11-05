@@ -36,8 +36,11 @@
 @property (nonatomic, strong) NSMutableArray *openWindows;
 
 @property (nonatomic, strong) PCTask *taskLibChecker;
+@property (nonatomic, strong) PCTask *taskVboxLoad;
 @property (nonatomic, readwrite) int libraryCheckupResult;
 
+- (void)checkBaseLibTask;
+- (void)reloadVboxNetinterfaceTask;
 - (void)haltRefreshTimer;
 - (void)refreshTimerState;
 - (void)updateProcessType;
@@ -53,6 +56,9 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
 
+    // first check base library
+    [self checkBaseLibTask];
+    
     // AFNetworking Preperation
     NSURLCache *URLCache =
     [[NSURLCache alloc]
@@ -114,14 +120,7 @@
         default:
             break;
     }
-    
 
-    // check basic libary status
-    PCTask *lc = [[PCTask alloc] init];
-    lc.taskCommand = [NSString stringWithFormat:@"sh %@/setup/check_base_library.sh",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
-    lc.delegate = self;
-    self.taskLibChecker = lc;
-    [lc launchTask];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -210,6 +209,9 @@
 
 - (void)startVagrantMonitoring {
     [self.nativeMenu vagrantRegisterNotifications];
+
+    // load virtualbox environment
+    [self reloadVboxNetinterfaceTask];
     
     [[PCProcManager sharedManager] freshSaltStart];
     
@@ -598,15 +600,45 @@
     return bestItem;
 }
 
+#pragma mark - Environment Check Task 
+- (void)checkBaseLibTask {
+    // check basic libary status
+    PCTask *lc = [[PCTask alloc] init];
+    lc.taskCommand = [NSString stringWithFormat:@"sh %@/setup/check_base_library.sh",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
+    lc.delegate = self;
+    self.taskLibChecker = lc;
+    [lc launchTask];
+}
+
+- (void)reloadVboxNetinterfaceTask {
+    PCTask *lve = [[PCTask alloc] init];
+    lve.taskCommand = [NSString stringWithFormat:@"sh %@/setup/reload_vbox_netinterface.sh %@",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"], @"vboxnet1"];
+    lve.delegate = self;
+    self.taskVboxLoad = lve;
+    [lve launchTask];
+}
+
 #pragma mark - PCTaskDelegate
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
-    int term = [aTask terminationStatus];
-    [self setLibraryCheckupResult:term];
-    [self.nativeMenu alertBaseLibraryDeficiency];
-    [self setTaskLibChecker:nil];
+    
+    if(self.taskLibChecker == aPCTask){
+        int term = [aTask terminationStatus];
+        [self setLibraryCheckupResult:term];
+        [self.nativeMenu alertBaseLibraryDeficiency];
+        [self setTaskLibChecker:nil];
+    }
+    
+    if (self.taskVboxLoad == aPCTask) {
+        [self setTaskVboxLoad:nil];
+    }
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
+    return;
+
+    NSData *data = [aFileHandler availableData];
+    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    Log(@"%s,%@",__PRETTY_FUNCTION__, str);
 }
 
 -(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {

@@ -104,9 +104,9 @@ extern NSString * const kPOCKET_CLUSTER_SALT_STATE_PATH;
 
 
 typedef enum PCLibraryError {
-    PC_LIB_JAVA = 400
-    ,PC_LIB_BREW = 402
-    ,PC_LIB_VAGRANT = 404
-    ,PC_LIB_VIRTUABOX = 406
+    PC_LIB_JAVA = 25
+    ,PC_LIB_BREW
+    ,PC_LIB_VIRTUABOX
+    ,PC_LIB_VAGRANT
 } PCLibraryError;
 

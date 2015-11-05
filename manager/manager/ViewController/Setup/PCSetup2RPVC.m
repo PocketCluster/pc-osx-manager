@@ -229,7 +229,7 @@ withFilterContext:(id)filterContext
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
     
     NSData *data = [aFileHandler availableData];
-    __block NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
     Log(@"%@",str);
     
