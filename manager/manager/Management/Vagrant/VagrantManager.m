@@ -10,6 +10,7 @@
 
 #import "SynthesizeSingleton.h"
 #import "VagrantManager.h"
+#import "NullStringChecker.h"
 
 @implementation VagrantManager {
     //all known vagrant instances
@@ -219,6 +220,17 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(VagrantManager, sharedManager);
     [providerIdentifiers addObject:@"vmware_fusion"];
     [providerIdentifiers addObject:@"docker"];
     return providerIdentifiers;
+}
+
+- (NSString *)vboxInterface {
+    return (NSString *)[[NSUserDefaults standardUserDefaults] objectForKey:kPCVagrantNetInterface];
+}
+
+- (void)setVboxInterface:(NSString *)aVboxIface {
+    if(!ISNULL_STRING(aVboxIface)){
+        [[NSUserDefaults standardUserDefaults] setObject:aVboxIface forKey:kPCVagrantNetInterface];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+    }
 }
 
 @end

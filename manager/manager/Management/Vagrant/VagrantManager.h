@@ -31,4 +31,7 @@
 - (NSString*)detectVagrantProvider:(NSString*)path;
 - (NSArray*)getProviderIdentifiers;
 
+- (NSString *)vboxInterface;
+- (void)setVboxInterface:(NSString *)aVboxIface;
+
 @end

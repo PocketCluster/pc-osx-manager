@@ -61,12 +61,15 @@ const int WEB_SERVER_PORT            = 10120;
 
 #pragma mark - NSUserDefaults KEYS
 //Raspberry collection
-NSString * const kRaspberryCollection   = @"raspberries";
 NSString * const kPCPrefDefaultTerm     = @"default_terminal";
+NSString * const kPCClusterType         = @"pocketcluster.cluster-type";
+
+NSString * const kRaspberryCollection   = @"raspberries";
 NSString * const kRaspberryClusterArray = @"raspberryclusterArray";
 NSString * const kRaspberryClusterId    = @"raspberryclusterId";
 NSString * const kRaspberryClusterTitle = @"raspberryclusterTitle";
-NSString * const kPCClusterType         = @"pocketcluster.cluster-type";
+
+NSString * const kPCVagrantNetInterface = @"vagrant-net-interface";
 
 #pragma mark - NOTIFICATION KEY (APPLICATION)
 NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE                    = @"pocketcluster.update-available";

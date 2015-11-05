@@ -20,6 +20,7 @@
 #import "VagrantManager.h"
 #import "RaspberryManager.h"
 #import "PCProcManager.h"
+#import "NullStringChecker.h"
 
 #import "PCTask.h"
 #import "Util.h"
@@ -612,8 +613,14 @@
 }
 
 - (void)reloadVboxNetinterfaceTask {
+    
+    NSString *viface = [[VagrantManager sharedManager] vboxInterface];
+    if(ISNULL_STRING(viface)){
+        return;
+    }
+    
     PCTask *lve = [[PCTask alloc] init];
-    lve.taskCommand = [NSString stringWithFormat:@"sh %@/setup/reload_vbox_netinterface.sh %@",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"], @"vboxnet1"];
+    lve.taskCommand = [NSString stringWithFormat:@"sh %@/setup/reload_vbox_netinterface.sh %@",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"], viface];
     lve.delegate = self;
     self.taskVboxLoad = lve;
     [lve launchTask];

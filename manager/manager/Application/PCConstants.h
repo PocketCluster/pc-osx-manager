@@ -58,11 +58,15 @@ extern NSString * const WEB_SERVER_ROOT_PATH;
 extern const int WEB_SERVER_PORT;
 
 //NSUserDefault KEYS
-extern NSString * const kRaspberryCollection;
 extern NSString * const kPCPrefDefaultTerm;
+extern NSString * const kPCClusterType;
+
+extern NSString * const kRaspberryCollection;
 extern NSString * const kRaspberryClusterArray;
 extern NSString * const kRaspberryClusterId;
 extern NSString * const kRaspberryClusterTitle;
+
+extern NSString * const kPCVagrantNetInterface;
 
 // --- MONITORING MANAGEMENT
 typedef enum PCClusterType {
@@ -71,7 +75,7 @@ typedef enum PCClusterType {
     ,PC_CLUSTER_RASPBERRY
     ,PC_CLUSTER_TYPE_SIZE
 } PCClusterType;
-extern NSString * const kPCClusterType;
+
 
 //Notfication Key
 extern NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE;

@@ -12,6 +12,7 @@
 #import "PCTask.h"
 #import "PCSetup3VC.h"
 #import "PCProcManager.h"
+#import "VagrantManager.h"
 
 @interface PCSetup2VVVC ()<PCTaskDelegate>
 
@@ -72,7 +73,21 @@
         return;
     }
     
-    if(self.sudoTask){
+    if(self.vagInitTask == aPCTask){
+        
+        NSString *basePath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
+        NSString *sudoSetup = [NSString stringWithFormat:@"%@/setup/vagrant_sudo_setup.sh",basePath];
+        PCTask *sudoTask = [PCTask new];
+        sudoTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", sudoSetup, basePath];
+        sudoTask.sudoCommand = YES;
+        sudoTask.delegate = self;
+        self.sudoTask = sudoTask;
+        [sudoTask launchTask];
+
+        self.vagInitTask = nil;
+    }
+    
+    if(self.sudoTask == aPCTask){
 
         [self setUIToProceedState];
         [[PCProcManager sharedManager] freshSaltStart];
@@ -80,18 +95,17 @@
 
         NSString *basePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
         NSString *userSetup = [NSString stringWithFormat:@"%@/setup/vagrant_user_setup.sh",basePath];
-        
         PCTask *userTask = [PCTask new];
         userTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", userSetup, basePath];
         userTask.delegate = self;
-        
         self.userTask = userTask;
         [userTask launchTask];
         
         self.sudoTask = nil;
         
-    }else{
-        
+    }
+    
+    if(self.userTask == aPCTask){
         [self setToNextStage];
         self.userTask = nil;
         
@@ -102,8 +116,12 @@
     
     NSData *data = [aFileHandler availableData];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-
-    Log(@"%@",str);
+    
+    // save vagrant interface
+    if (self.vagInitTask == aPCTask) {
+        [[VagrantManager sharedManager] setVboxInterface:str];
+        return;
+    }
     
     NSArray *p = nil;
     for (NSString *key in self.progDict) {
@@ -128,21 +146,13 @@
 #pragma mark - IBACTION
 -(IBAction)build:(id)sender {
     [self setUIToProceedState];
+
+    PCTask *vt = [PCTask new];
+    vt.taskCommand = [NSString stringWithFormat:@"python %@/setup/vbox_netiface_create.py",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
+    vt.delegate = self;
+    self.vagInitTask = vt;
+    [vt launchTask];
     
-    NSString *basePath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
-    NSString *sudoSetup = [NSString stringWithFormat:@"%@/setup/vagrant_sudo_setup.sh",basePath];
-    
-    PCTask *sudoTask = [PCTask new];
-    sudoTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", sudoSetup, basePath];
-    sudoTask.sudoCommand = YES;
-    sudoTask.delegate = self;
-    
-    self.sudoTask = sudoTask;
-    
-    [sudoTask launchTask];
-    
-    [self.progressBar startAnimation:self];
-    [self.buildBtn setEnabled:NO];
 }
 
 #pragma mark - Setup UI status
@@ -169,6 +179,15 @@
     [self.progressBar setDoubleValue:100.0];
     [self.progressBar displayIfNeeded];
     [self.buildBtn setEnabled:NO];
+    
+    
+    
+    
+    
+    return;
+    
+    
+    
     
     [[Util getApp] stopBasicServices];
     [[Util getApp] setClusterType:PC_CLUTER_VAGRANT];
