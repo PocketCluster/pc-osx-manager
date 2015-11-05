@@ -626,11 +626,11 @@
         int term = [aTask terminationStatus];
         [self setLibraryCheckupResult:term];
         [self.nativeMenu alertBaseLibraryDeficiency];
-        [self setTaskLibChecker:nil];
+        self.taskLibChecker = nil;
     }
     
     if (self.taskVboxLoad == aPCTask) {
-        [self setTaskVboxLoad:nil];
+        self.taskVboxLoad = nil;
     }
 }
 
