@@ -14,8 +14,12 @@
 #import "PCProcManager.h"
 
 @interface PCSetup2VVVC ()<PCTaskDelegate>
+
+@property (strong, nonatomic) PCTask *vagInitTask;
 @property (strong, nonatomic) PCTask *sudoTask;
+@property (strong, nonatomic) PCTask *saltTask;
 @property (strong, nonatomic) PCTask *userTask;
+
 @property (strong, nonatomic) NSDictionary *progDict;
 
 @property (readwrite, nonatomic) BOOL canContinue;
@@ -56,13 +60,19 @@
 #pragma mark - PCTaskDelegate
 
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
+    
+    if(aTask.terminationStatus != 0) {
+        [self resetUIForFailure];
+        [self.progressLabel setStringValue:@"Installation Error. Please try again."];
+        
+        self.vagInitTask = nil;
+        self.sudoTask = nil;
+        self.saltTask = nil;
+        self.userTask = nil;
+        return;
+    }
+    
     if(self.sudoTask){
-        if(aTask.terminationStatus != 0) {
-            [self resetUIForFailure];
-            [self.progressLabel setStringValue:@"Installation Error. Please try again."];
-            self.sudoTask = nil;
-            return;
-        }
 
         [self setUIToProceedState];
         [[PCProcManager sharedManager] freshSaltStart];
@@ -81,14 +91,6 @@
         self.sudoTask = nil;
         
     }else{
-        
-        if(aTask.terminationStatus != 0) {
-            [self resetUIForFailure];
-            [self.progressLabel setStringValue:@"Installation Error. Please try again."];
-            self.sudoTask = nil;
-            self.userTask = nil;
-            return;
-        }
         
         [self setToNextStage];
         self.userTask = nil;

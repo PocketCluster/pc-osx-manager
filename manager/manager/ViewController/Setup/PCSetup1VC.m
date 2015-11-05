@@ -38,7 +38,7 @@
         
         // check basic libary status
         PCTask *lc = [[PCTask alloc] init];
-        lc.taskCommand = [NSString stringWithFormat:@"sh %@/setup/check_base_library.sh",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
+        lc.taskCommand = [NSString stringWithFormat:@"sh %@/setup/check_vagrant_library.sh",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
         lc.delegate = self;
         self.taskLibChecker = lc;
         [lc launchTask];
@@ -60,18 +60,14 @@
         return;
     }
 
-    
+#if 0
     NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kDPNotification_addNextViewControllerAndProceed
      object:self
      userInfo:@{kDPNotification_key_viewController:vc3}];
-
-    
     return;
-    
-    
-    
+#endif
     
     NSViewController *vc2v =
         [[PCSetup2VVVC alloc]
