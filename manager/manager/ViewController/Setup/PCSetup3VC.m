@@ -186,9 +186,7 @@
 
 -(void)finalizeInstallProcess {
 
-#if 0
     PCClusterType t = [[Util getApp] loadClusterType];
-    t = PC_CLUTER_VAGRANT;
     switch (t) {
         case PC_CLUTER_VAGRANT:{
             [[Util getApp] startVagrantSetupService];
@@ -202,10 +200,9 @@
         default:
             break;
     }
-#endif
 
-    [self setToNextStage];
     [self setProgMessage:@"Installation completed!" value:100.0];
+    [self setToNextStage];
 }
 
 #pragma mark - IBACTION

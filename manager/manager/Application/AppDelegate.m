@@ -103,7 +103,7 @@
 #endif
     
     PCClusterType t = [self loadClusterType];
-    t = PC_CLUTER_VAGRANT;
+    t = PC_CLUSTER_NONE;
 
     switch (t) {
         case PC_CLUTER_VAGRANT:{

@@ -80,6 +80,8 @@
 
 -(void)raspberryUpdateNodeCount:(NSNotification *)aNotification {
     NSUInteger count = [[aNotification.userInfo objectForKey:@"count"] unsignedIntegerValue];
+    return;
+    
     if (count) {
         [_clusterSetupMenuItem setHidden:YES];
     } else {

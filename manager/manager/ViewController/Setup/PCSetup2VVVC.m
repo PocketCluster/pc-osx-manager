@@ -20,7 +20,6 @@
 @property (strong, nonatomic) PCTask *sudoTask;
 @property (strong, nonatomic) PCTask *saltTask;
 @property (strong, nonatomic) PCTask *userTask;
-
 @property (strong, nonatomic) NSDictionary *progDict;
 
 @property (readwrite, nonatomic) BOOL canContinue;
@@ -131,9 +130,6 @@
     
     NSData *data = [aFileHandler availableData];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    
-    
-    Log(@"%@",str);
     
     // save vagrant interface
     if (self.vagInitTask == aPCTask) {

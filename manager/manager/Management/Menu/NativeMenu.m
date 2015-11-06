@@ -395,8 +395,6 @@
 }
 
 - (void)vagrantUpdateInstancesCount:(NSNotification*)notification {
-    return;
-    
     int count = [[notification.userInfo objectForKey:@"count"] intValue];
     if (count) {
         [_clusterSetupMenuItem setHidden:YES];
