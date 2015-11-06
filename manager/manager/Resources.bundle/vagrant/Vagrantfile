@@ -24,8 +24,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 			node.vm.network :private_network, ip: "10.211.55.2%02d" % i
 			node.vm.hostname = "pc-node#{i}"
 
-			# path to save 
-			node.vm.synced_folder "/pocket/nodes/pc-node#{i}", "/pocket"
+			# path to save
+            node.vm.synced_folder "/pocket/nodes/pc-node#{i}", "/pocket", id: "vagrant-root",
+                owner: "pocket",
+                group: "pocket",
+                mount_options: ["dmode=755,fmode=644"]
 
 			node.vm.provision "shell", path: "scripts/setup-nodes.sh"
 			node.vm.provision "shell" do |s|

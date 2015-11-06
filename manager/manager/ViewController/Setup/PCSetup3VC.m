@@ -16,6 +16,7 @@
 @property (strong, nonatomic) NSDictionary *progDict;
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
+@property (nonatomic, strong) PCTask *saltBaseTask;
 @property (nonatomic, strong) PCTask *saltMasterTask;
 @property (nonatomic, strong) PCTask *saltMinionTask;
 @property (readwrite, nonatomic) BOOL canContinue;

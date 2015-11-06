@@ -88,10 +88,15 @@ cp -f $HOME/.ssh/* /pocket/salt/states/base/ssh/
 echo "USER_SETUP_STEP_2"
 
 salt-key -y --accept="pc-master"
+sleep 1
 for i in {1..3}
 do
     salt-key -y --accept="pc-node${i}"
 done
+
+salt 'pc-node*' state.sls base/setup
+salt 'pc-node*' state.sls base/ssh-login
+salt 'pc-node*' state.sls base/oracle-java8
 
 echo "USER_SETUP_DONE"
 
