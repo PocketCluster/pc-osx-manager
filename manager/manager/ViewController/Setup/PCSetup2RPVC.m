@@ -24,25 +24,23 @@
 #define MAX_SUPPORTED_NODE (6)
 
 @interface PCSetup2RPVC ()<PCTaskDelegate, GCDAsyncUdpSocketDelegate>
-@property (strong, nonatomic) PCTask *sudoTask;
-@property (strong, nonatomic) PCTask *userTask;
-@property (nonatomic, strong) GCDAsyncUdpSocket *udpSocket;
-//@property (nonatomic, strong) NSMutableArray<LinkInterface *> *localInterfaces;
 @property (atomic, strong) NSMutableArray *nodeList;
 @property (strong, nonatomic) NSDictionary *progDict;
 
+@property (strong, nonatomic) PCTask *sudoTask;
+@property (strong, nonatomic) PCTask *saltTask;
+@property (strong, nonatomic) PCTask *userTask;
 @property (nonatomic, strong) NSString *hostName;
 @property (nonatomic, strong) LinkInterface *interface;
 
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
 
-
 - (void)setUIToProceedState;
 - (void)resetUIForFailure;
+- (void)setToNextStage;
 
 - (void)refreshInterface;
-- (void)setToNextStage;
 - (void)removeViewControler;
 @end
 
@@ -88,15 +86,6 @@
 
 
 -(void)refreshInterface {
-#if 0
-    self.localInterfaces = [NSMutableArray arrayWithCapacity:0];
-    for (LinkInterface *iface in [PCInterfaceList all]){
-        if ([iface.kind isEqualToString:(__bridge NSString *)kSCNetworkInterfaceTypeEthernet]){
-            Log(@"%@-%@ %@", [iface BSDName],[iface ip4Address],[iface kind]);
-        }
-    }
-#endif
-    
     for (LinkInterface *iface in [PCInterfaceList all]){
         if (!ISNULL_STRING(iface.ip4Address) && [iface.kind isEqualToString:(__bridge NSString *)kSCNetworkInterfaceTypeEthernet]){
             self.interface = iface;
@@ -113,6 +102,11 @@ withFilterContext:(id)filterContext
 {
     NSDictionary *m =[NSDictionary dictionaryWithBSON:data];
     
+    // unbounded nodes only.
+    if(![[m objectForKey:MASTER_BOUND_AGENT] containsString:SLAVE_LOOKUP_AGENT]){
+        return;
+    }
+    
     BOOL doesNodeExist = false;
     for (NSDictionary *node in self.nodeList){
         if([[node valueForKey:SLAVE_NODE_MACADDR] isEqualToString:[m valueForKey:SLAVE_NODE_MACADDR]]){
@@ -121,16 +115,14 @@ withFilterContext:(id)filterContext
         }
     }
 
-    if (!doesNodeExist && self.nodeList.count <= MAX_SUPPORTED_NODE){
-
+    if (!doesNodeExist && self.nodeList.count < MAX_SUPPORTED_NODE){
         NSString *sn = [[RaspberryManager sharedManager] deviceSerial];
         NSString *hn = self.hostName;
-        //NSString *ha = [[NSHost currentHost] address];
         NSString *ha = [self.interface ip4Address];
         
         NSMutableDictionary* n = [NSMutableDictionary dictionaryWithDictionary:m];
         [n setValuesForKeysWithDictionary:
-         @{MASTER_COMMAND_TYPE:@"ct_fix_bound",
+         @{MASTER_COMMAND_TYPE:COMMAND_FIX_BOUND,
            MASTER_HOSTNAME:hn,
            MASTER_BOUND_AGENT:sn,
            MASTER_IP4_ADDRESS:ha,
@@ -185,17 +177,35 @@ withFilterContext:(id)filterContext
 
 #pragma mark - PCTaskDelegate
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
-    if(self.sudoTask){
+    
+    if(aTask.terminationStatus != 0) {
+        
+        Log(@"installation error ! %d",aTask.terminationStatus);
+        
+        [self resetUIForFailure];
+        [self.progressLabel setStringValue:@"Installation Error. Please try again."];
+        
+        self.sudoTask = nil;
+        self.saltTask = nil;
+        self.userTask = nil;
+        return;
+    }
+    
+    [self setUIToProceedState];
 
+    if(self.sudoTask == aPCTask ){
         
-        if(aTask.terminationStatus != 0) {
-            [self resetUIForFailure];
-            [self.progressLabel setStringValue:@"Installation Error. Please try again."];
-            self.sudoTask = nil;
-            return;
-        }
+        PCTask *st = [PCTask new];
+        st.taskCommand = @"brew install saltstack 2>&1";
+        st.delegate = self;
+        self.saltTask = st;
+        [st launchTask];
         
-        [self setUIToProceedState];
+        self.sudoTask = nil;
+    }
+    
+    if(self.saltTask == aPCTask) {
+        
         [[PCProcManager sharedManager] freshSaltStart];
         sleep(5);
         
@@ -205,22 +215,16 @@ withFilterContext:(id)filterContext
         PCTask *userTask = [PCTask new];
         userTask.taskCommand = [NSString stringWithFormat:@"bash %@ %@ %ld", userSetup, basePath, [self.nodeList count]];
         userTask.delegate = self;
-        
         self.userTask = userTask;
         [userTask launchTask];
         
-        self.sudoTask = nil;
-    }else{
-        
-        if(aTask.terminationStatus != 0) {
-            [self resetUIForFailure];
-            [self.progressLabel setStringValue:@"Installation Error. Please try again."];
-            self.sudoTask = nil;
-            self.userTask = nil;
-            return;
-        }
+        self.saltTask = nil;
+    }
+    
+    if(self.userTask == aPCTask) {
 
         [self setToNextStage];
+        
         self.userTask = nil;
 
     }
@@ -255,9 +259,6 @@ withFilterContext:(id)filterContext
 #pragma mark - IBACTION
 -(IBAction)build:(id)sender
 {
-    
-    [self setUIToProceedState];
-    
     // update interface status
     [self refreshInterface];
     
@@ -265,6 +266,7 @@ withFilterContext:(id)filterContext
     if (self.interface){
         [self.warningLabel setHidden:YES];
     }else{
+        [self resetUIForFailure];
         [self.warningLabel setHidden:NO];
         return;
     }
@@ -273,11 +275,14 @@ withFilterContext:(id)filterContext
     NSUInteger nodeCount = MIN([self.nodeList count], MAX_SUPPORTED_NODE);
     if (nodeCount <= 0){
         // NSAlert
+        
+        [self resetUIForFailure];
         return;
     }
 
+    [self setUIToProceedState];
+    
     // setup only six nodes
-
     RaspberryCluster *rpic = [[RaspberryCluster alloc] initWithTitle:@"Cluster 1"];
 
     // save to local configuration
@@ -308,9 +313,6 @@ withFilterContext:(id)filterContext
     self.sudoTask = sudoTask;
     
     [sudoTask launchTask];
-    
-    [self.progressBar startAnimation:self];
-    [self.buildBtn setEnabled:NO];
 }
 
 

@@ -35,7 +35,6 @@
         [self setHideContinue:YES];
         [self setHideGoBack:YES];
         
-        
         // check basic libary status
         PCTask *lc = [[PCTask alloc] init];
         lc.taskCommand = [NSString stringWithFormat:@"bash %@/setup/check_vagrant_library.sh",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
