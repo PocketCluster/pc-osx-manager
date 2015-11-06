@@ -38,7 +38,7 @@
         
         // check basic libary status
         PCTask *lc = [[PCTask alloc] init];
-        lc.taskCommand = [NSString stringWithFormat:@"sh %@/setup/check_vagrant_library.sh",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
+        lc.taskCommand = [NSString stringWithFormat:@"bash %@/setup/check_vagrant_library.sh",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
         lc.delegate = self;
         self.taskLibChecker = lc;
         [lc launchTask];

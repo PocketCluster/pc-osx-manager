@@ -203,7 +203,7 @@ withFilterContext:(id)filterContext
         NSString *userSetup = [NSString stringWithFormat:@"%@/setup/raspberry_user_setup.sh",basePath];
         
         PCTask *userTask = [PCTask new];
-        userTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@ %ld", userSetup, basePath, [self.nodeList count]];
+        userTask.taskCommand = [NSString stringWithFormat:@"bash %@ %@ %ld", userSetup, basePath, [self.nodeList count]];
         userTask.delegate = self;
         
         self.userTask = userTask;
@@ -301,7 +301,7 @@ withFilterContext:(id)filterContext
     NSString *sudoSetup = [NSString stringWithFormat:@"%@/setup/raspberry_sudo_setup.sh %@ %@ %@",basePath, basePath, self.interface.ip4Address, nodeip];
     
     PCTask *sudoTask = [PCTask new];
-    sudoTask.taskCommand = [NSString stringWithFormat:@"sh %@",sudoSetup];
+    sudoTask.taskCommand = [NSString stringWithFormat:@"bash %@",sudoSetup];
     sudoTask.sudoCommand = YES;
     sudoTask.delegate = self;
     

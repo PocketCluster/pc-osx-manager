@@ -26,6 +26,15 @@ chown $SUDO_USER:admin /usr/local
 
 # copy salt config files
 mkdir -p /etc/salt
+
+if [[ -n "/etc/salt/master" ]]; then
+    mv /etc/salt/master /etc/salt/master.backup
+fi
+
+if [[ -n "/etc/salt/minion" ]]; then
+    mv /etc/salt/minion /etc/salt/minion.backup
+fi
+
 cp -f "${BASE_BUNDLE_PATH}"/etc/salt/* /etc/salt/
 sed -i '' 's|PC_USER|'$SUDO_USER'|g' /etc/salt/*
 

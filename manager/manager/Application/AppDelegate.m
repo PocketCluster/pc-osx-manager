@@ -606,7 +606,7 @@
 - (void)checkBaseLibTask {
     // check basic libary status
     PCTask *lc = [[PCTask alloc] init];
-    lc.taskCommand = [NSString stringWithFormat:@"sh %@/setup/check_base_library.sh",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
+    lc.taskCommand = [NSString stringWithFormat:@"bash %@/setup/check_base_library.sh",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
     lc.delegate = self;
     self.taskLibChecker = lc;
     [lc launchTask];
@@ -620,7 +620,7 @@
     }
     
     PCTask *lve = [[PCTask alloc] init];
-    lve.taskCommand = [NSString stringWithFormat:@"sh %@/setup/reload_vbox_netinterface.sh %@",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"], viface];
+    lve.taskCommand = [NSString stringWithFormat:@"bash %@/setup/reload_vbox_netinterface.sh %@",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"], viface];
     lve.delegate = self;
     self.taskVboxLoad = lve;
     [lve launchTask];

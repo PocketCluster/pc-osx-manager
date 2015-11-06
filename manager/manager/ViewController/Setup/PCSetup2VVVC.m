@@ -80,7 +80,7 @@
         NSString *basePath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
         NSString *sudoSetup = [NSString stringWithFormat:@"%@/setup/vagrant_sudo_setup.sh",basePath];
         PCTask *sudoTask = [PCTask new];
-        sudoTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", sudoSetup, basePath];
+        sudoTask.taskCommand = [NSString stringWithFormat:@"bash %@ %@", sudoSetup, basePath];
         sudoTask.sudoCommand = YES;
         sudoTask.delegate = self;
         self.sudoTask = sudoTask;
@@ -110,7 +110,7 @@
         NSString *basePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
         NSString *userSetup = [NSString stringWithFormat:@"%@/setup/vagrant_user_setup.sh",basePath];
         PCTask *userTask = [PCTask new];
-        userTask.taskCommand = [NSString stringWithFormat:@"sh %@ %@", userSetup, basePath];
+        userTask.taskCommand = [NSString stringWithFormat:@"bash %@ %@", userSetup, basePath];
         userTask.delegate = self;
         self.userTask = userTask;
         [userTask launchTask];
