@@ -134,7 +134,7 @@
 
     NSNumber *type = nil;
     @synchronized(self) {
-        type = (NSNumber *)[[NSUserDefaults standardUserDefaults] dataForKey:kPCClusterType];
+        type = (NSNumber *)[[NSUserDefaults standardUserDefaults] objectForKey:kPCClusterType];
     }
 
     if (type == nil){

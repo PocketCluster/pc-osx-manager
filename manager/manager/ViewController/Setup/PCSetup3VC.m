@@ -13,6 +13,7 @@
 #import "PCTask.h"
 
 @interface PCSetup3VC()<PCTaskDelegate>
+@property (strong, nonatomic) NSDictionary *progDict;
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
 @property (nonatomic, strong) PCTask *saltMasterTask;
@@ -20,7 +21,13 @@
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
 
--(void)finalizePackageInstall;
+-(void)setUIToProceedState;
+-(void)resetUIForFailure;
+-(void)setToNextStage;
+
+-(void)startPackageInstall;
+-(void)failedPackageInstall;
+-(void)finalizeInstallProcess;
 @end
 
 @implementation PCSetup3VC
@@ -33,10 +40,15 @@
     if(self){
         self.packageList = [NSMutableArray arrayWithCapacity:0];
         self.downloadFileList = [NSMutableArray arrayWithCapacity:0];
+        
+        self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Setting up base configuration.",@20.0]
+                          ,@"SUDO_SETUP_DONE":@[@"Finishing configuration.",@30.0]
+                          ,@"USER_SETUP_STEP_0":@[@"Starting Vagrant.",@40.0]
+                          ,@"USER_SETUP_STEP_1":@[@"Setting up connection.",@50.0]
+                          ,@"USER_SETUP_STEP_2":@[@"Finalizing...",@90.0]
+                          ,@"USER_SETUP_DONE":@[@"Done!",@100.0]};
 
-        self.raspberryProcess = YES;
-        self.canGoBack = NO;
-        self.canContinue = NO;
+        [self resetToInitialState];
         
         WEAK_SELF(self);
         [PCPackageMeta metaPackageListWithBlock:^(NSArray<PCPackageMeta *> *packages, NSError *error) {
@@ -76,7 +88,21 @@
 
 #pragma mark - PCTaskDelegate
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
-    if(self.saltMasterTask){
+    
+    if(aTask.terminationStatus != 0) {
+        [self resetUIForFailure];
+        [self.progressLabel setStringValue:@"Installation Error. Please try again."];
+        
+        self.saltMasterTask = nil;
+        self.saltMinionTask = nil;
+        return;
+    }
+    
+    [self setUIToProceedState];
+
+
+    if(self.saltMasterTask == aPCTask ){
+        
         PCTask *smt = [PCTask new];
         smt.taskCommand = [NSString stringWithFormat:@"salt 'pc-node*' state.sls hadoop/2-4-0/datanode/cluster/init"];
         smt.delegate = self;
@@ -84,17 +110,35 @@
         [smt launchTask];
 
         self.saltMasterTask = nil;
-    }else{
+    }
+    
+    if(self.saltMinionTask == aPCTask){
+        
+        [self finalizeInstallProcess];
+        
         self.saltMinionTask = nil;
     }
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
-    
     NSData *data = [aFileHandler availableData];
-    __block NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
     Log(@"STR %@",str);
+    
+    NSArray *p = nil;
+    for (NSString *key in self.progDict) {
+        if ([str containsString:key]){
+            p = [self.progDict valueForKey:key];
+            break;
+        }
+    }
+    
+    if(p != nil){
+        [self.progressLabel setStringValue:[p objectAtIndex:0]];
+        [self.progressBar setDoubleValue:[[p objectAtIndex:1] doubleValue]];
+        [self.progressBar displayIfNeeded];
+    }
 }
 
 -(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
@@ -102,20 +146,48 @@
 }
 
 #pragma mark - DPSetupWindowDelegate
+-(void)resetToInitialState {
+    self.canContinue = NO;
+    self.canGoBack = NO;
+}
+
 - (NSString *)continueButtonTitle {
     return @"Finish";
 }
 
-#pragma mark - Install Start
--(void)finalizePackageInstall {
+#pragma mark - Setup UI status
+- (void)setUIToProceedState {
+    [self resetToInitialState];
+    
+    [self.installBtn setEnabled:NO];
+
+    [self.circularProgress startAnimation:nil];
+}
+
+-(void)resetUIForFailure {
+    [self resetToInitialState];
+    
+    [self.installBtn setEnabled:YES];
+    
+    [self.circularProgress stopAnimation:nil];
+    [self.progressBar setDoubleValue:0.0];
+    [self.progressBar displayIfNeeded];
+}
+
+-(void)setToNextStage {
+    self.canContinue = YES;
+    self.canGoBack = NO;
+
+    [self.installBtn setEnabled:NO];
+    
     [self.circularProgress stopAnimation:nil];
     [self.progressBar setDoubleValue:100.0];
     [self.progressBar displayIfNeeded];
-    
-    
-    
-    return;
-    
+}
+
+#pragma mark - Install Start
+-(void)startPackageInstall {
+    [self setToNextStage];
     
     PCTask *smt = [PCTask new];
     smt.taskCommand = [NSString stringWithFormat:@"salt 'pc-master' state.sls hadoop/2-4-0/namenode/cluster/init"];
@@ -125,11 +197,28 @@
 }
 
 -(void)failedPackageInstall {
-    [self.circularProgress stopAnimation:nil];
+    [self resetUIForFailure];
 }
 
 -(void)finalizeInstallProcess {
-    self.canContinue = YES;
+
+    PCClusterType t = [[Util getApp] loadClusterType];
+    t = PC_CLUTER_VAGRANT;
+    switch (t) {
+        case PC_CLUTER_VAGRANT:{
+            [[Util getApp] startVagrantSetupService];
+            break;
+        }
+        case PC_CLUSTER_RASPBERRY: {
+            [[Util getApp] startRaspberrySetupService];
+            break;
+        }
+        case PC_CLUSTER_NONE:
+        default:
+            break;
+    }
+
+    [self setToNextStage];
 }
 
 #pragma mark - IBACTION
@@ -142,9 +231,11 @@
         return;
     }
 
-    [self.circularProgress startAnimation:nil];
-    [self.progressBar setDoubleValue:50.0];
+    [self setUIToProceedState];
+    
+    [self.progressBar setDoubleValue:10.0];
     [self.progressBar displayIfNeeded];
+
     
     for(PCPackageMeta *meta in belf.packageList){
 
@@ -191,7 +282,7 @@
                                            if(![belf.downloadFileList count]){
                                                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
                                                    if(belf){
-                                                       [belf finalizePackageInstall];
+                                                       [belf startPackageInstall];
                                                    }
                                                }];
                                            }
@@ -220,7 +311,7 @@
                                            if(![belf.downloadFileList count]){
                                                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
                                                    if(belf){
-                                                       [belf finalizePackageInstall];
+                                                       [belf startPackageInstall];
                                                    }
                                                }];
                                            }

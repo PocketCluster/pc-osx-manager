@@ -22,6 +22,7 @@ mkdir -p /bigpkg/archive
 # copy vagrant files & modify
 chown -R $SUDO_USER:staff /pocket
 chown -R $SUDO_USER:staff /bigpkg
+chown $SUDO_USER:admin /usr/local
 
 # copy salt config files
 mkdir -p /etc/salt

@@ -11,6 +11,7 @@ mkdir -p /{pocket,bigpkg}
 # change permission
 chown -R $SUDO_USER:staff /pocket
 chown -R $SUDO_USER:staff /bigpkg
+chown $SUDO_USER:admin /usr/local
 
 # copy & modify salt config files
 mkdir -p /etc/salt

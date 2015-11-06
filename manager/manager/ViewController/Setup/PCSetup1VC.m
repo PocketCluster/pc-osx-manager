@@ -60,7 +60,7 @@
         return;
     }
 
-#if 0
+#if 1
     NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kDPNotification_addNextViewControllerAndProceed

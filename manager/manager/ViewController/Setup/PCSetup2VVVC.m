@@ -18,7 +18,6 @@
 
 @property (strong, nonatomic) PCTask *vagInitTask;
 @property (strong, nonatomic) PCTask *sudoTask;
-@property (strong, nonatomic) PCTask *prepTask;
 @property (strong, nonatomic) PCTask *saltTask;
 @property (strong, nonatomic) PCTask *userTask;
 
@@ -91,24 +90,14 @@
     }
     
     if (self.sudoTask == aPCTask){
-        PCTask *pt = [PCTask new];
-        pt.taskCommand = @"chown ${USER}:admin /usr/local 2>&1";
-        pt.sudoCommand = YES;
-        pt.delegate = self;
-        self.prepTask = pt;
-        [pt launchTask];
-        
-        self.sudoTask = nil;
-    }
-    
-    if (self.prepTask == aPCTask) {
+
         PCTask *st = [PCTask new];
         st.taskCommand = @"brew install saltstack 2>&1";
         st.delegate = self;
         self.saltTask = st;
         [st launchTask];
-
-        self.prepTask = nil;
+        
+        self.sudoTask = nil;
     }
     
     if (self.saltTask == aPCTask){
@@ -130,7 +119,9 @@
     }
     
     if(self.userTask == aPCTask){
+        
         [self setToNextStage];
+        
         self.userTask = nil;
         
     }
@@ -206,20 +197,10 @@
     [self.progressBar setDoubleValue:100.0];
     [self.progressBar displayIfNeeded];
     [self.buildBtn setEnabled:NO];
-    
-    
-    
-    
-    
-    return;
-    
-    
-    
-    
+
     [[Util getApp] stopBasicServices];
     [[Util getApp] setClusterType:PC_CLUTER_VAGRANT];
-    [[Util getApp] startVagrantSetupService];
-    
+
     NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kDPNotification_addFinalViewController

@@ -10,8 +10,6 @@
 
 @interface PCSetup3VC : NSViewController <DPSetupWindowStageViewController, NSTableViewDataSource, NSTableViewDelegate>
 
-@property (nonatomic, readwrite, getter=isRaspberryProcess) BOOL raspberryProcess;
-
 @property (nonatomic, weak) IBOutlet NSProgressIndicator *circularProgress;
 @property (nonatomic, weak) IBOutlet NSTableView *packageTable;
 @property (nonatomic, weak) IBOutlet NSProgressIndicator *progressBar;
