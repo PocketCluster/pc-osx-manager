@@ -18,6 +18,7 @@
 
 @property (strong, nonatomic) PCTask *vagInitTask;
 @property (strong, nonatomic) PCTask *sudoTask;
+@property (strong, nonatomic) PCTask *prepTask;
 @property (strong, nonatomic) PCTask *saltTask;
 @property (strong, nonatomic) PCTask *userTask;
 
@@ -73,6 +74,8 @@
         return;
     }
     
+    [self setUIToProceedState];
+    
     if(self.vagInitTask == aPCTask){
         
         NSString *basePath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
@@ -87,12 +90,34 @@
         self.vagInitTask = nil;
     }
     
-    if(self.sudoTask == aPCTask){
+    if (self.sudoTask == aPCTask){
+        PCTask *pt = [PCTask new];
+        pt.taskCommand = @"chown ${USER}:admin /usr/local 2>&1";
+        pt.sudoCommand = YES;
+        pt.delegate = self;
+        self.prepTask = pt;
+        [pt launchTask];
+        
+        self.sudoTask = nil;
+    }
+    
+    if (self.prepTask == aPCTask) {
+        PCTask *st = [PCTask new];
+        st.taskCommand = @"brew install saltstack 2>&1";
+        st.delegate = self;
+        self.saltTask = st;
+        [st launchTask];
 
-        [self setUIToProceedState];
+        self.prepTask = nil;
+    }
+    
+    if (self.saltTask == aPCTask){
+        
+        // initiate salt
         [[PCProcManager sharedManager] freshSaltStart];
         sleep(3);
-
+        
+        // initiate user task
         NSString *basePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
         NSString *userSetup = [NSString stringWithFormat:@"%@/setup/vagrant_user_setup.sh",basePath];
         PCTask *userTask = [PCTask new];
@@ -100,9 +125,8 @@
         userTask.delegate = self;
         self.userTask = userTask;
         [userTask launchTask];
-        
-        self.sudoTask = nil;
-        
+
+        self.saltTask = nil;
     }
     
     if(self.userTask == aPCTask){
@@ -116,6 +140,9 @@
     
     NSData *data = [aFileHandler availableData];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    
+    
+    Log(@"%@",str);
     
     // save vagrant interface
     if (self.vagInitTask == aPCTask) {
