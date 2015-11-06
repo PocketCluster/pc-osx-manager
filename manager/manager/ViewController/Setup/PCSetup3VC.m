@@ -13,7 +13,6 @@
 #import "PCTask.h"
 
 @interface PCSetup3VC()<PCTaskDelegate>
-@property (strong, nonatomic) NSDictionary *progDict;
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
 @property (nonatomic, strong) PCTask *saltBaseTask;
@@ -25,6 +24,7 @@
 -(void)setUIToProceedState;
 -(void)resetUIForFailure;
 -(void)setToNextStage;
+-(void)setProgMessage:(NSString *)aMessage value:(double)aValue;
 
 -(void)startPackageInstall;
 -(void)failedPackageInstall;
@@ -42,13 +42,6 @@
         self.packageList = [NSMutableArray arrayWithCapacity:0];
         self.downloadFileList = [NSMutableArray arrayWithCapacity:0];
         
-        self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Setting up base configuration.",@20.0]
-                          ,@"SUDO_SETUP_DONE":@[@"Finishing configuration.",@30.0]
-                          ,@"USER_SETUP_STEP_0":@[@"Starting Vagrant.",@40.0]
-                          ,@"USER_SETUP_STEP_1":@[@"Setting up connection.",@50.0]
-                          ,@"USER_SETUP_STEP_2":@[@"Finalizing...",@90.0]
-                          ,@"USER_SETUP_DONE":@[@"Done!",@100.0]};
-
         [self resetToInitialState];
         
         WEAK_SELF(self);
@@ -103,6 +96,7 @@
 
 
     if(self.saltMasterTask == aPCTask ){
+        [self setProgMessage:@"Setting up slave nodes..." value:60.0];
         
         PCTask *smt = [PCTask new];
         smt.taskCommand = [NSString stringWithFormat:@"salt 'pc-node*' state.sls hadoop/2-4-0/datanode/cluster/init"];
@@ -126,20 +120,6 @@
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
     Log(@"STR %@",str);
-    
-    NSArray *p = nil;
-    for (NSString *key in self.progDict) {
-        if ([str containsString:key]){
-            p = [self.progDict valueForKey:key];
-            break;
-        }
-    }
-    
-    if(p != nil){
-        [self.progressLabel setStringValue:[p objectAtIndex:0]];
-        [self.progressBar setDoubleValue:[[p objectAtIndex:1] doubleValue]];
-        [self.progressBar displayIfNeeded];
-    }
 }
 
 -(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
@@ -178,17 +158,20 @@
 -(void)setToNextStage {
     self.canContinue = YES;
     self.canGoBack = NO;
-
     [self.installBtn setEnabled:NO];
-    
     [self.circularProgress stopAnimation:nil];
-    [self.progressBar setDoubleValue:100.0];
+}
+
+-(void)setProgMessage:(NSString *)aMessage value:(double)aValue {
+    [self.progressLabel setStringValue:aMessage];
+    [self.progressBar setDoubleValue:aValue];
     [self.progressBar displayIfNeeded];
 }
 
 #pragma mark - Install Start
 -(void)startPackageInstall {
     [self setToNextStage];
+    [self setProgMessage:@"Setting up master node..." value:20.0];
     
     PCTask *smt = [PCTask new];
     smt.taskCommand = [NSString stringWithFormat:@"salt 'pc-master' state.sls hadoop/2-4-0/namenode/cluster/init"];
@@ -203,6 +186,7 @@
 
 -(void)finalizeInstallProcess {
 
+#if 0
     PCClusterType t = [[Util getApp] loadClusterType];
     t = PC_CLUTER_VAGRANT;
     switch (t) {
@@ -218,8 +202,10 @@
         default:
             break;
     }
+#endif
 
     [self setToNextStage];
+    [self setProgMessage:@"Installation completed!" value:100.0];
 }
 
 #pragma mark - IBACTION
@@ -233,10 +219,7 @@
     }
 
     [self setUIToProceedState];
-    
-    [self.progressBar setDoubleValue:10.0];
-    [self.progressBar displayIfNeeded];
-
+    [self setProgMessage:@"Downloading a meta package..." value:10.0];
     
     for(PCPackageMeta *meta in belf.packageList){
 

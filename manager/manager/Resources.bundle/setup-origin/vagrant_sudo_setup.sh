@@ -7,6 +7,7 @@ echo "SUDO_SETUP_STEP_0"
 
 # setup root directories
 mkdir -p /{pocket,bigpkg}
+mkdir -p /bigpkg/archive
 
 # change permission
 chown -R $SUDO_USER:staff /pocket

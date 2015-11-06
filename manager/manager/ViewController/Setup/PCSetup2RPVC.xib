@@ -11,7 +11,7 @@
                 <outlet property="circularProgress" destination="vGt-Iu-aSJ" id="Wo7-TE-hFO"/>
                 <outlet property="nodeTable" destination="FgY-4m-zjw" id="bqI-TW-87s"/>
                 <outlet property="progressBar" destination="t6E-yx-PXz" id="YBU-5O-8Q8"/>
-                <outlet property="progressLabel" destination="sQg-zq-gxW" id="gNq-MY-PUm"/>
+                <outlet property="progressLabel" destination="MKz-Wm-kOt" id="EAp-cI-gqT"/>
                 <outlet property="view" destination="1QC-ha-GCj" id="Mhm-Kx-GEo"/>
                 <outlet property="warningLabel" destination="2KP-9J-KgE" id="xLF-80-c8g"/>
             </connections>
@@ -175,19 +175,19 @@ Please connect an Ethernet adapter, power up Raspberry Pis and click Build.</str
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sQg-zq-gxW">
-                    <rect key="frame" x="40" y="60" width="357" height="24"/>
+                <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="vGt-Iu-aSJ">
+                    <rect key="frame" x="20" y="61" width="16" height="16"/>
                     <animations/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" id="sKz-m6-EkN">
-                        <font key="font" metaFont="systemLight" size="16"/>
-                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                </progressIndicator>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MKz-Wm-kOt">
+                    <rect key="frame" x="40" y="59" width="357" height="20"/>
+                    <animations/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" id="MAB-rP-ENF">
+                        <font key="font" metaFont="systemMedium" size="14"/>
+                        <color key="textColor" red="0.29803922770000002" green="0.29803922770000002" blue="0.29803922770000002" alpha="1" colorSpace="calibratedRGB"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="vGt-Iu-aSJ">
-                    <rect key="frame" x="20" y="64" width="16" height="16"/>
-                    <animations/>
-                </progressIndicator>
             </subviews>
             <animations/>
             <point key="canvasLocation" x="486.5" y="229.5"/>

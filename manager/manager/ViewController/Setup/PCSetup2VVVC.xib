@@ -10,7 +10,7 @@
                 <outlet property="buildBtn" destination="az4-lJ-tTt" id="gYy-Ce-nid"/>
                 <outlet property="circularProgress" destination="ZWx-gG-tJ5" id="UVN-NE-dDS"/>
                 <outlet property="progressBar" destination="6al-aC-JeU" id="UyB-iP-Pxq"/>
-                <outlet property="progressLabel" destination="NYJ-8N-afL" id="SRL-f9-Pvq"/>
+                <outlet property="progressLabel" destination="Txt-MU-KYV" id="TWX-qu-46k"/>
                 <outlet property="view" destination="ZmD-pe-h1n" id="p16-pQ-9go"/>
             </connections>
         </customObject>
@@ -56,19 +56,19 @@ This step may take a while to complete.</string>
                     <rect key="frame" x="20" y="59" width="375" height="20"/>
                     <animations/>
                 </progressIndicator>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NYJ-8N-afL">
-                    <rect key="frame" x="42" y="87" width="355" height="24"/>
+                <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="ZWx-gG-tJ5">
+                    <rect key="frame" x="20" y="77" width="16" height="16"/>
                     <animations/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" id="ejE-8o-bdh">
-                        <font key="font" metaFont="systemLight" size="16"/>
-                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                </progressIndicator>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Txt-MU-KYV">
+                    <rect key="frame" x="40" y="75" width="357" height="20"/>
+                    <animations/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" id="Djq-Wg-cJR">
+                        <font key="font" metaFont="systemMedium" size="14"/>
+                        <color key="textColor" red="0.29803922770000002" green="0.29803922770000002" blue="0.29803922770000002" alpha="1" colorSpace="calibratedRGB"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="ZWx-gG-tJ5">
-                    <rect key="frame" x="20" y="91" width="16" height="16"/>
-                    <animations/>
-                </progressIndicator>
             </subviews>
             <animations/>
             <point key="canvasLocation" x="-65.5" y="140.5"/>
