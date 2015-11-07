@@ -373,7 +373,10 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
        MASTER_TIMEZONE:tz,
        MASTER_IP4_ADDRESS:ia,
        MASTER_IP6_ADDRESS:@""}];
+    [n removeObjectForKey:SLAVE_TIMEZONE];
 
+    Log(@"\nFeedBack package \n %@\n",n);
+    
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         [belf multicastData:[n BSONRepresentation]];
     }];
@@ -574,8 +577,6 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 
         // once it is found to be my slaves, update node data & send them a feedback.
         if ([[node objectForKey:MASTER_BOUND_AGENT] containsString:sn]) {
-
-            Log(@"\n found my node\n %@\n", node);
 
             // check heartbeat
             @synchronized(_clusters) {
