@@ -8,9 +8,18 @@
 #import "Raspberry.h"
 #import "RaspberryCluster.h"
 #import "GCDAsyncUdpSocket.h"
+#import "LinkInterface.h"
+
+@protocol RaspberryAgentDelegate <NSObject>
+@optional
+- (void)didReceiveUnboundedAgentData:(NSDictionary *)anAgentData;
+- (void)didReceiveBoundedAgentData:(NSDictionary *)anAgentData;
+@end
 
 @interface RaspberryManager : NSObject <GCDAsyncUdpSocketDelegate>
+@property (nonatomic, strong, readonly) NSString *hostName;
 @property (nonatomic, strong, readonly) NSString *deviceSerial;
+@property (nonatomic, strong, readonly) NSString *systemTimeZone;
 
 + (RaspberryManager *)sharedManager;
 
@@ -21,6 +30,8 @@
 - (void)refreshRaspberryClusters;
 - (void)haltRefreshTimer;
 - (void)refreshTimerState;
+- (void)refreshInterface;
+- (LinkInterface *)ethernetInterface;
 
 - (NSUInteger)liveRaspberryCount;
 - (NSUInteger)raspberryCount;
@@ -36,10 +47,15 @@
 
 - (void)addMultDelegateToQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
 - (void)removeMultDelegateFromQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
+
+- (void)addAgentDelegateToQueue:(id<RaspberryAgentDelegate>)aDelegate;
+- (void)removeAgentDelegateFromQueue:(id<RaspberryAgentDelegate>)aDelegate;
+
+- (void)setupRaspberryNodes:(NSArray<NSDictionary *> *) aNodesList;
+
 - (void)startMulticastSocket;
 - (void)stopMulticastSocket;
 - (void)multicastData:(NSData *)aData;
 
-
--(void)debugOutput;
+- (void)debugOutput;
 @end

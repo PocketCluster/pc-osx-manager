@@ -4,29 +4,42 @@
 //
 //  Copyright (c) 2014 Lanayo. All rights reserved.
 //
+
+#include <sys/time.h>
+#import <SystemConfiguration/SCNetworkConfiguration.h>
+
 #import "VagrantManager.h"
 #import "SynthesizeSingleton.h"
 #import "RaspberryManager.h"
 #import "PCConstants.h"
 #import "BSONSerialization.h"
 #import "DeviceSerialNumber.h"
-#include <sys/time.h>
+#import "PCInterfaceList.h"
+
+#import "NullStringChecker.h"
+#import "Util.h"
 
 @interface RaspberryManager()
 @property (nonatomic, strong) NSMutableArray *clusters;
 @property (nonatomic, strong) GCDAsyncUdpSocket *multSocket;
+@property (nonatomic, strong) NSMutableArray<RaspberryAgentDelegate> *agentDelegates;
 @property (nonatomic, strong) NSMutableArray<GCDAsyncUdpSocketDelegate> *multSockDelegates;
+
+@property (nonatomic, strong, readwrite) NSString *hostName;
 @property (nonatomic, strong, readwrite) NSString *deviceSerial;
-@property (strong, nonatomic) NSTimer *refreshTimer;
+@property (nonatomic, strong, readwrite) NSString *systemTimeZone;
+@property (nonatomic, strong, readwrite) LinkInterface *interface;
+
+@property (nonatomic, strong) NSTimer *refreshTimer;
 
 - (void)refreshClusters;
 - (void)updateliveRaspberryCount;
 - (void)updateRaspberryCount;
-
+- (void)responseAgentMasterFeedback:(NSDictionary *)anAgentData;
 @end
 
 @implementation RaspberryManager {
-    BOOL isRefreshingRaspberryNodes;
+    BOOL _isRefreshingRaspberryNodes;
     int queuedRefreshes;
     volatile bool _isMulticastSocketOpen;
 }
@@ -36,13 +49,22 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     self = [super init];
     
     if(self) {
-        isRefreshingRaspberryNodes = NO;
+        _isRefreshingRaspberryNodes = NO;
+        _isMulticastSocketOpen = NO;
+        
         self.clusters = [[NSMutableArray alloc] init];
+        self.multSockDelegates = [NSMutableArray<GCDAsyncUdpSocketDelegate> arrayWithCapacity:0];
+        self.agentDelegates = [NSMutableArray<RaspberryAgentDelegate> arrayWithCapacity:0];
+        
+        self.deviceSerial = [[DeviceSerialNumber deviceSerialNumber] lowercaseString];
+        self.systemTimeZone = [[NSTimeZone systemTimeZone] name];
+        self.hostName = [[[NSHost currentHost] localizedName] lowercaseString];
+
+        self.interface = nil;
+        [self refreshInterface];
+
         self.multSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
         [self.multSocket setIPv6Enabled:NO];
-        self.multSockDelegates = [NSMutableArray<GCDAsyncUdpSocketDelegate> arrayWithCapacity:0];
-        self.deviceSerial = [[DeviceSerialNumber deviceSerialNumber] lowercaseString];
-        _isMulticastSocketOpen = false;
     }
 
     return self;
@@ -123,9 +145,13 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 }
 
 - (void)refreshRaspberryClusters {
+    
+    //TODO: fix this. put this to more organized places. More likely, use async notification.
+    [self refreshInterface];
+    
     //only run if not already refreshing
-    if(!isRefreshingRaspberryNodes) {
-        isRefreshingRaspberryNodes = YES;
+    if(!_isRefreshingRaspberryNodes) {
+        _isRefreshingRaspberryNodes = YES;
         
         //tell popup controller refreshing has started
         [[NSNotificationCenter defaultCenter]
@@ -143,16 +169,14 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 //tell popup controller refreshing has ended
-                isRefreshingRaspberryNodes = NO;
+                _isRefreshingRaspberryNodes = NO;
                 [[NSNotificationCenter defaultCenter]
                  postNotificationName:kRASPBERRY_MANAGER_REFRESHING_ENDED
                  object:nil];
                 [belf updateRaspberryCount];
                 [belf updateliveRaspberryCount];
             });
-            
         });
-
     }
 }
 
@@ -174,6 +198,26 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
      selector:@selector(refreshRaspberryClusters)
      userInfo:nil
      repeats:YES];
+}
+
+-(void)refreshInterface {
+    @synchronized(self) {
+        self.interface = nil;
+        for (LinkInterface *iface in [PCInterfaceList all]){
+            if (!ISNULL_STRING(iface.ip4Address) && [iface.kind isEqualToString:(__bridge NSString *)kSCNetworkInterfaceTypeEthernet]){
+                self.interface = iface;
+                return;
+            }
+        }
+    }
+}
+
+- (LinkInterface *)ethernetInterface {
+    __weak LinkInterface* eth = nil;
+    @synchronized(self) {
+        eth = self.interface;
+    }
+    return eth;
 }
 
 #pragma mark - MANAGING RAPSBERRY NODES
@@ -292,9 +336,95 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     return -1;
 }
 
+#pragma mark - RaspberryAgentDelegate 
+- (void)addAgentDelegateToQueue:(id<RaspberryAgentDelegate>)aDelegate {
+    @synchronized(self.agentDelegates) {
+        [self.agentDelegates addObject:aDelegate];
+    }
+}
+
+- (void)removeAgentDelegateFromQueue:(id<RaspberryAgentDelegate>)aDelegate {
+    @synchronized(self.agentDelegates) {
+        [self.agentDelegates removeObject:aDelegate];
+    }
+}
+
+// this node is found to be mine so that I am not going to
+- (void)responseAgentMasterFeedback:(NSDictionary *)anAgentData {
+
+    if([self ethernetInterface] == nil){
+        Log(@"cannot give updated feedback b/c interface is nil!");
+        return;
+    }
+
+    WEAK_SELF(self);
+
+    NSString *sn = self.deviceSerial;
+    NSString *hn = self.hostName;
+    NSString *ia = [[self ethernetInterface] ip4Address];
+    NSString *tz = self.systemTimeZone;
+
+    NSMutableDictionary* n = [NSMutableDictionary dictionaryWithDictionary:anAgentData];
+    [n setValuesForKeysWithDictionary:
+     @{MASTER_COMMAND_TYPE:@"-", // even if a node is fixed, we should include pc_ma_ct key. otherwise node will break!
+       MASTER_HOSTNAME:hn,
+       MASTER_BOUND_AGENT:sn,
+       MASTER_DATETIME:[NSString stringWithFormat:@"%ld",(long)[[NSDate date] timeIntervalSince1970]],
+       MASTER_TIMEZONE:tz,
+       MASTER_IP4_ADDRESS:ia,
+       MASTER_IP6_ADDRESS:@""}];
+
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [belf multicastData:[n BSONRepresentation]];
+    }];
+}
+
+#pragma mark - Raspberry Nodes Management
+- (void)setupRaspberryNodes:(NSArray<NSDictionary *> *) aNodesList {
+    
+    if([self ethernetInterface] == nil){
+        Log(@"cannot give updated feedback b/c interface is nil!");
+        return;
+    }
+
+    WEAK_SELF(self);
+    
+    NSString *sn = self.deviceSerial;
+    NSString *hn = self.hostName;
+    NSString *ia = [[self ethernetInterface] ip4Address];
+    NSString *tz = self.systemTimeZone;
+    
+    // setup only six nodes
+    RaspberryCluster *rpic = [[RaspberryCluster alloc] initWithTitle:@"Cluster 1"];
+    for (NSDictionary *anode in aNodesList){
+        
+        // fixed node definitions
+        NSMutableDictionary* fn = [NSMutableDictionary dictionaryWithDictionary:anode];
+        [fn setValuesForKeysWithDictionary:
+         @{MASTER_COMMAND_TYPE:COMMAND_FIX_BOUND,
+          MASTER_HOSTNAME:hn,
+          MASTER_BOUND_AGENT:sn,
+          MASTER_DATETIME:[NSString stringWithFormat:@"%ld",(long)[[NSDate date] timeIntervalSince1970]],
+          MASTER_TIMEZONE:tz,
+          MASTER_IP4_ADDRESS:ia,
+          MASTER_IP6_ADDRESS:@""}];
+        
+        Log(@"\n NODE FIX PACKAGE\n %@",fn);
+
+        [rpic addRaspberry:[[Raspberry alloc] initWithDictionary:fn]];
+#if 0
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [belf multicastData:[fn BSONRepresentation]];
+        }];
+#endif
+    }
+
+    [[RaspberryManager sharedManager] addCluster:rpic];
+    [[RaspberryManager sharedManager] saveClusters];
+}
+
 
 #pragma mark - GCDAsyncUdpSocket MANAGEMENT
-
 - (void)addMultDelegateToQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate {
     @synchronized(self.multSockDelegates) {
         [self.multSockDelegates addObject:aDelegate];
@@ -425,16 +555,48 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     __block struct timeval tv;
     gettimeofday(&tv, NULL);
     
-    __block NSString * const sn = self.deviceSerial;
-    __block NSDictionary * const node =[NSDictionary dictionaryWithBSON:data];
-    __block NSString *slaveMac = [node objectForKey:SLAVE_NODE_MACADDR];
-    
-    // check heartbeat
-    @synchronized(_clusters) {
-        [_clusters enumerateObjectsUsingBlock:^(RaspberryCluster*  _Nonnull rpic, NSUInteger idx, BOOL * _Nonnull stop) {
-            [rpic updateHeartBeats:sn withSlaveMAC:slaveMac forTS:tv];
-        }];
+    NSString * const sn = self.deviceSerial;
+    NSDictionary * const node =[NSDictionary dictionaryWithBSON:data];
+    NSString *slaveMac = [node objectForKey:SLAVE_NODE_MACADDR];
+
+    // these are the fresh nodes which need a care. let's pass to somebody else
+    if([[node objectForKey:MASTER_BOUND_AGENT] containsString:SLAVE_LOOKUP_AGENT]){
+        
+        @synchronized(self.agentDelegates) {
+            [_agentDelegates enumerateObjectsUsingBlock:^(id<RaspberryAgentDelegate> _Nonnull delegate, NSUInteger idx, BOOL * _Nonnull stop) {
+                if(CHECK_DELEGATE_EXECUTION(delegate, @protocol(RaspberryAgentDelegate), @selector(didReceiveUnboundedAgentData:))){
+                    [delegate didReceiveUnboundedAgentData:node];
+                }
+            }];
+        }
+
+    }else{
+
+        // once it is found to be my slaves, update node data & send them a feedback.
+        if ([[node objectForKey:MASTER_BOUND_AGENT] containsString:sn]) {
+
+            Log(@"\n found my node\n %@\n", node);
+
+            // check heartbeat
+            @synchronized(_clusters) {
+                [_clusters enumerateObjectsUsingBlock:^(RaspberryCluster*  _Nonnull rpic, NSUInteger idx, BOOL * _Nonnull stop) {
+                    [rpic updateHeartBeats:sn withSlaveMAC:slaveMac forTS:tv];
+                }];
+            }
+
+            [self responseAgentMasterFeedback:node];
+
+            // let agent delegates to know someone of our own responses
+            @synchronized(self.agentDelegates) {
+                [_agentDelegates enumerateObjectsUsingBlock:^(id<RaspberryAgentDelegate> _Nonnull delegate, NSUInteger idx, BOOL * _Nonnull stop) {
+                    if(CHECK_DELEGATE_EXECUTION(delegate, @protocol(RaspberryAgentDelegate), @selector(didReceiveBoundedAgentData:))){
+                        [delegate didReceiveBoundedAgentData:node];
+                    }
+                }];
+            }   
+        }
     }
+    
     
     @synchronized(self.multSockDelegates) {
         [self.multSockDelegates enumerateObjectsUsingBlock:^(id<GCDAsyncUdpSocketDelegate> _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {

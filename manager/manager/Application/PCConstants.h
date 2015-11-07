@@ -8,6 +8,8 @@
 
 #pragma once
 
+#define MAX_TRIAL_RASP_NODE_COUNT (6)
+
 //# ------ VERSION ------
 extern NSString * const PC_PROTO;
 extern NSString * const VERSION;
@@ -33,7 +35,10 @@ extern NSString * const MASTER_IP4_ADDRESS;
 extern NSString * const MASTER_IP6_ADDRESS;
 //master hostname
 extern NSString * const MASTER_HOSTNAME;
-
+// master datetime
+extern NSString * const MASTER_DATETIME;
+// master timezone
+extern NSString * const MASTER_TIMEZONE;
 //------ SLAVE SECTION ------
 extern NSString * const SLAVE_SECTION;
 
@@ -41,6 +46,7 @@ extern NSString * const SLAVE_SECTION;
 extern NSString * const SLAVE_LOOKUP_AGENT;
 extern NSString * const SLAVE_NODE_MACADDR;
 extern NSString * const SLAVE_NODE_NAME;
+extern NSString * const SLAVE_TIMEZONE;
 
 //------ network configuration ------
 extern NSString * const POCKETCAST_GROUP;
@@ -48,10 +54,6 @@ extern const NSUInteger PAGENT_SEND_PORT;
 extern const NSUInteger PAGENT_RECV_PORT;
 extern const double UNBOUNDED_TIMEOUT;
 extern const double BOUNDED_TIMEOUT;
-
-//------ time settings ------
-extern NSString * const MASTER_TIME_STAMP;
-extern NSString * const MASTER_TIME_ZONE;
 
 //------ Webserver path
 extern NSString * const WEB_SERVER_ROOT_PATH;

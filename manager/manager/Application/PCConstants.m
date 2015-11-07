@@ -35,6 +35,10 @@ NSString * const MASTER_IP4_ADDRESS  = @"pc_ma_i4";
 NSString * const MASTER_IP6_ADDRESS  = @"pc_ma_i6";
 //master hostname
 NSString * const MASTER_HOSTNAME     = @"pc_ma_hn";
+// master datetime
+NSString * const MASTER_DATETIME     = @"pc_ma_dt";
+// master timezone
+NSString * const MASTER_TIMEZONE     = @"pc_ma_tz";
 
 //------ SLAVE SECTION ------
 NSString * const SLAVE_SECTION       = @"slave";
@@ -43,6 +47,7 @@ NSString * const SLAVE_SECTION       = @"slave";
 NSString * const SLAVE_LOOKUP_AGENT  = @"pc_sl_la";
 NSString * const SLAVE_NODE_MACADDR  = @"pc_sl_ma";
 NSString * const SLAVE_NODE_NAME     = @"pc_sl_nm";
+NSString * const SLAVE_TIMEZONE      = @"pc_sl_tz";
 
 //------ network configuration ------
 NSString * const POCKETCAST_GROUP    = @"239.193.127.127";
@@ -50,10 +55,6 @@ const NSUInteger PAGENT_SEND_PORT    = 10060;
 const NSUInteger PAGENT_RECV_PORT    = 10061;
 const double UNBOUNDED_TIMEOUT       = 3.0;
 const double BOUNDED_TIMEOUT         = 10.0;
-
-//------ time settings ------
-NSString * const MASTER_TIME_STAMP   = @"pc_ma_ts";
-NSString * const MASTER_TIME_ZONE    = @"pc_ma_tz";
 
 //------ Webserver path
 NSString * const WEB_SERVER_ROOT_PATH = @"/bigpkg/archive";

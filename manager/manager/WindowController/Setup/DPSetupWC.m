@@ -66,7 +66,7 @@
     NSArray *dpwvc = [NSArray arrayWithArray:[dsw viewControllers]];
     for(NSViewController *vc in dpwvc){
         if([vc isKindOfClass:[PCSetup2RPVC class]]){
-            [[RaspberryManager sharedManager] removeMultDelegateFromQueue:vc];
+            [[RaspberryManager sharedManager] removeAgentDelegateFromQueue:vc];
         }
     }
     [dsw removeNotifications];

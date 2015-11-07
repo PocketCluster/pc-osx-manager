@@ -6,24 +6,16 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-
 #import "PCSetup2RPVC.h"
 
-#import "RaspberryManager.h"
-#import "PCInterfaceList.h"
-#import "BSONSerialization.h"
-#import "Util.h"
-#import "PCTask.h"
-#import "NullStringChecker.h"
-#import "RaspberryManager.h"
-#import <SystemConfiguration/SCNetworkConfiguration.h>
-#import "PCProcManager.h"
-
 #import "PCSetup3VC.h"
+#import "RaspberryManager.h"
+#import "PCProcManager.h"
+#import "PCTask.h"
+#import "Util.h"
+#import "PCConstants.h"
 
-#define MAX_SUPPORTED_NODE (6)
-
-@interface PCSetup2RPVC ()<PCTaskDelegate, GCDAsyncUdpSocketDelegate>
+@interface PCSetup2RPVC ()<PCTaskDelegate, RaspberryAgentDelegate>
 @property (atomic, strong) NSMutableArray *nodeList;
 @property (strong, nonatomic) NSDictionary *progDict;
 
@@ -31,7 +23,6 @@
 @property (strong, nonatomic) PCTask *saltTask;
 @property (strong, nonatomic) PCTask *userTask;
 @property (nonatomic, strong) NSString *hostName;
-@property (nonatomic, strong) LinkInterface *interface;
 
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
@@ -40,7 +31,6 @@
 - (void)resetUIForFailure;
 - (void)setToNextStage;
 
-- (void)refreshInterface;
 - (void)removeViewControler;
 @end
 
@@ -53,7 +43,6 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     
     if(self){
-        [[RaspberryManager sharedManager] addMultDelegateToQueue:self];
         self.nodeList = [NSMutableArray arrayWithCapacity:0];
         
         self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Base config done...",@10.0]
@@ -66,14 +55,16 @@
         self.hostName = [[[NSHost currentHost] localizedName] lowercaseString];
         
         [self resetToInitialState];
-        [self refreshInterface];
+        
+        [[RaspberryManager sharedManager] addAgentDelegateToQueue:self];
+        [[RaspberryManager sharedManager] refreshInterface];
     }
     
     return self;
 }
 
 -(void)viewDidAppear {
-    if (self.interface){
+    if ([[RaspberryManager sharedManager] ethernetInterface]){
         [self.warningLabel setHidden:YES];
     }else{
         [self.warningLabel setHidden:NO];
@@ -84,60 +75,29 @@
     Log(@"%s",__PRETTY_FUNCTION__);
 }
 
-
--(void)refreshInterface {
-    for (LinkInterface *iface in [PCInterfaceList all]){
-        if (!ISNULL_STRING(iface.ip4Address) && [iface.kind isEqualToString:(__bridge NSString *)kSCNetworkInterfaceTypeEthernet]){
-            self.interface = iface;
-            return;
-        }
-    }
-}
-
 #pragma mark - GCDAsyncUdpSocketDelegate
-- (void)udpSocket:(GCDAsyncUdpSocket *)sock
-   didReceiveData:(NSData *)data
-      fromAddress:(NSData *)address
-withFilterContext:(id)filterContext
-{
-    NSDictionary *m =[NSDictionary dictionaryWithBSON:data];
-    
-    // unbounded nodes only.
-    if(![[m objectForKey:MASTER_BOUND_AGENT] containsString:SLAVE_LOOKUP_AGENT]){
-        return;
-    }
+
+- (void)didReceiveUnboundedAgentData:(NSDictionary *)anAgentData {
     
     BOOL doesNodeExist = false;
     for (NSDictionary *node in self.nodeList){
-        if([[node valueForKey:SLAVE_NODE_MACADDR] isEqualToString:[m valueForKey:SLAVE_NODE_MACADDR]]){
+        if([[node valueForKey:SLAVE_NODE_MACADDR] isEqualToString:[anAgentData valueForKey:SLAVE_NODE_MACADDR]]){
             doesNodeExist = true;
             break;
         }
     }
 
-    if (!doesNodeExist && self.nodeList.count < MAX_SUPPORTED_NODE){
-        NSString *sn = [[RaspberryManager sharedManager] deviceSerial];
-        NSString *hn = self.hostName;
-        NSString *ha = [self.interface ip4Address];
-        
-        NSMutableDictionary* n = [NSMutableDictionary dictionaryWithDictionary:m];
-        [n setValuesForKeysWithDictionary:
-         @{MASTER_COMMAND_TYPE:COMMAND_FIX_BOUND,
-           MASTER_HOSTNAME:hn,
-           MASTER_BOUND_AGENT:sn,
-           MASTER_IP4_ADDRESS:ha,
-           MASTER_IP6_ADDRESS:@""}];
-        
-        [self.nodeList addObject:n];
+    if (!doesNodeExist && self.nodeList.count < MAX_TRIAL_RASP_NODE_COUNT){
+        [self.nodeList addObject:anAgentData];
         [self.nodeList sortUsingComparator:^NSComparisonResult(NSDictionary*  _Nonnull node1, NSDictionary* _Nonnull node2) {
             return [[node1 valueForKey:ADDRESS] compare:[node2 valueForKey:ADDRESS] options:NSNumericSearch];
         }];
-        
+
         for (int i = 0; i < [self.nodeList count]; i++){
             NSMutableDictionary *nd = [self.nodeList objectAtIndex:i];
             [nd setValue:[NSString stringWithFormat:@"pc-node%d",(i + 1)] forKey:SLAVE_NODE_NAME];
         }
-        
+
         [self.nodeTable reloadData];
     }
 }
@@ -159,9 +119,9 @@ withFilterContext:(id)filterContext
     NSTableCellView *nv = [aTableView makeViewWithIdentifier:@"nodeview" owner:self];
     
     if([aTableColumn.identifier isEqualToString:@"nodename"]){
-        [nv.textField setStringValue:[nd valueForKey:@"pc_sl_nm"]];
+        [nv.textField setStringValue:[nd valueForKey:SLAVE_NODE_NAME]];
     }else{
-        [nv.textField setStringValue:[nd valueForKey:@"address"]];
+        [nv.textField setStringValue:[nd valueForKey:ADDRESS]];
     }
     
     return nv;
@@ -260,10 +220,10 @@ withFilterContext:(id)filterContext
 -(IBAction)build:(id)sender
 {
     // update interface status
-    [self refreshInterface];
+    [[RaspberryManager sharedManager] refreshInterface];
     
     // if there is no Ethernet, do not proceed.
-    if (self.interface){
+    if ([[RaspberryManager sharedManager] ethernetInterface]){
         [self.warningLabel setHidden:YES];
     }else{
         [self resetUIForFailure];
@@ -272,7 +232,7 @@ withFilterContext:(id)filterContext
     }
 
     // return if there is no node
-    NSUInteger nodeCount = MIN([self.nodeList count], MAX_SUPPORTED_NODE);
+    NSUInteger nodeCount = MIN([self.nodeList count], MAX_TRIAL_RASP_NODE_COUNT);
     if (nodeCount <= 0){
         // NSAlert
         
@@ -282,34 +242,28 @@ withFilterContext:(id)filterContext
 
     [self setUIToProceedState];
     
-    // setup only six nodes
-    RaspberryCluster *rpic = [[RaspberryCluster alloc] initWithTitle:@"Cluster 1"];
-
-    // save to local configuration
-    for (NSUInteger i = 0; i < nodeCount; ++i){
-        NSDictionary *node = [self.nodeList objectAtIndex:i];
-        [rpic addRaspberry:[[Raspberry alloc] initWithDictionary:node]];
-        //[[Util getApp] multicastData:[node BSONRepresentation]];
-        sleep(1);
-    }
-
-    [[RaspberryManager sharedManager] addCluster:rpic];
-    [[RaspberryManager sharedManager] saveClusters];
+    // setup actual raspberry nodes
+    [[RaspberryManager sharedManager] setupRaspberryNodes:self.nodeList];
     
+    // setup hosts address with this
     NSMutableString *nodeip = [NSMutableString new];
     for (NSUInteger i = 0; i < nodeCount; ++i){
         NSDictionary *node = [self.nodeList objectAtIndex:i];
-        [nodeip appendString:[NSString stringWithFormat:@"%@ ", [node valueForKey:@"address"]]];
+        [nodeip appendString:[NSString stringWithFormat:@"%@ ", [node valueForKey:ADDRESS]]];
     }
     
     NSString *basePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
-    NSString *sudoSetup = [NSString stringWithFormat:@"%@/setup/raspberry_sudo_setup.sh %@ %@ %@",basePath, basePath, self.interface.ip4Address, nodeip];
-    
+    NSString *sudoSetup =
+        [NSString
+         stringWithFormat:@"%@/setup/raspberry_sudo_setup.sh %@ %@ %@",
+         basePath, basePath,
+         [[RaspberryManager sharedManager] ethernetInterface].ip4Address,
+         nodeip];
+
     PCTask *sudoTask = [PCTask new];
     sudoTask.taskCommand = [NSString stringWithFormat:@"bash %@",sudoSetup];
     sudoTask.sudoCommand = YES;
     sudoTask.delegate = self;
-    
     self.sudoTask = sudoTask;
     
     [sudoTask launchTask];
@@ -358,7 +312,7 @@ withFilterContext:(id)filterContext
 
 - (void)didRevertToPreviousStage {
     WEAK_SELF(self);
-    [[RaspberryManager sharedManager] removeMultDelegateFromQueue:self];
+    [[RaspberryManager sharedManager] removeAgentDelegateFromQueue:self];
     [[NSOperationQueue mainQueue]
      addOperationWithBlock:^{
          if(belf){
