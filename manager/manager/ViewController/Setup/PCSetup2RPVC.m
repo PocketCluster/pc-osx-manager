@@ -430,6 +430,7 @@
     self.canGoBack = NO;
     
     [self.circularProgress stopAnimation:nil];
+    [self.progressLabel setStringValue:@"Done!"];
     [self.progressBar setDoubleValue:100.0];
     [self.progressBar displayIfNeeded];
     [self.buildBtn setEnabled:NO];
