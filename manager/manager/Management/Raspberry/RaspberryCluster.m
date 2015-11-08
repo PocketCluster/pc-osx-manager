@@ -145,6 +145,12 @@
     
 }
 
+- (void)resetNodeHeartbeat {
+    @synchronized(_raspberries) {
+        [_raspberries makeObjectsPerformSelector:@selector(resetHeartbeat)];
+    }
+}
+
 -(void)debugOutput {
     Log(@"TITLE %@ CID %@ ", _title, _clusterId);
     for (Raspberry *rpi in _raspberries){

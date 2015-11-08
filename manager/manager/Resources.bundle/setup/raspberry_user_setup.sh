@@ -83,6 +83,8 @@ chmod 600 $HOME/.ssh/*
 
 cp -f $HOME/.ssh/* /pocket/salt/states/base/ssh/
 
+exit 0
+
 echo "USER_SETUP_STEP_2"
 
 salt-key -y --accept="pc-master"

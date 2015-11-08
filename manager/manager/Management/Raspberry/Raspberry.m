@@ -89,6 +89,8 @@
     return YES;
 }
 
-
+-(void)resetHeartbeat {
+    memset(&_heartbeat,0,sizeof(struct timeval));
+}
 
 @end

@@ -11,7 +11,6 @@
 @interface RaspberryCluster : NSObject <NSCoding, NSCopying>
 @property (nonatomic, strong, readonly) NSString *clusterId;
 @property (nonatomic, strong, readonly) NSString *title;
-@property (nonatomic, strong, readonly) NSMutableArray *raspberries;
 
 - (instancetype)initWithTitle:(NSString *)aTitle;
 - (void)updateHeartBeats:(NSString *)aMasterId withSlaveMAC:(NSString *)aSlaveMac forTS:(struct timeval)heatbeat;
@@ -22,8 +21,8 @@
 - (void)removeRaspberryWithName:(NSString*)aName;
 - (Raspberry*)getRaspberryWithName:(NSString*)aName;
 - (int)getIndexOfRaspberryWithName:(NSString*)aName;
-
 - (void)checkCluster;
+- (void)resetNodeHeartbeat;
 
--(void)debugOutput;
+- (void)debugOutput;
 @end

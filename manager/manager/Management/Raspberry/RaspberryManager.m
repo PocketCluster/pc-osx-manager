@@ -192,13 +192,27 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     [self haltRefreshTimer];
     
     self.refreshTimer =
-    [NSTimer
-     scheduledTimerWithTimeInterval:HEARTBEAT_CHECK_INTERVAL
-     target:self
-     selector:@selector(refreshRaspberryClusters)
-     userInfo:nil
-     repeats:YES];
+        [NSTimer
+         scheduledTimerWithTimeInterval:HEARTBEAT_CHECK_INTERVAL
+         target:self
+         selector:@selector(refreshRaspberryClusters)
+         userInfo:nil
+         repeats:YES];
 }
+
+-(void)rapidRefreshTimerState {
+    
+    [self haltRefreshTimer];
+    
+    self.refreshTimer =
+        [NSTimer
+         scheduledTimerWithTimeInterval:1.0
+         target:self
+         selector:@selector(refreshRaspberryClusters)
+         userInfo:nil
+         repeats:YES];
+}
+
 
 -(void)refreshInterface {
     @synchronized(self) {

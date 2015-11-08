@@ -23,4 +23,6 @@
 
 -(instancetype)initWithDictionary:(NSDictionary *)aDict;
 
+-(void)resetHeartbeat;
+
 @end

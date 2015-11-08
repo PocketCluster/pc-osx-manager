@@ -22,6 +22,7 @@
 @property (strong, nonatomic) PCTask *sudoTask;
 @property (strong, nonatomic) PCTask *saltTask;
 @property (strong, nonatomic) PCTask *userTask;
+@property (strong, nonatomic) PCTask *skeyTask;
 @property (nonatomic, strong) NSString *hostName;
 
 @property (readwrite, nonatomic) BOOL canContinue;
@@ -167,7 +168,6 @@
     if(self.saltTask == aPCTask) {
         
         [[PCProcManager sharedManager] freshSaltStart];
-        sleep(5);
         
         NSString *basePath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
         NSString *userSetup = [NSString stringWithFormat:@"%@/setup/raspberry_user_setup.sh",basePath];
@@ -183,11 +183,29 @@
     
     if(self.userTask == aPCTask) {
 
-        [self setToNextStage];
+        PCTask *kt = [PCTask new];
+        kt.taskCommand = @"salt-key -L 2>&1";
+        kt.delegate = self;
+        self.skeyTask = kt;
+        [kt launchTask];
         
         self.userTask = nil;
-
     }
+    
+    if(self.skeyTask == aPCTask) {
+        
+        
+
+        
+        //[self setToNextStage];
+        
+        
+        
+        
+        
+        self.skeyTask = nil;
+    }
+    
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
@@ -196,6 +214,22 @@
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
     Log(@"%@",str);
+    
+    
+    
+    if (self.skeyTask == aPCTask){
+        
+        
+        
+        
+        
+        
+        
+    }
+    
+    
+    
+    
     
     NSArray *p = nil;
     for (NSString *key in self.progDict) {

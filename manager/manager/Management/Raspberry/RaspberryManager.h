@@ -30,6 +30,7 @@
 - (void)refreshRaspberryClusters;
 - (void)haltRefreshTimer;
 - (void)refreshTimerState;
+- (void)rapidRefreshTimerState;
 - (void)refreshInterface;
 - (LinkInterface *)ethernetInterface;
 
