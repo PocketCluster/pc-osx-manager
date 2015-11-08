@@ -42,9 +42,9 @@
     self = [super initWithNibName:aNibNameOrNil bundle:aNibBundleOrNil];
     
     if(self){
-        self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Setting up base configuration.",@10.0]
-                           ,@"SUDO_SETUP_DONE":@[@"Finishing configuration.",@20.0]
-                           ,@"USER_SETUP_STEP_0":@[@"Starting Vagrant.",@30.0]
+        self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Setting up base configuration...",@10.0]
+                           ,@"SUDO_SETUP_DONE":@[@"Finishing configuration...",@20.0]
+                           ,@"USER_SETUP_STEP_0":@[@"Starting Vagrant...",@30.0]
                            ,@"USER_SETUP_STEP_1":@[@"Setting up connection.",@70.0]
                            ,@"USER_SETUP_STEP_2":@[@"Finalizing...",@90.0]
                            ,@"USER_SETUP_DONE":@[@"Done!",@100.0]};

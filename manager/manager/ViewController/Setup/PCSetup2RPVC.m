@@ -23,7 +23,7 @@
 @property (strong, nonatomic) PCTask *saltTask;
 @property (strong, nonatomic) PCTask *userTask;
 @property (strong, nonatomic) PCTask *skeyTask;
-@property (nonatomic, strong) NSString *hostName;
+@property (strong, nonatomic) PCTask *rpiTask;
 
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
@@ -35,7 +35,9 @@
 - (void)removeViewControler;
 @end
 
-@implementation PCSetup2RPVC
+@implementation PCSetup2RPVC {
+    BOOL _allNodesDeteceted;
+}
 @synthesize canContinue;
 @synthesize canGoBack;
 
@@ -44,19 +46,18 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     
     if(self){
+
+        _allNodesDeteceted = NO;
+        
         self.nodeList = [NSMutableArray arrayWithCapacity:0];
-        
-        self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Base config done...",@10.0]
-                          ,@"SUDO_SETUP_DONE":@[@"Start setting up Vagrant",@20.0]
-                          ,@"USER_SETUP_STEP_0":@[@"USER_SETUP_STEP_0",@30.0]
-                          ,@"USER_SETUP_STEP_1":@[@"USER_SETUP_STEP_1",@50.0]
-                          ,@"USER_SETUP_STEP_2":@[@"USER_SETUP_STEP_2",@90.0]
-                          ,@"USER_SETUP_DONE":@[@"USER_SETUP_DONE",@100.0]};
-        
-        self.hostName = [[[NSHost currentHost] localizedName] lowercaseString];
-        
+        self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Setting up base configuration.",@10.0]
+                          ,@"SUDO_SETUP_DONE":@[@"Finishing configuration.",@20.0]
+                          ,@"USER_SETUP_STEP_0":@[@"Setting up Raspberry PIs...",@30.0]
+                          ,@"USER_SETUP_STEP_1":@[@"Setting up Raspberry PIs...",@70.0]
+                          ,@"USER_SETUP_STEP_2":@[@"Finalizing...",@90.0]
+                          ,@"USER_SETUP_DONE":@[@"Finalizing...",@95.0]};
+
         [self resetToInitialState];
-        
         [[RaspberryManager sharedManager] addAgentDelegateToQueue:self];
         [[RaspberryManager sharedManager] refreshInterface];
     }
@@ -193,19 +194,33 @@
     }
     
     if(self.skeyTask == aPCTask) {
-        
-        
 
-        
-        //[self setToNextStage];
-        
-        
-        
-        
-        
+        if(_allNodesDeteceted){
+
+            PCTask *rt = [PCTask new];
+            rt.taskCommand = [NSString stringWithFormat:@"bash %@/setup/raspberry_skey_setup.sh",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
+            rt.delegate = self;
+            self.rpiTask = rt;
+            [rt launchTask];
+            
+        }else{
+            
+            self.skeyTask = nil;
+
+            PCTask *kt = [PCTask new];
+            kt.taskCommand = @"salt-key -L 2>&1";
+            kt.delegate = self;
+            self.skeyTask = kt;
+            [kt launchTask];
+        }
+
         self.skeyTask = nil;
     }
     
+    if(self.rpiTask == aPCTask){
+        [self setToNextStage];
+        self.rpiTask = nil;
+    }
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
@@ -214,23 +229,21 @@
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
     Log(@"%@",str);
-    
-    
-    
+
     if (self.skeyTask == aPCTask){
-        
-        
-        
-        
-        
-        
-        
+        @autoreleasepool {
+            BOOL allNodesExist = YES;
+            NSArray *ra = [str componentsSeparatedByString:@"\n"];
+            allNodesExist = (allNodesExist & [ra containsObject:@"pc-master"]);
+            NSUInteger count = [self.nodeList count];
+            for (NSUInteger i = 1; i <= count; i++){
+                NSString *nm = [NSString stringWithFormat:@"pc-node%ld",i];
+                allNodesExist = (allNodesExist & [ra containsObject:nm]);
+            }
+            _allNodesDeteceted = allNodesExist;
+        }
     }
-    
-    
-    
-    
-    
+
     NSArray *p = nil;
     for (NSString *key in self.progDict) {
         if ([str containsString:key]){
@@ -253,6 +266,7 @@
 #pragma mark - IBACTION
 -(IBAction)build:(id)sender
 {
+    
     // update interface status
     [[RaspberryManager sharedManager] refreshInterface];
     
