@@ -33,6 +33,9 @@
 - (void)resetUIForFailure;
 - (void)setToNextStage;
 
+- (void)startRapidClusterMonitoring;
+- (void)raspberryUpdateRunningNodeCount:(NSNotification *)aNotification;
+
 - (void)removeViewControler;
 @end
 
@@ -151,6 +154,9 @@
         self.sudoTask = nil;
         self.saltTask = nil;
         self.userTask = nil;
+        self.skeyTask = nil;
+        self.rpiTask  = nil;
+        
         return;
     }
     
@@ -219,7 +225,9 @@
     }
     
     if(self.rpiTask == aPCTask){
-        [self setToNextStage];
+        
+        [self startRapidClusterMonitoring];
+
         self.rpiTask = nil;
     }
 }
@@ -270,9 +278,28 @@
     
     [[[RaspberryManager sharedManager] clusters] makeObjectsPerformSelector:@selector(resetNodeHeartbeat)];
     [[RaspberryManager sharedManager] rapidRefreshTimerState];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryUpdateRunningNodeCount:) name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT      object:nil];
 
 }
 
+-(void)raspberryUpdateRunningNodeCount:(NSNotification *)aNotification {
+    NSUInteger count = [[aNotification.userInfo objectForKey:kPOCKET_CLUSTER_LIVE_NODE_COUNT] unsignedIntegerValue];
+    
+    NSUInteger nodeCount = [self.nodeList count];
+    if (count == nodeCount) {
+        
+        [[RaspberryManager sharedManager] haltRefreshTimer];
+        
+        WEAK_SELF(self);
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            if (belf) {
+                [[NSNotificationCenter defaultCenter] removeObserver:belf name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
+            }
+        }];
+        
+        [self setToNextStage];
+    }
+}
 
 #pragma mark - IBACTION
 -(IBAction)build:(id)sender
