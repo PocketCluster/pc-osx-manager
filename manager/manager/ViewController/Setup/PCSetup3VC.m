@@ -12,6 +12,9 @@
 #import "Util.h"
 #import "PCTask.h"
 
+//salt 'pc-node*' state.sls 'base/oracle-java8'
+//salt 'pc-node*' state.sls 'base/openjdk-7'
+
 @interface PCSetup3VC()<PCTaskDelegate>
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;

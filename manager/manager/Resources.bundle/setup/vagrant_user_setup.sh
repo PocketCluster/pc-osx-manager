@@ -12,6 +12,9 @@ mkdir -p /pocket/nodes/pc-node{1..3}
 # copy salt essential files
 cp -Rf "${BASE_BUNDLE_PATH}"/saltstack/* /pocket/salt/
 
+# copy java state file
+cp -f "${BASE_BUNDLE_PATH}"/java/oracle-java8.sls /pocket/salt/states/base/
+
 # copy vagrant essential fils
 cp -Rf "${BASE_BUNDLE_PATH}"/vagrant/* /pocket/boxes/
 
@@ -83,6 +86,7 @@ done
 chmod 700 $HOME/.ssh
 chmod 600 $HOME/.ssh/*
 
+# prepare SSH login credential
 cp -f $HOME/.ssh/* /pocket/salt/states/base/ssh/
 
 echo "USER_SETUP_STEP_2"
@@ -96,7 +100,6 @@ done
 
 salt 'pc-node*' state.sls base/setup
 salt 'pc-node*' state.sls base/ssh-login
-salt 'pc-node*' state.sls base/oracle-java8
 rm -rf /pocket/salt/states/base/ssh/*
 
 echo "USER_SETUP_DONE"

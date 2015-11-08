@@ -10,6 +10,9 @@ mkdir -p /pocket/{conf,log,salt}
 # copy salt essential files
 cp -Rf "${BASE_BUNDLE_PATH}"/saltstack/* /pocket/salt/
 
+# copy java state file
+cp -f "${BASE_BUNDLE_PATH}"/java/openjdk-7.sls /pocket/salt/states/base/
+
 echo "USER_SETUP_STEP_1"
 
 # setup ssh login
@@ -81,6 +84,7 @@ done
 chmod 700 $HOME/.ssh
 chmod 600 $HOME/.ssh/*
 
+# prepare SSH login credential
 cp -f $HOME/.ssh/* /pocket/salt/states/base/ssh/
 
 exit 0
