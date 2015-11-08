@@ -389,7 +389,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
        MASTER_IP6_ADDRESS:@""}];
     [n removeObjectForKey:SLAVE_TIMEZONE];
 
-    Log(@"\nFeedBack package \n %@\n",n);
+//Log(@"\nFeedBack package \n %@\n",n);
     
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         [belf multicastData:[n BSONRepresentation]];
@@ -429,7 +429,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
         Log(@"\n NODE FIX PACKAGE\n %@",fn);
 
         [rpic addRaspberry:[[Raspberry alloc] initWithDictionary:fn]];
-#if 0
+#if 1
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
             [belf multicastData:[fn BSONRepresentation]];
         }];

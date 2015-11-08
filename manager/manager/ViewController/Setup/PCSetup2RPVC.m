@@ -77,10 +77,6 @@
     }
 }
 
--(void)dealloc {
-    Log(@"%s",__PRETTY_FUNCTION__);
-}
-
 #pragma mark - RaspberryAgentDelegate
 
 - (void)didReceiveUnboundedAgentData:(NSDictionary *)anAgentData {
@@ -143,9 +139,9 @@
 
 #pragma mark - PCTaskDelegate
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
-    
-    if(aTask.terminationStatus != 0) {
-        
+
+    if((aTask.terminationStatus != 0) && (self.skeyTask != aPCTask) && (self.rpiTask != aPCTask)) {
+
         Log(@"installation error ! %d",aTask.terminationStatus);
         
         [self resetUIForFailure];
@@ -154,9 +150,9 @@
         self.sudoTask = nil;
         self.saltTask = nil;
         self.userTask = nil;
-        self.skeyTask = nil;
-        self.rpiTask  = nil;
-        
+        //self.skeyTask = nil;
+        //self.rpiTask  = nil;
+
         return;
     }
     
@@ -173,21 +169,24 @@
         self.sudoTask = nil;
     }
     
+    
     if(self.saltTask == aPCTask) {
         
         [[PCProcManager sharedManager] freshSaltStart];
         
         NSString *basePath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
         NSString *userSetup = [NSString stringWithFormat:@"%@/setup/raspberry_user_setup.sh",basePath];
+        NSUInteger nodeCount = MIN([self.nodeList count], MAX_TRIAL_RASP_NODE_COUNT);
         
         PCTask *userTask = [PCTask new];
-        userTask.taskCommand = [NSString stringWithFormat:@"bash %@ %@ %ld", userSetup, basePath, [self.nodeList count]];
+        userTask.taskCommand = [NSString stringWithFormat:@"bash %@ %@ %ld", userSetup, basePath, nodeCount];
         userTask.delegate = self;
         self.userTask = userTask;
         [userTask launchTask];
         
         self.saltTask = nil;
     }
+    
     
     if(self.userTask == aPCTask) {
 
@@ -200,34 +199,51 @@
         self.userTask = nil;
     }
     
+    
     if(self.skeyTask == aPCTask) {
-
+        
         if(_allNodesDeteceted){
 
+            NSUInteger nodeCount = MIN([self.nodeList count], MAX_TRIAL_RASP_NODE_COUNT);
+
+            NSString *rtcmd =
+                [NSString
+                 stringWithFormat:@"bash %@/setup/raspberry_skey_setup.sh %ld",
+                 [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"],
+                 nodeCount];
+
             PCTask *rt = [PCTask new];
-            rt.taskCommand = [NSString stringWithFormat:@"bash %@/setup/raspberry_skey_setup.sh",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
+            rt.taskCommand = rtcmd;
             rt.delegate = self;
             self.rpiTask = rt;
             [rt launchTask];
             
-        }else{
+            self.skeyTask = nil;
             
+        }else{
+
+            sleep(1);
             self.skeyTask = nil;
 
-            PCTask *kt = [PCTask new];
-            kt.taskCommand = @"salt-key -L 2>&1";
-            kt.delegate = self;
-            self.skeyTask = kt;
-            [kt launchTask];
+            WEAK_SELF(self);
+            [[NSOperationQueue mainQueue]
+            addOperationWithBlock:^{
+                if(belf) {
+                    PCTask *kt = [PCTask new];
+                    kt.taskCommand = @"salt-key -L 2>&1";
+                    kt.delegate = self;
+                    [belf setSkeyTask:kt];
+                    [kt launchTask];
+                }
+            }];
         }
-
-        self.skeyTask = nil;
     }
+
     
     if(self.rpiTask == aPCTask){
         
-        [self startRapidClusterMonitoring];
-
+        [self setToNextStage];
+        
         self.rpiTask = nil;
     }
 }
@@ -244,7 +260,7 @@
             BOOL allNodesExist = YES;
             NSArray *ra = [str componentsSeparatedByString:@"\n"];
             allNodesExist = (allNodesExist & [ra containsObject:@"pc-master"]);
-            NSUInteger count = [self.nodeList count];
+            NSUInteger count = MIN([self.nodeList count], MAX_TRIAL_RASP_NODE_COUNT);
             for (NSUInteger i = 1; i <= count; i++){
                 NSString *nm = [NSString stringWithFormat:@"pc-node%ld",i];
                 allNodesExist = (allNodesExist & [ra containsObject:nm]);
@@ -285,26 +301,54 @@
 -(void)raspberryUpdateRunningNodeCount:(NSNotification *)aNotification {
     NSUInteger count = [[aNotification.userInfo objectForKey:kPOCKET_CLUSTER_LIVE_NODE_COUNT] unsignedIntegerValue];
     
-    NSUInteger nodeCount = [self.nodeList count];
+    NSUInteger nodeCount = MIN([self.nodeList count], MAX_TRIAL_RASP_NODE_COUNT);
     if (count == nodeCount) {
         
         [[RaspberryManager sharedManager] haltRefreshTimer];
-        
+
         WEAK_SELF(self);
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
             if (belf) {
+                [belf startConfigWithSudoTask];
                 [[NSNotificationCenter defaultCenter] removeObserver:belf name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
             }
         }];
-        
-        [self setToNextStage];
     }
 }
 
-#pragma mark - IBACTION
--(IBAction)build:(id)sender
-{
+- (void)startConfigWithSudoTask {
     
+    // return if there is no node
+    NSUInteger nodeCount = MIN([self.nodeList count], MAX_TRIAL_RASP_NODE_COUNT);
+    
+    // setup hosts address with this
+    NSMutableString *nodeip = [NSMutableString new];
+    for (NSUInteger i = 0; i < nodeCount; ++i){
+        NSDictionary *node = [self.nodeList objectAtIndex:i];
+        [nodeip appendString:[NSString stringWithFormat:@"%@ ", [node valueForKey:ADDRESS]]];
+    }
+    
+    NSString *basePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
+    NSString *sudoSetup =
+        [NSString
+         stringWithFormat:@"%@/setup/raspberry_sudo_setup.sh %@ %@ %@",
+         basePath,
+         basePath,
+         [[RaspberryManager sharedManager] ethernetInterface].ip4Address,
+         nodeip];
+    
+    PCTask *sudoTask = [PCTask new];
+    sudoTask.taskCommand = [NSString stringWithFormat:@"bash %@",sudoSetup];
+    sudoTask.sudoCommand = YES;
+    sudoTask.delegate = self;
+    self.sudoTask = sudoTask;
+    
+    [sudoTask launchTask];
+}
+
+#pragma mark - IBACTION
+-(IBAction)build:(id)sender {
+
     // update interface status
     [[RaspberryManager sharedManager] refreshInterface];
     
@@ -327,32 +371,14 @@
     }
 
     [self setUIToProceedState];
+    [self.progressLabel setStringValue:@"Prepareing Raspberry PIs to configure..."];
     
     // setup actual raspberry nodes
     [[RaspberryManager sharedManager] setupRaspberryNodes:self.nodeList];
     
-    // setup hosts address with this
-    NSMutableString *nodeip = [NSMutableString new];
-    for (NSUInteger i = 0; i < nodeCount; ++i){
-        NSDictionary *node = [self.nodeList objectAtIndex:i];
-        [nodeip appendString:[NSString stringWithFormat:@"%@ ", [node valueForKey:ADDRESS]]];
-    }
-    
-    NSString *basePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
-    NSString *sudoSetup =
-        [NSString
-         stringWithFormat:@"%@/setup/raspberry_sudo_setup.sh %@ %@ %@",
-         basePath, basePath,
-         [[RaspberryManager sharedManager] ethernetInterface].ip4Address,
-         nodeip];
+    sleep(2);
 
-    PCTask *sudoTask = [PCTask new];
-    sudoTask.taskCommand = [NSString stringWithFormat:@"bash %@",sudoSetup];
-    sudoTask.sudoCommand = YES;
-    sudoTask.delegate = self;
-    self.sudoTask = sudoTask;
-    
-    [sudoTask launchTask];
+    [self startRapidClusterMonitoring];
 }
 
 
