@@ -97,6 +97,7 @@ done
 salt 'pc-node*' state.sls base/setup
 salt 'pc-node*' state.sls base/ssh-login
 salt 'pc-node*' state.sls base/oracle-java8
+rm -rf /pocket/salt/states/base/ssh/*
 
 echo "USER_SETUP_DONE"
 

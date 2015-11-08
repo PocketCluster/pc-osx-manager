@@ -16,6 +16,9 @@ done
 
 salt 'pc-node*' state.sls base/setup
 salt 'pc-node*' state.sls base/ssh-login
+salt 'pc-node*' cmd.run 'resize2fs /dev/mmcblk0p2'
+salt 'pc-node*' cmd.run 'reboot'
+rm -rf /pocket/salt/states/base/ssh/*
 
 echo "USER_SETUP_DONE"
 

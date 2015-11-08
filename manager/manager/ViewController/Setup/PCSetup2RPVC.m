@@ -33,8 +33,12 @@
 - (void)resetUIForFailure;
 - (void)setToNextStage;
 
-- (void)startRapidClusterMonitoring;
-- (void)raspberryUpdateRunningNodeCount:(NSNotification *)aNotification;
+- (void)startConfigWithSudoTask;
+- (void)startRapidClusterMonitoringForSetup;
+- (void)raspberryUpdateRunningNodeCountForSetup:(NSNotification *)aNotification;
+
+- (void)startRapidClusterMonitoringForFinish;
+- (void)raspberryUpdateRunningNodeCountForFinish:(NSNotification *)aNotification;
 
 - (void)removeViewControler;
 @end
@@ -239,11 +243,9 @@
         }
     }
 
-    
     if(self.rpiTask == aPCTask){
-        
-        [self setToNextStage];
-        
+        sleep(2);
+        [self startRapidClusterMonitoringForFinish];
         self.rpiTask = nil;
     }
 }
@@ -290,32 +292,6 @@
 
 
 #pragma mark - Raspberry Management Methods
--(void)startRapidClusterMonitoring {
-    
-    [[[RaspberryManager sharedManager] clusters] makeObjectsPerformSelector:@selector(resetNodeHeartbeat)];
-    [[RaspberryManager sharedManager] rapidRefreshTimerState];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryUpdateRunningNodeCount:) name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT      object:nil];
-
-}
-
--(void)raspberryUpdateRunningNodeCount:(NSNotification *)aNotification {
-    NSUInteger count = [[aNotification.userInfo objectForKey:kPOCKET_CLUSTER_LIVE_NODE_COUNT] unsignedIntegerValue];
-    
-    NSUInteger nodeCount = MIN([self.nodeList count], MAX_TRIAL_RASP_NODE_COUNT);
-    if (count == nodeCount) {
-        
-        [[RaspberryManager sharedManager] haltRefreshTimer];
-
-        WEAK_SELF(self);
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            if (belf) {
-                [belf startConfigWithSudoTask];
-                [[NSNotificationCenter defaultCenter] removeObserver:belf name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
-            }
-        }];
-    }
-}
-
 - (void)startConfigWithSudoTask {
     
     // return if there is no node
@@ -346,6 +322,56 @@
     [sudoTask launchTask];
 }
 
+-(void)startRapidClusterMonitoringForSetup {
+    
+    [[[RaspberryManager sharedManager] clusters] makeObjectsPerformSelector:@selector(resetNodeHeartbeat)];
+    [[RaspberryManager sharedManager] rapidRefreshTimerState];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryUpdateRunningNodeCountForSetup:) name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT      object:nil];
+
+}
+
+-(void)raspberryUpdateRunningNodeCountForSetup:(NSNotification *)aNotification {
+    NSUInteger count = [[aNotification.userInfo objectForKey:kPOCKET_CLUSTER_LIVE_NODE_COUNT] unsignedIntegerValue];
+    
+    NSUInteger nodeCount = MIN([self.nodeList count], MAX_TRIAL_RASP_NODE_COUNT);
+    if (count == nodeCount) {
+        
+        [[RaspberryManager sharedManager] haltRefreshTimer];
+
+        WEAK_SELF(self);
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            if (belf) {
+                [belf startConfigWithSudoTask];
+                [[NSNotificationCenter defaultCenter] removeObserver:belf name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
+            }
+        }];
+    }
+}
+
+- (void)startRapidClusterMonitoringForFinish {
+    [[[RaspberryManager sharedManager] clusters] makeObjectsPerformSelector:@selector(resetNodeHeartbeat)];
+    [[RaspberryManager sharedManager] rapidRefreshTimerState];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryUpdateRunningNodeCountForFinish:) name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT      object:nil];
+}
+
+- (void)raspberryUpdateRunningNodeCountForFinish:(NSNotification *)aNotification {
+    NSUInteger count = [[aNotification.userInfo objectForKey:kPOCKET_CLUSTER_LIVE_NODE_COUNT] unsignedIntegerValue];
+    
+    NSUInteger nodeCount = MIN([self.nodeList count], MAX_TRIAL_RASP_NODE_COUNT);
+    if (count == nodeCount) {
+        
+        [[RaspberryManager sharedManager] haltRefreshTimer];
+        
+        WEAK_SELF(self);
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            if (belf) {
+                [[NSNotificationCenter defaultCenter] removeObserver:belf name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
+                [belf setToNextStage];
+            }
+        }];
+    }
+}
+
 #pragma mark - IBACTION
 -(IBAction)build:(id)sender {
 
@@ -372,13 +398,14 @@
 
     [self setUIToProceedState];
     [self.progressLabel setStringValue:@"Prepareing Raspberry PIs to configure..."];
-    
+    [self.progressBar setDoubleValue:5.0];
+    [self.progressBar displayIfNeeded];
+
     // setup actual raspberry nodes
     [[RaspberryManager sharedManager] setupRaspberryNodes:self.nodeList];
     
     sleep(2);
-
-    [self startRapidClusterMonitoring];
+    [self startRapidClusterMonitoringForSetup];
 }
 
 
