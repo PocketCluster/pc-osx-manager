@@ -297,14 +297,14 @@
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kVAGRANT_MANAGER_UPDATE_RUNNING_VM_COUNT
      object:nil
-     userInfo:@{@"count": [NSNumber numberWithUnsignedInteger:[_vagManager getRunningVmCount]]}];
+     userInfo:@{kPOCKET_CLUSTER_LIVE_NODE_COUNT: [NSNumber numberWithUnsignedInteger:[_vagManager getRunningVmCount]]}];
 }
 
 - (void)updateInstancesCount {
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kVAGRANT_MANAGER_UPDATE_INSTANCES_COUNT
      object:nil
-     userInfo:@{@"count": [NSNumber numberWithUnsignedInteger:[[_vagManager getInstances] count]]}];
+     userInfo:@{kPOCKET_CLUSTER_NODE_COUNT: [NSNumber numberWithUnsignedInteger:[[_vagManager getInstances] count]]}];
 }
 
 - (void)refreshVagrantMachines {

@@ -75,6 +75,8 @@ NSString * const kPCVagrantNetInterface = @"vagrant-net-interface";
 #pragma mark - NOTIFICATION KEY (APPLICATION)
 NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE                    = @"pocketcluster.update-available";
 NSString * const kPOCKET_CLUSTER_UPDATE_VALUE                        = @"pocketcluster.is_update_available";
+NSString * const kPOCKET_CLUSTER_NODE_COUNT                          = @"pocketcluster.node-count";
+NSString * const kPOCKET_CLUSTER_LIVE_NODE_COUNT                     = @"pocketcluster.live-node-count";
 
 #pragma mark - NOTIFICATION KEY (VAGRANT)
 NSString * const kVAGRANT_MANAGER_NOTIFICATION_PREFERENCE_CHANGED    = @"vagrant-manager.notification-preference-changed";

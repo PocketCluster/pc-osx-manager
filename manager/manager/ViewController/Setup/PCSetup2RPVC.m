@@ -8,12 +8,13 @@
 
 #import "PCSetup2RPVC.h"
 
+#import "PCConstants.h"
 #import "PCSetup3VC.h"
 #import "RaspberryManager.h"
 #import "PCProcManager.h"
 #import "PCTask.h"
 #import "Util.h"
-#import "PCConstants.h"
+
 
 @interface PCSetup2RPVC ()<PCTaskDelegate, RaspberryAgentDelegate>
 @property (atomic, strong) NSMutableArray *nodeList;
@@ -77,7 +78,7 @@
     Log(@"%s",__PRETTY_FUNCTION__);
 }
 
-#pragma mark - GCDAsyncUdpSocketDelegate
+#pragma mark - RaspberryAgentDelegate
 
 - (void)didReceiveUnboundedAgentData:(NSDictionary *)anAgentData {
     
@@ -262,6 +263,16 @@
 -(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
     return NO;
 }
+
+
+#pragma mark - Raspberry Management Methods
+-(void)startRapidClusterMonitoring {
+    
+    [[[RaspberryManager sharedManager] clusters] makeObjectsPerformSelector:@selector(resetNodeHeartbeat)];
+    [[RaspberryManager sharedManager] rapidRefreshTimerState];
+
+}
+
 
 #pragma mark - IBACTION
 -(IBAction)build:(id)sender

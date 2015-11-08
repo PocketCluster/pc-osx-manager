@@ -78,10 +78,11 @@ typedef enum PCClusterType {
     ,PC_CLUSTER_TYPE_SIZE
 } PCClusterType;
 
-
 //Notfication Key
 extern NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE;
 extern NSString * const kPOCKET_CLUSTER_UPDATE_VALUE;
+extern NSString * const kPOCKET_CLUSTER_NODE_COUNT;
+extern NSString * const kPOCKET_CLUSTER_LIVE_NODE_COUNT;
 
 extern NSString * const kVAGRANT_MANAGER_NOTIFICATION_PREFERENCE_CHANGED;
 extern NSString * const kVAGRANT_MANAGER_INSTANCE;

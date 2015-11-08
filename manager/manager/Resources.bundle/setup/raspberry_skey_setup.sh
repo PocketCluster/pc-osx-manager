@@ -20,6 +20,8 @@ salt 'pc-node*' state.sls base/ssh-login
 salt 'pc-node*' cmd.run 'sh /repartition.sh'
 salt 'pc-node*' cmd.run 'reboot'
 
+sleep 3
+
 echo "USER_SETUP_DONE"
 
 exit 0

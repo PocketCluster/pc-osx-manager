@@ -69,7 +69,7 @@
 }
 
 -(void)raspberryUpdateRunningNodeCount:(NSNotification *)aNotification {
-    NSUInteger count = [[aNotification.userInfo objectForKey:@"count"] unsignedIntegerValue];
+    NSUInteger count = [[aNotification.userInfo objectForKey:kPOCKET_CLUSTER_LIVE_NODE_COUNT] unsignedIntegerValue];
     if (count) {
         _statusItem.button.image = [NSImage imageNamed:@"status-on"];
     } else {
@@ -79,7 +79,7 @@
 }
 
 -(void)raspberryUpdateNodeCount:(NSNotification *)aNotification {
-    NSUInteger count = [[aNotification.userInfo objectForKey:@"count"] unsignedIntegerValue];
+    NSUInteger count = [[aNotification.userInfo objectForKey:kPOCKET_CLUSTER_NODE_COUNT] unsignedIntegerValue];
     return;
     
     if (count) {

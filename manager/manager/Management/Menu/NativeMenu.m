@@ -384,7 +384,7 @@
 }
 
 - (void)vagrantUpdateRunningVmCount:(NSNotification*)notification {
-    int count = [[notification.userInfo objectForKey:@"count"] intValue];
+    int count = [[notification.userInfo objectForKey:kPOCKET_CLUSTER_LIVE_NODE_COUNT] intValue];
     
     if (count) {
         _statusItem.button.image = [NSImage imageNamed:@"status-on"];
@@ -395,7 +395,7 @@
 }
 
 - (void)vagrantUpdateInstancesCount:(NSNotification*)notification {
-    int count = [[notification.userInfo objectForKey:@"count"] intValue];
+    int count = [[notification.userInfo objectForKey:kPOCKET_CLUSTER_NODE_COUNT] intValue];
     if (count) {
         [_clusterSetupMenuItem setHidden:YES];
     } else {

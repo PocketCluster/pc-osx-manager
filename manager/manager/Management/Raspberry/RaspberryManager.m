@@ -134,14 +134,14 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT
      object:nil
-     userInfo:@{@"count": [NSNumber numberWithUnsignedInteger:[self liveRaspberryCount]]}];
+     userInfo:@{kPOCKET_CLUSTER_LIVE_NODE_COUNT: [NSNumber numberWithUnsignedInteger:[self liveRaspberryCount]]}];
 }
 
 - (void)updateRaspberryCount {
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kRASPBERRY_MANAGER_UPDATE_NODE_COUNT
      object:nil
-     userInfo:@{@"count": [NSNumber numberWithUnsignedInteger:[self raspberryCount]]}];
+     userInfo:@{kPOCKET_CLUSTER_NODE_COUNT: [NSNumber numberWithUnsignedInteger:[self raspberryCount]]}];
 }
 
 - (void)refreshRaspberryClusters {
@@ -161,7 +161,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
         WEAK_SELF(self);
         
         //tell popup controller refreshing has started
-        [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_REFRESHING_STARTED object:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kRASPBERRY_MANAGER_REFRESHING_STARTED object:nil];
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
             //tell manager to refresh all clusters and nodes
