@@ -27,6 +27,10 @@ extern NSString * const kPCPackageVersionMasterDownload;
 extern NSString * const kPCPackageVersionSecondaryDownload;
 extern NSString * const kPCPackageVersionNodeDownload;
 
+extern NSString * const kPCPackageVersionStartScript;
+extern NSString * const kPCPackageVersionStopScript;
+extern NSString * const kPCPackageVersionCmdScript;
+
 @interface PCPackageMeta : NSObject
 
 @property (nonatomic, readonly) NSString *metaVersion;
@@ -50,6 +54,10 @@ extern NSString * const kPCPackageVersionNodeDownload;
 @property (nonatomic, readonly) NSArray<NSString *> *masterDownloadPath;
 @property (nonatomic, readonly) NSArray<NSString *> *secondaryDownloadPath;
 @property (nonatomic, readonly) NSArray<NSString *> *nodeDownloadPath;
+
+@property (nonatomic, readonly) NSArray<NSString *> *startScript;
+@property (nonatomic, readonly) NSArray<NSString *> *stopScript;
+@property (nonatomic, readonly) NSArray<NSString *> *cmdScript;
 
 + (NSURLSessionDataTask *)metaPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block;
 + (NSURLSessionDataTask *)packageFileListOn:(NSString *)aPath WithBlock:(void (^)(NSArray<NSString *> *fileList, NSError *error))block;

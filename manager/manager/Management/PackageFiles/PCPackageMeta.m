@@ -36,8 +36,11 @@ NSString * const kPCPackageVersionMasterDownload     = @"path-download-master";
 NSString * const kPCPackageVersionSecondaryDownload  = @"path-download-secondary";
 NSString * const kPCPackageVersionNodeDownload       = @"path-download-nodes";
 
-static NSString * const kGithubRawFileLinkURL              = @"download_url";
+NSString * const kPCPackageVersionStartScript        = @"script-start";
+NSString * const kPCPackageVersionStopScript         = @"script-stop";
+NSString * const kPCPackageVersionCmdScript          = @"script-cmd";
 
+static NSString * const kGithubRawFileLinkURL              = @"download_url";
 
 @interface PCPackageMeta()
 @property (nonatomic, strong, readwrite) NSString *metaVersion;
@@ -61,8 +64,12 @@ static NSString * const kGithubRawFileLinkURL              = @"download_url";
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *masterDownloadPath;
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *secondaryDownloadPath;
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *nodeDownloadPath;
-@end
 
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *startScript;
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *stopScript;
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *cmdScript;
+
+@end
 
 #pragma mark - PCPACKAGEMETA NSCODING
 @implementation PCPackageMeta (NSCoding)
@@ -88,6 +95,11 @@ static NSString * const kGithubRawFileLinkURL              = @"download_url";
     [aCoder encodeObject:self.masterDownloadPath    forKey:kPCPackageVersionMasterDownload];
     [aCoder encodeObject:self.secondaryDownloadPath forKey:kPCPackageVersionSecondaryDownload];
     [aCoder encodeObject:self.nodeDownloadPath      forKey:kPCPackageVersionNodeDownload];
+    
+    [aCoder encodeObject:self.startScript           forKey:kPCPackageVersionStartScript];
+    [aCoder encodeObject:self.stopScript            forKey:kPCPackageVersionStopScript];
+    [aCoder encodeObject:self.cmdScript             forKey:kPCPackageVersionCmdScript];
+    
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
@@ -115,6 +127,10 @@ static NSString * const kGithubRawFileLinkURL              = @"download_url";
         self.masterDownloadPath    = [aDecoder decodeObjectForKey:kPCPackageVersionMasterDownload];
         self.secondaryDownloadPath = [aDecoder decodeObjectForKey:kPCPackageVersionSecondaryDownload];
         self.nodeDownloadPath      = [aDecoder decodeObjectForKey:kPCPackageVersionNodeDownload];
+        
+        self.startScript           = [aDecoder decodeObjectForKey:kPCPackageVersionStartScript];
+        self.stopScript            = [aDecoder decodeObjectForKey:kPCPackageVersionStopScript];
+        self.cmdScript             = [aDecoder decodeObjectForKey:kPCPackageVersionCmdScript];
         
     }
     return self;
@@ -169,6 +185,10 @@ static NSString * const kGithubRawFileLinkURL              = @"download_url";
                             meta.masterDownloadPath     = [mode objectForKey:kPCPackageVersionMasterDownload];
                             meta.secondaryDownloadPath  = [mode objectForKey:kPCPackageVersionSecondaryDownload];
                             meta.nodeDownloadPath       = [mode objectForKey:kPCPackageVersionNodeDownload];
+
+                            meta.startScript            = [mode objectForKey:kPCPackageVersionStartScript];
+                            meta.stopScript             = [mode objectForKey:kPCPackageVersionStopScript];
+                            meta.cmdScript              = [mode objectForKey:kPCPackageVersionCmdScript];
 
                             [metaList addObject:meta];
                         }
