@@ -71,6 +71,29 @@
 }
 
 - (IBAction)setupRaspberryCluster:(id)sender {
+    
+    
+#if 1
+    NSViewController *vc3c =
+        [[PCSetup3VC alloc]
+         initWithNibName:@"PCSetup3VC"
+         bundle:[NSBundle mainBundle]];
+    
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kDPNotification_addNextViewControllerAndProceed
+     object:self
+     userInfo:@{kDPNotification_key_viewController:vc3c}];
+    
+    return;
+#endif
+    
+    
+    
+    
+    
+    
+    
+    
     NSViewController *vc2r =
         [[PCSetup2RPVC alloc]
          initWithNibName:@"PCSetup2RPVC"

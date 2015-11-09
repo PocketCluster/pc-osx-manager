@@ -12,26 +12,26 @@
 #import "Util.h"
 #import "PCTask.h"
 
-//salt 'pc-node*' state.sls 'base/oracle-java8'
-//salt 'pc-node*' state.sls 'base/openjdk-7'
-
 @interface PCSetup3VC()<PCTaskDelegate>
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
+
+@property (nonatomic, strong) PCTask *javaTask;
 @property (nonatomic, strong) PCTask *saltBaseTask;
 @property (nonatomic, strong) PCTask *saltMasterTask;
 @property (nonatomic, strong) PCTask *saltMinionTask;
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
 
--(void)setUIToProceedState;
--(void)resetUIForFailure;
--(void)setToNextStage;
--(void)setProgMessage:(NSString *)aMessage value:(double)aValue;
+- (void)setUIToProceedState;
+- (void)resetUIForFailure;
+- (void)setToNextStage;
+- (void)setProgMessage:(NSString *)aMessage value:(double)aValue;
 
--(void)startPackageInstall;
--(void)failedPackageInstall;
--(void)finalizeInstallProcess;
+- (void)startPackageInstall;
+- (void)failedPackageInstall;
+- (void)finalizeInstallProcess;
+- (void)downloadMetaFiles;
 @end
 
 @implementation PCSetup3VC
@@ -90,6 +90,7 @@
         [self resetUIForFailure];
         [self.progressLabel setStringValue:@"Installation Error. Please try again."];
         
+        self.javaTask = nil;
         self.saltMasterTask = nil;
         self.saltMinionTask = nil;
         return;
@@ -97,9 +98,17 @@
     
     [self setUIToProceedState];
 
+    if(self.javaTask == aPCTask){
+        WEAK_SELF(self);
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [belf downloadMetaFiles];
+        }];
+        
+        self.javaTask = nil;
+    }
 
     if(self.saltMasterTask == aPCTask ){
-        [self setProgMessage:@"Setting up slave nodes..." value:60.0];
+        [self setProgMessage:@"Setting up slave nodes..." value:80.0];
         
         PCTask *smt = [PCTask new];
         smt.taskCommand = [NSString stringWithFormat:@"salt 'pc-node*' state.sls hadoop/2-4-0/datanode/cluster/init"];
@@ -174,7 +183,7 @@
 #pragma mark - Install Start
 -(void)startPackageInstall {
     [self setToNextStage];
-    [self setProgMessage:@"Setting up master node..." value:20.0];
+    [self setProgMessage:@"Setting up master node..." value:60.0];
     
     PCTask *smt = [PCTask new];
     smt.taskCommand = [NSString stringWithFormat:@"salt 'pc-master' state.sls hadoop/2-4-0/namenode/cluster/init"];
@@ -208,21 +217,12 @@
     [self setToNextStage];
 }
 
-#pragma mark - IBACTION
--(IBAction)install:(id)sender {
-    
+- (void)downloadMetaFiles {
     WEAK_SELF(self);
-    
-    // if there is no package to install, just don't do it.
-    if(![self.packageList count]){
-        return;
-    }
+    [belf setProgMessage:@"Downloading a meta package..." value:40.0];
 
-    [self setUIToProceedState];
-    [self setProgMessage:@"Downloading a meta package..." value:10.0];
-    
     for(PCPackageMeta *meta in belf.packageList){
-
+        
         if(!belf){
             return;
         }
@@ -270,7 +270,7 @@
                                                    }
                                                }];
                                            }
-
+                                           
                                        }
                                        Log(@"%@ %ld",filePath, [belf.downloadFileList count]);
                                    }
@@ -287,7 +287,7 @@
                                downloadFileFromURL:nFile
                                basePath:nBasePath
                                completion:^(NSString *URL, NSURL *filePath) {
-
+                                   
                                    if(belf){
                                        @synchronized(belf.downloadFileList) {
                                            [belf.downloadFileList removeObject:URL];
@@ -316,8 +316,41 @@
          }];
     }
 }
+
+
+#pragma mark - IBACTION
+-(IBAction)install:(id)sender {
+    
+
+    // if there is no package to install, just don't do it.
+    if(![self.packageList count]){
+        return;
+    }
+
+    [self setUIToProceedState];
+    [self setProgMessage:@"Installing Java to slave nodes..." value:10.0];
+
+    // start java installation task
+    PCTask *jt = [PCTask new];
+    PCClusterType t = [[Util getApp] loadClusterType];
+    switch (t) {
+        case PC_CLUTER_VAGRANT:{
+            jt.taskCommand = @"salt 'pc-node*' state.sls 'base/oracle-java8'";
+            break;
+        }
+        case PC_CLUSTER_RASPBERRY: {
+            jt.taskCommand = @"salt 'pc-node*' state.sls 'base/openjdk-7'";
+            break;
+        }
+        case PC_CLUSTER_NONE:
+        default:{
+            [self resetUIForFailure];
+            return;
+        }
+    }
+
+    jt.delegate = self;
+    self.javaTask = jt;
+    [jt launchTask];
+}
 @end
-
-
-
-
