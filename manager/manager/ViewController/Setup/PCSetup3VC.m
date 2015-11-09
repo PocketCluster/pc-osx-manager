@@ -362,6 +362,9 @@
 
     // start java installation task
     PCTask *jt = [PCTask new];
+#if 1
+    jt.taskCommand = @"salt 'pc-node*' state.sls 'base/oracle-java8'";
+#else
     PCClusterType t = [[Util getApp] loadClusterType];
     switch (t) {
         case PC_CLUTER_VAGRANT:{
@@ -378,9 +381,10 @@
             return;
         }
     }
-
+#endif
     jt.delegate = self;
     self.javaTask = jt;
+
     [jt launchTask];
 }
 @end

@@ -11,7 +11,8 @@ mkdir -p /pocket/{conf,log,salt}
 cp -Rf "${BASE_BUNDLE_PATH}"/saltstack/* /pocket/salt/
 
 # copy java state file
-cp -f "${BASE_BUNDLE_PATH}"/java/openjdk-7.sls /pocket/salt/states/base/
+# cp -f "${BASE_BUNDLE_PATH}"/java/openjdk-7.sls /pocket/salt/states/base/
+cp -f "${BASE_BUNDLE_PATH}"/java/oracle-java8.sls /pocket/salt/states/base/
 
 echo "USER_SETUP_STEP_1"
 
