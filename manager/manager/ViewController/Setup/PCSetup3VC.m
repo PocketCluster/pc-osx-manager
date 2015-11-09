@@ -11,6 +11,7 @@
 #import "PCConstants.h"
 #import "Util.h"
 #import "PCTask.h"
+#import "RaspberryManager.h"
 
 @interface PCSetup3VC()<PCTaskDelegate>
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
@@ -112,7 +113,7 @@
         [self setProgMessage:@"Setting up slave nodes..." value:80.0];
 
         PCTask *smt = [PCTask new];
-        smt.taskCommand = [NSString stringWithFormat:@"salt 'pc-node*' state.sls hadoop/2-4-0/datanode/cluster/install"];
+        smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-node*\' state.sls hadoop/2-4-0/datanode/cluster/install"];
         smt.delegate = self;
         self.saltMinionTask = smt;
         [smt launchTask];
@@ -122,8 +123,24 @@
     
     if(self.saltMinionTask == aPCTask){
         
+        NSUInteger nc = 3;
+        PCClusterType t = [[Util getApp] loadClusterType];
+        switch (t) {
+            case PC_CLUTER_VAGRANT:{
+                nc = 3;
+                break;
+            }
+            case PC_CLUSTER_RASPBERRY: {
+                nc = [[[[RaspberryManager sharedManager] clusters] objectAtIndex:0] raspberryCount];
+                break;
+            }
+            case PC_CLUSTER_NONE:
+            default:
+                break;
+        }
+        
         PCTask *smc = [PCTask new];
-        smc.taskCommand = [NSString stringWithFormat:@"salt 'pc-node*' state.sls hadoop/2-4-0/namenode/cluster/complete"];
+        smc.taskCommand = [NSString stringWithFormat:@"salt \'pc-master\' state.sls hadoop/2-4-0/namenode/cluster/complete pillar=\'{numnodes: %ld}\'",nc];
         smc.delegate = self;
         self.saltMasterCompleteTask = smc;
         [smc launchTask];
@@ -200,7 +217,7 @@
     [self setProgMessage:@"Setting up master node..." value:60.0];
     
     PCTask *smt = [PCTask new];
-    smt.taskCommand = [NSString stringWithFormat:@"salt 'pc-master' state.sls hadoop/2-4-0/namenode/cluster/install"];
+    smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-master\' state.sls hadoop/2-4-0/namenode/cluster/install"];
     smt.delegate = self;
     self.saltMasterTask = smt;
     [smt launchTask];
@@ -335,7 +352,6 @@
 #pragma mark - IBACTION
 -(IBAction)install:(id)sender {
     
-
     // if there is no package to install, just don't do it.
     if(![self.packageList count]){
         return;
