@@ -31,6 +31,10 @@ extern NSString * const kPCPackageVersionStartScript;
 extern NSString * const kPCPackageVersionStopScript;
 extern NSString * const kPCPackageVersionCmdScript;
 
+extern NSString * const kPCPackageVersionProcessCheck;
+extern NSString * const kPCPackageVersionResetCmd;
+extern NSString * const kPCPackageVersionUninstallCmd;
+
 @interface PCPackageMeta : NSObject
 
 @property (nonatomic, readonly) NSString *metaVersion;
@@ -58,6 +62,10 @@ extern NSString * const kPCPackageVersionCmdScript;
 @property (nonatomic, readonly) NSArray<NSString *> *startScript;
 @property (nonatomic, readonly) NSArray<NSString *> *stopScript;
 @property (nonatomic, readonly) NSArray<NSString *> *cmdScript;
+
+@property (nonatomic, readonly) NSArray<NSString *> *processCheck;
+@property (nonatomic, readonly) NSArray<NSString *> *resetCommands;
+@property (nonatomic, readonly) NSArray<NSString *> *uninstallCommands;
 
 + (NSURLSessionDataTask *)metaPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block;
 + (NSURLSessionDataTask *)packageFileListOn:(NSString *)aPath WithBlock:(void (^)(NSArray<NSString *> *fileList, NSError *error))block;

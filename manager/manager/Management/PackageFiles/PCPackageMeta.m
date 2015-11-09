@@ -40,7 +40,11 @@ NSString * const kPCPackageVersionStartScript        = @"script-start";
 NSString * const kPCPackageVersionStopScript         = @"script-stop";
 NSString * const kPCPackageVersionCmdScript          = @"script-cmd";
 
-static NSString * const kGithubRawFileLinkURL              = @"download_url";
+NSString * const kPCPackageVersionProcessCheck       = @"check-process";
+NSString * const kPCPackageVersionResetCmd           = @"cmd-reset";
+NSString * const kPCPackageVersionUninstallCmd       = @"cmd-uninstall";
+
+static NSString * const kGithubRawFileLinkURL        = @"download_url";
 
 @interface PCPackageMeta()
 @property (nonatomic, strong, readwrite) NSString *metaVersion;
@@ -68,6 +72,10 @@ static NSString * const kGithubRawFileLinkURL              = @"download_url";
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *startScript;
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *stopScript;
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *cmdScript;
+
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *processCheck;
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *resetCommands;
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *uninstallCommands;
 
 @end
 
@@ -99,7 +107,10 @@ static NSString * const kGithubRawFileLinkURL              = @"download_url";
     [aCoder encodeObject:self.startScript           forKey:kPCPackageVersionStartScript];
     [aCoder encodeObject:self.stopScript            forKey:kPCPackageVersionStopScript];
     [aCoder encodeObject:self.cmdScript             forKey:kPCPackageVersionCmdScript];
-    
+
+    [aCoder encodeObject:self.processCheck          forKey:kPCPackageVersionProcessCheck];
+    [aCoder encodeObject:self.resetCommands         forKey:kPCPackageVersionResetCmd];
+    [aCoder encodeObject:self.uninstallCommands     forKey:kPCPackageVersionUninstallCmd];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
@@ -131,7 +142,10 @@ static NSString * const kGithubRawFileLinkURL              = @"download_url";
         self.startScript           = [aDecoder decodeObjectForKey:kPCPackageVersionStartScript];
         self.stopScript            = [aDecoder decodeObjectForKey:kPCPackageVersionStopScript];
         self.cmdScript             = [aDecoder decodeObjectForKey:kPCPackageVersionCmdScript];
-        
+
+        self.processCheck          = [aDecoder decodeObjectForKey:kPCPackageVersionProcessCheck];
+        self.resetCommands         = [aDecoder decodeObjectForKey:kPCPackageVersionResetCmd];
+        self.uninstallCommands     = [aDecoder decodeObjectForKey:kPCPackageVersionUninstallCmd];
     }
     return self;
 }
@@ -189,6 +203,10 @@ static NSString * const kGithubRawFileLinkURL              = @"download_url";
                             meta.startScript            = [mode objectForKey:kPCPackageVersionStartScript];
                             meta.stopScript             = [mode objectForKey:kPCPackageVersionStopScript];
                             meta.cmdScript              = [mode objectForKey:kPCPackageVersionCmdScript];
+                            
+                            meta.processCheck           = [mode objectForKey:kPCPackageVersionProcessCheck];
+                            meta.resetCommands          = [mode objectForKey:kPCPackageVersionResetCmd];
+                            meta.uninstallCommands      = [mode objectForKey:kPCPackageVersionUninstallCmd];
 
                             [metaList addObject:meta];
                         }
