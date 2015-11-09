@@ -14,13 +14,18 @@ extern NSString * const kPCPackageVersions;
 extern NSString * const kPCPackageVersionNumber;
 extern NSString * const kPCPackageVersionModes;
 extern NSString * const kPCPackageVersionModesType;
-extern NSString * const kPCPackageVersionMasterPath;
-extern NSString * const kPCPackageVersionSecondaryPath;
-extern NSString * const kPCPackageVersionNodePath;
 
-extern NSString * const kPCPackageMetaMasterDownload;
-extern NSString * const kPCPackageMetaSecondaryDownload;
-extern NSString * const kPCPackageMetaNodeDownload;
+extern NSString * const kPCPackageVersionMasterInstallPath;
+extern NSString * const kPCPackageVersionSecondaryInstallPath;
+extern NSString * const kPCPackageVersionNodeInstallPath;
+
+extern NSString * const kPCPackageVersionMasterCompletePath;
+extern NSString * const kPCPackageVersionSecondaryCompletePath;
+extern NSString * const kPCPackageVersionNodeCompletePath;
+
+extern NSString * const kPCPackageVersionMasterDownload;
+extern NSString * const kPCPackageVersionSecondaryDownload;
+extern NSString * const kPCPackageVersionNodeDownload;
 
 @interface PCPackageMeta : NSObject
 
@@ -33,9 +38,18 @@ extern NSString * const kPCPackageMetaNodeDownload;
 @property (nonatomic, readonly) NSArray<NSString *> *ports;
 @property (nonatomic, readonly) NSArray<NSString *> *libraryDependencies;
 @property (nonatomic, readonly) NSArray<NSString *> *bigPkgDependencies;
-@property (nonatomic, readonly) NSArray<NSString *> *masterFilePath;
-@property (nonatomic, readonly) NSArray<NSString *> *secondaryFilePath;
-@property (nonatomic, readonly) NSArray<NSString *> *nodeFilePath;
+
+@property (nonatomic, readonly) NSArray<NSString *> *masterInstallPath;
+@property (nonatomic, readonly) NSArray<NSString *> *secondaryInstallPath;
+@property (nonatomic, readonly) NSArray<NSString *> *nodeInstallPath;
+
+@property (nonatomic, readonly) NSArray<NSString *> *masterCompletePath;
+@property (nonatomic, readonly) NSArray<NSString *> *secondaryCompletePath;
+@property (nonatomic, readonly) NSArray<NSString *> *nodeCompletePath;
+
+@property (nonatomic, readonly) NSArray<NSString *> *masterDownloadPath;
+@property (nonatomic, readonly) NSArray<NSString *> *secondaryDownloadPath;
+@property (nonatomic, readonly) NSArray<NSString *> *nodeDownloadPath;
 
 + (NSURLSessionDataTask *)metaPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block;
 + (NSURLSessionDataTask *)packageFileListOn:(NSString *)aPath WithBlock:(void (^)(NSArray<NSString *> *fileList, NSError *error))block;

@@ -23,13 +23,18 @@ NSString * const kPCPackageVersionModesType         = @"type";
 NSString * const kPCPackageVersionPort              = @"ports";
 NSString * const kPCPackageVersionLibraryDep        = @"dep-lib";
 NSString * const kPCPackageVersionBigpkgDep         = @"dep-bigpkg";
-NSString * const kPCPackageVersionMasterPath        = @"path-masters";
-NSString * const kPCPackageVersionSecondaryPath     = @"path-secondaries";
-NSString * const kPCPackageVersionNodePath          = @"path-nodes";
 
-NSString * const kPCPackageMetaMasterDownload       = @"meta-package.master.download";
-NSString * const kPCPackageMetaSecondaryDownload    = @"meta-package.secondary.download";
-NSString * const kPCPackageMetaNodeDownload         = @"meta-package.node.download";
+NSString * const kPCPackageVersionMasterInstallPath         = @"path-install-master";
+NSString * const kPCPackageVersionSecondaryInstallPath      = @"path-install-secondary";
+NSString * const kPCPackageVersionNodeInstallPath           = @"path-install-nodes";
+
+NSString * const kPCPackageVersionMasterCompletePath        = @"path-complete-master";
+NSString * const kPCPackageVersionSecondaryCompletePath     = @"path-complete-secondary";
+NSString * const kPCPackageVersionNodeCompletePath          = @"path-complete-nodes";
+
+NSString * const kPCPackageVersionMasterDownload     = @"path-download-master";
+NSString * const kPCPackageVersionSecondaryDownload  = @"path-download-secondary";
+NSString * const kPCPackageVersionNodeDownload       = @"path-download-nodes";
 
 static NSString * const kGithubRawFileLinkURL              = @"download_url";
 
@@ -44,9 +49,18 @@ static NSString * const kGithubRawFileLinkURL              = @"download_url";
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *ports;
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *libraryDependencies;
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *bigPkgDependencies;
-@property (nonatomic, strong, readwrite) NSArray<NSString *> *masterFilePath;
-@property (nonatomic, strong, readwrite) NSArray<NSString *> *secondaryFilePath;
-@property (nonatomic, strong, readwrite) NSArray<NSString *> *nodeFilePath;
+
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *masterInstallPath;
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *secondaryInstallPath;
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *nodeInstallPath;
+
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *masterCompletePath;
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *secondaryCompletePath;
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *nodeCompletePath;
+
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *masterDownloadPath;
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *secondaryDownloadPath;
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *nodeDownloadPath;
 @end
 
 
@@ -62,9 +76,18 @@ static NSString * const kGithubRawFileLinkURL              = @"download_url";
     [aCoder encodeObject:self.ports                 forKey:kPCPackageVersionPort];
     [aCoder encodeObject:self.libraryDependencies   forKey:kPCPackageVersionLibraryDep];
     [aCoder encodeObject:self.bigPkgDependencies    forKey:kPCPackageVersionBigpkgDep];
-    [aCoder encodeObject:self.masterFilePath        forKey:kPCPackageVersionMasterPath];
-    [aCoder encodeObject:self.secondaryFilePath     forKey:kPCPackageVersionSecondaryPath];
-    [aCoder encodeObject:self.nodeFilePath          forKey:kPCPackageVersionNodePath];
+    
+    [aCoder encodeObject:self.masterInstallPath     forKey:kPCPackageVersionMasterInstallPath];
+    [aCoder encodeObject:self.secondaryInstallPath  forKey:kPCPackageVersionSecondaryInstallPath];
+    [aCoder encodeObject:self.nodeInstallPath       forKey:kPCPackageVersionNodeInstallPath];
+    
+    [aCoder encodeObject:self.masterCompletePath    forKey:kPCPackageVersionMasterCompletePath];
+    [aCoder encodeObject:self.secondaryCompletePath forKey:kPCPackageVersionSecondaryCompletePath];
+    [aCoder encodeObject:self.nodeCompletePath      forKey:kPCPackageVersionNodeCompletePath];
+
+    [aCoder encodeObject:self.masterDownloadPath    forKey:kPCPackageVersionMasterDownload];
+    [aCoder encodeObject:self.secondaryDownloadPath forKey:kPCPackageVersionSecondaryDownload];
+    [aCoder encodeObject:self.nodeDownloadPath      forKey:kPCPackageVersionNodeDownload];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
@@ -80,9 +103,18 @@ static NSString * const kGithubRawFileLinkURL              = @"download_url";
         self.ports                 = [aDecoder decodeObjectForKey:kPCPackageVersionPort];
         self.libraryDependencies   = [aDecoder decodeObjectForKey:kPCPackageVersionLibraryDep];
         self.bigPkgDependencies    = [aDecoder decodeObjectForKey:kPCPackageVersionBigpkgDep];
-        self.masterFilePath        = [aDecoder decodeObjectForKey:kPCPackageVersionMasterPath];
-        self.secondaryFilePath     = [aDecoder decodeObjectForKey:kPCPackageVersionSecondaryPath];
-        self.nodeFilePath          = [aDecoder decodeObjectForKey:kPCPackageVersionNodePath];
+        
+        self.masterInstallPath     = [aDecoder decodeObjectForKey:kPCPackageVersionMasterInstallPath];
+        self.secondaryInstallPath  = [aDecoder decodeObjectForKey:kPCPackageVersionSecondaryInstallPath];
+        self.nodeInstallPath       = [aDecoder decodeObjectForKey:kPCPackageVersionNodeInstallPath];
+        
+        self.masterCompletePath    = [aDecoder decodeObjectForKey:kPCPackageVersionMasterCompletePath];
+        self.secondaryCompletePath = [aDecoder decodeObjectForKey:kPCPackageVersionSecondaryCompletePath];
+        self.nodeCompletePath      = [aDecoder decodeObjectForKey:kPCPackageVersionNodeCompletePath];
+        
+        self.masterDownloadPath    = [aDecoder decodeObjectForKey:kPCPackageVersionMasterDownload];
+        self.secondaryDownloadPath = [aDecoder decodeObjectForKey:kPCPackageVersionSecondaryDownload];
+        self.nodeDownloadPath      = [aDecoder decodeObjectForKey:kPCPackageVersionNodeDownload];
         
     }
     return self;
@@ -116,18 +148,27 @@ static NSString * const kGithubRawFileLinkURL              = @"download_url";
                         for (NSDictionary *mode in vModes){
 
                             PCPackageMeta *meta = [[PCPackageMeta alloc] init];
-                            meta.metaVersion        = pMeta;
-                            meta.packageName        = pName;
-                            meta.family             = pFami;
-                            meta.packageDescription = [NSString stringWithFormat:@"%@ %@ %@", pDesc, vDesc, [mode objectForKey:kDescription]];
-                            meta.version            = vNum;
-                            meta.modeType           = [mode objectForKey:kPCPackageVersionModesType];
-                            meta.ports              = [mode objectForKey:kPCPackageVersionPort];
-                            meta.libraryDependencies= [mode objectForKey:kPCPackageVersionLibraryDep];
-                            meta.bigPkgDependencies = [mode objectForKey:kPCPackageVersionBigpkgDep];
-                            meta.masterFilePath     = [mode objectForKey:kPCPackageVersionMasterPath];
-                            meta.secondaryFilePath  = [mode objectForKey:kPCPackageVersionSecondaryPath];
-                            meta.nodeFilePath       = [mode objectForKey:kPCPackageVersionNodePath];
+                            meta.metaVersion            = pMeta;
+                            meta.packageName            = pName;
+                            meta.family                 = pFami;
+                            meta.packageDescription     = [NSString stringWithFormat:@"%@ %@ %@", pDesc, vDesc, [mode objectForKey:kDescription]];
+                            meta.version                = vNum;
+                            meta.modeType               = [mode objectForKey:kPCPackageVersionModesType];
+                            meta.ports                  = [mode objectForKey:kPCPackageVersionPort];
+                            meta.libraryDependencies    = [mode objectForKey:kPCPackageVersionLibraryDep];
+                            meta.bigPkgDependencies     = [mode objectForKey:kPCPackageVersionBigpkgDep];
+                            
+                            meta.masterInstallPath      = [mode objectForKey:kPCPackageVersionMasterInstallPath];
+                            meta.secondaryInstallPath   = [mode objectForKey:kPCPackageVersionSecondaryInstallPath];
+                            meta.nodeInstallPath        = [mode objectForKey:kPCPackageVersionNodeInstallPath];
+
+                            meta.masterCompletePath     = [mode objectForKey:kPCPackageVersionMasterCompletePath];
+                            meta.secondaryCompletePath  = [mode objectForKey:kPCPackageVersionSecondaryCompletePath];
+                            meta.nodeCompletePath       = [mode objectForKey:kPCPackageVersionNodeCompletePath];
+
+                            meta.masterDownloadPath     = [mode objectForKey:kPCPackageVersionMasterDownload];
+                            meta.secondaryDownloadPath  = [mode objectForKey:kPCPackageVersionSecondaryDownload];
+                            meta.nodeDownloadPath       = [mode objectForKey:kPCPackageVersionNodeDownload];
 
                             [metaList addObject:meta];
                         }

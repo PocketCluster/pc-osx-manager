@@ -20,6 +20,7 @@
 @property (nonatomic, strong) PCTask *saltBaseTask;
 @property (nonatomic, strong) PCTask *saltMasterTask;
 @property (nonatomic, strong) PCTask *saltMinionTask;
+@property (nonatomic, strong) PCTask *saltMasterCompleteTask;
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
 
@@ -109,9 +110,9 @@
 
     if(self.saltMasterTask == aPCTask ){
         [self setProgMessage:@"Setting up slave nodes..." value:80.0];
-        
+
         PCTask *smt = [PCTask new];
-        smt.taskCommand = [NSString stringWithFormat:@"salt 'pc-node*' state.sls hadoop/2-4-0/datanode/cluster/init"];
+        smt.taskCommand = [NSString stringWithFormat:@"salt 'pc-node*' state.sls hadoop/2-4-0/datanode/cluster/install"];
         smt.delegate = self;
         self.saltMinionTask = smt;
         [smt launchTask];
@@ -121,10 +122,23 @@
     
     if(self.saltMinionTask == aPCTask){
         
-        [self finalizeInstallProcess];
-        
+        PCTask *smc = [PCTask new];
+        smc.taskCommand = [NSString stringWithFormat:@"salt 'pc-node*' state.sls hadoop/2-4-0/namenode/cluster/complete"];
+        smc.delegate = self;
+        self.saltMasterCompleteTask = smc;
+        [smc launchTask];
+
         self.saltMinionTask = nil;
     }
+    
+    
+    if (self.saltMasterCompleteTask == aPCTask) {
+        
+        [self finalizeInstallProcess];
+
+        self.saltMasterCompleteTask = nil;
+    }
+        
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
@@ -186,7 +200,7 @@
     [self setProgMessage:@"Setting up master node..." value:60.0];
     
     PCTask *smt = [PCTask new];
-    smt.taskCommand = [NSString stringWithFormat:@"salt 'pc-master' state.sls hadoop/2-4-0/namenode/cluster/init"];
+    smt.taskCommand = [NSString stringWithFormat:@"salt 'pc-master' state.sls hadoop/2-4-0/namenode/cluster/install"];
     smt.delegate = self;
     self.saltMasterTask = smt;
     [smt launchTask];
@@ -226,9 +240,9 @@
         if(!belf){
             return;
         }
-        
-        NSString *mpath = [meta.masterFilePath objectAtIndex:0];
-        NSString *npath = [meta.nodeFilePath objectAtIndex:0];
+
+        NSString *mpath = [meta.masterDownloadPath objectAtIndex:0];
+        NSString *npath = [meta.nodeDownloadPath objectAtIndex:0];
         NSString *mBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,mpath];
         NSString *nBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,npath];
         
