@@ -175,13 +175,9 @@
     
     [self.rpiManager refreshTimerState];
     
-    
-    [[PCPackageManager sharedManager] loadInstalledPackage];
-    
     [[PCProcManager sharedManager] refreshPackageProcessesStatus];
     
     [[PCProcManager sharedManager] startPackageProcessUpdateTimer];
-    
     
     [self.rpiManager debugOutput];
 }
@@ -204,6 +200,9 @@
 #pragma mark - Monitor Management
 - (void)startRaspberryMonitoring {
     [self.nativeMenu raspberryRegisterNotifications];
+
+    // load installed package list so cluster refresh can match where their target is installed to
+    [[PCPackageManager sharedManager] loadInstalledPackage];
     
     [self.rpiManager startMulticastSocket];
     
@@ -213,14 +212,10 @@
     
     [self.rpiManager refreshTimerState];
     
-    
-    [[PCPackageManager sharedManager] loadInstalledPackage];
-    
     [[PCProcManager sharedManager] refreshPackageProcessesStatus];
     
     [[PCProcManager sharedManager] startPackageProcessUpdateTimer];
 
-    
     [[PCProcManager sharedManager] freshSaltStart];
     
     [[PCProcManager sharedManager] startWebServer];
@@ -234,13 +229,15 @@
     
     [self.nativeMenu vagrantRegisterNotifications];
     
+    // load installed package list so cluster refresh can match where their target is installed to
+    [[PCPackageManager sharedManager] loadInstalledPackage];
+    
     //start initial vagrant machine detection
     [self refreshVagrantMachines];
     
     //start refresh timer if activated in preferences
     [self refreshTimerState];
     
-    // start process refresh timer
     [[PCProcManager sharedManager] refreshPackageProcessesStatus];
     
     [[PCProcManager sharedManager] startPackageProcessUpdateTimer];
