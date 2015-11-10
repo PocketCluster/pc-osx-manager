@@ -174,6 +174,10 @@
     
     [self.rpiManager refreshTimerState];
     
+    [[PCProcManager sharedManager] refreshPackageProcessesStatus];
+    
+    [[PCProcManager sharedManager] startPackageProcessUpdateTimer];
+    
     [self.rpiManager debugOutput];
 }
 
@@ -185,6 +189,11 @@
     
     //start refresh timer if activated in preferences
     [self refreshTimerState];
+
+    // start process refresh timer
+    [[PCProcManager sharedManager] refreshPackageProcessesStatus];
+    
+    [[PCProcManager sharedManager] startPackageProcessUpdateTimer];
 }
 
 #pragma mark - Monitor Management
@@ -199,6 +208,11 @@
     
     [self.rpiManager refreshTimerState];
     
+    // start process refresh timer
+    [[PCProcManager sharedManager] refreshPackageProcessesStatus];
+    
+    [[PCProcManager sharedManager] startPackageProcessUpdateTimer];
+
     [[PCProcManager sharedManager] freshSaltStart];
     
     [[PCProcManager sharedManager] startWebServer];
@@ -218,6 +232,11 @@
     //start refresh timer if activated in preferences
     [self refreshTimerState];
     
+    // start process refresh timer
+    [[PCProcManager sharedManager] refreshPackageProcessesStatus];
+    
+    [[PCProcManager sharedManager] startPackageProcessUpdateTimer];
+
     [[PCProcManager sharedManager] freshSaltStart];
 }
 
@@ -235,6 +254,8 @@
     
     // stop webserver
     [[PCProcManager sharedManager] stopWebServer];
+
+    [[PCProcManager sharedManager] haltPackageProcessRefreshTimer];
     
     [self.nativeMenu deregisterNotifications];
 }
@@ -639,16 +660,7 @@
     }
 }
 
--(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
-    return;
-
-    NSData *data = [aFileHandler availableData];
-    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    Log(@"%s,%@",__PRETTY_FUNCTION__, str);
-}
-
--(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
-    return NO;
-}
+-(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {}
+-(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {return NO;}
 
 @end

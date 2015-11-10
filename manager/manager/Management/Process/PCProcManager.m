@@ -182,34 +182,34 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
 
 #pragma mark - Package Process Manage
 - (void)addPackageProcess:(PCPkgProc *)aPackageProcess {
-    @synchronized(self) {
+    @synchronized(self.packageProcesses) {
         [self.packageProcesses addObject:aPackageProcess];
     }
 }
 
 - (void)removePackageProcess:(PCPkgProc *)aPackageProcess {
-    @synchronized(self) {
+    @synchronized(self.packageProcesses) {
         [self.packageProcesses removeObject:aPackageProcess];
     }
 }
 
 - (void)refreshPackageProcessesStatus {
-    @synchronized(self) {
+    @synchronized(self.packageProcesses) {
         [self.packageProcesses makeObjectsPerformSelector:@selector(refreshProcessStatus)];
     }
 }
 
-- (void)haltRefreshTimer {
+- (void)haltPackageProcessRefreshTimer {
     if (self.refreshTimer) {
         [self.refreshTimer invalidate];
         self.refreshTimer = nil;
     }
 }
 
-- (void)refreshUpdateTimer {
+- (void)startPackageProcessUpdateTimer {
     
-    [self haltRefreshTimer];
-    
+    [self haltPackageProcessRefreshTimer];
+
     self.refreshTimer =
         [NSTimer
          scheduledTimerWithTimeInterval:PROCESS_REFRESH_TIME_INTERVAL

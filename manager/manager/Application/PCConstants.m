@@ -103,4 +103,10 @@ NSString * const kRASPBERRY_MANAGER_NODE_ADDED                       = @"raspber
 NSString * const kRASPBERRY_MANAGER_NODE_REMOVED                     = @"raspberry-manager.node-removed";
 NSString * const kRASPBERRY_MANAGER_NODE_UPDATED                     = @"raspberry-manager.node-updated";
 
+
+// Package Process Notification
+NSString * const kPOCKET_CLUSTER_PACKAGE_PROCESS_STATUS              = @"pocketcluster.package-process-status";
+NSString * const kPOCKET_CLUSTER_PACKAGE_PROCESS_ISALIVE             = @"pocketcluster.package-process-isalive";
+NSString * const kPOCKET_CLUSTER_PACKAGE_IDENTIFICATION              = @"pocketcluster.package-identification";
+
 NSString * const kPOCKET_CLUSTER_SALT_STATE_PATH                     = @"/pocket/salt/states";

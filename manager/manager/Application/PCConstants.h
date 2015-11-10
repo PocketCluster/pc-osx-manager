@@ -107,6 +107,11 @@ extern NSString * const kRASPBERRY_MANAGER_NODE_ADDED;
 extern NSString * const kRASPBERRY_MANAGER_NODE_REMOVED;
 extern NSString * const kRASPBERRY_MANAGER_NODE_UPDATED;
 
+// Package Process Notification
+extern NSString * const kPOCKET_CLUSTER_PACKAGE_PROCESS_STATUS;
+extern NSString * const kPOCKET_CLUSTER_PACKAGE_PROCESS_ISALIVE;
+extern NSString * const kPOCKET_CLUSTER_PACKAGE_IDENTIFICATION;
+
 //Master Salt State Directory
 extern NSString * const kPOCKET_CLUSTER_SALT_STATE_PATH;
 

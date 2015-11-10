@@ -21,6 +21,6 @@
 - (void)addPackageProcess:(PCPkgProc *)aPackageProcess;
 - (void)removePackageProcess:(PCPkgProc *)aPackageProcess;
 - (void)refreshPackageProcessesStatus;
-- (void)haltRefreshTimer;
-- (void)refreshUpdateTimer;
+- (void)haltPackageProcessRefreshTimer;
+- (void)startPackageProcessUpdateTimer;
 @end
