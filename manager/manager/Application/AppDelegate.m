@@ -12,6 +12,7 @@
 
 #import "PCPrefWC.h"
 #import "TaskOutputWindow.h"
+#import "PCPackageManager.h"
 
 #import "VersionComparison.h"
 #import "NativeMenu+Raspberry.h"
@@ -174,9 +175,13 @@
     
     [self.rpiManager refreshTimerState];
     
+    
+    [[PCPackageManager sharedManager] loadInstalledPackage];
+    
     [[PCProcManager sharedManager] refreshPackageProcessesStatus];
     
     [[PCProcManager sharedManager] startPackageProcessUpdateTimer];
+    
     
     [self.rpiManager debugOutput];
 }
@@ -208,11 +213,14 @@
     
     [self.rpiManager refreshTimerState];
     
-    // start process refresh timer
+    
+    [[PCPackageManager sharedManager] loadInstalledPackage];
+    
     [[PCProcManager sharedManager] refreshPackageProcessesStatus];
     
     [[PCProcManager sharedManager] startPackageProcessUpdateTimer];
 
+    
     [[PCProcManager sharedManager] freshSaltStart];
     
     [[PCProcManager sharedManager] startWebServer];

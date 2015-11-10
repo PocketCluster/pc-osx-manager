@@ -7,7 +7,7 @@
 //
 
 #import "PCSetup3VC.h"
-#import "PCPackageMeta.h"
+#import "PCPackageManager.h"
 #import "PCConstants.h"
 #import "Util.h"
 #import "PCTask.h"
@@ -203,6 +203,7 @@
     self.canGoBack = NO;
     [self.installBtn setEnabled:NO];
     [self.circularProgress stopAnimation:nil];
+    [self setProgMessage:@"Installation completed!" value:100.0];
 }
 
 -(void)setProgMessage:(NSString *)aMessage value:(double)aValue {
@@ -244,7 +245,15 @@
             break;
     }
 
-    [self setProgMessage:@"Installation completed!" value:100.0];
+
+    //TODO: this needs to be fixed. the UUID or id should come from cluster itself
+    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    meta.clusterRelation = @"Cluster 1";
+    [[PCPackageManager sharedManager]
+     addInstalledPackage:meta];
+    [[PCPackageManager sharedManager] saveInstalledPackage];
+
+    
     [self setToNextStage];
 }
 

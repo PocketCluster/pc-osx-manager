@@ -26,7 +26,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCPackageManager, sharedManager);
     return self;
 }
 
-- (void)addInstalledPackage:(PCPackageMeta *)aPackage onCluster:(NSString *)aCluster {
+- (void)addInstalledPackage:(PCPackageMeta *)aPackage {
     
     // check if a package with same id and cluster relation exists
     @synchronized(self) {

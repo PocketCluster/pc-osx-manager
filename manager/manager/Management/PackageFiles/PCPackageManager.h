@@ -11,7 +11,7 @@
 @interface PCPackageManager : NSObject
 + (instancetype)sharedManager;
 
-- (void)addInstalledPackage:(PCPackageMeta *)aPackage onCluster:(NSString *)aCluster;
+- (void)addInstalledPackage:(PCPackageMeta *)aPackage;
 - (void)removeInstalledPackage:(PCPackageMeta *)aPackage;
 
 - (void)loadInstalledPackage;
