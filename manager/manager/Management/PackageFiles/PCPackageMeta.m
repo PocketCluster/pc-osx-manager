@@ -12,18 +12,20 @@
 #import "AFURLSessionManager.h"
 #import "PCConstants.h"
 
-NSString * const kPCPackageMetaVersion              = @"pkg-ver";
-NSString * const kDescription                       = @"description";
-NSString * const kPCPackageName                     = @"name";
-NSString * const kPCPackageFamily                   = @"family";
-NSString * const kPCPackageVersions                 = @"versions";
-NSString * const kPCPackageVersionId                = @"pkg-id";
-NSString * const kPCPackageVersionNumber            = @"ver-num";
-NSString * const kPCPackageVersionModes             = @"modes";
-NSString * const kPCPackageVersionModesType         = @"type";
-NSString * const kPCPackageVersionPort              = @"ports";
-NSString * const kPCPackageVersionLibraryDep        = @"dep-lib";
-NSString * const kPCPackageVersionBigpkgDep         = @"dep-bigpkg";
+NSString * const kPCPackageRelatedCluster                   = @"package-cluster-relation";
+
+NSString * const kPCPackageMetaVersion                      = @"pkg-ver";
+NSString * const kDescription                               = @"description";
+NSString * const kPCPackageName                             = @"name";
+NSString * const kPCPackageFamily                           = @"family";
+NSString * const kPCPackageVersions                         = @"versions";
+NSString * const kPCPackageVersionId                        = @"pkg-id";
+NSString * const kPCPackageVersionNumber                    = @"ver-num";
+NSString * const kPCPackageVersionModes                     = @"modes";
+NSString * const kPCPackageVersionModesType                 = @"mode-type";
+NSString * const kPCPackageVersionPort                      = @"ports";
+NSString * const kPCPackageVersionLibraryDep                = @"dep-lib";
+NSString * const kPCPackageVersionBigpkgDep                 = @"dep-bigpkg";
 
 NSString * const kPCPackageVersionMasterInstallPath         = @"path-install-master";
 NSString * const kPCPackageVersionSecondaryInstallPath      = @"path-install-secondary";
@@ -33,19 +35,25 @@ NSString * const kPCPackageVersionMasterCompletePath        = @"path-complete-ma
 NSString * const kPCPackageVersionSecondaryCompletePath     = @"path-complete-secondary";
 NSString * const kPCPackageVersionNodeCompletePath          = @"path-complete-nodes";
 
-NSString * const kPCPackageVersionMasterDownload     = @"path-download-master";
-NSString * const kPCPackageVersionSecondaryDownload  = @"path-download-secondary";
-NSString * const kPCPackageVersionNodeDownload       = @"path-download-nodes";
+NSString * const kPCPackageVersionMasterDownload            = @"path-download-master";
+NSString * const kPCPackageVersionSecondaryDownload         = @"path-download-secondary";
+NSString * const kPCPackageVersionNodeDownload              = @"path-download-nodes";
 
-NSString * const kPCPackageVersionStartScript        = @"script-start";
-NSString * const kPCPackageVersionStopScript         = @"script-stop";
-NSString * const kPCPackageVersionCmdScript          = @"script-cmd";
+NSString * const kPCPackageVersionMasterResetCmd            = @"cmd-reset-master";
+NSString * const kPCPackageVersionSecondaryResetCmd         = @"cmd-reset-secondary";
+NSString * const kPCPackageVersionNodesResetCmd             = @"cmd-reset-nodes";
 
-NSString * const kPCPackageVersionProcessCheck       = @"check-process";
+NSString * const kPCPackageVersionMasterUninstallCmd        = @"cmd-uninstall-master";
+NSString * const kPCPackageVersionSecondaryUninstallCmd     = @"cmd-uninstall-secondary";
+NSString * const kPCPackageVersionNodesUninstallCmd         = @"cmd-uninstall-nodes";
 
-NSString * const kPCPackageRelatedCluster            = @"package-cluster-relation";
+NSString * const kPCPackageVersionStartScript               = @"script-start";
+NSString * const kPCPackageVersionStopScript                = @"script-stop";
+NSString * const kPCPackageVersionCmdScript                 = @"script-cmd";
 
-static NSString * const kGithubRawFileLinkURL        = @"download_url";
+NSString * const kPCPackageVersionProcessCheck              = @"check-process";
+
+static NSString * const kGithubRawFileLinkURL               = @"download_url";
 
 @interface PCPackageMeta()
 
@@ -71,6 +79,14 @@ static NSString * const kGithubRawFileLinkURL        = @"download_url";
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *masterDownloadPath;
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *secondaryDownloadPath;
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *nodeDownloadPath;
+
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *masterResetCmd;
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *secondaryResetCmd;
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *nodeResetCmd;
+
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *masterUninstallCmd;
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *secondaryUninstallCmd;
+@property (nonatomic, strong, readwrite) NSArray<NSString *> *nodeUninstallCmd;
 
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *startScript;
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *stopScript;
@@ -110,6 +126,14 @@ static NSString * const kGithubRawFileLinkURL        = @"download_url";
     [aCoder encodeObject:self.secondaryDownloadPath forKey:kPCPackageVersionSecondaryDownload];
     [aCoder encodeObject:self.nodeDownloadPath      forKey:kPCPackageVersionNodeDownload];
     
+    [aCoder encodeObject:self.masterResetCmd        forKey:kPCPackageVersionMasterResetCmd];
+    [aCoder encodeObject:self.secondaryResetCmd     forKey:kPCPackageVersionSecondaryResetCmd];
+    [aCoder encodeObject:self.nodeResetCmd          forKey:kPCPackageVersionNodesResetCmd];
+    
+    [aCoder encodeObject:self.masterUninstallCmd    forKey:kPCPackageVersionMasterUninstallCmd];
+    [aCoder encodeObject:self.secondaryUninstallCmd forKey:kPCPackageVersionSecondaryUninstallCmd];
+    [aCoder encodeObject:self.nodeUninstallCmd      forKey:kPCPackageVersionNodesUninstallCmd];
+    
     [aCoder encodeObject:self.startScript           forKey:kPCPackageVersionStartScript];
     [aCoder encodeObject:self.stopScript            forKey:kPCPackageVersionStopScript];
     [aCoder encodeObject:self.cmdScript             forKey:kPCPackageVersionCmdScript];
@@ -146,6 +170,14 @@ static NSString * const kGithubRawFileLinkURL        = @"download_url";
         self.masterDownloadPath    = [aDecoder decodeObjectForKey:kPCPackageVersionMasterDownload];
         self.secondaryDownloadPath = [aDecoder decodeObjectForKey:kPCPackageVersionSecondaryDownload];
         self.nodeDownloadPath      = [aDecoder decodeObjectForKey:kPCPackageVersionNodeDownload];
+        
+        self.masterResetCmd        = [aDecoder decodeObjectForKey:kPCPackageVersionMasterResetCmd];
+        self.secondaryResetCmd     = [aDecoder decodeObjectForKey:kPCPackageVersionSecondaryResetCmd];
+        self.nodeResetCmd          = [aDecoder decodeObjectForKey:kPCPackageVersionNodesResetCmd];
+        
+        self.masterUninstallCmd    = [aDecoder decodeObjectForKey:kPCPackageVersionMasterUninstallCmd];
+        self.secondaryUninstallCmd = [aDecoder decodeObjectForKey:kPCPackageVersionSecondaryUninstallCmd];
+        self.nodeUninstallCmd      = [aDecoder decodeObjectForKey:kPCPackageVersionNodesUninstallCmd];
         
         self.startScript           = [aDecoder decodeObjectForKey:kPCPackageVersionStartScript];
         self.stopScript            = [aDecoder decodeObjectForKey:kPCPackageVersionStopScript];
@@ -212,13 +244,19 @@ static NSString * const kGithubRawFileLinkURL        = @"download_url";
                             meta.secondaryDownloadPath  = [mode objectForKey:kPCPackageVersionSecondaryDownload];
                             meta.nodeDownloadPath       = [mode objectForKey:kPCPackageVersionNodeDownload];
 
+                            meta.masterResetCmd         = [mode objectForKey:kPCPackageVersionMasterResetCmd];
+                            meta.secondaryResetCmd      = [mode objectForKey:kPCPackageVersionSecondaryResetCmd];
+                            meta.nodeResetCmd           = [mode objectForKey:kPCPackageVersionNodesResetCmd];
+                            
+                            meta.masterUninstallCmd     = [mode objectForKey:kPCPackageVersionMasterUninstallCmd];
+                            meta.secondaryUninstallCmd  = [mode objectForKey:kPCPackageVersionSecondaryUninstallCmd];
+                            meta.nodeUninstallCmd       = [mode objectForKey:kPCPackageVersionNodesUninstallCmd];
+                            
                             meta.startScript            = [mode objectForKey:kPCPackageVersionStartScript];
                             meta.stopScript             = [mode objectForKey:kPCPackageVersionStopScript];
                             meta.cmdScript              = [mode objectForKey:kPCPackageVersionCmdScript];
                             
                             meta.processCheck           = [mode objectForKey:kPCPackageVersionProcessCheck];
-                            
-                            
 
                             [metaList addObject:meta];
                         }

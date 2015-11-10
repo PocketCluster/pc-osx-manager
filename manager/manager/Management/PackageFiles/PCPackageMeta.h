@@ -5,6 +5,7 @@
 //  Created by Almighty Kim on 11/4/15.
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
+extern NSString * const kPCPackageRelatedCluster;
 
 extern NSString * const kPCPackageMetaVersion;
 extern NSString * const kDescription;
@@ -28,14 +29,19 @@ extern NSString * const kPCPackageVersionMasterDownload;
 extern NSString * const kPCPackageVersionSecondaryDownload;
 extern NSString * const kPCPackageVersionNodeDownload;
 
+extern NSString * const kPCPackageVersionMasterResetCmd;
+extern NSString * const kPCPackageVersionSecondaryResetCmd;
+extern NSString * const kPCPackageVersionNodesResetCmd;
+
+extern NSString * const kPCPackageVersionMasterUninstallCmd;
+extern NSString * const kPCPackageVersionSecondaryUninstallCmd;
+extern NSString * const kPCPackageVersionNodesUninstallCmd;
+
 extern NSString * const kPCPackageVersionStartScript;
 extern NSString * const kPCPackageVersionStopScript;
 extern NSString * const kPCPackageVersionCmdScript;
 
 extern NSString * const kPCPackageVersionProcessCheck;
-
-
-extern NSString * const kPCPackageRelatedCluster;
 
 @interface PCPackageMeta : NSObject
 
@@ -64,6 +70,14 @@ extern NSString * const kPCPackageRelatedCluster;
 @property (nonatomic, readonly) NSArray<NSString *> *masterDownloadPath;
 @property (nonatomic, readonly) NSArray<NSString *> *secondaryDownloadPath;
 @property (nonatomic, readonly) NSArray<NSString *> *nodeDownloadPath;
+
+@property (nonatomic, readonly) NSArray<NSString *> *masterResetCmd;
+@property (nonatomic, readonly) NSArray<NSString *> *secondaryResetCmd;
+@property (nonatomic, readonly) NSArray<NSString *> *nodeResetCmd;
+
+@property (nonatomic, readonly) NSArray<NSString *> *masterUninstallCmd;
+@property (nonatomic, readonly) NSArray<NSString *> *secondaryUninstallCmd;
+@property (nonatomic, readonly) NSArray<NSString *> *nodeUninstallCmd;
 
 @property (nonatomic, readonly) NSArray<NSString *> *startScript;
 @property (nonatomic, readonly) NSArray<NSString *> *stopScript;
