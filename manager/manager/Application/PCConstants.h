@@ -69,6 +69,7 @@ extern NSString * const kRaspberryClusterId;
 extern NSString * const kRaspberryClusterTitle;
 
 extern NSString * const kPCVagrantNetInterface;
+extern NSString * const kPCInstalledPackageCollection;
 
 // --- MONITORING MANAGEMENT
 typedef enum PCClusterType {
@@ -109,7 +110,6 @@ extern NSString * const kRASPBERRY_MANAGER_NODE_UPDATED;
 //Master Salt State Directory
 extern NSString * const kPOCKET_CLUSTER_SALT_STATE_PATH;
 
-
 typedef enum PCLibraryError {
     PC_LIB_JAVA = 25
     ,PC_LIB_BREW
@@ -117,3 +117,4 @@ typedef enum PCLibraryError {
     ,PC_LIB_VAGRANT
 } PCLibraryError;
 
+#define PROCESS_REFRESH_TIME_INTERVAL (5.0)

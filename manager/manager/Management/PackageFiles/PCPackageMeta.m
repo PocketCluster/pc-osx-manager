@@ -17,6 +17,7 @@ NSString * const kDescription                       = @"description";
 NSString * const kPCPackageName                     = @"name";
 NSString * const kPCPackageFamily                   = @"family";
 NSString * const kPCPackageVersions                 = @"versions";
+NSString * const kPCPackageVersionId                = @"pkg-id";
 NSString * const kPCPackageVersionNumber            = @"ver-num";
 NSString * const kPCPackageVersionModes             = @"modes";
 NSString * const kPCPackageVersionModesType         = @"type";
@@ -41,16 +42,18 @@ NSString * const kPCPackageVersionStopScript         = @"script-stop";
 NSString * const kPCPackageVersionCmdScript          = @"script-cmd";
 
 NSString * const kPCPackageVersionProcessCheck       = @"check-process";
-NSString * const kPCPackageVersionResetCmd           = @"cmd-reset";
-NSString * const kPCPackageVersionUninstallCmd       = @"cmd-uninstall";
+
+NSString * const kPCPackageRelatedCluster            = @"package-cluster-relation";
 
 static NSString * const kGithubRawFileLinkURL        = @"download_url";
 
 @interface PCPackageMeta()
+
 @property (nonatomic, strong, readwrite) NSString *metaVersion;
 @property (nonatomic, strong, readwrite) NSString *packageName;
 @property (nonatomic, strong, readwrite) NSArray<NSString*> *family;
 @property (nonatomic, strong, readwrite) NSString *packageDescription;
+@property (nonatomic, strong, readwrite) NSString *packageId;
 @property (nonatomic, strong, readwrite) NSString *version;
 @property (nonatomic, strong, readwrite) NSString *modeType;
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *ports;
@@ -74,18 +77,21 @@ static NSString * const kGithubRawFileLinkURL        = @"download_url";
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *cmdScript;
 
 @property (nonatomic, strong, readwrite) NSArray<NSString *> *processCheck;
-@property (nonatomic, strong, readwrite) NSArray<NSString *> *resetCommands;
-@property (nonatomic, strong, readwrite) NSArray<NSString *> *uninstallCommands;
 
 @end
 
 #pragma mark - PCPACKAGEMETA NSCODING
 @implementation PCPackageMeta (NSCoding)
 - (void)encodeWithCoder:(NSCoder *)aCoder {
+    
+    [aCoder encodeObject:self.clusterRelation       forKey:kPCPackageRelatedCluster];
+    
     [aCoder encodeObject:self.metaVersion           forKey:kPCPackageMetaVersion];
     [aCoder encodeObject:self.packageName           forKey:kPCPackageName];
     [aCoder encodeObject:self.family                forKey:kPCPackageFamily];
     [aCoder encodeObject:self.packageDescription    forKey:kDescription];
+
+    [aCoder encodeObject:self.packageId             forKey:kPCPackageVersionId];
     [aCoder encodeObject:self.version               forKey:kPCPackageVersionNumber];
     [aCoder encodeObject:self.modeType              forKey:kPCPackageVersionModesType];
     [aCoder encodeObject:self.ports                 forKey:kPCPackageVersionPort];
@@ -109,18 +115,20 @@ static NSString * const kGithubRawFileLinkURL        = @"download_url";
     [aCoder encodeObject:self.cmdScript             forKey:kPCPackageVersionCmdScript];
 
     [aCoder encodeObject:self.processCheck          forKey:kPCPackageVersionProcessCheck];
-    [aCoder encodeObject:self.resetCommands         forKey:kPCPackageVersionResetCmd];
-    [aCoder encodeObject:self.uninstallCommands     forKey:kPCPackageVersionUninstallCmd];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
     self = [super init];
     if (self) {
 
+        self.clusterRelation       = [aDecoder decodeObjectForKey:kPCPackageRelatedCluster];
+
         self.metaVersion           = [aDecoder decodeObjectForKey:kPCPackageMetaVersion];
         self.packageName           = [aDecoder decodeObjectForKey:kPCPackageName];
         self.family                = [aDecoder decodeObjectForKey:kPCPackageFamily];
         self.packageDescription    = [aDecoder decodeObjectForKey:kDescription];
+
+        self.packageId             = [aDecoder decodeObjectForKey:kPCPackageVersionId];
         self.version               = [aDecoder decodeObjectForKey:kPCPackageVersionNumber];
         self.modeType              = [aDecoder decodeObjectForKey:kPCPackageVersionModesType];
         self.ports                 = [aDecoder decodeObjectForKey:kPCPackageVersionPort];
@@ -144,8 +152,7 @@ static NSString * const kGithubRawFileLinkURL        = @"download_url";
         self.cmdScript             = [aDecoder decodeObjectForKey:kPCPackageVersionCmdScript];
 
         self.processCheck          = [aDecoder decodeObjectForKey:kPCPackageVersionProcessCheck];
-        self.resetCommands         = [aDecoder decodeObjectForKey:kPCPackageVersionResetCmd];
-        self.uninstallCommands     = [aDecoder decodeObjectForKey:kPCPackageVersionUninstallCmd];
+        
     }
     return self;
 }
@@ -178,10 +185,15 @@ static NSString * const kGithubRawFileLinkURL        = @"download_url";
                         for (NSDictionary *mode in vModes){
 
                             PCPackageMeta *meta = [[PCPackageMeta alloc] init];
+                            
+                            meta.clusterRelation        = @"";
+
                             meta.metaVersion            = pMeta;
                             meta.packageName            = pName;
                             meta.family                 = pFami;
                             meta.packageDescription     = [NSString stringWithFormat:@"%@ %@ %@", pDesc, vDesc, [mode objectForKey:kDescription]];
+
+                            meta.packageId              = [mode objectForKey:kPCPackageVersionId];
                             meta.version                = vNum;
                             meta.modeType               = [mode objectForKey:kPCPackageVersionModesType];
                             meta.ports                  = [mode objectForKey:kPCPackageVersionPort];
@@ -205,8 +217,8 @@ static NSString * const kGithubRawFileLinkURL        = @"download_url";
                             meta.cmdScript              = [mode objectForKey:kPCPackageVersionCmdScript];
                             
                             meta.processCheck           = [mode objectForKey:kPCPackageVersionProcessCheck];
-                            meta.resetCommands          = [mode objectForKey:kPCPackageVersionResetCmd];
-                            meta.uninstallCommands      = [mode objectForKey:kPCPackageVersionUninstallCmd];
+                            
+                            
 
                             [metaList addObject:meta];
                         }

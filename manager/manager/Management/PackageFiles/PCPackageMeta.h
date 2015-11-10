@@ -11,6 +11,7 @@ extern NSString * const kDescription;
 extern NSString * const kPCPackageName;
 extern NSString * const kPCPackageFamily;
 extern NSString * const kPCPackageVersions;
+extern NSString * const kPCPackageVersionId;
 extern NSString * const kPCPackageVersionNumber;
 extern NSString * const kPCPackageVersionModes;
 extern NSString * const kPCPackageVersionModesType;
@@ -32,15 +33,20 @@ extern NSString * const kPCPackageVersionStopScript;
 extern NSString * const kPCPackageVersionCmdScript;
 
 extern NSString * const kPCPackageVersionProcessCheck;
-extern NSString * const kPCPackageVersionResetCmd;
-extern NSString * const kPCPackageVersionUninstallCmd;
+
+
+extern NSString * const kPCPackageRelatedCluster;
 
 @interface PCPackageMeta : NSObject
+
+@property (nonatomic, strong) NSString *clusterRelation;
 
 @property (nonatomic, readonly) NSString *metaVersion;
 @property (nonatomic, readonly) NSString *packageName;
 @property (nonatomic, readonly) NSArray<NSString*> *family;
 @property (nonatomic, readonly) NSString *packageDescription;
+
+@property (nonatomic, readonly) NSString *packageId;
 @property (nonatomic, readonly) NSString *version;
 @property (nonatomic, readonly) NSString *modeType;
 @property (nonatomic, readonly) NSArray<NSString *> *ports;
@@ -64,8 +70,7 @@ extern NSString * const kPCPackageVersionUninstallCmd;
 @property (nonatomic, readonly) NSArray<NSString *> *cmdScript;
 
 @property (nonatomic, readonly) NSArray<NSString *> *processCheck;
-@property (nonatomic, readonly) NSArray<NSString *> *resetCommands;
-@property (nonatomic, readonly) NSArray<NSString *> *uninstallCommands;
+
 
 + (NSURLSessionDataTask *)metaPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block;
 + (NSURLSessionDataTask *)packageFileListOn:(NSString *)aPath WithBlock:(void (^)(NSArray<NSString *> *fileList, NSError *error))block;

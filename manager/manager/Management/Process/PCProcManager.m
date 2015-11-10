@@ -20,6 +20,10 @@
 @property (nonatomic, strong) PCTask *saltMaster;
 @property (nonatomic, strong) PCTask *saltClear;
 
+
+@property (nonatomic, strong) NSMutableArray<PCPkgProc *> *packageProcesses;
+@property (nonatomic, strong) NSTimer *refreshTimer;
+
 -(void)_webServerStart;
 -(void)_webServerStop;
 @end
@@ -33,6 +37,8 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
     
     self = [super init];
     if (self){
+        self.packageProcesses = [NSMutableArray<PCPkgProc *> arrayWithCapacity:0];
+
         GCDWebServer *ws = [[GCDWebServer alloc] init];
         [ws addGETHandlerForBasePath:@"/" directoryPath:WEB_SERVER_ROOT_PATH indexFilename:nil cacheAge:0 allowRangeRequests:YES];
         [ws setDelegate:self];
@@ -171,6 +177,46 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
 }
 
 - (void)webServerDidStop:(GCDWebServer*)server {
+}
+
+
+#pragma mark - Package Process Manage
+- (void)addPackageProcess:(PCPkgProc *)aPackageProcess {
+    @synchronized(self) {
+        [self.packageProcesses addObject:aPackageProcess];
+    }
+}
+
+- (void)removePackageProcess:(PCPkgProc *)aPackageProcess {
+    @synchronized(self) {
+        [self.packageProcesses removeObject:aPackageProcess];
+    }
+}
+
+- (void)refreshPackageProcessesStatus {
+    @synchronized(self) {
+        [self.packageProcesses makeObjectsPerformSelector:@selector(refreshProcessStatus)];
+    }
+}
+
+- (void)haltRefreshTimer {
+    if (self.refreshTimer) {
+        [self.refreshTimer invalidate];
+        self.refreshTimer = nil;
+    }
+}
+
+- (void)refreshUpdateTimer {
+    
+    [self haltRefreshTimer];
+    
+    self.refreshTimer =
+        [NSTimer
+         scheduledTimerWithTimeInterval:PROCESS_REFRESH_TIME_INTERVAL
+         target:self
+         selector:@selector(refreshPackageProcessesStatus)
+         userInfo:nil
+         repeats:YES];
 }
 
 @end

@@ -44,6 +44,12 @@
 		0422D4F61BDA0C2700C5CB33 /* PCTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4F51BDA0C2700C5CB33 /* PCTask.m */; };
 		0422D4F71BDA0C2700C5CB33 /* PCTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4F51BDA0C2700C5CB33 /* PCTask.m */; };
 		0422D4F81BDA0C2700C5CB33 /* PCTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4F51BDA0C2700C5CB33 /* PCTask.m */; };
+		043F05C81BF1139E003B54F5 /* PCPkgProc.m in Sources */ = {isa = PBXBuildFile; fileRef = 043F05C71BF1139E003B54F5 /* PCPkgProc.m */; };
+		043F05C91BF1139E003B54F5 /* PCPkgProc.m in Sources */ = {isa = PBXBuildFile; fileRef = 043F05C71BF1139E003B54F5 /* PCPkgProc.m */; };
+		043F05CA1BF1139E003B54F5 /* PCPkgProc.m in Sources */ = {isa = PBXBuildFile; fileRef = 043F05C71BF1139E003B54F5 /* PCPkgProc.m */; };
+		043F05CD1BF11C92003B54F5 /* PCPackageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 043F05CC1BF11C92003B54F5 /* PCPackageManager.m */; };
+		043F05CE1BF11C92003B54F5 /* PCPackageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 043F05CC1BF11C92003B54F5 /* PCPackageManager.m */; };
+		043F05CF1BF11C92003B54F5 /* PCPackageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 043F05CC1BF11C92003B54F5 /* PCPackageManager.m */; };
 		044071561BE70122005B6E6D /* RaspberryCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071551BE70122005B6E6D /* RaspberryCluster.m */; };
 		044071571BE70122005B6E6D /* RaspberryCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071551BE70122005B6E6D /* RaspberryCluster.m */; };
 		044071581BE70122005B6E6D /* RaspberryCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 044071551BE70122005B6E6D /* RaspberryCluster.m */; };
@@ -317,6 +323,10 @@
 		0422D4E91BDA067100C5CB33 /* TaskOutputWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TaskOutputWindow.xib; sourceTree = "<group>"; };
 		0422D4F41BDA0C2700C5CB33 /* PCTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCTask.h; sourceTree = "<group>"; };
 		0422D4F51BDA0C2700C5CB33 /* PCTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCTask.m; sourceTree = "<group>"; };
+		043F05C61BF1139E003B54F5 /* PCPkgProc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPkgProc.h; sourceTree = "<group>"; };
+		043F05C71BF1139E003B54F5 /* PCPkgProc.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPkgProc.m; sourceTree = "<group>"; };
+		043F05CB1BF11C92003B54F5 /* PCPackageManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPackageManager.h; sourceTree = "<group>"; };
+		043F05CC1BF11C92003B54F5 /* PCPackageManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPackageManager.m; sourceTree = "<group>"; };
 		044071541BE70122005B6E6D /* RaspberryCluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaspberryCluster.h; sourceTree = "<group>"; };
 		044071551BE70122005B6E6D /* RaspberryCluster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RaspberryCluster.m; sourceTree = "<group>"; };
 		0440715A1BE741A0005B6E6D /* MenuDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MenuDelegate.h; sourceTree = "<group>"; };
@@ -954,6 +964,8 @@
 			children = (
 				049622EF1BE778E200FD577A /* PCProcManager.h */,
 				049622F01BE778E200FD577A /* PCProcManager.m */,
+				043F05C61BF1139E003B54F5 /* PCPkgProc.h */,
+				043F05C71BF1139E003B54F5 /* PCPkgProc.m */,
 			);
 			path = Process;
 			sourceTree = "<group>";
@@ -965,6 +977,8 @@
 				04A371D91BEA10FE00554E80 /* PCFormulaClient.m */,
 				04A371DA1BEA10FE00554E80 /* PCPackageMeta.h */,
 				04A371DB1BEA10FE00554E80 /* PCPackageMeta.m */,
+				043F05CB1BF11C92003B54F5 /* PCPackageManager.h */,
+				043F05CC1BF11C92003B54F5 /* PCPackageManager.m */,
 			);
 			path = PackageFiles;
 			sourceTree = "<group>";
@@ -1341,6 +1355,7 @@
 			files = (
 				04A371DD1BEA10FE00554E80 /* PCPackageMeta.m in Sources */,
 				046A361A1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
+				043F05C81BF1139E003B54F5 /* PCPkgProc.m in Sources */,
 				046A368A1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				0440716C1BE741A0005B6E6D /* RaspberryMenuItem.m in Sources */,
 				0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */,
@@ -1361,6 +1376,7 @@
 				04D4073C1BDBC51F00625AD7 /* LinkMACAddress.m in Sources */,
 				0410240C1BE4DA400083D62E /* RaspberryManager.m in Sources */,
 				046A360E1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
+				043F05CD1BF11C92003B54F5 /* PCPackageManager.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
 				0422D4EA1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */,
 				0441A3EF1BD8921600AABD7A /* Util.m in Sources */,
@@ -1426,6 +1442,7 @@
 				046A36151BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
 				0422D4E11BDA04A500C5CB33 /* TaskOutputVC.m in Sources */,
 				04C6019F1BE3B040002389AB /* VagrantMachine.m in Sources */,
+				043F05CE1BF11C92003B54F5 /* PCPackageManager.m in Sources */,
 				046A35D41BD7871B004E0946 /* AboutWindow.m in Sources */,
 				0410240A1BE4DA400083D62E /* Raspberry.m in Sources */,
 				0441A3F51BD892A400AABD7A /* VersionComparison.m in Sources */,
@@ -1441,6 +1458,7 @@
 				046A36211BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
 				04D407431BDBC51F00625AD7 /* PCInterfaceList.m in Sources */,
 				04D407401BDBC51F00625AD7 /* LinkMACVendors.m in Sources */,
+				043F05C91BF1139E003B54F5 /* PCPkgProc.m in Sources */,
 				04F705771BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A368B1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				046A361E1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
@@ -1488,6 +1506,7 @@
 				046A36161BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
 				0422D4E21BDA04A500C5CB33 /* TaskOutputVC.m in Sources */,
 				04C601A01BE3B040002389AB /* VagrantMachine.m in Sources */,
+				043F05CF1BF11C92003B54F5 /* PCPackageManager.m in Sources */,
 				046A35D51BD7871B004E0946 /* AboutWindow.m in Sources */,
 				0410240B1BE4DA400083D62E /* Raspberry.m in Sources */,
 				0441A3F61BD892A400AABD7A /* VersionComparison.m in Sources */,
@@ -1503,6 +1522,7 @@
 				046A36221BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
 				04D407441BDBC51F00625AD7 /* PCInterfaceList.m in Sources */,
 				04D407411BDBC51F00625AD7 /* LinkMACVendors.m in Sources */,
+				043F05CA1BF1139E003B54F5 /* PCPkgProc.m in Sources */,
 				04F705781BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A368C1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				046A361F1BD78AB8004E0946 /* NSString+Contain.m in Sources */,

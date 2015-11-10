@@ -58,7 +58,7 @@ const double BOUNDED_TIMEOUT         = 10.0;
 
 //------ Webserver path
 NSString * const WEB_SERVER_ROOT_PATH = @"/bigpkg/archive";
-const int WEB_SERVER_PORT            = 10120;
+const int WEB_SERVER_PORT             = 10120;
 
 #pragma mark - NSUserDefaults KEYS
 //Raspberry collection
@@ -71,6 +71,7 @@ NSString * const kRaspberryClusterId    = @"raspberryclusterId";
 NSString * const kRaspberryClusterTitle = @"raspberryclusterTitle";
 
 NSString * const kPCVagrantNetInterface = @"vagrant-net-interface";
+NSString * const kPCInstalledPackageCollection = @"installed-package-collection";
 
 #pragma mark - NOTIFICATION KEY (APPLICATION)
 NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE                    = @"pocketcluster.update-available";
