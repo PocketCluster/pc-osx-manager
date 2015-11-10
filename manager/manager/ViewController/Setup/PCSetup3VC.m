@@ -229,7 +229,14 @@
 }
 
 -(void)finalizeInstallProcess {
+    
+    //TODO: this needs to be fixed. the UUID or id should come from cluster itself
+    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    meta.clusterRelation = @"Cluster 1";
 
+    [[PCPackageManager sharedManager] addInstalledPackage:meta];
+    [[PCPackageManager sharedManager] saveInstalledPackage];
+    
     PCClusterType t = [[Util getApp] loadClusterType];
     switch (t) {
         case PC_CLUTER_VAGRANT:{
@@ -244,15 +251,6 @@
         default:
             break;
     }
-
-
-    //TODO: this needs to be fixed. the UUID or id should come from cluster itself
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
-    meta.clusterRelation = @"Cluster 1";
-    [[PCPackageManager sharedManager]
-     addInstalledPackage:meta];
-    [[PCPackageManager sharedManager] saveInstalledPackage];
-
     
     [self setToNextStage];
 }
