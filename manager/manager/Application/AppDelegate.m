@@ -363,6 +363,7 @@
 }
 
 
+#pragma mark - VAGRANT ACTION METHODS
 - (void)runVagrantCustomCommand:(NSString*)command withMachine:(VagrantMachine*)machine {
     NSTask *task = [[NSTask alloc] init];
     [task setLaunchPath:@"/bin/bash"];
