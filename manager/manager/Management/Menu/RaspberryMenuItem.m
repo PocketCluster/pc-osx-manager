@@ -136,6 +136,7 @@
     }
     
     if(self.shutdownTask == aPCTask){
+        [[RaspberryManager sharedManager] refreshRaspberryClusters];
         self.shutdownTask = nil;
     }
 }
@@ -189,7 +190,5 @@
         [self.delegate raspberryMenuItemSSHNode:self];
     }
 }
-
-
 
 @end
