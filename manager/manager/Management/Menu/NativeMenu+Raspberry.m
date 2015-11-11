@@ -80,8 +80,6 @@
 
 -(void)raspberryUpdateNodeCount:(NSNotification *)aNotification {
     NSUInteger count = [[aNotification.userInfo objectForKey:kPOCKET_CLUSTER_NODE_COUNT] unsignedIntegerValue];
-    return;
-    
     if (count) {
         [_clusterSetupMenuItem setHidden:YES];
     } else {

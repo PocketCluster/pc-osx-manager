@@ -9,6 +9,7 @@
 #import "PCPackageMenuItem.h"
 #import "PCConstants.h"
 #import "PCProcManager.h"
+#import "Util.h"
 
 @interface PCPackageMenuItem()<NSMenuDelegate>
 @property (nonatomic, weak) PCPackageMeta *packageMeta;
@@ -122,6 +123,6 @@
 }
 
 - (void)shell {
-    
+    [[Util getApp] runTerminalCommand:[self.packageMeta.cmdScript objectAtIndex:0]];
 }
 @end
