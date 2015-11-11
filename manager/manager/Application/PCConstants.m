@@ -69,6 +69,7 @@ NSString * const kRaspberryCollection   = @"raspberries";
 NSString * const kRaspberryClusterArray = @"raspberryclusterArray";
 NSString * const kRaspberryClusterId    = @"raspberryclusterId";
 NSString * const kRaspberryClusterTitle = @"raspberryclusterTitle";
+NSString * const kRaspberryClusterSwapOn = @"raspberryclusterSwapOn";
 
 NSString * const kPCVagrantNetInterface = @"vagrant-net-interface";
 NSString * const kPCInstalledPackageCollection = @"installed-package-collection";

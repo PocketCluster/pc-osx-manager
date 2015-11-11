@@ -67,6 +67,7 @@ extern NSString * const kRaspberryCollection;
 extern NSString * const kRaspberryClusterArray;
 extern NSString * const kRaspberryClusterId;
 extern NSString * const kRaspberryClusterTitle;
+extern NSString * const kRaspberryClusterSwapOn;
 
 extern NSString * const kPCVagrantNetInterface;
 extern NSString * const kPCInstalledPackageCollection;

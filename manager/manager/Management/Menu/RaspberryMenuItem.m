@@ -9,10 +9,17 @@
 #import "RaspberryMenuItem.h"
 #import "RaspberryManager.h"
 #import "PCPackageMenuItem.h"
+#import "PCTask.h"
+
+@interface RaspberryMenuItem()<PCTaskDelegate>
+
+@property (nonatomic, strong) PCTask *makeSwapTask;
+@property (nonatomic, strong) PCTask *shutdownTask;
+@end
 
 @implementation RaspberryMenuItem{
     NSMenuItem *_instanceHaltMenuItem;
-    NSMenuItem *_sshMenuItem;
+    NSMenuItem *_makeSwapSpaceItem;
     NSMenuItem *_separator;
     NSMutableArray *_packageMenuItems;
 }
@@ -38,16 +45,15 @@
             [_instanceHaltMenuItem.image setTemplate:YES];
             [self.menuItem.submenu addItem:_instanceHaltMenuItem];
         }
-#ifdef SSH_ENABLED
-        if(!_sshMenuItem) {
-            _sshMenuItem = [[NSMenuItem alloc] initWithTitle:@"SSH" action:@selector(sshInstance:) keyEquivalent:@""];
-            _sshMenuItem.target = self;
-            _sshMenuItem.image = [NSImage imageNamed:@"ssh"];
-            [_sshMenuItem.image setTemplate:YES];
-            [self.menuItem.submenu addItem:_sshMenuItem];
-        }
-#endif
 
+        if (![self.rpiCluster swapHasMade] && !_makeSwapSpaceItem){
+            _makeSwapSpaceItem = [[NSMenuItem alloc] initWithTitle:@"Make Swap" action:@selector(makeSwap:) keyEquivalent:@""];
+            _makeSwapSpaceItem.target = self;
+            _makeSwapSpaceItem.image = [NSImage imageNamed:@"status_icon_problem"];
+            //[_makeSwapSpaceItem.image setTemplate:YES];
+            [self.menuItem.submenu addItem:_makeSwapSpaceItem];
+        }
+        
         if(!_separator){
             _separator = [NSMenuItem separatorItem];
             [self.menuItem.submenu addItem:_separator];
@@ -70,24 +76,20 @@
 
             if(runningCount == 0) {
                 self.menuItem.image = [NSImage imageNamed:@"status_icon_off"];
+                [_instanceHaltMenuItem setHidden:YES];
+                if(![self.rpiCluster swapHasMade]){
+                    [_makeSwapSpaceItem setHidden:YES];
+                }
+
             } else {
                 self.menuItem.image = [NSImage imageNamed:@"status_icon_on"];
-            }
-
-            if(runningCount == 0) {
-                [_instanceHaltMenuItem setHidden:YES];
-#ifdef SSH_ENABLED
-                [_sshMenuItem setHidden:YES];
-#endif
+                [_instanceHaltMenuItem setHidden:NO];
+                
+                if(![self.rpiCluster swapHasMade]){
+                    [_makeSwapSpaceItem setHidden:NO];
+                }
             }
             
-            if(runningCount > 0) {
-                [_instanceHaltMenuItem setHidden:NO];
-#ifdef SSH_ENABLED
-                [_sshMenuItem setHidden:NO];
-#endif
-            }
-
             if(runningCount){
                 [_separator setHidden:NO];
                 for(PCPackageMenuItem *item in _packageMenuItems){
@@ -119,10 +121,67 @@
     }
 }
 
+#pragma mark - PCTaskDelegate
+-(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
+
+    if (self.makeSwapTask == aPCTask) {
+
+        [_makeSwapSpaceItem setEnabled:NO];
+        [_makeSwapSpaceItem setHidden:YES];
+        for(PCPackageMenuItem *item in _packageMenuItems) {
+            [item.packageItem setEnabled:YES];
+        }
+        
+        self.makeSwapTask = nil;
+    }
+    
+    if(self.shutdownTask == aPCTask){
+        self.shutdownTask = nil;
+    }
+}
+
+-(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {}
+-(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {return NO;};
+
+
+//TODO: these menus needs to move a managed space!
+- (void)makeSwap:(NSMenuItem *)sender {
+
+    [[NSAlert
+      alertWithMessageText:@"Building swap on Raspberry PI 2 nodes could take up to 20 minutes. Please wait until \'Make Swap\' menu disappear."
+      defaultButton:@"OK"
+      alternateButton:nil
+      otherButton:nil
+      informativeTextWithFormat:@""] runModal];
+    
+    [_makeSwapSpaceItem setEnabled:NO];
+    for(PCPackageMenuItem *item in _packageMenuItems) {
+        [item.packageItem setEnabled:NO];
+    }
+    
+    self.rpiCluster.swapHasMade = YES;
+    [[RaspberryManager sharedManager] saveClusters];
+
+    PCTask *task = [[PCTask alloc] init];
+    task.taskCommand = @"salt \'pc-node*\' cmd.run  \'sh /makefsswap.sh ; reboot\'";
+    task.delegate = self;
+    self.makeSwapTask = task;
+    [task launchTask];
+}
+
 - (void)shutdownAllNode:(NSMenuItem*)sender {
+#if 0
     if (CHECK_DELEGATE_EXECUTION(self.delegate, @protocol(RaspberryMenuItemDelegate), @selector(raspberryMenuItemShutdownAll:))){
         [self.delegate raspberryMenuItemShutdownAll:self];
     }
+#endif
+    
+    PCTask *task = [[PCTask alloc] init];
+    task.taskCommand = @"salt \'pc-node*\' cmd.run  \'shutdown -h now\'";
+    task.delegate = self;
+    self.shutdownTask = task;
+    [task launchTask];
+    
 }
 
 - (void)sshInstance:(NSMenuItem*)sender {
@@ -130,5 +189,7 @@
         [self.delegate raspberryMenuItemSSHNode:self];
     }
 }
+
+
 
 @end

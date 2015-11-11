@@ -26,6 +26,7 @@
         self.title = aTitle;
         self.clusterId = [DeviceSerialNumber UUIDString];
         self.raspberries = [NSMutableArray arrayWithCapacity:0];
+        self.swapHasMade = NO;
     }
     return self;
 }
@@ -38,36 +39,38 @@
         NSString *cid = [aDecoder decodeObjectForKey:kRaspberryClusterId];
         NSString *ttl = [aDecoder decodeObjectForKey:kRaspberryClusterTitle];
         NSArray *rpis = [aDecoder decodeObjectForKey:kRaspberryClusterArray];
-        
+        BOOL swapon   = [[aDecoder decodeObjectForKey:kRaspberryClusterSwapOn] boolValue];
+
         self.clusterId = cid;
         self.raspberries = [rpis mutableCopy];
         if(!ISNULL_STRING(ttl)){
             self.title = ttl;
         }
-        
+        self.swapHasMade = swapon;
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)anEncoder {
-
-    [anEncoder encodeObject:_clusterId forKey:kRaspberryClusterId];
+    [anEncoder encodeObject:_clusterId              forKey:kRaspberryClusterId];
     if(!ISNULL_STRING(_title)){
-        [anEncoder encodeObject:_title forKey:kRaspberryClusterTitle];
+        [anEncoder encodeObject:_title              forKey:kRaspberryClusterTitle];
     }
-    [anEncoder encodeObject:_raspberries forKey:kRaspberryClusterArray];
+    [anEncoder encodeObject:_raspberries            forKey:kRaspberryClusterArray];
+    [anEncoder encodeObject:@(_swapHasMade)         forKey:kRaspberryClusterSwapOn];
 }
 
 - (id)copyWithZone:(NSZone*)zone {
     RaspberryCluster *rpiclsuter = [[[self class] allocWithZone:zone] init];
     
     if(rpiclsuter) {
-        rpiclsuter.clusterId = self.clusterId;
-        rpiclsuter.raspberries = self.raspberries;
+        rpiclsuter.clusterId        = self.clusterId;
+        rpiclsuter.title            = self.title;
+        rpiclsuter.raspberries      = self.raspberries;
+        rpiclsuter.swapHasMade      = self.swapHasMade;
     }
     return rpiclsuter;
 }
-
 
 - (void)updateHeartBeats:(NSString *)aMasterId withSlaveMAC:(NSString *)aSlaveMac forTS:(struct timeval)heartbeat {
     // check heartbeat
