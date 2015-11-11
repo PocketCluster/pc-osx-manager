@@ -120,11 +120,6 @@
         default:
             break;
     }
-
-    
-
-    [self runTerminalCommand:@"source /pocket/conf/hadoop/2.4.0/cluster/conf.bashrc"];
-    
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
