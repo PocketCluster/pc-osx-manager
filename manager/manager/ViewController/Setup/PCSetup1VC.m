@@ -71,9 +71,8 @@
 }
 
 - (IBAction)setupRaspberryCluster:(id)sender {
-    
-    
-#if 1
+
+#if 0
     NSViewController *vc3c =
         [[PCSetup3VC alloc]
          initWithNibName:@"PCSetup3VC"
@@ -86,13 +85,6 @@
     
     return;
 #endif
-    
-    
-    
-    
-    
-    
-    
     
     NSViewController *vc2r =
         [[PCSetup2RPVC alloc]
@@ -142,12 +134,7 @@
     [self setTaskLibChecker:nil];
 }
 
--(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
-}
-
--(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
-    return NO;
-}
-
+-(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {}
+-(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {return NO;}
 
 @end
