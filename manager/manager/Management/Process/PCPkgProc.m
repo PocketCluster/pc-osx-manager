@@ -11,69 +11,82 @@
 #import "PCConstants.h"
 
 @interface PCPkgProc()<PCTaskDelegate>
-@property (strong, nonatomic) PCTask *procCheckTask;
+@property (nonatomic, weak, readwrite) PCPackageMeta *package;
 @property (strong, nonatomic) NSMutableDictionary *procCheckDict;
+@property (strong, nonatomic) PCTask *procCheckTask;
+@property (strong, nonatomic) PCTask *procStartTask;
+@property (strong, nonatomic) PCTask *procStopTask;
 @end
 
 @implementation PCPkgProc{
     BOOL _isAlive;
 }
 @dynamic isAlive;
--(instancetype)init{
+
+- (instancetype)initWithPackageMeta:(PCPackageMeta *)aPackageMeta {
     self = [super init];
     if(self){
         _isAlive = NO;
         self.procCheckDict = nil;
+        self.package = aPackageMeta;
     }
     return self;
 }
 
 #pragma mark - PCTaskDelegate
--(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
-    if(self.procCheckTask){
+- (void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
+
+    if(self.procCheckTask == aPCTask){
+        BOOL isAlive = YES;
+        for(NSString *pn in self.procCheckDict){
+            NSNumber *pls = (NSNumber *)[self.procCheckDict objectForKey:pn];
+            isAlive = (isAlive & [pls boolValue]);
+        }
+        self.procCheckDict = nil;
+        @synchronized(self) {
+            _isAlive = isAlive;
+        }
+        
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:kPOCKET_CLUSTER_PACKAGE_PROCESS_STATUS
+         object:nil
+         userInfo:
+         @{kPOCKET_CLUSTER_PACKAGE_PROCESS_ISALIVE: @(isAlive),
+           kPOCKET_CLUSTER_PACKAGE_IDENTIFICATION:self.package.packageId}];
+        
         self.procCheckTask = nil;
     }
-
-    BOOL isAlive = YES;
-    for(NSString *pn in self.procCheckDict){
-        NSNumber *pls = (NSNumber *)[self.procCheckDict objectForKey:pn];
-        isAlive = (isAlive & [pls boolValue]);
-    }
-    self.procCheckDict = nil;
-    @synchronized(self) {
-        _isAlive = isAlive;
-    }
     
-    [[NSNotificationCenter defaultCenter]
-     postNotificationName:kPOCKET_CLUSTER_PACKAGE_PROCESS_STATUS
-     object:nil
-     userInfo:
-        @{kPOCKET_CLUSTER_PACKAGE_PROCESS_ISALIVE: @(isAlive),
-          kPOCKET_CLUSTER_PACKAGE_IDENTIFICATION:self.package.packageId}];
+    if(self.procStartTask == aPCTask){
+        self.procStartTask = nil;
+    }
+
+    if(self.procStopTask == aPCTask){
+        self.procStopTask = nil;
+    }
 }
 
--(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
+- (void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
+    if(self.procCheckTask == aPCTask){
+        NSData *data = [aFileHandler availableData];
+        NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        
+        NSString *pName = self.package.packageName;
+        NSString *pVer  = self.package.version;
+        NSString *pMode = self.package.modeType;
 
-    NSData *data = [aFileHandler availableData];
-    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-
-//Log(@"STR %@",str);
-    
-    NSString *pName = self.package.packageName;
-    NSString *pVer  = self.package.version;
-    NSString *pMode = self.package.modeType;
-    
-    NSMutableDictionary *pcl = [NSMutableDictionary dictionaryWithDictionary:self.procCheckDict];
-    for (NSString *pkgproc in self.procCheckDict){
-        BOOL ppcheck = [str containsString:pkgproc] & [str containsString:pName] & [str containsString:pVer] & [str containsString:pMode];
-        if(ppcheck){
-            [pcl setValue:@(YES) forKey:pkgproc];
+        NSMutableDictionary *pcl = [NSMutableDictionary dictionaryWithDictionary:self.procCheckDict];
+        for (NSString *pkgproc in self.procCheckDict){
+            BOOL ppcheck = [str containsString:pkgproc] & [str containsString:pName] & [str containsString:pVer] & [str containsString:pMode];
+            if(ppcheck){
+                [pcl setValue:@(YES) forKey:pkgproc];
+            }
         }
+        self.procCheckDict = pcl;
     }
-    self.procCheckDict = pcl;
 }
 
--(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {return NO;}
+- (BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {return NO;}
 
 #pragma mark - Alive
 - (BOOL)isAlive {
@@ -87,7 +100,7 @@
 }
 
 #pragma mark - Instance Methods
--(void)refreshProcessStatus {
+- (void)refreshProcessStatus {
 
     NSMutableDictionary *pcd = [NSMutableDictionary dictionary];
     for(NSString *pn in self.package.processCheck){
@@ -95,13 +108,28 @@
     }
     self.procCheckDict = pcd;
 
-
     PCTask *pct = [PCTask new];
     pct.taskCommand = @"jps -v";
     pct.delegate = self;
     self.procCheckTask = pct;
     
     [pct launchTask];
-    
 }
+
+- (void)startPackageProcess {
+    PCTask *spp = [PCTask new];
+    spp.taskCommand = [NSString stringWithFormat:@"bash %@",[self.package.startScript objectAtIndex:0]];
+    spp.delegate = self;
+    self.procStartTask = spp;
+    [spp launchTask];
+}
+
+- (void)stopPackageProcess {
+    PCTask *spp = [PCTask new];
+    spp.taskCommand = [NSString stringWithFormat:@"bash %@",[self.package.stopScript objectAtIndex:0]];
+    spp.delegate = self;
+    self.procStartTask = spp;
+    [spp launchTask];
+}
+
 @end

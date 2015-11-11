@@ -26,6 +26,9 @@
 
 -(void)_webServerStart;
 -(void)_webServerStop;
+
+- (void)addPackageProcess:(PCPkgProc *)aPackageProcess;
+- (void)removePackageProcess:(PCPkgProc *)aPackageProcess;
 @end
 
 
@@ -181,19 +184,55 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
 
 
 #pragma mark - Package Process Manage
+- (PCPkgProc *)startPackageProcess:(PCPackageMeta *)aMetaPacakge {
+    
+    PCPkgProc *proc = [self findPackageProcess:aMetaPacakge];
+    if(proc != nil){
+        return proc;
+    }
+
+    proc = [[PCPkgProc alloc] initWithPackageMeta:aMetaPacakge];
+    [self addPackageProcess:proc];
+    [proc startPackageProcess];
+    return proc;
+}
+
+- (void)stopPackageProcess:(PCPackageMeta *)aMetaPacakge {
+
+    PCPkgProc *proc = [self findPackageProcess:aMetaPacakge];
+    if(proc != nil){
+        [proc stopPackageProcess];
+        [self removePackageProcess:proc];
+    }
+}
+
 - (void)addPackageProcess:(PCPkgProc *)aPackageProcess {
+    
+    if(aPackageProcess == nil){
+        return;
+    }
+    
     @synchronized(self.packageProcesses) {
         [self.packageProcesses addObject:aPackageProcess];
     }
 }
 
 - (void)removePackageProcess:(PCPkgProc *)aPackageProcess {
+    
+    if(aPackageProcess == nil){
+        return;
+    }
+    
     @synchronized(self.packageProcesses) {
         [self.packageProcesses removeObject:aPackageProcess];
     }
 }
 
 - (PCPkgProc *)findPackageProcess:(PCPackageMeta *)aMetaPackage {
+    
+    if(aMetaPackage == nil){
+        return nil;
+    }
 
     PCPkgProc *proc = nil;
     @synchronized(self.packageProcesses) {

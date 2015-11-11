@@ -83,9 +83,6 @@
 
 - (void)refreshProcStatus {
     PCPkgProc *proc = [[PCProcManager sharedManager] findPackageProcess:self.packageMeta];
-    
-    Log(@"%s %@ %@",__PRETTY_FUNCTION__ ,proc, proc.isAlive?@"ALIVE":@"DEAD");
-    
     if(proc && proc.isAlive){
         _packageItem.image = [NSImage imageNamed:@"status_icon_on"];
         [self.packageStart setHidden:YES];
@@ -102,9 +99,6 @@
 - (void)refreshWithNotification:(NSNotification *)aNotification {
     NSDictionary *infoDict = [aNotification userInfo];
     BOOL isAlive = [[infoDict objectForKey:kPOCKET_CLUSTER_PACKAGE_PROCESS_ISALIVE] boolValue];
-    
-    Log(@"%s %@",__PRETTY_FUNCTION__,isAlive?@"ALIVE":@"DEAD");
-    
     if(isAlive){
         _packageItem.image = [NSImage imageNamed:@"status_icon_on"];
         [self.packageStart setHidden:YES];
@@ -120,11 +114,11 @@
 
 
 - (void)start {
-    
+    [[PCProcManager sharedManager] startPackageProcess:self.packageMeta];
 }
 
 - (void)stop {
-    
+    [[PCProcManager sharedManager] stopPackageProcess:self.packageMeta];
 }
 
 - (void)shell {

@@ -18,9 +18,10 @@
 - (void)startWebServer;
 - (void)stopWebServer;
 
-- (void)addPackageProcess:(PCPkgProc *)aPackageProcess;
-- (void)removePackageProcess:(PCPkgProc *)aPackageProcess;
+- (PCPkgProc *)startPackageProcess:(PCPackageMeta *)aMetaPacakge;
+- (void)stopPackageProcess:(PCPackageMeta *)aMetaPacakge;
 - (PCPkgProc *)findPackageProcess:(PCPackageMeta *)aMetaPackage;
+
 - (void)refreshPackageProcessesStatus;
 - (void)haltPackageProcessRefreshTimer;
 - (void)startPackageProcessUpdateTimer;

@@ -9,8 +9,11 @@
 #import "PCPackageMeta.h"
 
 @interface PCPkgProc : NSObject
-@property (nonatomic, weak) PCPackageMeta *package;
+@property (nonatomic, weak, readonly) PCPackageMeta *package;
 @property (nonatomic, readonly) BOOL isAlive;
--(void)refreshProcessStatus;
 
+- (instancetype)initWithPackageMeta:(PCPackageMeta *)aPackageMeta;
+- (void)refreshProcessStatus;
+- (void)startPackageProcess;
+- (void)stopPackageProcess;
 @end
