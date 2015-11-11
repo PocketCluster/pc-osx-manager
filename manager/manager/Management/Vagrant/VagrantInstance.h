@@ -13,6 +13,7 @@
 @property (readonly) NSString *displayName;
 @property (readonly) NSArray *machines;
 @property (strong, nonatomic) NSString *providerIdentifier;
+@property (nonatomic, strong, readonly) NSArray *relatedPackages;
 
 - (id)initWithPath:(NSString*)path providerIdentifier:(NSString*)providerIdentifier;
 - (id)initWithPath:(NSString*)path displayName:(NSString*)displayName providerIdentifier:(NSString*)providerIdentifier;
@@ -26,4 +27,5 @@
 
 - (NSString*)getPath;
 
+- (void)checkRelatedPackage;
 @end

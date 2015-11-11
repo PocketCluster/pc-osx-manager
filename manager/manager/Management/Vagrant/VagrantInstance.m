@@ -8,6 +8,11 @@
 #import "VagrantInstance.h"
 #import "VagrantManager.h"
 #import "Util.h"
+#import "PCPackageManager.h"
+
+@interface VagrantInstance()
+@property (nonatomic, strong, readwrite) NSArray *relatedPackages;
+@end
 
 @implementation VagrantInstance {
     NSString *_path;
@@ -147,6 +152,15 @@
     }
     
     return count;
+}
+
+- (void)checkRelatedPackage {
+
+    NSString *cr = [NSString stringWithFormat:@"%@-%@-%@",self.providerIdentifier, self.path, self.displayName];
+    self.relatedPackages =
+        [[[PCPackageManager sharedManager] installedPackage]
+         filteredArrayUsingPredicate:
+            [NSPredicate predicateWithFormat:@"(SELF.clusterRelation == %@)",cr]];
 }
 
 @end

@@ -11,7 +11,7 @@
 #import "PCConstants.h"
 
 @interface PCPackageManager()
-@property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *installedPackage;
+@property (nonatomic, strong, readwrite) NSMutableArray<PCPackageMeta *> *installedPackage;
 @end
 
 @implementation PCPackageManager

@@ -17,10 +17,10 @@
 @end
 
 @interface VagrantManager : NSObject
-+ (VagrantManager*)sharedManager;
-
 @property (weak) id<VagrantManagerDelegate> delegate;
 @property (readonly) NSArray *instances;
+
++ (VagrantManager*)sharedManager;
 
 - (NSArray*)getMachinesWithState:(VagrantMachineState)state;
 - (void)registerServiceProvider:(id<VirtualMachineServiceProvider>)provider;
@@ -33,5 +33,5 @@
 
 - (NSString *)vboxInterface;
 - (void)setVboxInterface:(NSString *)aVboxIface;
-
+- (void)refreshInstanceRelatedPackages;
 @end

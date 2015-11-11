@@ -9,6 +9,8 @@
 #import "PCPackageMeta.h"
 
 @interface PCPackageManager : NSObject
+@property (nonatomic, strong, readonly) NSMutableArray<PCPackageMeta *> *installedPackage;
+
 + (instancetype)sharedManager;
 
 - (void)addInstalledPackage:(PCPackageMeta *)aPackage;

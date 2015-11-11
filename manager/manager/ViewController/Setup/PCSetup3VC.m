@@ -11,6 +11,8 @@
 #import "PCConstants.h"
 #import "Util.h"
 #import "PCTask.h"
+
+#import "VagrantManager.h"
 #import "RaspberryManager.h"
 
 @interface PCSetup3VC()<PCTaskDelegate>
@@ -232,18 +234,31 @@
     
     //TODO: this needs to be fixed. the UUID or id should come from cluster itself
     PCPackageMeta *meta = [self.packageList objectAtIndex:0];
-    meta.clusterRelation = @"Cluster 1";
 
-    [[PCPackageManager sharedManager] addInstalledPackage:meta];
-    [[PCPackageManager sharedManager] saveInstalledPackage];
-    
     PCClusterType t = [[Util getApp] loadClusterType];
     switch (t) {
         case PC_CLUTER_VAGRANT:{
+
+            VagrantInstance *instance = [[[VagrantManager sharedManager] getInstances] objectAtIndex:0];
+            NSString *cr = [NSString stringWithFormat:@"%@-%@-%@",instance.providerIdentifier, instance.path, instance.displayName];
+            meta.clusterRelation = cr;
+            
+            // installed package data should be available before registration begins
+            [[PCPackageManager sharedManager] addInstalledPackage:meta];
+            [[PCPackageManager sharedManager] saveInstalledPackage];
+            
             [[Util getApp] startVagrantSetupService];
             break;
         }
         case PC_CLUSTER_RASPBERRY: {
+            
+            RaspberryCluster *cluster = [[[RaspberryManager sharedManager] clusters] objectAtIndex:0];
+            meta.clusterRelation = cluster.clusterId;
+
+            // installed package data should be available before registration begins
+            [[PCPackageManager sharedManager] addInstalledPackage:meta];
+            [[PCPackageManager sharedManager] saveInstalledPackage];
+            
             [[Util getApp] startRaspberrySetupService];
             break;
         }

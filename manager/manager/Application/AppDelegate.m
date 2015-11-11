@@ -344,6 +344,9 @@
             //tell manager to refresh all instances
             [belf.vagManager refreshInstances];
             
+            //TODO: refactor!
+            [belf.vagManager refreshInstanceRelatedPackages];
+            
             dispatch_async(dispatch_get_main_queue(), ^{
                 //tell popup controller refreshing has ended
                 isRefreshingVagrantMachines = NO;

@@ -9,11 +9,13 @@
 #import "RaspberryCluster.h"
 #import "DeviceSerialNumber.h"
 #import "NullStringChecker.h"
+#import "PCPackageManager.h"
 
 @interface RaspberryCluster()
 @property (nonatomic, strong, readwrite) NSString *clusterId;
 @property (nonatomic, strong, readwrite) NSString *title;
 @property (nonatomic, strong, readwrite) NSMutableArray *raspberries;
+@property (nonatomic, strong, readwrite) NSArray *relatedPackages;
 @end
 
 @implementation RaspberryCluster
@@ -142,7 +144,10 @@
 }
 
 - (void)checkCluster {
-    
+    self.relatedPackages =
+        [[[PCPackageManager sharedManager] installedPackage]
+         filteredArrayUsingPredicate:
+            [NSPredicate predicateWithFormat:@"(SELF.clusterRelation == %@)",self.clusterId]];
 }
 
 - (void)resetNodeHeartbeat {

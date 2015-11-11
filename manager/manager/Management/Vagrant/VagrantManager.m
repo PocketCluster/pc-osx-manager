@@ -92,6 +92,8 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(VagrantManager, sharedManager);
     NSMutableArray<VagrantInstance*> *instances = [[NSMutableArray alloc] init];
     NSMutableArray *allPaths = [[NSMutableArray alloc] init];
 
+    //TODO: display name should be editable. beside, Vagrant instance must have an unique id
+    
     //scan vagrant global-status output
     VagrantGlobalStatusScanner *globalStatusScanner = [[VagrantGlobalStatusScanner alloc] init];
     for(NSString *path in [globalStatusScanner getInstancePaths]) {
@@ -231,6 +233,10 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(VagrantManager, sharedManager);
         [[NSUserDefaults standardUserDefaults] setObject:aVboxIface forKey:kPCVagrantNetInterface];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
+}
+
+- (void)refreshInstanceRelatedPackages {
+    [self.instances makeObjectsPerformSelector:@selector(checkRelatedPackage)];
 }
 
 @end
