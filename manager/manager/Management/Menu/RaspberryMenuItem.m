@@ -8,22 +8,13 @@
 
 #import "RaspberryMenuItem.h"
 #import "RaspberryManager.h"
+#import "PCPackageMenuItem.h"
 
 @implementation RaspberryMenuItem{
-    
     NSMenuItem *_instanceHaltMenuItem;
     NSMenuItem *_sshMenuItem;
-
-    NSMutableArray *_nodeMenuItems;
-}
-
-- (id)init {
-    self = [super init];
-    if(self) {
-        _nodeMenuItems = [[NSMutableArray alloc] init];
-    }
-    
-    return self;
+    NSMenuItem *_separator;
+    NSMutableArray *_packageMenuItems;
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
@@ -39,7 +30,7 @@
             [self.menuItem.submenu setAutoenablesItems:NO];
             self.menuItem.submenu.delegate = self;
         }
-        
+
         if(!_instanceHaltMenuItem) {
             _instanceHaltMenuItem = [[NSMenuItem alloc] initWithTitle:@"Stop Cluster" action:@selector(shutdownAllNode:) keyEquivalent:@""];
             _instanceHaltMenuItem.target = self;
@@ -47,7 +38,7 @@
             [_instanceHaltMenuItem.image setTemplate:YES];
             [self.menuItem.submenu addItem:_instanceHaltMenuItem];
         }
-        
+#ifdef SSH_ENABLED
         if(!_sshMenuItem) {
             _sshMenuItem = [[NSMenuItem alloc] initWithTitle:@"SSH" action:@selector(sshInstance:) keyEquivalent:@""];
             _sshMenuItem.target = self;
@@ -55,7 +46,22 @@
             [_sshMenuItem.image setTemplate:YES];
             [self.menuItem.submenu addItem:_sshMenuItem];
         }
+#endif
 
+        if(!_separator){
+            _separator = [NSMenuItem separatorItem];
+            [self.menuItem.submenu addItem:_separator];
+        }
+
+        if (!_packageMenuItems) {
+            _packageMenuItems = [[NSMutableArray<PCPackageMenuItem *> alloc] init];
+            
+            for (PCPackageMeta *meta in self.rpiCluster.relatedPackages){                
+                PCPackageMenuItem *mi = [[PCPackageMenuItem alloc] initWithMetaPackage:meta];
+                [_packageMenuItems addObject:mi];
+                [self.menuItem.submenu addItem:mi.packageItem];
+            }
+        }
         
         NSUInteger runningCount = [self.rpiCluster liveRaspberryCount];
         NSUInteger raspberryCount = [self.rpiCluster raspberryCount];
@@ -70,12 +76,29 @@
 
             if(runningCount == 0) {
                 [_instanceHaltMenuItem setHidden:YES];
+#ifdef SSH_ENABLED
                 [_sshMenuItem setHidden:YES];
+#endif
             }
             
             if(runningCount > 0) {
                 [_instanceHaltMenuItem setHidden:NO];
+#ifdef SSH_ENABLED
                 [_sshMenuItem setHidden:NO];
+#endif
+            }
+
+            if(runningCount){
+                [_separator setHidden:NO];
+                for(PCPackageMenuItem *item in _packageMenuItems){
+                    [item.packageItem setHidden:NO];
+                    [item refreshProcStatus];
+                }
+            }else{
+                [_separator setHidden:YES];
+                for(PCPackageMenuItem *item in _packageMenuItems){
+                    [item.packageItem setHidden:YES];
+                }
             }
             
         } else {
@@ -85,17 +108,15 @@
         
         self.menuItem.title = self.rpiCluster.title;
         
-        //destroy machine menu items
-        for(NSMenuItem *machineItem in _nodeMenuItems) {
-            [self.menuItem.submenu removeItem:machineItem];
-        }
-        
-        [_nodeMenuItems removeAllObjects];
-        
     } else {
+
+        for(PCPackageMenuItem *item in _packageMenuItems) {
+            [self.menuItem.submenu removeItem:item.packageItem];
+            [item destoryMenuItem];
+        }
+        [_packageMenuItems removeAllObjects],_packageMenuItems = nil;
         self.menuItem.submenu = nil;
     }
-    
 }
 
 - (void)shutdownAllNode:(NSMenuItem*)sender {

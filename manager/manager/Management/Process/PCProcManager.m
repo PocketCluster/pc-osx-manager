@@ -193,6 +193,23 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
     }
 }
 
+- (PCPkgProc *)findPackageProcess:(PCPackageMeta *)aMetaPackage {
+
+    PCPkgProc *proc = nil;
+    @synchronized(self.packageProcesses) {
+        for(PCPkgProc *pkg in self.packageProcesses) {
+            
+            // there is only one meta package object at any given time
+            if ( pkg.package == aMetaPackage ) {
+                proc = pkg;
+                break;
+            }
+        }
+    }
+    
+    return proc;
+}
+
 - (void)refreshPackageProcessesStatus {
     @synchronized(self.packageProcesses) {
         [self.packageProcesses makeObjectsPerformSelector:@selector(refreshProcessStatus)];

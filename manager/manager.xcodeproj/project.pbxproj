@@ -44,6 +44,9 @@
 		0422D4F61BDA0C2700C5CB33 /* PCTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4F51BDA0C2700C5CB33 /* PCTask.m */; };
 		0422D4F71BDA0C2700C5CB33 /* PCTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4F51BDA0C2700C5CB33 /* PCTask.m */; };
 		0422D4F81BDA0C2700C5CB33 /* PCTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 0422D4F51BDA0C2700C5CB33 /* PCTask.m */; };
+		043790B71BF30B27003F97DE /* PCPackageMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 043790B61BF30B27003F97DE /* PCPackageMenuItem.m */; };
+		043790B81BF30B27003F97DE /* PCPackageMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 043790B61BF30B27003F97DE /* PCPackageMenuItem.m */; };
+		043790B91BF30B27003F97DE /* PCPackageMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 043790B61BF30B27003F97DE /* PCPackageMenuItem.m */; };
 		043F05C81BF1139E003B54F5 /* PCPkgProc.m in Sources */ = {isa = PBXBuildFile; fileRef = 043F05C71BF1139E003B54F5 /* PCPkgProc.m */; };
 		043F05C91BF1139E003B54F5 /* PCPkgProc.m in Sources */ = {isa = PBXBuildFile; fileRef = 043F05C71BF1139E003B54F5 /* PCPkgProc.m */; };
 		043F05CA1BF1139E003B54F5 /* PCPkgProc.m in Sources */ = {isa = PBXBuildFile; fileRef = 043F05C71BF1139E003B54F5 /* PCPkgProc.m */; };
@@ -323,6 +326,8 @@
 		0422D4E91BDA067100C5CB33 /* TaskOutputWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TaskOutputWindow.xib; sourceTree = "<group>"; };
 		0422D4F41BDA0C2700C5CB33 /* PCTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCTask.h; sourceTree = "<group>"; };
 		0422D4F51BDA0C2700C5CB33 /* PCTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCTask.m; sourceTree = "<group>"; };
+		043790B51BF30B27003F97DE /* PCPackageMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPackageMenuItem.h; sourceTree = "<group>"; };
+		043790B61BF30B27003F97DE /* PCPackageMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPackageMenuItem.m; sourceTree = "<group>"; };
 		043F05C61BF1139E003B54F5 /* PCPkgProc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPkgProc.h; sourceTree = "<group>"; };
 		043F05C71BF1139E003B54F5 /* PCPkgProc.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPkgProc.m; sourceTree = "<group>"; };
 		043F05CB1BF11C92003B54F5 /* PCPackageManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPackageManager.h; sourceTree = "<group>"; };
@@ -631,6 +636,8 @@
 				044071601BE741A0005B6E6D /* NativeMenuItem.m */,
 				044071611BE741A0005B6E6D /* RaspberryMenuItem.h */,
 				044071621BE741A0005B6E6D /* RaspberryMenuItem.m */,
+				043790B51BF30B27003F97DE /* PCPackageMenuItem.h */,
+				043790B61BF30B27003F97DE /* PCPackageMenuItem.m */,
 			);
 			path = Menu;
 			sourceTree = "<group>";
@@ -1397,6 +1404,7 @@
 				046F96041BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
 				046A366C1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
 				04C601B41BE3B0FA002389AB /* VirtualBoxMachineInfo.m in Sources */,
+				043790B71BF30B27003F97DE /* PCPackageMenuItem.m in Sources */,
 				049622F11BE778E200FD577A /* PCProcManager.m in Sources */,
 				04D407391BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
 				041C46AE1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
@@ -1435,6 +1443,7 @@
 				041C46AF1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
 				046A361B1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				0486781D1BCF5FE20071594B /* managerTests.m in Sources */,
+				043790B81BF30B27003F97DE /* PCPackageMenuItem.m in Sources */,
 				046A366D1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
 				044071641BE741A0005B6E6D /* NativeMenu+Raspberry.m in Sources */,
 				044071671BE741A0005B6E6D /* NativeMenu.m in Sources */,
@@ -1499,6 +1508,7 @@
 				041C46B01BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
 				046A361C1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				048678281BCF5FE20071594B /* managerUITests.m in Sources */,
+				043790B91BF30B27003F97DE /* PCPackageMenuItem.m in Sources */,
 				046A366E1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
 				044071651BE741A0005B6E6D /* NativeMenu+Raspberry.m in Sources */,
 				044071681BE741A0005B6E6D /* NativeMenu.m in Sources */,
