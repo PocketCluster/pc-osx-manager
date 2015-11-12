@@ -1694,7 +1694,7 @@
 			baseConfigurationReference = A85F78534743E49932D102D2 /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Mac Developer: xylopia@gmail.com (UP5T97JY43)";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1713,7 +1713,7 @@
 			baseConfigurationReference = 2A807ADE5C21861F3EE80045 /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Mac Developer: xylopia@gmail.com (UP5T97JY43)";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1723,7 +1723,7 @@
 				INFOPLIST_FILE = manager/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.manager;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = PocketCluster;
 			};
 			name = Release;
 		};
