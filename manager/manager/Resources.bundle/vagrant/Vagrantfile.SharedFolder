@@ -21,15 +21,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             node.vm.network :private_network, ip: "10.211.55.2%02d" % i
             node.vm.hostname = "pc-node#{i}"
 
-            node.vm.provision "shell", path: "scripts/setup-nodes.sh"
-            node.vm.provision "shell" do |s|
-                s.path = "scripts/setup-nodes.sh"
-                s.args = "-t #{numNodes}"
-            end
+            # path to save
+            node.vm.synced_folder "/pocket/nodes/pc-node#{i}", "/pocket", id: "vagrant-root",
+                owner: "pocket",
+                group: "pocket",
+                mount_options: ["dmode=755,fmode=644"]
 
-            node.vm.provision "shell", path: "scripts/setup-basic-packages.sh"
-            node.vm.provision "shell", path: "scripts/increase_swap.sh", args: "2048"
-
+            # node for sharing bigdata packages between master and slaves
+            node.vm.synced_folder "/bigpkg", "/bigpkg", id: "vagrant-root",
+                owner: "pocket",
+                group: "pocket",
+                mount_options: ["dmode=755,fmode=644"]
         end
     end
 end

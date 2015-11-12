@@ -1587,8 +1587,8 @@
 		046A36351BD78F52004E0946 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Mac Developer: xylopia@gmail.com (UP5T97JY43)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer: xylopia@gmail.com (UP5T97JY43)";
 				GCC_PREFIX_HEADER = "Askpass/Askpass-Prefix.pch";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1598,8 +1598,8 @@
 		046A36361BD78F52004E0946 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Mac Developer: xylopia@gmail.com (UP5T97JY43)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer: xylopia@gmail.com (UP5T97JY43)";
 				GCC_PREFIX_HEADER = "Askpass/Askpass-Prefix.pch";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";

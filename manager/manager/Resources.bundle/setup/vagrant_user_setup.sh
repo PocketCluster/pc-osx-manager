@@ -19,7 +19,8 @@ cp -f "${BASE_BUNDLE_PATH}"/java/oracle-java8.sls /pocket/salt/states/base/
 cp -Rf "${BASE_BUNDLE_PATH}"/vagrant/* /pocket/boxes/
 
 # vagrant up
-cd /pocket/boxes && $VAGRANT_PATH up 2>&1
+$VAGRANT_PATH plugin install vagrant-vbguest && cd /pocket/boxes && $VAGRANT_PATH up 2>&1
+mv /pocket/boxes/Vagrantfile.SharedFolder /pocket/boxes/Vagrantfile &&  rm -rf /pocket/boxes/scripts && $VAGRANT_PATH reload 2>&1
 
 echo "USER_SETUP_STEP_1"
 
