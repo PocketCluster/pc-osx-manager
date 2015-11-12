@@ -48,6 +48,13 @@ then
     echo "${LOC}" >> $HOME/.ssh/known_hosts
 fi
 
+# pc-master key
+PM="$(ssh-keyscan -t rsa pc-master)"
+if ! grep -Fxq "${PM}" $HOME/.ssh/known_hosts
+then
+    echo "${PM}" >> $HOME/.ssh/known_hosts
+fi
+
 # pc-node{1..3} key
 for i in {1..3}
 do
