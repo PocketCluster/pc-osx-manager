@@ -90,19 +90,4 @@ chmod 600 $HOME/.ssh/*
 # prepare SSH login credential
 cp -f $HOME/.ssh/* /pocket/salt/states/base/ssh/
 
-echo "USER_SETUP_STEP_2"
-
-salt-key -y --accept="pc-master"
-sleep 1
-for i in {1..3}
-do
-    salt-key -y --accept="pc-node${i}"
-done
-
-salt 'pc-node*' state.sls base/setup
-salt 'pc-node*' state.sls base/ssh-login
-rm -rf /pocket/salt/states/base/ssh/*
-
-echo "USER_SETUP_DONE"
-
 exit 0

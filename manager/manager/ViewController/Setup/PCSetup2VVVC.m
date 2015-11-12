@@ -15,12 +15,15 @@
 #import "VagrantManager.h"
 
 @interface PCSetup2VVVC ()<PCTaskDelegate>
+@property (strong, nonatomic) NSDictionary *progDict;
 
 @property (strong, nonatomic) PCTask *vagInitTask;
 @property (strong, nonatomic) PCTask *sudoTask;
 @property (strong, nonatomic) PCTask *saltTask;
 @property (strong, nonatomic) PCTask *userTask;
-@property (strong, nonatomic) NSDictionary *progDict;
+@property (strong, nonatomic) PCTask *skeyTask;
+@property (strong, nonatomic) PCTask *rpiTask;
+
 
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
@@ -32,7 +35,9 @@
 - (void)removeViewControler;
 @end
 
-@implementation PCSetup2VVVC
+@implementation PCSetup2VVVC{
+    BOOL _allNodesDeteceted;
+}
 
 @synthesize canContinue;
 @synthesize canGoBack;
@@ -42,6 +47,9 @@
     self = [super initWithNibName:aNibNameOrNil bundle:aNibBundleOrNil];
     
     if(self){
+        
+        _allNodesDeteceted = NO;
+    
         self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Setting up base configuration...",@10.0]
                            ,@"SUDO_SETUP_DONE":@[@"Finishing configuration...",@20.0]
                            ,@"USER_SETUP_STEP_0":@[@"Starting Vagrant...",@30.0]
@@ -55,13 +63,10 @@
     return self;
 }
 
-
-
 #pragma mark - PCTaskDelegate
-
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
     
-    if(aTask.terminationStatus != 0) {
+    if((aTask.terminationStatus != 0) && (self.skeyTask != aPCTask) && (self.rpiTask != aPCTask)) {
         [self resetUIForFailure];
         [self.progressLabel setStringValue:@"Installation Error. Please try again."];
         
@@ -119,11 +124,56 @@
     
     if(self.userTask == aPCTask){
         
-        [self setToNextStage];
-        
+        PCTask *kt = [PCTask new];
+        kt.taskCommand = @"salt-key -L 2>&1";
+        kt.delegate = self;
+        self.skeyTask = kt;
+        [kt launchTask];
+
         self.userTask = nil;
-        
     }
+    
+    if(self.skeyTask == aPCTask) {
+        
+        if(_allNodesDeteceted){
+
+            NSString *rtcmd =
+                [NSString
+                 stringWithFormat:@"bash %@/setup/vagrant_skey_setup.sh",
+                 [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
+            
+            PCTask *rt = [PCTask new];
+            rt.taskCommand = rtcmd;
+            rt.delegate = self;
+            self.rpiTask = rt;
+            [rt launchTask];
+            
+            self.skeyTask = nil;
+            
+        }else{
+            
+            sleep(1);
+            self.skeyTask = nil;
+            
+            WEAK_SELF(self);
+            [[NSOperationQueue mainQueue]
+             addOperationWithBlock:^{
+                 if(belf) {
+                     PCTask *kt = [PCTask new];
+                     kt.taskCommand = @"salt-key -L 2>&1";
+                     kt.delegate = self;
+                     [belf setSkeyTask:kt];
+                     [kt launchTask];
+                 }
+             }];
+        }
+    }
+
+    if(self.rpiTask == aPCTask){
+        [self setToNextStage];
+        self.rpiTask = nil;
+    }
+
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
@@ -137,6 +187,20 @@ Log(@"%@",str);
     if (self.vagInitTask == aPCTask) {
         [[VagrantManager sharedManager] setVboxInterface:str];
         return;
+    }
+    
+    if (self.skeyTask == aPCTask){
+        @autoreleasepool {
+            BOOL allNodesExist = YES;
+            NSArray *ra = [str componentsSeparatedByString:@"\n"];
+            allNodesExist = (allNodesExist & [ra containsObject:@"pc-master"]);
+            NSUInteger count = 3;
+            for (NSUInteger i = 1; i <= count; i++){
+                NSString *nm = [NSString stringWithFormat:@"pc-node%ld",i];
+                allNodesExist = (allNodesExist & [ra containsObject:nm]);
+            }
+            _allNodesDeteceted = allNodesExist;
+        }
     }
     
     NSArray *p = nil;
