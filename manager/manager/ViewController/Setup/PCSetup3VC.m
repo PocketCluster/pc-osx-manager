@@ -161,10 +161,12 @@
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
+#if 0
     NSData *data = [aFileHandler availableData];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
     Log(@"STR %@",str);
+#endif
 }
 
 -(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
@@ -325,7 +327,6 @@
                                            }
                                            
                                        }
-                                       Log(@"%@ %ld",filePath, [belf.downloadFileList count]);
                                    }
                                    
                                }
@@ -354,7 +355,6 @@
                                            }
                                            
                                        }
-                                       Log(@"%@ %ld",filePath, [belf.downloadFileList count]);
                                    }
                                    
                                }

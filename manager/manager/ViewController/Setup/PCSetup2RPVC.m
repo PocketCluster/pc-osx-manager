@@ -254,8 +254,6 @@
     
     NSData *data = [aFileHandler availableData];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    
-    Log(@"%@",str);
 
     if (self.skeyTask == aPCTask){
         @autoreleasepool {

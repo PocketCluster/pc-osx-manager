@@ -54,8 +54,6 @@
 
 - (void)windowWillClose:(NSNotification *)notification {
     
-    Log(@"%s", __PRETTY_FUNCTION__);
-    
     @synchronized(self) {
         _isClosed = YES;
     }

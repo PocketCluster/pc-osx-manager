@@ -15,10 +15,6 @@
 
 @implementation DPSetupWC
 
-- (void)dealloc {
-    Log(@"%s",__PRETTY_FUNCTION__);
-}
-
 - (void)windowDidLoad {
     [super windowDidLoad];
     
