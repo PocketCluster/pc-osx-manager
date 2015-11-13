@@ -1,9 +1,10 @@
-import subprocess
+import subprocess, time
 
 if __name__ == "__main__":
 
     lve = subprocess.call("VBoxManage list vms > /dev/null", shell=True)
     if lve:exit(lve)
+    time.sleep(3)
 
     vboxnet = dict()
     for iface in [il.strip() for il in subprocess.check_output("ifconfig -l", shell=True).split(" ")]:
