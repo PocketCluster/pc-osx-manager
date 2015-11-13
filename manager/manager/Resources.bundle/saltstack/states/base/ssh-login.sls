@@ -16,7 +16,8 @@ config:
     - template: jinja
 
 authorized_keys:
-  file.append:
+  file:
+    - managed
     - name: /home/pocket/.ssh/authorized_keys
     - source: salt://base/ssh/authorized_keys
     - user: pocket
