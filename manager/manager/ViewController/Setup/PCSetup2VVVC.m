@@ -181,7 +181,7 @@
     NSData *data = [aFileHandler availableData];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
-Log(@"%@",str);
+    //Log(@"%@",str);
     
     // save vagrant interface
     if (self.vagInitTask == aPCTask) {
