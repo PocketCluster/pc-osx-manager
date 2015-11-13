@@ -103,11 +103,15 @@
     [self setUIToProceedState];
 
     if(self.javaTask == aPCTask){
+
+#if 0
         WEAK_SELF(self);
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
             [belf downloadMetaFiles];
         }];
-        
+#else
+        [self performSelectorOnMainThread:@selector(downloadMetaFiles) withObject:nil waitUntilDone:NO];
+#endif
         self.javaTask = nil;
     }
 
@@ -319,11 +323,17 @@
                                            [belf.downloadFileList removeObject:URL];
                                            
                                            if(![belf.downloadFileList count]){
+
+#if 1
+                                               [belf performSelectorOnMainThread:@selector(startPackageInstall) withObject:nil waitUntilDone:NO];
+#else
                                                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
                                                    if(belf){
                                                        [belf startPackageInstall];
                                                    }
                                                }];
+#endif
+
                                            }
                                            
                                        }
@@ -347,11 +357,15 @@
                                            [belf.downloadFileList removeObject:URL];
                                            
                                            if(![belf.downloadFileList count]){
+#if 1
+                                               [belf performSelectorOnMainThread:@selector(startPackageInstall) withObject:nil waitUntilDone:NO];
+#else
                                                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
                                                    if(belf){
                                                        [belf startPackageInstall];
                                                    }
                                                }];
+#endif
                                            }
                                            
                                        }

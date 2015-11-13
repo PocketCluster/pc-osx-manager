@@ -88,9 +88,13 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
 
 - (void)freshSaltStart {
 
+#if 0
     if(self.saltMinion != nil && self.saltMaster != nil){
         return;
     }
+#else
+    [self stopSalt];
+#endif
     
     PCTask *t = [PCTask new];
     t.taskCommand = @"ps -efw | grep salt | grep -v grep | awk '{print $2}' | xargs kill";
