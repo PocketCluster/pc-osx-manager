@@ -262,6 +262,7 @@
 
     [[Util getApp] stopBasicServices];
     [[Util getApp] setClusterType:PC_CLUTER_VAGRANT];
+    [[VagrantManager sharedManager] refreshInstances];
 
     NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
     [[NSNotificationCenter defaultCenter]

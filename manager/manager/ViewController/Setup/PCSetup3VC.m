@@ -241,7 +241,6 @@
     switch (t) {
         case PC_CLUTER_VAGRANT:{
 
-            [[VagrantManager sharedManager] refreshInstances];
             VagrantInstance *instance = [[[VagrantManager sharedManager] getInstances] objectAtIndex:0];
             NSString *cr = [NSString stringWithFormat:@"%@-%@-%@",instance.providerIdentifier, instance.path, instance.displayName];
             meta.clusterRelation = cr;
