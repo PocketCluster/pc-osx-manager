@@ -19,6 +19,10 @@ authorized_keys:
   file.append:
     - name: /home/pocket/.ssh/authorized_keys
     - source: salt://base/ssh/authorized_keys
+    - user: pocket
+    - group: pocket
+    - mode: 600
+    - template: jinja
 
 id_rsa:
   file:
