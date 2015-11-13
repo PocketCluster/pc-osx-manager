@@ -87,7 +87,8 @@ typedef enum {
 #pragma mark - VIEW MANAGEMENT
 - (NSView *)initialiseContentViewForRect:(NSRect)contentRect {
 	NSView *contentView = [[NSView alloc] initWithFrame:contentRect];
-	
+
+#if 0
 	_cancelButton = [[NSButton alloc] initWithFrame:NSMakeRect(145, 13, 97, 32)];
 	[_cancelButton setBezelStyle:NSRoundedBezelStyle];
 	[_cancelButton setTarget:self];
@@ -95,7 +96,8 @@ typedef enum {
 	[_cancelButton setTitle:@"Cancel"];
 	[_cancelButton setFont:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSRegularControlSize]]];
 	[contentView addSubview:_cancelButton];
-	
+#endif
+    
 	_backButton = [[NSButton alloc] initWithFrame:NSMakeRect(372, 13, 97, 32)];
 	[_backButton setBezelStyle:NSRoundedBezelStyle];
 	[_backButton setTarget:self];

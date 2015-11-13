@@ -12,6 +12,7 @@
 
 - (void)windowWillClose:(NSNotification *)notification {
     [[Util getApp] removeOpenWindow:self];
+    [[NSApplication sharedApplication] endSheet:self.window returnCode:0];
     self.isClosed = YES;
 }
 
