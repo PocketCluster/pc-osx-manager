@@ -47,6 +47,7 @@ extern NSString * const SLAVE_LOOKUP_AGENT;
 extern NSString * const SLAVE_NODE_MACADDR;
 extern NSString * const SLAVE_NODE_NAME;
 extern NSString * const SLAVE_TIMEZONE;
+extern NSString * const SLAVE_CLUSTER_MEMBERS;
 
 //------ network configuration ------
 extern NSString * const POCKETCAST_GROUP;

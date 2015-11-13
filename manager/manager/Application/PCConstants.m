@@ -48,6 +48,7 @@ NSString * const SLAVE_LOOKUP_AGENT  = @"pc_sl_la";
 NSString * const SLAVE_NODE_MACADDR  = @"pc_sl_ma";
 NSString * const SLAVE_NODE_NAME     = @"pc_sl_nm";
 NSString * const SLAVE_TIMEZONE      = @"pc_sl_tz";
+NSString * const SLAVE_CLUSTER_MEMBERS = @"pc_sl_cl";
 
 //------ network configuration ------
 NSString * const POCKETCAST_GROUP    = @"239.193.127.127";
