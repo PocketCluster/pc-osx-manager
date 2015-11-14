@@ -395,9 +395,6 @@
 
 - (void)vagrantUpdateInstancesCount:(NSNotification*)notification {
     int count = [[notification.userInfo objectForKey:kPOCKET_CLUSTER_NODE_COUNT] intValue];
-    
-    return;
-    
     if (count) {
         [_clusterSetupMenuItem setHidden:YES];
     } else {

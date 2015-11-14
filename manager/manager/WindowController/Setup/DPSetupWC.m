@@ -18,6 +18,8 @@
 - (void)windowDidLoad {
     [super windowDidLoad];
     
+    WEAK_SELF(self);
+    
     DPSetupWindow *setupFlow = (DPSetupWindow *)[self window];
     [setupFlow setTitle:@"New Cluster"];
 
@@ -33,14 +35,19 @@
     [setupFlow
      initWithViewControllers:@[vc1]
      completionHandler:^(BOOL completed) {
+
+#if 0
          if (!completed) {
              Log(@"Cancelled setup process");
          } else {
              Log(@"Completed setup process");
          }
-         [setupFlow orderOut:self];
+#endif
+
+         [setupFlow orderOut:belf];
+         [belf close];
      }];
-    
+
     [setupFlow setBackgroundImage:[NSImage imageNamed:@"AppIcon"]];
     
     [setupFlow resetToZeroStage];
