@@ -25,6 +25,7 @@
 @property (strong, nonatomic) PCTask *userTask;
 @property (strong, nonatomic) PCTask *skeyTask;
 @property (strong, nonatomic) PCTask *rpiTask;
+@property (nonatomic, strong) PCTask *javaTask;
 
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
@@ -34,11 +35,15 @@
 - (void)setToNextStage;
 
 - (void)startConfigWithSudoTask;
-- (void)startRapidClusterMonitoringForSetup;
-- (void)raspberryUpdateRunningNodeCountForSetup:(NSNotification *)aNotification;
+- (void)startInstallJavaTask;
 
-- (void)startRapidClusterMonitoringForFinish;
-- (void)raspberryUpdateRunningNodeCountForFinish:(NSNotification *)aNotification;
+- (void)stopMonitoringForSetup;
+- (void)raspberryUpdateRunningNodeCountForSetup:(NSNotification *)aNotification;
+- (void)startRapidClusterMonitoringForSetup;
+
+- (void)stopMonitoringForJAVA;
+- (void)raspberryUpdateRunningNodeCountForJAVA:(NSNotification *)aNotification;
+- (void)startRapidClusterMonitoringForJAVA;
 
 - (void)removeViewControler;
 @end
@@ -58,12 +63,12 @@
         _allNodesDeteceted = NO;
         
         self.nodeList = [NSMutableArray arrayWithCapacity:0];
-        self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Setting up base configuration.",@10.0]
-                          ,@"SUDO_SETUP_DONE":@[@"Finishing configuration.",@20.0]
+        self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Setting up basic configurations.",@10.0]
+                          ,@"SUDO_SETUP_DONE":@[@"Finishing basic configurations.",@20.0]
                           ,@"USER_SETUP_STEP_0":@[@"Setting up Raspberry PIs...",@30.0]
                           ,@"USER_SETUP_STEP_1":@[@"Setting up Raspberry PIs...",@70.0]
                           ,@"USER_SETUP_STEP_2":@[@"Finalizing...",@90.0]
-                          ,@"USER_SETUP_DONE":@[@"Finalizing...",@95.0]};
+                          ,@"USER_SETUP_DONE":@[@"Installing Java to Raspberry Pi Nodes.",@95.0]};
 
         [self resetToInitialState];
         [[RaspberryManager sharedManager] addAgentDelegateToQueue:self];
@@ -156,6 +161,7 @@
         self.userTask = nil;
         //self.skeyTask = nil;
         //self.rpiTask  = nil;
+        self.javaTask = nil;
 
         return;
     }
@@ -229,25 +235,29 @@
             sleep(1);
             self.skeyTask = nil;
 
-            WEAK_SELF(self);
-            [[NSOperationQueue mainQueue]
-            addOperationWithBlock:^{
-                if(belf) {
-                    PCTask *kt = [PCTask new];
-                    kt.taskCommand = @"salt-key -L 2>&1";
-                    kt.delegate = self;
-                    [belf setSkeyTask:kt];
-                    [kt launchTask];
-                }
-            }];
+            PCTask *kt = [PCTask new];
+            kt.taskCommand = @"salt-key -L 2>&1";
+            kt.delegate = self;
+            [self setSkeyTask:kt];
+            [kt launchTask];
         }
     }
 
     if(self.rpiTask == aPCTask){
+        
         sleep(2);
-        [self startRapidClusterMonitoringForFinish];
+        [self startRapidClusterMonitoringForJAVA];
+
         self.rpiTask = nil;
     }
+    
+    if(self.javaTask == aPCTask){
+        
+        [self setToNextStage];
+
+        self.javaTask = nil;
+    }
+    
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
@@ -320,54 +330,60 @@
     [sudoTask launchTask];
 }
 
--(void)startRapidClusterMonitoringForSetup {
-    
-    [[[RaspberryManager sharedManager] clusters] makeObjectsPerformSelector:@selector(resetNodeHeartbeat)];
-    [[RaspberryManager sharedManager] rapidRefreshTimerState];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryUpdateRunningNodeCountForSetup:) name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT      object:nil];
+- (void)startInstallJavaTask {
+    // start java installation task
+    PCTask *jt = [PCTask new];
+#if 1
+    jt.taskCommand = @"salt 'pc-node*' state.sls 'base/oracle-java8'";
+#else
+    jt.taskCommand = @"salt 'pc-node*' state.sls 'base/openjdk-7'";
+#endif
 
+    jt.delegate = self;
+    self.javaTask = jt;
+    [jt launchTask];
 }
 
--(void)raspberryUpdateRunningNodeCountForSetup:(NSNotification *)aNotification {
+- (void)stopMonitoringForSetup {
+    [[RaspberryManager sharedManager] haltRefreshTimer];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
+    [self startConfigWithSudoTask];
+}
+
+- (void)raspberryUpdateRunningNodeCountForSetup:(NSNotification *)aNotification {
     NSUInteger count = [[aNotification.userInfo objectForKey:kPOCKET_CLUSTER_LIVE_NODE_COUNT] unsignedIntegerValue];
     
     NSUInteger nodeCount = MIN([self.nodeList count], MAX_TRIAL_RASP_NODE_COUNT);
     if (count == nodeCount) {
-        
-        [[RaspberryManager sharedManager] haltRefreshTimer];
-
-        WEAK_SELF(self);
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            if (belf) {
-                [belf startConfigWithSudoTask];
-                [[NSNotificationCenter defaultCenter] removeObserver:belf name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
-            }
-        }];
+        [self performSelectorOnMainThread:@selector(stopMonitoringForSetup) withObject:nil waitUntilDone:NO];
     }
 }
 
-- (void)startRapidClusterMonitoringForFinish {
+- (void)startRapidClusterMonitoringForSetup {
     [[[RaspberryManager sharedManager] clusters] makeObjectsPerformSelector:@selector(resetNodeHeartbeat)];
     [[RaspberryManager sharedManager] rapidRefreshTimerState];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryUpdateRunningNodeCountForFinish:) name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT      object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryUpdateRunningNodeCountForSetup:) name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
 }
 
-- (void)raspberryUpdateRunningNodeCountForFinish:(NSNotification *)aNotification {
+- (void)stopMonitoringForJAVA {
+    [[RaspberryManager sharedManager] haltRefreshTimer];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
+    [self startInstallJavaTask];
+}
+
+- (void)raspberryUpdateRunningNodeCountForJAVA:(NSNotification *)aNotification {
     NSUInteger count = [[aNotification.userInfo objectForKey:kPOCKET_CLUSTER_LIVE_NODE_COUNT] unsignedIntegerValue];
     
     NSUInteger nodeCount = MIN([self.nodeList count], MAX_TRIAL_RASP_NODE_COUNT);
     if (count == nodeCount) {
-        
-        [[RaspberryManager sharedManager] haltRefreshTimer];
-        
-        WEAK_SELF(self);
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            if (belf) {
-                [[NSNotificationCenter defaultCenter] removeObserver:belf name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
-                [belf setToNextStage];
-            }
-        }];
+        [self performSelectorOnMainThread:@selector(stopMonitoringForJAVA) withObject:nil waitUntilDone:NO];
     }
+}
+
+- (void)startRapidClusterMonitoringForJAVA {
+    [[[RaspberryManager sharedManager] clusters] makeObjectsPerformSelector:@selector(resetNodeHeartbeat)];
+    [[RaspberryManager sharedManager] rapidRefreshTimerState];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryUpdateRunningNodeCountForJAVA:) name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
 }
 
 #pragma mark - IBACTION
@@ -428,7 +444,7 @@
     self.canGoBack = NO;
     
     [self.circularProgress stopAnimation:nil];
-    [self.progressLabel setStringValue:@"Done!"];
+    [self.progressLabel setStringValue:@"Raspberry PI cluster setup complete!"];
     [self.progressBar setDoubleValue:100.0];
     [self.progressBar displayIfNeeded];
     [self.buildBtn setEnabled:NO];

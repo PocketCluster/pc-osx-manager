@@ -22,8 +22,8 @@
 @property (strong, nonatomic) PCTask *saltTask;
 @property (strong, nonatomic) PCTask *userTask;
 @property (strong, nonatomic) PCTask *skeyTask;
-@property (strong, nonatomic) PCTask *rpiTask;
-
+@property (strong, nonatomic) PCTask *accTask;
+@property (nonatomic, strong) PCTask *javaTask;
 
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
@@ -55,7 +55,7 @@
                            ,@"USER_SETUP_STEP_0":@[@"Starting Vagrant...",@30.0]
                            ,@"USER_SETUP_STEP_1":@[@"Setting up connection.",@70.0]
                            ,@"USER_SETUP_STEP_2":@[@"Finalizing...",@90.0]
-                           ,@"USER_SETUP_DONE":@[@"Done!",@100.0]};
+                           ,@"USER_SETUP_DONE":@[@"installing Java...",@95.0]};
 
         [self resetToInitialState];
     }
@@ -66,7 +66,7 @@
 #pragma mark - PCTaskDelegate
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
     
-    if((aTask.terminationStatus != 0) && (self.skeyTask != aPCTask) && (self.rpiTask != aPCTask)) {
+    if((aTask.terminationStatus != 0) && (self.skeyTask != aPCTask) && (self.accTask != aPCTask)) {
         [self resetUIForFailure];
         [self.progressLabel setStringValue:@"Installation Error. Please try again."];
         
@@ -74,6 +74,7 @@
         self.sudoTask = nil;
         self.saltTask = nil;
         self.userTask = nil;
+        self.javaTask = nil;
         return;
     }
     
@@ -145,35 +146,43 @@
             PCTask *rt = [PCTask new];
             rt.taskCommand = rtcmd;
             rt.delegate = self;
-            self.rpiTask = rt;
+            self.accTask = rt;
             [rt launchTask];
             
             self.skeyTask = nil;
             
         }else{
-            
+
             sleep(1);
             self.skeyTask = nil;
             
-            WEAK_SELF(self);
-            [[NSOperationQueue mainQueue]
-             addOperationWithBlock:^{
-                 if(belf) {
-                     PCTask *kt = [PCTask new];
-                     kt.taskCommand = @"salt-key -L 2>&1";
-                     kt.delegate = self;
-                     [belf setSkeyTask:kt];
-                     [kt launchTask];
-                 }
-             }];
+            PCTask *kt = [PCTask new];
+            kt.taskCommand = @"salt-key -L 2>&1";
+            kt.delegate = self;
+            self.skeyTask = kt;
+            [kt launchTask];
+
         }
     }
 
-    if(self.rpiTask == aPCTask){
-        [self setToNextStage];
-        self.rpiTask = nil;
+    if(self.accTask == aPCTask){
+
+        // start java installation task
+        PCTask *jt = [PCTask new];
+        jt.taskCommand = @"salt 'pc-node*' state.sls 'base/oracle-java8'";
+        jt.delegate = self;
+        self.javaTask = jt;
+        [jt launchTask];
+        
+        self.accTask = nil;
     }
 
+    if(self.javaTask == aPCTask){
+        
+        [self setToNextStage];
+
+        self.javaTask = nil;
+    }
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
@@ -181,9 +190,9 @@
     NSData *data = [aFileHandler availableData];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
-    //Log(@"%@",str);
+Log(@"%@",str);
     
-    // save vagrant interface
+    //save vagrant interface
     if (self.vagInitTask == aPCTask) {
         [[VagrantManager sharedManager] setVboxInterface:str];
         return;
@@ -255,6 +264,7 @@
     self.canContinue = YES;
     self.canGoBack = NO;
 
+    [self.progressLabel setStringValue:@"Vagrant cluster setup complete!"];
     [self.circularProgress stopAnimation:nil];
     [self.progressBar setDoubleValue:100.0];
     [self.progressBar displayIfNeeded];

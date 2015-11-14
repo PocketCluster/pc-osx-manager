@@ -56,6 +56,7 @@
     return [NSString stringWithFormat:@"sudo -A %@", self.taskCommand];
 }
 
+#pragma mark - NSNOTIFICATION BASED IMPLEMENTATION
 
 -(void)launchTask {
     
@@ -121,6 +122,36 @@
 - (void)cancelTask {
     [self.task interrupt],[self.task terminate],self.task = nil;
 }
+
+
+#pragma mark - SYNCHRONOUS IMPLEMENTATION
+- (int) executeTask {
+
+    if (!self.task){
+        self.task = [self defaultTask];
+    }
+    
+    NSPipe *pipe = [NSPipe pipe];
+    [self.task setStandardInput:[NSPipe pipe]];
+    [self.task setStandardOutput:pipe];
+    
+    //set up Askpass handler for sudo
+    NSString *askPassPath = [NSBundle pathForResource:@"Askpass" ofType:@"" inDirectory:[[NSBundle mainBundle] bundlePath]];
+    NSMutableDictionary *env = [[[NSProcessInfo processInfo] environment] mutableCopy];
+    [env setObject:@"NONE" forKey:@"DISPLAY"];
+    [env setObject:askPassPath forKey:@"SUDO_ASKPASS"];
+    [self.task setEnvironment:env];
+    
+    [self.task launch];
+    [self.task waitUntilExit];
+    
+    int ts = [self.task terminationStatus];
+    self.task = nil;
+
+    return ts;
+}
+
+
 
 #pragma mark - BLOCK IMPLEMENTATION
 - (void)runTaskWithProgressBlock:(void (^)(NSString *output))progress done:(void (^)(NSTask *task))done {

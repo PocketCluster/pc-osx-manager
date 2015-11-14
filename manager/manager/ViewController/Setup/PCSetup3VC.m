@@ -15,15 +15,17 @@
 #import "VagrantManager.h"
 #import "RaspberryManager.h"
 
+
+#define USE_OP_QUEUE
+
 @interface PCSetup3VC()<PCTaskDelegate>
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
 
-@property (nonatomic, strong) PCTask *javaTask;
-@property (nonatomic, strong) PCTask *saltBaseTask;
 @property (nonatomic, strong) PCTask *saltMasterTask;
 @property (nonatomic, strong) PCTask *saltMinionTask;
 @property (nonatomic, strong) PCTask *saltMasterCompleteTask;
+
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
 
@@ -94,26 +96,14 @@
         [self resetUIForFailure];
         [self.progressLabel setStringValue:@"Installation Error. Please try again."];
         
-        self.javaTask = nil;
         self.saltMasterTask = nil;
         self.saltMinionTask = nil;
+        self.saltMasterCompleteTask = nil;
         return;
     }
     
     [self setUIToProceedState];
 
-    if(self.javaTask == aPCTask){
-
-#if 0
-        WEAK_SELF(self);
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            [belf downloadMetaFiles];
-        }];
-#else
-        [self performSelectorOnMainThread:@selector(downloadMetaFiles) withObject:nil waitUntilDone:NO];
-#endif
-        self.javaTask = nil;
-    }
 
     if(self.saltMasterTask == aPCTask ){
         [self setProgMessage:@"Setting up slave nodes..." value:80.0];
@@ -165,7 +155,7 @@
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
-#if 0
+#if 1
     NSData *data = [aFileHandler availableData];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
@@ -215,6 +205,7 @@
 }
 
 -(void)setProgMessage:(NSString *)aMessage value:(double)aValue {
+    [self.circularProgress startAnimation:nil];
     [self.progressLabel setStringValue:aMessage];
     [self.progressBar setDoubleValue:aValue];
     [self.progressBar displayIfNeeded];
@@ -223,12 +214,13 @@
 #pragma mark - Install Start
 -(void)startPackageInstall {
     [self setToNextStage];
-    [self setProgMessage:@"Setting up master node..." value:60.0];
+    [self setProgMessage:@"Setting up master node..." value:40.0];
     
     PCTask *smt = [PCTask new];
     smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-master\' state.sls hadoop/2-4-0/namenode/cluster/install"];
     smt.delegate = self;
     self.saltMasterTask = smt;
+
     [smt launchTask];
 }
 
@@ -278,7 +270,7 @@
 
 - (void)downloadMetaFiles {
     WEAK_SELF(self);
-    [belf setProgMessage:@"Downloading a meta package..." value:40.0];
+    [belf setProgMessage:@"Downloading a meta package..." value:10.0];
 
     for(PCPackageMeta *meta in belf.packageList){
         
@@ -323,22 +315,10 @@
                                            [belf.downloadFileList removeObject:URL];
                                            
                                            if(![belf.downloadFileList count]){
-
-#if 1
                                                [belf performSelectorOnMainThread:@selector(startPackageInstall) withObject:nil waitUntilDone:NO];
-#else
-                                               [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                                                   if(belf){
-                                                       [belf startPackageInstall];
-                                                   }
-                                               }];
-#endif
-
                                            }
-                                           
                                        }
                                    }
-                                   
                                }
                                onError:^(NSString *URL, NSError *error) {
                                    Log(@"Master - %@",[error description]);
@@ -357,20 +337,10 @@
                                            [belf.downloadFileList removeObject:URL];
                                            
                                            if(![belf.downloadFileList count]){
-#if 1
                                                [belf performSelectorOnMainThread:@selector(startPackageInstall) withObject:nil waitUntilDone:NO];
-#else
-                                               [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                                                   if(belf){
-                                                       [belf startPackageInstall];
-                                                   }
-                                               }];
-#endif
                                            }
-                                           
                                        }
                                    }
-                                   
                                }
                                onError:^(NSString *URL, NSError *error) {
                                    Log(@"Node - %@",[error description]);
@@ -394,33 +364,8 @@
     }
 
     [self setUIToProceedState];
-    [self setProgMessage:@"Installing Java to slave nodes..." value:10.0];
 
-    // start java installation task
-    PCTask *jt = [PCTask new];
-#if 1
-    jt.taskCommand = @"salt 'pc-node*' state.sls 'base/oracle-java8'";
-#else
-    PCClusterType t = [[Util getApp] loadClusterType];
-    switch (t) {
-        case PC_CLUTER_VAGRANT:{
-            jt.taskCommand = @"salt 'pc-node*' state.sls 'base/oracle-java8'";
-            break;
-        }
-        case PC_CLUSTER_RASPBERRY: {
-            jt.taskCommand = @"salt 'pc-node*' state.sls 'base/openjdk-7'";
-            break;
-        }
-        case PC_CLUSTER_NONE:
-        default:{
-            [self resetUIForFailure];
-            return;
-        }
-    }
-#endif
-    jt.delegate = self;
-    self.javaTask = jt;
+    [self downloadMetaFiles];
 
-    [jt launchTask];
 }
 @end
