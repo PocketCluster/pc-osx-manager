@@ -190,7 +190,7 @@
     NSData *data = [aFileHandler availableData];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
-Log(@"%@",str);
+    //Log(@"%@",str);
     
     //save vagrant interface
     if (self.vagInitTask == aPCTask) {
@@ -272,7 +272,9 @@ Log(@"%@",str);
 
     [[Util getApp] stopBasicServices];
     [[Util getApp] setClusterType:PC_CLUTER_VAGRANT];
-    [[VagrantManager sharedManager] refreshInstances];
+
+    //FIXME: when an instance is added, noti is fired and UI should catch that. if you're to refresh instances here, that event is missed.
+    //[[VagrantManager sharedManager] refreshInstances];
 
     NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
     [[NSNotificationCenter defaultCenter]

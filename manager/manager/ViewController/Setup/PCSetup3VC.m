@@ -155,7 +155,7 @@
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
-#if 1
+#if 0
     NSData *data = [aFileHandler availableData];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
@@ -237,10 +237,12 @@
     switch (t) {
         case PC_CLUTER_VAGRANT:{
 
-            VagrantInstance *instance = [[[VagrantManager sharedManager] getInstances] objectAtIndex:0];
-            NSString *cr = [NSString stringWithFormat:@"%@-%@-%@",instance.providerIdentifier, instance.path, instance.displayName];
-            meta.clusterRelation = cr;
-            
+            // FIXME : if vagrant instances are not refreshed, you cannot have an instance at this point. fix this.
+            //VagrantInstance *instance = [[[VagrantManager sharedManager] getInstances] objectAtIndex:0];
+            //NSString *cr = [NSString stringWithFormat:@"%@-%@-%@",instance.providerIdentifier, instance.path, instance.displayName];
+
+            meta.clusterRelation = @"virtualbox-/pocket/boxes-Cluster 1";
+
             // installed package data should be available before registration begins
             [[PCPackageManager sharedManager] addInstalledPackage:meta];
             [[PCPackageManager sharedManager] saveInstalledPackage];

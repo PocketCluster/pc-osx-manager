@@ -385,7 +385,6 @@
 
 - (void)vagrantUpdateRunningVmCount:(NSNotification*)notification {
     int count = [[notification.userInfo objectForKey:kPOCKET_CLUSTER_LIVE_NODE_COUNT] intValue];
-    
     if (count) {
         _statusItem.button.image = [NSImage imageNamed:@"status-on"];
     } else {
