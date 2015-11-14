@@ -78,8 +78,6 @@
         return;
     }
     
-    [self setUIToProceedState];
-    
     if(self.vagInitTask == aPCTask){
         
         NSString *basePath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
@@ -272,8 +270,6 @@
 
     [[Util getApp] stopBasicServices];
     [[Util getApp] setClusterType:PC_CLUTER_VAGRANT];
-    [[PCProcManager sharedManager] freshSaltStart];
-    sleep(3);
 
     //FIXME: when an instance is added, noti is fired and UI should catch that. if you're to refresh instances here, that event is missed.
     //[[VagrantManager sharedManager] refreshInstances];

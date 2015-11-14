@@ -7,16 +7,14 @@
 //
 
 #import "PCSetup3VC.h"
-#import "PCPackageManager.h"
-#import "PCConstants.h"
-#import "Util.h"
-#import "PCTask.h"
 
+#import "PCConstants.h"
 #import "VagrantManager.h"
 #import "RaspberryManager.h"
+#import "PCPackageManager.h"
+#import "PCTask.h"
+#import "Util.h"
 
-
-#define USE_OP_QUEUE
 
 @interface PCSetup3VC()<PCTaskDelegate>
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
@@ -34,8 +32,7 @@
 - (void)setToNextStage;
 - (void)setProgMessage:(NSString *)aMessage value:(double)aValue;
 
-- (void)startPackageInstall;
-- (void)failedPackageInstall;
+- (void)startInstallProcessWithMasterNode;
 - (void)finalizeInstallProcess;
 - (void)downloadMetaFiles;
 @end
@@ -101,9 +98,6 @@
         self.saltMasterCompleteTask = nil;
         return;
     }
-    
-    [self setUIToProceedState];
-
 
     if(self.saltMasterTask == aPCTask ){
         [self setProgMessage:@"Setting up slave nodes..." value:80.0];
@@ -156,7 +150,7 @@
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
     NSData *data = [aFileHandler availableData];
-#if 0
+#if 1
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 
     NSLog(@"%@",str);
@@ -180,7 +174,7 @@
 #pragma mark - Setup UI status
 - (void)setUIToProceedState {
     [self resetToInitialState];
-    
+
     [self.installBtn setEnabled:NO];
 
     [self.circularProgress startAnimation:nil];
@@ -197,11 +191,13 @@
 }
 
 -(void)setToNextStage {
+    
     self.canContinue = YES;
     self.canGoBack = NO;
+    
+    [self setProgMessage:@"Installation completed!" value:100.0];
     [self.installBtn setEnabled:NO];
     [self.circularProgress stopAnimation:nil];
-    [self setProgMessage:@"Installation completed!" value:100.0];
 }
 
 -(void)setProgMessage:(NSString *)aMessage value:(double)aValue {
@@ -211,9 +207,9 @@
     [self.progressBar displayIfNeeded];
 }
 
-#pragma mark - Install Start
--(void)startPackageInstall {
-    [self setToNextStage];
+#pragma mark - INSTALL FLOW CONTROL
+-(void)startInstallProcessWithMasterNode {
+
     [self setProgMessage:@"Setting up master node..." value:40.0];
     
     PCTask *smt = [PCTask new];
@@ -222,10 +218,6 @@
     self.saltMasterTask = smt;
 
     [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
-}
-
--(void)failedPackageInstall {
-    [self resetUIForFailure];
 }
 
 -(void)finalizeInstallProcess {
@@ -293,18 +285,16 @@
          WithBlock:^(NSArray<NSString *> *mFileList, NSError *mError) {
              
              if(belf && !mError){
-                 @synchronized(belf.downloadFileList) {
-                     [belf.downloadFileList addObjectsFromArray:mFileList];
-                 }
+                 
+                 [belf.downloadFileList addObjectsFromArray:mFileList];
                  
                  [PCPackageMeta
                   packageFileListOn:npath
                   WithBlock:^(NSArray<NSString *> *nFileList, NSError *nError) {
                       
                       if(belf && !nError){
-                          @synchronized(belf.downloadFileList) {
-                              [belf.downloadFileList addObjectsFromArray:nFileList];
-                          }
+
+                          [belf.downloadFileList addObjectsFromArray:nFileList];
                           
                           for(NSString *mFile in mFileList){
                               [PCPackageMeta
@@ -313,18 +303,18 @@
                                completion:^(NSString *URL, NSURL *filePath) {
                                    
                                    if(belf){
-                                       @synchronized(belf.downloadFileList) {
-                                           [belf.downloadFileList removeObject:URL];
-                                           
-                                           if(![belf.downloadFileList count] == 0){
-                                               [belf startPackageInstall];
-                                           }
+
+                                       [belf.downloadFileList removeObject:URL];
+                                       
+                                       if(![belf.downloadFileList count] == 0){
+                                           [belf performSelector:@selector(startInstallProcessWithMasterNode) withObject:nil afterDelay:0.0];
                                        }
+
                                    }
                                }
                                onError:^(NSString *URL, NSError *error) {
                                    Log(@"Master - %@",[error description]);
-                                   [self failedPackageInstall];
+                                   [belf resetUIForFailure];
                                }];
                           }
                           
@@ -335,22 +325,26 @@
                                completion:^(NSString *URL, NSURL *filePath) {
                                    
                                    if(belf){
-                                       @synchronized(belf.downloadFileList) {
-                                           [belf.downloadFileList removeObject:URL];
-                                           
-                                           if([belf.downloadFileList count] == 0){
-                                               [belf startPackageInstall];
-                                           }
+                                       [belf.downloadFileList removeObject:URL];
+                                       
+                                       if([belf.downloadFileList count] == 0){
+                                          [belf performSelector:@selector(startInstallProcessWithMasterNode) withObject:nil afterDelay:0.0];
                                        }
                                    }
                                }
                                onError:^(NSString *URL, NSError *error) {
                                    Log(@"Node - %@",[error description]);
-                                   [self failedPackageInstall];
+                                   [belf resetUIForFailure];
                                }];
                           }
+                          
+                      } else {
+                          [belf resetUIForFailure];
                       }
                   }];
+                 
+             }else{
+                [belf resetUIForFailure];
              }
          }];
     }

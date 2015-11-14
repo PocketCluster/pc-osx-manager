@@ -165,8 +165,6 @@
 
         return;
     }
-    
-    [self setUIToProceedState];
 
     if(self.sudoTask == aPCTask ){
         
@@ -179,10 +177,10 @@
         self.sudoTask = nil;
     }
     
-    
     if(self.saltTask == aPCTask) {
         
         [[PCProcManager sharedManager] freshSaltStart];
+        sleep(3);
         
         NSString *basePath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"];
         NSString *userSetup = [NSString stringWithFormat:@"%@/setup/raspberry_user_setup.sh",basePath];
@@ -197,7 +195,6 @@
         self.saltTask = nil;
     }
     
-    
     if(self.userTask == aPCTask) {
 
         PCTask *kt = [PCTask new];
@@ -208,7 +205,6 @@
         
         self.userTask = nil;
     }
-    
     
     if(self.skeyTask == aPCTask) {
         
@@ -238,11 +234,13 @@
             PCTask *kt = [PCTask new];
             kt.taskCommand = @"salt-key -L 2>&1";
             kt.delegate = self;
-            [self setSkeyTask:kt];
+            self.skeyTask = kt;
             [kt launchTask];
+
         }
     }
 
+    
     if(self.rpiTask == aPCTask){
         
         sleep(2);
@@ -251,12 +249,14 @@
         self.rpiTask = nil;
     }
     
+    
     if(self.javaTask == aPCTask){
         
         [self setToNextStage];
 
         self.javaTask = nil;
     }
+    
     
 }
 
@@ -450,8 +450,6 @@
     [self.buildBtn setEnabled:NO];
     
     [[Util getApp] setClusterType:PC_CLUSTER_RASPBERRY];
-    [[PCProcManager sharedManager] freshSaltStart];
-    sleep(3);
     
     NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
     [[NSNotificationCenter defaultCenter]
