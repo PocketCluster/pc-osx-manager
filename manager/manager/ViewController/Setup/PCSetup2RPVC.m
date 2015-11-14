@@ -450,6 +450,8 @@
     [self.buildBtn setEnabled:NO];
     
     [[Util getApp] setClusterType:PC_CLUSTER_RASPBERRY];
+    [[PCProcManager sharedManager] freshSaltStart];
+    sleep(3);
     
     NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
     [[NSNotificationCenter defaultCenter]

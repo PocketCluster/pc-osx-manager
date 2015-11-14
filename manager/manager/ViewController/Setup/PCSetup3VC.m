@@ -112,7 +112,7 @@
         smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-node*\' state.sls hadoop/2-4-0/datanode/cluster/install"];
         smt.delegate = self;
         self.saltMinionTask = smt;
-        [smt launchTask];
+        [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
 
         self.saltMasterTask = nil;
     }
@@ -139,7 +139,7 @@
         smc.taskCommand = [NSString stringWithFormat:@"salt \'pc-master\' state.sls hadoop/2-4-0/namenode/cluster/complete pillar=\'{numnodes: %ld}\'",nc];
         smc.delegate = self;
         self.saltMasterCompleteTask = smc;
-        [smc launchTask];
+        [smc performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
 
         self.saltMinionTask = nil;
     }
@@ -155,11 +155,11 @@
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
-#if 0
     NSData *data = [aFileHandler availableData];
+#if 0
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    
-    Log(@"STR %@",str);
+
+    NSLog(@"%@",str);
 #endif
 }
 
@@ -221,7 +221,7 @@
     smt.delegate = self;
     self.saltMasterTask = smt;
 
-    [smt launchTask];
+    [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
 }
 
 -(void)failedPackageInstall {
@@ -316,8 +316,8 @@
                                        @synchronized(belf.downloadFileList) {
                                            [belf.downloadFileList removeObject:URL];
                                            
-                                           if(![belf.downloadFileList count]){
-                                               [belf performSelectorOnMainThread:@selector(startPackageInstall) withObject:nil waitUntilDone:NO];
+                                           if(![belf.downloadFileList count] == 0){
+                                               [belf startPackageInstall];
                                            }
                                        }
                                    }
@@ -338,8 +338,8 @@
                                        @synchronized(belf.downloadFileList) {
                                            [belf.downloadFileList removeObject:URL];
                                            
-                                           if(![belf.downloadFileList count]){
-                                               [belf performSelectorOnMainThread:@selector(startPackageInstall) withObject:nil waitUntilDone:NO];
+                                           if([belf.downloadFileList count] == 0){
+                                               [belf startPackageInstall];
                                            }
                                        }
                                    }

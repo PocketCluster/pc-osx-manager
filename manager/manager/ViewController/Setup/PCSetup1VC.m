@@ -59,6 +59,20 @@
         return;
     }
     
+#if 0
+    NSViewController *vc3c =
+        [[PCSetup3VC alloc]
+         initWithNibName:@"PCSetup3VC"
+         bundle:[NSBundle mainBundle]];
+    
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kDPNotification_addNextViewControllerAndProceed
+     object:self
+     userInfo:@{kDPNotification_key_viewController:vc3c}];
+    
+    return;
+#endif
+    
     NSViewController *vc2v =
         [[PCSetup2VVVC alloc]
          initWithNibName:@"PCSetup2VVVC"
