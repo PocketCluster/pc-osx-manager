@@ -390,6 +390,7 @@
     NSUInteger nodeCount = MIN([self.nodeList count], MAX_TRIAL_RASP_NODE_COUNT);
     NSMutableDictionary *statusDict = [NSMutableDictionary dictionary];
     for (int i = 1; i <= nodeCount; i++){
+        //TODO: later when pc-node11 exists, this could be an source of error
         [statusDict setObject:@(NO) forKey:[NSString stringWithFormat:@"pc-node%d",i]];
     }
     self.statusDict = statusDict;
