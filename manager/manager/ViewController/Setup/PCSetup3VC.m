@@ -210,7 +210,7 @@ typedef enum INSTALL_PROGRESS {
         
         //TODO: this is really important piece of code. Is this right Job ID?
         //NSRange range = [str rangeOfString:@"^[0-9]{20}\\:$" options:NSRegularExpressionSearch];
-        NSRange range = [str rangeOfString:@"[0-9]{20}" options:NSRegularExpressionSearch];
+        NSRange range = [str rangeOfString:@"[0-9]{20}\\:" options:NSRegularExpressionSearch];
 
         if (range.location != NSNotFound){
             Log(@"\tSALT JOB IS STILL RUNNING!!!");
