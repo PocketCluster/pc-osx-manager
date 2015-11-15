@@ -285,7 +285,7 @@ typedef enum INSTALL_PROGRESS {
     clsjt.delegate = self;
     self.saltJobTask = clsjt;
     
-    [clsjt performSelector:@selector(launchTask) withObject:nil afterDelay:3.0];
+    [clsjt performSelector:@selector(launchTask) withObject:nil afterDelay:5.0];
 }
 
 -(void)startInstallProcessWithMasterNode {

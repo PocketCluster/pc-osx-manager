@@ -63,8 +63,8 @@
         _allNodesDeteceted = NO;
         
         self.nodeList = [NSMutableArray arrayWithCapacity:0];
-        self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Setting up basic configurations.",@10.0]
-                          ,@"SUDO_SETUP_DONE":@[@"Finishing basic configurations.",@20.0]
+        self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Setting up basic configurations...",@10.0]
+                          ,@"SUDO_SETUP_DONE":@[@"Finishing basic configurations...",@20.0]
                           ,@"USER_SETUP_STEP_0":@[@"Setting up Raspberry PIs...",@30.0]
                           ,@"USER_SETUP_STEP_1":@[@"Setting up Raspberry PIs...",@70.0]
                           ,@"USER_SETUP_STEP_2":@[@"Finalizing...",@90.0]
@@ -336,9 +336,9 @@
     // start java installation task
     PCTask *jt = [PCTask new];
 #if 1
-    jt.taskCommand = @"salt 'pc-node*' state.sls 'base/oracle-java8'";
+    jt.taskCommand = @"salt \'pc-node*\' state.sls base/oracle-java8";
 #else
-    jt.taskCommand = @"salt 'pc-node*' state.sls 'base/openjdk-7'";
+    jt.taskCommand = @"salt \'pc-node*\' state.sls base/openjdk-7";
 #endif
 
     jt.delegate = self;
