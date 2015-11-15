@@ -19,12 +19,14 @@
 @interface PCSetup2RPVC ()<PCTaskDelegate, RaspberryAgentDelegate>
 @property (atomic, strong) NSMutableArray *nodeList;
 @property (strong, nonatomic) NSDictionary *progDict;
+@property (strong, nonatomic) NSDictionary *statusDict;
 
 @property (strong, nonatomic) PCTask *sudoTask;
 @property (strong, nonatomic) PCTask *saltTask;
 @property (strong, nonatomic) PCTask *userTask;
 @property (strong, nonatomic) PCTask *skeyTask;
 @property (strong, nonatomic) PCTask *rpiTask;
+@property (strong, nonatomic) PCTask *statusTask;
 @property (nonatomic, strong) PCTask *javaTask;
 
 @property (readwrite, nonatomic) BOOL canContinue;
@@ -36,6 +38,7 @@
 
 - (void)startConfigWithSudoTask;
 - (void)startInstallJavaTask;
+- (void)startSaltStatusTask;
 
 - (void)stopMonitoringForSetup;
 - (void)raspberryUpdateRunningNodeCountForSetup:(NSNotification *)aNotification;
@@ -149,21 +152,25 @@
 #pragma mark - PCTaskDelegate
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
 
-    if((aTask.terminationStatus != 0) && (self.skeyTask != aPCTask) && (self.rpiTask != aPCTask)) {
+    
+    if( !( (self.skeyTask == aPCTask) || (self.rpiTask == aPCTask) || (self.statusTask == aPCTask) ) ){
 
-        Log(@"installation error ! %d",aTask.terminationStatus);
-        
-        [self resetUIForFailure];
-        [self.progressLabel setStringValue:@"Installation Error. Please try again."];
-        
-        self.sudoTask = nil;
-        self.saltTask = nil;
-        self.userTask = nil;
-        //self.skeyTask = nil;
-        //self.rpiTask  = nil;
-        self.javaTask = nil;
+        if(aTask.terminationStatus != 0) {
 
-        return;
+            Log(@"installation error ! %d",aTask.terminationStatus);
+            
+            [self resetUIForFailure];
+            [self.progressLabel setStringValue:@"Installation Error. Please try again."];
+            
+            self.sudoTask = nil;
+            self.saltTask = nil;
+            self.userTask = nil;
+            //self.skeyTask = nil;
+            //self.rpiTask  = nil;
+            self.javaTask = nil;
+
+            return;
+        }
     }
 
     if(self.sudoTask == aPCTask ){
@@ -240,7 +247,7 @@
         }
     }
 
-    
+
     if(self.rpiTask == aPCTask){
         
         sleep(2);
@@ -250,6 +257,27 @@
     }
     
     
+    if(self.statusTask == aPCTask){
+        
+        Log(@"%@",self.statusDict);
+        
+        BOOL allNodesUp = YES;
+        for(NSString *minion in self.statusDict){
+            NSNumber *ms = (NSNumber *)[self.statusDict objectForKey:minion];
+            allNodesUp = (allNodesUp & [ms boolValue]);
+        }
+
+        self.statusTask = nil;
+        self.statusDict = nil;
+
+        if (allNodesUp) {
+            Log(@"ALL NODES ARE UP!!!! LET's INSTALL JAVA!!!");
+            [self startInstallJavaTask];
+        }else{
+            [self startSaltStatusTask];
+        }
+    }
+
     if(self.javaTask == aPCTask){
         
         [self setToNextStage];
@@ -280,7 +308,19 @@
             _allNodesDeteceted = allNodesExist;
         }
     }
-
+    
+    if(self.statusTask == aPCTask){
+        
+        NSMutableDictionary *pcl = [NSMutableDictionary dictionaryWithDictionary:self.statusDict];
+        for (NSString *minion in self.statusDict){
+            
+            if([str containsString:minion]){
+                [pcl setValue:@(YES) forKey:minion];
+            }
+        }
+        self.statusDict = pcl;
+    }
+    
     NSArray *p = nil;
     for (NSString *key in self.progDict) {
         if ([str containsString:key]){
@@ -340,12 +380,29 @@
 #else
     jt.taskCommand = @"salt \'pc-node*\' state.sls base/openjdk-7";
 #endif
-
     jt.delegate = self;
     self.javaTask = jt;
     [jt launchTask];
 }
 
+- (void)startSaltStatusTask {
+    
+    NSUInteger nodeCount = MIN([self.nodeList count], MAX_TRIAL_RASP_NODE_COUNT);
+    NSMutableDictionary *statusDict = [NSMutableDictionary dictionary];
+    for (int i = 1; i <= nodeCount; i++){
+        [statusDict setObject:@(NO) forKey:[NSString stringWithFormat:@"pc-node%d",i]];
+    }
+    self.statusDict = statusDict;
+    
+    PCTask *pct = [PCTask new];
+    pct.taskCommand = @"salt-run manage.up 2>&1";
+    pct.delegate = self;
+    self.statusTask = pct;
+    [pct performSelector:@selector(launchTask) withObject:nil afterDelay:3.0];
+}
+
+
+#pragma mark - Monitoring W/ Notification
 - (void)stopMonitoringForSetup {
     [[RaspberryManager sharedManager] haltRefreshTimer];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
@@ -370,7 +427,8 @@
 - (void)stopMonitoringForJAVA {
     [[RaspberryManager sharedManager] haltRefreshTimer];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
-    [self startInstallJavaTask];
+    
+    [self startSaltStatusTask];
 }
 
 - (void)raspberryUpdateRunningNodeCountForJAVA:(NSNotification *)aNotification {
