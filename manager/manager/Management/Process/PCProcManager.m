@@ -206,7 +206,9 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCProcManager, sharedManager);
     PCPkgProc *proc = [self findPackageProcess:aMetaPacakge];
     if(proc != nil){
         [proc stopPackageProcess];
-        [self removePackageProcess:proc];
+        
+        //FIXME: this need to be included and should be one-stop function call
+        //[self removePackageProcess:proc];
     }
 }
 

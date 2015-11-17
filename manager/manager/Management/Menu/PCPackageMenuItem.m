@@ -100,6 +100,9 @@
 - (void)refreshWithNotification:(NSNotification *)aNotification {
     NSDictionary *infoDict = [aNotification userInfo];
     BOOL isAlive = [[infoDict objectForKey:kPOCKET_CLUSTER_PACKAGE_PROCESS_ISALIVE] boolValue];
+    
+//Log(@"%s, %@ is %@",__PRETTY_FUNCTION__, self.packageMeta.packageName, isAlive?@"ALIVE":@"DEAD");
+    
     if(isAlive){
         _packageItem.image = [NSImage imageNamed:@"status_icon_on"];
         [self.packageStart setHidden:YES];

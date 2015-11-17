@@ -33,7 +33,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             node.vm.synced_folder "/bigpkg", "/bigpkg",
                 owner: "pocket",
                 group: "pocket",
-                mount_options: ["dmode=755,fmode=644"]
+                mount_options: ["dmode=755,fmode=755"]
         end
     end
 end

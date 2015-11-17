@@ -9,6 +9,7 @@
 #import "PCPkgProc.h"
 #import "PCTask.h"
 #import "PCConstants.h"
+#import "PCProcManager.h"
 
 @interface PCPkgProc()<PCTaskDelegate>
 @property (nonatomic, weak, readwrite) PCPackageMeta *package;
@@ -53,6 +54,8 @@
          userInfo:
          @{kPOCKET_CLUSTER_PACKAGE_PROCESS_ISALIVE: @(isAlive),
            kPOCKET_CLUSTER_PACKAGE_IDENTIFICATION:self.package.packageId}];
+
+//Log(@"%s, %@ is %@",__PRETTY_FUNCTION__, self.package.packageName, isAlive?@"ALIVE":@"DEAD");
         
         self.procCheckTask = nil;
     }
@@ -62,14 +65,30 @@
     }
 
     if(self.procStopTask == aPCTask){
+        
+        __weak NSString *pid = self.package.packageId;
+
+        // should fire dead notification.
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:kPOCKET_CLUSTER_PACKAGE_PROCESS_STATUS
+         object:nil
+         userInfo:
+         @{kPOCKET_CLUSTER_PACKAGE_PROCESS_ISALIVE:@(NO),
+           kPOCKET_CLUSTER_PACKAGE_IDENTIFICATION:pid}];
+
         self.procStopTask = nil;
+
+        //FIXME: this need to be included and should be one-stop function call
+        [[PCProcManager sharedManager] removePackageProcess:self];
+
     }
 }
 
 - (void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
+    NSData *data = [aFileHandler availableData];
+    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+
     if(self.procCheckTask == aPCTask){
-        NSData *data = [aFileHandler availableData];
-        NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         
         NSString *pName = self.package.packageName;
         NSString *pVer  = self.package.version;
@@ -128,7 +147,7 @@
     PCTask *spp = [PCTask new];
     spp.taskCommand = [NSString stringWithFormat:@"bash %@",[self.package.stopScript objectAtIndex:0]];
     spp.delegate = self;
-    self.procStartTask = spp;
+    self.procStopTask = spp;
     [spp launchTask];
 }
 

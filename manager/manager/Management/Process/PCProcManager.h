@@ -21,6 +21,8 @@
 - (PCPkgProc *)startPackageProcess:(PCPackageMeta *)aMetaPacakge;
 - (void)stopPackageProcess:(PCPackageMeta *)aMetaPacakge;
 - (PCPkgProc *)findPackageProcess:(PCPackageMeta *)aMetaPackage;
+- (void)addPackageProcess:(PCPkgProc *)aPackageProcess;
+- (void)removePackageProcess:(PCPkgProc *)aPackageProcess;
 
 - (void)refreshPackageProcessesStatus;
 - (void)haltPackageProcessRefreshTimer;
