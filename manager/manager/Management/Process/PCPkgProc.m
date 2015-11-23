@@ -7,16 +7,26 @@
 //
 
 #import "PCPkgProc.h"
-#import "PCTask.h"
+#import "TaskOutputWindow.h"
 #import "PCConstants.h"
 #import "PCProcManager.h"
+#import "PCTask.h"
+#import "Util.h"
+
+#define USE_TASK_WINDOW
 
 @interface PCPkgProc()<PCTaskDelegate>
 @property (nonatomic, weak, readwrite) PCPackageMeta *package;
 @property (strong, nonatomic) NSMutableDictionary *procCheckDict;
 @property (strong, nonatomic) PCTask *procCheckTask;
+
 @property (strong, nonatomic) PCTask *procStartTask;
+@property (weak, nonatomic) TaskOutputWindow *startWindow;
+
 @property (strong, nonatomic) PCTask *procStopTask;
+@property (weak, nonatomic) TaskOutputWindow *stopWindow;
+
+- (PCTask *)executionTask:(NSString *)anAction;
 @end
 
 @implementation PCPkgProc{
@@ -61,6 +71,7 @@
     }
     
     if(self.procStartTask == aPCTask){
+        [self.startWindow task:aPCTask taskCompletion:aTask], self.startWindow = nil;
         self.procStartTask = nil;
     }
 
@@ -75,7 +86,8 @@
          userInfo:
          @{kPOCKET_CLUSTER_PACKAGE_PROCESS_ISALIVE:@(NO),
            kPOCKET_CLUSTER_PACKAGE_IDENTIFICATION:pid}];
-
+        
+        [self.stopWindow task:aPCTask taskCompletion:aTask], self.stopWindow = nil;
         self.procStopTask = nil;
 
         //FIXME: this need to be included and should be one-stop function call
@@ -85,10 +97,11 @@
 }
 
 - (void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
-    NSData *data = [aFileHandler availableData];
-    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 
     if(self.procCheckTask == aPCTask){
+
+        NSData *data = [aFileHandler availableData];
+        NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         
         NSString *pName = self.package.packageName;
         NSString *pVer  = self.package.version;
@@ -102,6 +115,14 @@
             }
         }
         self.procCheckDict = pcl;
+    }
+    
+    if(self.procStartTask == aPCTask) {
+        [self.startWindow task:aPCTask recievedOutput:aFileHandler];
+    }
+    
+    if(self.procStopTask == aPCTask) {
+        [self.stopWindow task:aPCTask recievedOutput:aFileHandler];
     }
 }
 
@@ -136,19 +157,68 @@
 }
 
 - (void)startPackageProcess {
+#ifdef USE_TASK_WINDOW
+    Assert([NSThread isMainThread], @"startPackageProcess should run in Main Thread");
+    
+    PCTask *spp = [self executionTask:[NSString stringWithFormat:@"bash %@",[self.package.startScript objectAtIndex:0]]];
+    TaskOutputWindow *ow = [[TaskOutputWindow alloc] initWithWindowNibName:@"TaskOutputWindow"];
+    ow.taskOperator = spp;
+
+    self.procStartTask = spp;
+    self.startWindow = ow;
+    
+    [NSApp activateIgnoringOtherApps:YES];
+    [ow showWindow:[Util getApp]];
+    
+    [[Util getApp] addOpenWindow:ow];
+#else
     PCTask *spp = [PCTask new];
     spp.taskCommand = [NSString stringWithFormat:@"bash %@",[self.package.startScript objectAtIndex:0]];
     spp.delegate = self;
     self.procStartTask = spp;
     [spp launchTask];
+#endif
 }
 
 - (void)stopPackageProcess {
+#ifdef USE_TASK_WINDOW
+    Assert([NSThread isMainThread], @"stopPackageProcess should run in Main Thread");
+    
+    PCTask *spp = [self executionTask:[NSString stringWithFormat:@"bash %@",[self.package.stopScript objectAtIndex:0]]];
+    TaskOutputWindow *ow = [[TaskOutputWindow alloc] initWithWindowNibName:@"TaskOutputWindow"];
+    ow.taskOperator = spp;
+    
+    self.procStopTask = spp;
+    self.stopWindow = ow;
+    
+    [NSApp activateIgnoringOtherApps:YES];
+    [ow showWindow:[Util getApp]];
+
+    [[Util getApp] addOpenWindow:ow];
+#else
     PCTask *spp = [PCTask new];
     spp.taskCommand = [NSString stringWithFormat:@"bash %@",[self.package.stopScript objectAtIndex:0]];
     spp.delegate = self;
     self.procStopTask = spp;
     [spp launchTask];
+#endif
 }
 
+- (PCTask *)executionTask:(NSString *)anAction {
+
+    NSArray *cmdParts = @[anAction,@"--no-color"];
+    NSString *command = [cmdParts componentsJoinedByString:@" "];
+    
+    NSTask *task = [[NSTask alloc] init];
+    [task setLaunchPath:@"/bin/bash"];
+    [task setArguments:@[@"-c", @"-l", command]];
+    
+    PCTask *spp = [PCTask new];
+    spp.task = task;
+    spp.taskCommand = command;
+    spp.taskAction = command;
+    spp.delegate = self;
+
+    return spp;
+}
 @end

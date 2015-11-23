@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9059" systemVersion="15B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9060" systemVersion="15B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9059"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9060"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="TaskOutputWindow">
@@ -10,6 +10,7 @@
                 <outlet property="cancelButton" destination="hbl-VT-EZm" id="y4i-uN-2MO"/>
                 <outlet property="closeWindowButton" destination="L35-tt-XDn" id="1CK-wL-Pub"/>
                 <outlet property="outputTextView" destination="yGv-xC-aVr" id="Jmj-YV-czD"/>
+                <outlet property="progressCircle" destination="j1H-ar-5dD" id="VvA-wa-EUs"/>
                 <outlet property="taskStatusLabel" destination="YfK-N0-5lw" id="6Vm-4A-pdh"/>
                 <outlet property="window" destination="1" id="3"/>
             </connections>
@@ -71,7 +72,7 @@
                         </textFieldCell>
                     </textField>
                     <button verticalHuggingPriority="750" id="L35-tt-XDn">
-                        <rect key="frame" x="708" y="13" width="83" height="32"/>
+                        <rect key="frame" x="681" y="13" width="83" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                         <animations/>
                         <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" enabled="NO" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="aRO-dI-Ufm">
@@ -82,8 +83,8 @@
                             <action selector="closeButtonClicked:" target="-2" id="RNy-tG-2tU"/>
                         </connections>
                     </button>
-                    <button verticalHuggingPriority="750" id="hbl-VT-EZm">
-                        <rect key="frame" x="625" y="13" width="83" height="32"/>
+                    <button hidden="YES" verticalHuggingPriority="750" id="hbl-VT-EZm">
+                        <rect key="frame" x="598" y="13" width="83" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                         <animations/>
                         <buttonCell key="cell" type="push" title="Cancel" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="bii-yL-w9F">
@@ -97,6 +98,11 @@ Gw
                             <action selector="cancelButtonClicked:" target="-2" id="NCT-Pb-GS5"/>
                         </connections>
                     </button>
+                    <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" id="j1H-ar-5dD">
+                        <rect key="frame" x="766" y="22" width="16" height="16"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <animations/>
+                    </progressIndicator>
                 </subviews>
                 <animations/>
             </view>

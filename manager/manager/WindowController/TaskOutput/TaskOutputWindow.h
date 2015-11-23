@@ -15,8 +15,10 @@
 @property (strong, nonatomic) NSString *taskCommand;
 @property (strong, nonatomic) NSString *taskAction;
 @property (strong, nonatomic) NSTask *task;
+@property (strong, nonatomic) PCTask *taskOperator;
 @property (nonatomic) BOOL sudoCommand;
 
+@property (weak) IBOutlet NSProgressIndicator *progressCircle;
 @property (unsafe_unretained) IBOutlet NSTextView *outputTextView;
 @property (weak) IBOutlet NSProgressIndicator *progressBar;
 @property (weak) IBOutlet NSTextField *taskCommandLabel;

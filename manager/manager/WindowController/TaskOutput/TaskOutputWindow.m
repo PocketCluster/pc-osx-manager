@@ -11,10 +11,6 @@
 
 //#define BIND_OBJECTS
 
-@interface TaskOutputWindow ()
-@property (strong, nonatomic) PCTask *taskOperator;
-@end
-
 @implementation TaskOutputWindow{
     BOOL _isClosed;
 }
@@ -71,6 +67,7 @@
     [self.progressBar startAnimation:self];
 
     [self.taskOperator launchTask];
+    [self.progressCircle startAnimation:nil];
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
@@ -145,7 +142,9 @@
      
      [[Util getApp] showUserNotificationWithTitle:notificationText informativeText:[NSString stringWithFormat:@"%@ %@", name, self.taskAction] taskWindowUUID:self.taskOperator.taskUUID];
      */
-        
+    
+    [self.progressCircle stopAnimation:nil];
+    
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"autoCloseTaskWindows"] && aTask.terminationStatus == 0) {
         dispatch_async(dispatch_get_global_queue(0,0), ^{
             [self close];
@@ -165,13 +164,11 @@
             
             [self.outputTextView.textStorage appendAttributedString:[[NSAttributedString alloc] initWithString:str]];
             
-            if([NSFont fontWithName:@"Menlo" size:11])
-            {
+            if([NSFont fontWithName:@"Menlo" size:11]) {
                 [self.outputTextView.textStorage setFont:[NSFont fontWithName:@"Menlo" size:11]];
             }
-            
-            if (scroll)
-            {
+
+            if (scroll) {
                 [self.outputTextView scrollRangeToVisible: NSMakeRange(self.outputTextView.string.length, 0)];
             }
         }
@@ -181,5 +178,4 @@
 -(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
     return _isClosed;
 }
-
 @end
