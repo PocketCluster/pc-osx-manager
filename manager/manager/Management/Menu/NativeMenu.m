@@ -262,7 +262,7 @@
 
 #pragma mark - Menu Item Click Handlers
 - (void)refreshMenuItemClicked:(id)sender {
-    [[Util getApp] refreshVagrantMachines];
+    [[VagrantManager sharedManager] refreshVagrantMachines];
 }
 
 - (void)showSetupWindow:(id)sender {

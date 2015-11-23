@@ -7,17 +7,9 @@
 
 #import "VagrantInstance.h"
 #import "VirtualMachineServiceProvider.h"
+#import "MenuDelegate.h"
 
-@class VagrantManager;
-
-@protocol VagrantManagerDelegate <NSObject>
-- (void)vagrantManager:(VagrantManager*)vagrantManger instanceAdded:(VagrantInstance*)instance;
-- (void)vagrantManager:(VagrantManager*)vagrantManger instanceRemoved:(VagrantInstance*)instance;
-- (void)vagrantManager:(VagrantManager*)vagrantManger instanceUpdated:(VagrantInstance*)oldInstance withInstance:(VagrantInstance*)newInstance;
-@end
-
-@interface VagrantManager : NSObject
-@property (weak) id<VagrantManagerDelegate> delegate;
+@interface VagrantManager : NSObject <MenuDelegate>
 @property (readonly) NSArray *instances;
 
 + (VagrantManager*)sharedManager;
@@ -34,4 +26,18 @@
 - (NSString *)vboxInterface;
 - (void)setVboxInterface:(NSString *)aVboxIface;
 - (void)refreshInstanceRelatedPackages;
+
+- (void)haltRefreshTimer;
+- (void)refreshTimerState;
+- (void)updateRunningVmCount;
+- (void)updateInstancesCount;
+- (void)refreshVagrantMachines;
+
+- (void)runVagrantCustomCommand:(NSString*)command withMachine:(VagrantMachine*)machine;
+- (void)runVagrantAction:(NSString*)action withMachine:(VagrantMachine*)machine;
+- (void)runVagrantAction:(NSString*)action withInstance:(VagrantInstance*)instance;
+
+- (void)openInstanceInFinder:(VagrantInstance *)instance;
+- (void)openInstanceInTerminal:(VagrantInstance *)instance;
+
 @end

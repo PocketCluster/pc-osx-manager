@@ -15,4 +15,5 @@
 + (void)redirectConsoleLogToDocumentFolder;
 + (NSString*)getMachineId;
 + (BOOL)shouldSendProfileData;
++ (void)runTerminalCommand:(NSString*)command;
 @end

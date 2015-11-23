@@ -58,4 +58,37 @@
     return [[NSUserDefaults standardUserDefaults] boolForKey:@"sendProfileData"];
 }
 
++ (void)runTerminalCommand:(NSString*)command {
+    
+    Assert([NSThread isMainThread], @"runTerminalCommand: should run on Main thread");
+    
+    NSString *cmd = [command stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"];
+    cmd = [cmd stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""];
+    
+    NSNumber *terminalPreference = (NSNumber *)[[NSUserDefaults standardUserDefaults] stringForKey:kPCPrefDefaultTerm];
+    
+    NSString *s;
+    if ([terminalPreference integerValue] == 101) {
+        s = [NSString stringWithFormat:@"tell application \"iTerm\"\n"
+             "tell current terminal\n"
+             "launch session \"Default Session\"\n"
+             "delay .15\n"
+             "activate\n"
+             "tell the last session\n"
+             "write text \"%@\"\n"
+             "end tell\n"
+             "end tell\n"
+             "end tell\n", command];
+    } else {
+        s = [NSString stringWithFormat:@"tell application \"Terminal\"\n"
+             "activate\n"
+             "do script \"%@\"\n"
+             "end tell\n", command];
+    }
+    
+    NSAppleScript *as = [[NSAppleScript alloc] initWithSource: s];
+    [as executeAndReturnError:nil];
+}
+
+
 @end

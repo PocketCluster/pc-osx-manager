@@ -126,6 +126,6 @@
 }
 
 - (void)shell {
-    [[Util getApp] runTerminalCommand:[self.packageMeta.cmdScript objectAtIndex:0]];
+    [Util runTerminalCommand:[self.packageMeta.cmdScript objectAtIndex:0]];
 }
 @end

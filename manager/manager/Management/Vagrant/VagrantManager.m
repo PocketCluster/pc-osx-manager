@@ -6,11 +6,19 @@
 //
 
 #import "VagrantGlobalStatusScanner.h"
-#import "Util.h"
-
 #import "SynthesizeSingleton.h"
 #import "VagrantManager.h"
+
 #import "NullStringChecker.h"
+#import "TaskOutputWindow.h"
+#import "Util.h"
+
+@interface VagrantManager()
+@property (strong, nonatomic) NSTimer *refreshTimer;
+- (void)instanceAdded:(VagrantInstance*)instance;
+- (void)instanceRemoved:(VagrantInstance*)instance;
+- (void)instanceUpdated:(VagrantInstance*)oldInstance withInstance:(VagrantInstance*)newInstance;
+@end
 
 @implementation VagrantManager {
     //all known vagrant instances
@@ -18,6 +26,9 @@
     
     //map provider identifiers to providers
     NSMutableDictionary *_providers;
+    
+    BOOL isRefreshingVagrantMachines;
+    int queuedRefreshes;
 }
 SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(VagrantManager, sharedManager);
 
@@ -27,6 +38,9 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(VagrantManager, sharedManager);
     if(self) {
         _instances = [[NSMutableArray alloc] init];
         _providers = [[NSMutableDictionary alloc] init];
+        isRefreshingVagrantMachines = NO;
+        queuedRefreshes = 0;
+        
     }
     
     return self;
@@ -134,7 +148,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(VagrantManager, sharedManager);
                     if(instance.machines.count != existingInstance.machines.count || ![existingInstance.displayName isEqualToString:instance.displayName] || ![existingInstance.providerIdentifier isEqualToString:instance.providerIdentifier]) {
                         //instance has updated
                         [_instances replaceObjectAtIndex:idx withObject:instance];
-                        [self.delegate vagrantManager:self instanceUpdated:existingInstance withInstance:instance];
+                        [self instanceUpdated:existingInstance withInstance:instance];
                         
                     } else {
                         
@@ -144,14 +158,14 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(VagrantManager, sharedManager);
                             if(!existingMachine || ![existingMachine.stateString isEqualToString:machine.stateString]) {
                                 //machine did not exist, or state has changed
                                 [_instances replaceObjectAtIndex:idx withObject:instance];
-                                [self.delegate vagrantManager:self instanceUpdated:existingInstance withInstance:instance];
+                                [self instanceUpdated:existingInstance withInstance:instance];
                             }
                         }
                     }
                 } else {
                     //new instance
                     [_instances addObject:instance];
-                    [self.delegate vagrantManager:self instanceAdded:instance];
+                    [self instanceAdded:instance];
                 }
                 
                 //add path to list for pruning stale instances
@@ -167,7 +181,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(VagrantManager, sharedManager);
         VagrantInstance *instance = [_instances objectAtIndex:i];
         if(![validPaths containsObject:instance.path]) {
             [_instances removeObjectAtIndex:i];
-            [self.delegate vagrantManager:self instanceRemoved:instance];
+            [self instanceRemoved:instance];
             
             //TODO: "last seen" functionality may have to be implemented here as well so that this instance doesn't disappear from the list during this pass
         }
@@ -239,4 +253,282 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(VagrantManager, sharedManager);
     [self.instances makeObjectsPerformSelector:@selector(checkRelatedPackage)];
 }
 
+
+#pragma mark - VAGRANT MACHINE CONTROL
+- (void)haltRefreshTimer {
+    if (self.refreshTimer) {
+        [self.refreshTimer invalidate];
+        self.refreshTimer = nil;
+    }
+}
+
+- (void)refreshTimerState {
+    
+    [self haltRefreshTimer];
+    
+    //if ([[NSUserDefaults standardUserDefaults] boolForKey:@"refreshEvery"])
+    {
+        self.refreshTimer =
+        [NSTimer
+         scheduledTimerWithTimeInterval:30//[[NSUserDefaults standardUserDefaults] integerForKey:@"refreshEveryInterval"]
+         target:self
+         selector:@selector(refreshVagrantMachines)
+         userInfo:nil
+         repeats:YES];
+    }
+}
+
+- (void)updateRunningVmCount {
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kVAGRANT_MANAGER_UPDATE_RUNNING_VM_COUNT
+     object:nil
+     userInfo:@{kPOCKET_CLUSTER_LIVE_NODE_COUNT: [NSNumber numberWithUnsignedInteger:[self getRunningVmCount]]}];
+}
+
+- (void)updateInstancesCount {
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kVAGRANT_MANAGER_UPDATE_INSTANCES_COUNT
+     object:nil
+     userInfo:@{kPOCKET_CLUSTER_NODE_COUNT: [NSNumber numberWithUnsignedInteger:[[self getInstances] count]]}];
+}
+
+- (void)refreshVagrantMachines {
+    //only run if not already refreshing
+    if(!isRefreshingVagrantMachines) {
+        isRefreshingVagrantMachines = YES;
+        
+        WEAK_SELF(self);
+        
+        //tell popup controller refreshing has started
+        [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_REFRESHING_STARTED object:nil];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            //tell manager to refresh all instances
+            [belf refreshInstances];
+            
+            //TODO: refactor!
+            [belf refreshInstanceRelatedPackages];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                //tell popup controller refreshing has ended
+                isRefreshingVagrantMachines = NO;
+                [[NSNotificationCenter defaultCenter] postNotificationName:kVAGRANT_MANAGER_REFRESHING_ENDED object:nil];
+                [belf updateInstancesCount];
+                [belf updateRunningVmCount];
+                
+                if(queuedRefreshes > 0) {
+                    --queuedRefreshes;
+                    [belf refreshVagrantMachines];
+                }
+            });
+        });
+    } else {
+        ++queuedRefreshes;
+    }
+}
+
+
+#pragma mark - VAGRANT INSTANCE NOTIFIACTION
+- (void)instanceAdded:(VagrantInstance *)instance {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:kVAGRANT_MANAGER_INSTANCE_ADDED
+         object:nil
+         userInfo:@{kVAGRANT_MANAGER_INSTANCE: instance}];
+    });
+}
+
+- (void)instanceRemoved:(VagrantInstance *)instance {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:kVAGRANT_MANAGER_INSTANCE_REMOVED
+         object:nil
+         userInfo:@{kVAGRANT_MANAGER_INSTANCE: instance}];
+    });
+}
+
+- (void)instanceUpdated:(VagrantInstance *)oldInstance withInstance:(VagrantInstance *)newInstance {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:kVAGRANT_MANAGER_INSTANCE_UPDATED
+         object:nil
+         userInfo:@{kVAGRANT_MANAGER_INSTANCE_OLD:oldInstance,
+                    kVAGRANT_MANAGER_INSTANCE_NEW:newInstance}];
+    });
+}
+
+#pragma mark - VAGRANT ACTION METHODS
+- (void)runVagrantCustomCommand:(NSString*)command withMachine:(VagrantMachine*)machine {
+    
+    Assert([NSThread isMainThread], @"runVagrantCustomCommand:withMachine: should run in Main Thread");
+    
+    NSTask *task = [[NSTask alloc] init];
+    [task setLaunchPath:@"/bin/bash"];
+    
+    NSString *taskCommand = [NSString stringWithFormat:@"cd %@; vagrant ssh %@ -c %@", [Util escapeShellArg:machine.instance.path], [Util escapeShellArg:machine.name], [Util escapeShellArg:command]];
+    
+    [task setArguments:@[@"-l", @"-c", taskCommand]];
+    
+    TaskOutputWindow *outputWindow = [[TaskOutputWindow alloc] initWithWindowNibName:@"TaskOutputWindow"];
+    outputWindow.task = task;
+    outputWindow.taskCommand = taskCommand;
+    outputWindow.target = machine;
+    outputWindow.taskAction = command;
+    
+    [NSApp activateIgnoringOtherApps:YES];
+    [outputWindow showWindow:[Util getApp]];
+    
+    [[Util getApp] addOpenWindow:outputWindow];
+}
+
+- (void)runVagrantAction:(NSString*)action withMachine:(VagrantMachine*)machine {
+    
+    Assert([NSThread isMainThread], @"runVagrantAction:withMachine: should run in Main Thread");
+    
+    NSMutableArray *commandParts = [[NSMutableArray alloc] init];
+    
+    if([action isEqualToString:@"up"]) {
+        [commandParts addObject:@"vagrant up"];
+        if(machine.instance.providerIdentifier) {
+            [commandParts addObject:[NSString stringWithFormat:@"--provider=%@", machine.instance.providerIdentifier]];
+        }
+    } else if([action isEqualToString:@"up-provision"]) {
+        [commandParts addObject:@"vagrant up --provision"];
+        if(machine.instance.providerIdentifier) {
+            [commandParts addObject:[NSString stringWithFormat:@"--provider=%@", machine.instance.providerIdentifier]];
+        }
+    } else if([action isEqualToString:@"reload"]) {
+        [commandParts addObject:@"vagrant reload"];
+    } else if([action isEqualToString:@"suspend"]) {
+        [commandParts addObject:@"vagrant suspend"];
+    } else if([action isEqualToString:@"halt"]) {
+        [commandParts addObject:@"vagrant halt"];
+    } else if([action isEqualToString:@"provision"]) {
+        [commandParts addObject:@"vagrant provision"];
+    } else if([action isEqualToString:@"destroy"]) {
+        [commandParts addObject:@"vagrant destroy -f"];
+    } else if([action isEqualToString:@"rdp"]) {
+        [commandParts addObject:@"vagrant rdp"];
+    } else {
+        return;
+    }
+    
+    [commandParts addObject:@"--no-color"];
+    
+    NSString *command = [commandParts componentsJoinedByString:@" "];
+    
+    NSTask *task = [[NSTask alloc] init];
+    [task setLaunchPath:@"/bin/bash"];
+    
+    NSString *taskCommand = [NSString stringWithFormat:@"cd %@; %@ %@", [Util escapeShellArg:machine.instance.path], command, [Util escapeShellArg:machine.name]];
+    
+    [task setArguments:@[@"-l", @"-c", taskCommand]];
+    
+    TaskOutputWindow *outputWindow = [[TaskOutputWindow alloc] initWithWindowNibName:@"TaskOutputWindow"];
+    outputWindow.task = task;
+    outputWindow.taskCommand = taskCommand;
+    outputWindow.target = machine;
+    outputWindow.taskAction = command;
+    
+    [NSApp activateIgnoringOtherApps:YES];
+    [outputWindow showWindow:[Util getApp]];
+    
+    [[Util getApp] addOpenWindow:outputWindow];
+}
+
+- (void)runVagrantAction:(NSString*)action withInstance:(VagrantInstance*)instance {
+    
+    Assert([NSThread isMainThread], @"runVagrantAction:withInstance: should run in Main Thread");
+    
+    NSMutableArray *commandParts = [[NSMutableArray alloc] init];
+    
+    if([action isEqualToString:@"up"]) {
+        [commandParts addObject:@"vagrant up"];
+        if(instance.providerIdentifier) {
+            [commandParts addObject:[NSString stringWithFormat:@"--provider=%@", instance.providerIdentifier]];
+        }
+    } else if([action isEqualToString:@"up-provision"]) {
+        [commandParts addObject:@"vagrant up --provision"];
+        if(instance.providerIdentifier) {
+            [commandParts addObject:[NSString stringWithFormat:@"--provider=%@", instance.providerIdentifier]];
+        }
+    } else if([action isEqualToString:@"reload"]) {
+        [commandParts addObject:@"vagrant reload"];
+    } else if([action isEqualToString:@"suspend"]) {
+        [commandParts addObject:@"vagrant suspend"];
+    } else if([action isEqualToString:@"halt"]) {
+        [commandParts addObject:@"vagrant halt"];
+    } else if([action isEqualToString:@"provision"]) {
+        [commandParts addObject:@"vagrant provision"];
+    } else if([action isEqualToString:@"destroy"]) {
+        [commandParts addObject:@"vagrant destroy -f"];
+    } else if([action isEqualToString:@"rdp"]) {
+        [commandParts addObject:@"vagrant rdp"];
+    } else {
+        return;
+    }
+    
+    [commandParts addObject:@"--no-color"];
+    
+    NSString *command = [commandParts componentsJoinedByString:@" "];
+    
+    NSTask *task = [[NSTask alloc] init];
+    [task setLaunchPath:@"/bin/bash"];
+    
+    NSString *taskCommand = [NSString stringWithFormat:@"cd %@; %@", [Util escapeShellArg:instance.path], command];
+    
+    [task setArguments:@[@"-c", @"-l", taskCommand]];
+    
+    TaskOutputWindow *outputWindow = [[TaskOutputWindow alloc] initWithWindowNibName:@"TaskOutputWindow"];
+    outputWindow.task = task;
+    outputWindow.taskCommand = taskCommand;
+    outputWindow.target = instance;
+    outputWindow.taskAction = command;
+    
+    [NSApp activateIgnoringOtherApps:YES];
+    [outputWindow showWindow:[Util getApp]];
+    
+    [[Util getApp] addOpenWindow:outputWindow];
+}
+
+- (void)openInstanceInFinder:(VagrantInstance *)instance {
+    NSString *path = instance.path;
+    
+    BOOL isDir = NO;
+    if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] && isDir) {
+        NSURL *fileURL = [NSURL fileURLWithPath:path];
+        [[NSWorkspace sharedWorkspace] openURL:fileURL];
+    } else {
+        [[NSAlert alertWithMessageText:[NSString stringWithFormat:@"Path not found: %@", path] defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@""] runModal];
+    }
+}
+
+- (void)openInstanceInTerminal:(VagrantInstance *)instance {
+    NSString *path = instance.path;
+    
+    BOOL isDir = NO;
+    if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] && isDir) {
+        [Util runTerminalCommand:[NSString stringWithFormat:@"cd %@", [Util escapeShellArg:path]]];
+    } else {
+        [[NSAlert alertWithMessageText:[NSString stringWithFormat:@"Path not found: %@", path] defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@""] runModal];
+    }
+}
+
+#pragma mark - NativeMenu Delegate
+- (void)performVagrantAction:(NSString *)action withInstance:(VagrantInstance *)instance {
+    if([action isEqualToString:@"ssh"]) {
+        NSString *action = [NSString stringWithFormat:@"cd %@; vagrant ssh", [Util escapeShellArg:instance.path]];
+        [Util runTerminalCommand:action];
+    } else {
+        [self runVagrantAction:action withInstance:instance];
+    }
+}
+
+- (void)performVagrantAction:(NSString *)action withMachine:(VagrantMachine *)machine {
+    if([action isEqualToString:@"ssh"]) {
+        NSString *action = [NSString stringWithFormat:@"cd %@; vagrant ssh %@", [Util escapeShellArg:machine.instance.path], machine.name];
+        [Util runTerminalCommand:action];
+    } else {
+        [self runVagrantAction:action withMachine:machine];
+    }
+}
 @end
