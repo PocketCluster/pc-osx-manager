@@ -68,10 +68,10 @@
         self.nodeList = [NSMutableArray arrayWithCapacity:0];
         self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Setting up basic configurations...",@10.0]
                           ,@"SUDO_SETUP_DONE":@[@"Finishing basic configurations...",@20.0]
-                          ,@"USER_SETUP_STEP_0":@[@"Setting up Raspberry PIs...",@30.0]
-                          ,@"USER_SETUP_STEP_1":@[@"Setting up Raspberry PIs...",@70.0]
-                          ,@"USER_SETUP_STEP_2":@[@"Finalizing...",@90.0]
-                          ,@"USER_SETUP_DONE":@[@"Installing Java to Raspberry Pi Nodes.",@95.0]};
+                          ,@"USER_SETUP_STEP_0":@[@"Create config files ...",@30.0]
+                          ,@"USER_SETUP_STEP_1":@[@"Setting up login credential...",@40.0]
+                          ,@"USER_SETUP_STEP_2":@[@"Coalescing Raspberry PI nodes...",@60.0]
+                          ,@"USER_SETUP_DONE":@[@"Installing Java to Raspberry Pi Nodes.",@80.0]};
 
         [self resetToInitialState];
         [[RaspberryManager sharedManager] addAgentDelegateToQueue:self];
