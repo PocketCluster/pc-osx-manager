@@ -13,14 +13,16 @@
 #import "NativeMenuItem.h"
 #import "PCConstants.h"
 #import "Util.h"
+#import "PCPkgInstallWC.h"
 
 @interface NativeMenu : NSObject <NativeMenuItemDelegate,NSMenuDelegate>{
 @private
     __weak DPSetupWC *_setupWindow;
-    PCPrefWC *_preferencesWindow;
-    AboutWindow *_aboutWindow;
+    PCPrefWC         *_preferencesWindow;
+    AboutWindow      *_aboutWindow;
+    PCPkgInstallWC   *_installWindow;
 
-    NSStatusItem *_statusItem;
+    NSStatusItem     *_statusItem;
     NSMenu *_menu;
 
     NSMenuItem *_clusterSetupMenuItem;
@@ -32,7 +34,7 @@
 @property (nonatomic, weak) DPSetupWC *setupWindow;
 @property (nonatomic, strong) PCPrefWC *preferencesWindow;
 @property (nonatomic, strong) AboutWindow *aboutWindow;
-
+@property (nonatomic, strong) PCPkgInstallWC *installWindow;
 @property (nonatomic, strong) NSStatusItem *statusItem;
 @property (nonatomic, strong) NSMenu *menu;
 
@@ -46,6 +48,8 @@
 - (void)vagrantRegisterNotifications;
 - (void)deregisterNotifications;
 - (void)setIsRefreshing:(BOOL)isRefreshing;
+
+- (void)openInstallWindow:(id)sender;
 
 - (void)alertBaseLibraryDeficiency;
 - (void)alertBaseLibraryJava;

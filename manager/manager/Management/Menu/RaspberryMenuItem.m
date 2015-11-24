@@ -12,15 +12,22 @@
 #import "PCTask.h"
 
 @interface RaspberryMenuItem()<PCTaskDelegate>
-
 @property (nonatomic, strong) PCTask *makeSwapTask;
 @property (nonatomic, strong) PCTask *shutdownTask;
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem;
+- (void)makeSwap:(NSMenuItem *)sender;
+- (void)shutdownAllNode:(NSMenuItem*)sender;
+- (void)sshInstance:(NSMenuItem*)sender;
+- (void)openPackageInstallWindow:(NSMenuItem *)sender;
 @end
 
 @implementation RaspberryMenuItem{
     NSMenuItem *_instanceHaltMenuItem;
     NSMenuItem *_makeSwapSpaceItem;
+
     NSMenuItem *_separator;
+    NSMenuItem *_installPackage;
     NSMutableArray *_packageMenuItems;
 }
 
@@ -54,50 +61,70 @@
             [self.menuItem.submenu addItem:_makeSwapSpaceItem];
         }
         
-        if(!_separator){
-            _separator = [NSMenuItem separatorItem];
-            [self.menuItem.submenu addItem:_separator];
-        }
-
-        if (!_packageMenuItems) {
-            _packageMenuItems = [[NSMutableArray<PCPackageMenuItem *> alloc] init];
-            
-            for (PCPackageMeta *meta in self.rpiCluster.relatedPackages){                
-                PCPackageMenuItem *mi = [[PCPackageMenuItem alloc] initWithMetaPackage:meta];
-                [_packageMenuItems addObject:mi];
-                [self.menuItem.submenu addItem:mi.packageItem];
-            }
-        }
-        
         NSUInteger runningCount = [self.rpiCluster liveRaspberryCount];
         NSUInteger raspberryCount = [self.rpiCluster raspberryCount];
         
         if(raspberryCount) {
-
-            if(runningCount == 0) {
-                self.menuItem.image = [NSImage imageNamed:@"status_icon_off"];
-                [_instanceHaltMenuItem setHidden:YES];
-                if(![self.rpiCluster swapHasMade]){
-                    [_makeSwapSpaceItem setHidden:YES];
-                }
-
-            } else {
-                self.menuItem.image = [NSImage imageNamed:@"status_icon_on"];
-                [_instanceHaltMenuItem setHidden:NO];
+        
+            
+            if(!_separator){
+                _separator = [NSMenuItem separatorItem];
+                [self.menuItem.submenu addItem:_separator];
+            }
+            
+            if(!_installPackage){
+                _installPackage = [[NSMenuItem alloc] initWithTitle:@"Install Package" action:@selector(openPackageInstallWindow:) keyEquivalent:@""];
+                _installPackage.target = self;
+                _installPackage.image = [NSImage imageNamed:@"ssh"];
+                [_installPackage.image setTemplate:YES];
+                [self.menuItem.submenu addItem:_installPackage];
+            }
+            
+            if (!_packageMenuItems) {
+                _packageMenuItems = [[NSMutableArray<PCPackageMenuItem *> alloc] init];
                 
-                if(![self.rpiCluster swapHasMade]){
-                    [_makeSwapSpaceItem setHidden:NO];
+                for (PCPackageMeta *meta in self.rpiCluster.relatedPackages){
+                    PCPackageMenuItem *mi = [[PCPackageMenuItem alloc] initWithMetaPackage:meta];
+                    [_packageMenuItems addObject:mi];
+                    [self.menuItem.submenu addItem:mi.packageItem];
                 }
             }
             
-            if(runningCount){
+            if(runningCount == 0) {
+                self.menuItem.image = [NSImage imageNamed:@"status_icon_off"];
+                [_instanceHaltMenuItem setHidden:YES];
+            } else {
+                self.menuItem.image = [NSImage imageNamed:@"status_icon_on"];
+                [_instanceHaltMenuItem setHidden:NO];
+            }
+
+            // swap space handling
+            if([self.rpiCluster swapHasMade]){
+                [_makeSwapSpaceItem setHidden:YES];
+            }else{
+                if (runningCount == raspberryCount) {
+                    [_makeSwapSpaceItem setHidden:NO];
+                    [_makeSwapSpaceItem setEnabled:YES];
+                }else if (0 < runningCount) {
+                    [_makeSwapSpaceItem setHidden:NO];
+                    [_makeSwapSpaceItem setEnabled:NO];
+                }else{
+                    [_makeSwapSpaceItem setHidden:YES];
+                }
+            }
+
+            
+            if(runningCount == raspberryCount){
+                
                 [_separator setHidden:NO];
+                [_installPackage setHidden: NO];
                 for(PCPackageMenuItem *item in _packageMenuItems){
                     [item.packageItem setHidden:NO];
                     [item refreshProcStatus];
                 }
             }else{
                 [_separator setHidden:YES];
+                [_installPackage setHidden:YES];
                 for(PCPackageMenuItem *item in _packageMenuItems){
                     [item.packageItem setHidden:YES];
                 }
@@ -128,6 +155,8 @@
 
         [_makeSwapSpaceItem setEnabled:NO];
         [_makeSwapSpaceItem setHidden:YES];
+        
+        [_installPackage setEnabled:YES];
         for(PCPackageMenuItem *item in _packageMenuItems) {
             [item.packageItem setEnabled:YES];
         }
@@ -156,6 +185,7 @@
       informativeTextWithFormat:@""] runModal];
     
     [_makeSwapSpaceItem setEnabled:NO];
+    [_installPackage setEnabled:NO];
     for(PCPackageMenuItem *item in _packageMenuItems) {
         [item.packageItem setEnabled:NO];
     }
@@ -182,12 +212,17 @@
     task.delegate = self;
     self.shutdownTask = task;
     [task launchTask];
-    
 }
 
 - (void)sshInstance:(NSMenuItem*)sender {
     if (CHECK_DELEGATE_EXECUTION(self.delegate, @protocol(RaspberryMenuItemDelegate), @selector(raspberryMenuItemSSHNode:))){
         [self.delegate raspberryMenuItemSSHNode:self];
+    }
+}
+
+-(void)openPackageInstallWindow:(NSMenuItem *)sender {
+    if (CHECK_DELEGATE_EXECUTION(self.delegate, @protocol(RaspberryMenuItemDelegate), @selector(raspberryMenuItemOpenPackageInstall:))){
+        [self.delegate raspberryMenuItemOpenPackageInstall:self];
     }
 }
 

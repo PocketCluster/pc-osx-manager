@@ -131,6 +131,10 @@
 -(void)raspberryMenuItemSSHNode:(RaspberryMenuItem *)aMenuItem {
 }
 
+-(void)raspberryMenuItemOpenPackageInstall:(RaspberryMenuItem *)aMenuItem {
+    [self openInstallWindow:aMenuItem];
+}
+
 #pragma mark - MISC
 - (RaspberryMenuItem *)menuItemForCluster:(RaspberryCluster *)aNode {
     for (RaspberryMenuItem *rpiMenuItem in _menuItems) {

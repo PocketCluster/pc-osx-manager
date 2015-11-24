@@ -14,8 +14,9 @@
 
 @protocol RaspberryMenuItemDelegate <NSObject>
 @optional
--(void)raspberryMenuItemShutdownAll:(RaspberryMenuItem *)aMenuItem;
--(void)raspberryMenuItemSSHNode:(RaspberryMenuItem *)aMenuItem;
+- (void)raspberryMenuItemShutdownAll:(RaspberryMenuItem *)aMenuItem;
+- (void)raspberryMenuItemSSHNode:(RaspberryMenuItem *)aMenuItem;
+- (void)raspberryMenuItemOpenPackageInstall:(RaspberryMenuItem *)aMenuItem;
 @end
 
 @interface RaspberryMenuItem : NSObject <NSMenuDelegate>

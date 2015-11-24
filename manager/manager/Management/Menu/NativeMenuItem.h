@@ -16,6 +16,7 @@
 - (void)nativeMenuItemSuspendAllMachines:(NativeMenuItem*)menuItem;
 - (void)nativeMenuItemHaltAllMachines:(NativeMenuItem*)menuItem;
 - (void)nativeMenuItemSSHInstance:(NativeMenuItem*)menuItem;
+- (void)nativeMenuItemOpenPackageInstall:(NativeMenuItem *)menuItem;
 @end
 
 @interface NativeMenuItem : NSObject <NSMenuDelegate>

@@ -62,7 +62,7 @@
 @synthesize setupWindow = _setupWindow;
 @synthesize preferencesWindow = _preferencesWindow;
 @synthesize aboutWindow = _aboutWindow;
-
+@synthesize installWindow = _installWindow;
 @synthesize statusItem = _statusItem;
 @synthesize menu = _menu;
 
@@ -260,6 +260,11 @@
     [self performAction:@"suspend" withMachine:machine];
 }
 
+- (void)nativeMenuItemOpenPackageInstall:(NativeMenuItem *)menuItem {
+    [self openInstallWindow:menuItem];
+}
+
+
 #pragma mark - Menu Item Click Handlers
 - (void)refreshMenuItemClicked:(id)sender {
     [[VagrantManager sharedManager] refreshVagrantMachines];
@@ -309,6 +314,18 @@
         [NSApp activateIgnoringOtherApps:YES];
         [_aboutWindow showWindow:self];
         [[Util getApp] addOpenWindow:_aboutWindow];
+    }
+}
+
+-(void)openInstallWindow:(id)sender {
+    if(_installWindow && !_installWindow.isClosed) {
+        [NSApp activateIgnoringOtherApps:YES];
+        [_installWindow showWindow:self];
+    }else{
+        _installWindow = [[PCPkgInstallWC alloc] initWithWindowNibName:@"PCPkgInstallWC"];
+        [NSApp activateIgnoringOtherApps:YES];
+        [_installWindow showWindow:self];
+        [[Util getApp] addOpenWindow:_installWindow];
     }
 }
 
