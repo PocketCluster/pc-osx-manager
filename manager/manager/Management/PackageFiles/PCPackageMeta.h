@@ -93,6 +93,9 @@ extern NSString * const kPCPackageVersionProcessCheck;
                    basePath:(NSString *)aBasePath
                  completion:(void (^)(NSString *URL, NSURL *filePath))completionBlock
                     onError:(void (^)(NSString *URL, NSError *error))errorBlock;
+
+// test methods
++ (NSURLSessionDataTask *)WIPPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block;
 @end
 
 @interface PCPackageMeta (NSCoding) <NSCoding>

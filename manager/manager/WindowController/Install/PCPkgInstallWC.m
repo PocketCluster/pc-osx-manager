@@ -20,8 +20,12 @@
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
 
 @property (nonatomic, strong) PCTask *saltMasterInstallTask;
+@property (nonatomic, strong) PCTask *saltSecondInstallTask;
 @property (nonatomic, strong) PCTask *saltMinionInstallTask;
+
 @property (nonatomic, strong) PCTask *saltMasterCompleteTask;
+@property (nonatomic, strong) PCTask *saltSecondCompleteTask;
+@property (nonatomic, strong) PCTask *saltNodeCompleteTask;
 
 @property (nonatomic, strong) PCTask *saltJobTask;
 
@@ -49,9 +53,11 @@
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 }
 
--(instancetype)init {
-    self = [super init];
+-(instancetype)initWithWindowNibName:(NSString *)windowNibName {
+
+    self = [super initWithWindowNibName:windowNibName];
     if(self){
+
         self.packageList = [NSMutableArray arrayWithCapacity:0];
         self.downloadFileList = [NSMutableArray arrayWithCapacity:0];
         
@@ -60,7 +66,12 @@
         [self resetToInitialState];
         
         WEAK_SELF(self);
+
+#ifdef DEBUG
+        [PCPackageMeta WIPPackageListWithBlock:^(NSArray<PCPackageMeta *> *packages, NSError *error) {
+#else
         [PCPackageMeta metaPackageListWithBlock:^(NSArray<PCPackageMeta *> *packages, NSError *error) {
+#endif
             if(belf != nil){
                 [belf.packageList addObjectsFromArray:packages];
                 [belf.packageTable reloadData];
@@ -380,78 +391,120 @@
         if(!belf){
             return;
         }
-        
+
         NSString *mpath = [meta.masterDownloadPath objectAtIndex:0];
+        NSString *spath = [meta.secondaryDownloadPath objectAtIndex:0];
         NSString *npath = [meta.nodeDownloadPath objectAtIndex:0];
+
         NSString *mBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,mpath];
+        NSString *sBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,spath];
         NSString *nBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,npath];
         
         [PCPackageMeta makeIntermediateDirectories:mBasePath];
+        [PCPackageMeta makeIntermediateDirectories:sBasePath];
         [PCPackageMeta makeIntermediateDirectories:nBasePath];
         
         [PCPackageMeta
          packageFileListOn:mpath
          WithBlock:^(NSArray<NSString *> *mFileList, NSError *mError) {
              
+             // master files download
              if(belf && !mError){
-                 
                  [belf.downloadFileList addObjectsFromArray:mFileList];
                  
                  [PCPackageMeta
-                  packageFileListOn:npath
-                  WithBlock:^(NSArray<NSString *> *nFileList, NSError *nError) {
+                  packageFileListOn:spath
+                  WithBlock:^(NSArray<NSString *> *sFileList, NSError *sError) {
                       
-                      if(belf && !nError){
+                      // secondary files download
+                      if(belf && !mError){
+                          [belf.downloadFileList addObjectsFromArray:sFileList];
                           
-                          [belf.downloadFileList addObjectsFromArray:nFileList];
-                          
-                          for(NSString *mFile in mFileList){
-                              [PCPackageMeta
-                               downloadFileFromURL:mFile
-                               basePath:mBasePath
-                               completion:^(NSString *URL, NSURL *filePath) {
-                                   
-                                   if(belf){
-                                       
-                                       [belf.downloadFileList removeObject:URL];
-                                       
-                                       Log(@"%@ %ld",URL, [belf.downloadFileList count]);
-                                       
-                                       if([belf.downloadFileList count] == 0){
-                                           [belf performSelector:@selector(startInstallProcessWithMasterNode) withObject:nil afterDelay:0.0];
-                                       }
-                                       
+                          [PCPackageMeta
+                           packageFileListOn:npath
+                           WithBlock:^(NSArray<NSString *> *nFileList, NSError *nError) {
+                               
+                               // node files download
+                               if(belf && !nError){
+                                   [belf.downloadFileList addObjectsFromArray:nFileList];
+                               
+
+                                   for(NSString *mFile in mFileList){
+                                       [PCPackageMeta
+                                        downloadFileFromURL:mFile
+                                        basePath:mBasePath
+                                        completion:^(NSString *URL, NSURL *filePath) {
+                                            
+                                            if(belf){
+                                                
+                                                [belf.downloadFileList removeObject:URL];
+                                                
+                                                Log(@"%@ %ld",URL, [belf.downloadFileList count]);
+                                                
+                                                if([belf.downloadFileList count] == 0){
+                                                    [belf performSelector:@selector(startInstallProcessWithMasterNode) withObject:nil afterDelay:0.0];
+                                                }
+                                                
+                                            }
+                                        }
+                                        onError:^(NSString *URL, NSError *error) {
+                                            Log(@"Master - %@",[error description]);
+                                            [belf resetUIForFailure];
+                                        }];
                                    }
-                               }
-                               onError:^(NSString *URL, NSError *error) {
-                                   Log(@"Master - %@",[error description]);
-                                   [belf resetUIForFailure];
-                               }];
-                          }
-                          
-                          for(NSString *nFile in nFileList){
-                              [PCPackageMeta
-                               downloadFileFromURL:nFile
-                               basePath:nBasePath
-                               completion:^(NSString *URL, NSURL *filePath) {
                                    
-                                   if(belf){
-                                       [belf.downloadFileList removeObject:URL];
-                                       
-                                       Log(@"%@ %ld",URL, [belf.downloadFileList count]);
-                                       
-                                       if([belf.downloadFileList count] == 0){
-                                           [belf performSelector:@selector(startInstallProcessWithMasterNode) withObject:nil afterDelay:0.0];
-                                       }
+                                   for(NSString *sFile in mFileList){
+                                       [PCPackageMeta
+                                        downloadFileFromURL:sFile
+                                        basePath:sBasePath
+                                        completion:^(NSString *URL, NSURL *filePath) {
+                                            
+                                            if(belf){
+                                                
+                                                [belf.downloadFileList removeObject:URL];
+                                                
+                                                Log(@"%@ %ld",URL, [belf.downloadFileList count]);
+                                                
+                                                if([belf.downloadFileList count] == 0){
+                                                    [belf performSelector:@selector(startInstallProcessWithMasterNode) withObject:nil afterDelay:0.0];
+                                                }
+                                                
+                                            }
+                                        }
+                                        onError:^(NSString *URL, NSError *error) {
+                                            Log(@"Secondary - %@",[error description]);
+                                            [belf resetUIForFailure];
+                                        }];
                                    }
-                               }
-                               onError:^(NSString *URL, NSError *error) {
-                                   Log(@"Node - %@",[error description]);
+
+                                   for(NSString *nFile in nFileList){
+                                       [PCPackageMeta
+                                        downloadFileFromURL:nFile
+                                        basePath:nBasePath
+                                        completion:^(NSString *URL, NSURL *filePath) {
+                                            
+                                            if(belf){
+                                                [belf.downloadFileList removeObject:URL];
+                                                
+                                                Log(@"%@ %ld",URL, [belf.downloadFileList count]);
+                                                
+                                                if([belf.downloadFileList count] == 0){
+                                                    [belf performSelector:@selector(startInstallProcessWithMasterNode) withObject:nil afterDelay:0.0];
+                                                }
+                                            }
+                                        }
+                                        onError:^(NSString *URL, NSError *error) {
+                                            Log(@"Node - %@",[error description]);
+                                            [belf resetUIForFailure];
+                                        }];
+                                   }
+                                   
+                               } else {
                                    [belf resetUIForFailure];
-                               }];
-                          }
+                               }
+                           }];
                           
-                      } else {
+                      }else{
                           [belf resetUIForFailure];
                       }
                   }];

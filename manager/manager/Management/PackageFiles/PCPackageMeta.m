@@ -191,82 +191,108 @@ static NSString * const kGithubRawFileLinkURL               = @"download_url";
 @end
 
 @implementation PCPackageMeta
+
++ (void (^)(NSURLSessionDataTask *, id))metaPackageParserWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))metaListBlock {
+    
+#if 0
+    void (^parser)(NSURLSessionDataTask*, id) = ^(NSURLSessionDataTask* __unused task , id JSON) {
+        
+    };
+#endif
+    
+    return [^void(NSURLSessionDataTask* __unused task , id JSON) {
+        NSMutableArray<PCPackageMeta *> *metaList = [NSMutableArray arrayWithCapacity:0];
+        NSArray *parray = (NSArray *)JSON;
+        for (NSDictionary *pi in parray){
+            
+            NSString *pMeta = [pi objectForKey:kPCPackageMetaVersion];
+            NSString *pName = [pi objectForKey:kPCPackageName];
+            NSString *pDesc = [pi objectForKey:kDescription];
+            NSArray  *pFami = [pi objectForKey:kPCPackageFamily];
+            
+            NSArray  *pVers = [pi objectForKey:kPCPackageVersions];
+            for (NSDictionary *version in pVers){
+                
+                NSString *vNum   = [version objectForKey:kPCPackageVersionNumber];
+                NSString *vDesc  = [version objectForKey:kDescription];
+                
+                NSArray *vModes = [version objectForKey:kPCPackageVersionModes];
+                for (NSDictionary *mode in vModes){
+                    
+                    PCPackageMeta *meta = [[PCPackageMeta alloc] init];
+                    
+                    meta.clusterRelation        = @"";
+                    
+                    meta.metaVersion            = pMeta;
+                    meta.packageName            = pName;
+                    meta.family                 = pFami;
+                    meta.packageDescription     = [NSString stringWithFormat:@"%@ %@ %@", pDesc, vDesc, [mode objectForKey:kDescription]];
+                    
+                    meta.packageId              = [mode objectForKey:kPCPackageVersionId];
+                    meta.version                = vNum;
+                    meta.modeType               = [mode objectForKey:kPCPackageVersionModesType];
+                    meta.ports                  = [mode objectForKey:kPCPackageVersionPort];
+                    meta.libraryDependencies    = [mode objectForKey:kPCPackageVersionLibraryDep];
+                    meta.bigPkgDependencies     = [mode objectForKey:kPCPackageVersionBigpkgDep];
+                    
+                    meta.masterInstallPath      = [mode objectForKey:kPCPackageVersionMasterInstallPath];
+                    meta.secondaryInstallPath   = [mode objectForKey:kPCPackageVersionSecondaryInstallPath];
+                    meta.nodeInstallPath        = [mode objectForKey:kPCPackageVersionNodeInstallPath];
+                    
+                    meta.masterCompletePath     = [mode objectForKey:kPCPackageVersionMasterCompletePath];
+                    meta.secondaryCompletePath  = [mode objectForKey:kPCPackageVersionSecondaryCompletePath];
+                    meta.nodeCompletePath       = [mode objectForKey:kPCPackageVersionNodeCompletePath];
+                    
+                    meta.masterDownloadPath     = [mode objectForKey:kPCPackageVersionMasterDownload];
+                    meta.secondaryDownloadPath  = [mode objectForKey:kPCPackageVersionSecondaryDownload];
+                    meta.nodeDownloadPath       = [mode objectForKey:kPCPackageVersionNodeDownload];
+                    
+                    meta.masterResetCmd         = [mode objectForKey:kPCPackageVersionMasterResetCmd];
+                    meta.secondaryResetCmd      = [mode objectForKey:kPCPackageVersionSecondaryResetCmd];
+                    meta.nodeResetCmd           = [mode objectForKey:kPCPackageVersionNodesResetCmd];
+                    
+                    meta.masterUninstallCmd     = [mode objectForKey:kPCPackageVersionMasterUninstallCmd];
+                    meta.secondaryUninstallCmd  = [mode objectForKey:kPCPackageVersionSecondaryUninstallCmd];
+                    meta.nodeUninstallCmd       = [mode objectForKey:kPCPackageVersionNodesUninstallCmd];
+                    
+                    meta.startScript            = [mode objectForKey:kPCPackageVersionStartScript];
+                    meta.stopScript             = [mode objectForKey:kPCPackageVersionStopScript];
+                    meta.cmdScript              = [mode objectForKey:kPCPackageVersionCmdScript];
+                    
+                    meta.processCheck           = [mode objectForKey:kPCPackageVersionProcessCheck];
+                    
+                    [metaList addObject:meta];
+                }
+            }
+        }
+
+        if (metaListBlock != nil) {
+            metaListBlock(metaList, nil);
+        }
+    } copy];
+    
+}
+
+
 #pragma mark - Class Methods
 + (NSURLSessionDataTask *)metaPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block {
     return [[PCFormulaClient sharedGithubRawFileClient]
             GET:@"meta/packages.json"
             parameters:nil
-            success:^(NSURLSessionDataTask * __unused task, id JSON){
-
-                NSMutableArray<PCPackageMeta *> *metaList = [NSMutableArray arrayWithCapacity:0];
-                NSArray *parray = (NSArray *)JSON;
-                for (NSDictionary *pi in parray){
-                    
-                    NSString *pMeta = [pi objectForKey:kPCPackageMetaVersion];
-                    NSString *pName = [pi objectForKey:kPCPackageName];
-                    NSString *pDesc = [pi objectForKey:kDescription];
-                    NSArray  *pFami = [pi objectForKey:kPCPackageFamily];
-                    
-                    NSArray  *pVers = [pi objectForKey:kPCPackageVersions];
-                    for (NSDictionary *version in pVers){
-                        
-                        NSString *vNum   = [version objectForKey:kPCPackageVersionNumber];
-                        NSString *vDesc  = [version objectForKey:kDescription];
-                        
-                        NSArray *vModes = [version objectForKey:kPCPackageVersionModes];
-                        for (NSDictionary *mode in vModes){
-
-                            PCPackageMeta *meta = [[PCPackageMeta alloc] init];
-                            
-                            meta.clusterRelation        = @"";
-
-                            meta.metaVersion            = pMeta;
-                            meta.packageName            = pName;
-                            meta.family                 = pFami;
-                            meta.packageDescription     = [NSString stringWithFormat:@"%@ %@ %@", pDesc, vDesc, [mode objectForKey:kDescription]];
-
-                            meta.packageId              = [mode objectForKey:kPCPackageVersionId];
-                            meta.version                = vNum;
-                            meta.modeType               = [mode objectForKey:kPCPackageVersionModesType];
-                            meta.ports                  = [mode objectForKey:kPCPackageVersionPort];
-                            meta.libraryDependencies    = [mode objectForKey:kPCPackageVersionLibraryDep];
-                            meta.bigPkgDependencies     = [mode objectForKey:kPCPackageVersionBigpkgDep];
-                            
-                            meta.masterInstallPath      = [mode objectForKey:kPCPackageVersionMasterInstallPath];
-                            meta.secondaryInstallPath   = [mode objectForKey:kPCPackageVersionSecondaryInstallPath];
-                            meta.nodeInstallPath        = [mode objectForKey:kPCPackageVersionNodeInstallPath];
-
-                            meta.masterCompletePath     = [mode objectForKey:kPCPackageVersionMasterCompletePath];
-                            meta.secondaryCompletePath  = [mode objectForKey:kPCPackageVersionSecondaryCompletePath];
-                            meta.nodeCompletePath       = [mode objectForKey:kPCPackageVersionNodeCompletePath];
-
-                            meta.masterDownloadPath     = [mode objectForKey:kPCPackageVersionMasterDownload];
-                            meta.secondaryDownloadPath  = [mode objectForKey:kPCPackageVersionSecondaryDownload];
-                            meta.nodeDownloadPath       = [mode objectForKey:kPCPackageVersionNodeDownload];
-
-                            meta.masterResetCmd         = [mode objectForKey:kPCPackageVersionMasterResetCmd];
-                            meta.secondaryResetCmd      = [mode objectForKey:kPCPackageVersionSecondaryResetCmd];
-                            meta.nodeResetCmd           = [mode objectForKey:kPCPackageVersionNodesResetCmd];
-                            
-                            meta.masterUninstallCmd     = [mode objectForKey:kPCPackageVersionMasterUninstallCmd];
-                            meta.secondaryUninstallCmd  = [mode objectForKey:kPCPackageVersionSecondaryUninstallCmd];
-                            meta.nodeUninstallCmd       = [mode objectForKey:kPCPackageVersionNodesUninstallCmd];
-                            
-                            meta.startScript            = [mode objectForKey:kPCPackageVersionStartScript];
-                            meta.stopScript             = [mode objectForKey:kPCPackageVersionStopScript];
-                            meta.cmdScript              = [mode objectForKey:kPCPackageVersionCmdScript];
-                            
-                            meta.processCheck           = [mode objectForKey:kPCPackageVersionProcessCheck];
-
-                            [metaList addObject:meta];
-                        }
-                    }
-                }
-                
+            success:[PCPackageMeta metaPackageParserWithBlock:block]
+            failure:^(NSURLSessionDataTask *__unused task, NSError *error) {
                 if (block) {
-                    block(metaList, nil);
+                    block([NSArray array], error);
                 }
-            } failure:^(NSURLSessionDataTask *__unused task, NSError *error) {
+            }];
+}
+
++ (NSURLSessionDataTask *)WIPPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block {
+    return [[PCFormulaClient sharedWIPRawFileClient]
+            GET:@"meta/packages.json"
+            parameters:nil
+            success:[PCPackageMeta metaPackageParserWithBlock:block]
+            failure:^(NSURLSessionDataTask *__unused task, NSError *error) {
                 if (block) {
                     block([NSArray array], error);
                 }

@@ -26,8 +26,9 @@ static NSString * const PCGithubAPIBaseURLString = @"https://api.github.com/repo
 
 static NSString * const PCGithubRawFileURLString = @"https://raw.githubusercontent.com/PocketCluster/formulas/master/";
 
-@implementation PCFormulaClient
+static NSString * const PCWIPRawFileURLString = @"https://raw.githubusercontent.com/PocketCluster/WIP/master/";
 
+@implementation PCFormulaClient
 + (instancetype)sharedGithubAPIClient {
     static PCFormulaClient *_sharedGithubAPIClient = nil;
     static dispatch_once_t onceToken;
@@ -48,6 +49,17 @@ static NSString * const PCGithubRawFileURLString = @"https://raw.githubuserconte
         _sharedGithubRawFileClient.responseSerializer.acceptableContentTypes = [NSSet setWithArray:@[@"text/plain", @"text/plain",@"application/json"]];
     });
     return _sharedGithubRawFileClient;
+}
+
++ (instancetype)sharedWIPRawFileClient {
+    static PCFormulaClient *_sharedWIPRawFileClient = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _sharedWIPRawFileClient = [[PCFormulaClient alloc] initWithBaseURL:[NSURL URLWithString:PCWIPRawFileURLString]];
+        _sharedWIPRawFileClient.securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+        _sharedWIPRawFileClient.responseSerializer.acceptableContentTypes = [NSSet setWithArray:@[@"text/plain", @"text/plain",@"application/json"]];
+    });
+    return _sharedWIPRawFileClient;
 }
 
 + (AFURLSessionManager *)sharedDownloadManager {

@@ -32,17 +32,6 @@
                     <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="muz-af-7e9">
                         <rect key="frame" x="0.0" y="0.0" width="415" height="345"/>
                         <subviews>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XCg-lm-pPE">
-                                <rect key="frame" x="166" y="7" width="82" height="32"/>
-                                <animations/>
-                                <buttonCell key="cell" type="push" title="Install" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5fy-x7-9fc">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="install:" target="-2" id="SRP-GW-RQ4"/>
-                                </connections>
-                            </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rhE-Ng-ayJ">
                                 <rect key="frame" x="52" y="292" width="311" height="44"/>
                                 <animations/>
@@ -55,7 +44,7 @@
                             <scrollView fixedFrame="YES" borderType="none" autohidesScrollers="YES" horizontalLineScroll="42" horizontalPageScroll="10" verticalLineScroll="42" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fGf-zy-BWX">
                                 <rect key="frame" x="20" y="80" width="375" height="141"/>
                                 <clipView key="contentView" ambiguous="YES" id="t3K-4K-0Id">
-                                    <rect key="frame" x="0.0" y="23" width="375" height="118"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="141"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="40" rowSizeStyle="automatic" headerView="Tqv-rE-ufg" viewBased="YES" id="Uhi-Gf-3Ba">
@@ -101,6 +90,10 @@
                                                     </prototypeCellViews>
                                                 </tableColumn>
                                             </tableColumns>
+                                            <connections>
+                                                <outlet property="dataSource" destination="-2" id="2hk-4Q-mR7"/>
+                                                <outlet property="delegate" destination="-2" id="POQ-Af-xEW"/>
+                                            </connections>
                                         </tableView>
                                     </subviews>
                                     <animations/>
@@ -152,6 +145,28 @@ This process will take some time. Please be patient and do not cancel during ins
                                 <rect key="frame" x="20" y="41" width="375" height="20"/>
                                 <animations/>
                             </progressIndicator>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BUU-ew-BbU">
+                                <rect key="frame" x="320" y="7" width="81" height="32"/>
+                                <animations/>
+                                <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="QDI-cV-53z">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="performClose:" target="F0z-JX-Cv5" id="XxU-Ac-GxK"/>
+                                </connections>
+                            </button>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XCg-lm-pPE">
+                                <rect key="frame" x="244" y="7" width="82" height="32"/>
+                                <animations/>
+                                <buttonCell key="cell" type="push" title="Install" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5fy-x7-9fc">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="install:" target="-2" id="SRP-GW-RQ4"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <animations/>
                     </customView>
