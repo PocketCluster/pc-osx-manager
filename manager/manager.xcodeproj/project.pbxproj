@@ -206,6 +206,12 @@
 		04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
 		04C585871BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
 		04C585881BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
+		04C59E2D1C04041400265688 /* PCPkgInstallWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C59E2B1C04041400265688 /* PCPkgInstallWC.m */; };
+		04C59E2E1C04041400265688 /* PCPkgInstallWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C59E2B1C04041400265688 /* PCPkgInstallWC.m */; };
+		04C59E2F1C04041400265688 /* PCPkgInstallWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C59E2B1C04041400265688 /* PCPkgInstallWC.m */; };
+		04C59E301C04041400265688 /* PCPkgInstallWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C59E2C1C04041400265688 /* PCPkgInstallWC.xib */; };
+		04C59E311C04041400265688 /* PCPkgInstallWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C59E2C1C04041400265688 /* PCPkgInstallWC.xib */; };
+		04C59E321C04041400265688 /* PCPkgInstallWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04C59E2C1C04041400265688 /* PCPkgInstallWC.xib */; };
 		04C601981BE3B040002389AB /* VagrantInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018D1BE3B040002389AB /* VagrantInstance.m */; };
 		04C601991BE3B040002389AB /* VagrantInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018D1BE3B040002389AB /* VagrantInstance.m */; };
 		04C6019A1BE3B040002389AB /* VagrantInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6018D1BE3B040002389AB /* VagrantInstance.m */; };
@@ -446,6 +452,9 @@
 		04C585851BE5BF3B004B2839 /* PCConstants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCConstants.m; sourceTree = "<group>"; };
 		04C5858E1BE6357B004B2839 /* NSManagedObjectContext+FetchAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSManagedObjectContext+FetchAdditions.h"; sourceTree = "<group>"; };
 		04C5858F1BE6357B004B2839 /* NSManagedObjectContext+FetchAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObjectContext+FetchAdditions.m"; sourceTree = "<group>"; };
+		04C59E2A1C04041400265688 /* PCPkgInstallWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPkgInstallWC.h; sourceTree = "<group>"; };
+		04C59E2B1C04041400265688 /* PCPkgInstallWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPkgInstallWC.m; sourceTree = "<group>"; };
+		04C59E2C1C04041400265688 /* PCPkgInstallWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCPkgInstallWC.xib; sourceTree = "<group>"; };
 		04C6018C1BE3B040002389AB /* VagrantInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VagrantInstance.h; sourceTree = "<group>"; };
 		04C6018D1BE3B040002389AB /* VagrantInstance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VagrantInstance.m; sourceTree = "<group>"; };
 		04C6018E1BE3B040002389AB /* VagrantManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VagrantManager.m; sourceTree = "<group>"; };
@@ -666,6 +675,7 @@
 			children = (
 				046A35B61BD783CE004E0946 /* BaseWindowController.h */,
 				046A35B71BD783CE004E0946 /* BaseWindowController.m */,
+				04C59E291C04039400265688 /* Install */,
 				0422D4E61BDA067100C5CB33 /* TaskOutput */,
 				046A36781BD793F7004E0946 /* Setup */,
 				04C09D5D1BE35EBE009E074D /* Preferences */,
@@ -1012,6 +1022,16 @@
 			path = CoreData;
 			sourceTree = "<group>";
 		};
+		04C59E291C04039400265688 /* Install */ = {
+			isa = PBXGroup;
+			children = (
+				04C59E2A1C04041400265688 /* PCPkgInstallWC.h */,
+				04C59E2B1C04041400265688 /* PCPkgInstallWC.m */,
+				04C59E2C1C04041400265688 /* PCPkgInstallWC.xib */,
+			);
+			path = Install;
+			sourceTree = "<group>";
+		};
 		04C601AF1BE3B0FA002389AB /* Virtualbox */ = {
 			isa = PBXGroup;
 			children = (
@@ -1249,6 +1269,7 @@
 				0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */,
 				046A36631BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */,
 				046A368D1BD795AC004E0946 /* DPSetupWC.xib in Resources */,
+				04C59E301C04041400265688 /* PCPkgInstallWC.xib in Resources */,
 				046F960D1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib in Resources */,
 				041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				04C09D641BE35EDF009E074D /* PCPrefWC.xib in Resources */,
@@ -1269,6 +1290,7 @@
 				046A36641BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */,
 				04C09D651BE35EDF009E074D /* PCPrefWC.xib in Resources */,
 				046A366A1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */,
+				04C59E311C04041400265688 /* PCPkgInstallWC.xib in Resources */,
 				046A36701BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
 				0422D4EE1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */,
 				046A365E1BD793BB004E0946 /* PCSetup1VC.xib in Resources */,
@@ -1289,6 +1311,7 @@
 				046A36651BD793BB004E0946 /* PCSetup2RPVC.xib in Resources */,
 				04C09D661BE35EDF009E074D /* PCPrefWC.xib in Resources */,
 				046A366B1BD793BB004E0946 /* PCSetup2VVVC.xib in Resources */,
+				04C59E321C04041400265688 /* PCPkgInstallWC.xib in Resources */,
 				046A36711BD793BB004E0946 /* PCSetup3VC.xib in Resources */,
 				0422D4EF1BDA067100C5CB33 /* TaskOutputWindow.xib in Resources */,
 				046A365F1BD793BB004E0946 /* PCSetup1VC.xib in Resources */,
@@ -1424,6 +1447,7 @@
 				046A366C1BD793BB004E0946 /* PCSetup3VC.m in Sources */,
 				04C601B41BE3B0FA002389AB /* VirtualBoxMachineInfo.m in Sources */,
 				043790B71BF30B27003F97DE /* PCPackageMenuItem.m in Sources */,
+				04C59E2D1C04041400265688 /* PCPkgInstallWC.m in Sources */,
 				049622F11BE778E200FD577A /* PCProcManager.m in Sources */,
 				04D407391BDBC51F00625AD7 /* LinkInterfaces.m in Sources */,
 				041C46AE1BE3674C000D1521 /* SSSelectableToolbarItem.m in Sources */,
@@ -1490,6 +1514,7 @@
 				04F705771BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A368B1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				046A361E1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
+				04C59E2E1C04041400265688 /* PCPkgInstallWC.m in Sources */,
 				041C46AC1BE3674C000D1521 /* SSSelectableToolbar.m in Sources */,
 				04C09D621BE35EDF009E074D /* PCPrefWC.m in Sources */,
 				046F96051BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
@@ -1555,6 +1580,7 @@
 				04F705781BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A368C1BD795AC004E0946 /* DPSetupWC.m in Sources */,
 				046A361F1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
+				04C59E2F1C04041400265688 /* PCPkgInstallWC.m in Sources */,
 				041C46AD1BE3674C000D1521 /* SSSelectableToolbar.m in Sources */,
 				04C09D631BE35EDF009E074D /* PCPrefWC.m in Sources */,
 				046F96061BDDBB65006AA8EE /* PCTaskOutputWindow.m in Sources */,
