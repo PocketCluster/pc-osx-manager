@@ -8,6 +8,7 @@
         <customObject id="-2" userLabel="File's Owner" customClass="PCPkgInstallWC">
             <connections>
                 <outlet property="circularProgress" destination="xmB-uV-C5e" id="ZcA-JU-VAW"/>
+                <outlet property="closeBtn" destination="BUU-ew-BbU" id="rxD-92-o9l"/>
                 <outlet property="installBtn" destination="XCg-lm-pPE" id="DyW-Z9-5n6"/>
                 <outlet property="packageTable" destination="Uhi-Gf-3Ba" id="Lf1-Sg-4a3"/>
                 <outlet property="progressBar" destination="yue-Sf-roN" id="Qjd-Fq-PGg"/>
@@ -33,10 +34,10 @@
                         <rect key="frame" x="0.0" y="0.0" width="415" height="345"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rhE-Ng-ayJ">
-                                <rect key="frame" x="52" y="292" width="311" height="44"/>
+                                <rect key="frame" x="52" y="307" width="311" height="29"/>
                                 <animations/>
                                 <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" title="Package Installation" id="wbm-Wv-jNR">
-                                    <font key="font" metaFont="systemMedium" size="32"/>
+                                    <font key="font" metaFont="systemMedium" size="24"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
@@ -121,7 +122,7 @@
                                 <animations/>
                             </progressIndicator>
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YdZ-ff-34A">
-                                <rect key="frame" x="18" y="229" width="379" height="68"/>
+                                <rect key="frame" x="18" y="229" width="379" height="77"/>
                                 <animations/>
                                 <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" id="Qwe-FZ-lmD">
                                     <font key="font" metaFont="system"/>

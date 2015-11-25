@@ -15,6 +15,7 @@
 @property (nonatomic, weak) IBOutlet NSTableView *packageTable;
 @property (nonatomic, weak) IBOutlet NSTextField *progressLabel;
 @property (nonatomic, weak) IBOutlet NSButton *installBtn;
+@property (nonatomic, weak) IBOutlet NSButton *closeBtn;
 
 - (IBAction)install:(id)sender;
 

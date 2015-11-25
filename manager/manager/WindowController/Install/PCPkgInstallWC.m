@@ -21,7 +21,7 @@
 
 @property (nonatomic, strong) PCTask *saltMasterInstallTask;
 @property (nonatomic, strong) PCTask *saltSecondInstallTask;
-@property (nonatomic, strong) PCTask *saltMinionInstallTask;
+@property (nonatomic, strong) PCTask *saltNodeInstallTask;
 
 @property (nonatomic, strong) PCTask *saltMasterCompleteTask;
 @property (nonatomic, strong) PCTask *saltSecondCompleteTask;
@@ -29,15 +29,22 @@
 
 @property (nonatomic, strong) PCTask *saltJobTask;
 
+- (NSUInteger)getNodeCount;
+
+- (void)resetToInitialState;
 - (void)setUIToProceedState;
 - (void)resetUIForFailure;
 - (void)setToNextStage;
 - (void)setProgMessage:(NSString *)aMessage value:(double)aValue;
 
 - (void)checkLiveSaltJob;
-- (void)startInstallProcessWithMasterNode;
-- (void)nodeInstallProcess;
-- (void)masterCompleteProcess;
+- (void)startInstallProcessForMaster;
+- (void)startInstallProcessForSecondary;
+- (void)startInstallProcessForNode:(NSUInteger)aStartNode;
+
+- (void)startCompletionForMaster;
+- (void)startCompletionForSecondary;
+- (void)startCompletionForNode:(NSUInteger)aStartNode;
 - (void)finalizeInstallProcess;
 
 - (void)downloadMetaFiles;
@@ -69,14 +76,19 @@
 
 #ifdef DEBUG
         [PCPackageMeta WIPPackageListWithBlock:^(NSArray<PCPackageMeta *> *packages, NSError *error) {
-#else
-        [PCPackageMeta metaPackageListWithBlock:^(NSArray<PCPackageMeta *> *packages, NSError *error) {
-#endif
             if(belf != nil){
                 [belf.packageList addObjectsFromArray:packages];
                 [belf.packageTable reloadData];
             }
         }];
+#else
+        [PCPackageMeta metaPackageListWithBlock:^(NSArray<PCPackageMeta *> *packages, NSError *error) {
+            if(belf != nil){
+                [belf.packageList addObjectsFromArray:packages];
+                [belf.packageTable reloadData];
+            }
+        }];
+#endif
     }
     return self;
 }
@@ -131,27 +143,77 @@
                     [self downloadMetaFiles];
                     break;
                 }
-                    
+
                 case PI_MASTER_INSTALL:{
                     
-                    _install_marker = PI_NODE_INSTALL;
-                    [self nodeInstallProcess];
+                    // if secondary install script exists
+                    if ([[self.packageList objectAtIndex:0].secondaryInstallPath count]){
+                        _install_marker = PI_SECONDARY_INSTALL;
+                        [self startInstallProcessForSecondary];
+                        
+                    // if secondary install script DNE
+                    }else{
+                        _install_marker = PI_NODE_INSTALL;
+                        [self startInstallProcessForNode:1];
+                    }
+                    
                     break;
                 }
                     
+                    
+                case PI_SECONDARY_INSTALL:{
+
+                    _install_marker = PI_NODE_INSTALL;
+                    [self startInstallProcessForNode:2];
+                    break;
+                }
+
                 case PI_NODE_INSTALL: {
                     
                     _install_marker = PI_MASTER_COMPLETE;
-                    [self masterCompleteProcess];
+                    [self startCompletionForMaster];
                     break;
                 }
                     
                 case PI_MASTER_COMPLETE: {
                     
+                    // if secondary complete script exists
+                    if ([[self.packageList objectAtIndex:0].secondaryCompletePath count]){
+                        
+                        _install_marker = PI_SECONDARY_COMPLETE;
+                        [self startCompletionForSecondary];
+                        
+                        // if secondary complete script DNE
+                    }else{
+                        
+                        // if node complete script exists
+                        if([[self.packageList objectAtIndex:0].nodeCompletePath count]){
+                            
+                            _install_marker = PI_NODE_COMPLETE;
+                            [self startCompletionForNode:1];
+                            
+                            // if node complete script DNE
+                        }else{
+                            _install_marker = PI_FINALIZE_INSTALL;
+                            [self finalizeInstallProcess];
+                        }
+                    }
+                    
+                    break;
+                }
+                    
+                case PI_SECONDARY_COMPLETE: {
+                    _install_marker = PI_NODE_COMPLETE;
+                    [self startCompletionForNode:2];
+                    break;
+                }
+                    
+                case PI_NODE_COMPLETE: {
                     _install_marker = PI_FINALIZE_INSTALL;
                     [self finalizeInstallProcess];
                     break;
                 }
+                
                 case PI_FINALIZE_INSTALL:
                 default:
                     break;
@@ -159,11 +221,25 @@
         }
     }
     
+    
+    
+    
+    
     if(self.saltMasterInstallTask == aPCTask ){
         
         if(term_status == 0){
-            _install_marker = PI_NODE_INSTALL;
-            [self nodeInstallProcess];
+            
+            // if secondary install script exists
+            if ([[self.packageList objectAtIndex:0].secondaryInstallPath count]){
+                _install_marker = PI_SECONDARY_INSTALL;
+                [self startInstallProcessForSecondary];
+                
+            // if secondary install script DNE
+            }else{
+                _install_marker = PI_NODE_INSTALL;
+                [self startInstallProcessForNode:1];
+            }
+
         } else {
             Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].masterInstallPath objectAtIndex:0]);
             [self checkLiveSaltJob];
@@ -172,25 +248,60 @@
         self.saltMasterInstallTask = nil;
     }
     
-    if(self.saltMinionInstallTask == aPCTask){
+    
+    if(self.saltSecondInstallTask == aPCTask){
+
+        if(term_status == 0){
+            _install_marker = PI_NODE_INSTALL;
+            [self startInstallProcessForNode:2];
+        }else{
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].secondaryInstallPath objectAtIndex:0]);
+            [self checkLiveSaltJob];
+        }
+
+        self.saltSecondInstallTask = nil;
+    }
+    
+    if(self.saltNodeInstallTask == aPCTask){
         
         if (term_status == 0){
             _install_marker = PI_MASTER_COMPLETE;
-            [self masterCompleteProcess];
+            [self startCompletionForMaster];
         } else {
             Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].nodeInstallPath objectAtIndex:0]);
             [self checkLiveSaltJob];
         }
         
-        self.saltMinionInstallTask = nil;
+        self.saltNodeInstallTask = nil;
     }
     
     
     if (self.saltMasterCompleteTask == aPCTask) {
         
         if (term_status == 0){
-            _install_marker = PI_FINALIZE_INSTALL;
-            [self finalizeInstallProcess];
+            
+            // if secondary complete script exists
+            if ([[self.packageList objectAtIndex:0].secondaryCompletePath count]){
+                
+                _install_marker = PI_SECONDARY_COMPLETE;
+                [self startCompletionForSecondary];
+
+            // if secondary complete script DNE
+            }else{
+
+                // if node complete script exists
+                if([[self.packageList objectAtIndex:0].nodeCompletePath count]){
+
+                    _install_marker = PI_NODE_COMPLETE;
+                    [self startCompletionForNode:1];
+
+                // if node complete script DNE
+                }else{
+                    _install_marker = PI_FINALIZE_INSTALL;
+                    [self finalizeInstallProcess];
+                }
+            }
+            
         } else {
             Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].masterCompletePath objectAtIndex:0]);
             [self checkLiveSaltJob];
@@ -198,6 +309,35 @@
         
         self.saltMasterCompleteTask = nil;
     }
+    
+    
+    if(self.saltSecondCompleteTask == aPCTask) {
+        
+        if(term_status == 0){
+            _install_marker = PI_NODE_COMPLETE;
+            [self startCompletionForNode:2];
+        }else{
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].secondaryCompletePath objectAtIndex:0]);
+            [self checkLiveSaltJob];
+        }
+
+        self.saltSecondCompleteTask = nil;
+    }
+    
+    if(self.saltNodeCompleteTask == aPCTask) {
+        
+        if(term_status == 0){
+            _install_marker = PI_FINALIZE_INSTALL;
+            [self finalizeInstallProcess];
+        }else {
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].nodeCompletePath objectAtIndex:0]);
+            [self checkLiveSaltJob];
+        }
+
+        self.saltNodeCompleteTask = nil;
+    }
+    
+    
     
 }
 
@@ -224,96 +364,9 @@
 -(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
     return NO;
 }
+#pragma mark - Utils
 
-#pragma mark - DPSetupWindowDelegate
--(void)resetToInitialState {
-
-}
-
-- (NSString *)continueButtonTitle {
-    return @"Finish";
-}
-
-#pragma mark - Setup UI status
-- (void)setUIToProceedState {
-    
-    [self resetToInitialState];
-    [self.installBtn setEnabled:NO];
-    [self.circularProgress startAnimation:nil];
-    
-}
-
--(void)resetUIForFailure {
-    
-    [self resetToInitialState];
-    [self.installBtn setEnabled:YES];
-    [self.progressLabel setStringValue:@"Installation Error. Please try again."];
-    [self.circularProgress stopAnimation:nil];
-    [self.progressBar setDoubleValue:0.0];
-    [self.progressBar displayIfNeeded];
-    
-}
-
--(void)setToNextStage {
-        
-    [self setProgMessage:@"Installation completed!" value:100.0];
-    [self.installBtn setEnabled:NO];
-    [self.circularProgress stopAnimation:nil];
-}
-
--(void)setProgMessage:(NSString *)aMessage value:(double)aValue {
-    
-    [self.circularProgress startAnimation:nil];
-    [self.progressLabel setStringValue:aMessage];
-    [self.progressBar setDoubleValue:aValue];
-    [self.progressBar displayIfNeeded];
-    
-}
-
-#pragma mark - INSTALL FLOW CONTROL
-
-- (void)checkLiveSaltJob {
-    
-    _isJobStillRunning = NO;
-    
-    PCTask *clsjt = [PCTask new];
-    clsjt.taskCommand = @"salt-run jobs.active";
-    clsjt.delegate = self;
-    self.saltJobTask = clsjt;
-    
-    [clsjt performSelector:@selector(launchTask) withObject:nil afterDelay:5.0];
-}
-
--(void)startInstallProcessWithMasterNode {
-    
-    [self setProgMessage:@"Setting up master node..." value:40.0];
-    
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
-    PCTask *smt = [PCTask new];
-    smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-master\' state.sls %@",[meta.masterInstallPath objectAtIndex:0]];
-    smt.delegate = self;
-    self.saltMasterInstallTask = smt;
-    
-    [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
-}
-
-- (void)nodeInstallProcess {
-    
-    [self setProgMessage:@"Setting up slave nodes..." value:60.0];
-    
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
-    PCTask *smt = [PCTask new];
-    smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-node*\' state.sls %@", [meta.nodeInstallPath objectAtIndex:0]];
-    smt.delegate = self;
-    self.saltMinionInstallTask = smt;
-    [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
-}
-
-
-- (void)masterCompleteProcess {
-    
-    [self setProgMessage:@"Finishing master node..." value:80.0];
-    
+-(NSUInteger)getNodeCount {
     NSUInteger nc = 3;
     PCClusterType t = [[Util getApp] loadClusterType];
     switch (t) {
@@ -327,8 +380,116 @@
         }
         case PC_CLUSTER_NONE:
         default:
+            nc = 0;
             break;
     }
+    
+    return nc;
+}
+
+
+#pragma mark - UI status
+-(void)resetToInitialState {
+    [self.installBtn setEnabled:YES];
+    [self.closeBtn setEnabled:YES];
+}
+
+- (void)setUIToProceedState {
+    [self resetToInitialState];
+    [self.installBtn setEnabled:NO];
+    [self.circularProgress startAnimation:nil];
+}
+
+-(void)resetUIForFailure {
+    [self resetToInitialState];
+    [self.installBtn setEnabled:YES];
+    [self.progressLabel setStringValue:@"Installation Error. Please try again."];
+    [self.circularProgress stopAnimation:nil];
+    [self.progressBar setDoubleValue:0.0];
+    [self.progressBar displayIfNeeded];
+}
+
+-(void)setToNextStage {
+    [self setProgMessage:@"Installation completed!" value:100.0];
+    [self.installBtn setEnabled:NO];
+    [self.circularProgress stopAnimation:nil];
+}
+
+-(void)setProgMessage:(NSString *)aMessage value:(double)aValue {
+    [self.circularProgress startAnimation:nil];
+    [self.progressLabel setStringValue:aMessage];
+    [self.progressBar setDoubleValue:aValue];
+    [self.progressBar displayIfNeeded];
+}
+
+#pragma mark - INSTALL FLOW CONTROL
+- (void)checkLiveSaltJob {
+    
+    _isJobStillRunning = NO;
+    
+    PCTask *clsjt = [PCTask new];
+    clsjt.taskCommand = @"salt-run jobs.active";
+    clsjt.delegate = self;
+    self.saltJobTask = clsjt;
+    
+    [clsjt performSelector:@selector(launchTask) withObject:nil afterDelay:5.0];
+}
+
+-(void)startInstallProcessForMaster {
+    
+    [self setProgMessage:@"Setting up master node..." value:40.0];
+    
+    NSUInteger nc = [self getNodeCount];
+    if(nc == 0){return;}
+    
+    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    PCTask *smt = [PCTask new];
+    smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-master\' state.sls %@ pillar=\'{numnodes: %ld}\'",[meta.masterInstallPath objectAtIndex:0],nc];
+    smt.delegate = self;
+    self.saltMasterInstallTask = smt;
+    
+    [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+}
+
+-(void)startInstallProcessForSecondary {
+    
+    [self setProgMessage:@"Setting up secondary node..." value:50.0];
+    
+    NSUInteger nc = [self getNodeCount];
+    if(nc == 0){return;}
+    
+    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    PCTask *smt = [PCTask new];
+    smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-node1\' state.sls %@ pillar=\'{numnodes: %ld}\'",[meta.secondaryInstallPath objectAtIndex:0],nc];
+    smt.delegate = self;
+    self.saltSecondInstallTask = smt;
+
+    [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+}
+
+- (void)startInstallProcessForNode:(NSUInteger)aStartNode {
+    
+    [self setProgMessage:@"Setting up slave nodes..." value:60.0];
+    
+    NSUInteger nc = [self getNodeCount];
+    if(nc == 0){return;}
+
+    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    PCTask *snt = [PCTask new];
+    snt.taskCommand = [NSString stringWithFormat:@"salt \'pc-node[%ld-%ld]\' state.sls %@ pillar=\'{numnodes: %ld}\'",aStartNode,nc,[meta.nodeInstallPath objectAtIndex:0],nc];
+    snt.delegate = self;
+    self.saltNodeInstallTask = snt;
+    [snt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+}
+
+#pragma mark - COMPLETION FLOW CONTROL
+
+- (void)startCompletionForMaster {
+    
+    [self setProgMessage:@"Finishing master node..." value:70.0];
+    
+    NSUInteger nc = [self getNodeCount];
+    if(nc == 0){return;}
     
     PCPackageMeta *meta = [self.packageList objectAtIndex:0];
     PCTask *smc = [PCTask new];
@@ -339,6 +500,34 @@
     
 }
 
+- (void)startCompletionForSecondary {
+
+    [self setProgMessage:@"Finishing Secondary node..." value:80.0];
+    
+    NSUInteger nc = [self getNodeCount];
+    if(nc == 0){return;}
+
+    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    PCTask *ssc = [PCTask new];
+    ssc.taskCommand = [NSString stringWithFormat:@"salt \'pc-node1\' state.sls %@ pillar=\'{numnodes: %ld}\'", [meta.secondaryCompletePath objectAtIndex:0], nc];
+    ssc.delegate = self;
+    self.saltMasterCompleteTask = ssc;
+    [ssc performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+}
+
+- (void)startCompletionForNode:(NSUInteger)aStartNode {
+    [self setProgMessage:@"Finishing Rest of Node..." value:90.0];
+    
+    NSUInteger nc = [self getNodeCount];
+    if(nc == 0){return;}
+
+    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    PCTask *snc = [PCTask new];
+    snc.taskCommand = [NSString stringWithFormat:@"salt \'pc-node[%ld-%ld]\' state.sls %@ pillar=\'{numnodes: %ld}\'",aStartNode, nc, [meta.nodeCompletePath objectAtIndex:0], nc];
+    snc.delegate = self;
+    self.saltMasterCompleteTask = snc;
+    [snc performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+}
 
 -(void)finalizeInstallProcess {
     
@@ -442,7 +631,7 @@
                                                 Log(@"%@ %ld",URL, [belf.downloadFileList count]);
                                                 
                                                 if([belf.downloadFileList count] == 0){
-                                                    [belf performSelector:@selector(startInstallProcessWithMasterNode) withObject:nil afterDelay:0.0];
+                                                    [belf performSelector:@selector(startInstallProcessForMaster) withObject:nil afterDelay:0.0];
                                                 }
                                                 
                                             }
@@ -466,7 +655,7 @@
                                                 Log(@"%@ %ld",URL, [belf.downloadFileList count]);
                                                 
                                                 if([belf.downloadFileList count] == 0){
-                                                    [belf performSelector:@selector(startInstallProcessWithMasterNode) withObject:nil afterDelay:0.0];
+                                                    [belf performSelector:@selector(startInstallProcessForMaster) withObject:nil afterDelay:0.0];
                                                 }
                                                 
                                             }
@@ -489,7 +678,7 @@
                                                 Log(@"%@ %ld",URL, [belf.downloadFileList count]);
                                                 
                                                 if([belf.downloadFileList count] == 0){
-                                                    [belf performSelector:@selector(startInstallProcessWithMasterNode) withObject:nil afterDelay:0.0];
+                                                    [belf performSelector:@selector(startInstallProcessForMaster) withObject:nil afterDelay:0.0];
                                                 }
                                             }
                                         }
