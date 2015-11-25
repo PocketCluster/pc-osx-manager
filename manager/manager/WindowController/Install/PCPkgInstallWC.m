@@ -132,8 +132,8 @@
         if(_isJobStillRunning){
             
             [self checkLiveSaltJob];
-            
-            // no job is running. let's proceed
+
+        // no job is running. let's proceed
         }else{
             
             switch (_install_marker) {
@@ -148,28 +148,37 @@
                     
                     // if secondary install script exists
                     if ([[self.packageList objectAtIndex:0].secondaryInstallPath count]){
+                        
                         _install_marker = PI_SECONDARY_INSTALL;
                         [self startInstallProcessForSecondary];
                         
                     // if secondary install script DNE
                     }else{
-                        _install_marker = PI_NODE_INSTALL;
-                        [self startInstallProcessForNode:1];
+
+                        // if node install script exists
+                        if([[self.packageList objectAtIndex:0].nodeInstallPath count]){
+                            _install_marker = PI_NODE_INSTALL;
+                            [self startInstallProcessForNode:1];
+                            
+                        // if node install script DNE
+                        }else{
+                            _install_marker = PI_MASTER_COMPLETE;
+                            [self startCompletionForMaster];
+                        }
+
                     }
-                    
+
                     break;
                 }
                     
                     
                 case PI_SECONDARY_INSTALL:{
-
                     _install_marker = PI_NODE_INSTALL;
                     [self startInstallProcessForNode:2];
                     break;
                 }
 
                 case PI_NODE_INSTALL: {
-                    
                     _install_marker = PI_MASTER_COMPLETE;
                     [self startCompletionForMaster];
                     break;
@@ -183,22 +192,22 @@
                         _install_marker = PI_SECONDARY_COMPLETE;
                         [self startCompletionForSecondary];
                         
-                        // if secondary complete script DNE
+                    // if secondary complete script DNE
                     }else{
-                        
+
                         // if node complete script exists
                         if([[self.packageList objectAtIndex:0].nodeCompletePath count]){
-                            
+
                             _install_marker = PI_NODE_COMPLETE;
                             [self startCompletionForNode:1];
                             
-                            // if node complete script DNE
+                        // if node complete script DNE
                         }else{
+
                             _install_marker = PI_FINALIZE_INSTALL;
                             [self finalizeInstallProcess];
                         }
                     }
-                    
                     break;
                 }
                     
@@ -231,13 +240,24 @@
             
             // if secondary install script exists
             if ([[self.packageList objectAtIndex:0].secondaryInstallPath count]){
+                
                 _install_marker = PI_SECONDARY_INSTALL;
                 [self startInstallProcessForSecondary];
                 
             // if secondary install script DNE
             }else{
-                _install_marker = PI_NODE_INSTALL;
-                [self startInstallProcessForNode:1];
+                
+                // if node install script exists
+                if([[self.packageList objectAtIndex:0].nodeInstallPath count]){
+                    _install_marker = PI_NODE_INSTALL;
+                    [self startInstallProcessForNode:1];
+                    
+                    // if node install script DNE
+                }else{
+                    _install_marker = PI_MASTER_COMPLETE;
+                    [self startCompletionForMaster];
+                }
+                
             }
 
         } else {
@@ -439,6 +459,10 @@
     
     [self setProgMessage:@"Setting up master node..." value:40.0];
     
+    return;
+    
+    
+
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
     
