@@ -22,11 +22,16 @@
 
 #import "PCFormulaClient.h"
 
-static NSString * const PCGithubAPIBaseURLString = @"https://api.github.com/repos/pocketcluster/formulas/contents/";
+#ifdef DEBUG
+    NSString * const PCGithubAPIBaseURLString = @"https://api.github.com/repos/pocketcluster/WIP/contents/";
+    NSString * const PCGithubRawFileURLString = @"https://raw.githubusercontent.com/PocketCluster/WIP/master/";
+#else
+    #warning THIS IS PRODUCTION URL!
+    NSString * const PCGithubAPIBaseURLString = @"https://api.github.com/repos/pocketcluster/formulas/contents/";
+    NSString * const PCGithubRawFileURLString = @"https://raw.githubusercontent.com/PocketCluster/formulas/master/";
+#endif
 
-static NSString * const PCGithubRawFileURLString = @"https://raw.githubusercontent.com/PocketCluster/formulas/master/";
-
-static NSString * const PCWIPRawFileURLString = @"https://raw.githubusercontent.com/PocketCluster/WIP/master/";
+//static NSString * const PCWIPRawFileURLString = @"https://raw.githubusercontent.com/PocketCluster/WIP/master/";
 
 @implementation PCFormulaClient
 + (instancetype)sharedGithubAPIClient {
@@ -51,6 +56,7 @@ static NSString * const PCWIPRawFileURLString = @"https://raw.githubusercontent.
     return _sharedGithubRawFileClient;
 }
 
+#if 0
 + (instancetype)sharedWIPRawFileClient {
     static PCFormulaClient *_sharedWIPRawFileClient = nil;
     static dispatch_once_t onceToken;
@@ -61,6 +67,7 @@ static NSString * const PCWIPRawFileURLString = @"https://raw.githubusercontent.
     });
     return _sharedWIPRawFileClient;
 }
+#endif
 
 + (AFURLSessionManager *)sharedDownloadManager {
     static AFURLSessionManager *_sharedDownloadManager = nil;

@@ -74,21 +74,12 @@
         
         WEAK_SELF(self);
 
-#ifdef DEBUG
-        [PCPackageMeta WIPPackageListWithBlock:^(NSArray<PCPackageMeta *> *packages, NSError *error) {
-            if(belf != nil){
-                [belf.packageList addObjectsFromArray:packages];
-                [belf.packageTable reloadData];
-            }
-        }];
-#else
         [PCPackageMeta metaPackageListWithBlock:^(NSArray<PCPackageMeta *> *packages, NSError *error) {
             if(belf != nil){
                 [belf.packageList addObjectsFromArray:packages];
                 [belf.packageTable reloadData];
             }
         }];
-#endif
     }
     return self;
 }
@@ -595,27 +586,54 @@
     [self setToNextStage];
 }
 
-- (void)downloadMetaFiles {
+#ifdef USE_INTERCHAINED_METHODS
+#ifdef DEPLAY_SECONDARY_NODE
+//+ (void (^)(NSURLSessionDataTask *, id))metaPackageParserWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))metaListBlock {
+- (void (^)(NSArray<NSString *>*, NSError*))fileListDownloadResult:(void (^)())nextChain {
+
+    WEAK_SELF(self);
+    return [^void(NSArray<NSString *> *fileList, NSError *error) {
+        if(belf && !error){
+            [belf.downloadFileList addObjectsFromArray:fileList];
+
+            if (nextChain != nil) {
+                nextChain();
+            }
+        }
+    } copy];
+}
+#endif
+
+- (void)_downloadMetaFiles {
     WEAK_SELF(self);
     [belf setProgMessage:@"Downloading a meta package..." value:20.0];
     
     for(PCPackageMeta *meta in belf.packageList){
+        
+        NSLog(@"meta %@", meta.packageDescription);
         
         if(!belf){
             return;
         }
 
         NSString *mpath = [meta.masterDownloadPath objectAtIndex:0];
-        NSString *spath = [meta.secondaryDownloadPath objectAtIndex:0];
-        NSString *npath = [meta.nodeDownloadPath objectAtIndex:0];
-
         NSString *mBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,mpath];
-        NSString *sBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,spath];
-        NSString *nBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,npath];
-        
         [PCPackageMeta makeIntermediateDirectories:mBasePath];
-        [PCPackageMeta makeIntermediateDirectories:sBasePath];
-        [PCPackageMeta makeIntermediateDirectories:nBasePath];
+
+#ifdef DEPLAY_SECONDARY_NODE
+        NSString *spath = nil, *sBasePath = nil;
+        if( meta.secondaryDownloadPath.count ){
+            spath = [meta.secondaryDownloadPath objectAtIndex:0];
+            sBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,spath];
+            [PCPackageMeta makeIntermediateDirectories:sBasePath];
+        }
+#endif
+        NSString *npath = nil, *nBasePath = nil;
+        if( meta.nodeDownloadPath.count ){
+            npath = [meta.nodeDownloadPath objectAtIndex:0];
+            nBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,npath];
+            [PCPackageMeta makeIntermediateDirectories:nBasePath];
+        }
         
         [PCPackageMeta
          packageFileListOn:mpath
@@ -624,7 +642,8 @@
              // master files download
              if(belf && !mError){
                  [belf.downloadFileList addObjectsFromArray:mFileList];
-                 
+
+#ifdef DEPLAY_SECONDARY_NODE
                  [PCPackageMeta
                   packageFileListOn:spath
                   WithBlock:^(NSArray<NSString *> *sFileList, NSError *sError) {
@@ -632,7 +651,7 @@
                       // secondary files download
                       if(belf && !mError){
                           [belf.downloadFileList addObjectsFromArray:sFileList];
-                          
+#endif
                           [PCPackageMeta
                            packageFileListOn:npath
                            WithBlock:^(NSArray<NSString *> *nFileList, NSError *nError) {
@@ -640,7 +659,6 @@
                                // node files download
                                if(belf && !nError){
                                    [belf.downloadFileList addObjectsFromArray:nFileList];
-                               
 
                                    for(NSString *mFile in mFileList){
                                        [PCPackageMeta
@@ -665,8 +683,8 @@
                                             [belf resetUIForFailure];
                                         }];
                                    }
-                                   
-                                   for(NSString *sFile in mFileList){
+#ifdef DEPLAY_SECONDARY_NODE
+                                   for(NSString *sFile in sFileList){
                                        [PCPackageMeta
                                         downloadFileFromURL:sFile
                                         basePath:sBasePath
@@ -689,7 +707,7 @@
                                             [belf resetUIForFailure];
                                         }];
                                    }
-
+#endif
                                    for(NSString *nFile in nFileList){
                                        [PCPackageMeta
                                         downloadFileFromURL:nFile
@@ -716,19 +734,165 @@
                                    [belf resetUIForFailure];
                                }
                            }];
-                          
+#ifdef DEPLAY_SECONDARY_NODE
                       }else{
                           [belf resetUIForFailure];
                       }
                   }];
-                 
+#endif
              }else{
                  [belf resetUIForFailure];
              }
          }];
     }
 }
+#endif
 
+- (void)downloadMetaFiles {
+    
+    WEAK_SELF(self);
+    [self setProgMessage:@"Downloading a meta package..." value:20.0];
+    
+    NSMutableArray *mtlst = [NSMutableArray array];
+    __block NSMutableArray *dllst = [NSMutableArray array];
+    __block BOOL hasDownloadEverFailed = NO;
+
+    for(PCPackageMeta *meta in self.packageList){
+        
+        NSString *mpath = [meta.masterDownloadPath objectAtIndex:0];
+        NSString *mBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,mpath];
+        [PCPackageMeta makeIntermediateDirectories:mBasePath];
+
+        id mop = [PCPackageMeta packageFileListOperation:mpath withSucess:^(NSArray<NSString *> *fileList) {
+
+            Log(@"meta files \n%@",fileList);
+            
+            for (NSString *furl in fileList){
+                id dop = [PCPackageMeta
+                          packageFileDownloadOperation:furl
+                          detinationPath:mBasePath
+                          completion:^(NSString *URL, NSURL *filePath) {
+                              
+                              Log(@"%@ DONE",URL);
+                              
+                          } onError:^(NSString *URL, NSError *error) {
+                              
+                              Log(@"Master - %@",[error description]);
+                              hasDownloadEverFailed = YES;
+
+                          }];
+                [dllst addObject:dop];
+            }
+            
+        } withFailure:^(NSError *error) {
+            
+            Log(@"Master - %@",[error description]);
+            hasDownloadEverFailed = YES;
+
+        }];
+        [mtlst addObject:mop];
+        
+        
+        
+        // secondary master files
+        NSString *spath = nil, *sBasePath = nil;
+        if( meta.secondaryDownloadPath.count ){
+            
+            spath = [meta.secondaryDownloadPath objectAtIndex:0];
+            sBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,spath];
+            [PCPackageMeta makeIntermediateDirectories:sBasePath];
+
+            id sop = [PCPackageMeta packageFileListOperation:spath withSucess:^(NSArray<NSString *> *fileList) {
+                
+                Log(@"meta files \n%@",fileList);
+                
+                for (NSString *furl in fileList){
+                    id dop = [PCPackageMeta
+                              packageFileDownloadOperation:furl
+                              detinationPath:sBasePath
+                              completion:^(NSString *URL, NSURL *filePath) {
+                                  
+                                  Log(@"%@ DONE",URL);
+
+                              } onError:^(NSString *URL, NSError *error) {
+
+                                  Log(@"Secondary - %@",[error description]);
+                                  hasDownloadEverFailed = YES;
+
+                              }];
+                    
+                    [dllst addObject:dop];
+                }
+                
+            } withFailure:^(NSError *error) {
+
+                Log(@"Secondary - %@",[error description]);
+                hasDownloadEverFailed = YES;
+
+            }];
+
+            
+            [mtlst addObject:sop];
+        }
+
+        
+        
+        NSString *npath = nil, *nBasePath = nil;
+        if( meta.nodeDownloadPath.count ){
+            
+            npath = [meta.nodeDownloadPath objectAtIndex:0];
+            nBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,npath];
+            [PCPackageMeta makeIntermediateDirectories:nBasePath];
+            
+            id nop = [PCPackageMeta packageFileListOperation:npath withSucess:^(NSArray<NSString *> *fileList) {
+
+                Log(@"meta files \n%@",fileList);
+                
+                for (NSString *furl in fileList){
+                    id dop = [PCPackageMeta
+                              packageFileDownloadOperation:furl
+                              detinationPath:nBasePath
+                              completion:^(NSString *URL, NSURL *filePath) {
+
+                                  Log(@"%@ DONE",URL);
+
+                              } onError:^(NSString *URL, NSError *error) {
+
+                                  Log(@"Node - %@",[error description]);
+                                  hasDownloadEverFailed = YES;
+
+                              }];
+                    [dllst addObject:dop];
+                }
+
+            } withFailure:^(NSError *error) {
+
+                Log(@"Node - %@",[error description]);
+                hasDownloadEverFailed = YES;
+
+            }];
+            [mtlst addObject:nop];
+        }
+    }
+
+    [PCPackageMeta batchDownloadOperation:mtlst
+     progressBlock:^(NSUInteger numberOfFinishedOperations, NSUInteger totalNumberOfOperations){}
+     completionBlock:^(NSArray *operations) {
+
+         [PCPackageMeta
+          batchDownloadOperation:dllst
+          progressBlock:^(NSUInteger numberOfFinishedOperations, NSUInteger totalNumberOfOperations){}
+          completionBlock:^(NSArray *operations) {
+
+              Log(@"filedownload all completed");
+              if(hasDownloadEverFailed){
+                  [belf resetUIForFailure];
+              }else{
+                  [belf performSelector:@selector(startInstallProcessForMaster) withObject:nil afterDelay:0.0];
+              }
+         }];
+     }];
+}
 
 #pragma mark - IBACTION
 -(IBAction)install:(id)sender {

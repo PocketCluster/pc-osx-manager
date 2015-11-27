@@ -21,11 +21,18 @@
 // THE SOFTWARE.
 
 #import "AFHTTPSessionManager.h"
+#import "AFHTTPRequestOperation.h"
+
+extern NSString * const PCGithubAPIBaseURLString;
+extern NSString * const PCGithubRawFileURLString;
 
 @interface PCFormulaClient : AFHTTPSessionManager
 
 + (instancetype)sharedGithubAPIClient;
 + (instancetype)sharedGithubRawFileClient;
-+ (instancetype)sharedWIPRawFileClient;
+//+ (instancetype)sharedWIPRawFileClient;
 + (AFURLSessionManager *)sharedDownloadManager;
+
++ (NSMutableURLRequest *)packageFileListRequest:(NSString *)aPath;
++ (void)batchFileListAquisition;
 @end

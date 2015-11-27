@@ -192,6 +192,26 @@ static NSString * const kGithubRawFileLinkURL               = @"download_url";
 
 @implementation PCPackageMeta
 
+- (NSString *)description {
+    return [NSString stringWithFormat:@"%@ - %@",[super description], [self packageDescription]];
+}
+
++ (BOOL)makeIntermediateDirectories:(NSString *)aPath {
+    NSError *error = nil;
+    BOOL isDirectory;
+    if([[NSFileManager defaultManager] fileExistsAtPath:aPath isDirectory:&isDirectory]){
+        return YES;
+    }
+    
+    BOOL result = [[NSFileManager defaultManager] createDirectoryAtPath:aPath withIntermediateDirectories:YES attributes:nil error:&error];
+    if(!result || error){
+        Log(@"Error: Create folder failed %@ %@", aPath, [error debugDescription]);
+        return NO;
+    }
+    return YES;
+}
+
+
 + (void (^)(NSURLSessionDataTask *, id))metaPackageParserWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))metaListBlock {
     
 #if 0
@@ -273,8 +293,6 @@ static NSString * const kGithubRawFileLinkURL               = @"download_url";
     
 }
 
-
-#pragma mark - Class Methods
 + (NSURLSessionDataTask *)metaPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block {
     return [[PCFormulaClient sharedGithubRawFileClient]
             GET:@"meta/packages.json"
@@ -287,6 +305,7 @@ static NSString * const kGithubRawFileLinkURL               = @"download_url";
             }];
 }
 
+#if 0
 + (NSURLSessionDataTask *)WIPPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block {
     return [[PCFormulaClient sharedWIPRawFileClient]
             GET:@"meta/packages.json"
@@ -298,12 +317,14 @@ static NSString * const kGithubRawFileLinkURL               = @"download_url";
                 }
             }];
 }
+#endif
 
 /*
  * check file list with following commands
  * curl -i https://api.github.com/repos/pocketcluster/formulas/contents/hadoop/2-4-0/datanode/cluster
  */
-+ (NSURLSessionDataTask *)packageFileListOn:(NSString *)aPath WithBlock:(void (^)(NSArray<NSString *> *fileList, NSError *error))block {
++ (NSURLSessionDataTask *)packageFileListOn:(NSString *)aPath
+                                  WithBlock:(void (^)(NSArray<NSString *> *fileList, NSError *error))block {
 
     return [[PCFormulaClient sharedGithubAPIClient]
             GET:aPath
@@ -325,26 +346,6 @@ static NSString * const kGithubRawFileLinkURL               = @"download_url";
                     block([NSArray array], error);
                 }
             }];
-}
-
-
--(NSString *)description {
-    return [NSString stringWithFormat:@"%@ - %@",[super description], [self packageDescription]];
-}
-
-+ (BOOL)makeIntermediateDirectories:(NSString *)aPath {
-    NSError *error = nil;
-    BOOL isDirectory;
-    if([[NSFileManager defaultManager] fileExistsAtPath:aPath isDirectory:&isDirectory]){
-        return YES;
-    }
-
-    BOOL result = [[NSFileManager defaultManager] createDirectoryAtPath:aPath withIntermediateDirectories:YES attributes:nil error:&error];
-    if(!result || error){
-        Log(@"Error: Create folder failed %@ %@", aPath, [error debugDescription]);
-        return NO;
-    }
-    return YES;
 }
 
 + (void) downloadFileFromURL:(NSString *)URL
@@ -371,4 +372,79 @@ static NSString * const kGithubRawFileLinkURL               = @"download_url";
       }] resume];    
 }
 
+#pragma mark BATCH OPERATIONS
++ (id)packageFileListOperation:(NSString *)aPath
+                    withSucess:(void (^)(NSArray<NSString *> *fileList))sucess
+                   withFailure:(void (^)(NSError *error))failure
+{
+    NSURLRequest *req =
+        [NSURLRequest requestWithURL:[NSURL URLWithString:aPath
+                                            relativeToURL:[NSURL URLWithString:PCGithubAPIBaseURLString]]];
+    
+    AFHTTPRequestOperation *op = [[AFHTTPRequestOperation alloc] initWithRequest:req];
+    [op setCompletionBlockWithSuccess:^(AFHTTPRequestOperation * operation, id JSON) {
+        
+        NSMutableArray<NSString *> *fl = [NSMutableArray arrayWithCapacity:0];
+        NSArray *farray = (NSArray *)JSON;
+        
+        for(NSDictionary *fDict in farray) {
+            [fl addObject:[fDict objectForKey:kGithubRawFileLinkURL]];
+        }
+        
+        if(sucess) {
+            sucess(fl);
+        }
+        
+    } failure:^(AFHTTPRequestOperation * _Nonnull operation, NSError * _Nonnull error) {
+        if(failure){
+            failure(error);
+        }
+    }];
+    
+    [op setResponseSerializer:[[PCFormulaClient sharedGithubAPIClient] responseSerializer]];
+    return op;
+}
+
++ (id)packageFileDownloadOperation:(NSString *)aDownloadURL
+                    detinationPath:(NSString *)aBasePath
+                        completion:(void (^)(NSString *URL, NSURL *filePath))completionBlock
+                           onError:(void (^)(NSString *URL, NSError *error))errorBlock {
+
+    __block NSString *fileName = [[aDownloadURL componentsSeparatedByString:@"/"] lastObject];
+    
+    NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:aDownloadURL]];
+    NSURL *destination = [NSURL URLWithString:[NSString stringWithFormat:@"file://%@/%@", aBasePath, fileName]];
+
+    AFHTTPRequestOperation *op = [[AFHTTPRequestOperation alloc] initWithRequest:req];
+    op.responseSerializer = [[PCFormulaClient sharedGithubRawFileClient] responseSerializer];
+    op.outputStream = [NSOutputStream outputStreamWithURL:destination append:NO];
+    op.queuePriority = NSOperationQueuePriorityLow;
+    //[op setDownloadProgressBlock:^(NSUInteger bytesRead, long long totalBytesRead, long long totalBytesExpectedToRead){}];
+    [op setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id  responseObject) {
+        if(completionBlock != nil){
+            completionBlock(aDownloadURL, destination);
+        }
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        //Otherwise return the error block
+        if (errorBlock) {
+            errorBlock(aDownloadURL, error);
+        }
+    }];
+    
+    return op;
+}
+
++ (void)batchDownloadOperation:(NSArray *)anOperationArray
+                 progressBlock:(void (^)(NSUInteger numberOfFinishedOperations, NSUInteger totalNumberOfOperations))progress
+               completionBlock:(void (^)(NSArray *operations))completion
+{
+    NSArray *batchRequests =
+        [AFURLConnectionOperation
+         batchOfRequestOperations:anOperationArray
+         progressBlock:progress
+         completionBlock:completion];
+    
+    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
+    [queue addOperations:batchRequests waitUntilFinished:NO];
+}
 @end

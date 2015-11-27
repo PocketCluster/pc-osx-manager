@@ -85,7 +85,6 @@ extern NSString * const kPCPackageVersionProcessCheck;
 
 @property (nonatomic, readonly) NSArray<NSString *> *processCheck;
 
-
 + (NSURLSessionDataTask *)metaPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block;
 + (NSURLSessionDataTask *)packageFileListOn:(NSString *)aPath WithBlock:(void (^)(NSArray<NSString *> *fileList, NSError *error))block;
 + (BOOL)makeIntermediateDirectories:(NSString *)aPath;
@@ -95,7 +94,21 @@ extern NSString * const kPCPackageVersionProcessCheck;
                     onError:(void (^)(NSString *URL, NSError *error))errorBlock;
 
 // test methods
-+ (NSURLSessionDataTask *)WIPPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block;
+//+ (NSURLSessionDataTask *)WIPPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block;
+
++ (id)packageFileListOperation:(NSString *)aPath
+                    withSucess:(void (^)(NSArray<NSString *> *fileList))sucess
+                   withFailure:(void (^)(NSError *error))failure;
+
++ (id)packageFileDownloadOperation:(NSString *)aDownloadURL
+                    detinationPath:(NSString *)aBasePath
+                        completion:(void (^)(NSString *URL, NSURL *filePath))completionBlock
+                           onError:(void (^)(NSString *URL, NSError *error))errorBlock;
+
++ (void)batchDownloadOperation:(NSArray *)anOperationArray
+                 progressBlock:(void (^)(NSUInteger numberOfFinishedOperations, NSUInteger totalNumberOfOperations))progress
+               completionBlock:(void (^)(NSArray *operations))completion;
+
 @end
 
 @interface PCPackageMeta (NSCoding) <NSCoding>
