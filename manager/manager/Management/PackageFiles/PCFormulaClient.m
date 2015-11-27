@@ -56,19 +56,6 @@
     return _sharedGithubRawFileClient;
 }
 
-#if 0
-+ (instancetype)sharedWIPRawFileClient {
-    static PCFormulaClient *_sharedWIPRawFileClient = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        _sharedWIPRawFileClient = [[PCFormulaClient alloc] initWithBaseURL:[NSURL URLWithString:PCWIPRawFileURLString]];
-        _sharedWIPRawFileClient.securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
-        _sharedWIPRawFileClient.responseSerializer.acceptableContentTypes = [NSSet setWithArray:@[@"text/plain", @"text/plain",@"application/json"]];
-    });
-    return _sharedWIPRawFileClient;
-}
-#endif
-
 + (AFURLSessionManager *)sharedDownloadManager {
     static AFURLSessionManager *_sharedDownloadManager = nil;
     static dispatch_once_t onceToken;

@@ -305,20 +305,6 @@ static NSString * const kGithubRawFileLinkURL               = @"download_url";
             }];
 }
 
-#if 0
-+ (NSURLSessionDataTask *)WIPPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block {
-    return [[PCFormulaClient sharedWIPRawFileClient]
-            GET:@"meta/packages.json"
-            parameters:nil
-            success:[PCPackageMeta metaPackageParserWithBlock:block]
-            failure:^(NSURLSessionDataTask *__unused task, NSError *error) {
-                if (block) {
-                    block([NSArray array], error);
-                }
-            }];
-}
-#endif
-
 /*
  * check file list with following commands
  * curl -i https://api.github.com/repos/pocketcluster/formulas/contents/hadoop/2-4-0/datanode/cluster

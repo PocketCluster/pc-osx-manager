@@ -30,9 +30,6 @@ extern NSString * const PCGithubRawFileURLString;
 
 + (instancetype)sharedGithubAPIClient;
 + (instancetype)sharedGithubRawFileClient;
-//+ (instancetype)sharedWIPRawFileClient;
 + (AFURLSessionManager *)sharedDownloadManager;
 
-+ (NSMutableURLRequest *)packageFileListRequest:(NSString *)aPath;
-+ (void)batchFileListAquisition;
 @end
