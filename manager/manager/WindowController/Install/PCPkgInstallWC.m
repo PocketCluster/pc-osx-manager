@@ -72,10 +72,19 @@
         _isJobStillRunning = NO;
         [self resetToInitialState];
         
+        // TODO move this process to package manager or somewhere to make it more formalized
         WEAK_SELF(self);
-
         [PCPackageMeta metaPackageListWithBlock:^(NSArray<PCPackageMeta *> *packages, NSError *error) {
             if(belf != nil){
+
+                for (PCPackageMeta *meta in packages){
+                    for (PCPackageMeta *installed in [[PCPackageManager sharedManager] installedPackage]) {
+                        if ([meta.packageId isEqualToString:installed.packageId ]) {
+                            [meta setInstalled:YES];
+                        }
+                    }
+                }
+                
                 [belf.packageList addObjectsFromArray:packages];
                 [belf.packageTable reloadData];
             }
@@ -98,6 +107,13 @@
     PCPackageMeta *meta = [self.packageList objectAtIndex:row];
     NSTableCellView *nv = [aTableView makeViewWithIdentifier:@"packageview" owner:self];
     [nv.textField setStringValue:[meta packageDescription]];
+
+    if([meta isInstalled]){
+        [nv.textField setTextColor:[NSColor lightGrayColor]];
+    }else{
+        [nv.textField setTextColor:[NSColor blackColor]];
+    }
+
     return nv;
 }
 
@@ -221,10 +237,7 @@
         }
     }
     
-    
-    
-    
-    
+
     if(self.saltMasterInstallTask == aPCTask ){
         
         if(term_status == 0){
@@ -596,6 +609,10 @@
     __block BOOL hasDownloadEverFailed = NO;
 
     for(PCPackageMeta *meta in self.packageList){
+        
+        if (meta.isInstalled){
+            continue;
+        }
         
         NSString *mpath = [meta.masterDownloadPath objectAtIndex:0];
         NSString *mBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,mpath];

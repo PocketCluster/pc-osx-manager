@@ -45,6 +45,9 @@ extern NSString * const kPCPackageVersionProcessCheck;
 
 @interface PCPackageMeta : NSObject
 
+//TODO : fix this with installed package checking
+@property (nonatomic, readwrite, getter=isInstalled) BOOL installed;
+
 @property (nonatomic, strong) NSString *clusterRelation;
 
 @property (nonatomic, readonly) NSString *metaVersion;
