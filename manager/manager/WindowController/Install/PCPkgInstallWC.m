@@ -53,6 +53,7 @@
 @implementation PCPkgInstallWC {
     PKG_INSTALL_PROGRESS _install_marker;
     BOOL _isJobStillRunning;
+    NSUInteger _target_package_index;
 }
 
 - (void)windowDidLoad {
@@ -70,6 +71,7 @@
         
         _install_marker = PI_INIT_JOB_CHECKER;
         _isJobStillRunning = NO;
+        _target_package_index = 0;
         [self resetToInitialState];
         
         // TODO move this process to package manager or somewhere to make it more formalized
@@ -99,7 +101,7 @@
 }
 
 - (nullable id)tableView:(NSTableView *)tableView objectValueForTableColumn:(nullable NSTableColumn *)tableColumn row:(NSInteger)row {
-    return [self.packageList objectAtIndex:row];
+    return [[self.packageList objectAtIndex:row] description];
 }
 
 #pragma mark - NSTableViewDelegate
@@ -154,7 +156,7 @@
                 case PI_MASTER_INSTALL:{
                     
                     // if secondary install script exists
-                    if ([[self.packageList objectAtIndex:0].secondaryInstallPath count]){
+                    if ([[self.packageList objectAtIndex:_target_package_index].secondaryInstallPath count]){
                         
                         _install_marker = PI_SECONDARY_INSTALL;
                         [self startInstallProcessForSecondary];
@@ -163,7 +165,7 @@
                     }else{
 
                         // if node install script exists
-                        if([[self.packageList objectAtIndex:0].nodeInstallPath count]){
+                        if([[self.packageList objectAtIndex:_target_package_index].nodeInstallPath count]){
                             _install_marker = PI_NODE_INSTALL;
                             [self startInstallProcessForNode:1];
                             
@@ -194,7 +196,7 @@
                 case PI_MASTER_COMPLETE: {
                     
                     // if secondary complete script exists
-                    if ([[self.packageList objectAtIndex:0].secondaryCompletePath count]){
+                    if ([[self.packageList objectAtIndex:_target_package_index].secondaryCompletePath count]){
                         
                         _install_marker = PI_SECONDARY_COMPLETE;
                         [self startCompletionForSecondary];
@@ -203,7 +205,7 @@
                     }else{
 
                         // if node complete script exists
-                        if([[self.packageList objectAtIndex:0].nodeCompletePath count]){
+                        if([[self.packageList objectAtIndex:_target_package_index].nodeCompletePath count]){
 
                             _install_marker = PI_NODE_COMPLETE;
                             [self startCompletionForNode:1];
@@ -243,7 +245,7 @@
         if(term_status == 0){
             
             // if secondary install script exists
-            if ([[self.packageList objectAtIndex:0].secondaryInstallPath count]){
+            if ([[self.packageList objectAtIndex:_target_package_index].secondaryInstallPath count]){
                 
                 _install_marker = PI_SECONDARY_INSTALL;
                 [self startInstallProcessForSecondary];
@@ -252,7 +254,7 @@
             }else{
                 
                 // if node install script exists
-                if([[self.packageList objectAtIndex:0].nodeInstallPath count]){
+                if([[self.packageList objectAtIndex:_target_package_index].nodeInstallPath count]){
                     _install_marker = PI_NODE_INSTALL;
                     [self startInstallProcessForNode:1];
                     
@@ -265,7 +267,7 @@
             }
 
         } else {
-            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].masterInstallPath objectAtIndex:0]);
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:_target_package_index].masterInstallPath objectAtIndex:0]);
             [self checkLiveSaltJob];
         }
         
@@ -279,7 +281,7 @@
             _install_marker = PI_NODE_INSTALL;
             [self startInstallProcessForNode:2];
         }else{
-            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].secondaryInstallPath objectAtIndex:0]);
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:_target_package_index].secondaryInstallPath objectAtIndex:0]);
             [self checkLiveSaltJob];
         }
 
@@ -292,7 +294,7 @@
             _install_marker = PI_MASTER_COMPLETE;
             [self startCompletionForMaster];
         } else {
-            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].nodeInstallPath objectAtIndex:0]);
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:_target_package_index].nodeInstallPath objectAtIndex:0]);
             [self checkLiveSaltJob];
         }
         
@@ -305,7 +307,7 @@
         if (term_status == 0){
             
             // if secondary complete script exists
-            if ([[self.packageList objectAtIndex:0].secondaryCompletePath count]){
+            if ([[self.packageList objectAtIndex:_target_package_index].secondaryCompletePath count]){
                 
                 _install_marker = PI_SECONDARY_COMPLETE;
                 [self startCompletionForSecondary];
@@ -314,7 +316,7 @@
             }else{
 
                 // if node complete script exists
-                if([[self.packageList objectAtIndex:0].nodeCompletePath count]){
+                if([[self.packageList objectAtIndex:_target_package_index].nodeCompletePath count]){
 
                     _install_marker = PI_NODE_COMPLETE;
                     [self startCompletionForNode:1];
@@ -327,7 +329,7 @@
             }
             
         } else {
-            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].masterCompletePath objectAtIndex:0]);
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:_target_package_index].masterCompletePath objectAtIndex:0]);
             [self checkLiveSaltJob];
         }
         
@@ -341,7 +343,7 @@
             _install_marker = PI_NODE_COMPLETE;
             [self startCompletionForNode:2];
         }else{
-            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].secondaryCompletePath objectAtIndex:0]);
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:_target_package_index].secondaryCompletePath objectAtIndex:0]);
             [self checkLiveSaltJob];
         }
 
@@ -354,7 +356,7 @@
             _install_marker = PI_FINALIZE_INSTALL;
             [self finalizeInstallProcess];
         }else {
-            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].nodeCompletePath objectAtIndex:0]);
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:_target_package_index].nodeCompletePath objectAtIndex:0]);
             [self checkLiveSaltJob];
         }
 
@@ -460,8 +462,29 @@
 }
 
 -(void)startInstallProcessForMaster {
+
+    Log(@"%s",__PRETTY_FUNCTION__);
     
     [self setProgMessage:@"Setting up master node..." value:40.0];
+
+    if(_install_marker == PI_MASTER_INSTALL){
+        for (NSUInteger i = 0; i < [self.packageList count]; ++i){
+            
+            PCPackageMeta *meta = [self.packageList objectAtIndex:i];
+            if(meta.isInstalled){
+                continue;
+            }
+            
+            if(_target_package_index < i){
+                _target_package_index = i;
+                Log(@"next target %ld %@", i, [meta debugDescription]);
+                break;
+            }
+        }
+    }
+    
+    
+    
     
     return;
     
@@ -470,7 +493,7 @@
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
     
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
     PCTask *smt = [PCTask new];
     smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-master\' state.sls %@ pillar=\'{numnodes: %ld}\'",[meta.masterInstallPath objectAtIndex:0],nc];
     smt.delegate = self;
@@ -486,7 +509,7 @@
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
     
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
     PCTask *smt = [PCTask new];
     smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-node1\' state.sls %@ pillar=\'{numnodes: %ld}\'",[meta.secondaryInstallPath objectAtIndex:0],nc];
     smt.delegate = self;
@@ -502,7 +525,7 @@
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
 
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
     PCTask *snt = [PCTask new];
     snt.taskCommand = [NSString stringWithFormat:@"salt \'pc-node[%ld-%ld]\' state.sls %@ pillar=\'{numnodes: %ld}\'",aStartNode,nc,[meta.nodeInstallPath objectAtIndex:0],nc];
     snt.delegate = self;
@@ -519,7 +542,7 @@
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
     
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
     PCTask *smc = [PCTask new];
     smc.taskCommand = [NSString stringWithFormat:@"salt \'pc-master\' state.sls %@ pillar=\'{numnodes: %ld}\'", [meta.masterCompletePath objectAtIndex:0], nc];
     smc.delegate = self;
@@ -535,7 +558,7 @@
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
 
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
     PCTask *ssc = [PCTask new];
     ssc.taskCommand = [NSString stringWithFormat:@"salt \'pc-node1\' state.sls %@ pillar=\'{numnodes: %ld}\'", [meta.secondaryCompletePath objectAtIndex:0], nc];
     ssc.delegate = self;
@@ -549,7 +572,7 @@
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
 
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
     PCTask *snc = [PCTask new];
     snc.taskCommand = [NSString stringWithFormat:@"salt \'pc-node[%ld-%ld]\' state.sls %@ pillar=\'{numnodes: %ld}\'",aStartNode, nc, [meta.nodeCompletePath objectAtIndex:0], nc];
     snc.delegate = self;
@@ -560,7 +583,7 @@
 -(void)finalizeInstallProcess {
     
     //TODO: this needs to be fixed. the UUID or id should come from cluster itself
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
     
     PCClusterType t = [[Util getApp] loadClusterType];
     switch (t) {
