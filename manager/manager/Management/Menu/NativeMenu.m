@@ -276,6 +276,11 @@
         return;
     }
 
+    if(![[Util getApp] sshServerCheckResult]){
+        [self alertSSHServerClosed];
+        return;
+    }
+
     if(_setupWindow && !_setupWindow.isClosed) {
         [NSApp activateIgnoringOtherApps:YES];
         [_setupWindow showWindow:self];
@@ -453,5 +458,15 @@
       informativeTextWithFormat:@""] runModal];
     
 }
+
+- (void)alertSSHServerClosed {
+    [[NSAlert
+      alertWithMessageText:@"\'Remote Login\' is not enabled. Go \'System Preference\' -> \'Sharing\' and check \'Remote Login\'"
+      defaultButton:@"OK"
+      alternateButton:nil
+      otherButton:nil
+      informativeTextWithFormat:@""] runModal];
+}
+
 
 @end

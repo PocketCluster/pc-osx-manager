@@ -54,4 +54,5 @@
 - (void)alertBaseLibraryDeficiency;
 - (void)alertBaseLibraryJava;
 - (void)alertBaseLibraryBrew;
+- (void)alertSSHServerClosed;
 @end

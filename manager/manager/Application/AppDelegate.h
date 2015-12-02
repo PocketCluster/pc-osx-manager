@@ -15,6 +15,7 @@
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 @property (readonly) NativeMenu *nativeMenu;
 @property (nonatomic, readonly) int libraryCheckupResult;
+@property (nonatomic, readonly) BOOL sshServerCheckResult;
 
 - (PCClusterType)loadClusterType;
 - (void)setClusterType:(PCClusterType)aType;

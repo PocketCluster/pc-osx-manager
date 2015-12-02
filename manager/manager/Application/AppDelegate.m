@@ -9,6 +9,7 @@
 
 #import <Sparkle/Sparkle.h>
 #import <Parse/Parse.h>
+#import <NMSSH/NMSSH.h>
 
 #import "PCPrefWC.h"
 #import "PCPackageManager.h"
@@ -45,6 +46,8 @@
 @end
 
 @implementation AppDelegate
+@dynamic sshServerCheckResult;
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
 
     // first check base library
@@ -326,6 +329,18 @@
 }
 
 #pragma mark - Environment Check Task 
+
+- (BOOL)sshServerCheckResult {
+    
+    BOOL result = NO;
+    NMSSHSession *session = [NMSSHSession connectToHost:@"127.0.0.1:22" withUsername:NSUserName()];
+    result = session.isConnected;
+    [session disconnect];
+
+    return result;
+}
+
+
 - (void)checkBaseLibTask {
     // check basic libary status
     PCTask *lc = [[PCTask alloc] init];
@@ -357,6 +372,10 @@
         [self setLibraryCheckupResult:term];
         [self.nativeMenu alertBaseLibraryDeficiency];
         self.taskLibChecker = nil;
+        
+        if(![self sshServerCheckResult]){
+            [self.nativeMenu alertSSHServerClosed];
+        }
     }
     
     if (self.taskVboxLoad == aPCTask) {
