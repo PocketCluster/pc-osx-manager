@@ -9,7 +9,10 @@
 
 #import <Sparkle/Sparkle.h>
 #import <Parse/Parse.h>
-#import <NMSSH/NMSSH.h>
+
+#ifdef USE_LIBSSH2
+    #import <NMSSH/NMSSH.h>
+#endif
 
 #import "PCPrefWC.h"
 #import "PCPackageManager.h"
@@ -333,9 +336,35 @@
 - (BOOL)sshServerCheckResult {
     
     BOOL result = NO;
+    
+#ifdef USE_LIBSSH2
+    
     NMSSHSession *session = [NMSSHSession connectToHost:@"127.0.0.1:22" withUsername:NSUserName()];
     result = session.isConnected;
     [session disconnect];
+    
+#else
+
+    //get output of vagrant global-status
+    NSTask *task = [[NSTask alloc] init];
+    [task setLaunchPath:@"/usr/bin/ssh-keyscan"];
+    [task setArguments:@[@"-t", @"rsa", @"localhost"]];
+    
+    NSPipe *pipe = [NSPipe pipe];
+    [task setStandardInput:[NSPipe pipe]];
+    [task setStandardOutput:pipe];
+    
+    [task launch];
+    [task waitUntilExit];
+    
+    if(task.terminationStatus == 0) {
+        //parse instance info from global-status output
+        NSData *outputData = [[pipe fileHandleForReading] readDataToEndOfFile];
+        NSString *outputString = [[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding];
+        result = !ISNULL_STRING(outputString) && [outputString hasPrefix:@"localhost ssh-rsa"];
+    }
+
+#endif
 
     return result;
 }
