@@ -7,8 +7,9 @@
 
 #import "AppDelegate.h"
 
-@interface Util : NSObject
+@class PCPackageMeta;
 
+@interface Util : NSObject
 + (AppDelegate*)getApp;
 + (NSString*)escapeShellArg:(NSString*)arg;
 + (NSString*)trimTrailingSlash:(NSString*)path;
@@ -16,4 +17,5 @@
 + (NSString*)getMachineId;
 + (BOOL)shouldSendProfileData;
 + (void)runTerminalCommand:(NSString*)command;
++ (void)openTerminalCommand:(PCPackageMeta*)aPackage;
 @end

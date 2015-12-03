@@ -6,6 +6,8 @@
 //
 
 #import "Util.h"
+#import "PCPackageMeta.h"
+#import "PCPackageManager.h"
 
 @implementation Util
 
@@ -65,6 +67,7 @@
     NSString *cmd = [command stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"];
     cmd = [cmd stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""];
     
+    // check if iTerm really exits before doing this.
     NSNumber *terminalPreference = (NSNumber *)[[NSUserDefaults standardUserDefaults] stringForKey:kPCPrefDefaultTerm];
     
     NSString *s;
@@ -90,5 +93,24 @@
     [as executeAndReturnError:nil];
 }
 
+
++ (void)openTerminalCommand:(PCPackageMeta*)aPackage {
+    
+    Assert([NSThread isMainThread], @"runTerminalCommand: should run on Main thread");
+
+    NSMutableArray *cmd = [NSMutableArray arrayWithCapacity:0];
+    for(NSString *bigdep in aPackage.bigPkgDependencies){
+        for (PCPackageMeta *meta in [[PCPackageManager sharedManager] installedPackage]){
+            //FIXME: should handle version check!
+            if([bigdep containsString:[meta.family objectAtIndex:0]]){
+                [cmd addObject:[meta.cmdScript objectAtIndex:0]];
+                break;
+            }
+        }
+    }
+    [cmd addObject:[aPackage.cmdScript objectAtIndex:0]];
+
+    [Util runTerminalCommand:[cmd componentsJoinedByString:@"\n"]];
+}
 
 @end
