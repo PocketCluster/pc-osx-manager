@@ -109,7 +109,9 @@
 
         NSMutableDictionary *pcl = [NSMutableDictionary dictionaryWithDictionary:self.procCheckDict];
         for (NSString *pkgproc in self.procCheckDict){
-            BOOL ppcheck = [str containsString:pkgproc] & [str containsString:pName] & [str containsString:pVer] & [str containsString:pMode];
+            
+            //FIXME: Spark cannot make use of package name, version or, mode. What should I do?
+            BOOL ppcheck = [str containsString:pkgproc]; //& [str containsString:pName] & [str containsString:pVer] & [str containsString:pMode];
             if(ppcheck){
                 [pcl setValue:@(YES) forKey:pkgproc];
             }

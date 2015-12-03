@@ -98,17 +98,19 @@
 }
 
 - (void)refreshWithNotification:(NSNotification *)aNotification {
+    
     NSDictionary *infoDict = [aNotification userInfo];
     BOOL isAlive = [[infoDict objectForKey:kPOCKET_CLUSTER_PACKAGE_PROCESS_ISALIVE] boolValue];
+    NSString *pid = [infoDict objectForKey:kPOCKET_CLUSTER_PACKAGE_IDENTIFICATION];
     
-//Log(@"%s, %@ is %@",__PRETTY_FUNCTION__, self.packageMeta.packageName, isAlive?@"ALIVE":@"DEAD");
-    
-    if(isAlive){
+    if([self.packageMeta.packageId isEqualToString:pid] && isAlive){
+//Log(@"%s, %@ is %@",__PRETTY_FUNCTION__, self.packageMeta.packageName, @"ALIVE");
         _packageItem.image = [NSImage imageNamed:@"status_icon_on"];
         [self.packageStart setHidden:YES];
         [self.packageStop setHidden:NO];
         [self.packageShell setHidden:NO];
     }else{
+//Log(@"%s, %@ is %@",__PRETTY_FUNCTION__, self.packageMeta.packageName, @"DEAD");
         _packageItem.image = [NSImage imageNamed:@"status_icon_off"];
         [self.packageStart setHidden:NO];
         [self.packageStop setHidden:YES];
