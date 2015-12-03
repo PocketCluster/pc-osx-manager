@@ -9,53 +9,62 @@
 #import "PCSetup3VC.h"
 
 #import "PCConstants.h"
-#import "VagrantManager.h"
-#import "RaspberryManager.h"
 #import "PCPackageManager.h"
 #import "PCTask.h"
 #import "Util.h"
 
-typedef enum INSTALL_PROGRESS {
-    
-    IP_SALT_INIT_JOB_CHECKER = 0,
-    IP_SALT_MASTER_INSTALL,
-    IP_SALT_NODE_INSTALL,
-    IP_SALT_MASTER_COMPLETE,
-    IP_FINALIZE_INSTALL
+#import "RaspberryManager.h"
+#import "VagrantManager.h"
 
-} INSTALL_PROGRESS;
-
+#define BASE_PROGRESS_PERCENTAGE  (30.0)
+#define TOTAL_PROGRESS_DURATION  (60.0)
 
 @interface PCSetup3VC()<PCTaskDelegate>
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
 
 @property (nonatomic, strong) PCTask *saltMasterInstallTask;
-@property (nonatomic, strong) PCTask *saltMinionInstallTask;
+@property (nonatomic, strong) PCTask *saltSecondInstallTask;
+@property (nonatomic, strong) PCTask *saltNodeInstallTask;
+
 @property (nonatomic, strong) PCTask *saltMasterCompleteTask;
+@property (nonatomic, strong) PCTask *saltSecondCompleteTask;
+@property (nonatomic, strong) PCTask *saltNodeCompleteTask;
 
 @property (nonatomic, strong) PCTask *saltJobTask;
 
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
 
+- (NSUInteger)getNodeCount;
+- (double)getDeltaProgress:(double)aProgressMark;
+
+- (void)resetToInitialState;
 - (void)setUIToProceedState;
 - (void)resetUIForFailure;
 - (void)setToNextStage;
 - (void)setProgMessage:(NSString *)aMessage value:(double)aValue;
 
 - (void)checkLiveSaltJob;
-- (void)startInstallProcessWithMasterNode;
-- (void)nodeInstallProcess;
-- (void)masterCompleteProcess;
+- (void)proceedTargetStage;
+- (void)startInstallProcessForMaster;
+- (void)startInstallProcessForSecondary;
+- (void)startInstallProcessForNode:(NSUInteger)aStartNode;
+
+- (void)startCompletionForMaster;
+- (void)startCompletionForSecondary;
+- (void)startCompletionForNode:(NSUInteger)aStartNode;
 - (void)finalizeInstallProcess;
 
 - (void)downloadMetaFiles;
 @end
 
 @implementation PCSetup3VC {
-    INSTALL_PROGRESS _install_marker;
+    PKG_INSTALL_PROGRESS _install_marker;
     BOOL _isJobStillRunning;
+    NSUInteger _target_package_index;
+    NSUInteger _total_target_count;
+    NSUInteger _target_installed;
 }
 @synthesize canContinue;
 @synthesize canGoBack;
@@ -63,13 +72,16 @@ typedef enum INSTALL_PROGRESS {
 -(instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if(self){
+        
         self.packageList = [NSMutableArray arrayWithCapacity:0];
         self.downloadFileList = [NSMutableArray arrayWithCapacity:0];
-
-        _install_marker = IP_SALT_INIT_JOB_CHECKER;
+        
+        _install_marker = PI_INIT_JOB_CHECKER;
         _isJobStillRunning = NO;
+        _target_package_index = 0;
         [self resetToInitialState];
         
+        // TODO move this process to package manager or somewhere to make it more formalized
         WEAK_SELF(self);
         [PCPackageMeta metaPackageListWithBlock:^(NSArray<PCPackageMeta *> *packages, NSError *error) {
             if(belf != nil){
@@ -87,7 +99,7 @@ typedef enum INSTALL_PROGRESS {
 }
 
 - (nullable id)tableView:(NSTableView *)tableView objectValueForTableColumn:(nullable NSTableColumn *)tableColumn row:(NSInteger)row {
-    return [self.packageList objectAtIndex:row];
+    return [[self.packageList objectAtIndex:row] description];
 }
 
 #pragma mark - NSTableViewDelegate
@@ -121,84 +133,227 @@ typedef enum INSTALL_PROGRESS {
             
             [self checkLiveSaltJob];
             
-        // no job is running. let's proceed
+            // no job is running. let's proceed
         }else{
             
             switch (_install_marker) {
-                case IP_SALT_INIT_JOB_CHECKER:{
-
-                    _install_marker = IP_SALT_MASTER_INSTALL;
+                case PI_INIT_JOB_CHECKER:{
+                    
+                    //FIXME: this could be a root of serious bug!
+                    _install_marker = PI_MASTER_INSTALL;
                     [self downloadMetaFiles];
                     break;
                 }
                     
-                case IP_SALT_MASTER_INSTALL:{
-
-                    _install_marker = IP_SALT_NODE_INSTALL;
-                    [self nodeInstallProcess];
+                case PI_MASTER_INSTALL:{
+                    
+                    // if secondary install script exists
+                    if ([[self.packageList objectAtIndex:_target_package_index].secondaryInstallPath count]){
+                        
+                        _install_marker = PI_SECONDARY_INSTALL;
+                        [self startInstallProcessForSecondary];
+                        
+                        // if secondary install script DNE
+                    }else{
+                        
+                        // if node install script exists
+                        if([[self.packageList objectAtIndex:_target_package_index].nodeInstallPath count]){
+                            _install_marker = PI_NODE_INSTALL;
+                            [self startInstallProcessForNode:1];
+                            
+                            // if node install script DNE
+                        }else{
+                            _install_marker = PI_MASTER_COMPLETE;
+                            [self startCompletionForMaster];
+                        }
+                        
+                    }
+                    
                     break;
                 }
                     
-                case IP_SALT_NODE_INSTALL: {
                     
-                    _install_marker = IP_SALT_MASTER_COMPLETE;
-                    [self masterCompleteProcess];
+                case PI_SECONDARY_INSTALL:{
+                    _install_marker = PI_NODE_INSTALL;
+                    [self startInstallProcessForNode:2];
                     break;
                 }
                     
-                case IP_SALT_MASTER_COMPLETE: {
-
-                    _install_marker = IP_FINALIZE_INSTALL;
+                case PI_NODE_INSTALL: {
+                    _install_marker = PI_MASTER_COMPLETE;
+                    [self startCompletionForMaster];
+                    break;
+                }
+                    
+                case PI_MASTER_COMPLETE: {
+                    
+                    // if secondary complete script exists
+                    if ([[self.packageList objectAtIndex:_target_package_index].secondaryCompletePath count]){
+                        
+                        _install_marker = PI_SECONDARY_COMPLETE;
+                        [self startCompletionForSecondary];
+                        
+                        // if secondary complete script DNE
+                    }else{
+                        
+                        // if node complete script exists
+                        if([[self.packageList objectAtIndex:_target_package_index].nodeCompletePath count]){
+                            
+                            _install_marker = PI_NODE_COMPLETE;
+                            [self startCompletionForNode:1];
+                            
+                            // if node complete script DNE
+                        }else{
+                            
+                            _install_marker = PI_FINALIZE_INSTALL;
+                            [self finalizeInstallProcess];
+                        }
+                    }
+                    break;
+                }
+                    
+                case PI_SECONDARY_COMPLETE: {
+                    _install_marker = PI_NODE_COMPLETE;
+                    [self startCompletionForNode:2];
+                    break;
+                }
+                    
+                case PI_NODE_COMPLETE: {
+                    _install_marker = PI_FINALIZE_INSTALL;
                     [self finalizeInstallProcess];
                     break;
                 }
-                case IP_FINALIZE_INSTALL:
+                    
+                case PI_FINALIZE_INSTALL:
                 default:
                     break;
             }
         }
     }
-
+    
+    
     if(self.saltMasterInstallTask == aPCTask ){
         
         if(term_status == 0){
-            _install_marker = IP_SALT_NODE_INSTALL;
-            [self nodeInstallProcess];
+            
+            // if secondary install script exists
+            if ([[self.packageList objectAtIndex:_target_package_index].secondaryInstallPath count]){
+                
+                _install_marker = PI_SECONDARY_INSTALL;
+                [self startInstallProcessForSecondary];
+                
+                // if secondary install script DNE
+            }else{
+                
+                // if node install script exists
+                if([[self.packageList objectAtIndex:_target_package_index].nodeInstallPath count]){
+                    _install_marker = PI_NODE_INSTALL;
+                    [self startInstallProcessForNode:1];
+                    
+                    // if node install script DNE
+                }else{
+                    _install_marker = PI_MASTER_COMPLETE;
+                    [self startCompletionForMaster];
+                }
+                
+            }
+            
         } else {
-            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].masterInstallPath objectAtIndex:0]);
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:_target_package_index].masterInstallPath objectAtIndex:0]);
             [self checkLiveSaltJob];
         }
         
         self.saltMasterInstallTask = nil;
     }
     
-    if(self.saltMinionInstallTask == aPCTask){
+    
+    if(self.saltSecondInstallTask == aPCTask){
         
-        if (term_status == 0){
-            _install_marker = IP_SALT_MASTER_COMPLETE;
-            [self masterCompleteProcess];
-        } else {
-            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].nodeInstallPath objectAtIndex:0]);
+        if(term_status == 0){
+            _install_marker = PI_NODE_INSTALL;
+            [self startInstallProcessForNode:2];
+        }else{
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:_target_package_index].secondaryInstallPath objectAtIndex:0]);
             [self checkLiveSaltJob];
         }
         
-        self.saltMinionInstallTask = nil;
+        self.saltSecondInstallTask = nil;
+    }
+    
+    if(self.saltNodeInstallTask == aPCTask){
+        
+        if (term_status == 0){
+            _install_marker = PI_MASTER_COMPLETE;
+            [self startCompletionForMaster];
+        } else {
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:_target_package_index].nodeInstallPath objectAtIndex:0]);
+            [self checkLiveSaltJob];
+        }
+        
+        self.saltNodeInstallTask = nil;
     }
     
     
     if (self.saltMasterCompleteTask == aPCTask) {
         
         if (term_status == 0){
-            _install_marker = IP_FINALIZE_INSTALL;
-            [self finalizeInstallProcess];
+            
+            // if secondary complete script exists
+            if ([[self.packageList objectAtIndex:_target_package_index].secondaryCompletePath count]){
+                
+                _install_marker = PI_SECONDARY_COMPLETE;
+                [self startCompletionForSecondary];
+                
+                // if secondary complete script DNE
+            }else{
+                
+                // if node complete script exists
+                if([[self.packageList objectAtIndex:_target_package_index].nodeCompletePath count]){
+                    
+                    _install_marker = PI_NODE_COMPLETE;
+                    [self startCompletionForNode:1];
+                    
+                    // if node complete script DNE
+                }else{
+                    _install_marker = PI_FINALIZE_INSTALL;
+                    [self finalizeInstallProcess];
+                }
+            }
+            
         } else {
-            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:0].masterCompletePath objectAtIndex:0]);
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:_target_package_index].masterCompletePath objectAtIndex:0]);
             [self checkLiveSaltJob];
         }
         
         self.saltMasterCompleteTask = nil;
     }
     
+    
+    if(self.saltSecondCompleteTask == aPCTask) {
+        
+        if(term_status == 0){
+            _install_marker = PI_NODE_COMPLETE;
+            [self startCompletionForNode:2];
+        }else{
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:_target_package_index].secondaryCompletePath objectAtIndex:0]);
+            [self checkLiveSaltJob];
+        }
+        
+        self.saltSecondCompleteTask = nil;
+    }
+    
+    if(self.saltNodeCompleteTask == aPCTask) {
+        
+        if(term_status == 0){
+            _install_marker = PI_FINALIZE_INSTALL;
+            [self finalizeInstallProcess];
+        }else {
+            Log(@"There is an while exec %@", [[self.packageList objectAtIndex:_target_package_index].nodeCompletePath objectAtIndex:0]);
+            [self checkLiveSaltJob];
+        }
+        
+        self.saltNodeCompleteTask = nil;
+    }
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
@@ -211,7 +366,7 @@ typedef enum INSTALL_PROGRESS {
         //TODO: this is really important piece of code. Is this right Job ID?
         //NSRange range = [str rangeOfString:@"^[0-9]{20}\\:$" options:NSRegularExpressionSearch];
         NSRange range = [str rangeOfString:@"[0-9]{20}\\:" options:NSRegularExpressionSearch];
-
+        
         if (range.location != NSNotFound){
             Log(@"\tSALT JOB IS STILL RUNNING!!!");
             _isJobStillRunning = YES;
@@ -223,6 +378,33 @@ typedef enum INSTALL_PROGRESS {
 
 -(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
     return NO;
+}
+#pragma mark - Utils
+-(NSUInteger)getNodeCount {
+    NSUInteger nc = 3;
+    PCClusterType t = [[Util getApp] loadClusterType];
+    switch (t) {
+        case PC_CLUTER_VAGRANT:{
+            nc = 3;
+            break;
+        }
+        case PC_CLUSTER_RASPBERRY: {
+            nc = [[[[RaspberryManager sharedManager] clusters] objectAtIndex:0] raspberryCount];
+            break;
+        }
+        case PC_CLUSTER_NONE:
+        default:
+            nc = 0;
+            break;
+    }
+    
+    return nc;
+}
+
+-(double)getDeltaProgress:(double)aProgressMark {
+    double delta_duration = (TOTAL_PROGRESS_DURATION)/(double)_total_target_count;
+    double delta_progress = (delta_duration * aProgressMark) + delta_duration * _target_installed;
+    return delta_progress;
 }
 
 #pragma mark - DPSetupWindowDelegate
@@ -241,7 +423,7 @@ typedef enum INSTALL_PROGRESS {
     [self resetToInitialState];
     [self.installBtn setEnabled:NO];
     [self.circularProgress startAnimation:nil];
-
+    
 }
 
 -(void)resetUIForFailure {
@@ -252,7 +434,7 @@ typedef enum INSTALL_PROGRESS {
     [self.circularProgress stopAnimation:nil];
     [self.progressBar setDoubleValue:0.0];
     [self.progressBar displayIfNeeded];
-
+    
 }
 
 -(void)setToNextStage {
@@ -266,20 +448,19 @@ typedef enum INSTALL_PROGRESS {
 }
 
 -(void)setProgMessage:(NSString *)aMessage value:(double)aValue {
-
+    
     [self.circularProgress startAnimation:nil];
     [self.progressLabel setStringValue:aMessage];
     [self.progressBar setDoubleValue:aValue];
     [self.progressBar displayIfNeeded];
-
+    
 }
 
 #pragma mark - INSTALL FLOW CONTROL
-
 - (void)checkLiveSaltJob {
-
+    
     _isJobStillRunning = NO;
-
+    
     PCTask *clsjt = [PCTask new];
     clsjt.taskCommand = @"salt-run jobs.active";
     clsjt.delegate = self;
@@ -288,53 +469,93 @@ typedef enum INSTALL_PROGRESS {
     [clsjt performSelector:@selector(launchTask) withObject:nil afterDelay:5.0];
 }
 
--(void)startInstallProcessWithMasterNode {
-
-    [self setProgMessage:@"Setting up master node..." value:40.0];
+//FIXME: introducing an intermediate function stage could cause hineous bug.
+// Be very careful and monitor closely
+-(void)proceedTargetStage {
+    Log(@"%s",__PRETTY_FUNCTION__);
     
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
-    PCTask *smt = [PCTask new];
-    smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-master\' state.sls %@",[meta.masterInstallPath objectAtIndex:0]];
-    smt.delegate = self;
-    self.saltMasterInstallTask = smt;
-
-    [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
-}
-
-- (void)nodeInstallProcess {
-
-    [self setProgMessage:@"Setting up slave nodes..." value:60.0];
+    BOOL foundTarget = NO;
     
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
-    PCTask *smt = [PCTask new];
-    smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-node*\' state.sls %@", [meta.nodeInstallPath objectAtIndex:0]];
-    smt.delegate = self;
-    self.saltMinionInstallTask = smt;
-    [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
-}
-
-
-- (void)masterCompleteProcess {
-
-    [self setProgMessage:@"Finishing master node..." value:80.0];
-    
-    NSUInteger nc = 3;
-    PCClusterType t = [[Util getApp] loadClusterType];
-    switch (t) {
-        case PC_CLUTER_VAGRANT:{
-            nc = 3;
-            break;
+    for (NSUInteger i = 0; i < [self.packageList count]; ++i){
+        
+        PCPackageMeta *meta = [self.packageList objectAtIndex:i];
+        if(meta.isInstalled){
+            continue;
         }
-        case PC_CLUSTER_RASPBERRY: {
-            nc = [[[[RaspberryManager sharedManager] clusters] objectAtIndex:0] raspberryCount];
-            break;
-        }
-        case PC_CLUSTER_NONE:
-        default:
-            break;
+        
+        foundTarget = YES;
+        _target_package_index = i;
+        Log(@"next target %ld %@", i, [meta debugDescription]);
+        break;
     }
     
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
+    // we have no packages to install. close installation
+    if(foundTarget){
+        //FIXME: this could be a root of serious bug!
+        _install_marker = PI_MASTER_INSTALL;
+        [self startInstallProcessForMaster];
+    }else{
+        [self setToNextStage];
+    }
+}
+
+-(void)startInstallProcessForMaster {
+    
+    [self setProgMessage:@"Setting up master node..." value:[self getDeltaProgress:0.167]];
+    
+    NSUInteger nc = [self getNodeCount];
+    if(nc == 0){return;}
+    
+    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
+    PCTask *smt = [PCTask new];
+    smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-master\' state.sls %@ pillar=\'{numnodes: %ld}\'",[meta.masterInstallPath objectAtIndex:0],nc];
+    smt.delegate = self;
+    self.saltMasterInstallTask = smt;
+    
+    [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+}
+
+-(void)startInstallProcessForSecondary {
+    
+    [self setProgMessage:@"Setting up secondary node..." value:[self getDeltaProgress:0.334]];
+    
+    NSUInteger nc = [self getNodeCount];
+    if(nc == 0){return;}
+    
+    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
+    PCTask *smt = [PCTask new];
+    smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-node1\' state.sls %@ pillar=\'{numnodes: %ld}\'",[meta.secondaryInstallPath objectAtIndex:0],nc];
+    smt.delegate = self;
+    self.saltSecondInstallTask = smt;
+    
+    [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+}
+
+- (void)startInstallProcessForNode:(NSUInteger)aStartNode {
+    
+    [self setProgMessage:@"Setting up slave nodes..." value:[self getDeltaProgress:0.5]];
+    
+    NSUInteger nc = [self getNodeCount];
+    if(nc == 0){return;}
+    
+    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
+    PCTask *snt = [PCTask new];
+    snt.taskCommand = [NSString stringWithFormat:@"salt \'pc-node[%ld-%ld]\' state.sls %@ pillar=\'{numnodes: %ld}\'",aStartNode,nc,[meta.nodeInstallPath objectAtIndex:0],nc];
+    snt.delegate = self;
+    self.saltNodeInstallTask = snt;
+    [snt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+}
+
+#pragma mark - COMPLETION FLOW CONTROL
+
+- (void)startCompletionForMaster {
+    
+    [self setProgMessage:@"Finishing master node..." value:[self getDeltaProgress:0.668]];
+    
+    NSUInteger nc = [self getNodeCount];
+    if(nc == 0){return;}
+    
+    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
     PCTask *smc = [PCTask new];
     smc.taskCommand = [NSString stringWithFormat:@"salt \'pc-master\' state.sls %@ pillar=\'{numnodes: %ld}\'", [meta.masterCompletePath objectAtIndex:0], nc];
     smc.delegate = self;
@@ -343,22 +564,52 @@ typedef enum INSTALL_PROGRESS {
     
 }
 
+- (void)startCompletionForSecondary {
+    
+    [self setProgMessage:@"Finishing Secondary node..." value:[self getDeltaProgress:0.835]];
+    
+    NSUInteger nc = [self getNodeCount];
+    if(nc == 0){return;}
+    
+    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
+    PCTask *ssc = [PCTask new];
+    ssc.taskCommand = [NSString stringWithFormat:@"salt \'pc-node1\' state.sls %@ pillar=\'{numnodes: %ld}\'", [meta.secondaryCompletePath objectAtIndex:0], nc];
+    ssc.delegate = self;
+    self.saltMasterCompleteTask = ssc;
+    [ssc performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+}
+
+- (void)startCompletionForNode:(NSUInteger)aStartNode {
+    
+    [self setProgMessage:@"Finishing Rest of Node..." value:[self getDeltaProgress:1.0]];
+    
+    NSUInteger nc = [self getNodeCount];
+    if(nc == 0){return;}
+    
+    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
+    PCTask *snc = [PCTask new];
+    snc.taskCommand = [NSString stringWithFormat:@"salt \'pc-node[%ld-%ld]\' state.sls %@ pillar=\'{numnodes: %ld}\'",aStartNode, nc, [meta.nodeCompletePath objectAtIndex:0], nc];
+    snc.delegate = self;
+    self.saltMasterCompleteTask = snc;
+    [snc performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+}
 
 -(void)finalizeInstallProcess {
     
     //TODO: this needs to be fixed. the UUID or id should come from cluster itself
-    PCPackageMeta *meta = [self.packageList objectAtIndex:0];
-
+    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
+    meta.installed = YES;
+    
     PCClusterType t = [[Util getApp] loadClusterType];
     switch (t) {
         case PC_CLUTER_VAGRANT:{
-
+            
             // FIXME : if vagrant instances are not refreshed, you cannot have an instance at this point. fix this.
             //VagrantInstance *instance = [[[VagrantManager sharedManager] getInstances] objectAtIndex:0];
             //NSString *cr = [NSString stringWithFormat:@"%@-%@-%@",instance.providerIdentifier, instance.path, instance.displayName];
-
+            
             meta.clusterRelation = @"virtualbox-/pocket/boxes-Cluster 1";
-
+            
             // installed package data should be available before registration begins
             [[PCPackageManager sharedManager] addInstalledPackage:meta];
             [[PCPackageManager sharedManager] saveInstalledPackage];
@@ -370,7 +621,7 @@ typedef enum INSTALL_PROGRESS {
             
             RaspberryCluster *cluster = [[[RaspberryManager sharedManager] clusters] objectAtIndex:0];
             meta.clusterRelation = cluster.clusterId;
-
+            
             // installed package data should be available before registration begins
             [[PCPackageManager sharedManager] addInstalledPackage:meta];
             [[PCPackageManager sharedManager] saveInstalledPackage];
@@ -383,99 +634,162 @@ typedef enum INSTALL_PROGRESS {
             break;
     }
     
-    [self setToNextStage];
+    // count installed packages
+    ++_target_installed;
+    
+    // go back to the head of iteration cycle
+    [self proceedTargetStage];
 }
 
 - (void)downloadMetaFiles {
+    
     WEAK_SELF(self);
-    [belf setProgMessage:@"Downloading a meta package..." value:20.0];
-
-    for(PCPackageMeta *meta in belf.packageList){
+    [self setProgMessage:@"Downloading a meta package..." value:20];
+    
+    NSMutableArray *mtlst = [NSMutableArray array];
+    __block NSMutableArray *dllst = [NSMutableArray array];
+    __block BOOL hasDownloadEverFailed = NO;
+    
+    for(PCPackageMeta *meta in self.packageList){
         
-        if(!belf){
-            return;
+        if (meta.isInstalled){
+            continue;
         }
-
+        
         NSString *mpath = [meta.masterDownloadPath objectAtIndex:0];
-        NSString *npath = [meta.nodeDownloadPath objectAtIndex:0];
         NSString *mBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,mpath];
-        NSString *nBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,npath];
-        
         [PCPackageMeta makeIntermediateDirectories:mBasePath];
-        [PCPackageMeta makeIntermediateDirectories:nBasePath];
         
-        [PCPackageMeta
-         packageFileListOn:mpath
-         WithBlock:^(NSArray<NSString *> *mFileList, NSError *mError) {
-             
-             if(belf && !mError){
-                 
-                 [belf.downloadFileList addObjectsFromArray:mFileList];
-                 
-                 [PCPackageMeta
-                  packageFileListOn:npath
-                  WithBlock:^(NSArray<NSString *> *nFileList, NSError *nError) {
-                      
-                      if(belf && !nError){
-
-                          [belf.downloadFileList addObjectsFromArray:nFileList];
-                          
-                          for(NSString *mFile in mFileList){
-                              [PCPackageMeta
-                               downloadFileFromURL:mFile
-                               basePath:mBasePath
-                               completion:^(NSString *URL, NSURL *filePath) {
-                                   
-                                   if(belf){
-
-                                       [belf.downloadFileList removeObject:URL];
-                                       
-Log(@"%@ %ld",URL, [belf.downloadFileList count]);
-                                       
-                                       if([belf.downloadFileList count] == 0){
-                                           [belf performSelector:@selector(startInstallProcessWithMasterNode) withObject:nil afterDelay:0.0];
-                                       }
-
-                                   }
-                               }
-                               onError:^(NSString *URL, NSError *error) {
-                                   Log(@"Master - %@",[error description]);
-                                   [belf resetUIForFailure];
-                               }];
-                          }
-                          
-                          for(NSString *nFile in nFileList){
-                              [PCPackageMeta
-                               downloadFileFromURL:nFile
-                               basePath:nBasePath
-                               completion:^(NSString *URL, NSURL *filePath) {
-                                   
-                                   if(belf){
-                                       [belf.downloadFileList removeObject:URL];
-
-Log(@"%@ %ld",URL, [belf.downloadFileList count]);
-                                       
-                                       if([belf.downloadFileList count] == 0){
-                                          [belf performSelector:@selector(startInstallProcessWithMasterNode) withObject:nil afterDelay:0.0];
-                                       }
-                                   }
-                               }
-                               onError:^(NSString *URL, NSError *error) {
-                                   Log(@"Node - %@",[error description]);
-                                   [belf resetUIForFailure];
-                               }];
-                          }
-                          
-                      } else {
-                          [belf resetUIForFailure];
-                      }
-                  }];
-                 
-             }else{
-                [belf resetUIForFailure];
-             }
-         }];
+        id mop = [PCPackageMeta packageFileListOperation:mpath withSucess:^(NSArray<NSString *> *fileList) {
+            
+            Log(@"meta files \n%@",fileList);
+            
+            for (NSString *furl in fileList){
+                id dop = [PCPackageMeta
+                          packageFileDownloadOperation:furl
+                          detinationPath:mBasePath
+                          completion:^(NSString *URL, NSURL *filePath) {
+                              
+                              Log(@"%@ DONE",URL);
+                              
+                          } onError:^(NSString *URL, NSError *error) {
+                              
+                              Log(@"Master - %@",[error description]);
+                              hasDownloadEverFailed = YES;
+                              
+                          }];
+                [dllst addObject:dop];
+            }
+            
+        } withFailure:^(NSError *error) {
+            
+            Log(@"Master - %@",[error description]);
+            hasDownloadEverFailed = YES;
+            
+        }];
+        [mtlst addObject:mop];
+        
+        
+        
+        // secondary master files
+        NSString *spath = nil, *sBasePath = nil;
+        if( meta.secondaryDownloadPath.count ){
+            
+            spath = [meta.secondaryDownloadPath objectAtIndex:0];
+            sBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,spath];
+            [PCPackageMeta makeIntermediateDirectories:sBasePath];
+            
+            id sop = [PCPackageMeta packageFileListOperation:spath withSucess:^(NSArray<NSString *> *fileList) {
+                
+                Log(@"meta files \n%@",fileList);
+                
+                for (NSString *furl in fileList){
+                    id dop = [PCPackageMeta
+                              packageFileDownloadOperation:furl
+                              detinationPath:sBasePath
+                              completion:^(NSString *URL, NSURL *filePath) {
+                                  
+                                  Log(@"%@ DONE",URL);
+                                  
+                              } onError:^(NSString *URL, NSError *error) {
+                                  
+                                  Log(@"Secondary - %@",[error description]);
+                                  hasDownloadEverFailed = YES;
+                                  
+                              }];
+                    
+                    [dllst addObject:dop];
+                }
+                
+            } withFailure:^(NSError *error) {
+                
+                Log(@"Secondary - %@",[error description]);
+                hasDownloadEverFailed = YES;
+                
+            }];
+            
+            
+            [mtlst addObject:sop];
+        }
+        
+        
+        
+        NSString *npath = nil, *nBasePath = nil;
+        if( meta.nodeDownloadPath.count ){
+            
+            npath = [meta.nodeDownloadPath objectAtIndex:0];
+            nBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,npath];
+            [PCPackageMeta makeIntermediateDirectories:nBasePath];
+            
+            id nop = [PCPackageMeta packageFileListOperation:npath withSucess:^(NSArray<NSString *> *fileList) {
+                
+                Log(@"meta files \n%@",fileList);
+                
+                for (NSString *furl in fileList){
+                    id dop = [PCPackageMeta
+                              packageFileDownloadOperation:furl
+                              detinationPath:nBasePath
+                              completion:^(NSString *URL, NSURL *filePath) {
+                                  
+                                  Log(@"%@ DONE",URL);
+                                  
+                              } onError:^(NSString *URL, NSError *error) {
+                                  
+                                  Log(@"Node - %@",[error description]);
+                                  hasDownloadEverFailed = YES;
+                                  
+                              }];
+                    [dllst addObject:dop];
+                }
+                
+            } withFailure:^(NSError *error) {
+                
+                Log(@"Node - %@",[error description]);
+                hasDownloadEverFailed = YES;
+                
+            }];
+            [mtlst addObject:nop];
+        }
     }
+    
+    [PCPackageMeta
+     batchDownloadOperation:mtlst
+     progressBlock:^(NSUInteger numberOfFinishedOperations, NSUInteger totalNumberOfOperations){}
+     completionBlock:^(NSArray *operations) {
+      
+      [PCPackageMeta
+       batchDownloadOperation:dllst
+       progressBlock:^(NSUInteger numberOfFinishedOperations, NSUInteger totalNumberOfOperations){}
+       completionBlock:^(NSArray *operations) {
+           
+           Log(@"filedownload all completed");
+           if(hasDownloadEverFailed){
+               [belf resetUIForFailure];
+           }else{
+               [belf performSelector:@selector(proceedTargetStage) withObject:nil afterDelay:0.0];
+           }
+       }];
+    }];
 }
 
 
@@ -483,13 +797,15 @@ Log(@"%@ %ld",URL, [belf.downloadFileList count]);
 -(IBAction)install:(id)sender {
     
     // if there is no package to install, just don't do it.
-    if(![self.packageList count]){
+    _total_target_count = [self.packageList count];
+    _target_installed = 0;
+    if(_total_target_count == 0){
         return;
     }
-
+    
     [self setUIToProceedState];
     [self setProgMessage:@"Check cluster status..." value:10.0];
-
+    
     [self checkLiveSaltJob];
 }
 @end

@@ -15,6 +15,9 @@
 #import "RaspberryManager.h"
 #import "VagrantManager.h"
 
+#define BASE_PROGRESS_PERCENTAGE  (30.0)
+#define TOTAL_PROGRESS_DURATION  (60.0)
+
 @interface PCPkgInstallWC ()<PCTaskDelegate>
 @property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
@@ -30,6 +33,7 @@
 @property (nonatomic, strong) PCTask *saltJobTask;
 
 - (NSUInteger)getNodeCount;
+- (double)getDeltaProgress:(double)aProgressMark;
 
 - (void)resetToInitialState;
 - (void)setUIToProceedState;
@@ -38,6 +42,7 @@
 - (void)setProgMessage:(NSString *)aMessage value:(double)aValue;
 
 - (void)checkLiveSaltJob;
+- (void)proceedTargetStage;
 - (void)startInstallProcessForMaster;
 - (void)startInstallProcessForSecondary;
 - (void)startInstallProcessForNode:(NSUInteger)aStartNode;
@@ -54,6 +59,8 @@
     PKG_INSTALL_PROGRESS _install_marker;
     BOOL _isJobStillRunning;
     NSUInteger _target_package_index;
+    NSUInteger _total_target_count;
+    NSUInteger _target_installed;
 }
 
 - (void)windowDidLoad {
@@ -148,6 +155,7 @@
             switch (_install_marker) {
                 case PI_INIT_JOB_CHECKER:{
                     
+                    //FIXME: this could be a root of serious bug!
                     _install_marker = PI_MASTER_INSTALL;
                     [self downloadMetaFiles];
                     break;
@@ -362,9 +370,6 @@
 
         self.saltNodeCompleteTask = nil;
     }
-    
-    
-    
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
@@ -413,6 +418,11 @@
     return nc;
 }
 
+-(double)getDeltaProgress:(double)aProgressMark {
+    double delta_duration = (TOTAL_PROGRESS_DURATION)/(double)_total_target_count;
+    double delta_progress = (delta_duration * aProgressMark) + delta_duration * _target_installed;
+    return delta_progress;
+}
 
 #pragma mark - UI status
 -(void)resetToInitialState {
@@ -461,34 +471,39 @@
     [clsjt performSelector:@selector(launchTask) withObject:nil afterDelay:5.0];
 }
 
--(void)startInstallProcessForMaster {
-
+//FIXME: introducing an intermediate function stage could cause hineous bug.
+// Be very careful and monitor closely
+-(void)proceedTargetStage {
     Log(@"%s",__PRETTY_FUNCTION__);
     
-    [self setProgMessage:@"Setting up master node..." value:40.0];
-
-    if(_install_marker == PI_MASTER_INSTALL){
-        for (NSUInteger i = 0; i < [self.packageList count]; ++i){
-            
-            PCPackageMeta *meta = [self.packageList objectAtIndex:i];
-            if(meta.isInstalled){
-                continue;
-            }
-            
-            if(_target_package_index < i){
-                _target_package_index = i;
-                Log(@"next target %ld %@", i, [meta debugDescription]);
-                break;
-            }
+    BOOL foundTarget = NO;
+    
+    for (NSUInteger i = 0; i < [self.packageList count]; ++i){
+        
+        PCPackageMeta *meta = [self.packageList objectAtIndex:i];
+        if(meta.isInstalled){
+            continue;
         }
+        
+        foundTarget = YES;
+        _target_package_index = i;
+        Log(@"next target %ld %@", i, [meta debugDescription]);
+        break;
     }
-    
-    
-    
-    
-    return;
-    
-    
+
+    // we have no packages to install. close installation
+    if(foundTarget){
+        //FIXME: this could be a root of serious bug!
+        _install_marker = PI_MASTER_INSTALL;
+        [self startInstallProcessForMaster];
+    }else{
+        [self setToNextStage];
+    }
+}
+
+-(void)startInstallProcessForMaster {
+
+    [self setProgMessage:@"Setting up master node..." value:[self getDeltaProgress:0.167]];
 
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
@@ -504,7 +519,7 @@
 
 -(void)startInstallProcessForSecondary {
     
-    [self setProgMessage:@"Setting up secondary node..." value:50.0];
+    [self setProgMessage:@"Setting up secondary node..." value:[self getDeltaProgress:0.334]];
     
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
@@ -520,7 +535,7 @@
 
 - (void)startInstallProcessForNode:(NSUInteger)aStartNode {
     
-    [self setProgMessage:@"Setting up slave nodes..." value:60.0];
+    [self setProgMessage:@"Setting up slave nodes..." value:[self getDeltaProgress:0.5]];
     
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
@@ -536,8 +551,8 @@
 #pragma mark - COMPLETION FLOW CONTROL
 
 - (void)startCompletionForMaster {
-    
-    [self setProgMessage:@"Finishing master node..." value:70.0];
+
+    [self setProgMessage:@"Finishing master node..." value:[self getDeltaProgress:0.668]];
     
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
@@ -553,7 +568,7 @@
 
 - (void)startCompletionForSecondary {
 
-    [self setProgMessage:@"Finishing Secondary node..." value:80.0];
+    [self setProgMessage:@"Finishing Secondary node..." value:[self getDeltaProgress:0.835]];
     
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
@@ -567,7 +582,8 @@
 }
 
 - (void)startCompletionForNode:(NSUInteger)aStartNode {
-    [self setProgMessage:@"Finishing Rest of Node..." value:90.0];
+    
+    [self setProgMessage:@"Finishing Rest of Node..." value:[self getDeltaProgress:1.0]];
     
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
@@ -584,7 +600,8 @@
     
     //TODO: this needs to be fixed. the UUID or id should come from cluster itself
     PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
-    
+    meta.installed = YES;
+
     PCClusterType t = [[Util getApp] loadClusterType];
     switch (t) {
         case PC_CLUTER_VAGRANT:{
@@ -618,14 +635,18 @@
         default:
             break;
     }
-    
-    [self setToNextStage];
+
+    // count installed packages
+    ++_target_installed;
+
+    // go back to the head of iteration cycle
+    [self proceedTargetStage];
 }
 
 - (void)downloadMetaFiles {
     
     WEAK_SELF(self);
-    [self setProgMessage:@"Downloading a meta package..." value:20.0];
+    [self setProgMessage:@"Downloading a meta package..." value:20];
     
     NSMutableArray *mtlst = [NSMutableArray array];
     __block NSMutableArray *dllst = [NSMutableArray array];
@@ -753,7 +774,8 @@
         }
     }
 
-    [PCPackageMeta batchDownloadOperation:mtlst
+    [PCPackageMeta
+     batchDownloadOperation:mtlst
      progressBlock:^(NSUInteger numberOfFinishedOperations, NSUInteger totalNumberOfOperations){}
      completionBlock:^(NSArray *operations) {
 
@@ -766,7 +788,7 @@
               if(hasDownloadEverFailed){
                   [belf resetUIForFailure];
               }else{
-                  [belf performSelector:@selector(startInstallProcessForMaster) withObject:nil afterDelay:0.0];
+                  [belf performSelector:@selector(proceedTargetStage) withObject:nil afterDelay:0.0];
               }
          }];
      }];
@@ -777,6 +799,12 @@
     
     // if there is no package to install, just don't do it.
     if(![self.packageList count]){
+        return;
+    }
+
+    _total_target_count = [[self.packageList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(SELF.installed == NO)"]] count];
+    _target_installed = 0;
+    if(_total_target_count == 0){
         return;
     }
     
