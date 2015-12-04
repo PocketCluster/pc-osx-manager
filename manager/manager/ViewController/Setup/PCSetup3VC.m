@@ -405,7 +405,7 @@
 
 -(double)getDeltaProgress:(double)aProgressMark {
     double delta_duration = (TOTAL_PROGRESS_DURATION)/(double)_total_target_count;
-    double delta_progress = (delta_duration * aProgressMark) + delta_duration * _target_installed;
+    double delta_progress = (BASE_PROGRESS_PERCENTAGE) + (delta_duration * _target_installed) + (delta_duration * aProgressMark);
     return delta_progress;
 }
 
@@ -646,7 +646,7 @@
 - (void)downloadMetaFiles {
     
     WEAK_SELF(self);
-    [self setProgMessage:@"Downloading a meta package..." value:20];
+    [self setProgMessage:@"Downloading a meta package..." value:20.0];
     
     NSMutableArray *mtlst = [NSMutableArray array];
     __block NSMutableArray *dllst = [NSMutableArray array];
