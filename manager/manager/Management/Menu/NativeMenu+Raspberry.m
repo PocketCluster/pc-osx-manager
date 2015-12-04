@@ -10,7 +10,7 @@
 #import "RaspberryManager.h"
 #import "RaspberryMenuItem.h"
 
-@interface NativeMenu(RaspberryPrivate)<RaspberryMenuItemDelegate>
+@interface NativeMenu(RaspberryPrivate)
 -(void)raspberryNodeAdded:(NSNotification *)aNotification;
 -(void)raspberryNodeRemoved:(NSNotification *)aNotification;
 -(void)raspberryNodeUpdated:(NSNotification *)aNotification;

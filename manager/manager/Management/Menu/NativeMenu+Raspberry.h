@@ -7,7 +7,8 @@
 //
 
 #import "NativeMenu.h"
+#import "RaspberryMenuItem.h"
 
-@interface NativeMenu(Raspberry)
+@interface NativeMenu(Raspberry)<RaspberryMenuItemDelegate>
 -(void)raspberryRegisterNotifications;
 @end
