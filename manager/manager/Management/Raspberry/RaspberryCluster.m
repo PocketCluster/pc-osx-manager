@@ -146,7 +146,7 @@
     return -1;
 }
 
-- (void)checkCluster {
+- (void)checkRelatedPackage {
     self.relatedPackages =
         [[[PCPackageManager sharedManager] installedPackage]
          filteredArrayUsingPredicate:

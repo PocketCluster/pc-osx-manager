@@ -23,7 +23,7 @@
 - (void)removeRaspberryWithName:(NSString*)aName;
 - (Raspberry*)getRaspberryWithName:(NSString*)aName;
 - (int)getIndexOfRaspberryWithName:(NSString*)aName;
-- (void)checkCluster;
+- (void)checkRelatedPackage;
 - (void)resetNodeHeartbeat;
 
 - (void)debugOutput;

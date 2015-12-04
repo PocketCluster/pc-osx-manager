@@ -115,7 +115,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     for(RaspberryCluster *rpic in clusters) {
         dispatch_group_async(queryClusterGroup, queryClusterQueue, ^{
             //query instance machines
-            [rpic checkCluster];
+            [rpic checkRelatedPackage];
 
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[NSNotificationCenter defaultCenter]

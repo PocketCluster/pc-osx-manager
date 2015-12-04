@@ -448,6 +448,22 @@
 }
 
 -(void)setToNextStage {
+    
+    PCClusterType t = [[Util getApp] loadClusterType];
+    switch (t) {
+        case PC_CLUTER_VAGRANT:{
+            [[VagrantManager sharedManager] refreshVagrantMachines];
+            break;
+        }
+        case PC_CLUSTER_RASPBERRY: {
+            [[RaspberryManager sharedManager] refreshRaspberryClusters];
+            break;
+        }
+        case PC_CLUSTER_NONE:
+        default:
+            break;
+    }
+    
     [self setProgMessage:@"Installation completed!" value:100.0];
     [self.installBtn setEnabled:NO];
     [self.circularProgress stopAnimation:nil];
@@ -617,8 +633,7 @@
             // installed package data should be available before registration begins
             [[PCPackageManager sharedManager] addInstalledPackage:meta];
             [[PCPackageManager sharedManager] saveInstalledPackage];
-            
-            [[Util getApp] startVagrantSetupService];
+
             break;
         }
         case PC_CLUSTER_RASPBERRY: {
@@ -629,8 +644,7 @@
             // installed package data should be available before registration begins
             [[PCPackageManager sharedManager] addInstalledPackage:meta];
             [[PCPackageManager sharedManager] saveInstalledPackage];
-            
-            [[Util getApp] startRaspberrySetupService];
+
             break;
         }
         case PC_CLUSTER_NONE:
