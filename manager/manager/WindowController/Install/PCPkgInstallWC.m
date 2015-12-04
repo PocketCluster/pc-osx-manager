@@ -137,8 +137,10 @@
 #pragma mark - PCTaskDelegate
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
     
-    int term_status = aTask.terminationStatus;
-    
+    //FIXME: should always check active job status
+    //int term_status = aTask.terminationStatus;
+    int term_status = -1;
+
     if(self.saltJobTask == aPCTask) {
         
         // need to invalidate job task first
