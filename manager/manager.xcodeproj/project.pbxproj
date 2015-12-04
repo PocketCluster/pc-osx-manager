@@ -101,9 +101,6 @@
 		046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
 		046A35B91BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
 		046A35BA1BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
-		046A35D31BD7871B004E0946 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C51BD7871B004E0946 /* AboutWindow.m */; };
-		046A35D41BD7871B004E0946 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C51BD7871B004E0946 /* AboutWindow.m */; };
-		046A35D51BD7871B004E0946 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35C51BD7871B004E0946 /* AboutWindow.m */; };
 		046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
 		046A35D71BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
 		046A35D81BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
@@ -245,6 +242,7 @@
 		04D407421BDBC51F00625AD7 /* PCInterfaceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407351BDBC51F00625AD7 /* PCInterfaceList.m */; };
 		04D407431BDBC51F00625AD7 /* PCInterfaceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407351BDBC51F00625AD7 /* PCInterfaceList.m */; };
 		04D407441BDBC51F00625AD7 /* PCInterfaceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D407351BDBC51F00625AD7 /* PCInterfaceList.m */; };
+		04DCF30D1C11601F007B1DC8 /* AboutWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04DCF30C1C11601F007B1DC8 /* AboutWindow.swift */; };
 		04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
 		04E51DC11BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
 		04E51DC21BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
@@ -367,8 +365,6 @@
 		0441A4181BD8BFE200AABD7A /* GCDWebServers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GCDWebServers.framework; path = Frameworks/GCDWebServers.framework; sourceTree = "<group>"; };
 		046A35B61BD783CE004E0946 /* BaseWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseWindowController.h; sourceTree = "<group>"; };
 		046A35B71BD783CE004E0946 /* BaseWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseWindowController.m; sourceTree = "<group>"; };
-		046A35C41BD7871B004E0946 /* AboutWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutWindow.h; sourceTree = "<group>"; };
-		046A35C51BD7871B004E0946 /* AboutWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AboutWindow.m; sourceTree = "<group>"; };
 		046A35C61BD7871B004E0946 /* AboutWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AboutWindow.xib; sourceTree = "<group>"; };
 		046A35DE1BD78AB8004E0946 /* NSDictionary+HTTPAddition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+HTTPAddition.h"; sourceTree = "<group>"; };
 		046A35DF1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+HTTPAddition.m"; sourceTree = "<group>"; };
@@ -428,7 +424,7 @@
 		046F96071BDDBBBC006AA8EE /* BaseWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseWindow.h; sourceTree = "<group>"; };
 		046F96081BDDBBBC006AA8EE /* BaseWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseWindow.m; sourceTree = "<group>"; };
 		046F960C1BDDBDA9006AA8EE /* PCTaskOutputWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCTaskOutputWindow.xib; sourceTree = "<group>"; };
-		048678051BCF5FE20071594B /* manager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = manager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		048678051BCF5FE20071594B /* PocketCluster.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PocketCluster.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0486780E1BCF5FE20071594B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		048678111BCF5FE20071594B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		048678131BCF5FE20071594B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -478,6 +474,8 @@
 		04D407331BDBC51F00625AD7 /* LinkMACVendors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkMACVendors.m; sourceTree = "<group>"; };
 		04D407341BDBC51F00625AD7 /* PCInterfaceList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCInterfaceList.h; sourceTree = "<group>"; };
 		04D407351BDBC51F00625AD7 /* PCInterfaceList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCInterfaceList.m; sourceTree = "<group>"; };
+		04DCF3071C115F0F007B1DC8 /* Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
+		04DCF30C1C11601F007B1DC8 /* AboutWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutWindow.swift; sourceTree = "<group>"; };
 		04E51DBF1BDC88E3001F1F22 /* Resources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Resources.bundle; sourceTree = "<group>"; };
 		04F705641BD7A94300829651 /* BSONSerialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSONSerialization.h; sourceTree = "<group>"; };
 		04F705651BD7A94300829651 /* BSONSerialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSONSerialization.m; sourceTree = "<group>"; };
@@ -688,8 +686,7 @@
 		046A35C31BD7871B004E0946 /* About */ = {
 			isa = PBXGroup;
 			children = (
-				046A35C41BD7871B004E0946 /* AboutWindow.h */,
-				046A35C51BD7871B004E0946 /* AboutWindow.m */,
+				04DCF30C1C11601F007B1DC8 /* AboutWindow.swift */,
 				046A35C61BD7871B004E0946 /* AboutWindow.xib */,
 			);
 			path = About;
@@ -939,7 +936,7 @@
 		048678061BCF5FE20071594B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				048678051BCF5FE20071594B /* manager.app */,
+				048678051BCF5FE20071594B /* PocketCluster.app */,
 				048678181BCF5FE20071594B /* managerTests.xctest */,
 				048678231BCF5FE20071594B /* managerUITests.xctest */,
 				046A36301BD78F52004E0946 /* Askpass */,
@@ -950,6 +947,7 @@
 		048678071BCF5FE20071594B /* manager */ = {
 			isa = PBXGroup;
 			children = (
+				04DCF3071C115F0F007B1DC8 /* Bridging-Header.h */,
 				0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */,
 				04E51DBF1BDC88E3001F1F22 /* Resources.bundle */,
 				0486780E1BCF5FE20071594B /* Assets.xcassets */,
@@ -1150,9 +1148,9 @@
 			productReference = 046A36301BD78F52004E0946 /* Askpass */;
 			productType = "com.apple.product-type.tool";
 		};
-		048678041BCF5FE20071594B /* manager */ = {
+		048678041BCF5FE20071594B /* PocketCluster */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0486782C1BCF5FE20071594B /* Build configuration list for PBXNativeTarget "manager" */;
+			buildConfigurationList = 0486782C1BCF5FE20071594B /* Build configuration list for PBXNativeTarget "PocketCluster" */;
 			buildPhases = (
 				02153022E9716F2E3D2829F4 /* Check Pods Manifest.lock */,
 				048678011BCF5FE20071594B /* Sources */,
@@ -1168,9 +1166,9 @@
 			dependencies = (
 				046A363E1BD791B1004E0946 /* PBXTargetDependency */,
 			);
-			name = manager;
+			name = PocketCluster;
 			productName = manager;
-			productReference = 048678051BCF5FE20071594B /* manager.app */;
+			productReference = 048678051BCF5FE20071594B /* PocketCluster.app */;
 			productType = "com.apple.product-type.application";
 		};
 		048678171BCF5FE20071594B /* managerTests */ = {
@@ -1215,6 +1213,7 @@
 		048677FD1BCF5FE20071594B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0710;
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = io.pocketcluster;
 				TargetAttributes = {
@@ -1249,7 +1248,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				048678041BCF5FE20071594B /* manager */,
+				048678041BCF5FE20071594B /* PocketCluster */,
 				048678171BCF5FE20071594B /* managerTests */,
 				048678221BCF5FE20071594B /* managerUITests */,
 				046A362F1BD78F52004E0946 /* Askpass */,
@@ -1457,11 +1456,11 @@
 				04C601B71BE3B0FA002389AB /* VirtualBoxServiceProvider.m in Sources */,
 				044071691BE741A0005B6E6D /* NativeMenuItem.m in Sources */,
 				046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */,
-				046A35D31BD7871B004E0946 /* AboutWindow.m in Sources */,
 				0441A3E31BD8904100AABD7A /* main.m in Sources */,
 				04F705691BD7A94300829651 /* BSONSerialization.m in Sources */,
 				0422D4F61BDA0C2700C5CB33 /* PCTask.m in Sources */,
 				044071631BE741A0005B6E6D /* NativeMenu+Raspberry.m in Sources */,
+				04DCF30D1C11601F007B1DC8 /* AboutWindow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1495,7 +1494,6 @@
 				0422D4E11BDA04A500C5CB33 /* TaskOutputVC.m in Sources */,
 				04C6019F1BE3B040002389AB /* VagrantMachine.m in Sources */,
 				043F05CE1BF11C92003B54F5 /* PCPackageManager.m in Sources */,
-				046A35D41BD7871B004E0946 /* AboutWindow.m in Sources */,
 				0410240A1BE4DA400083D62E /* Raspberry.m in Sources */,
 				0441A3F51BD892A400AABD7A /* VersionComparison.m in Sources */,
 				0422D4EB1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */,
@@ -1561,7 +1559,6 @@
 				0422D4E21BDA04A500C5CB33 /* TaskOutputVC.m in Sources */,
 				04C601A01BE3B040002389AB /* VagrantMachine.m in Sources */,
 				043F05CF1BF11C92003B54F5 /* PCPackageManager.m in Sources */,
-				046A35D51BD7871B004E0946 /* AboutWindow.m in Sources */,
 				0410240B1BE4DA400083D62E /* Raspberry.m in Sources */,
 				0441A3F61BD892A400AABD7A /* VersionComparison.m in Sources */,
 				0422D4EC1BDA067100C5CB33 /* TaskOutputWindow.m in Sources */,
@@ -1607,12 +1604,12 @@
 		};
 		0486781A1BCF5FE20071594B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 048678041BCF5FE20071594B /* manager */;
+			target = 048678041BCF5FE20071594B /* PocketCluster */;
 			targetProxy = 048678191BCF5FE20071594B /* PBXContainerItemProxy */;
 		};
 		048678251BCF5FE20071594B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 048678041BCF5FE20071594B /* manager */;
+			target = 048678041BCF5FE20071594B /* PocketCluster */;
 			targetProxy = 048678241BCF5FE20071594B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -1739,8 +1736,11 @@
 			baseConfigurationReference = A85F78534743E49932D102D2 /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
@@ -1750,6 +1750,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.manager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
@@ -1758,8 +1760,11 @@
 			baseConfigurationReference = 2A807ADE5C21861F3EE80045 /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
@@ -1769,6 +1774,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.manager;
 				PRODUCT_NAME = PocketCluster;
+				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
 			};
 			name = Release;
 		};
@@ -1776,6 +1782,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1786,6 +1793,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.managerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/manager.app/Contents/MacOS/manager";
 			};
 			name = Debug;
@@ -1794,6 +1803,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1804,6 +1814,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.managerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/manager.app/Contents/MacOS/manager";
 			};
 			name = Release;
@@ -1811,6 +1822,7 @@
 		048678331BCF5FE20071594B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1821,6 +1833,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.managerUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TEST_TARGET_NAME = manager;
 				USES_XCTRUNNER = YES;
 			};
@@ -1829,6 +1843,7 @@
 		048678341BCF5FE20071594B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1839,6 +1854,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.managerUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
 				TEST_TARGET_NAME = manager;
 				USES_XCTRUNNER = YES;
 			};
@@ -1865,7 +1881,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0486782C1BCF5FE20071594B /* Build configuration list for PBXNativeTarget "manager" */ = {
+		0486782C1BCF5FE20071594B /* Build configuration list for PBXNativeTarget "PocketCluster" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0486782D1BCF5FE20071594B /* Debug */,

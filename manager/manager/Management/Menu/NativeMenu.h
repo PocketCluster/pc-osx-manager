@@ -8,7 +8,7 @@
 #import "MenuDelegate.h"
 #import "DPSetupWC.h"
 #import "PCPrefWC.h"
-#import "AboutWindow.h"
+#import "PocketCluster-Swift.h"
 #import "VagrantManager.h"
 #import "NativeMenuItem.h"
 #import "PCConstants.h"
