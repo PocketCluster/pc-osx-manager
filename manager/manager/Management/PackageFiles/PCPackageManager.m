@@ -64,4 +64,14 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCPackageManager, sharedManager);
     }
 }
 
+#ifdef DEBUG
+- (void)clearInstalledPackageMeta {
+    @synchronized(self) {
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:kPCInstalledPackageCollection];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+    }
+}
+#endif
+
+
 @end

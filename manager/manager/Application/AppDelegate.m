@@ -97,6 +97,12 @@
     return;
 #endif
     
+#ifdef DEBUG
+    #if 0
+        [[PCPackageManager sharedManager] clearInstalledPackageMeta];
+    #endif
+#endif
+    
     PCClusterType t = [self loadClusterType];
     switch (t) {
         case PC_CLUTER_VAGRANT:{

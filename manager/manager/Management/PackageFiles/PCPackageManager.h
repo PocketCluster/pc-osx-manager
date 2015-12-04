@@ -19,4 +19,7 @@
 - (void)loadInstalledPackage;
 - (void)saveInstalledPackage;
 
+#ifdef DEBUG
+- (void)clearInstalledPackageMeta;
+#endif
 @end
