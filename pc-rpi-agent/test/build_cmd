@@ -1,0 +1,21 @@
+# packages
+sudo apt-get install python2.7-examples python2.7-dev zlib1g-dev lib32z1-dev
+
+# http://stackoverflow.com/questions/20313886/error-in-using-python-freeze-py
+ln -s /usr/lib/python2.7/config-arm-linux-gnueabihf /usr/lib/python2.7/config
+
+# edit encodings in tzfile.py
+sudo -s pico /usr/local/lib/python2.7/dist-packages/pytz/tzfile.py
+"US-ASCII" -> "ascii"
+
+# python freeze with all encoding modules
+python -S /usr/share/doc/python2.7/examples/Tools/freeze/freeze.py main.py -m encodings.*
+
+# build executable
+make
+
+# remove debugging symbols
+strip main
+
+# runlevels 2-5 and stop in runlevels 0, 1 and 6.
+update-rc.d pocket start 90 2 3 4 5 . stop 10 0 1 6 .

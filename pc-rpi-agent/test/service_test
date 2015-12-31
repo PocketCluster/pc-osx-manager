@@ -1,0 +1,10 @@
+#! /bin/sh
+### BEGIN INIT INFO
+
+#output=$((./service_test.py start) 2>&1)
+$(./service_test.py start)
+
+echo $output
+
+echo "----- exit value ------"
+echo $?
