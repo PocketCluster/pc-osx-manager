@@ -1,0 +1,27 @@
+# clear process
+ps -efw | grep salt | grep -v grep | awk '{print $2}' | xargs kill
+
+# clear directory
+rm -rf /pocket/*
+rm -rf /bigpkg/*
+
+# clear registry
+rm ~/Library/Preferences/io.pocketcluster.manager.plist
+defaults delete io.pocketcluster
+defaults delete io.pocketcluster.manager
+defaults delete io.pocketcluster.pocketcluster
+
+# clean brew packages
+brew uninstall libyaml saltstack zeromq; brew cleanup -s
+
+# clean ssh
+restore ssh directory
+
+# clean hosts
+restore /etc/hosts
+
+# clean VBox
+sudo route -nv add -net 10.211.55 -interface vboxnet0
+vboxmanage hostonlyif remove vboxnet1
+VBoxManage list vms > /dev/null
+VBoxManage hostonlyif ipconfig vboxnet0 --ip 10.211.55.1 --netmask 255.255.255.0

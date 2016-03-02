@@ -1,0 +1,30 @@
+# Default Github
+Host *
+ ServerAliveInterval 30
+
+Host github.com
+	HostName github.com
+	User git
+	IdentityFile ~/.ssh/id_rsa
+
+Host tinyspark.kr
+        HostName tinyspark.kr
+        User tinyspark
+        IdentityFile ~/.ssh/id_rsa
+
+Host index.pocketcluster.io
+        HostName 104.131.134.219
+        User stkim1
+        IdentityFile ~/.ssh/id_rsa
+
+Host pocket
+	HostName 192.168.1.151
+	User ubuntu
+	IdentityFile ~/.ssh/id_rsa
+
+Host macmini
+        HostName 192.168.1.100
+        User almightykim
+        IdentityFile ~/.ssh/id_rsa
+
+
