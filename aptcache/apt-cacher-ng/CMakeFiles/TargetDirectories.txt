@@ -1,0 +1,2 @@
+/Users/almightykim/Workspace/PC/CODE/aptcache/apt-cacher-ng/CMakeFiles/in.acng.dir
+/Users/almightykim/Workspace/PC/CODE/aptcache/apt-cacher-ng/CMakeFiles/apt-cacher-ng.dir
