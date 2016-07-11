@@ -25,7 +25,7 @@ HRESULT VboxClientThreadUninitialize();
 
 void VboxClientUninitialize();
 
-void VboxClientRelease(IVirtualBoxClient* client);
+HRESULT VboxClientRelease(IVirtualBoxClient* client);
 
 HRESULT VboxGetVirtualBox(IVirtualBoxClient* client, IVirtualBox** cbox);
 

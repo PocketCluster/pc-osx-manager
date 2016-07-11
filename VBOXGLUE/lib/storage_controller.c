@@ -26,7 +26,9 @@ HRESULT VboxSetStorageControllerType(IStorageController* ccontroller, PRUint32 c
 }
 
 HRESULT VboxIStorageControllerRelease(IStorageController* ccontroller) {
-    return IStorageController_Release(ccontroller);
+    HRESULT result = IStorageController_Release(ccontroller);
+    ccontroller = NULL;
+    return result;
 }
 
 HRESULT VboxMachineAddStorageController(IMachine* cmachine, char* cname, PRUint32 connectionType, IStorageController** ccontroller) {

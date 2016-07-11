@@ -12,6 +12,7 @@ HRESULT VboxArrayOutFree(void* carray) {
 
 void VboxUtf8Free(char* cstring) {
     g_pVBoxFuncs->pfnUtf8Free(cstring);
+    cstring = NULL;
 }
 
 HRESULT VboxInit() {
@@ -46,8 +47,10 @@ void VboxClientUninitialize() {
     g_pVBoxFuncs->pfnClientUninitialize();
 }
 
-void VboxClientRelease(IVirtualBoxClient* client) {
-    IVirtualBoxClient_Release(client);
+HRESULT VboxClientRelease(IVirtualBoxClient* client) {
+    HRESULT result = IVirtualBoxClient_Release(client);
+    client = NULL;
+    return result;
 }
 
 HRESULT VboxGetVirtualBox(IVirtualBoxClient* client, IVirtualBox** cbox) {
@@ -59,7 +62,9 @@ HRESULT VboxGetRevision(IVirtualBox* cbox, ULONG* revision) {
 }
 
 HRESULT VboxIVirtualBoxRelease(IVirtualBox* cbox) {
-    return IVirtualBox_Release(cbox);
+    HRESULT result = IVirtualBox_Release(cbox);
+    cbox = NULL;
+    return result;
 }
 
 HRESULT VboxComposeMachineFilename(IVirtualBox* cbox, char* cname, char* cflags, char* cbaseFolder, char **cpath) {

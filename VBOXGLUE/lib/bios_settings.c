@@ -26,7 +26,9 @@ HRESULT VboxSetBiosSettingsBootMenuMode(IBIOSSettings* csettings, PRUint32 cmenu
 }
 
 HRESULT VboxIBiosSettingsRelease(IBIOSSettings* csettings) {
-    return IBIOSSettings_Release(csettings);
+    HRESULT result = IBIOSSettings_Release(csettings);
+    csettings = NULL;
+    return result;
 }
 
 HRESULT VboxGetMachineBIOSSettings(IMachine* cmachine, IBIOSSettings** csettings) {

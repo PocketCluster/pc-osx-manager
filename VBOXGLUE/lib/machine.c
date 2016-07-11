@@ -127,6 +127,10 @@ HRESULT VboxMachineGetMedium(IMachine* cmachine, char* cname, PRInt32 cport, PRI
     return result;
 }
 
+HRESULT VboxMachineGetNetworkAdapter(IMachine *cmachine, PRUint32 slotNumber, INetworkAdapter **cAdapter) {
+    return IMachine_GetNetworkAdapter(cmachine, slotNumber, cAdapter);
+}
+
 HRESULT VboxMachineLaunchVMProcess(IMachine* cmachine, ISession* csession, char* cuiType, char* cenvironment, IProgress** cprogress) {
     BSTR wuiType;
     HRESULT result = g_pVBoxFuncs->pfnUtf8ToUtf16(cuiType, &wuiType);
@@ -149,7 +153,9 @@ HRESULT VboxMachineLaunchVMProcess(IMachine* cmachine, ISession* csession, char*
 }
 
 HRESULT VboxIMachineRelease(IMachine* cmachine) {
-    return IMachine_Release(cmachine);
+    HRESULT result = IMachine_Release(cmachine);
+    cmachine = NULL;
+    return result;
 }
 
 HRESULT VboxCreateMachine(IVirtualBox* cbox, char* cSettingsFile, char* cname, char* cosTypeId, char* cflags, IMachine** cmachine) {

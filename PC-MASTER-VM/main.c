@@ -795,7 +795,7 @@ main(int argc, const char * argv[]) {
 #include "medium_format.h"
 #include "progress.h"
 #include "storage_controller.h"
-
+#include "network.h"
 
 /**
  * Print detailed error information if available.
@@ -981,7 +981,6 @@ main(int argc, const char * argv[]) {
         }
         // release bios settings
         VboxIBiosSettingsRelease(bios);
-        bios = NULL;
     }
 
     // Motherboard Settings
@@ -1088,7 +1087,6 @@ main(int argc, const char * argv[]) {
 
             // release storage controller
             VboxIStorageControllerRelease(storage_controller);
-            storage_controller = NULL;
         }
         
         // SAVE SETTINGS & REGISTER MACHINE BEFORE ATTACH A MEDIUM
@@ -1104,7 +1102,7 @@ main(int argc, const char * argv[]) {
             }
         }
 
-#pragma mark ATTACH BOOT IMAGE
+#pragma mark - ATTACH BOOT IMAGE
         // CREATE & ATTACHE BOOT IMAGE
         {
             // Create and Open Boot Image
@@ -1173,7 +1171,7 @@ main(int argc, const char * argv[]) {
             }
         }
 
-#pragma mark CREATE AND ATTACH HDD
+#pragma mark - CREATE AND ATTACH HDD
         // CREATE & ATTACHE A HDD MEDIUM
         {
             // Create and Open hard drive
@@ -1188,6 +1186,8 @@ main(int argc, const char * argv[]) {
                 if (FAILED(result) || hdd_medium == NULL) {
                     print_error_info("Failed to create harddrive", result);
                 }
+                
+//TODO : make sure we put enough time buffer + progress monitor for hard disk to be created
                 
                 PRUint32 cVariant[2] = {MediumVariant_Standard, MediumVariant_NoCreateDir};
                 PRUint32 variantCount = sizeof(cVariant) / sizeof(cVariant[0]);
@@ -1223,7 +1223,6 @@ main(int argc, const char * argv[]) {
                 if (FAILED(result)) {
                     print_error_info("Failed to lock machine", result);
                 }
-                
                 // get mutable machine
                 IMachine *mutable_machine;
                 result = VboxGetSessionMachine(session, &mutable_machine);
@@ -1281,33 +1280,93 @@ main(int argc, const char * argv[]) {
         }
     }
 
+#pragma mark - ADD NETWORK ADAPTER
+    // BRIDGED FIRST NETWORK
+    {
+        INetworkAdapter *adapter = NULL;
+        {
+            //firstly lock the machine
+            result = VboxLockMachine(machine, session, LockType_Write);
+            if (FAILED(result)) {
+                print_error_info("Failed to lock machine for networking", result);
+            }
+            // get mutable machine
+            IMachine *mutable_machine;
+            result = VboxGetSessionMachine(session, &mutable_machine);
+            if (FAILED(result) || mutable_machine == NULL) {
+                print_error_info("Failed to get a mutable copy of a machine for networking", result);
+            }
+            // get network adapter
+            result = VboxMachineGetNetworkAdapter(mutable_machine, 0, &adapter);
+            if (FAILED(result) || adapter == NULL) {
+                print_error_info("Failed to acquire adapter from slot 0", result);
+            }
+            // enable network adapter
+            result = VboxNetworkAdapterSetEnabled(adapter, TRUE);
+            if (FAILED(result)) {
+                print_error_info("Failed to enable network adapter", result);
+            }
+            // set bridged network type
+            result = VboxNetworkAdapterSetAttachmentType(adapter, NetworkAttachmentType_Bridged);
+            if (FAILED(result)) {
+                print_error_info("Failed to set network attachement type", result);
+            }
+/*
+            // set host network adapter this bridge should connect to
+            result = VboxNetworkAdapterSetBridgedHostInterface(adapter, NULL);
+            if (FAILED(result)) {
+                print_error_info("Failed to connect to host network interface", result);
+            }
+*/
+            // set adapter type (AMD PCnet-FAST III, VBox Default)
+            result = VboxNetworkAdapterSetAdapterType(adapter, NetworkAdapterType_Am79C973);
+            if (FAILED(result)) {
+                print_error_info("Failed to set network adapter type", result);
+            }
+            // promiscuous mode policy
+            result = VboxNetworkAdapterSetPromiscModePolicy(adapter, NetworkAdapterPromiscModePolicy_Deny);
+            if (FAILED(result)) {
+                print_error_info("Failed to set promiscuous mode", result);
+            }
+            // set cable connected
+            result = VboxNetworkAdapterSetCableConnected(adapter, TRUE);
+            if (FAILED(result)) {
+                print_error_info("Failed to set cable connected", result);
+            }
+            // save setting
+            result = VboxMachineSaveSettings(mutable_machine);
+            if (FAILED(result)) {
+                print_error_info("Failed to save machine after attaching hard disk medium", result);
+            }
+            // release the first adapter
+            VboxNetworkAdapterRelease(adapter);
+            // then we can safely release the mutable machine
+            if (mutable_machine) {
+                VboxIMachineRelease(mutable_machine);
+            }
+            // then unlock machine
+            result = VboxUnlockMachine(session);
+            if (FAILED(result)) {
+                print_error_info("Failed to unlock machine", result);
+            }
+        }
+    }
     printf("------------------------VBOX CLIENT TERMINATED ----------------------------\n");
 #pragma mark VBOX CLIENT TERMINATED
     if (machine) {
         VboxIMachineRelease(machine);
-        machine = NULL;
     }
-    
     if (base_folder) {
         VboxUtf8Free(base_folder);
-        base_folder = NULL;
     }
-
-    if (session)
-    {
+    if (session) {
         VboxISessionRelease(session);
-        session = NULL;
     }
-    
-    if (vbox)
-    {
+    if (vbox) {
         VboxIVirtualBoxRelease(vbox);
-        vbox = NULL;
     }
-    if (vboxclient)
-    {
+    if (vboxclient) {
         VboxClientRelease(vboxclient);
-        vboxclient = NULL;
     }
     
     VboxClientUninitialize();

@@ -41,6 +41,8 @@ HRESULT VboxMachineUnmountMedium(IMachine* cmachine, char* cname, PRInt32 cport,
 
 HRESULT VboxMachineGetMedium(IMachine* cmachine, char* cname, PRInt32 cport, PRInt32 cdevice, IMedium** cmedium);
 
+HRESULT VboxMachineGetNetworkAdapter(IMachine *cmachine, PRUint32 slotNumber, INetworkAdapter **cAdapter);
+
 HRESULT VboxMachineLaunchVMProcess(IMachine* cmachine, ISession* csession, char* cuiType, char* cenvironment, IProgress** cprogress);
 
 HRESULT VboxIMachineRelease(IMachine* cmachine);

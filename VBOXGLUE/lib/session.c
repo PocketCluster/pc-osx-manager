@@ -6,7 +6,9 @@ HRESULT VboxUnlockMachine(ISession* csession) {
 }
 
 HRESULT VboxISessionRelease(ISession* csession) {
-    return ISession_Release(csession);
+    HRESULT result = ISession_Release(csession);
+    csession = NULL;
+    return result;
 }
 
 HRESULT VboxGetSessionConsole(ISession* csession, IConsole** cconsole) {

@@ -9,4 +9,18 @@
 #ifndef __NETWORK_H__
 #define __NETWORK_H__
 
+HRESULT VboxNetworkAdapterSetEnabled(INetworkAdapter *cAdapter, BOOL isEnabled);
+
+HRESULT VboxNetworkAdapterSetAttachmentType(INetworkAdapter *cAdapter, NetworkAttachmentType attachementType);
+
+HRESULT VboxNetworkAdapterSetBridgedHostInterface(INetworkAdapter *cAdapter, const char* cHostInterface);
+
+HRESULT VboxNetworkAdapterSetAdapterType(INetworkAdapter *cAdapter, NetworkAdapterType adapterType);
+
+HRESULT VboxNetworkAdapterSetPromiscModePolicy(INetworkAdapter *cAdapter, NetworkAdapterPromiscModePolicy policyType);
+
+HRESULT VboxNetworkAdapterSetCableConnected(INetworkAdapter *cAdapter, BOOL isConnected);
+
+HRESULT VboxNetworkAdapterRelease(INetworkAdapter *cAdapter);
+
 #endif /* network_h */

@@ -74,5 +74,7 @@ HRESULT VboxGetMediumSize(IMedium* cmedium, PRInt64* csize) {
 }
 
 HRESULT VboxIMediumRelease(IMedium* cmedium) {
-    return IMedium_Release(cmedium);
+    HRESULT result = IMedium_Release(cmedium);
+    cmedium = NULL;
+    return result;
 }
