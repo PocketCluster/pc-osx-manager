@@ -127,6 +127,28 @@ HRESULT VboxMachineGetMedium(IMachine* cmachine, char* cname, PRInt32 cport, PRI
     return result;
 }
 
+HRESULT VboxMachineCreateSharedFolder(IMachine *cmachine, const char* cName, const char* cHostPath, BOOL cWritable, BOOL cAutomount) {
+    BSTR wName;
+    HRESULT result = g_pVBoxFuncs->pfnUtf8ToUtf16(cName, &wName);
+    if (FAILED(result)) {
+        return result;
+    }
+    
+    BSTR wHostPath;
+    result = g_pVBoxFuncs->pfnUtf8ToUtf16(cHostPath, &wHostPath);
+    if (FAILED(result)) {
+        return result;
+    }
+    
+    PRBool writable  = (PRBool)cWritable;
+    PRBool automount = (PRBool)cAutomount;
+    
+    result = IMachine_CreateSharedFolder(cmachine, wName, wHostPath, writable, automount);
+    g_pVBoxFuncs->pfnUtf16Free(wName);
+    g_pVBoxFuncs->pfnUtf16Free(wHostPath);
+    return result;
+}
+
 HRESULT VboxMachineGetNetworkAdapter(IMachine *cmachine, PRUint32 slotNumber, INetworkAdapter **cAdapter) {
     return IMachine_GetNetworkAdapter(cmachine, slotNumber, cAdapter);
 }
@@ -157,6 +179,7 @@ HRESULT VboxIMachineRelease(IMachine* cmachine) {
     cmachine = NULL;
     return result;
 }
+
 
 HRESULT VboxCreateMachine(IVirtualBox* cbox, char* cSettingsFile, char* cname, char* cosTypeId, char* cflags, IMachine** cmachine) {
     BSTR wSettingsFile;
@@ -222,3 +245,4 @@ HRESULT VboxGetMachines(IVirtualBox* cbox, IMachine*** cmachines, ULONG* machine
 HRESULT VboxRegisterMachine(IVirtualBox* cbox, IMachine* cmachine) {
     return IVirtualBox_RegisterMachine(cbox, cmachine);
 }
+

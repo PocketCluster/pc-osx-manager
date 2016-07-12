@@ -41,6 +41,8 @@ HRESULT VboxMachineUnmountMedium(IMachine* cmachine, char* cname, PRInt32 cport,
 
 HRESULT VboxMachineGetMedium(IMachine* cmachine, char* cname, PRInt32 cport, PRInt32 cdevice, IMedium** cmedium);
 
+HRESULT VboxMachineCreateSharedFolder(IMachine *cmachine, const char* cName, const char* cHostPath, BOOL cWritable, BOOL cAutomount);
+
 HRESULT VboxMachineGetNetworkAdapter(IMachine *cmachine, PRUint32 slotNumber, INetworkAdapter **cAdapter);
 
 HRESULT VboxMachineLaunchVMProcess(IMachine* cmachine, ISession* csession, char* cuiType, char* cenvironment, IProgress** cprogress);

@@ -957,7 +957,7 @@ main(int argc, const char * argv[]) {
         print_error_info("Failed to create machine", result);
     }
 
-#pragma mark VBOX CLIENT READY
+#pragma mark - VBOX CLIENT READY
     printf("------------------------VBOX CLIENT READY----------------------------\n");
     printf("Base folder : %s\n", base_folder);
     
@@ -1351,8 +1351,44 @@ main(int argc, const char * argv[]) {
             }
         }
     }
+    
+#pragma mark - ADD SHARED FOLDER
+    // ADD SHARED FOLDER
+    {
+        //firstly lock the machine
+        result = VboxLockMachine(machine, session, LockType_Write);
+        if (FAILED(result)) {
+            print_error_info("Failed to lock machine for shared folder", result);
+        }
+        // get mutable machine
+        IMachine *mutable_machine;
+        result = VboxGetSessionMachine(session, &mutable_machine);
+        if (FAILED(result) || mutable_machine == NULL) {
+            print_error_info("Failed to get a mutable copy of a machine for shared folder", result);
+        }
+        // create shared folder
+        result = VboxMachineCreateSharedFolder(mutable_machine, "/pocket", "/Users/almightykim/Workspace", TRUE, TRUE);
+        if (FAILED(result)) {
+            print_error_info("Failed to add shared folder /pocket", result);
+        }
+        // save setting
+        result = VboxMachineSaveSettings(mutable_machine);
+        if (FAILED(result)) {
+            print_error_info("Failed to save machine after attaching hard disk medium", result);
+        }
+        // then we can safely release the mutable machine
+        if (mutable_machine) {
+            VboxIMachineRelease(mutable_machine);
+        }
+        // then unlock machine
+        result = VboxUnlockMachine(session);
+        if (FAILED(result)) {
+            print_error_info("Failed to unlock machine", result);
+        }
+        
+    }
     printf("------------------------VBOX CLIENT TERMINATED ----------------------------\n");
-#pragma mark VBOX CLIENT TERMINATED
+#pragma mark - VBOX CLIENT TERMINATED
     if (machine) {
         VboxIMachineRelease(machine);
     }
