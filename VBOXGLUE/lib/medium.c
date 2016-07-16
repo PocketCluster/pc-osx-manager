@@ -1,7 +1,7 @@
 #include "../include/common.h"
 #include "../include/medium.h"
 
-HRESULT VboxCreateHardDisk(IVirtualBox* cbox, char* cformat, char* clocation, DeviceType deviceType, AccessMode accessMode, IMedium** cmedium) {
+HRESULT VboxCreateHardDisk(IVirtualBox* cbox, char* cformat, const char* clocation, DeviceType deviceType, AccessMode accessMode, IMedium** cmedium) {
     BSTR wformat;
     HRESULT result = g_pVBoxFuncs->pfnUtf8ToUtf16(cformat, &wformat);
     if (FAILED(result)) {
@@ -23,7 +23,7 @@ HRESULT VboxCreateHardDisk(IVirtualBox* cbox, char* cformat, char* clocation, De
     return result;
 }
 
-HRESULT VboxOpenMedium(IVirtualBox* cbox, char* clocation, DeviceType cdeviceType, AccessMode caccessType, PRBool cforceNewUuid, IMedium** cmedium) {
+HRESULT VboxOpenMedium(IVirtualBox* cbox, const char* clocation, DeviceType cdeviceType, AccessMode caccessType, PRBool cforceNewUuid, IMedium** cmedium) {
     BSTR wlocation;
     HRESULT result = g_pVBoxFuncs->pfnUtf8ToUtf16(clocation, &wlocation);
     if (FAILED(result)) {

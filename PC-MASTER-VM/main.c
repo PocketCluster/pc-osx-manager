@@ -1,11 +1,3 @@
-//
-//  main.c
-//  PC-MASTER-VM
-//
-//  Created by Almighty Kim on 7/8/16.
-//  Copyright © 2016 io.pocketcluster. All rights reserved.
-//
-
 #if 0
 
 #include <stdio.h>
@@ -785,7 +777,6 @@ main(int argc, const char * argv[]) {
 }
 #endif
 
-
 #include "common.h"
 #include "vbox.h"
 #include "session.h"
@@ -1056,6 +1047,133 @@ main(int argc, const char * argv[]) {
         }
     }
     
+    
+    
+    
+    // SAVE SETTINGS & REGISTER MACHINE BEFORE ATTACH A MEDIUM
+    {
+        result = VboxMachineSaveSettings(machine);
+        if (FAILED(result)) {
+            print_error_info("Failed to save machine before attaching a medium", result);
+        }
+        // Register machine
+        result = VboxRegisterMachine(vbox, machine);
+        if (FAILED(result)) {
+            print_error_info("Failed to register machine", result);
+        }
+    }
+
+    
+    
+#pragma mark - ADD NETWORK ADAPTER
+    // BRIDGED FIRST NETWORK
+    {
+        INetworkAdapter *adapter = NULL;
+        {
+            //firstly lock the machine
+            result = VboxLockMachine(machine, session, LockType_Write);
+            if (FAILED(result)) {
+                print_error_info("Failed to lock machine for networking", result);
+            }
+            // get mutable machine
+            IMachine *mutable_machine;
+            result = VboxGetSessionMachine(session, &mutable_machine);
+            if (FAILED(result) || mutable_machine == NULL) {
+                print_error_info("Failed to get a mutable copy of a machine for networking", result);
+            }
+            // get network adapter
+            result = VboxMachineGetNetworkAdapter(mutable_machine, 0, &adapter);
+            if (FAILED(result) || adapter == NULL) {
+                print_error_info("Failed to acquire adapter from slot 0", result);
+            }
+            // enable network adapter
+            result = VboxNetworkAdapterSetEnabled(adapter, TRUE);
+            if (FAILED(result)) {
+                print_error_info("Failed to enable network adapter", result);
+            }
+            // set bridged network type
+            result = VboxNetworkAdapterSetAttachmentType(adapter, NetworkAttachmentType_Bridged);
+            if (FAILED(result)) {
+                print_error_info("Failed to set network attachement type", result);
+            }
+            /*
+             // set host network adapter this bridge should connect to
+             result = VboxNetworkAdapterSetBridgedHostInterface(adapter, NULL);
+             if (FAILED(result)) {
+             print_error_info("Failed to connect to host network interface", result);
+             }
+             */
+            // set adapter type (AMD PCnet-FAST III, VBox Default)
+            result = VboxNetworkAdapterSetAdapterType(adapter, NetworkAdapterType_Am79C973);
+            if (FAILED(result)) {
+                print_error_info("Failed to set network adapter type", result);
+            }
+            // promiscuous mode policy
+            result = VboxNetworkAdapterSetPromiscModePolicy(adapter, NetworkAdapterPromiscModePolicy_Deny);
+            if (FAILED(result)) {
+                print_error_info("Failed to set promiscuous mode", result);
+            }
+            // set cable connected
+            result = VboxNetworkAdapterSetCableConnected(adapter, TRUE);
+            if (FAILED(result)) {
+                print_error_info("Failed to set cable connected", result);
+            }
+            // save setting
+            result = VboxMachineSaveSettings(mutable_machine);
+            if (FAILED(result)) {
+                print_error_info("Failed to save machine after attaching hard disk medium", result);
+            }
+            // release the first adapter
+            VboxNetworkAdapterRelease(adapter);
+            // then we can safely release the mutable machine
+            if (mutable_machine) {
+                VboxIMachineRelease(mutable_machine);
+            }
+            // then unlock machine
+            result = VboxUnlockMachine(session);
+            if (FAILED(result)) {
+                print_error_info("Failed to unlock machine", result);
+            }
+        }
+    }
+    
+#pragma mark - ADD SHARED FOLDER
+    // ADD SHARED FOLDER
+    {
+        //firstly lock the machine
+        result = VboxLockMachine(machine, session, LockType_Write);
+        if (FAILED(result)) {
+            print_error_info("Failed to lock machine for shared folder", result);
+        }
+        // get mutable machine
+        IMachine *mutable_machine;
+        result = VboxGetSessionMachine(session, &mutable_machine);
+        if (FAILED(result) || mutable_machine == NULL) {
+            print_error_info("Failed to get a mutable copy of a machine for shared folder", result);
+        }
+        // create shared folder
+        result = VboxMachineCreateSharedFolder(mutable_machine, "/pocket", "/Users/almightykim/Workspace", TRUE, TRUE);
+        if (FAILED(result)) {
+            print_error_info("Failed to add shared folder /pocket", result);
+        }
+        // save setting
+        result = VboxMachineSaveSettings(mutable_machine);
+        if (FAILED(result)) {
+            print_error_info("Failed to save machine after attaching hard disk medium", result);
+        }
+        // then we can safely release the mutable machine
+        if (mutable_machine) {
+            VboxIMachineRelease(mutable_machine);
+        }
+        // then unlock machine
+        result = VboxUnlockMachine(session);
+        if (FAILED(result)) {
+            print_error_info("Failed to unlock machine", result);
+        }
+        
+    }
+    
+#pragma mark - STORAGE
     // STORAGE
     {
         // STORAGE CONTROLLER
@@ -1063,7 +1181,20 @@ main(int argc, const char * argv[]) {
         {
             IStorageController *storage_controller;
             storage_controller_name = "SATA";
-            result = VboxMachineAddStorageController(machine, storage_controller_name, StorageBus_SATA, &storage_controller);
+            
+            //firstly lock the machine
+            result = VboxLockMachine(machine, session, LockType_Write);
+            if (FAILED(result)) {
+                print_error_info("Failed to lock machine", result);
+            }
+            // get mutable machine
+            IMachine *mutable_machine;
+            result = VboxGetSessionMachine(session, &mutable_machine);
+            if (FAILED(result) || mutable_machine == NULL) {
+                print_error_info("Failed to get a mutable copy of a machine", result);
+            }
+            
+            result = VboxMachineAddStorageController(mutable_machine, storage_controller_name, StorageBus_SATA, &storage_controller);
             if (FAILED(result) || storage_controller_name == NULL) {
                 print_error_info("Failed to add storage controller", result);
             }
@@ -1087,21 +1218,23 @@ main(int argc, const char * argv[]) {
 
             // release storage controller
             VboxIStorageControllerRelease(storage_controller);
+            // save setting
+            result = VboxMachineSaveSettings(mutable_machine);
+            if (FAILED(result)) {
+                print_error_info("Failed to save machine after attaching boot image", result);
+            }
+            // then we can safely release the mutable machine
+            if (mutable_machine) {
+                VboxIMachineRelease(mutable_machine);
+                mutable_machine = NULL;
+            }
+            // then unlock machine
+            result = VboxUnlockMachine(session);
+            if (FAILED(result)) {
+                print_error_info("Failed to unlock machine", result);
+            }
         }
         
-        // SAVE SETTINGS & REGISTER MACHINE BEFORE ATTACH A MEDIUM
-        {
-            result = VboxMachineSaveSettings(machine);
-            if (FAILED(result)) {
-                print_error_info("Failed to save machine before attaching a medium", result);
-            }
-            // Register machine
-            result = VboxRegisterMachine(vbox, machine);
-            if (FAILED(result)) {
-                print_error_info("Failed to register machine", result);
-            }
-        }
-
 #pragma mark - ATTACH BOOT IMAGE
         // CREATE & ATTACHE BOOT IMAGE
         {
@@ -1204,7 +1337,7 @@ main(int argc, const char * argv[]) {
                 
                 PRInt32 code;
                 result = VboxGetProgressResultCode(progress, &code);
-                if (FAILED(result)|| code != 0) {
+                if (FAILED(result) || code != 0) {
                     print_error_info("Actuqired bad storage creation result code", result);
                 }
                 
@@ -1279,97 +1412,33 @@ main(int argc, const char * argv[]) {
             }
         }
     }
-
-#pragma mark - ADD NETWORK ADAPTER
-    // BRIDGED FIRST NETWORK
-    {
-        INetworkAdapter *adapter = NULL;
-        {
-            //firstly lock the machine
-            result = VboxLockMachine(machine, session, LockType_Write);
-            if (FAILED(result)) {
-                print_error_info("Failed to lock machine for networking", result);
-            }
-            // get mutable machine
-            IMachine *mutable_machine;
-            result = VboxGetSessionMachine(session, &mutable_machine);
-            if (FAILED(result) || mutable_machine == NULL) {
-                print_error_info("Failed to get a mutable copy of a machine for networking", result);
-            }
-            // get network adapter
-            result = VboxMachineGetNetworkAdapter(mutable_machine, 0, &adapter);
-            if (FAILED(result) || adapter == NULL) {
-                print_error_info("Failed to acquire adapter from slot 0", result);
-            }
-            // enable network adapter
-            result = VboxNetworkAdapterSetEnabled(adapter, TRUE);
-            if (FAILED(result)) {
-                print_error_info("Failed to enable network adapter", result);
-            }
-            // set bridged network type
-            result = VboxNetworkAdapterSetAttachmentType(adapter, NetworkAttachmentType_Bridged);
-            if (FAILED(result)) {
-                print_error_info("Failed to set network attachement type", result);
-            }
-/*
-            // set host network adapter this bridge should connect to
-            result = VboxNetworkAdapterSetBridgedHostInterface(adapter, NULL);
-            if (FAILED(result)) {
-                print_error_info("Failed to connect to host network interface", result);
-            }
-*/
-            // set adapter type (AMD PCnet-FAST III, VBox Default)
-            result = VboxNetworkAdapterSetAdapterType(adapter, NetworkAdapterType_Am79C973);
-            if (FAILED(result)) {
-                print_error_info("Failed to set network adapter type", result);
-            }
-            // promiscuous mode policy
-            result = VboxNetworkAdapterSetPromiscModePolicy(adapter, NetworkAdapterPromiscModePolicy_Deny);
-            if (FAILED(result)) {
-                print_error_info("Failed to set promiscuous mode", result);
-            }
-            // set cable connected
-            result = VboxNetworkAdapterSetCableConnected(adapter, TRUE);
-            if (FAILED(result)) {
-                print_error_info("Failed to set cable connected", result);
-            }
-            // save setting
-            result = VboxMachineSaveSettings(mutable_machine);
-            if (FAILED(result)) {
-                print_error_info("Failed to save machine after attaching hard disk medium", result);
-            }
-            // release the first adapter
-            VboxNetworkAdapterRelease(adapter);
-            // then we can safely release the mutable machine
-            if (mutable_machine) {
-                VboxIMachineRelease(mutable_machine);
-            }
-            // then unlock machine
-            result = VboxUnlockMachine(session);
-            if (FAILED(result)) {
-                print_error_info("Failed to unlock machine", result);
-            }
-        }
-    }
+    sleep(2);
     
-#pragma mark - ADD SHARED FOLDER
-    // ADD SHARED FOLDER
+#pragma mark - UNREGISTER MACHINE
+    printf("start unregistering...\n");
+    // Unregister machine
     {
         //firstly lock the machine
         result = VboxLockMachine(machine, session, LockType_Write);
         if (FAILED(result)) {
-            print_error_info("Failed to lock machine for shared folder", result);
+            print_error_info("Failed to lock machine", result);
         }
         // get mutable machine
         IMachine *mutable_machine;
         result = VboxGetSessionMachine(session, &mutable_machine);
         if (FAILED(result) || mutable_machine == NULL) {
-            print_error_info("Failed to get a mutable copy of a machine for shared folder", result);
+            print_error_info("Failed to get a mutable copy of a machine", result);
         }
-        // create shared folder
-        result = VboxMachineCreateSharedFolder(mutable_machine, "/pocket", "/Users/almightykim/Workspace", TRUE, TRUE);
+        // detach dvd
+        PRBool force_detach = (PRBool)1;
+        result = VboxMachineUnmountMedium(mutable_machine, "SATA", 0, 0, force_detach);
         if (FAILED(result)) {
-            print_error_info("Failed to add shared folder /pocket", result);
+            print_error_info("Failed to detach dvd medium", result);
+        }
+        // detach hdd
+        result = VboxMachineUnmountMedium(mutable_machine, "SATA", 1, 0, force_detach);
+        if (FAILED(result)) {
+            print_error_info("Failed to attach hard disk medium", result);
         }
         // save setting
         result = VboxMachineSaveSettings(mutable_machine);
@@ -1379,14 +1448,41 @@ main(int argc, const char * argv[]) {
         // then we can safely release the mutable machine
         if (mutable_machine) {
             VboxIMachineRelease(mutable_machine);
+            mutable_machine = NULL;
         }
         // then unlock machine
         result = VboxUnlockMachine(session);
         if (FAILED(result)) {
             print_error_info("Failed to unlock machine", result);
         }
-        
     }
+
+    {
+        IMedium** media;
+        ULONG media_count;
+        result = VboxMachineUnregister(machine, CleanupMode_Full, &media, &media_count);
+        if (FAILED(result)) {
+            print_error_info("Failed to unregister media", result);
+        }
+        IProgress *progress;
+        result = VboxMachineDeleteConfig(machine, media_count, media, &progress);
+        if (FAILED(result)) {
+            print_error_info("Failed to delete medium", result);
+        }
+        PRUint32 progress_percent = 0;
+        do {
+            VboxGetProgressPercent(progress, &progress_percent);
+            printf("\nprogress %d\n",progress_percent);
+            usleep(200000);
+        } while (progress_percent < 100);
+
+        // fail to free media
+        VboxArrayOutFree(media);
+    }
+    
+    
+    
+    
     printf("------------------------VBOX CLIENT TERMINATED ----------------------------\n");
 #pragma mark - VBOX CLIENT TERMINATED
     if (machine) {

@@ -14,5 +14,7 @@ HRESULT VboxGetProgressResultCode(IProgress* cprogress, PRInt32* code) {
 }
 
 HRESULT VboxIProgressRelease(IProgress* cprogress) {
-    return IProgress_Release(cprogress);
+    HRESULT result = IProgress_Release(cprogress);
+    cprogress = NULL;
+    return result;
 }

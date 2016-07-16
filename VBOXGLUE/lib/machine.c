@@ -88,7 +88,7 @@ HRESULT VboxMachineDeleteConfig(IMachine* cmachine, PRUint32 mediaCount, IMedium
     return result;
 }
 
-HRESULT VboxMachineAttachDevice(IMachine* cmachine, char* cname, PRInt32 cport, PRInt32 cdevice, PRUint32 ctype, IMedium* cmedium) {
+HRESULT VboxMachineAttachDevice(IMachine* cmachine, const char* cname, PRInt32 cport, PRInt32 cdevice, PRUint32 ctype, IMedium* cmedium) {
     BSTR wname;
     HRESULT result = g_pVBoxFuncs->pfnUtf8ToUtf16(cname, &wname);
     if (FAILED(result)) {
@@ -101,7 +101,7 @@ HRESULT VboxMachineAttachDevice(IMachine* cmachine, char* cname, PRInt32 cport, 
     return result;
 }
 
-HRESULT VboxMachineUnmountMedium(IMachine* cmachine, char* cname, PRInt32 cport, PRInt32 cdevice, PRBool cforce) {
+HRESULT VboxMachineUnmountMedium(IMachine* cmachine, const char* cname, PRInt32 cport, PRInt32 cdevice, PRBool cforce) {
     BSTR wname;
     HRESULT result = g_pVBoxFuncs->pfnUtf8ToUtf16(cname, &wname);
     if (FAILED(result)) {
@@ -181,7 +181,7 @@ HRESULT VboxIMachineRelease(IMachine* cmachine) {
 }
 
 
-HRESULT VboxCreateMachine(IVirtualBox* cbox, char* cSettingsFile, char* cname, char* cosTypeId, char* cflags, IMachine** cmachine) {
+HRESULT VboxCreateMachine(IVirtualBox* cbox, char* cSettingsFile, const char* cname, char* cosTypeId, char* cflags, IMachine** cmachine) {
     BSTR wSettingsFile;
     HRESULT result = g_pVBoxFuncs->pfnUtf8ToUtf16(cSettingsFile, &wSettingsFile);
     if (FAILED(result)) {
@@ -219,7 +219,15 @@ HRESULT VboxCreateMachine(IVirtualBox* cbox, char* cSettingsFile, char* cname, c
     return result;
 }
 
-HRESULT VboxFindMachine(IVirtualBox* cbox, char* cnameOrId, IMachine** cmachine) {
+HRESULT VboxMachineGetID(IMachine* cmachine, char** cMachineId) {
+    BSTR uuidUtf16;
+    HRESULT result = IMachine_get_Id(cmachine, &uuidUtf16);
+    g_pVBoxFuncs->pfnUtf16ToUtf8(uuidUtf16, cMachineId);
+    g_pVBoxFuncs->pfnComUnallocString(uuidUtf16);
+    return result;
+}
+
+HRESULT VboxFindMachine(IVirtualBox* cbox, const char* cnameOrId, IMachine** cmachine) {
     BSTR wnameOrId;
     HRESULT result = g_pVBoxFuncs->pfnUtf8ToUtf16(cnameOrId, &wnameOrId);
     if (FAILED(result)) {

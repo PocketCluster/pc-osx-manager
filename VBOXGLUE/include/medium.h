@@ -9,9 +9,9 @@
 #ifndef __MEDIUM_H__
 #define __MEDIUM_H__
 
-HRESULT VboxCreateHardDisk(IVirtualBox* cbox, char* cformat, char* clocation, DeviceType deviceType, AccessMode accessMode, IMedium** cmedium);
+HRESULT VboxCreateHardDisk(IVirtualBox* cbox, char* cformat, const char* clocation, DeviceType deviceType, AccessMode accessMode, IMedium** cmedium);
 
-HRESULT VboxOpenMedium(IVirtualBox* cbox, char* clocation, DeviceType cdeviceType, AccessMode caccessType, PRBool cforceNewUuid, IMedium** cmedium);
+HRESULT VboxOpenMedium(IVirtualBox* cbox, const char* clocation, DeviceType cdeviceType, AccessMode caccessType, PRBool cforceNewUuid, IMedium** cmedium);
 
 HRESULT VboxMediumCreateBaseStorage(IMedium* cmedium, PRInt64 size, PRUint32 variantCount, PRUint32* cvariant, IProgress** cprogress);
 

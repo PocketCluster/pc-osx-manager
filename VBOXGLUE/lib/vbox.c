@@ -67,7 +67,7 @@ HRESULT VboxIVirtualBoxRelease(IVirtualBox* cbox) {
     return result;
 }
 
-HRESULT VboxComposeMachineFilename(IVirtualBox* cbox, char* cname, char* cflags, char* cbaseFolder, char **cpath) {
+HRESULT VboxComposeMachineFilename(IVirtualBox* cbox, const char* cname, char* cflags, char* cbaseFolder, char **cpath) {
     BSTR wname;
     HRESULT result = g_pVBoxFuncs->pfnUtf8ToUtf16(cname, &wname);
     if (FAILED(result)) {

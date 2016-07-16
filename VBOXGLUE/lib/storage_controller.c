@@ -31,7 +31,7 @@ HRESULT VboxIStorageControllerRelease(IStorageController* ccontroller) {
     return result;
 }
 
-HRESULT VboxMachineAddStorageController(IMachine* cmachine, char* cname, PRUint32 connectionType, IStorageController** ccontroller) {
+HRESULT VboxMachineAddStorageController(IMachine* cmachine, const char* cname, PRUint32 connectionType, IStorageController** ccontroller) {
     BSTR wname;
     HRESULT result = g_pVBoxFuncs->pfnUtf8ToUtf16(cname, &wname);
     if (FAILED(result)) {

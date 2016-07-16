@@ -33,6 +33,6 @@ HRESULT VboxGetRevision(IVirtualBox* cbox, ULONG* revision);
 
 HRESULT VboxIVirtualBoxRelease(IVirtualBox* cbox);
 
-HRESULT VboxComposeMachineFilename(IVirtualBox* cbox, char* cname, char* cflags, char* cbaseFolder, char **cpath);
+HRESULT VboxComposeMachineFilename(IVirtualBox* cbox, const char* cname, char* cflags, char* cbaseFolder, char **cpath);
 
 #endif /* vbox_h */

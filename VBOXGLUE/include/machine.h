@@ -35,9 +35,9 @@ HRESULT VboxMachineUnregister(IMachine* cmachine, PRUint32 cleanupMode, IMedium*
 
 HRESULT VboxMachineDeleteConfig(IMachine* cmachine, PRUint32 mediaCount, IMedium** cmedia, IProgress** cprogress);
 
-HRESULT VboxMachineAttachDevice(IMachine* cmachine, char* cname, PRInt32 cport, PRInt32 cdevice, PRUint32 ctype, IMedium* cmedium);
+HRESULT VboxMachineAttachDevice(IMachine* cmachine, const char* cname, PRInt32 cport, PRInt32 cdevice, PRUint32 ctype, IMedium* cmedium);
 
-HRESULT VboxMachineUnmountMedium(IMachine* cmachine, char* cname, PRInt32 cport, PRInt32 cdevice, PRBool cforce);
+HRESULT VboxMachineUnmountMedium(IMachine* cmachine, const char* cname, PRInt32 cport, PRInt32 cdevice, PRBool cforce);
 
 HRESULT VboxMachineGetMedium(IMachine* cmachine, char* cname, PRInt32 cport, PRInt32 cdevice, IMedium** cmedium);
 
@@ -49,9 +49,11 @@ HRESULT VboxMachineLaunchVMProcess(IMachine* cmachine, ISession* csession, char*
 
 HRESULT VboxIMachineRelease(IMachine* cmachine);
 
-HRESULT VboxCreateMachine(IVirtualBox* cbox, char* cSettingsFile, char* cname, char* cosTypeId, char* cflags, IMachine** cmachine);
+HRESULT VboxCreateMachine(IVirtualBox* cbox, char* cSettingsFile, const char* cname, char* cosTypeId, char* cflags, IMachine** cmachine);
 
-HRESULT VboxFindMachine(IVirtualBox* cbox, char* cnameOrId, IMachine** cmachine);
+HRESULT VboxMachineGetID(IMachine* cmachine, char** cMachineId);
+
+HRESULT VboxFindMachine(IVirtualBox* cbox, const char* cnameOrId, IMachine** cmachine);
 
 HRESULT VboxGetMachines(IVirtualBox* cbox, IMachine*** cmachines, ULONG* machineCount);
 
