@@ -76,6 +76,12 @@
 		046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96081BDDBBBC006AA8EE /* BaseWindow.m */; };
 		046F960A1BDDBBBC006AA8EE /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96081BDDBBBC006AA8EE /* BaseWindow.m */; };
 		046F960B1BDDBBBC006AA8EE /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96081BDDBBBC006AA8EE /* BaseWindow.m */; };
+		047F32AC1D8A898E00568210 /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 047F326E1D8A898E00568210 /* NativeMenu.m */; };
+		047F32B01D8A898E00568210 /* LinkInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 047F32771D8A898E00568210 /* LinkInterface.m */; };
+		047F32B11D8A898E00568210 /* LinkInterfaces.m in Sources */ = {isa = PBXBuildFile; fileRef = 047F32791D8A898E00568210 /* LinkInterfaces.m */; };
+		047F32B21D8A898E00568210 /* LinkMACAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 047F327B1D8A898E00568210 /* LinkMACAddress.m */; };
+		047F32B31D8A898E00568210 /* LinkMACVendors.m in Sources */ = {isa = PBXBuildFile; fileRef = 047F327D1D8A898E00568210 /* LinkMACVendors.m */; };
+		047F32B41D8A898E00568210 /* PCInterfaceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 047F327F1D8A898E00568210 /* PCInterfaceList.m */; };
 		0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0486780E1BCF5FE20071594B /* Assets.xcassets */; };
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
 		0486781D1BCF5FE20071594B /* managerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0486781C1BCF5FE20071594B /* managerTests.m */; };
@@ -198,6 +204,18 @@
 		046A36471BD79359004E0946 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		046F96071BDDBBBC006AA8EE /* BaseWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseWindow.h; sourceTree = "<group>"; };
 		046F96081BDDBBBC006AA8EE /* BaseWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseWindow.m; sourceTree = "<group>"; };
+		047F326D1D8A898E00568210 /* NativeMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NativeMenu.h; sourceTree = "<group>"; };
+		047F326E1D8A898E00568210 /* NativeMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NativeMenu.m; sourceTree = "<group>"; };
+		047F32761D8A898E00568210 /* LinkInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkInterface.h; sourceTree = "<group>"; };
+		047F32771D8A898E00568210 /* LinkInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkInterface.m; sourceTree = "<group>"; };
+		047F32781D8A898E00568210 /* LinkInterfaces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkInterfaces.h; sourceTree = "<group>"; };
+		047F32791D8A898E00568210 /* LinkInterfaces.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkInterfaces.m; sourceTree = "<group>"; };
+		047F327A1D8A898E00568210 /* LinkMACAddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkMACAddress.h; sourceTree = "<group>"; };
+		047F327B1D8A898E00568210 /* LinkMACAddress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkMACAddress.m; sourceTree = "<group>"; };
+		047F327C1D8A898E00568210 /* LinkMACVendors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkMACVendors.h; sourceTree = "<group>"; };
+		047F327D1D8A898E00568210 /* LinkMACVendors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkMACVendors.m; sourceTree = "<group>"; };
+		047F327E1D8A898E00568210 /* PCInterfaceList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCInterfaceList.h; sourceTree = "<group>"; };
+		047F327F1D8A898E00568210 /* PCInterfaceList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCInterfaceList.m; sourceTree = "<group>"; };
 		048678051BCF5FE20071594B /* PocketCluster.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PocketCluster.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0486780E1BCF5FE20071594B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		048678111BCF5FE20071594B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -478,6 +496,42 @@
 			path = manager/Window;
 			sourceTree = "<group>";
 		};
+		047F325E1D8A898E00568210 /* Management */ = {
+			isa = PBXGroup;
+			children = (
+				047F32691D8A898E00568210 /* Menu */,
+				047F32751D8A898E00568210 /* NetworkStatus */,
+			);
+			name = Management;
+			path = manager/Management;
+			sourceTree = "<group>";
+		};
+		047F32691D8A898E00568210 /* Menu */ = {
+			isa = PBXGroup;
+			children = (
+				047F326D1D8A898E00568210 /* NativeMenu.h */,
+				047F326E1D8A898E00568210 /* NativeMenu.m */,
+			);
+			path = Menu;
+			sourceTree = "<group>";
+		};
+		047F32751D8A898E00568210 /* NetworkStatus */ = {
+			isa = PBXGroup;
+			children = (
+				047F32761D8A898E00568210 /* LinkInterface.h */,
+				047F32771D8A898E00568210 /* LinkInterface.m */,
+				047F32781D8A898E00568210 /* LinkInterfaces.h */,
+				047F32791D8A898E00568210 /* LinkInterfaces.m */,
+				047F327A1D8A898E00568210 /* LinkMACAddress.h */,
+				047F327B1D8A898E00568210 /* LinkMACAddress.m */,
+				047F327C1D8A898E00568210 /* LinkMACVendors.h */,
+				047F327D1D8A898E00568210 /* LinkMACVendors.m */,
+				047F327E1D8A898E00568210 /* PCInterfaceList.h */,
+				047F327F1D8A898E00568210 /* PCInterfaceList.m */,
+			);
+			path = NetworkStatus;
+			sourceTree = "<group>";
+		};
 		048677FC1BCF5FE20071594B = {
 			isa = PBXGroup;
 			children = (
@@ -486,6 +540,7 @@
 				046F95EF1BDD9AA9006AA8EE /* Window */,
 				046A36491BD793BB004E0946 /* ViewController */,
 				046A35B51BD783CE004E0946 /* WindowController */,
+				047F325E1D8A898E00568210 /* Management */,
 				0441A3D51BD8904100AABD7A /* Application */,
 				048678071BCF5FE20071594B /* manager */,
 				0486781B1BCF5FE20071594B /* managerTests */,
@@ -839,17 +894,23 @@
 				0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */,
 				0441A3F41BD892A400AABD7A /* VersionComparison.m in Sources */,
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
+				047F32AC1D8A898E00568210 /* NativeMenu.m in Sources */,
+				047F32B31D8A898E00568210 /* LinkMACVendors.m in Sources */,
+				047F32B01D8A898E00568210 /* LinkInterface.m in Sources */,
 				04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */,
 				046A360E1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
 				0441A3EF1BD8921600AABD7A /* Util.m in Sources */,
 				046A360B1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
+				047F32B21D8A898E00568210 /* LinkMACAddress.m in Sources */,
 				046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
 				046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				046A36081BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */,
+				047F32B41D8A898E00568210 /* PCInterfaceList.m in Sources */,
 				04F705761BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
+				047F32B11D8A898E00568210 /* LinkInterfaces.m in Sources */,
 				046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
 				046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				0441A3E31BD8904100AABD7A /* main.m in Sources */,

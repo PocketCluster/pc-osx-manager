@@ -14,6 +14,7 @@
 
 #import "Util.h"
 #import "AppDelegate.h"
+#import "NativeMenu.h"
 
 @interface AppDelegate ()<SUUpdaterDelegate, NSUserNotificationCenterDelegate>
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
@@ -31,6 +32,11 @@
     [[SUUpdater sharedUpdater] setDelegate:self];
     [[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
     [[SUUpdater sharedUpdater] checkForUpdateInformation];
+    
+    //create popup and status menu item
+    self.nativeMenu = [[NativeMenu alloc] init];
+    
+    Log(@"Application Started");
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
