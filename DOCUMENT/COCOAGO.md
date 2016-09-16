@@ -22,7 +22,10 @@
   
   ```
   
-  **Remark** : `LDFLAGS: -Wl,-U,_osxmain` is important to tell `clang` to compile only go sources.
+  **Remark**  
+  a. `LDFLAGS: -Wl,-U,_osxmain` is important to tell `clang` to compile only go sources.  
+  b. `#cgo` has following directives: `CFLAGS`, `CPPFLAGS`, `CXXFLAGS`, `FFLAGS` and `LDFLAGS`.  
+  
   > Reference
 
   - [hyperlink - Xcode clang link_ Build Dynamic Framework (or dylib) not embed dependencies](hyperlink - Xcode clang link_ Build Dynamic Framework (or dylib) not embed dependencies - Stack Overflow.pdf)
