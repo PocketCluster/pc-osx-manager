@@ -1,0 +1,21 @@
+platform :osx, '10.11'
+source 'https://github.com/CocoaPods/Specs.git'
+
+workspace 'manager.xcworkspace'
+target 'PocketCluster' do 
+    project 'manager/manager.xcodeproj'
+    use_frameworks!
+    pod 'Sparkle'
+end
+
+# target 'managerTests' do
+#     project 'manager/manager.xcodeproj'
+# end
+
+# target 'managerUITests' do
+#     project 'manager/manager.xcodeproj'
+# end
+
+# target 'Askpass' do
+#     project 'manager/manager.xcodeproj'
+# end
