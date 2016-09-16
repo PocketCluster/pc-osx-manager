@@ -17,6 +17,7 @@
 		0464E7441D36649700FA0AB0 /* GlobalMacro.h in Headers */ = {isa = PBXBuildFile; fileRef = 0464E7431D36649700FA0AB0 /* GlobalMacro.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		046ED9F81D3A6E9200A6028A /* libvboxcom_init_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 046ED9F71D3A6E9200A6028A /* libvboxcom_init_test.m */; };
 		046ED9FA1D3A6FA400A6028A /* libvboxcom_create_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 046ED9F91D3A6FA400A6028A /* libvboxcom_create_test.m */; };
+		04BF54871D3F75B4006DDB2E /* VBoxCAPI_v5_1.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BF54861D3F75B4006DDB2E /* VBoxCAPI_v5_1.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		04C9E11B1D34A2CE00EB299C /* VBoxCAPIGlue.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 0415F0951D2F6D6800EE470A /* VBoxCAPIGlue.o */; };
 		04C9E11C1D34A2CE00EB299C /* VirtualBox_i.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 0415F0961D2F6D6800EE470A /* VirtualBox_i.o */; };
 		04C9E11D1D34A2D600EB299C /* bios_settings.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F0B4AE1D2FF00B002947B2 /* bios_settings.c */; };
@@ -88,6 +89,7 @@
 		0464E7431D36649700FA0AB0 /* GlobalMacro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalMacro.h; sourceTree = "<group>"; };
 		046ED9F71D3A6E9200A6028A /* libvboxcom_init_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = libvboxcom_init_test.m; sourceTree = "<group>"; };
 		046ED9F91D3A6FA400A6028A /* libvboxcom_create_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = libvboxcom_create_test.m; sourceTree = "<group>"; };
+		04BF54861D3F75B4006DDB2E /* VBoxCAPI_v5_1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VBoxCAPI_v5_1.h; sourceTree = "<group>"; };
 		04C9E1111D34A22900EB299C /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		04C9E1171D34A2AA00EB299C /* liblibvboxcom.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblibvboxcom.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		04C9E1301D34A33F00EB299C /* libvboxcom-test.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "libvboxcom-test.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -108,7 +110,6 @@
 		04F0B4B91D2FF00B002947B2 /* system_properties.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = system_properties.c; sourceTree = "<group>"; };
 		04F0B4BA1D2FF00B002947B2 /* usb_controller.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = usb_controller.c; sourceTree = "<group>"; };
 		04F0B4BB1D2FF00B002947B2 /* vbox.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vbox.c; sourceTree = "<group>"; };
-		04F0B4CB1D2FF013002947B2 /* VBoxCAPI_v5_0.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VBoxCAPI_v5_0.h; sourceTree = "<group>"; };
 		04F0B4CC1D2FF013002947B2 /* VBoxCAPIGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VBoxCAPIGlue.h; sourceTree = "<group>"; };
 		04F0B4CD1D2FF031002947B2 /* bios_settings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bios_settings.h; sourceTree = "<group>"; };
 		04F0B4CE1D2FF039002947B2 /* common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
@@ -240,7 +241,7 @@
 		04F0B4CA1D2FF013002947B2 /* include */ = {
 			isa = PBXGroup;
 			children = (
-				04F0B4CB1D2FF013002947B2 /* VBoxCAPI_v5_0.h */,
+				04BF54861D3F75B4006DDB2E /* VBoxCAPI_v5_1.h */,
 				04F0B4CC1D2FF013002947B2 /* VBoxCAPIGlue.h */,
 				04F0B4CD1D2FF031002947B2 /* bios_settings.h */,
 				04F0B4CE1D2FF039002947B2 /* common.h */,
@@ -271,6 +272,7 @@
 				0426EF721D34A5E000E0B36D /* VboxCom.h in Headers */,
 				0464E7441D36649700FA0AB0 /* GlobalMacro.h in Headers */,
 				045915AC1D3504C200FE9D8A /* libvboxcom.h in Headers */,
+				04BF54871D3F75B4006DDB2E /* VBoxCAPI_v5_1.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

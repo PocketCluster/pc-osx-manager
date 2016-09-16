@@ -1029,3 +1029,194 @@ vbox_machine_destroy(VOID_DPTR vbox_machine, char* base_folder, const char* stor
     }
     return ret;
 }
+
+
+#pragma mark - START & STOP MACHINE
+
+
+/**
+ * Register passive event listener for the selected VM.
+ *
+ * @param   virtualBox ptr to IVirtualBox object
+ * @param   session    ptr to ISession object
+ * @param   id         identifies the machine to start
+ */
+static void
+registerPassiveEventListener(IVirtualBox *virtualBox, ISession *session, BSTR machineId) {
+#if 0
+    IConsole *console = NULL;
+    HRESULT rc;
+    
+    rc = ISession_get_Console(session, &console);
+    if ((SUCCEEDED(rc)) && console) {
+        
+        IEventSource *es = NULL;
+        rc = IConsole_get_EventSource(console, &es);
+        
+        if (SUCCEEDED(rc) && es) {
+            static const ULONG interestingEvents[] = {
+                VBoxEventType_OnMousePointerShapeChanged,
+                VBoxEventType_OnMouseCapabilityChanged,
+                VBoxEventType_OnKeyboardLedsChanged,
+                VBoxEventType_OnStateChanged,
+                VBoxEventType_OnAdditionsStateChanged,
+                VBoxEventType_OnNetworkAdapterChanged,
+                VBoxEventType_OnSerialPortChanged,
+                VBoxEventType_OnParallelPortChanged,
+                VBoxEventType_OnStorageControllerChanged,
+                VBoxEventType_OnMediumChanged,
+                VBoxEventType_OnVRDEServerChanged,
+                VBoxEventType_OnUSBControllerChanged,
+                VBoxEventType_OnUSBDeviceStateChanged,
+                VBoxEventType_OnSharedFolderChanged,
+                VBoxEventType_OnRuntimeError,
+                VBoxEventType_OnCanShowWindow,
+                VBoxEventType_OnShowWindow
+            };
+            SAFEARRAY *interestingEventsSA = NULL;
+            IEventListener *consoleListener = NULL;
+            
+            /* The VirtualBox API expects enum values as VT_I4, which in the
+             * future can be hopefully relaxed. */
+            interestingEventsSA = g_pVBoxFuncs->pfnSafeArrayCreateVector(VT_I4, 0, sizeof(interestingEvents) / sizeof(interestingEvents[0]));
+            g_pVBoxFuncs->pfnSafeArrayCopyInParamHelper(interestingEventsSA, &interestingEvents, sizeof(interestingEvents));
+            
+            rc = IEventSource_CreateListener(es, &consoleListener);
+            if (SUCCEEDED(rc) && consoleListener) {
+                rc = IEventSource_RegisterListener(es,
+                                                   consoleListener,
+                                                   ComSafeArrayAsInParam(interestingEventsSA),
+                                                   0 /* passive */);
+                
+                if (SUCCEEDED(rc)) {
+                    
+                    /* Just wait here for events, no easy way to do this better
+                     * as there's not much to do after this completes. */
+                    printf("Entering event loop, PowerOff the machine to exit or press Ctrl-C to terminate\n");
+                    fflush(stdout);
+                    signal(SIGINT, (void (*)(int))ctrlCHandler);
+                    
+                    while (!g_fStop) {
+                        IEvent *ev = NULL;
+                        rc = IEventSource_GetEvent(es, consoleListener, 250, &ev);
+                        if (FAILED(rc)) {
+                            printf("Failed getting event: %#x\n", rc);
+                            g_fStop = 1;
+                            continue;
+                        }
+                        /* handle timeouts, resulting in NULL events */
+                        if (!ev) {
+                            continue;
+                        }
+                        rc = EventListenerDemoProcessEvent(ev);
+                        if (FAILED(rc)) {
+                            printf("Failed processing event: %#x\n", rc);
+                            g_fStop = 1;
+                            /* finish processing the event */
+                        }
+                        rc = IEventSource_EventProcessed(es, consoleListener, ev);
+                        if (FAILED(rc)) {
+                            printf("Failed to mark event as processed: %#x\n", rc);
+                            g_fStop = 1;
+                            /* continue with event release */
+                        }
+                        if (ev) {
+                            IEvent_Release(ev);
+                            ev = NULL;
+                        }
+                    }
+                    signal(SIGINT, SIG_DFL);
+                } else {
+                    printf("Failed to register event listener.\n");
+                }
+                IEventSource_UnregisterListener(es, (IEventListener *)consoleListener);
+                IEventListener_Release(consoleListener);
+            } else {
+                printf("Failed to create an event listener instance.\n");
+            }
+            g_pVBoxFuncs->pfnSafeArrayDestroy(interestingEventsSA);
+            IEventSource_Release(es);
+        } else {
+            printf("Failed to get the event source instance.\n");
+        }
+        IConsole_Release(console);
+    }
+#endif
+}
+
+HRESULT
+VboxMachineStart(IVirtualBox *virtualBox, ISession *session, IMachine *cmachine, const char* session_type) {
+    HRESULT rc;
+    IMachine  *machine    = NULL;
+    IProgress *progress   = NULL;
+    BSTR env              = NULL;
+    BSTR sessionType;
+    SAFEARRAY *groupsSA = g_pVBoxFuncs->pfnSafeArrayOutParamAlloc();
+    
+    rc = IMachine_get_Groups(machine, ComSafeArrayAsOutTypeParam(groupsSA, BSTR));
+    if (SUCCEEDED(rc)) {
+        BSTR *groups = NULL;
+        ULONG cbGroups = 0;
+        ULONG i, cGroups;
+        g_pVBoxFuncs->pfnSafeArrayCopyOutParamHelper((void **)&groups, &cbGroups, VT_BSTR, groupsSA);
+        g_pVBoxFuncs->pfnSafeArrayDestroy(groupsSA);
+        cGroups = cbGroups / sizeof(groups[0]);
+        for (i = 0; i < cGroups; ++i) {
+            /* Note that the use of %S might be tempting, but it is not
+             * available on all platforms, and even where it is usable it
+             * may depend on correct compiler options to make wchar_t a
+             * 16 bit number. So better play safe and use UTF-8. */
+            char *group;
+            g_pVBoxFuncs->pfnUtf16ToUtf8(groups[i], &group);
+            g_pVBoxFuncs->pfnUtf8Free(group);
+        }
+        for (i = 0; i < cGroups; ++i) {
+            g_pVBoxFuncs->pfnComUnallocString(groups[i]);
+        }
+        g_pVBoxFuncs->pfnArrayOutFree(groups);
+    }
+    
+    g_pVBoxFuncs->pfnUtf8ToUtf16("gui", &sessionType);
+    rc = IMachine_LaunchVMProcess(machine, session, sessionType, env, &progress);
+    g_pVBoxFuncs->pfnUtf16Free(sessionType);
+    if (SUCCEEDED(rc)) {
+        
+        BOOL completed;
+        LONG resultCode;
+        
+        printf("Waiting for the remote session to open...\n");
+        IProgress_WaitForCompletion(progress, -1);
+        
+        rc = IProgress_get_Completed(progress, &completed);
+        if (FAILED(rc)) {
+            fprintf(stderr, "Error: GetCompleted status failed\n");
+        }
+        
+        IProgress_get_ResultCode(progress, &resultCode);
+        if (FAILED(resultCode)) {
+            IVirtualBoxErrorInfo *errorInfo;
+            BSTR textUtf16;
+            char *text;
+            
+            IProgress_get_ErrorInfo(progress, &errorInfo);
+            IVirtualBoxErrorInfo_get_Text(errorInfo, &textUtf16);
+            g_pVBoxFuncs->pfnUtf16ToUtf8(textUtf16, &text);
+            printf("Error: %s\n", text);
+            
+            g_pVBoxFuncs->pfnComUnallocString(textUtf16);
+            g_pVBoxFuncs->pfnUtf8Free(text);
+            IVirtualBoxErrorInfo_Release(errorInfo);
+        } else {
+            fprintf(stderr, "VM process has been successfully started\n");
+            
+            /* Kick off the event listener demo part, which is quite separate.
+             * Ignore it if you need a more basic sample. */
+            //registerPassiveEventListener(virtualBox, session, id);
+        }
+        IProgress_Release(progress);
+    }
+    
+    /* It's important to always release resources. */
+    //IMachine_Release(machine);
+    return rc;
+}
