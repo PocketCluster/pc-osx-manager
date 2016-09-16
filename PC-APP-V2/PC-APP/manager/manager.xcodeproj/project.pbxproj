@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		040D6EE71D8B835E00A94F64 /* pc-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 040D6EE61D8B835E00A94F64 /* pc-core.a */; };
+		040D6EE81D8B835E00A94F64 /* pc-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 040D6EE61D8B835E00A94F64 /* pc-core.a */; };
 		041023ED1BE434290083D62E /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 041023EC1BE434290083D62E /* AppKit.framework */; };
 		041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
 		041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
@@ -149,6 +151,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		040D6EE21D8B7F7100A94F64 /* go-setup.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "go-setup.sh"; sourceTree = "<group>"; };
+		040D6EE51D8B834F00A94F64 /* _cgo_export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _cgo_export.h; sourceTree = "<group>"; };
+		040D6EE61D8B835E00A94F64 /* pc-core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "pc-core.a"; sourceTree = "<group>"; };
 		041023EC1BE434290083D62E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		041FB3B61BD0F3FA0027136F /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
 		0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = ../Pods/Sparkle/Sparkle.framework; sourceTree = "<group>"; };
@@ -267,6 +272,7 @@
 				04F705701BD7A9B700829651 /* IOKit.framework in Frameworks */,
 				046A36481BD79359004E0946 /* Cocoa.framework in Frameworks */,
 				046A36461BD7934D004E0946 /* Security.framework in Frameworks */,
+				040D6EE71D8B835E00A94F64 /* pc-core.a in Frameworks */,
 				046A36451BD79343004E0946 /* WebKit.framework in Frameworks */,
 				89580BEF40BDD88F96DECDEE /* Pods_PocketCluster.framework in Frameworks */,
 			);
@@ -276,6 +282,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				040D6EE81D8B835E00A94F64 /* pc-core.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -292,6 +299,7 @@
 		0441A3D51BD8904100AABD7A /* Application */ = {
 			isa = PBXGroup;
 			children = (
+				040D6EE51D8B834F00A94F64 /* _cgo_export.h */,
 				0441A3F21BD892A400AABD7A /* VersionComparison.h */,
 				0441A3F31BD892A400AABD7A /* VersionComparison.m */,
 				0441A3ED1BD8921600AABD7A /* Util.h */,
@@ -535,6 +543,7 @@
 		048677FC1BCF5FE20071594B = {
 			isa = PBXGroup;
 			children = (
+				040D6EE21D8B7F7100A94F64 /* go-setup.sh */,
 				04F705621BD7A94300829651 /* Vendors */,
 				046A35D91BD78AB8004E0946 /* Common */,
 				046F95EF1BDD9AA9006AA8EE /* Window */,
@@ -566,6 +575,7 @@
 		048678071BCF5FE20071594B /* manager */ = {
 			isa = PBXGroup;
 			children = (
+				040D6EE61D8B835E00A94F64 /* pc-core.a */,
 				04DCF3071C115F0F007B1DC8 /* Bridging-Header.h */,
 				0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */,
 				04E51DBF1BDC88E3001F1F22 /* Resources.bundle */,
@@ -674,6 +684,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0486782C1BCF5FE20071594B /* Build configuration list for PBXNativeTarget "PocketCluster" */;
 			buildPhases = (
+				040D6EE41D8B811E00A94F64 /* PC-CORE BINARY CP */,
 				34B2DA13C3350D6C611A64AA /* [CP] Check Pods Manifest.lock */,
 				048678011BCF5FE20071594B /* Sources */,
 				048678021BCF5FE20071594B /* Frameworks */,
@@ -816,6 +827,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		040D6EE41D8B811E00A94F64 /* PC-CORE BINARY CP */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "PC-CORE BINARY CP";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = "/bin/bash /Users/almightykim/Workspace/PC/CODE/pc-osx-manager/PC-APP-V2/PC-APP/manager/go-setup.sh";
+			shellScript = "";
+		};
 		0427673E1BF8CEF8002C1FAE /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1123,6 +1148,10 @@
 				);
 				INFOPLIST_FILE = manager/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/manager",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.manager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
@@ -1146,6 +1175,10 @@
 				);
 				INFOPLIST_FILE = manager/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/manager",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.manager;
 				PRODUCT_NAME = PocketCluster;
 				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
@@ -1165,6 +1198,10 @@
 				);
 				INFOPLIST_FILE = managerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/manager",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.managerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
@@ -1186,6 +1223,10 @@
 				);
 				INFOPLIST_FILE = managerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/manager",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.managerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";

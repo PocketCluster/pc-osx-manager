@@ -6,7 +6,6 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-
-int main(int argc, const char * argv[]) {
+int osxmain(int argc, const char * argv[]) {
     return NSApplicationMain(argc, argv);
 }
