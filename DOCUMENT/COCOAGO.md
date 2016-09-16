@@ -23,7 +23,10 @@
   ```
   
   **Remark** : `LDFLAGS: -Wl,-U,_osxmain` is important to tell `clang` to compile only go sources.
-  
+  > Reference
+
+  - [hyperlink - Xcode clang link_ Build Dynamic Framework (or dylib) not embed dependencies](hyperlink - Xcode clang link_ Build Dynamic Framework (or dylib) not embed dependencies - Stack Overflow.pdf)
+  - [glandium.org Fun with weak dynamic linking](glandium.org Fun with weak dynamic linking.pdf)
 
 2. Build GO library
 
