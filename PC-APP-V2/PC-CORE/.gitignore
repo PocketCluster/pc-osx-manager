@@ -46,3 +46,4 @@ fabric.properties
 .build
 Godeps
 vendor
+staticlib/staticlib
