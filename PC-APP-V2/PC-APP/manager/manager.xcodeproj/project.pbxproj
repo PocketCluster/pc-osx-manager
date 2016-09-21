@@ -838,7 +838,7 @@
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = "/bin/bash /Users/almightykim/Workspace/PC/CODE/pc-osx-manager/PC-APP-V2/PC-APP/manager/go-setup.sh";
+			shellPath = "/bin/bash /Users/almightykim/Workspace/POCKET/CODE/pc-osx-manager/PC-APP-V2/PC-APP/manager/go-setup.sh";
 			shellScript = "";
 		};
 		0427673E1BF8CEF8002C1FAE /* ShellScript */ = {

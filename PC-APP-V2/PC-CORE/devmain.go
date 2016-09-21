@@ -1,12 +1,9 @@
 package main
 
 import (
-    "crypto/tls"
-    "github.com/docker/swarm/api"
+    "github.com/stkim1/pc-core/swarm"
 )
 func main() {
-    var tlsConfig *tls.Config;
-
-    server := api.NewServer([]string{"0.0.0.0:2375"},tlsConfig)
-    server.ListenAndServe()
+    context := swarm.NewContext("localhost:3275", "1810ffdf37ad898423ada7262f7baf80")
+    context.Manage()
 }
