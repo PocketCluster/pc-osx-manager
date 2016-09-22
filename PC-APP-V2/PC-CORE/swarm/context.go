@@ -4,14 +4,17 @@ import (
     "time"
     "github.com/docker/swarm/cluster"
     "github.com/docker/docker/pkg/discovery"
+    "github.com/docker/docker-pkg/discovery/nodes"
     log "github.com/Sirupsen/logrus"
-    "github.com/docker/swarm/discovery/token"
 )
 
 // Context is the global cluster setup context
 type SwarmContext struct {
     discoveryOpt       map[string]string
-    discoveryURI       string             // e.g. token://1810ffdf37ad898423ada7262f7baf80
+
+    // https://docs.docker.com/swarm/discovery/#/to-use-a-node-list
+    // e.g : <node_ip1:2375>,<node_ip2:2375>
+    nodeList           string
 
     heartbeat          time.Duration
     refreshMinInterval time.Duration
@@ -28,13 +31,13 @@ type SwarmContext struct {
     strategy           string
 }
 
-func NewContext(host string, token string) *SwarmContext {
+func NewContext(host string, nodeList string) *SwarmContext {
     discoveryOpt := make(map[string]string)
     clusterOpt := cluster.DriverOpts{}
 
     return &SwarmContext{
         discoveryOpt: discoveryOpt,
-        discoveryURI: token,
+        nodeList: nodeList,
 
         heartbeat: time.Duration(1 * time.Second),
         refreshMinInterval: time.Duration(5 * time.Second),
@@ -50,40 +53,21 @@ func NewContext(host string, token string) *SwarmContext {
     }
 }
 
-// Initialize the discovery service.
-func (c *SwarmContext)createDiscovery(uri string) discovery.Backend {
-    hb := c.heartbeat
-    if hb < 1*time.Second {
-        log.Fatal("--heartbeat should be at least one second")
-    }
-    // Set up discovery.
-    discovery, err := discovery.New(uri, hb, 0, c.getDiscoveryOpt())
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    return discovery
-}
-
-// createTokenDiscovery replaces $GOPATH/src/github.com/docker/swarm/cli/manage/createDiscovery
+// createNodesDiscovery replaces $GOPATH/src/github.com/docker/swarm/cli/manage/createDiscovery
 // Instead of going through dokcker/pkg/discovery interface for the compatiblity with consul,
-// this function creates token backend directly.
-func (c *SwarmContext)createTokenDiscovery() discovery.Backend {
+// this function creates node based backend directly.
+func (c *SwarmContext)createNodeDiscovery() discovery.Backend {
     hb := c.heartbeat
     if hb < 1*time.Second {
         log.Fatal("--heartbeat should be at least one second")
     }
-    discovery := &token.Discovery{}
-    err := discovery.Initialize(c.discoveryURI, hb, 0, c.getDiscoveryOpt())
-
-
-
+    discovery := &nodes.Discovery{}
+    err := discovery.Initialize(c.nodeList, hb, 0, c.getDiscoveryOpt())
     if err != nil {
         log.Fatal(err)
     }
     return discovery
 }
-
 
 func (c *SwarmContext)getDiscoveryOpt() map[string]string {
     // Process the store options

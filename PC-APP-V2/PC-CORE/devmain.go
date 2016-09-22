@@ -4,6 +4,6 @@ import (
     "github.com/stkim1/pc-core/swarm"
 )
 func main() {
-    context := swarm.NewContext("localhost:3275", "1810ffdf37ad898423ada7262f7baf80")
+    context := swarm.NewContext("localhost:3275", "192.168.1.151:2375,192.168.1.152:2375")
     context.Manage()
 }

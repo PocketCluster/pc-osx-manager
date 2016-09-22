@@ -12,9 +12,7 @@ import (
     log "github.com/Sirupsen/logrus"
 
     // implicit loading and initialization
-    _ "github.com/docker/docker/pkg/discovery/file"
     _ "github.com/docker/docker/pkg/discovery/nodes"
-    _ "github.com/docker/swarm/discovery/token"
 
     "github.com/docker/leadership"
     "github.com/docker/swarm/api"
@@ -120,12 +118,12 @@ func (context *SwarmContext) Manage() {
         FailureRetry:       failureRetry,
     }
 
-    uri := context.discoveryURI
+    // FIXME : this should check the validity of node list (form, # of items, etc)
+    uri := context.nodeList
     if uri == "" {
         log.Fatalf("discovery required to manage a cluster.")
     }
-    //discovery := context.createDiscovery(uri)
-    discovery := context.createTokenDiscovery()
+    discovery := context.createNodeDiscovery()
     s, err := strategy.New(context.strategy)
     if err != nil {
         log.Fatal(err)
@@ -146,9 +144,7 @@ func (context *SwarmContext) Manage() {
     }
 
     hosts := context.managerHost
-    //server := api.NewServer(hosts, tlsConfig)
     server := NewServer(hosts, tlsConfig)
-
     primary := api.NewPrimary(cl, tlsConfig, &statusHandler{cl, nil, nil}, context.debug, context.cors)
     server.SetHandler(primary)
     cluster.NewWatchdog(cl)
