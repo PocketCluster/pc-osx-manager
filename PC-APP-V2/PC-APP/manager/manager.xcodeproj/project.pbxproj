@@ -234,8 +234,6 @@
 		0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		04C585841BE5BF3B004B2839 /* PCConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCConstants.h; sourceTree = "<group>"; };
 		04C585851BE5BF3B004B2839 /* PCConstants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCConstants.m; sourceTree = "<group>"; };
-		04C5858E1BE6357B004B2839 /* NSManagedObjectContext+FetchAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSManagedObjectContext+FetchAdditions.h"; sourceTree = "<group>"; };
-		04C5858F1BE6357B004B2839 /* NSManagedObjectContext+FetchAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObjectContext+FetchAdditions.m"; sourceTree = "<group>"; };
 		04DCF3071C115F0F007B1DC8 /* Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		04DCF30C1C11601F007B1DC8 /* AboutWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutWindow.swift; sourceTree = "<group>"; };
 		04E51DBF1BDC88E3001F1F22 /* Resources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Resources.bundle; sourceTree = "<group>"; };
@@ -337,7 +335,6 @@
 		046A35D91BD78AB8004E0946 /* Common */ = {
 			isa = PBXGroup;
 			children = (
-				04C5858D1BE6357B004B2839 /* CoreData */,
 				04F705731BD7A9EE00829651 /* Serial */,
 				046A35DD1BD78AB8004E0946 /* Dictionary */,
 				046A35E01BD78AB8004E0946 /* DirectoryAddition */,
@@ -604,15 +601,6 @@
 				048678291BCF5FE20071594B /* Info.plist */,
 			);
 			path = managerUITests;
-			sourceTree = "<group>";
-		};
-		04C5858D1BE6357B004B2839 /* CoreData */ = {
-			isa = PBXGroup;
-			children = (
-				04C5858E1BE6357B004B2839 /* NSManagedObjectContext+FetchAdditions.h */,
-				04C5858F1BE6357B004B2839 /* NSManagedObjectContext+FetchAdditions.m */,
-			);
-			path = CoreData;
 			sourceTree = "<group>";
 		};
 		04F705621BD7A94300829651 /* Vendors */ = {
