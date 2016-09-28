@@ -6,9 +6,10 @@ import (
     "time"
 
     "github.com/stkim1/pc-node-agent/mcast"
+    "github.com/stkim1/pc-node-agent/crypt"
 )
 
-func main() {
+func mcastTest() {
     client, err := mcast.NewClient(); if err != nil {
         log.Fatal("[ERR] cannot initate Multi-cast client")
     }
@@ -29,4 +30,13 @@ func main() {
     for {
         time.Sleep(time.Second)
     }
+}
+
+func cryptTest() {
+    crypt.Cryptotest()
+}
+
+
+func main() {
+
 }
