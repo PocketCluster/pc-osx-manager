@@ -144,7 +144,9 @@ class AsyncAuth(object):
 				:rtype: str
 				:return: An empty string on verification failure. On success, the decrypted AES message in the payload.
 				'''
-
+					def verify_signing_master(self, payload):
+						def verify_pubkey_sig(payload['pub_key'],payload['pub_sig']):
+							def verify_signature(path,message, binascii.a2b_base64(sig))
 			}
 ```
 

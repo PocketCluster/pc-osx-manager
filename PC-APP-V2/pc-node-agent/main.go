@@ -6,7 +6,6 @@ import (
     "time"
 
     "github.com/stkim1/pc-node-agent/mcast"
-    "github.com/stkim1/pc-node-agent/crypt"
 )
 
 func mcastTest() {
@@ -32,11 +31,5 @@ func mcastTest() {
     }
 }
 
-func cryptTest() {
-    crypt.Cryptotest()
-}
-
-
 func main() {
-
 }
