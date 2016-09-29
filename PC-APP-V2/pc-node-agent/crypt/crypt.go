@@ -74,7 +74,7 @@ func signDataWithHash(r *rsaPrivateKey, data []byte, hashType crypto.Hash) ([]by
 
 // Decrypt returns encrypted payload for the given data.
 func (r *rsaPrivateKey) decrypt(data []byte) ([]byte, error) {
-    decrypted, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, r.PrivateKey, data, []byte("~pc*crypt^pkg!")); if err != nil {
+    decrypted, err := rsa.DecryptOAEP(sha1.New(), rand.Reader, r.PrivateKey, data, []byte("~pc*crypt^pkg!")); if err != nil {
         return nil, err
     }
     return decrypted, nil

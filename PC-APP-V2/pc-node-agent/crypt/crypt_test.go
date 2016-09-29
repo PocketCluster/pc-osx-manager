@@ -133,7 +133,7 @@ func TestEncDecMessage(t *testing.T) {
     if err := ioutil.WriteFile("sendtest.pem", testPrivateKey(), os.ModePerm); err != nil {
         t.Errorf("Fail to write private key %v", err)
     }
-    if err := GenerateKeyPair("recvtest.pub", "recvtest.pem", "recvtest.ssh", ); err != nil {
+    if err := GenerateKeyPair("recvtest.pub", "recvtest.pem", "recvtest.ssh"); err != nil {
         t.Errorf("failed to generate a key pair %v", err)
     }
 
