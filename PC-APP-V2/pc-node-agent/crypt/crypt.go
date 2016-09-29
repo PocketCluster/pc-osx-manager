@@ -12,46 +12,45 @@ import (
     "io/ioutil"
     "crypto/sha1"
     "os"
+    "golang.org/x/crypto/ssh"
 )
 
-// Use PKCS1 v1.5 to verify the signature on a message. Returns True for valid signature.
-func VerifySignature(pubkeyPath string, message string, signature string) error {
-
-    parser, perr := NewUnsignerFromPublicKeyFile(pubkeyPath)
-    if perr != nil {
-        return fmt.Errorf("[ERR] could load public key: %v", perr)
-    }
-
-    err := parser.Unsign([]byte(message), []byte(signature))
-    if err != nil {
-        return fmt.Errorf("[ERR] could not verify message : %v", err)
-    }
-
-    return nil
-}
+type Signature []byte
 
 //------------------------------------------------ PRIVATE KEY ---------------------------------------------------------
-
-// A Signer is can create signatures that verify against a public key.
-type Signer interface {
-    // Sign returns raw signature for the given data. This method
-    // will apply the hash specified for the keytype to the data.
-    Sign(data []byte) ([]byte, error)
-}
 
 type rsaPrivateKey struct {
     *rsa.PrivateKey
 }
 
-func newSignerFromKey(k interface{}) (Signer, error) {
-    var sshKey Signer
+func newPrivateKeyFromKey(k interface{}) (*rsaPrivateKey, error) {
     switch t := k.(type) {
         case *rsa.PrivateKey:
-            sshKey = &rsaPrivateKey{t}
+            return &rsaPrivateKey{t}, nil
         default:
             return nil, fmt.Errorf("ssh: unsupported key type %T", k)
     }
-    return sshKey, nil
+}
+
+// parsePublicKey parses a PEM encoded private key.
+func parsePrivateKey(pemBytes []byte) (interface{}, error) {
+    block, _ := pem.Decode(pemBytes)
+    if block == nil {
+        return nil, errors.New("ssh: no key found")
+    }
+
+    var rawkey interface{}
+    switch block.Type {
+    case "RSA PRIVATE KEY":
+        rsa, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+        if err != nil {
+            return nil, err
+        }
+        rawkey = rsa
+    default:
+        return nil, fmt.Errorf("ssh: unsupported key type %q", block.Type)
+    }
+    return rawkey, nil
 }
 
 func signDataWithHash(r *rsaPrivateKey, data []byte, hashType crypto.Hash) ([]byte, error) {
@@ -73,14 +72,49 @@ func signDataWithHash(r *rsaPrivateKey, data []byte, hashType crypto.Hash) ([]by
     }
 }
 
+// Decrypt returns encrypted payload for the given data.
+func (r *rsaPrivateKey) decrypt(data []byte) ([]byte, error) {
+    decrypted, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, r.PrivateKey, data, []byte("~pc*crypt^pkg!")); if err != nil {
+        return nil, err
+    }
+    return decrypted, nil
+}
+
+func newPrivateKeyFromFile(prvkeyPath string) (*rsaPrivateKey, error) {
+    data, err := ioutil.ReadFile(prvkeyPath); if err != nil {
+        return nil, fmt.Errorf("[ERR] cannot open private key file %s for error %v", prvkeyPath, err)
+    }
+    rawkey, err := parsePrivateKey(data); if err != nil {
+        return nil, fmt.Errorf("[ERR] cannot parse private rawkey %v", err)
+    }
+    return newPrivateKeyFromKey(rawkey)
+}
+
 // Sign signs data with rsa-sha hash
 func (r *rsaPrivateKey) Sign(data []byte) ([]byte, error) {
     // TODO : when overal cluster nodes are powerful enough to handle SHA256, please change to that
     return signDataWithHash(r, data, crypto.SHA1)
 }
 
+//------------------------------------------------ PUBLIC KEY ----------------------------------------------------------
+
+
+type rsaPublicKey struct {
+    *rsa.PublicKey
+}
+
+func newPublicKeyFromKey(k interface{}) (*rsaPublicKey, error) {
+    switch t := k.(type) {
+        case *rsa.PublicKey:
+            return &rsaPublicKey{t}, nil
+        default:
+            return nil, fmt.Errorf("ssh: unsupported key type %T", k)
+    }
+}
+
+
 // parsePublicKey parses a PEM encoded private key.
-func parsePrivateKey(pemBytes []byte) (Signer, error) {
+func parsePublicKey(pemBytes []byte) (interface{}, error) {
     block, _ := pem.Decode(pemBytes)
     if block == nil {
         return nil, errors.New("ssh: no key found")
@@ -88,49 +122,17 @@ func parsePrivateKey(pemBytes []byte) (Signer, error) {
 
     var rawkey interface{}
     switch block.Type {
-        case "RSA PRIVATE KEY":
-            rsa, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-            if err != nil {
-                return nil, err
-            }
-            rawkey = rsa
-        default:
-            return nil, fmt.Errorf("ssh: unsupported key type %q", block.Type)
+    case "PUBLIC KEY":
+        rsa, err := x509.ParsePKIXPublicKey(block.Bytes)
+        if err != nil {
+            return nil, err
+        }
+        rawkey = rsa
+    default:
+        return nil, fmt.Errorf("ssh: unsupported key type %q", block.Type)
     }
-    return newSignerFromKey(rawkey)
-}
 
-// NewSignerFromPrivateKeyFile loads and parses a PEM encoded private key file
-// prvkeyPath : has to be an absolute or a valid path
-func NewSignerFromPrivateKeyFile(prvkeyPath string) (Signer, error) {
-    data, err := ioutil.ReadFile(prvkeyPath); if err != nil {
-        return nil, fmt.Errorf("[ERR] cannot open private key file %s for error %v", prvkeyPath, err)
-    }
-    return parsePrivateKey(data)
-}
-
-//------------------------------------------------ PUBLIC KEY ----------------------------------------------------------
-
-type rsaPublicKey struct {
-    *rsa.PublicKey
-}
-
-// A Signer is can create signatures that verify against a public key.
-type Unsigner interface {
-    // Sign returns raw signature for the given data. This method
-    // will apply the hash specified for the keytype to the data.
-    Unsign(data[]byte, sig []byte) error
-}
-
-func newUnsignerFromKey(k interface{}) (Unsigner, error) {
-    var sshKey Unsigner
-    switch t := k.(type) {
-        case *rsa.PublicKey:
-            sshKey = &rsaPublicKey{t}
-        default:
-            return nil, fmt.Errorf("ssh: unsupported key type %T", k)
-    }
-    return sshKey, nil
+    return rawkey, nil
 }
 
 func unsignDataWithHash(r *rsaPublicKey, message []byte, sig []byte, hashType crypto.Hash) error {
@@ -152,48 +154,35 @@ func unsignDataWithHash(r *rsaPublicKey, message []byte, sig []byte, hashType cr
     }
 }
 
+// Encrypt returns encrypted payload for the given data.
+func (r *rsaPublicKey) encrypt(data []byte) ([]byte, error) {
+    // The label parameter must be the same for decrypt function
+    encrypted, err := rsa.EncryptOAEP(sha1.New(), rand.Reader, r.PublicKey, data, []byte("~pc*crypt^pkg!")); if err != nil {
+        return nil, err
+    }
+    return encrypted, nil
+}
+
+func newPublicKeyFromFile(pubkeyPath string) (*rsaPublicKey, error) {
+    data, err := ioutil.ReadFile(pubkeyPath); if err != nil {
+        return nil, fmt.Errorf("[ERR] cannot open public key file from %s : %v", pubkeyPath, err)
+    }
+    rawkey, err := parsePublicKey(data); if err != nil {
+        return nil, fmt.Errorf("[ERR] cannot parse pulic rawkey %v", err)
+    }
+    return newPublicKeyFromKey(rawkey)
+}
+
 // Unsign verifies the message using a rsa-sha signature
 func (r *rsaPublicKey) Unsign(message []byte, sig []byte) error {
     // TODO : when overal cluster nodes are powerful enough to handle SHA256, please change to that
     return unsignDataWithHash(r, message, sig, crypto.SHA1)
 }
 
-// parsePublicKey parses a PEM encoded private key.
-func parsePublicKey(pemBytes []byte) (Unsigner, error) {
-    block, _ := pem.Decode(pemBytes)
-    if block == nil {
-        return nil, errors.New("ssh: no key found")
-    }
-
-    var rawkey interface{}
-    switch block.Type {
-        case "PUBLIC KEY":
-            rsa, err := x509.ParsePKIXPublicKey(block.Bytes)
-            if err != nil {
-                return nil, err
-            }
-            rawkey = rsa
-        default:
-            return nil, fmt.Errorf("ssh: unsupported key type %q", block.Type)
-    }
-
-    return newUnsignerFromKey(rawkey)
-}
-
-// NewUnsignerFromPublicKeyFile loads and parses a PEM encoded public key file
-// pubkeyPath : has to be an absolute or a valid path
-func NewUnsignerFromPublicKeyFile(pubkeyPath string) (Unsigner, error) {
-    data, err := ioutil.ReadFile(pubkeyPath); if err != nil {
-        return nil, fmt.Errorf("[ERR] cannot open public key file %s for error %v", pubkeyPath, err)
-    }
-    return parsePublicKey(data)
-}
-
-
 //------------------------------------------------ KEY GENERATION ------------------------------------------------------
 
 // GenerateKeyPair make a pair of public and private keys encoded in PEM format
-func GenerateKeyPair(pubKeyPath string, prvkeyPath string) error {
+func GenerateKeyPair(pubKeyPath, prvkeyPath, sshPubkeyPath string) error {
     privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
     if err != nil {
         return err
@@ -224,13 +213,9 @@ func GenerateKeyPair(pubKeyPath string, prvkeyPath string) error {
         return err
     }
 
-    return nil
-    // we can also write in SSH pubkey file format, but that's not the focus of this function
-    /*
-        // generate and write public key
-        pub, err := ssh.NewPublicKey(&privateKey.PublicKey); if err != nil {
-            return err
-        }
-        return ioutil.WriteFile(pubKeyPath, ssh.MarshalAuthorizedKey(pub), 0655)
-    */
+    // generate and write public key for ssh
+    pub, err := ssh.NewPublicKey(&privateKey.PublicKey); if err != nil {
+        return err
+    }
+    return ioutil.WriteFile(sshPubkeyPath, ssh.MarshalAuthorizedKey(pub), 0655)
 }

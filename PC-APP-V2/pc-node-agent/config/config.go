@@ -25,6 +25,7 @@ const (
     CONFIG_PATH         = "/etc/pocket/conf.ini"
     SLAVE_PRVATE_KEY    = "/etc/pocket/pki/slave.pem"
     SLAVE_PUBLIC_KEY    = "/etc/pocket/pki/slave.pub"
+    SLAVE_PUBLIC_SSH    = "/etc/pocket/pki/slave.ssh"
     MASTER_PUBLIC_KEY   = "/etc/pocket/pki/master.pub"
 
     // HOST GENERAL CONFIG
