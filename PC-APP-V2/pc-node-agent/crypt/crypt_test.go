@@ -5,6 +5,7 @@ import (
     "os"
     "io/ioutil"
     "encoding/base64"
+    "reflect"
 )
 
 // loadTestPublicKey loads an parses a PEM encoded public key file.
@@ -36,7 +37,7 @@ G6aFKaqQfOXKCyWoUiVknQJAXrlgySFci/2ueKlIE1QqIiLSZ8V8OlpFLRnb1pzI
 }
 
 func TestKeyGeneration(t *testing.T) {
-    const toSign string = "date: Thu, 05 Jan 2012 21:31:40 GMT"
+    var toSign []byte = []byte("date: Thu, 05 Jan 2012 21:31:40 GMT")
     if err := GenerateKeyPair("test.pub", "test.pem", "test.ssh", ); err != nil {
         t.Errorf("failed to generate a key pair %v", err)
     }
@@ -45,7 +46,7 @@ func TestKeyGeneration(t *testing.T) {
     signer, err := NewSignerFromPrivateKeyFile("test.pem"); if err != nil {
         t.Errorf("signer is damaged: %v", err)
     }
-    signed, err := signer.Sign([]byte(toSign)); if err != nil {
+    signed, err := signer.Sign(toSign); if err != nil {
         t.Errorf("could not sign request: %v", err)
     }
 
@@ -53,7 +54,7 @@ func TestKeyGeneration(t *testing.T) {
     parser, perr := NewUnsignerFromPublicKeyFile("test.pub"); if perr != nil {
         t.Errorf("could not sign request: %v", err)
     }
-    if err = parser.Unsign([]byte(toSign), signed); err != nil {
+    if err = parser.Unsign(toSign, signed); err != nil {
         t.Errorf("could not unsign request: %v", err)
     }
 
@@ -84,7 +85,7 @@ func TestSignatureGeneration(t *testing.T) {
 }
 
 func TestSignatureVerification(t *testing.T) {
-    var orgMsg string = string(testPublicKey())
+    var orgMsg []byte = testPublicKey()
     if err := ioutil.WriteFile("test.pub", testPublicKey(), os.ModePerm); err != nil {
         t.Errorf("Fail to write public key %v", err)
     }
@@ -105,7 +106,7 @@ func TestSignatureVerification(t *testing.T) {
 }
 
 func TestMessageSigning(t *testing.T) {
-    const orgMsg string = "date: Thu, 05 Jan 2012 21:31:40 GMT"
+    var orgMsg []byte = []byte("date: Thu, 05 Jan 2012 21:31:40 GMT")
     if err := ioutil.WriteFile("test.pub", testPublicKey(), os.ModePerm); err != nil {
         t.Errorf("Fail to write public key %v", err)
     }
@@ -126,7 +127,7 @@ func TestMessageSigning(t *testing.T) {
 }
 
 func TestEncDecMessage(t *testing.T) {
-    const orgMsg string = "date: Thu, 05 Jan 2012 21:31:40 GMT"
+    var orgMsg []byte = []byte("date: Thu, 05 Jan 2012 21:31:40 GMT")
     if err := ioutil.WriteFile("sendtest.pub", testPublicKey(), os.ModePerm); err != nil {
         t.Errorf("Fail to write public key %v", err)
     }
@@ -148,14 +149,32 @@ func TestEncDecMessage(t *testing.T) {
     decr, err := NewDecryptorFromKeyFiles("sendtest.pub", "recvtest.pem"); if err != nil {
         t.Errorf(err.Error())
     }
-    plain, err := decr.DecryptMessage(string(crypted), sig); if err != nil {
+    plain, err := decr.DecryptMessage(crypted, sig); if err != nil {
         t.Errorf(err.Error())
     }
     // comp
-    if orgMsg != string(plain) {
+    if !reflect.DeepEqual(orgMsg, plain) {
         t.Error("Original Message and Decrypted message are different" + string(plain))
     }
 
     os.Remove("sendtest.pem");os.Remove("sendtest.pub")
     os.Remove("recvtest.pem");os.Remove("recvtest.pub");os.Remove("recvtest.ssh")
+}
+
+func TestAES_EncDec(t *testing.T) {
+    key := []byte("longer means more possible keys ")
+    text := []byte("This is the unecrypted data. Referring to it as plain text.")
+
+    ac, err := NewAESCrypto(key); if err != nil {
+        t.Errorf("Cannot create AES cryptor %v", err)
+    }
+    crypted, err := ac.Encrypt(text); if err != nil {
+        t.Errorf("Cannot encrypt message with AES %v", err)
+    }
+    plain, err := ac.Decrypt(crypted); if err != nil {
+        t.Errorf("Cannot decrypt message with AES %v", err)
+    }
+    if string(plain) != string(text) {
+        t.Errorf("Orinal and decrypted are different")
+    }
 }

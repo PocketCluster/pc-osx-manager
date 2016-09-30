@@ -7,11 +7,11 @@ import (
     "errors"
 )
 
-type Decryptor interface {
-    DecryptMessage(crypted string, sendSig Signature) ([]byte, error)
+type RsaDecryptor interface {
+    DecryptMessage(crypted []byte, sendSig Signature) (plain []byte, err error)
 }
 
-func NewDecryptorFromKeyFiles(sendPubkeyPath, recvPrvkeyPath string) (Decryptor, error) {
+func NewDecryptorFromKeyFiles(sendPubkeyPath, recvPrvkeyPath string) (RsaDecryptor, error) {
     pubkey, err := newPublicKeyFromFile(sendPubkeyPath); if err != nil {
         return nil, err
     }
@@ -41,11 +41,11 @@ func (d *decryption) verifySignature(plainText []byte, sendSig Signature) error 
     return nil
 }
 
-func (d *decryption) DecryptMessage(crypted string, sendSig Signature) ([]byte, error) {
-    plain, err := d.recvPrvkey.decrypt([]byte(crypted)); if err != nil {
+func (d *decryption) DecryptMessage(crypted []byte, sendSig Signature) (plain []byte, err error) {
+    plain, err = d.recvPrvkey.decrypt(crypted); if err != nil {
         return nil, errors.New("[ERR] decryption failed due to " + err.Error())
     }
-    if err := d.verifySignature(plain, sendSig); err != nil {
+    if err = d.verifySignature(plain, sendSig); err != nil {
         return nil, fmt.Errorf("[ERR] Cannot verify message with sender signature %v", err)
     }
     return plain, nil

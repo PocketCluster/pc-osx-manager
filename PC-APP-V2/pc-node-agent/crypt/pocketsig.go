@@ -5,20 +5,20 @@ import (
     "io/ioutil"
 )
 
-func SignMessageWithPrivateKeyFile(prvkeyPath string, message string) ([]byte, error) {
+func SignMessageWithPrivateKeyFile(prvkeyPath string, message []byte) ([]byte, error) {
     // private key signer
     signer, err := NewSignerFromPrivateKeyFile(prvkeyPath); if err != nil {
         return nil, err
     }
-    return signer.Sign([]byte(message))
+    return signer.Sign(message)
 }
 
 // Use PKCS1 v1.5 to verify the signature on a message. Returns True for valid signature.
-func VerifySignature(pubkeyPath string, message string, signature []byte) error {
+func VerifySignature(pubkeyPath string, message []byte, signature []byte) error {
     unsigner, perr := NewUnsignerFromPublicKeyFile(pubkeyPath); if perr != nil {
         return fmt.Errorf("[ERR] could load public key: %v", perr)
     }
-    if err := unsigner.Unsign([]byte(message), signature); err != nil {
+    if err := unsigner.Unsign(message, signature); err != nil {
         return fmt.Errorf("[ERR] could not verify message : %v", err)
     }
     return nil
