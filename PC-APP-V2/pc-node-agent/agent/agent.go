@@ -45,7 +45,7 @@ const (
     //SLAVE_CLUSTER_MEMBERS = "pc_sl_cl"
 )
 
-type PocketAgentDiscover struct {
+type PocketSlaveAgent struct {
     Version             string      `bson:"pc_ver"      json:"pc_ver"`
 
     // master
@@ -61,10 +61,10 @@ type PocketAgentDiscover struct {
     SlaveNameServer     string      `bson:"pc_sl_ns,omitempty"    json:"pc_sl_ns"`
 }
 
-func (pa *PocketAgentDiscover) getUnboundBroadcast() {
+func (pa *PocketSlaveAgent) getUnboundBroadcast() {
 
 }
 
-func (pa *PocketAgentDiscover) getBoundBroadcast() {
+func (pa *PocketSlaveAgent) getBoundBroadcast() {
 
 }
