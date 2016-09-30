@@ -4,6 +4,7 @@ import (
     "crypto/rsa"
     "fmt"
     "io/ioutil"
+    "crypto"
 )
 
 // A Signer is can create signatures that verify against a public key.
@@ -11,6 +12,20 @@ type Signer interface {
     // Sign returns raw signature for the given data. This method
     // will apply the hash specified for the keytype to the data.
     Sign(data []byte) ([]byte, error)
+}
+
+func newSignerFromKey(k interface{}) (Signer, error) {
+    var sshKey Signer
+    switch t := k.(type) {
+    case *rsa.PrivateKey:
+        sshKey = &rsaPrivateKey{
+            PrivateKey:t,
+            Hash:crypto.SHA1,
+        }
+    default:
+        return nil, fmt.Errorf("ssh: unsupported key type %T", k)
+    }
+    return sshKey, nil
 }
 
 // NewSignerFromPrivateKeyFile loads and parses a PEM encoded private key file
@@ -23,15 +38,4 @@ func NewSignerFromPrivateKeyFile(prvkeyPath string) (Signer, error) {
         return nil, fmt.Errorf("[ERR] cannot parse private rawkey %v", err)
     }
     return newSignerFromKey(rawkey)
-}
-
-func newSignerFromKey(k interface{}) (Signer, error) {
-    var sshKey Signer
-    switch t := k.(type) {
-        case *rsa.PrivateKey:
-            sshKey = &rsaPrivateKey{t}
-        default:
-            return nil, fmt.Errorf("ssh: unsupported key type %T", k)
-    }
-    return sshKey, nil
 }
