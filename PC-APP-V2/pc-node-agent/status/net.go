@@ -30,12 +30,14 @@ func (iface *Interface) IP4Addrs() ([]*IP4Addr, error) {
             if ip4 := v.IP.To4(); ip4 != nil {
                 addrs = append(addrs, &IP4Addr{IP:&ip4, IPMask:&v.Mask})
             }
+        // TODO : make sure net.IPAddr only represents IP6
+        /*
         case *net.IPAddr:
             if ip4 := v.IP.To4(); ip4 != nil {
                 addrs = append(addrs, &IP4Addr{IP:&ip4, IPMask:nil})
             }
+        */
         }
-
     }
     if len(addrs) == 0 {
         return nil, fmt.Errorf("[ERR] No IPv4 address is given to interface %s", iface.Name);

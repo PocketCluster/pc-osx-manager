@@ -1,11 +1,19 @@
 package agent
 
-import "github.com/stkim1/pc-node-agent/status"
-
 // ------ VERSION ------
 const (
-    PC_PROTO            = "pc_ver"
-    VERSION             = "1.0.1"
+    SLAVE_META_PROTO    = "pc_sl_mt"
+    SLAVE_META_VERSION  = "1.0.1"
+)
+
+const (
+    SLAVE_DISCOVER_PROTO   = "pc_sl_dc"
+    SLAVE_DISCOVER_VERSION = "1.0.1"
+)
+
+const (
+    SLAVE_STATUS_PROTO  = "pc_sl_st"
+    SLAVE_STATUS_VERSION= "1.0.1"
 )
 
 // ------ PROTOCOL DEFINITIONS ------
@@ -46,44 +54,3 @@ const (
     //TODO check if this is really necessary. If we're to manage SSH sessions with a centralized server, this is not needed
     //SLAVE_CLUSTER_MEMBERS = "pc_sl_cl"
 )
-
-type PocketSlaveAgent struct {
-    Version             string      `bson:"pc_ver"      json:"pc_ver"`
-
-    // master
-    MasterBoundAgent    string      `bson:"pc_ma_ba"    json:"pc_ma_ba"`
-
-    // slave
-    SlaveNodeName       string      `bson:"pc_sl_nm,omitempty"    json:"pc_sl_nm"`
-    // current interface status
-    SlaveAddress        string      `bson:"pc_sl_i4,omitempty"    json:"pc_sl_i4"`
-    SlaveNodeMacAddr    string      `bson:"pc_sl_ma,omitempty"    json:"pc_sl_ma"`
-    SlaveTimeZone       string      `bson:"pc_sl_tz,omitempty"    json:"pc_sl_tz"`
-
-    // TODO check if nameserver setting is really needed.
-    //SlaveNameServer     string      `bson:"pc_sl_ns,omitempty"    json:"pc_sl_ns"`
-}
-
-func UnboundedBroadcastAgent() (agent *PocketSlaveAgent, err error) {
-    _, ifname, err := status.GetDefaultIP4Gateway(); if err != nil {
-        return nil, err
-    }
-    // TODO : should this be fixed to have "eth0"?
-    iface, err := status.InterfaceByName(ifname); if err != nil {
-        return nil, err
-    }
-    ipaddrs, err := iface.IP4Addrs(); if err != nil {
-        return nil, err
-    }
-    agent = &PocketSlaveAgent{
-        Version:VERSION,
-        MasterBoundAgent:SLAVE_LOOKUP_AGENT,
-        SlaveNodeMacAddr: iface.HardwareAddr.String(),
-        SlaveAddress: ipaddrs[0].IP.String(),
-    }
-    err = nil
-    return
-}
-
-func (pa *PocketSlaveAgent) boundedStatus() {
-}
