@@ -1,5 +1,7 @@
 package agent
 
+import "github.com/stkim1/pc-node-agent/status"
+
 // ------ VERSION ------
 const (
     PC_PROTO            = "pc_ver"
@@ -52,19 +54,36 @@ type PocketSlaveAgent struct {
     MasterBoundAgent    string      `bson:"pc_ma_ba"    json:"pc_ma_ba"`
 
     // slave
-    SlaveNodeMacAddr    string      `bson:"pc_sl_ma"    json:"pc_sl_ma"`
-    SlaveNodeName       string      `bson:"pc_sl_nm"    json:"pc_sl_nm"`
-    SlaveTimeZone       string      `bson:"pc_sl_tz"    json:"pc_sl_tz"`
-
+    SlaveNodeName       string      `bson:"pc_sl_nm,omitempty"    json:"pc_sl_nm"`
     // current interface status
-    SlaveAddress        string      `bson:"pc_sl_i4"    json:"pc_sl_i4"`
-    SlaveNameServer     string      `bson:"pc_sl_ns,omitempty"    json:"pc_sl_ns"`
+    SlaveAddress        string      `bson:"pc_sl_i4,omitempty"    json:"pc_sl_i4"`
+    SlaveNodeMacAddr    string      `bson:"pc_sl_ma,omitempty"    json:"pc_sl_ma"`
+    SlaveTimeZone       string      `bson:"pc_sl_tz,omitempty"    json:"pc_sl_tz"`
+
+    // TODO check if nameserver setting is really needed.
+    //SlaveNameServer     string      `bson:"pc_sl_ns,omitempty"    json:"pc_sl_ns"`
 }
 
-func (pa *PocketSlaveAgent) getUnboundBroadcast() {
-
+func UnboundBroadcastAgent() (agent *PocketSlaveAgent, err error) {
+    _, ifname, err := status.GetDefaultIP4Gateway(); if err != nil {
+        return nil, err
+    }
+    // TODO : should this be fixed to have "eth0"?
+    iface, err := status.InterfaceByName(ifname); if err != nil {
+        return nil, err
+    }
+    ipaddrs, err := status.IP4Addrs(iface); if err != nil || len(ipaddrs) == 0 {
+        return nil, err
+    }
+    agent = &PocketSlaveAgent{
+        Version:VERSION,
+        MasterBoundAgent:SLAVE_LOOKUP_AGENT,
+        SlaveNodeMacAddr: iface.HardwareAddr.String(),
+        SlaveAddress: ipaddrs[0].IP.String(),
+    }
+    err = nil
+    return
 }
 
 func (pa *PocketSlaveAgent) getBoundBroadcast() {
-
 }

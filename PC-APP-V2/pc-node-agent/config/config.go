@@ -33,6 +33,7 @@ const (
     HOSTNAME_FILE       = "/etc/hostname"
     HOSTADDR_FILE       = "/etc/hosts"
     HOST_TIMEZONE       = "/etc/timezone"
+    RESOLVE_CONF        = "/etc/resolv.conf"
 )
 
 // ------ SALT DEFAULT ------
