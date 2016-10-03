@@ -6,7 +6,7 @@ import (
     "time"
 
     "github.com/stkim1/pc-node-agent/mcast"
-    "github.com/stkim1/pc-node-agent/agent"
+    "github.com/stkim1/pc-node-agent/slagent"
 )
 
 func mcastTest() {
@@ -53,7 +53,7 @@ func main() {
         fmt.Println("--------\n")
     }
 */
-    pa, err := agent.UnboundedBroadcastAgent(); if err != nil {
+    pa, err := slagent.UnboundedBroadcastAgent(); if err != nil {
         return
     }
     fmt.Printf("addr %s mac %s", pa.SlaveAddress, pa.SlaveNodeMacAddr)

@@ -1,19 +1,28 @@
-package agent
+package slagent
 
 // ------ VERSION ------
+// meta protocol scheme & version
 const (
-    SLAVE_META_PROTO    = "pc_sl_mt"
+    SLAVE_META_PROTO    = "pc_sl_pm"
     SLAVE_META_VERSION  = "1.0.1"
 )
 
+// discovery protocol scheme & version
 const (
-    SLAVE_DISCOVER_PROTO   = "pc_sl_dc"
+    SLAVE_DISCOVER_PROTO   = "pc_sl_pd"
     SLAVE_DISCOVER_VERSION = "1.0.1"
 )
 
+// status protocol scheme & version
 const (
-    SLAVE_STATUS_PROTO  = "pc_sl_st"
+    SLAVE_STATUS_PROTO  = "pc_sl_ps"
     SLAVE_STATUS_VERSION= "1.0.1"
+)
+
+// Discovery & Status tag for meta
+const (
+    SLAVE_DISCOVER_AGENT= "pc_sl_ad"
+    SLAVE_STATUS_AGENT  = "pc_sl_as"
 )
 
 // ------ PROTOCOL DEFINITIONS ------

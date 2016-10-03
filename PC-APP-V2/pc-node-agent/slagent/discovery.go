@@ -1,9 +1,9 @@
-package agent
+package slagent
 
 import "github.com/stkim1/pc-node-agent/status"
 
 type PocketSlaveDiscoveryAgent struct {
-    Version             string      `msgpack:"pc_sl_dc"`
+    Version             string      `msgpack:"pc_sl_pd"`
     // master
     MasterBoundAgent    string      `msgpack:"pc_ma_ba"`
 
