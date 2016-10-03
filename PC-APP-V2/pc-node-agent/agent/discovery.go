@@ -3,19 +3,19 @@ package agent
 import "github.com/stkim1/pc-node-agent/status"
 
 type PocketSlaveDiscoveryAgent struct {
-    Version             string      `bson:"pc_sl_dc"    json:"pc_sl_dc"`
+    Version             string      `msgpack:"pc_sl_dc"`
     // master
-    MasterBoundAgent    string      `bson:"pc_ma_ba"    json:"pc_ma_ba"`
+    MasterBoundAgent    string      `msgpack:"pc_ma_ba"`
 
     // slave
-    SlaveAddress        string      `bson:"pc_sl_i4,omitempty"    json:"pc_sl_i4"`
-    SlaveGateway        string      `bson:"pc_sl_ma,omitempty"    json:"pc_sl_ma"`
-    SlaveNetmask        string      `bson:"pc_sl_ma,omitempty"    json:"pc_sl_ma"`
-    SlaveNodeMacAddr    string      `bson:"pc_sl_ma,omitempty"    json:"pc_sl_ma"`
+    SlaveAddress        string      `msgpack:"pc_sl_i4,omitempty"`
+    SlaveGateway        string      `msgpack:"pc_sl_ma,omitempty"`
+    SlaveNetmask        string      `msgpack:"pc_sl_ma,omitempty"`
+    SlaveNodeMacAddr    string      `msgpack:"pc_sl_ma"`
 
     // TODO : check if nameserver & node name is really necessary for discovery
-    //SlaveNameServer     string      `bson:"pc_sl_ns,omitempty"    json:"pc_sl_ns"`
-    //SlaveNodeName       string      `bson:"pc_sl_nm,omitempty"    json:"pc_sl_nm"`
+    //SlaveNameServer     string     `bson:"pc_sl_ns,omitempty"    json:"pc_sl_ns"`
+    //SlaveNodeName       string     `bson:"pc_sl_nm,omitempty"    json:"pc_sl_nm"`
 }
 
 func UnboundedBroadcastAgent() (agent *PocketSlaveDiscoveryAgent, err error) {

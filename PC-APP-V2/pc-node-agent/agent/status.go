@@ -3,18 +3,18 @@ package agent
 import "github.com/stkim1/pc-node-agent/status"
 
 type PocketSlaveStatusAgent struct {
-    Version             string      `json:"pc_sl_st"`
+    Version             string      `msgpack:"pc_sl_st"`
 
     // master
-    MasterBoundAgent    string      `json:"pc_ma_ba"`
+    MasterBoundAgent    string      `msgpack:"pc_ma_ba"`
 
     // slave
-    SlaveNodeName       string      `json:"pc_sl_nm"`
+    SlaveNodeName       string      `msgpack:"pc_sl_nm"`
 
     // current interface status
-    SlaveAddress        string      `json:"pc_sl_i4"`
-    SlaveNodeMacAddr    string      `json:"pc_sl_ma"`
-    SlaveTimeZone       string      `json:"pc_sl_tz"`
+    SlaveAddress        string      `msgpack:"pc_sl_i4"`
+    SlaveNodeMacAddr    string      `msgpack:"pc_sl_ma"`
+    SlaveTimeZone       string      `msgpack:"pc_sl_tz"`
 }
 
 func BoundedStatusAgent(master, slave, timezone string) (agent *PocketSlaveStatusAgent, err error) {
