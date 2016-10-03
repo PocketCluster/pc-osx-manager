@@ -2,18 +2,22 @@ package status
 
 import (
     "net"
+    "fmt"
     "github.com/stkim1/netifaces"
 )
 
-func Interfaces() ([]net.Interface, error) {
-    return net.Interfaces()
+type Interface struct {
+    *net.Interface
 }
 
-func InterfaceByName(name string) (*net.Interface, error) {
-    return net.InterfaceByName(name)
+func InterfaceByName(name string) (*Interface, error) {
+    iface, err := net.InterfaceByName(name); if err != nil {
+        return nil, err
+    }
+    return &Interface{iface}, nil
 }
 
-func IP4Addrs(iface *net.Interface) ([]*IP4Addr, error) {
+func (iface *Interface) IP4Addrs() ([]*IP4Addr, error) {
     ifAddrs, err := iface.Addrs()
     if err != nil {
         return nil, err
@@ -33,7 +37,14 @@ func IP4Addrs(iface *net.Interface) ([]*IP4Addr, error) {
         }
 
     }
+    if len(addrs) == 0 {
+        return nil, fmt.Errorf("[ERR] No IPv4 address is given to interface %s", iface.Name);
+    }
     return addrs, nil
+}
+
+func (iface *Interface) MacAddress() string {
+    return iface.HardwareAddr.String()
 }
 
 type IP4Addr struct {

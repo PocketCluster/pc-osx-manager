@@ -13,7 +13,7 @@ func TestGetDefaultIP4Gateway(t *testing.T) {
     ifs, err := InterfaceByName(iface); if err != nil {
         t.Error(err.Error())
     }
-    _, err = IP4Addrs(ifs); if err != nil {
+    _, err = ifs.IP4Addrs(); if err != nil {
         t.Error(err.Error())
     }
 }

@@ -53,7 +53,7 @@ func main() {
         fmt.Println("--------\n")
     }
 */
-    pa, err := agent.UnboundBroadcastAgent(); if err != nil {
+    pa, err := agent.UnboundedBroadcastAgent(); if err != nil {
         return
     }
     fmt.Printf("addr %s mac %s", pa.SlaveAddress, pa.SlaveNodeMacAddr)

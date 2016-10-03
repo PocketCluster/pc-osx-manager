@@ -64,7 +64,7 @@ type PocketSlaveAgent struct {
     //SlaveNameServer     string      `bson:"pc_sl_ns,omitempty"    json:"pc_sl_ns"`
 }
 
-func UnboundBroadcastAgent() (agent *PocketSlaveAgent, err error) {
+func UnboundedBroadcastAgent() (agent *PocketSlaveAgent, err error) {
     _, ifname, err := status.GetDefaultIP4Gateway(); if err != nil {
         return nil, err
     }
@@ -72,7 +72,7 @@ func UnboundBroadcastAgent() (agent *PocketSlaveAgent, err error) {
     iface, err := status.InterfaceByName(ifname); if err != nil {
         return nil, err
     }
-    ipaddrs, err := status.IP4Addrs(iface); if err != nil || len(ipaddrs) == 0 {
+    ipaddrs, err := iface.IP4Addrs(); if err != nil {
         return nil, err
     }
     agent = &PocketSlaveAgent{
@@ -85,5 +85,5 @@ func UnboundBroadcastAgent() (agent *PocketSlaveAgent, err error) {
     return
 }
 
-func (pa *PocketSlaveAgent) getBoundBroadcast() {
+func (pa *PocketSlaveAgent) boundedStatus() {
 }
