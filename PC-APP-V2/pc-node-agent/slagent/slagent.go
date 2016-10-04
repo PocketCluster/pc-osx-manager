@@ -53,9 +53,12 @@ const (
 
     // node looks for agent
     SLAVE_LOOKUP_AGENT  = "pc_sl_la"
+
+    // slave info
+    SLAVE_HARDWARE      = "pc_sl_hd"
     SLAVE_NODE_MACADDR  = "pc_sl_ma"
     SLAVE_NODE_NAME     = "pc_sl_nm"
-    SLAVE_TIMEZONE      = "pc_sl_tz"
+    SLAVE_TIMESTAMP     = "pc_sl_ts"
     SLAVE_IP4_ADDRESS   = "pc_sl_i4"
     SLAVE_IP6_ADDRESS   = "pc_sl_i6"
     SLAVE_NAMESERVER    = "pc_sl_ns"
