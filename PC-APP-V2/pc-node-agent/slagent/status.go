@@ -20,7 +20,7 @@ type PocketSlaveStatusAgent struct {
     // current interface status
     SlaveAddress        string      `msgpack:"pc_sl_i4"`
     SlaveNodeMacAddr    string      `msgpack:"pc_sl_ma"`
-    SlaveHardware       string      `msgpack:"pc_sl_hd"`
+    SlaveHardware       string      `msgpack:"pc_sl_hw"`
     SlaveTimestamp      *time.Time  `msgpack:"pc_sl_ts"`
 }
 

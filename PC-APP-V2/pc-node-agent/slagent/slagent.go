@@ -55,7 +55,7 @@ const (
     SLAVE_LOOKUP_AGENT  = "pc_sl_la"
 
     // slave info
-    SLAVE_HARDWARE      = "pc_sl_hd"
+    SLAVE_HARDWARE      = "pc_sl_hw"
     SLAVE_NODE_MACADDR  = "pc_sl_ma"
     SLAVE_NODE_NAME     = "pc_sl_nm"
     SLAVE_TIMESTAMP     = "pc_sl_ts"
