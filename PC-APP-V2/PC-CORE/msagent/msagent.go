@@ -1,5 +1,7 @@
 package msagent
 
+import "github.com/stkim1/pc-node-agent/slagent"
+
 // ------ VERSION ------
 // meta protocol scheme & version
 type MetaProtocol string
@@ -11,8 +13,8 @@ const (
 // discovery protocol scheme & version
 type DiscoveryProtocol string
 const (
-    MASTER_DISCOVER_PROTO    DiscoveryProtocol = "pc_ms_pd"
-    MASTER_DISCOVER_VERSION  DiscoveryProtocol = "1.0.1"
+    MASTER_DISCOVERY_PROTO    DiscoveryProtocol = "pc_ms_pd"
+    MASTER_DISCOVERY_VERSION  DiscoveryProtocol = "1.0.1"
 )
 
 // status protocol scheme & version
@@ -32,10 +34,11 @@ const (
 type CommandType string
 const MASTER_COMMAND_TYPE  string = "pc_ms_ct"
 const (
-    COMMAND_WHO_R_U          CommandType = "pc_ms_wr"
-    COMMAND_ASK_PUBKEY       CommandType = "pc_ms_ap"
-    COMMAND_SEND_AES         CommandType = "pc_ms_sa"
-    COMMAND_MASTER_BIND_DONE CommandType = "pc_ms_mb"
+    COMMAND_WHO_R_U             CommandType = "pc_ms_wr"
+    COMMAND_ASK_PUBKEY          CommandType = "pc_ms_ap"
+    COMMAND_SEND_AES            CommandType = "pc_ms_sa"
+    COMMAND_MASTER_BIND_READY   CommandType = "pc_ms_mr"
+    COMMAND_SLAVE_ACK           CommandType = "pc_ms_ak"
 )
 
 // ------ MASTER SECTION ------
@@ -54,93 +57,28 @@ const (
     //MASTER_HOSTNAME        = "pc_ms_hn"
 )
 
-
-/*
-// this node is found to be mine so that I am not going to
-- (void)responseAgentMasterFeedback:(NSDictionary *)anAgentData {
-
-    if([self ethernetInterface] == nil){
-        Log(@"cannot give updated feedback b/c interface is nil!");
-        return;
-    }
-
-    WEAK_SELF(self);
-
-    NSString *sn = self.deviceSerial;
-    NSString *hn = self.hostName;
-    NSString *ia = [[self ethernetInterface] ip4Address];
-    NSString *tz = self.systemTimeZone;
-
-    //TODO: send this only when 1. member address changes, 2. when you fix client.
-    NSMutableDictionary *cms = [NSMutableDictionary dictionary];
-    RaspberryCluster *clu = [[self clusters] objectAtIndex:0];
-    for (Raspberry *rpi in [clu getRaspberries]){
-        [cms setObject:rpi.address forKey:rpi.slaveNodeName];
-    }
-
-    NSMutableDictionary* n = [NSMutableDictionary dictionaryWithDictionary:anAgentData];
-    [n setValuesForKeysWithDictionary:
-     @{MASTER_COMMAND_TYPE:@"-", // even if a node is fixed, we should include pc_ma_ct key. otherwise node will break!
-       MASTER_HOSTNAME:hn,
-       MASTER_BOUND_AGENT:sn,
-       MASTER_DATETIME:[NSString stringWithFormat:@"%ld",(long)[[NSDate date] timeIntervalSince1970]],
-       MASTER_TIMEZONE:tz,
-       MASTER_IP4_ADDRESS:ia,
-       MASTER_IP6_ADDRESS:@"",
-       SLAVE_CLUSTER_MEMBERS:cms}];
-    [n removeObjectForKey:SLAVE_TIMEZONE];
-
-    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        [belf multicastData:[n BSONRepresentation]];
-    }];
+func MakeWhoruInquery(unboundedDiscovery *slagent.PocketSlaveDiscoveryAgent, masterAgent, ip4Address string) (responder *PocketMasterDiscoveryResponder, err error) {
+    // TODO : sanity checker here
+    return &PocketMasterDiscoveryResponder{
+        Version          :MASTER_DISCOVERY_VERSION,
+        MasterBoundAgent :masterAgent,
+        MasterCommandType:COMMAND_WHO_R_U,
+        MasterAddress    :ip4Address,
+    }, nil
 }
 
-#pragma mark - Raspberry Nodes Management
-- (void)setupRaspberryNodes:(NSArray<NSDictionary *> *) aNodesList {
-
-    if([self ethernetInterface] == nil){
-        Log(@"cannot give updated feedback b/c interface is nil!");
-        return;
-    }
-
-    WEAK_SELF(self);
-
-    NSString *sn = self.deviceSerial;
-    NSString *hn = self.hostName;
-    NSString *ia = [[self ethernetInterface] ip4Address];
-    NSString *tz = self.systemTimeZone;
-
-    // build cluster member
-    NSMutableDictionary *cms = [NSMutableDictionary dictionary];
-    for (NSDictionary *anode in aNodesList){
-        [cms setObject:[anode objectForKey:ADDRESS] forKey:[anode objectForKey:SLAVE_NODE_NAME]];
-    }
-
-    // setup only six nodes
-    RaspberryCluster *rpic = [[RaspberryCluster alloc] initWithTitle:@"Cluster 1"];
-    for (NSDictionary *anode in aNodesList){
-
-        // fixed node definitions
-        NSMutableDictionary* fn = [NSMutableDictionary dictionaryWithDictionary:anode];
-        [fn setValuesForKeysWithDictionary:
-         @{MASTER_COMMAND_TYPE:COMMAND_FIX_BOUND,
-          MASTER_HOSTNAME:hn,
-          MASTER_BOUND_AGENT:sn,
-          MASTER_DATETIME:[NSString stringWithFormat:@"%ld",(long)[[NSDate date] timeIntervalSince1970]],
-          MASTER_TIMEZONE:tz,
-          MASTER_IP4_ADDRESS:ia,
-          MASTER_IP6_ADDRESS:@"",
-          SLAVE_CLUSTER_MEMBERS:cms}];
-
-        [rpic addRaspberry:[[Raspberry alloc] initWithDictionary:fn]];
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            [belf multicastData:[fn BSONRepresentation]];
-        }];
-    }
-
-    [[RaspberryManager sharedManager] addCluster:rpic];
-    [[RaspberryManager sharedManager] saveClusters];
+func MakeMasterPubkeyDelivery(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterDiscoveryResponder, err error) {
+    return nil, nil
 }
-*/
 
+func ExchangeMasterSlaveKeys(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCollector, err error) {
+    return nil, nil
+}
 
+func CheckMasterSlaveCrypto(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCollector, err error) {
+    return nil, nil
+}
+
+func SendMasterBindReady(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCollector, err error) {
+    return nil, nil
+}
