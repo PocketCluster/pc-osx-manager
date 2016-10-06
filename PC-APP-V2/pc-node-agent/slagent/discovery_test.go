@@ -12,7 +12,7 @@ func ExampleUnboundedBroadcastAgent() {
         return
     }
     fmt.Printf("Version : %s\n", ua.Version)
-    fmt.Printf("MasterBoundAgent : %s\n", ua.MasterBoundAgent)
+    fmt.Printf("SlaveResponse : %s\n", ua.SlaveResponse)
     fmt.Printf("SlaveAddress : %s\n", ua.SlaveAddress)
     fmt.Printf("SlaveGateway : %s\n", ua.SlaveGateway)
     fmt.Printf("SlaveNetmask : %s\n", ua.SlaveNetmask)
@@ -26,12 +26,12 @@ func ExampleUnboundedBroadcastAgent() {
     fmt.Printf("MsgPack : %v, Length : %d", mp, len(mp))
     // Output:
     // Version : 1.0.1
-    // MasterBoundAgent : pc_sl_la
+    // SlaveResponse : pc_sl_la
     // SlaveAddress : 192.168.1.236
     // SlaveGateway : 192.168.1.1
     // SlaveNetmask : ffffff00
     // SlaveNodeMacAddr : ac:bc:32:9a:8d:69
-    // MsgPack : [134 168 112 99 95 115 108 95 112 100 165 49 46 48 46 49 168 112 99 95 109 97 95 98 97 168 112 99 95 115 108 95 108 97 168 112 99 95 115 108 95 105 52 173 49 57 50 46 49 54 56 46 49 46 50 51 54 168 112 99 95 115 108 95 109 97 171 49 57 50 46 49 54 56 46 49 46 49 168 112 99 95 115 108 95 109 97 168 102 102 102 102 102 102 48 48 168 112 99 95 115 108 95 109 97 177 97 99 58 98 99 58 51 50 58 57 97 58 56 100 58 54 57], Length : 123
+    // MsgPack : [134 168 112 99 95 115 108 95 112 100 165 49 46 48 46 49 173 83 108 97 118 101 82 101 115 112 111 110 115 101 168 112 99 95 115 108 95 108 97 168 112 99 95 115 108 95 105 52 173 49 57 50 46 49 54 56 46 49 46 50 51 54 168 112 99 95 115 108 95 109 97 171 49 57 50 46 49 54 56 46 49 46 49 168 112 99 95 115 108 95 109 97 168 102 102 102 102 102 102 48 48 168 112 99 95 115 108 95 109 97 177 97 99 58 98 99 58 51 50 58 57 97 58 56 100 58 54 57], Length : 128
 }
 
 func ExampleBoundedBroadcastAgent() {
@@ -42,6 +42,7 @@ func ExampleBoundedBroadcastAgent() {
     }
     fmt.Printf("Version : %s\n", ba.Version)
     fmt.Printf("MasterBoundAgent : %s\n", ba.MasterBoundAgent)
+    fmt.Printf("SlaveResponse : %s\n", ba.SlaveResponse)
     fmt.Printf("SlaveAddress : %s\n", ba.SlaveAddress)
     fmt.Printf("SlaveGateway : %s\n", ba.SlaveGateway)
     fmt.Printf("SlaveNetmask : %s\n", ba.SlaveNetmask)
@@ -57,9 +58,11 @@ func ExampleBoundedBroadcastAgent() {
     // Output:
     // Version : 1.0.1
     // MasterBoundAgent : master-yoda
+    // SlaveResponse : pc_sl_la
     // SlaveAddress : 192.168.1.236
     // SlaveGateway : 192.168.1.1
     // SlaveNetmask : ffffff00
     // SlaveNodeMacAddr : ac:bc:32:9a:8d:69
-    // MsgPack : [134 168 112 99 95 115 108 95 112 100 165 49 46 48 46 49 168 112 99 95 109 97 95 98 97 171 109 97 115 116 101 114 45 121 111 100 97 168 112 99 95 115 108 95 105 52 173 49 57 50 46 49 54 56 46 49 46 50 51 54 168 112 99 95 115 108 95 109 97 171 49 57 50 46 49 54 56 46 49 46 49 168 112 99 95 115 108 95 109 97 168 102 102 102 102 102 102 48 48 168 112 99 95 115 108 95 109 97 177 97 99 58 98 99 58 51 50 58 57 97 58 56 100 58 54 57], Length : 126
+    // MsgPack : [135 168 112 99 95 115 108 95 112 100 165 49 46 48 46 49 168 112 99 95 109 115 95 98 97 171 109 97 115 116 101 114 45 121 111 100 97 173 83 108 97 118 101 82 101 115 112 111 110 115 101 168 112 99 95 115 108 95 108 97 168 112 99 95 115 108 95 105 52 173 49 57 50 46 49 54 56 46 49 46 50 51 54 168 112 99 95 115 108 95 109 97 171 49 57 50 46 49 54 56 46 49 46 49 168 112 99 95 115 108 95 109 97 168 102 102 102 102 102 102 48 48 168 112 99 95 115 108 95 109 97 177 97 99 58 98 99 58 51 50 58 57 97 58 56 100 58 54 57], Length : 149
+
 }

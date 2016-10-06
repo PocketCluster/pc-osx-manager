@@ -6,7 +6,7 @@ import (
 )
 
 type PocketSlaveAgentMeta struct {
-    MetaVersion         string                      `msgpack:"pc_sl_pm"`
+    MetaVersion         MetaProtocol                `msgpack:"pc_sl_pm"`
     StatusAgent         []byte                      `msgpack:"pc_sl_as", omitempty`
     DiscoveryAgent      *PocketSlaveDiscoveryAgent  `msgpack:"pc_sl_ad", inline, omitempty`
 }

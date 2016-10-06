@@ -92,8 +92,8 @@ type ConfigSlaveSection struct {
 type PocketSlaveConfig struct {
     ConfigVersion       string                   `yaml:"config-version"`
     BindingStatus       string                   `yaml:"binding-status"`
-    MasterSection       *ConfigMasterSection      `yaml:"master-section",inline,flow`
-    SlaveSection        *ConfigSlaveSection       `yaml:"slave-section",inline,flow`
+    MasterSection       *ConfigMasterSection     `yaml:"master-section",inline,flow`
+    SlaveSection        *ConfigSlaveSection      `yaml:"slave-section",inline,flow`
 }
 
 func buildInitConfig() (*PocketSlaveConfig) {

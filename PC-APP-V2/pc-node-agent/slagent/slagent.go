@@ -2,21 +2,24 @@ package slagent
 
 // ------ VERSION ------
 // meta protocol scheme & version
+type MetaProtocol string
 const (
-    SLAVE_META_PROTO    = "pc_sl_pm"
-    SLAVE_META_VERSION  = "1.0.1"
+    SLAVE_META_PROTO    MetaProtocol = "pc_sl_pm"
+    SLAVE_META_VERSION  MetaProtocol = "1.0.1"
 )
 
 // discovery protocol scheme & version
+type DiscoveryProtocol string
 const (
-    SLAVE_DISCOVER_PROTO   = "pc_sl_pd"
-    SLAVE_DISCOVER_VERSION = "1.0.1"
+    SLAVE_DISCOVER_PROTO   DiscoveryProtocol = "pc_sl_pd"
+    SLAVE_DISCOVER_VERSION DiscoveryProtocol = "1.0.1"
 )
 
 // status protocol scheme & version
+type StatusProtocol string
 const (
-    SLAVE_STATUS_PROTO  = "pc_sl_ps"
-    SLAVE_STATUS_VERSION= "1.0.1"
+    SLAVE_STATUS_PROTO   StatusProtocol = "pc_sl_ps"
+    SLAVE_STATUS_VERSION StatusProtocol = "1.0.1"
 )
 
 // Discovery & Status tag for meta
@@ -25,12 +28,25 @@ const (
     SLAVE_STATUS_AGENT  = "pc_sl_as"
 )
 
+// Report types (respond to command)
+type ResponseType string
+const SLAVE_REPORT_TYPE string = "pc_sl_rt"
+const (
+    // slave node looks for a master agent
+    SLAVE_LOOKUP_AGENT   ResponseType = "pc_sl_la"
+    // slave node "check me" if i can join
+    SLAVE_CHECK_ME       ResponseType = "pc_sl_cm"
+    // checking slave node public key
+    SLAVE_CHECK_PUBKEY   ResponseType = "pc_sl_cp"
+    // slave node ready for binding
+    SLAVE_BIND_READY     ResponseType = "pc_sl_br"
+    // slave node report status to the master agent
+    SLAVE_REPORT_STATUS  ResponseType = "pc_sl_rs"
+)
+
 // ------ SLAVE SECTION ------
 const (
     SLAVE_SECTION       = "slave"
-
-    // node looks for agent
-    SLAVE_LOOKUP_AGENT  = "pc_sl_la"
 
     // slave info
     SLAVE_HARDWARE      = "pc_sl_hw"
