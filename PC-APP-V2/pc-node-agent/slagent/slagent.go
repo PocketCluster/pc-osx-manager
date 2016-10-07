@@ -27,7 +27,7 @@ const (
     SLAVE_DISCOVER_AGENT    = "pc_sl_ad"
     SLAVE_STATUS_AGENT      = "pc_sl_as"
     SLAVE_ENCRYPTED_STATUS  = "pc_sl_es"
-    SLAVE_PUBKEY            = "pc_sl_pk"
+    SLAVE_PUBLIC_KEY        = "pc_sl_pk"
 )
 
 // Report types (respond to command)

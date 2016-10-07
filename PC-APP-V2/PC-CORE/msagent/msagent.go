@@ -6,28 +6,31 @@ import "github.com/stkim1/pc-node-agent/slagent"
 // meta protocol scheme & version
 type MetaProtocol string
 const (
-    MASTER_META_PROTO      MetaProtocol = "pc_ms_pm"
-    MASTER_META_VERSION    MetaProtocol = "1.0.1"
+    MASTER_META_PROTO           MetaProtocol = "pc_ms_pm"
+    MASTER_META_VERSION         MetaProtocol = "1.0.1"
 )
 
 // discovery protocol scheme & version
 type DiscoveryProtocol string
 const (
-    MASTER_DISCOVERY_PROTO    DiscoveryProtocol = "pc_ms_pd"
-    MASTER_DISCOVERY_VERSION  DiscoveryProtocol = "1.0.1"
+    MASTER_DISCOVERY_PROTO      DiscoveryProtocol = "pc_ms_pd"
+    MASTER_DISCOVERY_VERSION    DiscoveryProtocol = "1.0.1"
 )
 
 // status protocol scheme & version
 type StatusProtocol string
 const (
-    MASTER_STATUS_PROTO    StatusProtocol = "pc_ms_ps"
-    MASTER_STATUS_VERSION  StatusProtocol = "1.0.1"
+    MASTER_STATUS_PROTO         StatusProtocol = "pc_ms_ps"
+    MASTER_STATUS_VERSION       StatusProtocol = "1.0.1"
 )
 
 // Discovery & Status tag for meta
 const (
-    MASTER_DISCOVER_RESP   = "pc_ms_dr"
-    MASTER_STATUS_COLLECT  = "pc_ms_sc"
+    MASTER_ENCRYPTED_COMMAND    = "pc_ms_ec"
+    MASTER_DISCOVER_RESPOND     = "pc_ms_dr"
+    MASTER_STATUS_COMMANDER     = "pc_ms_sc"
+    MASTER_PUBLIC_KEY           = "pc_ms_pk"
+    MASTER_ENCRYPTED_AESKEY     = "pc_ms_ak"
 )
 
 // ------ COMMAND DEFINITIONS ------
@@ -77,9 +80,9 @@ func MakeMasterPubkeyDelivery(unboundedStatus *slagent.PocketSlaveStatusAgent) (
     }, nil
 }
 
-func ExchangeMasterSlaveKeys(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCollector, err error) {
+func ExchangeMasterSlaveKeys(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCommander, err error) {
     // TODO : sanity checker here
-    return &PocketMasterStatusCollector{
+    return &PocketMasterStatusCommander{
         Version          :MASTER_DISCOVERY_VERSION,
         MasterBoundAgent :"",
         MasterCommandType:COMMAND_WHO_R_U,
@@ -87,9 +90,9 @@ func ExchangeMasterSlaveKeys(unboundedStatus *slagent.PocketSlaveStatusAgent) (c
     }, nil
 }
 
-func CheckMasterSlaveCrypto(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCollector, err error) {
+func CheckMasterSlaveCrypto(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCommander, err error) {
     // TODO : sanity checker here
-    return &PocketMasterStatusCollector{
+    return &PocketMasterStatusCommander{
         Version          :MASTER_DISCOVERY_VERSION,
         MasterBoundAgent :"",
         MasterCommandType:COMMAND_WHO_R_U,
@@ -97,9 +100,9 @@ func CheckMasterSlaveCrypto(unboundedStatus *slagent.PocketSlaveStatusAgent) (co
     }, nil
 }
 
-func SendMasterBindReady(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCollector, err error) {
+func SendMasterBindReady(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCommander, err error) {
     // TODO : sanity checker here
-    return &PocketMasterStatusCollector{
+    return &PocketMasterStatusCommander{
         Version          :MASTER_DISCOVERY_VERSION,
         MasterBoundAgent :"",
         MasterCommandType:COMMAND_WHO_R_U,

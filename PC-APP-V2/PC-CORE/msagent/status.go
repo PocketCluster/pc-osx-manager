@@ -43,7 +43,7 @@ import "time"
     }];
 }
  */
-type PocketMasterStatusCollector struct {
+type PocketMasterStatusCommander struct {
     Version                 StatusProtocol      `msgpack:"pc_ms_ps"`
     MasterBoundAgent        string              `msgpack:"pc_ms_ba"`
     MasterCommandType       CommandType         `msgpack:"pc_ms_ct"`
