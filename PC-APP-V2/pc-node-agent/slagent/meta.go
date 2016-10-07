@@ -3,12 +3,15 @@ package slagent
 import (
     "github.com/stkim1/pc-node-agent/crypt"
     "gopkg.in/vmihailenco/msgpack.v2"
+    "fmt"
 )
 
 type PocketSlaveAgentMeta struct {
     MetaVersion         MetaProtocol                `msgpack:"pc_sl_pm"`
-    StatusAgent         []byte                      `msgpack:"pc_sl_as", omitempty`
     DiscoveryAgent      *PocketSlaveDiscoveryAgent  `msgpack:"pc_sl_ad", inline, omitempty`
+    StatusAgent         *PocketSlaveStatusAgent     `msgpack:"pc_sl_as", inline, omitempty`
+    EncryptedStatus     []byte                      `msgpack:"pc_sl_es", omitempty`
+    SlavePubKey         []byte                      `msgpack:"pc_sl_pk", omitempty`
 }
 
 func DiscoveryMetaAgent(agent *PocketSlaveDiscoveryAgent) (*PocketSlaveAgentMeta) {
@@ -18,7 +21,31 @@ func DiscoveryMetaAgent(agent *PocketSlaveDiscoveryAgent) (*PocketSlaveAgentMeta
     }
 }
 
-func StatusMetaAgent(agent *PocketSlaveStatusAgent, aescrypto crypt.AESCryptor) (meta *PocketSlaveAgentMeta, err error) {
+func InquiredMetaAgent(agent *PocketSlaveStatusAgent) (meta *PocketSlaveAgentMeta, err error) {
+    meta = &PocketSlaveAgentMeta{
+        MetaVersion: SLAVE_META_VERSION,
+        StatusAgent: agent,
+    }
+    err = nil
+    return
+}
+
+func KeyExchangeMetaAgent(agent *PocketSlaveStatusAgent, pubkey []byte) (meta *PocketSlaveAgentMeta, err error) {
+    if pubkey == nil {
+        err = fmt.Errorf("[ERR] You cannot pass an empty pubkey")
+        return
+    }
+    meta = &PocketSlaveAgentMeta{
+        MetaVersion: SLAVE_META_VERSION,
+        StatusAgent: agent,
+        SlavePubKey: pubkey,
+    }
+    err = nil
+    return
+}
+
+
+func CryptoCheckMetaAgent(agent *PocketSlaveStatusAgent, aescrypto crypt.AESCryptor) (meta *PocketSlaveAgentMeta, err error) {
     mp, err := msgpack.Marshal(agent)
     if err != nil {
         return nil, err
@@ -29,7 +56,24 @@ func StatusMetaAgent(agent *PocketSlaveStatusAgent, aescrypto crypt.AESCryptor) 
     }
     meta = &PocketSlaveAgentMeta{
         MetaVersion: SLAVE_META_VERSION,
-        StatusAgent: crypted,
+        EncryptedStatus: crypted,
+    }
+    err = nil
+    return
+}
+
+func StatusReportMetaAgent(agent *PocketSlaveStatusAgent, aescrypto crypt.AESCryptor) (meta *PocketSlaveAgentMeta, err error) {
+    mp, err := msgpack.Marshal(agent)
+    if err != nil {
+        return nil, err
+    }
+    crypted, err := aescrypto.Encrypt(mp)
+    if err != nil {
+        return nil, err
+    }
+    meta = &PocketSlaveAgentMeta{
+        MetaVersion: SLAVE_META_VERSION,
+        EncryptedStatus: crypted,
     }
     err = nil
     return

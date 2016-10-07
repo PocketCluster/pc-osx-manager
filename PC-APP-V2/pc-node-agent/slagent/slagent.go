@@ -22,10 +22,12 @@ const (
     SLAVE_STATUS_VERSION StatusProtocol = "1.0.1"
 )
 
-// Discovery & Status tag for meta
+// Meta Agent field
 const (
-    SLAVE_DISCOVER_AGENT= "pc_sl_ad"
-    SLAVE_STATUS_AGENT  = "pc_sl_as"
+    SLAVE_DISCOVER_AGENT    = "pc_sl_ad"
+    SLAVE_STATUS_AGENT      = "pc_sl_as"
+    SLAVE_ENCRYPTED_STATUS  = "pc_sl_es"
+    SLAVE_PUBKEY            = "pc_sl_pk"
 )
 
 // Report types (respond to command)
@@ -35,9 +37,9 @@ const (
     // slave node looks for a master agent
     SLAVE_LOOKUP_AGENT   ResponseType = "pc_sl_la"
     // slave node "check me" if i can join
-    SLAVE_CHECK_ME       ResponseType = "pc_sl_cm"
+    SLAVE_WHO_I_AM       ResponseType = "pc_sl_wi"
     // checking slave node public key
-    SLAVE_CHECK_PUBKEY   ResponseType = "pc_sl_cp"
+    SLAVE_SEND_PUBKEY    ResponseType = "pc_sl_sp"
     // slave node ready for binding
     SLAVE_BIND_READY     ResponseType = "pc_sl_br"
     // slave node report status to the master agent

@@ -46,7 +46,7 @@ func UnboundedBroadcastAgent() (agent *PocketSlaveDiscoveryAgent, err error) {
     return
 }
 
-func BoundedBroadcastAgent(master string) (agent *PocketSlaveDiscoveryAgent, err error) {
+func BindBrokenBroadcastAgent(master string) (agent *PocketSlaveDiscoveryAgent, err error) {
     gwaddr, gwifname, err := status.GetDefaultIP4Gateway()
     if err != nil {
         return nil, err

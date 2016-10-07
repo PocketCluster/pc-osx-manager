@@ -57,28 +57,52 @@ const (
     //MASTER_HOSTNAME        = "pc_ms_hn"
 )
 
-func MakeWhoruInquery(unboundedDiscovery *slagent.PocketSlaveDiscoveryAgent, masterAgent, ip4Address string) (responder *PocketMasterDiscoveryResponder, err error) {
+func MakeWhoruInquery(unboundedDiscovery *slagent.PocketSlaveDiscoveryAgent) (responder *PocketMasterDiscoveryResponder, err error) {
     // TODO : sanity checker here
     return &PocketMasterDiscoveryResponder{
         Version          :MASTER_DISCOVERY_VERSION,
-        MasterBoundAgent :masterAgent,
+        MasterBoundAgent :"",
         MasterCommandType:COMMAND_WHO_R_U,
-        MasterAddress    :ip4Address,
+        MasterAddress    :"",
     }, nil
 }
 
 func MakeMasterPubkeyDelivery(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterDiscoveryResponder, err error) {
-    return nil, nil
+    // TODO : sanity checker here
+    return &PocketMasterDiscoveryResponder{
+        Version          :MASTER_DISCOVERY_VERSION,
+        MasterBoundAgent :"",
+        MasterCommandType:COMMAND_WHO_R_U,
+        MasterAddress    :"",
+    }, nil
 }
 
 func ExchangeMasterSlaveKeys(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCollector, err error) {
-    return nil, nil
+    // TODO : sanity checker here
+    return &PocketMasterStatusCollector{
+        Version          :MASTER_DISCOVERY_VERSION,
+        MasterBoundAgent :"",
+        MasterCommandType:COMMAND_WHO_R_U,
+        MasterAddress    :"",
+    }, nil
 }
 
 func CheckMasterSlaveCrypto(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCollector, err error) {
-    return nil, nil
+    // TODO : sanity checker here
+    return &PocketMasterStatusCollector{
+        Version          :MASTER_DISCOVERY_VERSION,
+        MasterBoundAgent :"",
+        MasterCommandType:COMMAND_WHO_R_U,
+        MasterAddress    :"",
+    }, nil
 }
 
 func SendMasterBindReady(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCollector, err error) {
-    return nil, nil
+    // TODO : sanity checker here
+    return &PocketMasterStatusCollector{
+        Version          :MASTER_DISCOVERY_VERSION,
+        MasterBoundAgent :"",
+        MasterCommandType:COMMAND_WHO_R_U,
+        MasterAddress    :"",
+    }, nil
 }

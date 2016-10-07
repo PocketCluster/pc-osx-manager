@@ -8,20 +8,19 @@ import (
 )
 
 
-func ExampleUnboundedStatusAgent() {
+func ExampleInquiredStatusAgent() {
     timestmap, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
-    sa, err := UnboundedStatusAgent(&timestmap)
+    sa, err := InquiredAgent(&timestmap)
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
     fmt.Printf("Version : %s\n", sa.Version)
     fmt.Printf("SlaveResponse : %s\n", sa.SlaveResponse)
-    fmt.Printf("SlaveNodeName : %s\n", sa.SlaveNodeName)
     fmt.Printf("SlaveAddress : %s\n", sa.SlaveAddress)
     fmt.Printf("SlaveNodeMacAddr : %s\n", sa.SlaveNodeMacAddr)
     fmt.Printf("SlaveHardware : %s\n", sa.SlaveHardware)
@@ -36,13 +35,12 @@ func ExampleUnboundedStatusAgent() {
 
     // Output:
     // Version : 1.0.1
-    // SlaveResponse : pc_sl_la
-    // SlaveNodeName : MacBook-Pro-4.local
+    // SlaveResponse : pc_sl_wi
     // SlaveAddress : 192.168.1.236
     // SlaveNodeMacAddr : ac:bc:32:9a:8d:69
     // SlaveHardware : amd64
     // SlaveTimestamp : 2012-11-01 22:08:41 +0000 +0000
-    // MsgPack [135 168 112 99 95 115 108 95 112 115 165 49 46 48 46 49 173 83 108 97 118 101 82 101 115 112 111 110 115 101 168 112 99 95 115 108 95 108 97 168 112 99 95 115 108 95 110 109 179 77 97 99 66 111 111 107 45 80 114 111 45 52 46 108 111 99 97 108 168 112 99 95 115 108 95 105 52 173 49 57 50 46 49 54 56 46 49 46 50 51 54 168 112 99 95 115 108 95 109 97 177 97 99 58 98 99 58 51 50 58 57 97 58 56 100 58 54 57 168 112 99 95 115 108 95 104 119 165 97 109 100 54 52 168 112 99 95 115 108 95 116 115 146 206 80 146 242 233 0] len 149
+    // MsgPack [134 168 112 99 95 115 108 95 112 115 165 49 46 48 46 49 173 83 108 97 118 101 82 101 115 112 111 110 115 101 168 112 99 95 115 108 95 119 105 168 112 99 95 115 108 95 105 52 173 49 57 50 46 49 54 56 46 49 46 50 51 54 168 112 99 95 115 108 95 109 97 177 97 99 58 98 99 58 51 50 58 57 97 58 56 100 58 54 57 168 112 99 95 115 108 95 104 119 165 97 109 100 54 52 168 112 99 95 115 108 95 116 115 146 206 80 146 242 233 0] len 120
 }
 
 func ExampleBoundedStatusAgent() {

@@ -35,7 +35,7 @@ func ExampleUnboundedBroadcastAgent() {
 }
 
 func ExampleBoundedBroadcastAgent() {
-    ba, err := BoundedBroadcastAgent("master-yoda")
+    ba, err := BindBrokenBroadcastAgent("master-yoda")
     if err != nil {
         fmt.Printf(err.Error())
         return
