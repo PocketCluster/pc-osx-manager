@@ -2,7 +2,6 @@ package slagent
 
 import (
     "fmt"
-    "gopkg.in/vmihailenco/msgpack.v2"
     "time"
     "github.com/stkim1/pc-node-agent/crypt"
 )
@@ -22,7 +21,7 @@ func ExampleUnboundedBroadcastMeta() {
     fmt.Printf("DiscoveryAgent.SlaveNetmask : %s\n", ma.DiscoveryAgent.SlaveNetmask)
     fmt.Printf("DiscoveryAgent.SlaveNodeMacAddr : %s\n", ma.DiscoveryAgent.SlaveNodeMacAddr)
 
-    mp, err := msgpack.Marshal(ma)
+    mp, err := MessagePackedMeta(ma)
     if err != nil {
         fmt.Printf(err.Error())
         return
@@ -63,7 +62,7 @@ func ExampleInquiredMetaAgent() {
     fmt.Printf("DiscoveryAgent.SlaveNodeMacAddr : %s\n", ma.StatusAgent.SlaveNodeMacAddr)
     fmt.Printf("DiscoveryAgent.SlaveHardware : %s\n", ma.StatusAgent.SlaveHardware)
     fmt.Printf("DiscoveryAgent.SlaveTimestamp : %s\n", ma.StatusAgent.SlaveTimestamp)
-    mp, err := msgpack.Marshal(ma)
+    mp, err := MessagePackedMeta(ma)
     if err != nil {
         fmt.Printf(err.Error())
         return
@@ -117,7 +116,7 @@ func ExampleKeyExchangeMetaAgent() {
     fmt.Printf("DiscoveryAgent.SlaveNodeMacAddr : %s\n", ma.StatusAgent.SlaveNodeMacAddr)
     fmt.Printf("DiscoveryAgent.SlaveHardware : %s\n", ma.StatusAgent.SlaveHardware)
     fmt.Printf("DiscoveryAgent.SlaveTimestamp : %s\n", ma.StatusAgent.SlaveTimestamp)
-    mp, err := msgpack.Marshal(ma)
+    mp, err := MessagePackedMeta(ma)
     if err != nil {
         fmt.Printf(err.Error())
         return
@@ -158,7 +157,7 @@ func ExampleSlaveBindReadyAgent() {
         fmt.Printf(err.Error())
         return
     }
-    _, err = msgpack.Marshal(ma)
+    _, err = MessagePackedMeta(ma)
     if err != nil {
         fmt.Printf(err.Error())
         return
@@ -190,7 +189,7 @@ func ExampleBoundedStatusMetaAgent() {
         fmt.Printf(err.Error())
         return
     }
-    _, err = msgpack.Marshal(ma)
+    _, err = MessagePackedMeta(ma)
     if err != nil {
         fmt.Printf(err.Error())
         return
@@ -213,7 +212,7 @@ func ExampleBindBrokenBroadcastMeta() {
     fmt.Printf("DiscoveryAgent.SlaveNetmask : %s\n", ma.DiscoveryAgent.SlaveNetmask)
     fmt.Printf("DiscoveryAgent.SlaveNodeMacAddr : %s\n", ma.DiscoveryAgent.SlaveNodeMacAddr)
 
-    mp, err := msgpack.Marshal(ma)
+    mp, err := MessagePackedMeta(ma)
     if err != nil {
         fmt.Printf(err.Error())
         return

@@ -17,6 +17,20 @@ type PocketMasterAgentMeta struct {
     RsaCryptoSignature     []byte                             `msgpack:"pc_ms_sg, omitempty"`
 }
 
+
+func MessagePackedMeta(meta *PocketMasterAgentMeta) ([]byte, error) {
+    return msgpack.Marshal(meta)
+}
+
+func MessageUnpackedMeta(message []byte) (*PocketMasterAgentMeta, error) {
+    var meta PocketMasterAgentMeta
+    err := msgpack.Unmarshal(message, meta)
+    if err != nil {
+        return nil, err
+    }
+    return &meta, nil
+}
+
 func UnboundedInqueryMeta(respond *PocketMasterDiscoveryRespond) (meta *PocketMasterAgentMeta) {
     meta = &PocketMasterAgentMeta{
         MetaVersion         :MASTER_META_VERSION,
@@ -34,7 +48,7 @@ func IdentityInqueryMeta(command *PocketMasterStatusCommand, pubkey []byte) (met
     return
 }
 
-func SendKeyExchangeMeta(command *PocketMasterStatusCommand, status *slagent.PocketSlaveStatusAgent, aeskey []byte, aescrypto crypt.AESCryptor, rsacrypto crypt.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
+func ExecKeyExchangeMeta(command *PocketMasterStatusCommand, status *slagent.PocketSlaveStatusAgent, aeskey []byte, aescrypto crypt.AESCryptor, rsacrypto crypt.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
     // marshal command
     mc, err := msgpack.Marshal(command)
     if err != nil {

@@ -63,7 +63,7 @@ type PocketMasterDiscoveryRespond struct {
 }
 
 // usd : unbounded slave discovery
-func IdentityInqueryResponder(usd *slagent.PocketSlaveDiscoveryAgent) (responder *PocketMasterDiscoveryRespond, err error) {
+func IdentityInqueryRespond(usd *slagent.PocketSlaveDiscoveryAgent) (responder *PocketMasterDiscoveryRespond, err error) {
     if string(usd.Version) != string(MASTER_DISCOVERY_VERSION) {
         return nil, fmt.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
@@ -100,6 +100,6 @@ func IdentityInqueryResponder(usd *slagent.PocketSlaveDiscoveryAgent) (responder
     return
 }
 
-func BindBrokenCheckResponder() (responder *PocketMasterDiscoveryRespond, err error) {
+func BindBrokenCheckRespond() (responder *PocketMasterDiscoveryRespond, err error) {
     return
 }
