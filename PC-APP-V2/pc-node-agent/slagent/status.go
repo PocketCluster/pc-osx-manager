@@ -20,11 +20,18 @@ type PocketSlaveStatusAgent struct {
     SlaveAddress        string          `msgpack:"pc_sl_i4"`
     SlaveNodeMacAddr    string          `msgpack:"pc_sl_ma"`
     SlaveHardware       string          `msgpack:"pc_sl_hw"`
-    SlaveTimestamp      *time.Time      `msgpack:"pc_sl_ts"`
+    SlaveTimestamp      time.Time       `msgpack:"pc_sl_ts"`
+}
+
+func (ssa *PocketSlaveStatusAgent) IsAppropriateSlaveInfo() bool {
+    if len(ssa.SlaveAddress) == 0 || len(ssa.SlaveNodeMacAddr) == 0 || len(ssa.SlaveHardware) == 0 {
+        return false
+    }
+    return true
 }
 
 // Unbounded
-func InquiredAgent(timestamp *time.Time) (agent *PocketSlaveStatusAgent, err error) {
+func InquiredAgent(timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
     _, gwifname, err := status.GetDefaultIP4Gateway(); if err != nil {
         return nil, err
     }
@@ -47,7 +54,7 @@ func InquiredAgent(timestamp *time.Time) (agent *PocketSlaveStatusAgent, err err
     return
 }
 
-func KeyExchangeAgent(master string, timestamp *time.Time) (agent *PocketSlaveStatusAgent, err error) {
+func KeyExchangeAgent(master string, timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
     _, gwifname, err := status.GetDefaultIP4Gateway(); if err != nil {
         return nil, err
     }
@@ -71,7 +78,7 @@ func KeyExchangeAgent(master string, timestamp *time.Time) (agent *PocketSlaveSt
     return
 }
 
-func SlaveBindReadyAgent(master, nodename string, timestamp *time.Time) (agent *PocketSlaveStatusAgent, err error) {
+func SlaveBindReadyAgent(master, nodename string, timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
     _, gwifname, err := status.GetDefaultIP4Gateway(); if err != nil {
         return nil, err
     }
@@ -96,7 +103,7 @@ func SlaveBindReadyAgent(master, nodename string, timestamp *time.Time) (agent *
     return
 }
 
-func BoundedStatusAgent(master string, timestamp *time.Time) (agent *PocketSlaveStatusAgent, err error) {
+func BoundedStatusAgent(master string, timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
     _, gwifname, err := status.GetDefaultIP4Gateway()
     if err != nil {
         return nil, err

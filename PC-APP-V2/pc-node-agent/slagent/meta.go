@@ -8,10 +8,10 @@ import (
 
 type PocketSlaveAgentMeta struct {
     MetaVersion         MetaProtocol                `msgpack:"pc_sl_pm"`
-    DiscoveryAgent      *PocketSlaveDiscoveryAgent  `msgpack:"pc_sl_ad", inline, omitempty`
-    StatusAgent         *PocketSlaveStatusAgent     `msgpack:"pc_sl_as", inline, omitempty`
-    EncryptedStatus     []byte                      `msgpack:"pc_sl_es", omitempty`
-    SlavePubKey         []byte                      `msgpack:"pc_sl_pk", omitempty`
+    DiscoveryAgent      *PocketSlaveDiscoveryAgent  `msgpack:"pc_sl_ad, inline, omitempty"`
+    StatusAgent         *PocketSlaveStatusAgent     `msgpack:"pc_sl_as, inline, omitempty"`
+    EncryptedStatus     []byte                      `msgpack:"pc_sl_es, omitempty"`
+    SlavePubKey         []byte                      `msgpack:"pc_sl_pk, omitempty"`
 }
 
 func DiscoveryMetaAgent(agent *PocketSlaveDiscoveryAgent) (*PocketSlaveAgentMeta) {

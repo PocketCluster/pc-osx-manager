@@ -14,7 +14,7 @@ func ExampleInquiredStatusAgent() {
         fmt.Printf(err.Error())
         return
     }
-    sa, err := InquiredAgent(&timestmap)
+    sa, err := InquiredAgent(timestmap)
     if err != nil {
         fmt.Printf(err.Error())
         return
@@ -49,7 +49,7 @@ func ExampleBoundedStatusAgent() {
         fmt.Printf(err.Error())
         return
     }
-    sa, err := BoundedStatusAgent("master-yoda", &timestmap)
+    sa, err := BoundedStatusAgent("master-yoda", timestmap)
     if err != nil {
         fmt.Printf(err.Error())
         return

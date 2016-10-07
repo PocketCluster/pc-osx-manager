@@ -1,5 +1,11 @@
 package msagent
 
+import (
+    "github.com/stkim1/pc-node-agent/slagent"
+    "fmt"
+    "github.com/stkim1/pc-core/config"
+)
+
 /*
 #pragma mark - Raspberry Nodes Management
 - (void)setupRaspberryNodes:(NSArray<NSDictionary *> *) aNodesList {
@@ -49,9 +55,51 @@ package msagent
 }
 */
 
-type PocketMasterDiscoveryResponder struct {
+type PocketMasterDiscoveryRespond struct {
     Version                 DiscoveryProtocol      `msgpack:"pc_ms_pd"`
     MasterBoundAgent        string                 `msgpack:"pc_ms_ba"`
     MasterCommandType       CommandType            `msgpack:"pc_ms_ct"`
     MasterAddress           string                 `msgpack:"pc_ms_i4"`
+}
+
+// usd : unbounded slave discovery
+func IdentityInqueryResponder(usd *slagent.PocketSlaveDiscoveryAgent) (responder *PocketMasterDiscoveryRespond, err error) {
+    if string(usd.Version) != string(MASTER_DISCOVERY_VERSION) {
+        return nil, fmt.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
+    }
+    if len(usd.MasterBoundAgent) != 0 {
+        return nil, fmt.Errorf("[ERR] Slave is already bounded to a master")
+    }
+    if usd.SlaveResponse != slagent.SLAVE_LOOKUP_AGENT {
+        return nil, fmt.Errorf("[ERR] Slave is not looking for Master")
+    }
+    if !usd.IsAppropriateSlaveInfo() {
+        return nil, fmt.Errorf("[ERR] Inappropriate Slave information")
+    }
+
+    // TODO : check if this agent could be bound
+
+    sn, err := config.MasterHostSerial()
+    if err != nil {
+        return nil, fmt.Errorf("[ERR] Cannot find out Master serial")
+    }
+    ia, err := config.MasterIPAddress()
+    if err != nil {
+        return nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
+    }
+
+    // TODO : check ip address if this Slave can be bound
+
+    responder = &PocketMasterDiscoveryRespond{
+        Version          :MASTER_DISCOVERY_VERSION,
+        MasterBoundAgent :sn,
+        MasterCommandType:COMMAND_WHO_R_U,
+        MasterAddress    :ia,
+    }
+    err = nil
+    return
+}
+
+func BindBrokenCheckResponder() (responder *PocketMasterDiscoveryRespond, err error) {
+    return
 }

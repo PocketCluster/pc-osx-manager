@@ -4,22 +4,22 @@ package slagent
 // meta protocol scheme & version
 type MetaProtocol string
 const (
-    SLAVE_META_PROTO    MetaProtocol = "pc_sl_pm"
-    SLAVE_META_VERSION  MetaProtocol = "1.0.1"
+    SLAVE_META_PROTO        MetaProtocol = "pc_sl_pm"
+    SLAVE_META_VERSION      MetaProtocol = "1.0.1"
 )
 
 // discovery protocol scheme & version
 type DiscoveryProtocol string
 const (
-    SLAVE_DISCOVER_PROTO   DiscoveryProtocol = "pc_sl_pd"
-    SLAVE_DISCOVER_VERSION DiscoveryProtocol = "1.0.1"
+    SLAVE_DISCOVER_PROTO    DiscoveryProtocol = "pc_sl_pd"
+    SLAVE_DISCOVER_VERSION  DiscoveryProtocol = "1.0.1"
 )
 
 // status protocol scheme & version
 type StatusProtocol string
 const (
-    SLAVE_STATUS_PROTO   StatusProtocol = "pc_sl_ps"
-    SLAVE_STATUS_VERSION StatusProtocol = "1.0.1"
+    SLAVE_STATUS_PROTO      StatusProtocol = "pc_sl_ps"
+    SLAVE_STATUS_VERSION    StatusProtocol = "1.0.1"
 )
 
 // Meta Agent field
@@ -35,29 +35,29 @@ type ResponseType string
 const SLAVE_REPORT_TYPE string = "pc_sl_rt"
 const (
     // slave node looks for a master agent
-    SLAVE_LOOKUP_AGENT   ResponseType = "pc_sl_la"
+    SLAVE_LOOKUP_AGENT      ResponseType = "pc_sl_la"
     // slave node "check me" if i can join
-    SLAVE_WHO_I_AM       ResponseType = "pc_sl_wi"
+    SLAVE_WHO_I_AM          ResponseType = "pc_sl_wi"
     // checking slave node public key
-    SLAVE_SEND_PUBKEY    ResponseType = "pc_sl_sp"
+    SLAVE_SEND_PUBKEY       ResponseType = "pc_sl_sp"
     // slave node ready for binding
-    SLAVE_BIND_READY     ResponseType = "pc_sl_br"
+    SLAVE_BIND_READY        ResponseType = "pc_sl_br"
     // slave node report status to the master agent
-    SLAVE_REPORT_STATUS  ResponseType = "pc_sl_rs"
+    SLAVE_REPORT_STATUS     ResponseType = "pc_sl_rs"
 )
 
 // ------ SLAVE SECTION ------
 const (
-    SLAVE_SECTION       = "slave"
+    SLAVE_SECTION           = "slave"
 
     // slave info
-    SLAVE_HARDWARE      = "pc_sl_hw"
-    SLAVE_NODE_MACADDR  = "pc_sl_ma"
-    SLAVE_NODE_NAME     = "pc_sl_nm"
-    SLAVE_TIMESTAMP     = "pc_sl_ts"
-    SLAVE_IP4_ADDRESS   = "pc_sl_i4"
-    SLAVE_IP6_ADDRESS   = "pc_sl_i6"
-    SLAVE_NAMESERVER    = "pc_sl_ns"
+    SLAVE_HARDWARE          = "pc_sl_hw"
+    SLAVE_NODE_MACADDR      = "pc_sl_ma"
+    SLAVE_NODE_NAME         = "pc_sl_nm"
+    SLAVE_TIMESTAMP         = "pc_sl_ts"
+    SLAVE_IP4_ADDRESS       = "pc_sl_i4"
+    SLAVE_IP6_ADDRESS       = "pc_sl_i6"
+    SLAVE_NAMESERVER        = "pc_sl_ns"
 
     //TODO check if this is really necessary. If we're to manage SSH sessions with a centralized server, this is not needed
     //SLAVE_CLUSTER_MEMBERS = "pc_sl_cl"

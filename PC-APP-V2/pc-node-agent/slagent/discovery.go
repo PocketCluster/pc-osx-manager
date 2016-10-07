@@ -20,6 +20,13 @@ type PocketSlaveDiscoveryAgent struct {
     //SlaveNodeName       string     `bson:"pc_sl_nm,omitempty"
 }
 
+func (sda *PocketSlaveDiscoveryAgent) IsAppropriateSlaveInfo() bool {
+    if len(sda.SlaveAddress) == 0 || len(sda.SlaveGateway) == 0 || len(sda.SlaveNetmask) == 0 || len(sda.SlaveNodeMacAddr) == 0 {
+        return false
+    }
+    return true
+}
+
 func UnboundedBroadcastAgent() (agent *PocketSlaveDiscoveryAgent, err error) {
     gwaddr, gwifname, err := status.GetDefaultIP4Gateway()
     if err != nil {

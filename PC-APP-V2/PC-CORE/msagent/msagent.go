@@ -1,7 +1,5 @@
 package msagent
 
-import "github.com/stkim1/pc-node-agent/slagent"
-
 // ------ VERSION ------
 // meta protocol scheme & version
 type MetaProtocol string
@@ -31,6 +29,8 @@ const (
     MASTER_STATUS_COMMANDER     = "pc_ms_sc"
     MASTER_PUBLIC_KEY           = "pc_ms_pk"
     MASTER_ENCRYPTED_AESKEY     = "pc_ms_ak"
+    MASTER_RSA_SIGNATURE        = "pc_ms_sg"
+    MASTER_ENCRYPTED_SLAVE      = "pc_ms_es"
 )
 
 // ------ COMMAND DEFINITIONS ------
@@ -38,74 +38,25 @@ type CommandType string
 const MASTER_COMMAND_TYPE  string = "pc_ms_ct"
 const (
     COMMAND_WHO_R_U             CommandType = "pc_ms_wr"
-    COMMAND_ASK_PUBKEY          CommandType = "pc_ms_ap"
+    COMMAND_SEND_PUBKEY         CommandType = "pc_ms_sp"
     COMMAND_SEND_AES            CommandType = "pc_ms_sa"
     COMMAND_MASTER_BIND_READY   CommandType = "pc_ms_mr"
     COMMAND_SLAVE_ACK           CommandType = "pc_ms_ak"
+
 )
 
 // ------ MASTER SECTION ------
 const (
-    MASTER_SECTION         = "master"
+    MASTER_SECTION              = "master"
 
     // bound-id
-    MASTER_BOUND_AGENT     = "pc_ms_ba"
+    MASTER_BOUND_AGENT          = "pc_ms_ba"
     // master ip4 / ip6
-    MASTER_IP4_ADDRESS     = "pc_ms_i4"
-    MASTER_IP6_ADDRESS     = "pc_ms_i6"
+    MASTER_IP4_ADDRESS          = "pc_ms_i4"
+    MASTER_IP6_ADDRESS          = "pc_ms_i6"
     // master datetime
-    MASTER_TIMESTAMP       = "pc_ms_ts"
+    MASTER_TIMESTAMP            = "pc_ms_ts"
 
     // TODO : Do we need this?
     //MASTER_HOSTNAME        = "pc_ms_hn"
 )
-
-func MakeWhoruInquery(unboundedDiscovery *slagent.PocketSlaveDiscoveryAgent) (responder *PocketMasterDiscoveryResponder, err error) {
-    // TODO : sanity checker here
-    return &PocketMasterDiscoveryResponder{
-        Version          :MASTER_DISCOVERY_VERSION,
-        MasterBoundAgent :"",
-        MasterCommandType:COMMAND_WHO_R_U,
-        MasterAddress    :"",
-    }, nil
-}
-
-func MakeMasterPubkeyDelivery(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterDiscoveryResponder, err error) {
-    // TODO : sanity checker here
-    return &PocketMasterDiscoveryResponder{
-        Version          :MASTER_DISCOVERY_VERSION,
-        MasterBoundAgent :"",
-        MasterCommandType:COMMAND_WHO_R_U,
-        MasterAddress    :"",
-    }, nil
-}
-
-func ExchangeMasterSlaveKeys(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCommander, err error) {
-    // TODO : sanity checker here
-    return &PocketMasterStatusCommander{
-        Version          :MASTER_DISCOVERY_VERSION,
-        MasterBoundAgent :"",
-        MasterCommandType:COMMAND_WHO_R_U,
-        MasterAddress    :"",
-    }, nil
-}
-
-func CheckMasterSlaveCrypto(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCommander, err error) {
-    // TODO : sanity checker here
-    return &PocketMasterStatusCommander{
-        Version          :MASTER_DISCOVERY_VERSION,
-        MasterBoundAgent :"",
-        MasterCommandType:COMMAND_WHO_R_U,
-        MasterAddress    :"",
-    }, nil
-}
-
-func SendMasterBindReady(unboundedStatus *slagent.PocketSlaveStatusAgent) (collector *PocketMasterStatusCommander, err error) {
-    // TODO : sanity checker here
-    return &PocketMasterStatusCommander{
-        Version          :MASTER_DISCOVERY_VERSION,
-        MasterBoundAgent :"",
-        MasterCommandType:COMMAND_WHO_R_U,
-        MasterAddress    :"",
-    }, nil
-}

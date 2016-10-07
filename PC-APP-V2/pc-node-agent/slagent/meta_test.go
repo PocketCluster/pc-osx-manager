@@ -45,7 +45,7 @@ func ExampleInquiredMetaAgent() {
         fmt.Printf(err.Error())
         return
     }
-    agent, err := InquiredAgent(&timestmap)
+    agent, err := InquiredAgent(timestmap)
     if err != nil {
         fmt.Printf(err.Error())
         return
@@ -97,7 +97,7 @@ func ExampleKeyExchangeMetaAgent() {
         fmt.Printf(err.Error())
         return
     }
-    agent, err := KeyExchangeAgent("master-yoda", &timestmap)
+    agent, err := KeyExchangeAgent("master-yoda", timestmap)
     if err != nil {
         fmt.Printf(err.Error())
         return
@@ -143,7 +143,7 @@ func ExampleSlaveBindReadyAgent() {
         fmt.Printf(err.Error())
         return
     }
-    sa, err := SlaveBindReadyAgent("master-yoda", "jedi-obiwan", &timestmap)
+    sa, err := SlaveBindReadyAgent("master-yoda", "jedi-obiwan", timestmap)
     if err != nil {
         fmt.Printf(err.Error())
         return
@@ -175,7 +175,7 @@ func ExampleBoundedStatusMetaAgent() {
         fmt.Printf(err.Error())
         return
     }
-    sa, err := BoundedStatusAgent("master-yoda", &timestmap)
+    sa, err := BoundedStatusAgent("master-yoda", timestmap)
     if err != nil {
         fmt.Printf(err.Error())
         return
