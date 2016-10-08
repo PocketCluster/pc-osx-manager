@@ -1,0 +1,325 @@
+package slagent
+
+import (
+    "fmt"
+    "time"
+    "github.com/stkim1/pc-node-agent/crypt"
+    //"reflect"
+)
+
+func ExampleUnboundedBroadcastMeta() {
+    ua, err := UnboundedBroadcastAgent()
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    ma := DiscoveryMetaAgent(ua)
+    fmt.Printf("MetaVersion : %v\n",                        ma.MetaVersion)
+    fmt.Printf("DiscoveryAgent.Version : %s\n",             ma.DiscoveryAgent.Version)
+    fmt.Printf("DiscoveryAgent.SlaveResponse : %s\n",       ma.DiscoveryAgent.SlaveResponse)
+    fmt.Printf("DiscoveryAgent.SlaveAddress : %s\n",        ma.DiscoveryAgent.SlaveAddress)
+    fmt.Printf("DiscoveryAgent.SlaveGateway : %s\n",        ma.DiscoveryAgent.SlaveGateway)
+    fmt.Printf("DiscoveryAgent.SlaveNetmask : %s\n",        ma.DiscoveryAgent.SlaveNetmask)
+    fmt.Printf("DiscoveryAgent.SlaveNodeMacAddr : %s\n",    ma.DiscoveryAgent.SlaveNodeMacAddr)
+
+    mp, err := PackedSlaveMeta(ma)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    fmt.Print("------------------\n")
+    fmt.Printf("MsgPack Length : %d\n", len(mp))
+    fmt.Print("------------------\n")
+    up, err := UnpackedSlaveMeta(mp)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    fmt.Printf("MetaVersion : %v\n",                        up.MetaVersion)
+    fmt.Printf("DiscoveryAgent.Version : %s\n",             up.DiscoveryAgent.Version)
+    fmt.Printf("DiscoveryAgent.SlaveResponse : %s\n",       up.DiscoveryAgent.SlaveResponse)
+    fmt.Printf("DiscoveryAgent.SlaveAddress : %s\n",        up.DiscoveryAgent.SlaveAddress)
+    fmt.Printf("DiscoveryAgent.SlaveGateway : %s\n",        up.DiscoveryAgent.SlaveGateway)
+    fmt.Printf("DiscoveryAgent.SlaveNetmask : %s\n",        up.DiscoveryAgent.SlaveNetmask)
+    fmt.Printf("DiscoveryAgent.SlaveNodeMacAddr : %s\n",    up.DiscoveryAgent.SlaveNodeMacAddr)
+    // Output:
+    // MetaVersion : 1.0.1
+    // DiscoveryAgent.Version : 1.0.1
+    // DiscoveryAgent.SlaveResponse : pc_sl_la
+    // DiscoveryAgent.SlaveAddress : 192.168.1.236
+    // DiscoveryAgent.SlaveGateway : 192.168.1.1
+    // DiscoveryAgent.SlaveNetmask : ffffff00
+    // DiscoveryAgent.SlaveNodeMacAddr : ac:bc:32:9a:8d:69
+    // ------------------
+    // MsgPack Length : 183
+    // ------------------
+    // MetaVersion : 1.0.1
+    // DiscoveryAgent.Version : 1.0.1
+    // DiscoveryAgent.SlaveResponse : pc_sl_la
+    // DiscoveryAgent.SlaveAddress : 192.168.1.236
+    // DiscoveryAgent.SlaveGateway : 192.168.1.1
+    // DiscoveryAgent.SlaveNetmask : ffffff00
+    // DiscoveryAgent.SlaveNodeMacAddr : ac:bc:32:9a:8d:69
+}
+
+func ExampleInquiredMetaAgent() {
+    timestmap, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    agent, err := InquiredAgent(timestmap)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    ma, err := InquiredMetaAgent(agent)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+
+    fmt.Printf("MetaVersion : %v\n",                        ma.MetaVersion)
+    fmt.Printf("DiscoveryAgent.Version : %s\n",             ma.StatusAgent.Version)
+    fmt.Printf("DiscoveryAgent.SlaveResponse : %s\n",       ma.StatusAgent.SlaveResponse)
+    fmt.Printf("DiscoveryAgent.SlaveAddress : %s\n",        ma.StatusAgent.SlaveAddress)
+    fmt.Printf("DiscoveryAgent.SlaveNodeMacAddr : %s\n",    ma.StatusAgent.SlaveNodeMacAddr)
+    fmt.Printf("DiscoveryAgent.SlaveHardware : %s\n",       ma.StatusAgent.SlaveHardware)
+    fmt.Printf("DiscoveryAgent.SlaveTimestamp : %s\n",      ma.StatusAgent.SlaveTimestamp)
+    mp, err := PackedSlaveMeta(ma)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    fmt.Print("------------------\n")
+    fmt.Printf("MsgPack Length : %d\n", len(mp))
+    fmt.Print("------------------\n")
+    up, err := UnpackedSlaveMeta(mp)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    fmt.Printf("MetaVersion : %v\n",                        up.MetaVersion)
+    fmt.Printf("DiscoveryAgent.Version : %s\n",             up.StatusAgent.Version)
+    fmt.Printf("DiscoveryAgent.SlaveResponse : %s\n",       up.StatusAgent.SlaveResponse)
+    fmt.Printf("DiscoveryAgent.SlaveAddress : %s\n",        up.StatusAgent.SlaveAddress)
+    fmt.Printf("DiscoveryAgent.SlaveNodeMacAddr : %s\n",    up.StatusAgent.SlaveNodeMacAddr)
+    fmt.Printf("DiscoveryAgent.SlaveHardware : %s\n",       up.StatusAgent.SlaveHardware)
+    fmt.Printf("DiscoveryAgent.SlaveTimestamp : %s\n",      up.StatusAgent.SlaveTimestamp)
+
+    // Output:
+    // MetaVersion : 1.0.1
+    // DiscoveryAgent.Version : 1.0.1
+    // DiscoveryAgent.SlaveResponse : pc_sl_wi
+    // DiscoveryAgent.SlaveAddress : 192.168.1.236
+    // DiscoveryAgent.SlaveNodeMacAddr : ac:bc:32:9a:8d:69
+    // DiscoveryAgent.SlaveHardware : amd64
+    // DiscoveryAgent.SlaveTimestamp : 2012-11-01 22:08:41 +0000 +0000
+    // ------------------
+    // MsgPack Length : 175
+    // ------------------
+    // MetaVersion : 1.0.1
+    // DiscoveryAgent.Version : 1.0.1
+    // DiscoveryAgent.SlaveResponse : pc_sl_wi
+    // DiscoveryAgent.SlaveAddress : 192.168.1.236
+    // DiscoveryAgent.SlaveNodeMacAddr : ac:bc:32:9a:8d:69
+    // DiscoveryAgent.SlaveHardware : amd64
+    // DiscoveryAgent.SlaveTimestamp : 2012-11-02 07:08:41 +0900 KST
+}
+
+// loadTestPublicKey loads an parses a PEM encoded public key file.
+func testPublicKey() []byte {
+    return []byte(`-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCFENGw33yGihy92pDjZQhl0C3
+6rPJj+CvfSC8+q28hxA161QFNUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6
+Z4UMR7EOcpfdUE9Hf3m/hs+FUR45uBJeDK1HSFHD8bHKD6kv8FPGfJTotc+2xjJw
+oYi+1hqp1fIekaxsyQIDAQAB
+-----END PUBLIC KEY-----`)
+}
+
+func ExampleKeyExchangeMetaAgent() {
+    timestmap, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    agent, err := KeyExchangeAgent("master-yoda", timestmap)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+
+    ma, err := KeyExchangeMetaAgent(agent, testPublicKey())
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+
+    fmt.Printf("MetaVersion : %v\n",                        ma.MetaVersion)
+    fmt.Printf("DiscoveryAgent.Version : %s\n",             ma.StatusAgent.Version)
+    fmt.Printf("DiscoveryAgent.SlaveResponse : %s\n",       ma.StatusAgent.SlaveResponse)
+    fmt.Printf("DiscoveryAgent.SlaveAddress : %s\n",        ma.StatusAgent.SlaveAddress)
+    fmt.Printf("DiscoveryAgent.SlaveNodeMacAddr : %s\n",    ma.StatusAgent.SlaveNodeMacAddr)
+    fmt.Printf("DiscoveryAgent.SlaveHardware : %s\n",       ma.StatusAgent.SlaveHardware)
+    fmt.Printf("DiscoveryAgent.SlaveTimestamp : %s\n",      ma.StatusAgent.SlaveTimestamp)
+    mp, err := PackedSlaveMeta(ma)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    up, err := UnpackedSlaveMeta(mp)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    fmt.Print("------------------\n")
+    fmt.Printf("MsgPack Length : %d / Pubkey Length : %d\n", len(mp), len(up.SlavePubKey))
+    fmt.Print("------------------\n")
+    fmt.Printf("MetaVersion : %v\n",                        up.MetaVersion)
+    fmt.Printf("DiscoveryAgent.Version : %s\n",             up.StatusAgent.Version)
+    fmt.Printf("DiscoveryAgent.SlaveResponse : %s\n",       up.StatusAgent.SlaveResponse)
+    fmt.Printf("DiscoveryAgent.SlaveAddress : %s\n",        up.StatusAgent.SlaveAddress)
+    fmt.Printf("DiscoveryAgent.SlaveNodeMacAddr : %s\n",    up.StatusAgent.SlaveNodeMacAddr)
+    fmt.Printf("DiscoveryAgent.SlaveHardware : %s\n",       up.StatusAgent.SlaveHardware)
+    fmt.Printf("DiscoveryAgent.SlaveTimestamp : %s\n",      up.StatusAgent.SlaveTimestamp)
+
+    // Output:
+    // MetaVersion : 1.0.1
+    // DiscoveryAgent.Version : 1.0.1
+    // DiscoveryAgent.SlaveResponse : pc_sl_sp
+    // DiscoveryAgent.SlaveAddress : 192.168.1.236
+    // DiscoveryAgent.SlaveNodeMacAddr : ac:bc:32:9a:8d:69
+    // DiscoveryAgent.SlaveHardware : amd64
+    // DiscoveryAgent.SlaveTimestamp : 2012-11-01 22:08:41 +0000 +0000
+    // ------------------
+    // MsgPack Length : 469 / Pubkey Length : 271
+    // ------------------
+    // MetaVersion : 1.0.1
+    // DiscoveryAgent.Version : 1.0.1
+    // DiscoveryAgent.SlaveResponse : pc_sl_sp
+    // DiscoveryAgent.SlaveAddress : 192.168.1.236
+    // DiscoveryAgent.SlaveNodeMacAddr : ac:bc:32:9a:8d:69
+    // DiscoveryAgent.SlaveHardware : amd64
+    // DiscoveryAgent.SlaveTimestamp : 2012-11-02 07:08:41 +0900 KST
+}
+
+func ExampleSlaveBindReadyAgent() {
+    key := []byte("longer means more possible keys ")
+    timestmap, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
+
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    sa, err := SlaveBindReadyAgent("master-yoda", "jedi-obiwan", timestmap)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    ac, err := crypt.NewAESCrypto(key)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    ma, err := CryptoCheckMetaAgent(sa, ac)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    _, err = PackedSlaveMeta(ma)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+}
+
+
+// becuase the encrypted output differs everytime, we can only check by decrypt it.
+func ExampleBoundedStatusMetaAgent() {
+    key := []byte("longer means more possible keys ")
+    timestmap, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
+
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    sa, err := BoundedStatusAgent("master-yoda", timestmap)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    ac, err := crypt.NewAESCrypto(key)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    ma, err := StatusReportMetaAgent(sa, ac)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    _, err = PackedSlaveMeta(ma)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+}
+
+func ExampleBindBrokenBroadcastMeta() {
+    ba, err := BindBrokenBroadcastAgent("master-yoda")
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    ma := DiscoveryMetaAgent(ba)
+    fmt.Printf("MetaVersion : %v\n",                        ma.MetaVersion)
+    fmt.Printf("DiscoveryAgent.Version : %s\n",             ma.DiscoveryAgent.Version)
+    fmt.Printf("DiscoveryAgent.MasterBoundAgent : %s\n",    ma.DiscoveryAgent.MasterBoundAgent)
+    fmt.Printf("DiscoveryAgent.SlaveResponse : %s\n",       ma.DiscoveryAgent.SlaveResponse)
+    fmt.Printf("DiscoveryAgent.SlaveAddress : %s\n",        ma.DiscoveryAgent.SlaveAddress)
+    fmt.Printf("DiscoveryAgent.SlaveGateway : %s\n",        ma.DiscoveryAgent.SlaveGateway)
+    fmt.Printf("DiscoveryAgent.SlaveNetmask : %s\n",        ma.DiscoveryAgent.SlaveNetmask)
+    fmt.Printf("DiscoveryAgent.SlaveNodeMacAddr : %s\n",    ma.DiscoveryAgent.SlaveNodeMacAddr)
+
+    mp, err := PackedSlaveMeta(ma)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    fmt.Print("------------------\n")
+    fmt.Printf("MsgPack Length : %d\n", len(mp))
+    fmt.Print("------------------\n")
+    up, err := UnpackedSlaveMeta(mp)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    fmt.Printf("MetaVersion : %v\n",                        up.MetaVersion)
+    fmt.Printf("DiscoveryAgent.Version : %s\n",             up.DiscoveryAgent.Version)
+    fmt.Printf("DiscoveryAgent.MasterBoundAgent : %s\n",    ma.DiscoveryAgent.MasterBoundAgent)
+    fmt.Printf("DiscoveryAgent.SlaveResponse : %s\n",       up.DiscoveryAgent.SlaveResponse)
+    fmt.Printf("DiscoveryAgent.SlaveAddress : %s\n",        up.DiscoveryAgent.SlaveAddress)
+    fmt.Printf("DiscoveryAgent.SlaveGateway : %s\n",        up.DiscoveryAgent.SlaveGateway)
+    fmt.Printf("DiscoveryAgent.SlaveNetmask : %s\n",        up.DiscoveryAgent.SlaveNetmask)
+    fmt.Printf("DiscoveryAgent.SlaveNodeMacAddr : %s\n",    up.DiscoveryAgent.SlaveNodeMacAddr)
+    // Output:
+    // MetaVersion : 1.0.1
+    // DiscoveryAgent.Version : 1.0.1
+    // DiscoveryAgent.MasterBoundAgent : master-yoda
+    // DiscoveryAgent.SlaveResponse : pc_sl_la
+    // DiscoveryAgent.SlaveAddress : 192.168.1.236
+    // DiscoveryAgent.SlaveGateway : 192.168.1.1
+    // DiscoveryAgent.SlaveNetmask : ffffff00
+    // DiscoveryAgent.SlaveNodeMacAddr : ac:bc:32:9a:8d:69
+    // ------------------
+    // MsgPack Length : 204
+    // ------------------
+    // MetaVersion : 1.0.1
+    // DiscoveryAgent.Version : 1.0.1
+    // DiscoveryAgent.MasterBoundAgent : master-yoda
+    // DiscoveryAgent.SlaveResponse : pc_sl_la
+    // DiscoveryAgent.SlaveAddress : 192.168.1.236
+    // DiscoveryAgent.SlaveGateway : 192.168.1.1
+    // DiscoveryAgent.SlaveNetmask : ffffff00
+    // DiscoveryAgent.SlaveNodeMacAddr : ac:bc:32:9a:8d:69
+}

@@ -1,0 +1,129 @@
+[
+    {
+        "pkg-ver": "1.0.0",
+        "name": "hadoop",
+        "family": [
+            "hadoop"
+        ],
+        "description": "Apache Hadoop",
+        "versions": [
+            {
+                "ver-num": "2.4.0",
+                "description": "2.4.0",
+                "modes": [
+                    {
+                        "pkg-id": "78b11b92-8714-11e5-af63-feff819cdc9f",
+                        "mode-type": "cluster",
+                        "description": "Multi-nodes Yarn cluster",
+                        "ports": [],
+                        "dep-lib": [],
+                        "dep-bigpkg": [],
+                        "path-download-master": [
+                            "hadoop/2-4-0/namenode/cluster"
+                        ],
+                        "path-download-secondary": [],
+                        "path-download-nodes": [
+                            "hadoop/2-4-0/datanode/cluster"
+                        ],
+                        "path-install-master": [
+                            "hadoop/2-4-0/namenode/cluster/install"
+                        ],
+                        "path-install-secondary": [],
+                        "path-install-nodes": [
+                            "hadoop/2-4-0/datanode/cluster/install"
+                        ],
+                        "path-complete-master": [
+                            "hadoop/2-4-0/namenode/cluster/complete"
+                        ],
+                        "path-complete-secondary": [],
+                        "path-complete-nodes": [],
+                        "script-start": [
+                            "/bigpkg/hadoop-2.4.0/bin/hadoop-start.sh"
+                        ],
+                        "script-stop": [
+                            "/bigpkg/hadoop-2.4.0/bin/hadoop-stop.sh"
+                        ],
+                        "script-cmd": [
+                            "source /pocket/conf/hadoop/2.4.0/cluster/conf.bashrc"
+                        ],
+                        "check-process": [
+                            "SecondaryNameNode",
+                            "ResourceManager",
+                            "NameNode",
+                            "JobHistoryServer"
+                        ],
+                        "cmd-reset-master": [],
+                        "cmd-reset-secondary": [],
+                        "cmd-reset-nodes": [],
+                        "cmd-uninstall-master": [],
+                        "cmd-uninstall-secondary": [],
+                        "cmd-uninstall-nodes": []
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "pkg-ver": "1.0.0",
+        "name": "spark",
+        "family": [
+            "spark"
+        ],
+        "description": "Apache Spark",
+        "versions": [
+            {
+                "ver-num": "1.5.2",
+                "description": "1.5.2",
+                "modes": [
+                    {
+                        "pkg-id": "16effe9e-9346-11e5-8994-feff819cdc9f",
+                        "mode-type": "standalone",
+                        "description": "Standardalone Cluster for Hadoop 2.4.0",
+                        "ports": [],
+                        "dep-lib": [],
+                        "dep-bigpkg": [
+                            "hadoop (>= 2.4.0)"
+                        ],
+                        "path-download-master": [
+                            "spark/1-5-2/master/standalone"
+                        ],
+                        "path-download-secondary": [],
+                        "path-download-nodes": [
+                            "spark/1-5-2/slave/standalone"
+                        ],
+                        "path-install-master": [
+                            "spark/1-5-2/master/standalone/install"
+                        ],
+                        "path-install-secondary": [],
+                        "path-install-nodes": [
+                            "spark/1-5-2/slave/standalone/install"
+                        ],
+                        "path-complete-master": [
+                            "spark/1-5-2/master/standalone/complete"
+                        ],
+                        "path-complete-secondary": [],
+                        "path-complete-nodes": [],
+                        "script-start": [
+                            "/bigpkg/spark-1.5.2-bin-hadoop2.4/bin/spark-start.sh"
+                        ],
+                        "script-stop": [
+                            "/bigpkg/spark-1.5.2-bin-hadoop2.4/bin/spark-stop.sh"
+                        ],
+                        "script-cmd": [
+                            "source /pocket/conf/spark/1.5.2/standalone/conf.bashrc"
+                        ],
+                        "check-process": [
+                            "Master"
+                        ],
+                        "cmd-reset-master": [],
+                        "cmd-reset-secondary": [],
+                        "cmd-reset-nodes": [],
+                        "cmd-uninstall-master": [],
+                        "cmd-uninstall-secondary": [],
+                        "cmd-uninstall-nodes": []
+                    }
+                ]
+            }
+        ]
+    }
+]
