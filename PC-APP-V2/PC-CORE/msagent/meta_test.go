@@ -274,7 +274,7 @@ func TestExecKeyExchangeMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if len(mp) != 633 {
+    if len(mp) != 481 {
         t.Errorf("[ERR] package meta message size [%d] does not match an expectant", len(mp))
         return
     }

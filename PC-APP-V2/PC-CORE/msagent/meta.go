@@ -59,6 +59,10 @@ func ExecKeyExchangeMeta(command *PocketMasterStatusCommand, status *slagent.Poc
     if err != nil {
         return nil, err
     }
+
+    //TODO : since including encrypted status bloats the final meta packet size to 633, we're here to omit it and put encrypted slave name instead
+    //TODO : this should later be looked into again
+/*
     // marshal status
     ms, err := msgpack.Marshal(status)
     if err != nil {
@@ -66,6 +70,12 @@ func ExecKeyExchangeMeta(command *PocketMasterStatusCommand, status *slagent.Poc
     }
     // encrypt the marshaled status with AES
     encryptedStatus, err := aescrypto.Encrypt(ms)
+    if err != nil {
+        return nil, err
+    }
+*/
+    // encrypted slave name
+    encryptedSlaveName, err := aescrypto.Encrypt([]byte(status.SlaveNodeName))
     if err != nil {
         return nil, err
     }
@@ -77,7 +87,7 @@ func ExecKeyExchangeMeta(command *PocketMasterStatusCommand, status *slagent.Poc
     meta = &PocketMasterAgentMeta{
         MetaVersion             :MASTER_META_VERSION,
         EncryptedMasterCommand  :encryptedCommand,
-        EncryptedSlaveStatus    :encryptedStatus,
+        EncryptedSlaveStatus    :encryptedSlaveName, //encryptedStatus,
         EncryptedAESKey         :encryptedAES,
         RsaCryptoSignature      :AESsignature,
     }
