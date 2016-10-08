@@ -24,21 +24,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="rsaencryptor.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/crypt/rsaencryptor.go">
+      <file leaf-file-name="meta.go" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/slagent/meta.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="208">
-              <caret line="17" column="71" selection-start-line="17" selection-start-column="23" selection-end-line="17" selection-end-column="23" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="crypt_test.go" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/crypt/crypt_test.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="699">
-              <caret line="161" column="0" selection-start-line="159" selection-start-column="0" selection-end-line="161" selection-end-column="0" />
+            <state relative-caret-position="555">
+              <caret line="77" column="26" selection-start-line="77" selection-start-column="5" selection-end-line="77" selection-end-column="26" />
               <folding />
             </state>
           </provider>
@@ -101,13 +91,13 @@
         <option value="$PROJECT_DIR$/discovery/transitions.go" />
         <option value="$PROJECT_DIR$/slagent/discovery_test.go" />
         <option value="$PROJECT_DIR$/slagent/status_test.go" />
-        <option value="$PROJECT_DIR$/slagent/status.go" />
         <option value="$PROJECT_DIR$/slagent/slagent.go" />
         <option value="$PROJECT_DIR$/slagent/discovery.go" />
-        <option value="$PROJECT_DIR$/slagent/meta.go" />
         <option value="$PROJECT_DIR$/slagent/meta_test.go" />
         <option value="$PROJECT_DIR$/crypt/rsadecryptor.go" />
         <option value="$PROJECT_DIR$/crypt/rsaencryptor.go" />
+        <option value="$PROJECT_DIR$/slagent/status.go" />
+        <option value="$PROJECT_DIR$/slagent/meta.go" />
       </list>
     </option>
   </component>
@@ -200,20 +190,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="slagent" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="pc-node-agent" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="pc-node-agent" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="crypt" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -600,7 +576,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-1920" y="-157" width="1920" height="1053" extended-state="0" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -916,14 +892,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/GOREPO/src/gopkg.in/vmihailenco/msgpack.v2/decode.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="302">
-          <caret line="31" column="5" selection-start-line="31" selection-start-column="5" selection-end-line="31" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/local/Cellar/go/1.6.2/libexec/src/reflect/value.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="302">
@@ -956,14 +924,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slagent/status.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="21" column="18" selection-start-line="21" selection-start-column="18" selection-end-line="21" selection-end-column="18" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/slagent/discovery.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="752">
@@ -972,22 +932,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slagent/meta.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="320">
-          <caret line="20" column="18" selection-start-line="20" selection-start-column="18" selection-end-line="20" selection-end-column="18" />
-          <folding>
-            <element signature="e#17#119#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/slagent/meta_test.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3568">
           <caret line="223" column="0" selection-start-line="218" selection-start-column="0" selection-end-line="223" selection-end-column="0" />
           <folding>
-            <element signature="e#17#108#0" expanded="true" />
+            <element signature="e#17#108#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1018,8 +968,32 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/crypt/crypt_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="699">
+        <state relative-caret-position="507">
           <caret line="161" column="0" selection-start-line="159" selection-start-column="0" selection-end-line="161" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/GOREPO/src/gopkg.in/vmihailenco/msgpack.v2/decode.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="302">
+          <caret line="31" column="5" selection-start-line="31" selection-start-column="5" selection-end-line="31" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slagent/status.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="480">
+          <caret line="37" column="24" selection-start-line="37" selection-start-column="5" selection-end-line="37" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slagent/meta.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="555">
+          <caret line="77" column="26" selection-start-line="77" selection-start-column="5" selection-end-line="77" selection-end-column="26" />
           <folding />
         </state>
       </provider>

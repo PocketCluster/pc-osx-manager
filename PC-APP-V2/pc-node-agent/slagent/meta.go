@@ -59,7 +59,7 @@ func KeyExchangeMetaAgent(agent *PocketSlaveStatusAgent, pubkey []byte) (meta *P
 
 
 func CryptoCheckMetaAgent(agent *PocketSlaveStatusAgent, aescrypto crypt.AESCryptor) (meta *PocketSlaveAgentMeta, err error) {
-    mp, err := msgpack.Marshal(agent)
+    mp, err := PackedSlaveStatus(agent)
     if err != nil {
         return nil, err
     }
@@ -76,7 +76,7 @@ func CryptoCheckMetaAgent(agent *PocketSlaveStatusAgent, aescrypto crypt.AESCryp
 }
 
 func StatusReportMetaAgent(agent *PocketSlaveStatusAgent, aescrypto crypt.AESCryptor) (meta *PocketSlaveAgentMeta, err error) {
-    mp, err := msgpack.Marshal(agent)
+    mp, err := PackedSlaveStatus(agent)
     if err != nil {
         return nil, err
     }

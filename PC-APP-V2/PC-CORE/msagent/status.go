@@ -90,6 +90,7 @@ func MasterIdentityRevealCommand(uss *slagent.PocketSlaveStatusAgent, timestamp 
     return
 }
 
+// Since this is the first time data gets encrypted, we're to send slave node name, AES key and signature.
 func CryptoKeyAndNameSetCommand(uss *slagent.PocketSlaveStatusAgent, slavename string, timestamp time.Time) (command *PocketMasterStatusCommand, slavestatus *slagent.PocketSlaveStatusAgent, err error) {
     if string(uss.Version) != string(MASTER_DISCOVERY_VERSION) {
         return nil, nil, fmt.Errorf("[ERR] Master <-> Slave Discovery version mismatch")

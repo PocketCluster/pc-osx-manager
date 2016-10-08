@@ -23,12 +23,12 @@ func PackedMasterMeta(meta *PocketMasterAgentMeta) ([]byte, error) {
 }
 
 func UnpackedMasterMeta(message []byte) (*PocketMasterAgentMeta, error) {
-    var meta PocketMasterAgentMeta
+    var meta *PocketMasterAgentMeta
     err := msgpack.Unmarshal(message, &meta)
     if err != nil {
         return nil, err
     }
-    return &meta, nil
+    return meta, nil
 }
 
 func UnboundedInqueryMeta(respond *PocketMasterDiscoveryRespond) (meta *PocketMasterAgentMeta) {
@@ -48,6 +48,8 @@ func IdentityInqueryMeta(command *PocketMasterStatusCommand, pubkey []byte) (met
     return
 }
 
+// AES key is encrypted with RSA for async encryption scheme, and rest of data, EncryptedMasterCommand &
+// EncryptedSlaveStatus, are encrypted with AES
 func ExecKeyExchangeMeta(command *PocketMasterStatusCommand, status *slagent.PocketSlaveStatusAgent, aeskey []byte, aescrypto crypt.AESCryptor, rsacrypto crypt.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
     // marshal command
     mc, err := msgpack.Marshal(command)
@@ -74,7 +76,7 @@ func ExecKeyExchangeMeta(command *PocketMasterStatusCommand, status *slagent.Poc
         return nil, err
     }
 */
-    // encrypted slave name
+    // encrypted slave name with AES
     encryptedSlaveName, err := aescrypto.Encrypt([]byte(status.SlaveNodeName))
     if err != nil {
         return nil, err

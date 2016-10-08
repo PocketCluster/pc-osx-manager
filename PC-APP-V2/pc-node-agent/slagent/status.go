@@ -6,6 +6,7 @@ import (
     "time"
 
     "github.com/stkim1/pc-node-agent/status"
+    "gopkg.in/vmihailenco/msgpack.v2"
 )
 
 type PocketSlaveStatusAgent struct {
@@ -29,6 +30,20 @@ func (ssa *PocketSlaveStatusAgent) IsAppropriateSlaveInfo() bool {
     }
     return true
 }
+
+func PackedSlaveStatus(status *PocketSlaveStatusAgent) ([]byte, error) {
+    return msgpack.Marshal(status)
+}
+
+func UnpackedSlaveStatus(message []byte) (*PocketSlaveStatusAgent, error) {
+    var status *PocketSlaveStatusAgent
+    err := msgpack.Unmarshal(message, &status)
+    if err != nil {
+        return nil, err
+    }
+    return status, err
+}
+
 
 // Unbounded
 func InquiredAgent(timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
