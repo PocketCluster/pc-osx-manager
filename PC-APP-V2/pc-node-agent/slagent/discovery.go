@@ -11,8 +11,8 @@ type PocketSlaveDiscoveryAgent struct {
 
     // slave
     SlaveAddress        string               `msgpack:"pc_sl_i4,omitempty"`
-    SlaveGateway        string               `msgpack:"pc_sl_ma,omitempty"`
-    SlaveNetmask        string               `msgpack:"pc_sl_ma,omitempty"`
+    SlaveGateway        string               `msgpack:"pc_sl_g4,omitempty"`
+    SlaveNetmask        string               `msgpack:"pc_sl_n4,omitempty"`
     SlaveNodeMacAddr    string               `msgpack:"pc_sl_ma"`
 
     // TODO : check if nameserver & node name is really necessary for discovery

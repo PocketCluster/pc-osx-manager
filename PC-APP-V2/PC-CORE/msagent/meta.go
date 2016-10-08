@@ -18,13 +18,13 @@ type PocketMasterAgentMeta struct {
 }
 
 
-func MessagePackedMeta(meta *PocketMasterAgentMeta) ([]byte, error) {
+func PackedMasterMeta(meta *PocketMasterAgentMeta) ([]byte, error) {
     return msgpack.Marshal(meta)
 }
 
-func MessageUnpackedMeta(message []byte) (*PocketMasterAgentMeta, error) {
+func UnpackedMasterMeta(message []byte) (*PocketMasterAgentMeta, error) {
     var meta PocketMasterAgentMeta
-    err := msgpack.Unmarshal(message, meta)
+    err := msgpack.Unmarshal(message, &meta)
     if err != nil {
         return nil, err
     }

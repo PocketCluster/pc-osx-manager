@@ -14,17 +14,17 @@ type PocketSlaveAgentMeta struct {
     SlavePubKey         []byte                      `msgpack:"pc_sl_pk, omitempty"`
 }
 
-func MessagePackedMeta(meta *PocketSlaveAgentMeta) ([]byte, error) {
+func PackedSlaveMeta(meta *PocketSlaveAgentMeta) ([]byte, error) {
     return msgpack.Marshal(meta)
 }
 
-func MessageUnpackedMeta(message []byte) (*PocketSlaveAgentMeta, error) {
-    var meta PocketSlaveAgentMeta
-    err := msgpack.Unmarshal(message, meta)
+func UnpackedSlaveMeta(message []byte) (*PocketSlaveAgentMeta, error) {
+    var meta *PocketSlaveAgentMeta
+    err := msgpack.Unmarshal(message, &meta)
     if err != nil {
         return nil, err
     }
-    return &meta, nil
+    return meta, nil
 }
 
 func DiscoveryMetaAgent(agent *PocketSlaveDiscoveryAgent) (*PocketSlaveAgentMeta) {

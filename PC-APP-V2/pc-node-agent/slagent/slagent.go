@@ -52,12 +52,19 @@ const (
 
     // slave info
     SLAVE_HARDWARE          = "pc_sl_hw"
+
     SLAVE_NODE_MACADDR      = "pc_sl_ma"
     SLAVE_NODE_NAME         = "pc_sl_nm"
     SLAVE_TIMESTAMP         = "pc_sl_ts"
-    SLAVE_IP4_ADDRESS       = "pc_sl_i4"
-    SLAVE_IP6_ADDRESS       = "pc_sl_i6"
     SLAVE_NAMESERVER        = "pc_sl_ns"
+
+    SLAVE_IP4_GATEWAY       = "pc_sl_g4"
+    SLAVE_IP4_ADDRESS       = "pc_sl_i4"
+    SLAVE_IP4_NETMASK       = "pc_sl_n4"
+
+    SLAVE_IP6_GATEWAY       = "pc_sl_g6"
+    SLAVE_IP6_ADDRESS       = "pc_sl_i6"
+    SLAVE_IP6_NETMASK       = "pc_sl_n6"
 
     //TODO check if this is really necessary. If we're to manage SSH sessions with a centralized server, this is not needed
     //SLAVE_CLUSTER_MEMBERS = "pc_sl_cl"
