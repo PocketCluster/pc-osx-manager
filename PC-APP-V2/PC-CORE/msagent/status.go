@@ -112,9 +112,16 @@ func CryptoKeyAndNameSetCommand(uss *slagent.PocketSlaveStatusAgent, slavename s
         return nil, nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
     }
     // make copy of slave status agent & set slave node name
-    *slavestatus = *uss
-    slavestatus.SlaveNodeName = slavename
-
+    slavestatus = &slagent.PocketSlaveStatusAgent{
+        Version:            uss.Version,
+        MasterBoundAgent:   sn,
+        SlaveResponse:      uss.SlaveResponse,
+        SlaveNodeName:      slavename,
+        SlaveAddress:       uss.SlaveAddress,
+        SlaveNodeMacAddr:   uss.SlaveNodeMacAddr,
+        SlaveHardware:      uss.SlaveHardware,
+        SlaveTimestamp:     uss.SlaveTimestamp,
+    }
     command = &PocketMasterStatusCommand{
         Version          :MASTER_STATUS_VERSION,
         MasterBoundAgent :sn,

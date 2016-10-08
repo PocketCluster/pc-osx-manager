@@ -24,14 +24,22 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="meta_test.go" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/slagent/meta_test.go">
+      <file leaf-file-name="rsaencryptor.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/crypt/rsaencryptor.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="16">
-              <caret line="137" column="0" selection-start-line="137" selection-start-column="0" selection-end-line="137" selection-end-column="0" />
-              <folding>
-                <element signature="e#17#108#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="208">
+              <caret line="17" column="71" selection-start-line="17" selection-start-column="23" selection-end-line="17" selection-end-column="23" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="crypt_test.go" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/crypt/crypt_test.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="699">
+              <caret line="161" column="0" selection-start-line="159" selection-start-column="0" selection-end-line="161" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -70,8 +78,6 @@
         <option value="$PROJECT_DIR$/crypt/aescrypto.go" />
         <option value="$PROJECT_DIR$/crypt/signer.go" />
         <option value="$PROJECT_DIR$/crypt/pocketsig.go" />
-        <option value="$PROJECT_DIR$/crypt/rsadecryptor.go" />
-        <option value="$PROJECT_DIR$/crypt/rsaencryptor.go" />
         <option value="$PROJECT_DIR$/status/cpu.go" />
         <option value="$PROJECT_DIR$/status/netifaces.c" />
         <option value="$PROJECT_DIR$/status/net_linux.go" />
@@ -100,6 +106,8 @@
         <option value="$PROJECT_DIR$/slagent/discovery.go" />
         <option value="$PROJECT_DIR$/slagent/meta.go" />
         <option value="$PROJECT_DIR$/slagent/meta_test.go" />
+        <option value="$PROJECT_DIR$/crypt/rsadecryptor.go" />
+        <option value="$PROJECT_DIR$/crypt/rsaencryptor.go" />
       </list>
     </option>
   </component>
@@ -192,6 +200,20 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="slagent" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="pc-node-agent" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="pc-node-agent" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="crypt" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -650,13 +672,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/GOREPO/src/github.com/vishvananda/netlink/route.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="160">
-          <caret line="13" column="5" selection-start-line="13" selection-start-column="5" selection-end-line="13" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/GOREPO/src/github.com/vishvananda/netlink/link.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-8533">
@@ -861,13 +876,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/crypt/crypt.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1680">
-          <caret line="62" column="25" selection-start-line="62" selection-start-column="25" selection-end-line="62" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/discovery/transitions.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1728">
@@ -879,13 +887,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="528">
           <caret line="33" column="0" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/crypt/rsaencryptor.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="64">
-          <caret line="8" column="17" selection-start-line="8" selection-start-column="5" selection-end-line="8" selection-end-column="17" />
+          <folding>
+            <element signature="e#19#40#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -936,14 +940,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/crypt/crypt_test.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="459">
-          <caret line="147" column="0" selection-start-line="144" selection-start-column="0" selection-end-line="147" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/status/net.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
@@ -988,11 +984,43 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/slagent/meta_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="16">
-          <caret line="137" column="0" selection-start-line="137" selection-start-column="0" selection-end-line="137" selection-end-column="0" />
+        <state relative-caret-position="3568">
+          <caret line="223" column="0" selection-start-line="218" selection-start-column="0" selection-end-line="223" selection-end-column="0" />
           <folding>
             <element signature="e#17#108#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crypt/crypt.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="734">
+          <caret line="141" column="30" selection-start-line="141" selection-start-column="11" selection-end-line="141" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crypt/rsadecryptor.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="304">
+          <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crypt/rsaencryptor.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="208">
+          <caret line="17" column="71" selection-start-line="17" selection-start-column="23" selection-end-line="17" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crypt/crypt_test.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="699">
+          <caret line="161" column="0" selection-start-line="159" selection-start-column="0" selection-end-line="161" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
