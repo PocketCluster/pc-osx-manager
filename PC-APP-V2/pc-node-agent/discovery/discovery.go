@@ -2,6 +2,7 @@ package discovery
 
 import (
     "time"
+    "github.com/stkim1/pc-core/msagent"
 )
 
 type SDState int
@@ -22,18 +23,30 @@ const (
     SlaveTransitionIdle
 )
 
-type SlaveDiscovery interface {
-    Unbounded(timestamp *time.Time) (err error)
-    Inquired(timestamp *time.Time) (err error)
-    KeyExchange(timestamp *time.Time) (err error)
-    CryptoCheck(timestamp *time.Time) (err error)
-    Bounded(timestamp *time.Time) (err error)
-    BindBroken(timestamp *time.Time) (err error)
+func (st SDState) String() string {
+    var state string
+    switch st {
+    case SlaveUnbounded:
+        state = "SlaveUnbounded"
+    case SlaveBounded:
+        state = "SlaveBounded"
+    case SlaveBindBroken:
+        state = "SlaveBindBroken"
+    case SlaveInquired:
+        state = "SlaveInquired"
+    case SlaveKeyExchange:
+        state = "SlaveKeyExchange"
+    case SlaveCryptoCheck:
+        state = "SlaveCryptoCheck"
+    case SlaveDiscarded:
+        state = "SlaveDiscarded"
+    }
+    return state
 }
 
-type slaveDiscovery struct {
-    *time.Time
-    discoveryState         SDState
+type SlaveDiscovery interface {
+    CurrentState() SDState
+    TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta) (func (timestamp time.Time) (error))
 }
 
 func NewSlaveDiscovery() (sd SlaveDiscovery) {
@@ -42,3 +55,4 @@ func NewSlaveDiscovery() (sd SlaveDiscovery) {
     }
     return
 }
+
