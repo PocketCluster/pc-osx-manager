@@ -56,15 +56,15 @@ import (
 */
 
 type PocketMasterDiscoveryRespond struct {
-    Version                 DiscoveryProtocol      `msgpack:"pc_ms_pd"`
-    MasterBoundAgent        string                 `msgpack:"pc_ms_ba"`
-    MasterCommandType       CommandType            `msgpack:"pc_ms_ct"`
-    MasterAddress           string                 `msgpack:"pc_ms_i4"`
+    Version           RespondProtocol        `msgpack:"pc_ms_pr"`
+    MasterBoundAgent  string                 `msgpack:"pc_ms_ba"`
+    MasterCommandType CommandType            `msgpack:"pc_ms_ct"`
+    MasterAddress     string                 `msgpack:"pc_ms_i4"`
 }
 
 // usd : unbounded slave discovery
 func IdentityInqueryRespond(usd *slagent.PocketSlaveDiscoveryAgent) (responder *PocketMasterDiscoveryRespond, err error) {
-    if string(usd.Version) != string(MASTER_DISCOVERY_VERSION) {
+    if string(usd.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, fmt.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
     if len(usd.MasterBoundAgent) != 0 {
@@ -91,7 +91,7 @@ func IdentityInqueryRespond(usd *slagent.PocketSlaveDiscoveryAgent) (responder *
     // TODO : check ip address if this Slave can be bound
 
     responder = &PocketMasterDiscoveryRespond{
-        Version          :MASTER_DISCOVERY_VERSION,
+        Version          :MASTER_RESPOND_VERSION,
         MasterBoundAgent :sn,
         MasterCommandType:COMMAND_WHO_R_U,
         MasterAddress    :ia,

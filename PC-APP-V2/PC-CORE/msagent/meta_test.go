@@ -235,13 +235,13 @@ func TestExecKeyExchangeMeta(t *testing.T) {
     }
     // encryptor
     err = ioutil.WriteFile("sendtest.pub", testMasterPublicKey(), os.ModePerm)
-    defer os.Remove("sendtest.pem")
+    defer os.Remove("sendtest.pub")
     if err != nil {
         t.Errorf("Fail to write public key %v", err)
         return
     }
     err = ioutil.WriteFile("sendtest.pem", testMasterPrivateKey(), os.ModePerm)
-    defer os.Remove("sendtest.pub")
+    defer os.Remove("sendtest.pem")
     if err != nil {
         t.Errorf("Fail to write private key %v", err)
         return

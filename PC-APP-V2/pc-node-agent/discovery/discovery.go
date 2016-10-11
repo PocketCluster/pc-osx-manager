@@ -8,11 +8,11 @@ import (
 type SDState int
 const (
     SlaveUnbounded         SDState = iota
-    SlaveBounded
-    SlaveBindBroken
     SlaveInquired
     SlaveKeyExchange
     SlaveCryptoCheck
+    SlaveBounded
+    SlaveBindBroken
     SlaveDiscarded
 )
 
@@ -46,7 +46,7 @@ func (st SDState) String() string {
 
 type SlaveDiscovery interface {
     CurrentState() SDState
-    TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta) (func (timestamp time.Time) (error))
+    TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) error
 }
 
 func NewSlaveDiscovery() (sd SlaveDiscovery) {

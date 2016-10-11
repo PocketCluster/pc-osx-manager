@@ -9,17 +9,17 @@ const (
 )
 
 // discovery protocol scheme & version
-type DiscoveryProtocol string
+type RespondProtocol string
 const (
-    MASTER_DISCOVERY_PROTO      DiscoveryProtocol = "pc_ms_pd"
-    MASTER_DISCOVERY_VERSION    DiscoveryProtocol = "1.0.1"
+    MASTER_RESPOND_PROTO        RespondProtocol = "pc_ms_pr"
+    MASTER_RESPOND_VERSION      RespondProtocol = "1.0.1"
 )
 
 // status protocol scheme & version
-type StatusProtocol string
+type CommandProtocol string
 const (
-    MASTER_STATUS_PROTO         StatusProtocol = "pc_ms_ps"
-    MASTER_STATUS_VERSION       StatusProtocol = "1.0.1"
+    MASTER_COMMAND_PROTO        CommandProtocol = "pc_ms_pc"
+    MASTER_COMMAND_VERSION      CommandProtocol = "1.0.1"
 )
 
 // Discovery & Status tag for meta
