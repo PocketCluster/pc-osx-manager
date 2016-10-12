@@ -86,28 +86,14 @@ func (sd *slaveDiscovery) TranstionWithMasterMeta(meta *msagent.PocketMasterAgen
     case SlaveKeyExchange:
         return sd.keyExchange(meta, timestamp)
 
-    case SlaveCryptoCheck: {
-        if meta.StatusCommand == nil || meta.StatusCommand.Version != msagent.MASTER_COMMAND_VERSION {
-            return fmt.Errorf("[ERR] Null or incorrect version of master command")
-        }
-        if len(meta.EncryptedMasterCommand) == 0 {
-            return fmt.Errorf("[ERR] Null or incorrect encrypted master command")
-        }
-        return nil
-    }
+    case SlaveCryptoCheck:
+        return sd.cryptoCheck(meta, timestamp)
 
-    case SlaveBounded: {
-        if meta.StatusCommand == nil || meta.StatusCommand.Version != msagent.MASTER_COMMAND_VERSION {
-            return fmt.Errorf("[ERR] Null or incorrect version of master command")
-        }
-        if len(meta.EncryptedMasterCommand) == 0 {
-            return fmt.Errorf("[ERR] Null or incorrect encrypted master command")
-        }
-        return nil
-    }
-    case SlaveBindBroken: {
+    case SlaveBounded:
+        return sd.bounded(meta, timestamp)
 
-    }
+    case SlaveBindBroken:
+        return sd.bindBroken(meta, timestamp)
     }
     return fmt.Errorf("[ERR] TranstionWithMasterMeta should never reach default")
 }
@@ -222,7 +208,34 @@ func (sd *slaveDiscovery) keyExchange(meta *msagent.PocketMasterAgentMeta, times
     return
 }
 
-func (sd *slaveDiscovery) cryptoCheck(timestamp time.Time) (err error) {
+func (sd *slaveDiscovery) cryptoCheck(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (err error) {
+    if len(meta.EncryptedMasterCommand) == 0 {
+        return fmt.Errorf("[ERR] Null or incorrect encrypted master command")
+    }
+    // aes decryption of command
+    pckedCmd, err := sd.slaveContext.Decrypt(meta.EncryptedMasterCommand)
+    if err != nil {
+        return
+    }
+    msCmd, err := msagent.UnpackedMasterCommand(pckedCmd)
+    if err != nil {
+        return
+    }
+    msAgent, err := sd.slaveContext.GetMasterAgent()
+    if err != nil {
+        return
+    }
+    if msCmd.MasterBoundAgent != msAgent {
+        return fmt.Errorf("[ERR] Master bound agent is different than commissioned one %s", msAgent)
+    }
+    if msCmd.Version != msagent.MASTER_COMMAND_VERSION {
+        return fmt.Errorf("[ERR] Incorrect version of master command")
+    }
+    // if command is not for exchange key, just ignore
+    if msCmd.MasterCommandType != msagent.COMMAND_MASTER_BIND_READY {
+        return nil
+    }
+
     state, err := stateTransition(sd.discoveryState, func() SDTranstion {
         return SlaveTransitionOk
     })
@@ -233,7 +246,7 @@ func (sd *slaveDiscovery) cryptoCheck(timestamp time.Time) (err error) {
     return
 }
 
-func (sd *slaveDiscovery) bounded(timestamp time.Time) (err error) {
+func (sd *slaveDiscovery) bounded(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (err error) {
     state, err := stateTransition(sd.discoveryState, func() SDTranstion {
         return SlaveTransitionOk
     })
@@ -244,7 +257,7 @@ func (sd *slaveDiscovery) bounded(timestamp time.Time) (err error) {
     return
 }
 
-func (sd *slaveDiscovery) bindBroken(timestamp time.Time) (err error) {
+func (sd *slaveDiscovery) bindBroken(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (err error) {
     state, err := stateTransition(sd.discoveryState, func() SDTranstion {
         return SlaveTransitionOk
     })

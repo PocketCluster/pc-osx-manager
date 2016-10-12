@@ -46,7 +46,7 @@ func UnpackedSlaveStatus(message []byte) (*PocketSlaveStatusAgent, error) {
 
 
 // Unbounded
-func InquiredAgent(timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
+func MasterAnswerInquiryStatus(timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
     _, gwifname, err := status.GetDefaultIP4Gateway(); if err != nil {
         return nil, err
     }
@@ -69,7 +69,7 @@ func InquiredAgent(timestamp time.Time) (agent *PocketSlaveStatusAgent, err erro
     return
 }
 
-func KeyExchangeAgent(master string, timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
+func KeyExchangeStatus(master string, timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
     _, gwifname, err := status.GetDefaultIP4Gateway(); if err != nil {
         return nil, err
     }
@@ -93,7 +93,7 @@ func KeyExchangeAgent(master string, timestamp time.Time) (agent *PocketSlaveSta
     return
 }
 
-func SlaveBindReadyAgent(master, nodename string, timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
+func SlaveBindReadyStatus(master, nodename string, timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
     _, gwifname, err := status.GetDefaultIP4Gateway(); if err != nil {
         return nil, err
     }
@@ -118,7 +118,7 @@ func SlaveBindReadyAgent(master, nodename string, timestamp time.Time) (agent *P
     return
 }
 
-func BoundedStatusAgent(master string, timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
+func SlaveBoundedStatus(master string, timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
     _, gwifname, err := status.GetDefaultIP4Gateway()
     if err != nil {
         return nil, err

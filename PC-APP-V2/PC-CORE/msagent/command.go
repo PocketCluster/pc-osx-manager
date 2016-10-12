@@ -70,7 +70,7 @@ func UnpackedMasterCommand(message []byte) (*PocketMasterStatusCommand, error) {
 }
 
 // usd : unbounded slave state
-func MasterIdentityRevealCommand(uss *slagent.PocketSlaveStatusAgent, timestamp time.Time) (command *PocketMasterStatusCommand, err error) {
+func MasterDeclarationCommand(uss *slagent.PocketSlaveStatusAgent, timestamp time.Time) (command *PocketMasterStatusCommand, err error) {
     if string(uss.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, fmt.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
@@ -105,7 +105,7 @@ func MasterIdentityRevealCommand(uss *slagent.PocketSlaveStatusAgent, timestamp 
 }
 
 // Since this is the first time data gets encrypted, we're to send slave node name, AES key and signature.
-func CryptoKeyAndNameSetCommand(uss *slagent.PocketSlaveStatusAgent, slavename string, timestamp time.Time) (command *PocketMasterStatusCommand, slavestatus *slagent.PocketSlaveStatusAgent, err error) {
+func ExchangeCryptoKeyAndNameCommand(uss *slagent.PocketSlaveStatusAgent, slavename string, timestamp time.Time) (command *PocketMasterStatusCommand, slavestatus *slagent.PocketSlaveStatusAgent, err error) {
     if string(uss.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, nil, fmt.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }

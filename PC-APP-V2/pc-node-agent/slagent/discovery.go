@@ -27,7 +27,7 @@ func (sda *PocketSlaveDiscoveryAgent) IsAppropriateSlaveInfo() bool {
     return true
 }
 
-func UnboundedBroadcastAgent() (agent *PocketSlaveDiscoveryAgent, err error) {
+func UnboundedMasterSearchDiscovery() (agent *PocketSlaveDiscoveryAgent, err error) {
     gwaddr, gwifname, err := status.GetDefaultIP4Gateway()
     if err != nil {
         return nil, err
@@ -53,7 +53,7 @@ func UnboundedBroadcastAgent() (agent *PocketSlaveDiscoveryAgent, err error) {
     return
 }
 
-func BindBrokenBroadcastAgent(master string) (agent *PocketSlaveDiscoveryAgent, err error) {
+func BrokenBindDiscovery(master string) (agent *PocketSlaveDiscoveryAgent, err error) {
     gwaddr, gwifname, err := status.GetDefaultIP4Gateway()
     if err != nil {
         return nil, err

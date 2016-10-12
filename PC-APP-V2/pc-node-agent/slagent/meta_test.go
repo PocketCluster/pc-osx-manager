@@ -13,14 +13,14 @@ import (
 const masterBoundAgentName string = "master-yoda"
 var initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 
-/*
+
 func ExampleUnboundedBroadcastMeta() {
-    ua, err := UnboundedBroadcastAgent()
+    ua, err := UnboundedMasterSearchDiscovery()
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
-    ma := DiscoveryMetaAgent(ua)
+    ma := UnboundedMasterSearchMeta(ua)
     fmt.Printf("MetaVersion : %v\n",                        ma.MetaVersion)
     fmt.Printf("DiscoveryAgent.Version : %s\n",             ma.DiscoveryAgent.Version)
     fmt.Printf("DiscoveryAgent.SlaveResponse : %s\n",       ma.DiscoveryAgent.SlaveResponse)
@@ -75,12 +75,12 @@ func ExampleInquiredMetaAgent() {
         fmt.Printf(err.Error())
         return
     }
-    agent, err := InquiredAgent(timestmap)
+    agent, err := MasterAnswerInquiryStatus(timestmap)
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
-    ma, err := InquiredMetaAgent(agent)
+    ma, err := MasterAnswerInquiryAgent(agent)
     if err != nil {
         fmt.Printf(err.Error())
         return
@@ -133,7 +133,7 @@ func ExampleInquiredMetaAgent() {
     // DiscoveryAgent.SlaveHardware : amd64
     // DiscoveryAgent.SlaveTimestamp : 2012-11-02 07:08:41 +0900 KST
 }
-*/
+
 
 // loadTestPublicKey loads an parses a PEM encoded public key file.
 func testPublicKey() []byte {
@@ -146,13 +146,13 @@ oYi+1hqp1fIekaxsyQIDAQAB
 }
 
 func TestKeyExchangeMetaAgent(t *testing.T) {
-    agent, err := KeyExchangeAgent(masterBoundAgentName, initSendTimestmap)
+    agent, err := KeyExchangeStatus(masterBoundAgentName, initSendTimestmap)
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
 
-    ma, err := KeyExchangeMetaAgent(agent, testPublicKey())
+    ma, err := KeyExchangeMeta(agent, testPublicKey())
     if err != nil {
         fmt.Printf(err.Error())
         return
@@ -208,7 +208,7 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
 
 func TestSlaveBindReadyAgent(t *testing.T) {
     key := []byte("longer means more possible keys ")
-    sa, err := SlaveBindReadyAgent("master-yoda", "jedi-obiwan", initSendTimestmap)
+    sa, err := SlaveBindReadyStatus("master-yoda", "jedi-obiwan", initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -218,7 +218,7 @@ func TestSlaveBindReadyAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    ma, err := CryptoCheckMetaAgent(sa, ac)
+    ma, err := SlaveBindReadyMeta(sa, ac)
     if err != nil {
         t.Error(err.Error())
         return
@@ -234,7 +234,7 @@ func TestSlaveBindReadyAgent(t *testing.T) {
 // becuase the encrypted output differs everytime, we can only check by decrypt it.
 func TestBoundedStatusMetaAgent(t *testing.T) {
     key := []byte("longer means more possible keys ")
-    sa, err := BoundedStatusAgent("master-yoda", initSendTimestmap)
+    sa, err := SlaveBoundedStatus("master-yoda", initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -244,7 +244,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    ma, err := StatusReportMetaAgent(sa, ac)
+    ma, err := SlaveBoundedMeta(sa, ac)
     if err != nil {
         t.Error(err.Error())
         return
@@ -257,12 +257,12 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
 }
 
 func TestBindBrokenBroadcastMeta(t *testing.T) {
-    ba, err := BindBrokenBroadcastAgent("master-yoda")
+    ba, err := BrokenBindDiscovery("master-yoda")
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
-    ma := DiscoveryMetaAgent(ba)
+    ma := BrokenBindMeta(ba)
 
     // test comparison
     gwaddr, gwifname, _ := status.GetDefaultIP4Gateway()

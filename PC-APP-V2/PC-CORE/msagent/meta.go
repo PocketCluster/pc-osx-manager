@@ -31,7 +31,9 @@ func UnpackedMasterMeta(message []byte) (*PocketMasterAgentMeta, error) {
     return meta, nil
 }
 
-func UnboundedInqueryMeta(respond *PocketMasterDiscoveryRespond) (meta *PocketMasterAgentMeta) {
+// --- per-state meta function
+
+func SlaveIdentityInquiryMeta(respond *PocketMasterDiscoveryRespond) (meta *PocketMasterAgentMeta) {
     meta = &PocketMasterAgentMeta{
         MetaVersion         :MASTER_META_VERSION,
         DiscoveryRespond    :respond,
@@ -39,7 +41,7 @@ func UnboundedInqueryMeta(respond *PocketMasterDiscoveryRespond) (meta *PocketMa
     return
 }
 
-func IdentityInqueryMeta(command *PocketMasterStatusCommand, pubkey []byte) (meta *PocketMasterAgentMeta) {
+func MasterDeclarationMeta(command *PocketMasterStatusCommand, pubkey []byte) (meta *PocketMasterAgentMeta) {
     meta = &PocketMasterAgentMeta{
         MetaVersion         :MASTER_META_VERSION,
         StatusCommand       :command,
@@ -50,7 +52,7 @@ func IdentityInqueryMeta(command *PocketMasterStatusCommand, pubkey []byte) (met
 
 // AES key is encrypted with RSA for async encryption scheme, and rest of data, EncryptedMasterCommand &
 // EncryptedSlaveStatus, are encrypted with AES
-func ExecKeyExchangeMeta(command *PocketMasterStatusCommand, status *slagent.PocketSlaveStatusAgent, aeskey []byte, aescrypto crypt.AESCryptor, rsacrypto crypt.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
+func ExchangeCryptoKeyAndNameMeta(command *PocketMasterStatusCommand, status *slagent.PocketSlaveStatusAgent, aeskey []byte, aescrypto crypt.AESCryptor, rsacrypto crypt.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
     // marshal command
     mc, err := msgpack.Marshal(command)
     if err != nil {
@@ -96,7 +98,7 @@ func ExecKeyExchangeMeta(command *PocketMasterStatusCommand, status *slagent.Poc
     return
 }
 
-func SendCryptoCheckMeta(command *PocketMasterStatusCommand, aescrypto crypt.AESCryptor) (meta *PocketMasterAgentMeta, err error) {
+func MasterBindReadyMeta(command *PocketMasterStatusCommand, aescrypto crypt.AESCryptor) (meta *PocketMasterAgentMeta, err error) {
     // marshal command
     mc, err := msgpack.Marshal(command)
     if err != nil {
@@ -114,7 +116,7 @@ func SendCryptoCheckMeta(command *PocketMasterStatusCommand, aescrypto crypt.AES
     return
 }
 
-func BoundedStatusMeta(command *PocketMasterStatusCommand, aescrypto crypt.AESCryptor) (meta *PocketMasterAgentMeta, err error) {
+func BoundedSlaveAckMeta(command *PocketMasterStatusCommand, aescrypto crypt.AESCryptor) (meta *PocketMasterAgentMeta, err error) {
     // marshal command
     mc, err := msgpack.Marshal(command)
     if err != nil {
@@ -132,6 +134,6 @@ func BoundedStatusMeta(command *PocketMasterStatusCommand, aescrypto crypt.AESCr
     return
 }
 
-func BindBrokenMeta() (meta *PocketMasterAgentMeta, err error) {
+func BrokenBindCheckMeta() (meta *PocketMasterAgentMeta, err error) {
     return
 }

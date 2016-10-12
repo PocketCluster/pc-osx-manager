@@ -15,12 +15,12 @@ import (
 
 func ExampleUnboundedInqueryMeta() {
     // Let's Suppose you've received an unbounded inquery from a node over multicast net.
-    ua, err := slagent.UnboundedBroadcastAgent()
+    ua, err := slagent.UnboundedMasterSearchDiscovery()
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
-    psm, err := slagent.PackedSlaveMeta(slagent.DiscoveryMetaAgent(ua))
+    psm, err := slagent.PackedSlaveMeta(slagent.UnboundedMasterSearchMeta(ua))
     if err != nil {
         fmt.Printf(err.Error())
         return
@@ -32,8 +32,8 @@ func ExampleUnboundedInqueryMeta() {
         return
     }
     // TODO : we need ways to identify if what this package is
-    cmd, err := IdentityInqueryRespond(usm.DiscoveryAgent)
-    meta := UnboundedInqueryMeta(cmd)
+    cmd, err := SlaveIdentityInqueryRespond(usm.DiscoveryAgent)
+    meta := SlaveIdentityInquiryMeta(cmd)
     mp, err := PackedMasterMeta(meta)
     if err != nil {
         fmt.Printf(err.Error())
@@ -108,12 +108,12 @@ func ExampleIdentityInqeuryMeta() {
         fmt.Printf(err.Error())
         return
     }
-    agent, err := slagent.InquiredAgent(timestmap)
+    agent, err := slagent.MasterAnswerInquiryStatus(timestmap)
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
-    msa, err := slagent.InquiredMetaAgent(agent)
+    msa, err := slagent.MasterAnswerInquiryAgent(agent)
     if err != nil {
         fmt.Printf(err.Error())
         return
@@ -135,12 +135,12 @@ func ExampleIdentityInqeuryMeta() {
         fmt.Printf(err.Error())
         return
     }
-    cmd, err := MasterIdentityRevealCommand(usm.StatusAgent, timestmap)
+    cmd, err := MasterDeclarationCommand(usm.StatusAgent, timestmap)
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
-    meta := IdentityInqueryMeta(cmd, testMasterPublicKey())
+    meta := MasterDeclarationMeta(cmd, testMasterPublicKey())
     mp, err := PackedMasterMeta(meta)
     if err != nil {
         fmt.Printf(err.Error())
@@ -205,12 +205,12 @@ func TestExecKeyExchangeMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    agent, err := slagent.KeyExchangeAgent(masterAgentName, timestmap)
+    agent, err := slagent.KeyExchangeStatus(masterAgentName, timestmap)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    msa, err := slagent.KeyExchangeMetaAgent(agent, testSlavePublicKey())
+    msa, err := slagent.KeyExchangeMeta(agent, testSlavePublicKey())
     if err != nil {
         t.Error(err.Error())
         return
@@ -258,12 +258,12 @@ func TestExecKeyExchangeMeta(t *testing.T) {
         return
     }
     // responding commnad
-    cmd, slvstat, err := CryptoKeyAndNameSetCommand(usm.StatusAgent, slaveNodeName, timestmap)
+    cmd, slvstat, err := ExchangeCryptoKeyAndNameCommand(usm.StatusAgent, slaveNodeName, timestmap)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    meta, err := ExecKeyExchangeMeta(cmd, slvstat, aeskey, aesenc, rsaenc)
+    meta, err := ExchangeCryptoKeyAndNameMeta(cmd, slvstat, aeskey, aesenc, rsaenc)
     if err != nil {
         t.Error(err.Error())
         return
@@ -316,12 +316,12 @@ func TestSendCryptoCheckMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    agent, err := slagent.SlaveBindReadyAgent(masterAgentName, slaveNodeName, timestmap)
+    agent, err := slagent.SlaveBindReadyStatus(masterAgentName, slaveNodeName, timestmap)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    msa, err := slagent.CryptoCheckMetaAgent(agent, aesenc)
+    msa, err := slagent.SlaveBindReadyMeta(agent, aesenc)
     if err != nil {
         t.Error(err.Error())
         return
@@ -362,7 +362,7 @@ func TestSendCryptoCheckMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    meta, err := SendCryptoCheckMeta(cmd, aesenc)
+    meta, err := MasterBindReadyMeta(cmd, aesenc)
     if err != nil {
         t.Error(err.Error())
         return
@@ -403,12 +403,12 @@ func TestBoundedStatusMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    agent, err := slagent.BoundedStatusAgent(masterAgentName, timestmap)
+    agent, err := slagent.SlaveBoundedStatus(masterAgentName, timestmap)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    msa, err := slagent.StatusReportMetaAgent(agent, aesenc)
+    msa, err := slagent.SlaveBoundedMeta(agent, aesenc)
     if err != nil {
         t.Error(err.Error())
         return
@@ -449,7 +449,7 @@ func TestBoundedStatusMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    meta, err := BoundedStatusMeta(cmd, aesenc)
+    meta, err := BoundedSlaveAckMeta(cmd, aesenc)
     if err != nil {
         t.Error(err.Error())
         return

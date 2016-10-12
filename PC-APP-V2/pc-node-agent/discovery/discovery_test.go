@@ -95,11 +95,11 @@ yHP1nQ1E0mWOV5sWcNJnU8ZhJt3M2pxhGp7bRGl2c8FxhAvWyYSRXtOILremUAhN
 
 func masterIdentityInqueryRespond() (meta *msagent.PocketMasterAgentMeta, err error) {
     // ------------- Let's Suppose you've sent an unbounded inquery from a node over multicast net ---------------------
-    ua, err := slagent.UnboundedBroadcastAgent()
+    ua, err := slagent.UnboundedMasterSearchDiscovery()
     if err != nil {
         return
     }
-    psm, err := slagent.PackedSlaveMeta(slagent.DiscoveryMetaAgent(ua))
+    psm, err := slagent.PackedSlaveMeta(slagent.UnboundedMasterSearchMeta(ua))
     if err != nil {
         return
     }
@@ -108,37 +108,37 @@ func masterIdentityInqueryRespond() (meta *msagent.PocketMasterAgentMeta, err er
     if err != nil {
         return
     }
-    cmd, err := msagent.IdentityInqueryRespond(usm.DiscoveryAgent)
+    cmd, err := msagent.SlaveIdentityInqueryRespond(usm.DiscoveryAgent)
     if err != nil {
         return
     }
-    meta = msagent.UnboundedInqueryMeta(cmd)
+    meta = msagent.SlaveIdentityInquiryMeta(cmd)
     return
 }
 
 func masterIdentityFixationRespond() (meta *msagent.PocketMasterAgentMeta, err error) {
-    agent, err := slagent.InquiredAgent(initSendTimestmap)
+    agent, err := slagent.MasterAnswerInquiryStatus(initSendTimestmap)
     if err != nil {
         return
     }
-    msa, err := slagent.InquiredMetaAgent(agent)
+    msa, err := slagent.MasterAnswerInquiryAgent(agent)
     if err != nil {
         return
     }
-    cmd, err := msagent.MasterIdentityRevealCommand(msa.StatusAgent, initSendTimestmap.Add(time.Second))
+    cmd, err := msagent.MasterDeclarationCommand(msa.StatusAgent, initSendTimestmap.Add(time.Second))
     if err != nil {
         return
     }
-    meta = msagent.IdentityInqueryMeta(cmd, testMasterPublicKey())
+    meta = msagent.MasterDeclarationMeta(cmd, testMasterPublicKey())
     return
 }
 
 func masterKeyExchangeCommand() (meta *msagent.PocketMasterAgentMeta, err error) {
-    agent, err := slagent.KeyExchangeAgent(masterBoundAgentName, initSendTimestmap)
+    agent, err := slagent.KeyExchangeStatus(masterBoundAgentName, initSendTimestmap)
     if err != nil {
         return
     }
-    msa, err := slagent.KeyExchangeMetaAgent(agent, testSlavePublicKey())
+    msa, err := slagent.KeyExchangeMeta(agent, testSlavePublicKey())
     if err != nil {
         return
     }
@@ -160,11 +160,44 @@ func masterKeyExchangeCommand() (meta *msagent.PocketMasterAgentMeta, err error)
         return
     }
     // responding commnad
-    cmd, slvstat, err := msagent.CryptoKeyAndNameSetCommand(usm.StatusAgent, slaveNodeName, timestmap)
+    cmd, slvstat, err := msagent.ExchangeCryptoKeyAndNameCommand(usm.StatusAgent, slaveNodeName, timestmap)
     if err != nil {
         return
     }
-    meta, err = msagent.ExecKeyExchangeMeta(cmd, slvstat, aeskey, aesenc, rsaenc)
+    meta, err = msagent.ExchangeCryptoKeyAndNameMeta(cmd, slvstat, aeskey, aesenc, rsaenc)
+    return
+}
+
+func masterCryptoCheckCommand() (meta *msagent.PocketMasterAgentMeta, err error) {
+    agent, err := slagent.SlaveBindReadyStatus(masterBoundAgentName, slaveNodeName, initSendTimestmap)
+    if err != nil {
+        return
+    }
+    msa, err := slagent.SlaveBindReadyMeta(agent, aesenc)
+    if err != nil {
+        return
+    }
+    //-------------- over master, we've received the message ----------------------
+    mdsa, err := aesenc.Decrypt(msa.EncryptedStatus)
+    if err != nil {
+        return
+    }
+    // unmarshaled, slave-status
+    ussa, err := slagent.UnpackedSlaveStatus(mdsa)
+    if err != nil {
+        return
+    }
+    // master preperation
+    timestmap := initSendTimestmap.Add(time.Second)
+    if err != nil {
+        return
+    }
+    // master crypto check state command
+    cmd, err := msagent.MasterBindReadyCommand(ussa, timestmap)
+    if err != nil {
+        return
+    }
+    meta, err = msagent.MasterBindReadyMeta(cmd, aesenc)
     return
 }
 
@@ -253,6 +286,73 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
         return
     }
 
+
+    // Verification
+    if msName, _ := context.GetMasterAgent(); msName != masterBoundAgentName {
+        t.Errorf("[ERR] master node name is setup inappropriately | Current : %s\n", msName)
+        return
+    }
+    if snName, _ := context.GetSlaveNodeName(); snName != slaveNodeName {
+        t.Errorf("[ERR] slave node name is setup inappropriately | Current : %s\n", snName)
+        return
+    }
+    if bytes.Compare(context.GetAESKey(), aeskey) != 0 {
+        t.Errorf("[ERR] slave aes key is setup inappropriately")
+        return
+    }
+}
+
+func TestCryptoCheck_BoundedTransition(t *testing.T) {
+    meta, err := masterIdentityFixationRespond()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    // set to slave discovery state to "Inquired"
+    context := slcontext.DebugSlaveContext(testSlavePublicKey(), testSlavePrivateKey())
+    sd := NewSlaveDiscovery(context)
+    sd.(*slaveDiscovery).discoveryState = SlaveInquired
+
+    // execute state transition
+    if err = sd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 2)); err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+
+    // get master meta with aeskey
+    meta, err = masterKeyExchangeCommand()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    // execute state transition
+    if err = sd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 3)); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if sd.CurrentState() != SlaveCryptoCheck {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", sd.CurrentState().String())
+        return
+    }
+
+    // get master bind ready
+    meta, err = masterCryptoCheckCommand()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    // execute state transition
+    if err = sd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 4)); err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    if sd.CurrentState() != SlaveBounded {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", sd.CurrentState().String())
+        return
+    }
 
     // Verification
     if msName, _ := context.GetMasterAgent(); msName != masterBoundAgentName {
