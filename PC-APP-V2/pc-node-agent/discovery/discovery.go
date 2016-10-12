@@ -49,10 +49,3 @@ type SlaveDiscovery interface {
     TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) error
 }
 
-func NewSlaveDiscovery() (sd SlaveDiscovery) {
-    sd = &slaveDiscovery{
-        discoveryState:SlaveUnbounded,
-    }
-    return
-}
-

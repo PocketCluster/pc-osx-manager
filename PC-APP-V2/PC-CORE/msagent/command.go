@@ -5,6 +5,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
     "fmt"
     "github.com/stkim1/pc-core/config"
+    "gopkg.in/vmihailenco/msgpack.v2"
 )
 
 /*
@@ -53,6 +54,19 @@ type PocketMasterStatusCommand struct {
     MasterCommandType CommandType         `msgpack:"pc_ms_ct"`
     MasterAddress     string              `msgpack:"pc_ms_i4"`
     MasterTimestamp   time.Time           `msgpack:"pc_ms_ts"`
+}
+
+func PackedMasterCommand(meta *PocketMasterStatusCommand) ([]byte, error) {
+    return msgpack.Marshal(meta)
+}
+
+func UnpackedMasterCommand(message []byte) (*PocketMasterStatusCommand, error) {
+    var cmd *PocketMasterStatusCommand
+    err := msgpack.Unmarshal(message, &cmd)
+    if err != nil {
+        return nil, err
+    }
+    return cmd, nil
 }
 
 // usd : unbounded slave state

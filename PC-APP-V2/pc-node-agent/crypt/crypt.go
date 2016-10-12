@@ -68,6 +68,16 @@ func newPrivateKeyFromFile(prvkeyPath string) (*rsaPrivateKey, error) {
     return newPrivateKeyFromKey(rawkey)
 }
 
+func newPrivateKeyFromData(prvkeyData []byte) (*rsaPrivateKey, error) {
+    if len(prvkeyData) == 0 {
+        return nil, fmt.Errorf("[ERR] cannot create private with null data")
+    }
+    rawkey, err := parsePrivateKey(prvkeyData); if err != nil {
+        return nil, fmt.Errorf("[ERR] cannot parse private rawkey %v", err)
+    }
+    return newPrivateKeyFromKey(rawkey)
+}
+
 // Decrypt returns encrypted payload for the given data.
 func (r *rsaPrivateKey) decrypt(data []byte) ([]byte, error) {
     decrypted, err := rsa.DecryptOAEP(r.Hash.New(), rand.Reader, r.PrivateKey, data, []byte("~pc*crypt^pkg!")); if err != nil {
@@ -137,6 +147,16 @@ func newPublicKeyFromFile(pubkeyPath string) (*rsaPublicKey, error) {
         return nil, fmt.Errorf("[ERR] cannot open public key file from %s : %v", pubkeyPath, err)
     }
     rawkey, err := parsePublicKey(data); if err != nil {
+        return nil, fmt.Errorf("[ERR] cannot parse pulic rawkey %v", err)
+    }
+    return newPublicKeyFromKey(rawkey)
+}
+
+func newPublicKeyFromData(pubkeyData []byte) (*rsaPublicKey, error) {
+    if len(pubkeyData) == 0 {
+        return nil, fmt.Errorf("[ERR] cannot create public key with null data")
+    }
+    rawkey, err := parsePublicKey(pubkeyData); if err != nil {
         return nil, fmt.Errorf("[ERR] cannot parse pulic rawkey %v", err)
     }
     return newPublicKeyFromKey(rawkey)
