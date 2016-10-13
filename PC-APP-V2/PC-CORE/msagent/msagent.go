@@ -31,6 +31,7 @@ const (
     MASTER_ENCRYPTED_AESKEY     = "pc_ms_ak"
     MASTER_RSA_SIGNATURE        = "pc_ms_sg"
     MASTER_ENCRYPTED_SLAVE      = "pc_ms_es"
+    MASTER_ENCRYPTED_RESPOND    = "pc_ms_er"
 )
 
 // ------ COMMAND DEFINITIONS ------
@@ -42,6 +43,7 @@ const (
     COMMAND_SEND_AES            CommandType = "pc_ms_sa"
     COMMAND_MASTER_BIND_READY   CommandType = "pc_ms_mr"
     COMMAND_SLAVE_ACK           CommandType = "pc_ms_ak"
+    COMMAND_RECOVER_BIND        CommandType = "pc_ms_rb"
 
 )
 

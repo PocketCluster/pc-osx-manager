@@ -60,13 +60,9 @@ func PackedMasterCommand(meta *PocketMasterStatusCommand) ([]byte, error) {
     return msgpack.Marshal(meta)
 }
 
-func UnpackedMasterCommand(message []byte) (*PocketMasterStatusCommand, error) {
-    var cmd *PocketMasterStatusCommand
-    err := msgpack.Unmarshal(message, &cmd)
-    if err != nil {
-        return nil, err
-    }
-    return cmd, nil
+func UnpackedMasterCommand(message []byte) (command *PocketMasterStatusCommand, err error) {
+    err = msgpack.Unmarshal(message, &command)
+    return
 }
 
 // usd : unbounded slave state

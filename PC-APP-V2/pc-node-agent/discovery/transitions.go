@@ -258,6 +258,49 @@ func (sd *slaveDiscovery) bounded(meta *msagent.PocketMasterAgentMeta, timestamp
 }
 
 func (sd *slaveDiscovery) bindBroken(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (err error) {
+    if len(meta.EncryptedMasterRespond) == 0 {
+        return fmt.Errorf("[ERR] Null or incorrect encrypted master respond")
+    }
+    if len(meta.EncryptedAESKey) == 0 {
+        return fmt.Errorf("[ERR] Null or incorrect AES key from Master command")
+    }
+    if len(meta.RsaCryptoSignature) == 0 {
+        return fmt.Errorf("[ERR] Null or incorrect RSA signature from Master command")
+    }
+
+    aeskey, err := sd.slaveContext.DecryptMessage(meta.EncryptedAESKey, meta.RsaCryptoSignature)
+    if err != nil {
+        return
+    }
+    sd.slaveContext.SetAESKey(aeskey)
+
+    // aes decryption of command
+    pckedRsp, err := sd.slaveContext.Decrypt(meta.EncryptedMasterCommand)
+    if err != nil {
+        return
+    }
+    msRsp, err := msagent.UnpackedMasterRespond(pckedRsp)
+    if err != nil {
+        return
+    }
+
+
+    msAgent, err := sd.slaveContext.GetMasterAgent()
+    if err != nil {
+        return
+    }
+    if msRsp.MasterBoundAgent != msAgent {
+        return fmt.Errorf("[ERR] Master bound agent is different than commissioned one %s", msAgent)
+    }
+    if msRsp.Version != msagent.MASTER_RESPOND_VERSION {
+        return fmt.Errorf("[ERR] Null or incorrect version of master meta")
+    }
+    // if command is not for exchange key, just ignore
+    if msRsp.MasterCommandType != msagent.COMMAND_RECOVER_BIND {
+        return
+    }
+
+
     state, err := stateTransition(sd.discoveryState, func() SDTranstion {
         return SlaveTransitionOk
     })
