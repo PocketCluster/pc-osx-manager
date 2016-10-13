@@ -44,6 +44,7 @@ const (
     COMMAND_MASTER_BIND_READY   CommandType = "pc_ms_mr"
     COMMAND_SLAVE_ACK           CommandType = "pc_ms_ak"
     COMMAND_RECOVER_BIND        CommandType = "pc_ms_rb"
+    COMMAND_MASTER_AWAY         CommandType = "pc_ms_ma"
 )
 
 // ------ MASTER SECTION ------
