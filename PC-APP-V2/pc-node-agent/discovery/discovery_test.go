@@ -81,15 +81,7 @@ func masterIdentityInqueryRespond() (meta *msagent.PocketMasterAgentMeta, err er
     if err != nil {
         return
     }
-    psm, err := slagent.PackedSlaveMeta(slagent.UnboundedMasterSearchMeta(ua))
-    if err != nil {
-        return
-    }
-    // -------------- over master, it's received the message and need to make an inquiry "Who R U"? --------------------
-    usm, err := slagent.UnpackedSlaveMeta(psm)
-    if err != nil {
-        return
-    }
+    usm := slagent.UnboundedMasterSearchMeta(ua)
     cmd, err := msagent.SlaveIdentityInqueryRespond(usm.DiscoveryAgent)
     if err != nil {
         return
@@ -107,6 +99,7 @@ func masterIdentityFixationRespond() (meta *msagent.PocketMasterAgentMeta, err e
     if err != nil {
         return
     }
+    // --- over master side
     cmd, err := msagent.MasterDeclarationCommand(msa.StatusAgent, initSendTimestmap.Add(time.Second))
     if err != nil {
         return
@@ -120,29 +113,20 @@ func masterKeyExchangeCommand() (meta *msagent.PocketMasterAgentMeta, err error)
     if err != nil {
         return
     }
-    msa, err := slagent.KeyExchangeMeta(agent, testSlavePublicKey())
+    sam, err := slagent.KeyExchangeMeta(agent, testSlavePublicKey())
     if err != nil {
         return
     }
-    psm, err := slagent.PackedSlaveMeta(msa)
-    if err != nil {
-        return
-    }
-    //-------------- over master, we've received the message ----------------------
-    // suppose we've sort out what this is.
-    usm, err := slagent.UnpackedSlaveMeta(psm)
-    if err != nil {
-        return
-    }
+    // --- over master side
     // master preperation
     timestmap := initSendTimestmap.Add(time.Second)
     // encryptor
-    rsaenc ,err := crypt.NewEncryptorFromKeyData(usm.SlavePubKey, testMasterPrivateKey())
+    rsaenc ,err := crypt.NewEncryptorFromKeyData(sam.SlavePubKey, testMasterPrivateKey())
     if err != nil {
         return
     }
     // responding commnad
-    cmd, slvstat, err := msagent.ExchangeCryptoKeyAndNameCommand(usm.StatusAgent, slaveNodeName, timestmap)
+    cmd, slvstat, err := msagent.ExchangeCryptoKeyAndNameCommand(sam.StatusAgent, slaveNodeName, timestmap)
     if err != nil {
         return
     }
@@ -184,35 +168,23 @@ func masterCryptoCheckCommand() (meta *msagent.PocketMasterAgentMeta, err error)
 }
 
 func masterBrokenBindRecoveryCommand() (meta *msagent.PocketMasterAgentMeta, err error) {
-    agent, err := slagent.SlaveBindReadyStatus(masterBoundAgentName, slaveNodeName, initSendTimestmap)
+    agent, err := slagent.BrokenBindDiscovery(masterBoundAgentName)
     if err != nil {
         return
     }
-    msa, err := slagent.SlaveBindReadyMeta(agent, aesenc)
-    if err != nil {
-        return
-    }
+    sam := slagent.BrokenBindMeta(agent)
     //-------------- over master, we've received the message ----------------------
-    mdsa, err := aesenc.Decrypt(msa.EncryptedStatus)
-    if err != nil {
-        return
-    }
-    // unmarshaled, slave-status
-    ussa, err := slagent.UnpackedSlaveStatus(mdsa)
-    if err != nil {
-        return
-    }
     // master preperation
-    timestmap := initSendTimestmap.Add(time.Second)
+    cmd, err := msagent.BrokenBindRecoverRespond(sam.DiscoveryAgent)
     if err != nil {
         return
     }
-    // master crypto check state command
-    cmd, err := msagent.MasterBindReadyCommand(ussa, timestmap)
+    // encryptor
+    rsaenc ,err := crypt.NewEncryptorFromKeyData(testSlavePublicKey(), testMasterPrivateKey())
     if err != nil {
         return
     }
-    meta, err = msagent.MasterBindReadyMeta(cmd, aesenc)
+    meta, err = msagent.BrokenBindRecoverMeta(cmd, aeskey, aesenc, rsaenc)
     return
 }
 
@@ -364,6 +336,22 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
         return
     }
 
+    if sd.CurrentState() != SlaveBounded {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", sd.CurrentState().String())
+        return
+    }
+
+    meta, err = masterBrokenBindRecoveryCommand()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    // execute state transition
+    if err = sd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 5)); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    // now broken bind is recovered
     if sd.CurrentState() != SlaveBounded {
         t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", sd.CurrentState().String())
         return
