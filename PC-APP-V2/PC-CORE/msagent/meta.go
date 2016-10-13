@@ -7,15 +7,15 @@ import (
 )
 
 type PocketMasterAgentMeta struct {
-    MetaVersion            MetaProtocol                       `msgpack:"pc_ms_pm"`
-    DiscoveryRespond       *PocketMasterDiscoveryRespond      `msgpack:"pc_ms_dr, inline, omitempty"`
-    StatusCommand          *PocketMasterStatusCommand         `msgpack:"pc_ms_sc, inline, omitempty"`
-    EncryptedMasterCommand []byte                             `msgpack:"pc_ms_ec, omitempty"`
-    EncryptedSlaveStatus   []byte                             `msgpack:"pc_ms_es, omitempty"`
-    MasterPubkey           []byte                             `msgpack:"pc_ms_pk, omitempty"`
-    EncryptedAESKey        []byte                             `msgpack:"pc_ms_ak, omitempty"`
-    RsaCryptoSignature     []byte                             `msgpack:"pc_ms_sg, omitempty"`
-    EncryptedMasterRespond []byte                             `msgpack:"pc_ms_er, omitempty"`
+    MetaVersion               MetaProtocol            `msgpack:"pc_ms_pm"`
+    DiscoveryRespond          *PocketMasterRespond    `msgpack:"pc_ms_dr, inline, omitempty"`
+    StatusCommand             *PocketMasterCommand    `msgpack:"pc_ms_sc, inline, omitempty"`
+    EncryptedMasterCommand    []byte                  `msgpack:"pc_ms_ec, omitempty"`
+    EncryptedSlaveStatus      []byte                  `msgpack:"pc_ms_es, omitempty"`
+    MasterPubkey              []byte                  `msgpack:"pc_ms_pk, omitempty"`
+    EncryptedAESKey           []byte                  `msgpack:"pc_ms_ak, omitempty"`
+    RsaCryptoSignature        []byte                  `msgpack:"pc_ms_sg, omitempty"`
+    EncryptedMasterRespond    []byte                  `msgpack:"pc_ms_er, omitempty"`
 }
 
 
@@ -34,7 +34,7 @@ func UnpackedMasterMeta(message []byte) (*PocketMasterAgentMeta, error) {
 
 // --- per-state meta function
 
-func SlaveIdentityInquiryMeta(respond *PocketMasterDiscoveryRespond) (meta *PocketMasterAgentMeta) {
+func SlaveIdentityInquiryMeta(respond *PocketMasterRespond) (meta *PocketMasterAgentMeta) {
     meta = &PocketMasterAgentMeta{
         MetaVersion         :MASTER_META_VERSION,
         DiscoveryRespond    :respond,
@@ -42,7 +42,7 @@ func SlaveIdentityInquiryMeta(respond *PocketMasterDiscoveryRespond) (meta *Pock
     return
 }
 
-func MasterDeclarationMeta(command *PocketMasterStatusCommand, pubkey []byte) (meta *PocketMasterAgentMeta) {
+func MasterDeclarationMeta(command *PocketMasterCommand, pubkey []byte) (meta *PocketMasterAgentMeta) {
     meta = &PocketMasterAgentMeta{
         MetaVersion         :MASTER_META_VERSION,
         StatusCommand       :command,
@@ -53,7 +53,7 @@ func MasterDeclarationMeta(command *PocketMasterStatusCommand, pubkey []byte) (m
 
 // AES key is encrypted with RSA for async encryption scheme, and rest of data, EncryptedMasterCommand &
 // EncryptedSlaveStatus, are encrypted with AES
-func ExchangeCryptoKeyAndNameMeta(command *PocketMasterStatusCommand, status *slagent.PocketSlaveStatusAgent, aeskey []byte, aescrypto crypt.AESCryptor, rsacrypto crypt.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
+func ExchangeCryptoKeyAndNameMeta(command *PocketMasterCommand, status *slagent.PocketSlaveStatus, aeskey []byte, aescrypto crypt.AESCryptor, rsacrypto crypt.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
     // marshal command
     mc, err := PackedMasterCommand(command)
     if err != nil {
@@ -98,7 +98,7 @@ func ExchangeCryptoKeyAndNameMeta(command *PocketMasterStatusCommand, status *sl
     return
 }
 
-func MasterBindReadyMeta(command *PocketMasterStatusCommand, aescrypto crypt.AESCryptor) (meta *PocketMasterAgentMeta, err error) {
+func MasterBindReadyMeta(command *PocketMasterCommand, aescrypto crypt.AESCryptor) (meta *PocketMasterAgentMeta, err error) {
     // marshal command
     mc, err := PackedMasterCommand(command)
     if err != nil {
@@ -116,7 +116,7 @@ func MasterBindReadyMeta(command *PocketMasterStatusCommand, aescrypto crypt.AES
     return
 }
 
-func BoundedSlaveAckMeta(command *PocketMasterStatusCommand, aescrypto crypt.AESCryptor) (meta *PocketMasterAgentMeta, err error) {
+func BoundedSlaveAckMeta(command *PocketMasterCommand, aescrypto crypt.AESCryptor) (meta *PocketMasterAgentMeta, err error) {
     // marshal command
     mc, err := PackedMasterCommand(command)
     if err != nil {
@@ -134,7 +134,7 @@ func BoundedSlaveAckMeta(command *PocketMasterStatusCommand, aescrypto crypt.AES
     return
 }
 
-func BrokenBindRecoverMeta(respond *PocketMasterDiscoveryRespond, aeskey []byte, aescrypto crypt.AESCryptor, rsacrypto crypt.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
+func BrokenBindRecoverMeta(respond *PocketMasterRespond, aeskey []byte, aescrypto crypt.AESCryptor, rsacrypto crypt.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
     // marshal command
     mr, err := PackedMasterRespond(respond)
     if err != nil {

@@ -38,13 +38,12 @@ const (
 type CommandType string
 const MASTER_COMMAND_TYPE  string = "pc_ms_ct"
 const (
-    COMMAND_WHO_R_U             CommandType = "pc_ms_wr"
-    COMMAND_SEND_PUBKEY         CommandType = "pc_ms_sp"
-    COMMAND_SEND_AES            CommandType = "pc_ms_sa"
+    COMMAND_SLAVE_IDINQUERY     CommandType = "pc_ms_si"
+    COMMAND_MASTER_DECLARE      CommandType = "pc_ms_md"
+    COMMAND_EXCHANGE_CRPTKEY    CommandType = "pc_ms_ck"
     COMMAND_MASTER_BIND_READY   CommandType = "pc_ms_mr"
     COMMAND_SLAVE_ACK           CommandType = "pc_ms_ak"
     COMMAND_RECOVER_BIND        CommandType = "pc_ms_rb"
-
 )
 
 // ------ MASTER SECTION ------

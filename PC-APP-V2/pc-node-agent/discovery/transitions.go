@@ -105,7 +105,7 @@ func (sd *slaveDiscovery) unbounded(meta *msagent.PocketMasterAgentMeta, timesta
         return fmt.Errorf("[ERR] Null or incorrect version of master response")
     }
     // If command is incorrect, it should not be considered as an error and be ignored, although ignoring shouldn't happen.
-    if meta.DiscoveryRespond.MasterCommandType != msagent.COMMAND_WHO_R_U {
+    if meta.DiscoveryRespond.MasterCommandType != msagent.COMMAND_SLAVE_IDINQUERY {
         return nil
     }
     state, err := stateTransition(sd.discoveryState, func() SDTranstion {
@@ -127,7 +127,7 @@ func (sd *slaveDiscovery) inquired(meta *msagent.PocketMasterAgentMeta, timestam
     if meta.MasterPubkey == nil {
         return fmt.Errorf("[ERR] Malformed master command without public key")
     }
-    if meta.StatusCommand.MasterCommandType != msagent.COMMAND_SEND_PUBKEY {
+    if meta.StatusCommand.MasterCommandType != msagent.COMMAND_MASTER_DECLARE {
         return nil
     }
     if err = sd.slaveContext.SetMasterAgent(meta.StatusCommand.MasterBoundAgent); err != nil {
@@ -188,7 +188,7 @@ func (sd *slaveDiscovery) keyExchange(meta *msagent.PocketMasterAgentMeta, times
         return fmt.Errorf("[ERR] Incorrect version of master command")
     }
     // if command is not for exchange key, just ignore
-    if msCmd.MasterCommandType != msagent.COMMAND_SEND_AES {
+    if msCmd.MasterCommandType != msagent.COMMAND_EXCHANGE_CRPTKEY {
         return nil
     }
     nodeName, err := sd.slaveContext.Decrypt(meta.EncryptedSlaveStatus)

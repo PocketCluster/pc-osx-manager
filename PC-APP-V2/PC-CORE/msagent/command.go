@@ -48,7 +48,7 @@ import (
     }];
 }
  */
-type PocketMasterStatusCommand struct {
+type PocketMasterCommand struct {
     Version           CommandProtocol     `msgpack:"pc_ms_pc"`
     MasterBoundAgent  string              `msgpack:"pc_ms_ba"`
     MasterCommandType CommandType         `msgpack:"pc_ms_ct"`
@@ -56,17 +56,17 @@ type PocketMasterStatusCommand struct {
     MasterTimestamp   time.Time           `msgpack:"pc_ms_ts"`
 }
 
-func PackedMasterCommand(meta *PocketMasterStatusCommand) ([]byte, error) {
+func PackedMasterCommand(meta *PocketMasterCommand) ([]byte, error) {
     return msgpack.Marshal(meta)
 }
 
-func UnpackedMasterCommand(message []byte) (command *PocketMasterStatusCommand, err error) {
+func UnpackedMasterCommand(message []byte) (command *PocketMasterCommand, err error) {
     err = msgpack.Unmarshal(message, &command)
     return
 }
 
 // usd : unbounded slave state
-func MasterDeclarationCommand(uss *slagent.PocketSlaveStatusAgent, timestamp time.Time) (command *PocketMasterStatusCommand, err error) {
+func MasterDeclarationCommand(uss *slagent.PocketSlaveStatus, timestamp time.Time) (command *PocketMasterCommand, err error) {
     if string(uss.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, fmt.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
@@ -90,10 +90,10 @@ func MasterDeclarationCommand(uss *slagent.PocketSlaveStatusAgent, timestamp tim
 
     // TODO : check ip address if this Slave can be bound
 
-    command = &PocketMasterStatusCommand{
+    command = &PocketMasterCommand{
         Version          :MASTER_COMMAND_VERSION,
         MasterBoundAgent :sn,
-        MasterCommandType:COMMAND_SEND_PUBKEY,
+        MasterCommandType:COMMAND_MASTER_DECLARE,
         MasterAddress    :ia,
         MasterTimestamp  :timestamp,
     }
@@ -101,7 +101,7 @@ func MasterDeclarationCommand(uss *slagent.PocketSlaveStatusAgent, timestamp tim
 }
 
 // Since this is the first time data gets encrypted, we're to send slave node name, AES key and signature.
-func ExchangeCryptoKeyAndNameCommand(uss *slagent.PocketSlaveStatusAgent, slavename string, timestamp time.Time) (command *PocketMasterStatusCommand, slavestatus *slagent.PocketSlaveStatusAgent, err error) {
+func ExchangeCryptoKeyAndNameCommand(uss *slagent.PocketSlaveStatus, slavename string, timestamp time.Time) (command *PocketMasterCommand, slavestatus *slagent.PocketSlaveStatus, err error) {
     if string(uss.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, nil, fmt.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
@@ -123,7 +123,7 @@ func ExchangeCryptoKeyAndNameCommand(uss *slagent.PocketSlaveStatusAgent, slaven
         return nil, nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
     }
     // make copy of slave status agent & set slave node name
-    slavestatus = &slagent.PocketSlaveStatusAgent{
+    slavestatus = &slagent.PocketSlaveStatus{
         Version:            uss.Version,
         MasterBoundAgent:   sn,
         SlaveResponse:      uss.SlaveResponse,
@@ -133,17 +133,17 @@ func ExchangeCryptoKeyAndNameCommand(uss *slagent.PocketSlaveStatusAgent, slaven
         SlaveHardware:      uss.SlaveHardware,
         SlaveTimestamp:     uss.SlaveTimestamp,
     }
-    command = &PocketMasterStatusCommand{
+    command = &PocketMasterCommand{
         Version          :MASTER_COMMAND_VERSION,
         MasterBoundAgent :sn,
-        MasterCommandType:COMMAND_SEND_AES,
+        MasterCommandType:COMMAND_EXCHANGE_CRPTKEY,
         MasterAddress    :ia,
         MasterTimestamp  :timestamp,
     }
     return
 }
 
-func MasterBindReadyCommand(uss *slagent.PocketSlaveStatusAgent, timestamp time.Time) (command *PocketMasterStatusCommand, err error) {
+func MasterBindReadyCommand(uss *slagent.PocketSlaveStatus, timestamp time.Time) (command *PocketMasterCommand, err error) {
     if string(uss.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, fmt.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
@@ -164,7 +164,7 @@ func MasterBindReadyCommand(uss *slagent.PocketSlaveStatusAgent, timestamp time.
     if err != nil {
         return nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
     }
-    command = &PocketMasterStatusCommand{
+    command = &PocketMasterCommand{
         Version          :MASTER_COMMAND_VERSION,
         MasterBoundAgent :sn,
         MasterCommandType:COMMAND_MASTER_BIND_READY,
@@ -174,7 +174,7 @@ func MasterBindReadyCommand(uss *slagent.PocketSlaveStatusAgent, timestamp time.
     return
 }
 
-func BoundedSlaveAckCommand(uss *slagent.PocketSlaveStatusAgent, timestamp time.Time) (command *PocketMasterStatusCommand, err error) {
+func BoundedSlaveAckCommand(uss *slagent.PocketSlaveStatus, timestamp time.Time) (command *PocketMasterCommand, err error) {
     if string(uss.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, fmt.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
@@ -195,7 +195,7 @@ func BoundedSlaveAckCommand(uss *slagent.PocketSlaveStatusAgent, timestamp time.
     if err != nil {
         return nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
     }
-    command = &PocketMasterStatusCommand{
+    command = &PocketMasterCommand{
         Version          :MASTER_COMMAND_VERSION,
         MasterBoundAgent :sn,
         MasterCommandType:COMMAND_SLAVE_ACK,

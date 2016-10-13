@@ -20,7 +20,6 @@ var aesenc, _ = crypt.NewAESCrypto(aeskey)
 
 var initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 
-
 func testMasterPublicKey() []byte {
     return []byte(`-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCFENGw33yGihy92pDjZQhl0C3
@@ -48,47 +47,30 @@ G6aFKaqQfOXKCyWoUiVknQJAXrlgySFci/2ueKlIE1QqIiLSZ8V8OlpFLRnb1pzI
 -----END RSA PRIVATE KEY-----`)
 }
 
-
 func testSlavePublicKey() []byte {
     return []byte(`-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTd+iJMPFWGUENpOxJsw
-jvZMgW0O/pQXJpN5miRdJcjk7ajBEDoo/NJPf5El60sp3+F+VT82ROab3nQknU5b
-XXfinny0yvC2JNaORzPh7P8UzPGljXgxOfb+++tgEgSFI5WnBeMcima/Ce7M2AxS
-WoAHxmu9AroBc33OMgg7TCpqqyWqbSIlnkizKi7IDopp1F0q92xPQFhFJne9IVDH
-Opxdk8aFik3aWunVOla2olc/Vn+rs+J0i9+Kn8e4bHe0M5kGNx5+P/0OD37XsfVy
-zNGJRIE1O1DIJ2ZHVtole4mtAt3C8d9lUrI7BacLBjDS1iZ/6kksO9Jhr4Lj9u4+
-DQIDAQAB
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCFENGw33yGihy92pDjZQhl0C3
+6rPJj+CvfSC8+q28hxA161QFNUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6
+Z4UMR7EOcpfdUE9Hf3m/hs+FUR45uBJeDK1HSFHD8bHKD6kv8FPGfJTotc+2xjJw
+oYi+1hqp1fIekaxsyQIDAQAB
 -----END PUBLIC KEY-----`)
 }
 
-
 func testSlavePrivateKey() []byte {
     return []byte(`-----BEGIN RSA PRIVATE KEY-----
-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
+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
 -----END RSA PRIVATE KEY-----`)
 }
 
@@ -117,11 +99,11 @@ func masterIdentityInqueryRespond() (meta *msagent.PocketMasterAgentMeta, err er
 }
 
 func masterIdentityFixationRespond() (meta *msagent.PocketMasterAgentMeta, err error) {
-    agent, err := slagent.MasterAnswerInquiryStatus(initSendTimestmap)
+    agent, err := slagent.AnswerMasterInquiryStatus(initSendTimestmap)
     if err != nil {
         return
     }
-    msa, err := slagent.MasterAnswerInquiryAgent(agent)
+    msa, err := slagent.AnswerMasterInquiryMeta(agent)
     if err != nil {
         return
     }
@@ -169,6 +151,39 @@ func masterKeyExchangeCommand() (meta *msagent.PocketMasterAgentMeta, err error)
 }
 
 func masterCryptoCheckCommand() (meta *msagent.PocketMasterAgentMeta, err error) {
+    agent, err := slagent.SlaveBindReadyStatus(masterBoundAgentName, slaveNodeName, initSendTimestmap)
+    if err != nil {
+        return
+    }
+    msa, err := slagent.SlaveBindReadyMeta(agent, aesenc)
+    if err != nil {
+        return
+    }
+    //-------------- over master, we've received the message ----------------------
+    mdsa, err := aesenc.Decrypt(msa.EncryptedStatus)
+    if err != nil {
+        return
+    }
+    // unmarshaled, slave-status
+    ussa, err := slagent.UnpackedSlaveStatus(mdsa)
+    if err != nil {
+        return
+    }
+    // master preperation
+    timestmap := initSendTimestmap.Add(time.Second)
+    if err != nil {
+        return
+    }
+    // master crypto check state command
+    cmd, err := msagent.MasterBindReadyCommand(ussa, timestmap)
+    if err != nil {
+        return
+    }
+    meta, err = msagent.MasterBindReadyMeta(cmd, aesenc)
+    return
+}
+
+func masterBrokenBindRecoveryCommand() (meta *msagent.PocketMasterAgentMeta, err error) {
     agent, err := slagent.SlaveBindReadyStatus(masterBoundAgentName, slaveNodeName, initSendTimestmap)
     if err != nil {
         return

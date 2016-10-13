@@ -19,6 +19,14 @@ import (
 type Signature []byte
 
 //------------------------------------------------ RSA PRIVATE KEY -----------------------------------------------------
+// TODO : Implement stronger encryption key
+// As of now (10/13/2016), 1024-bit keysize is ineffective to defend from malicious attack.
+// But, this is required due to 1) slow slave node processing power (2048-bit key take 19.sec to pass tests on Odroid C2
+// and 2) bloated CryptoKeyExchange packet sent to slave (up to 620 bytes).
+//
+// We can mitigate this with asymmetric key size (i.e. master 2048, slave 1024) in the future.
+
+const rsaKeySize int = 1024
 
 type rsaPrivateKey struct {
     *rsa.PrivateKey
@@ -100,7 +108,6 @@ func (r *rsaPrivateKey) Sign(data []byte) ([]byte, error) {
 }
 
 //------------------------------------------------ RSA PUBLIC KEY ------------------------------------------------------
-
 
 type rsaPublicKey struct {
     *rsa.PublicKey
@@ -188,7 +195,7 @@ func (r *rsaPublicKey) Unsign(message []byte, sig []byte) error {
 
 // GenerateKeyPair make a pair of public and private keys encoded in PEM format
 func GenerateKeyPair(pubKeyPath, prvkeyPath, sshPubkeyPath string) error {
-    privateKey, err := rsa.GenerateKey(rand.Reader, 2048); if err != nil {
+    privateKey, err := rsa.GenerateKey(rand.Reader, rsaKeySize); if err != nil {
         return err
     }
     if err = privateKey.Validate(); err != nil {

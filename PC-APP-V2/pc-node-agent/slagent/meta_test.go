@@ -1,5 +1,5 @@
 package slagent
-
+/*
 import (
     "fmt"
     "time"
@@ -75,12 +75,12 @@ func ExampleInquiredMetaAgent() {
         fmt.Printf(err.Error())
         return
     }
-    agent, err := MasterAnswerInquiryStatus(timestmap)
+    agent, err := AnswerMasterInquiryStatus(timestmap)
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
-    ma, err := MasterAnswerInquiryAgent(agent)
+    ma, err := AnswerMasterInquiryMeta(agent)
     if err != nil {
         fmt.Printf(err.Error())
         return
@@ -331,3 +331,4 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
         t.Errorf("[ERR] Slave MAC address is incorrect %s\n", ma.DiscoveryAgent.SlaveNodeMacAddr)
     }
 }
+*/
