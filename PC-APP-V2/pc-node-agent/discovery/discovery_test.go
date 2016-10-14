@@ -90,8 +90,8 @@ func masterIdentityInqueryRespond() (meta *msagent.PocketMasterAgentMeta, err er
     return
 }
 
-func masterIdentityFixationRespond() (meta *msagent.PocketMasterAgentMeta, err error) {
-    agent, err := slagent.AnswerMasterInquiryStatus(initSendTimestmap)
+func masterIdentityFixationRespond(begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
+    agent, err := slagent.AnswerMasterInquiryStatus(begin)
     if err != nil {
         return
     }
@@ -100,7 +100,7 @@ func masterIdentityFixationRespond() (meta *msagent.PocketMasterAgentMeta, err e
         return
     }
     // --- over master side
-    cmd, err := msagent.MasterDeclarationCommand(msa.StatusAgent, initSendTimestmap.Add(time.Second))
+    cmd, err := msagent.MasterDeclarationCommand(msa.StatusAgent, begin.Add(time.Second))
     if err != nil {
         return
     }
@@ -108,8 +108,8 @@ func masterIdentityFixationRespond() (meta *msagent.PocketMasterAgentMeta, err e
     return
 }
 
-func masterKeyExchangeCommand() (meta *msagent.PocketMasterAgentMeta, err error) {
-    agent, err := slagent.KeyExchangeStatus(masterBoundAgentName, initSendTimestmap)
+func masterKeyExchangeCommand(begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
+    agent, err := slagent.KeyExchangeStatus(masterBoundAgentName, begin)
     if err != nil {
         return
     }
@@ -117,9 +117,8 @@ func masterKeyExchangeCommand() (meta *msagent.PocketMasterAgentMeta, err error)
     if err != nil {
         return
     }
-    // --- over master side
-    // master preperation
-    timestmap := initSendTimestmap.Add(time.Second)
+    // --- over master side ---
+    timestmap := begin.Add(time.Second)
     // encryptor
     rsaenc ,err := crypt.NewEncryptorFromKeyData(sam.SlavePubKey, testMasterPrivateKey())
     if err != nil {
@@ -134,8 +133,8 @@ func masterKeyExchangeCommand() (meta *msagent.PocketMasterAgentMeta, err error)
     return
 }
 
-func masterCryptoCheckCommand() (meta *msagent.PocketMasterAgentMeta, err error) {
-    agent, err := slagent.SlaveBindReadyStatus(masterBoundAgentName, slaveNodeName, initSendTimestmap)
+func masterCryptoCheckCommand(begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
+    agent, err := slagent.SlaveBindReadyStatus(masterBoundAgentName, slaveNodeName, begin)
     if err != nil {
         return
     }
@@ -154,7 +153,7 @@ func masterCryptoCheckCommand() (meta *msagent.PocketMasterAgentMeta, err error)
         return
     }
     // master preperation
-    timestmap := initSendTimestmap.Add(time.Second)
+    timestmap := begin.Add(time.Second)
     if err != nil {
         return
     }
@@ -167,7 +166,7 @@ func masterCryptoCheckCommand() (meta *msagent.PocketMasterAgentMeta, err error)
     return
 }
 
-func masterBrokenBindRecoveryCommand() (meta *msagent.PocketMasterAgentMeta, err error) {
+func masterBrokenBindRecoveryCommand(begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
     agent, err := slagent.BrokenBindDiscovery(masterBoundAgentName)
     if err != nil {
         return
@@ -199,7 +198,7 @@ func TestUnboundedState_InquiredTransition(t *testing.T) {
 
     context := slcontext.DebugSlaveContext(testSlavePublicKey(), testSlavePrivateKey())
     ssd := NewSlaveDiscovery(context)
-    err = ssd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second))
+    err = ssd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 2))
     if err != nil {
         t.Error(err.Error())
         return
@@ -212,7 +211,7 @@ func TestUnboundedState_InquiredTransition(t *testing.T) {
 }
 
 func TestInquired_KeyExchangeTransition(t *testing.T) {
-    meta, err := masterIdentityFixationRespond()
+    meta, err := masterIdentityFixationRespond(initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -235,7 +234,7 @@ func TestInquired_KeyExchangeTransition(t *testing.T) {
 }
 
 func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
-    meta, err := masterIdentityFixationRespond()
+    meta, err := masterIdentityFixationRespond(initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -257,14 +256,14 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
     }
 
     // get master meta with aeskey
-    meta, err = masterKeyExchangeCommand()
+    meta, err = masterKeyExchangeCommand(initSendTimestmap.Add(time.Second * 3))
     if err != nil {
         t.Error(err.Error())
         return
     }
 
     // execute state transition
-    if err = sd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 3)); err != nil {
+    if err = sd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 4)); err != nil {
         t.Error(err.Error())
         return
     }
@@ -290,7 +289,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
 }
 
 func TestCryptoCheck_BoundedTransition(t *testing.T) {
-    meta, err := masterIdentityFixationRespond()
+    meta, err := masterIdentityFixationRespond(initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -308,14 +307,14 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
     }
 
     // get master meta with aeskey
-    meta, err = masterKeyExchangeCommand()
+    meta, err = masterKeyExchangeCommand(initSendTimestmap.Add(time.Second * 3))
     if err != nil {
         t.Error(err.Error())
         return
     }
 
     // execute state transition
-    if err = sd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 3)); err != nil {
+    if err = sd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 4)); err != nil {
         t.Error(err.Error())
         return
     }
@@ -325,13 +324,13 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
     }
 
     // get master bind ready
-    meta, err = masterCryptoCheckCommand()
+    meta, err = masterCryptoCheckCommand(initSendTimestmap.Add(time.Second * 5))
     if err != nil {
         t.Error(err.Error())
         return
     }
     // execute state transition
-    if err = sd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 4)); err != nil {
+    if err = sd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 6)); err != nil {
         t.Error(err.Error())
         return
     }
@@ -341,13 +340,13 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
         return
     }
 
-    meta, err = masterBrokenBindRecoveryCommand()
+    meta, err = masterBrokenBindRecoveryCommand(initSendTimestmap.Add(time.Second * 7))
     if err != nil {
         t.Error(err.Error())
         return
     }
     // execute state transition
-    if err = sd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 5)); err != nil {
+    if err = sd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 8)); err != nil {
         t.Error(err.Error())
         return
     }

@@ -46,6 +46,6 @@ func (st SDState) String() string {
 
 type SlaveDiscovery interface {
     CurrentState() SDState
-    TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) error
+    TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (err error)
 }
 

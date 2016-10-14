@@ -7,11 +7,9 @@ import (
     "github.com/stkim1/pc-node-agent/slcontext"
 )
 
-func stateTransition(currState SDState, nextCondition func() (SDTranstion)) (nextState SDState, err error) {
-    var transtion SDTranstion = nextCondition()
-
+func stateTransition(currState SDState, nextCondition SDTranstion) (nextState SDState, err error) {
     // Succeed to transition to the next
-    if  transtion == SlaveTransitionOk {
+    if  nextCondition == SlaveTransitionOk {
         switch currState {
         case SlaveUnbounded:
             nextState = SlaveInquired
@@ -24,12 +22,12 @@ func stateTransition(currState SDState, nextCondition func() (SDTranstion)) (nex
         case SlaveBindBroken:
             nextState = SlaveBounded
         case SlaveBounded:
-            nextState = currState
+            nextState = SlaveBounded
         default:
-            err = fmt.Errorf("[PANIC] 'nextCondition is true and hit default' cannot happen")
+            err = fmt.Errorf("[ERR] 'nextCondition is true and hit default' cannot happen")
         }
         // Fail to transition to the next
-    } else if transtion == SlaveTransitionFail {
+    } else if nextCondition == SlaveTransitionFail {
         switch currState {
         case SlaveUnbounded:
             nextState = SlaveUnbounded
@@ -44,7 +42,7 @@ func stateTransition(currState SDState, nextCondition func() (SDTranstion)) (nex
         case SlaveBounded:
             nextState = SlaveBindBroken
         default:
-            err = fmt.Errorf("[PANIC] 'nextCondition is false and hit default' cannot happen")
+            err = fmt.Errorf("[ERR] 'nextCondition is false and hit default' cannot happen")
         }
         // Idle
     } else {
@@ -71,7 +69,7 @@ func (sd *slaveDiscovery) CurrentState() SDState {
     return sd.discoveryState
 }
 
-func (sd *slaveDiscovery) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) error {
+func (sd *slaveDiscovery) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (err error) {
     if meta == nil || meta.MetaVersion != msagent.MASTER_META_VERSION {
         return fmt.Errorf("[ERR] Null or incorrect version of master meta")
     }
@@ -108,11 +106,9 @@ func (sd *slaveDiscovery) unbounded(meta *msagent.PocketMasterAgentMeta, timesta
     if meta.DiscoveryRespond.MasterCommandType != msagent.COMMAND_SLAVE_IDINQUERY {
         return nil
     }
-    state, err := stateTransition(sd.discoveryState, func() SDTranstion {
-        return SlaveTransitionOk
-    })
+    state, err := stateTransition(sd.discoveryState, SlaveTransitionOk)
     if err != nil {
-        return err
+        return
     }
     sd.discoveryState = state
     return
@@ -137,11 +133,9 @@ func (sd *slaveDiscovery) inquired(meta *msagent.PocketMasterAgentMeta, timestam
         return
     }
 
-    state, err := stateTransition(sd.discoveryState, func() SDTranstion {
-        return SlaveTransitionOk
-    })
+    state, err := stateTransition(sd.discoveryState, SlaveTransitionOk)
     if err != nil {
-        return err
+        return
     }
     sd.discoveryState = state
     return
@@ -198,11 +192,9 @@ func (sd *slaveDiscovery) keyExchange(meta *msagent.PocketMasterAgentMeta, times
     sd.slaveContext.SetSlaveNodeName(string(nodeName))
 
     // let's make transition
-    state, err := stateTransition(sd.discoveryState, func() SDTranstion {
-        return SlaveTransitionOk
-    })
+    state, err := stateTransition(sd.discoveryState, SlaveTransitionOk)
     if err != nil {
-        return err
+        return
     }
     sd.discoveryState = state
     return
@@ -236,22 +228,18 @@ func (sd *slaveDiscovery) cryptoCheck(meta *msagent.PocketMasterAgentMeta, times
         return nil
     }
 
-    state, err := stateTransition(sd.discoveryState, func() SDTranstion {
-        return SlaveTransitionOk
-    })
+    state, err := stateTransition(sd.discoveryState, SlaveTransitionOk)
     if err != nil {
-        return err
+        return
     }
     sd.discoveryState = state
     return
 }
 
 func (sd *slaveDiscovery) bounded(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (err error) {
-    state, err := stateTransition(sd.discoveryState, func() SDTranstion {
-        return SlaveTransitionOk
-    })
+    state, err := stateTransition(sd.discoveryState, SlaveTransitionOk)
     if err != nil {
-        return err
+        return
     }
     sd.discoveryState = state
     return
@@ -301,11 +289,9 @@ func (sd *slaveDiscovery) bindBroken(meta *msagent.PocketMasterAgentMeta, timest
     }
 
 
-    state, err := stateTransition(sd.discoveryState, func() SDTranstion {
-        return SlaveTransitionOk
-    })
+    state, err := stateTransition(sd.discoveryState, SlaveTransitionOk)
     if err != nil {
-        return err
+        return
     }
     sd.discoveryState = state
     return

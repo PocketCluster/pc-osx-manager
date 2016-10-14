@@ -1,18 +1,18 @@
 package slagent
+
 /*
 import (
     "fmt"
     "time"
-    "github.com/stkim1/pc-node-agent/crypt"
-    //"reflect"
     "testing"
-    "github.com/stkim1/pc-node-agent/status"
     "runtime"
+
+    "github.com/stkim1/pc-node-agent/crypt"
+    "github.com/stkim1/pc-node-agent/status"
 )
 
 const masterBoundAgentName string = "master-yoda"
 var initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
-
 
 func ExampleUnboundedBroadcastMeta() {
     ua, err := UnboundedMasterSearchDiscovery()
@@ -21,6 +21,23 @@ func ExampleUnboundedBroadcastMeta() {
         return
     }
     ma := UnboundedMasterSearchMeta(ua)
+
+    if ma.MetaVersion != SLAVE_META_VERSION {
+    }
+    if ma.DiscoveryAgent.Version != SLAVE_DISCOVER_VERSION {
+    }
+    if ma.DiscoveryAgent.SlaveResponse != SLAVE_LOOKUP_AGENT {
+    }
+    if ma.DiscoveryAgent.SlaveAddress != ""{
+    }
+    if ma.DiscoveryAgent.SlaveGateway != "" {
+    }
+    if ma.DiscoveryAgent.SlaveNetmask != "" {
+    }
+    if ma.DiscoveryAgent.SlaveNodeMacAddr != "" {
+    }
+
+
     fmt.Printf("MetaVersion : %v\n",                        ma.MetaVersion)
     fmt.Printf("DiscoveryAgent.Version : %s\n",             ma.DiscoveryAgent.Version)
     fmt.Printf("DiscoveryAgent.SlaveResponse : %s\n",       ma.DiscoveryAgent.SlaveResponse)

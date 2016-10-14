@@ -23,13 +23,9 @@ func PackedMasterMeta(meta *PocketMasterAgentMeta) ([]byte, error) {
     return msgpack.Marshal(meta)
 }
 
-func UnpackedMasterMeta(message []byte) (*PocketMasterAgentMeta, error) {
-    var meta *PocketMasterAgentMeta
-    err := msgpack.Unmarshal(message, &meta)
-    if err != nil {
-        return nil, err
-    }
-    return meta, nil
+func UnpackedMasterMeta(message []byte) (meta *PocketMasterAgentMeta, err error) {
+    err = msgpack.Unmarshal(message, &meta)
+    return
 }
 
 // --- per-state meta function
