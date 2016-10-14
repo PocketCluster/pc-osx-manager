@@ -66,6 +66,22 @@ func (mm *masterManagement) CurrentState() MMState {
 }
 
 func (mm *masterManagement) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
+    switch mm.managmentState {
+    case MasterUnbounded:
+        return mm.unbounded(meta, timestamp)
+    case MasterInquired:
+        return mm.inquired(meta, timestamp)
+    case MasterKeyExchange:
+        return mm.keyExchange(meta, timestamp)
+    case MasterCryptoCheck:
+        return mm.cryptoCheck(meta, timestamp)
+    case MasterBounded:
+        return mm.bounded(meta, timestamp)
+    case MasterBindBroken:
+        return mm.bindBroken(meta, timestamp)
+    default:
+        err = fmt.Errorf("[ERR] managmentState cannot default")
+    }
     return
 }
 
