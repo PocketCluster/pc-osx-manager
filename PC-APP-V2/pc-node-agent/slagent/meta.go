@@ -8,8 +8,8 @@ import (
 
 type PocketSlaveAgentMeta struct {
     MetaVersion         MetaProtocol                `msgpack:"pc_sl_pm"`
-    DiscoveryAgent      *PocketSlaveDiscoveryAgent  `msgpack:"pc_sl_ad, inline, omitempty"`
-    StatusAgent         *PocketSlaveStatusAgent     `msgpack:"pc_sl_as, inline, omitempty"`
+    DiscoveryAgent      *PocketSlaveDiscovery  `msgpack:"pc_sl_ad, inline, omitempty"`
+    StatusAgent         *PocketSlaveStatus     `msgpack:"pc_sl_as, inline, omitempty"`
     EncryptedStatus     []byte                      `msgpack:"pc_sl_es, omitempty"`
     SlavePubKey         []byte                      `msgpack:"pc_sl_pk, omitempty"`
 }
@@ -27,14 +27,16 @@ func UnpackedSlaveMeta(message []byte) (*PocketSlaveAgentMeta, error) {
     return meta, nil
 }
 
-func DiscoveryMetaAgent(agent *PocketSlaveDiscoveryAgent) (*PocketSlaveAgentMeta) {
+// --- per-state meta funcs
+
+func UnboundedMasterSearchMeta(agent *PocketSlaveDiscovery) (*PocketSlaveAgentMeta) {
     return &PocketSlaveAgentMeta{
         MetaVersion:    SLAVE_META_VERSION,
         DiscoveryAgent: agent,
     }
 }
 
-func InquiredMetaAgent(agent *PocketSlaveStatusAgent) (meta *PocketSlaveAgentMeta, err error) {
+func AnswerMasterInquiryMeta(agent *PocketSlaveStatus) (meta *PocketSlaveAgentMeta, err error) {
     meta = &PocketSlaveAgentMeta{
         MetaVersion: SLAVE_META_VERSION,
         StatusAgent: agent,
@@ -43,7 +45,7 @@ func InquiredMetaAgent(agent *PocketSlaveStatusAgent) (meta *PocketSlaveAgentMet
     return
 }
 
-func KeyExchangeMetaAgent(agent *PocketSlaveStatusAgent, pubkey []byte) (meta *PocketSlaveAgentMeta, err error) {
+func KeyExchangeMeta(agent *PocketSlaveStatus, pubkey []byte) (meta *PocketSlaveAgentMeta, err error) {
     if pubkey == nil {
         err = fmt.Errorf("[ERR] You cannot pass an empty pubkey")
         return
@@ -58,7 +60,7 @@ func KeyExchangeMetaAgent(agent *PocketSlaveStatusAgent, pubkey []byte) (meta *P
 }
 
 
-func CryptoCheckMetaAgent(agent *PocketSlaveStatusAgent, aescrypto crypt.AESCryptor) (meta *PocketSlaveAgentMeta, err error) {
+func SlaveBindReadyMeta(agent *PocketSlaveStatus, aescrypto crypt.AESCryptor) (meta *PocketSlaveAgentMeta, err error) {
     mp, err := PackedSlaveStatus(agent)
     if err != nil {
         return nil, err
@@ -75,7 +77,7 @@ func CryptoCheckMetaAgent(agent *PocketSlaveStatusAgent, aescrypto crypt.AESCryp
     return
 }
 
-func StatusReportMetaAgent(agent *PocketSlaveStatusAgent, aescrypto crypt.AESCryptor) (meta *PocketSlaveAgentMeta, err error) {
+func SlaveBoundedMeta(agent *PocketSlaveStatus, aescrypto crypt.AESCryptor) (meta *PocketSlaveAgentMeta, err error) {
     mp, err := PackedSlaveStatus(agent)
     if err != nil {
         return nil, err
@@ -90,4 +92,11 @@ func StatusReportMetaAgent(agent *PocketSlaveStatusAgent, aescrypto crypt.AESCry
     }
     err = nil
     return
+}
+
+func BrokenBindMeta(agent *PocketSlaveDiscovery) (*PocketSlaveAgentMeta) {
+    return &PocketSlaveAgentMeta{
+        MetaVersion:    SLAVE_META_VERSION,
+        DiscoveryAgent: agent,
+    }
 }

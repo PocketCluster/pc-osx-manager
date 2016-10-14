@@ -19,6 +19,14 @@ import (
 type Signature []byte
 
 //------------------------------------------------ RSA PRIVATE KEY -----------------------------------------------------
+// TODO : Implement stronger encryption key
+// As of now (10/13/2016), 1024-bit keysize is ineffective to defend from malicious attack.
+// But, this is required due to 1) slow slave node processing power (2048-bit key take 19.sec to pass tests on Odroid C2
+// and 2) bloated CryptoKeyExchange packet sent to slave (up to 620 bytes).
+//
+// We can mitigate this with asymmetric key size (i.e. master 2048, slave 1024) in the future.
+
+const rsaKeySize int = 1024
 
 type rsaPrivateKey struct {
     *rsa.PrivateKey
@@ -68,6 +76,16 @@ func newPrivateKeyFromFile(prvkeyPath string) (*rsaPrivateKey, error) {
     return newPrivateKeyFromKey(rawkey)
 }
 
+func newPrivateKeyFromData(prvkeyData []byte) (*rsaPrivateKey, error) {
+    if len(prvkeyData) == 0 {
+        return nil, fmt.Errorf("[ERR] cannot create private with null data")
+    }
+    rawkey, err := parsePrivateKey(prvkeyData); if err != nil {
+        return nil, fmt.Errorf("[ERR] cannot parse private rawkey %v", err)
+    }
+    return newPrivateKeyFromKey(rawkey)
+}
+
 // Decrypt returns encrypted payload for the given data.
 func (r *rsaPrivateKey) decrypt(data []byte) ([]byte, error) {
     decrypted, err := rsa.DecryptOAEP(r.Hash.New(), rand.Reader, r.PrivateKey, data, []byte("~pc*crypt^pkg!")); if err != nil {
@@ -90,7 +108,6 @@ func (r *rsaPrivateKey) Sign(data []byte) ([]byte, error) {
 }
 
 //------------------------------------------------ RSA PUBLIC KEY ------------------------------------------------------
-
 
 type rsaPublicKey struct {
     *rsa.PublicKey
@@ -142,6 +159,16 @@ func newPublicKeyFromFile(pubkeyPath string) (*rsaPublicKey, error) {
     return newPublicKeyFromKey(rawkey)
 }
 
+func newPublicKeyFromData(pubkeyData []byte) (*rsaPublicKey, error) {
+    if len(pubkeyData) == 0 {
+        return nil, fmt.Errorf("[ERR] cannot create public key with null data")
+    }
+    rawkey, err := parsePublicKey(pubkeyData); if err != nil {
+        return nil, fmt.Errorf("[ERR] cannot parse pulic rawkey %v", err)
+    }
+    return newPublicKeyFromKey(rawkey)
+}
+
 // Encrypt returns encrypted payload for the given data.
 func (r *rsaPublicKey) encrypt(data []byte) ([]byte, error) {
     // The label parameter must be the same for decrypt function
@@ -168,7 +195,7 @@ func (r *rsaPublicKey) Unsign(message []byte, sig []byte) error {
 
 // GenerateKeyPair make a pair of public and private keys encoded in PEM format
 func GenerateKeyPair(pubKeyPath, prvkeyPath, sshPubkeyPath string) error {
-    privateKey, err := rsa.GenerateKey(rand.Reader, 2048); if err != nil {
+    privateKey, err := rsa.GenerateKey(rand.Reader, rsaKeySize); if err != nil {
         return err
     }
     if err = privateKey.Validate(); err != nil {

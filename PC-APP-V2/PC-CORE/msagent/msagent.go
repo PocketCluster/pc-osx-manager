@@ -9,17 +9,17 @@ const (
 )
 
 // discovery protocol scheme & version
-type DiscoveryProtocol string
+type RespondProtocol string
 const (
-    MASTER_DISCOVERY_PROTO      DiscoveryProtocol = "pc_ms_pd"
-    MASTER_DISCOVERY_VERSION    DiscoveryProtocol = "1.0.1"
+    MASTER_RESPOND_PROTO        RespondProtocol = "pc_ms_pr"
+    MASTER_RESPOND_VERSION      RespondProtocol = "1.0.1"
 )
 
 // status protocol scheme & version
-type StatusProtocol string
+type CommandProtocol string
 const (
-    MASTER_STATUS_PROTO         StatusProtocol = "pc_ms_ps"
-    MASTER_STATUS_VERSION       StatusProtocol = "1.0.1"
+    MASTER_COMMAND_PROTO        CommandProtocol = "pc_ms_pc"
+    MASTER_COMMAND_VERSION      CommandProtocol = "1.0.1"
 )
 
 // Discovery & Status tag for meta
@@ -31,18 +31,20 @@ const (
     MASTER_ENCRYPTED_AESKEY     = "pc_ms_ak"
     MASTER_RSA_SIGNATURE        = "pc_ms_sg"
     MASTER_ENCRYPTED_SLAVE      = "pc_ms_es"
+    MASTER_ENCRYPTED_RESPOND    = "pc_ms_er"
 )
 
 // ------ COMMAND DEFINITIONS ------
 type CommandType string
 const MASTER_COMMAND_TYPE  string = "pc_ms_ct"
 const (
-    COMMAND_WHO_R_U             CommandType = "pc_ms_wr"
-    COMMAND_SEND_PUBKEY         CommandType = "pc_ms_sp"
-    COMMAND_SEND_AES            CommandType = "pc_ms_sa"
+    COMMAND_SLAVE_IDINQUERY     CommandType = "pc_ms_si"
+    COMMAND_MASTER_DECLARE      CommandType = "pc_ms_md"
+    COMMAND_EXCHANGE_CRPTKEY    CommandType = "pc_ms_ck"
     COMMAND_MASTER_BIND_READY   CommandType = "pc_ms_mr"
     COMMAND_SLAVE_ACK           CommandType = "pc_ms_ak"
-
+    COMMAND_RECOVER_BIND        CommandType = "pc_ms_rb"
+    COMMAND_MASTER_AWAY         CommandType = "pc_ms_ma"
 )
 
 // ------ MASTER SECTION ------

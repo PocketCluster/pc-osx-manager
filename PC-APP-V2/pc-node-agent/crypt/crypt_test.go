@@ -1,5 +1,5 @@
 package crypt
-/*
+
 import (
     "testing"
     "os"
@@ -126,7 +126,7 @@ func TestMessageSigning(t *testing.T) {
     os.Remove("test.pem");os.Remove("test.pub")
 }
 
-func TestEncDecMessage(t *testing.T) {
+func TestEncDecMessageWithFile(t *testing.T) {
     var orgMsg []byte = []byte("date: Thu, 05 Jan 2012 21:31:40 GMT")
     if err := ioutil.WriteFile("sendtest.pub", testPublicKey(), os.ModePerm); err != nil {
         t.Errorf("Fail to write public key %v", err)
@@ -161,6 +161,44 @@ func TestEncDecMessage(t *testing.T) {
     os.Remove("recvtest.pem");os.Remove("recvtest.pub");os.Remove("recvtest.ssh")
 }
 
+func TestEncDecMessageWithData(t *testing.T) {
+    var orgMsg []byte = []byte("date: Thu, 05 Jan 2012 21:31:40 GMT")
+    if err := GenerateKeyPair("recvtest.pub", "recvtest.pem", "recvtest.ssh"); err != nil {
+        t.Errorf("failed to generate a key pair %v", err)
+    }
+    sendTestPubKey := testPublicKey()
+    sendTestPrvKey := testPrivateKey()
+    recvTestPubKey, err := ioutil.ReadFile("recvtest.pub")
+    if err != nil {
+        t.Error(err.Error())
+    }
+    recvTestPrvKey, err := ioutil.ReadFile("recvtest.pem")
+    if err != nil {
+        t.Error(err.Error())
+    }
+
+
+    // encryptor
+    encr ,err := NewEncryptorFromKeyData(recvTestPubKey, sendTestPrvKey); if  err != nil {
+        t.Errorf(err.Error())
+    }
+    crypted, sig, err := encr.EncryptMessage(orgMsg); if err != nil {
+        t.Errorf(err.Error())
+    }
+    // decryptor
+    decr, err := NewDecryptorFromKeyData(sendTestPubKey, recvTestPrvKey); if err != nil {
+        t.Errorf(err.Error())
+    }
+    plain, err := decr.DecryptMessage(crypted, sig); if err != nil {
+        t.Errorf(err.Error())
+    }
+    // comp
+    if !reflect.DeepEqual(orgMsg, plain) {
+        t.Error("Original Message and Decrypted message are different" + string(plain))
+    }
+    os.Remove("recvtest.pem");os.Remove("recvtest.pub");os.Remove("recvtest.ssh")
+}
+
 func TestAES_EncDec(t *testing.T) {
     key := []byte("longer means more possible keys ")
     text := []byte("This is the unecrypted data. Referring to it as plain text.")
@@ -178,4 +216,3 @@ func TestAES_EncDec(t *testing.T) {
         t.Errorf("Orinal and decrypted are different")
     }
 }
-*/

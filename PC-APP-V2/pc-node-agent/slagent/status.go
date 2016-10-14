@@ -9,7 +9,7 @@ import (
     "gopkg.in/vmihailenco/msgpack.v2"
 )
 
-type PocketSlaveStatusAgent struct {
+type PocketSlaveStatus struct {
     Version             StatusProtocol  `msgpack:"pc_sl_ps"`
     // master
     MasterBoundAgent    string          `msgpack:"pc_ms_ba,omitempty"`
@@ -24,19 +24,19 @@ type PocketSlaveStatusAgent struct {
     SlaveTimestamp      time.Time       `msgpack:"pc_sl_ts"`
 }
 
-func (ssa *PocketSlaveStatusAgent) IsAppropriateSlaveInfo() bool {
+func (ssa *PocketSlaveStatus) IsAppropriateSlaveInfo() bool {
     if len(ssa.SlaveAddress) == 0 || len(ssa.SlaveNodeMacAddr) == 0 || len(ssa.SlaveHardware) == 0 {
         return false
     }
     return true
 }
 
-func PackedSlaveStatus(status *PocketSlaveStatusAgent) ([]byte, error) {
+func PackedSlaveStatus(status *PocketSlaveStatus) ([]byte, error) {
     return msgpack.Marshal(status)
 }
 
-func UnpackedSlaveStatus(message []byte) (*PocketSlaveStatusAgent, error) {
-    var status *PocketSlaveStatusAgent
+func UnpackedSlaveStatus(message []byte) (*PocketSlaveStatus, error) {
+    var status *PocketSlaveStatus
     err := msgpack.Unmarshal(message, &status)
     if err != nil {
         return nil, err
@@ -46,7 +46,7 @@ func UnpackedSlaveStatus(message []byte) (*PocketSlaveStatusAgent, error) {
 
 
 // Unbounded
-func InquiredAgent(timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
+func AnswerMasterInquiryStatus(timestamp time.Time) (agent *PocketSlaveStatus, err error) {
     _, gwifname, err := status.GetDefaultIP4Gateway(); if err != nil {
         return nil, err
     }
@@ -57,7 +57,7 @@ func InquiredAgent(timestamp time.Time) (agent *PocketSlaveStatusAgent, err erro
     ipaddrs, err := iface.IP4Addrs(); if err != nil {
         return nil, err
     }
-    agent = &PocketSlaveStatusAgent{
+    agent = &PocketSlaveStatus{
         Version         : SLAVE_STATUS_VERSION,
         SlaveResponse   : SLAVE_WHO_I_AM,
         SlaveAddress    : ipaddrs[0].IP.String(),
@@ -69,7 +69,7 @@ func InquiredAgent(timestamp time.Time) (agent *PocketSlaveStatusAgent, err erro
     return
 }
 
-func KeyExchangeAgent(master string, timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
+func KeyExchangeStatus(master string, timestamp time.Time) (agent *PocketSlaveStatus, err error) {
     _, gwifname, err := status.GetDefaultIP4Gateway(); if err != nil {
         return nil, err
     }
@@ -80,7 +80,7 @@ func KeyExchangeAgent(master string, timestamp time.Time) (agent *PocketSlaveSta
     ipaddrs, err := iface.IP4Addrs(); if err != nil {
         return nil, err
     }
-    agent = &PocketSlaveStatusAgent{
+    agent = &PocketSlaveStatus{
         Version         : SLAVE_STATUS_VERSION,
         MasterBoundAgent: master,
         SlaveResponse   : SLAVE_SEND_PUBKEY,
@@ -93,7 +93,7 @@ func KeyExchangeAgent(master string, timestamp time.Time) (agent *PocketSlaveSta
     return
 }
 
-func SlaveBindReadyAgent(master, nodename string, timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
+func SlaveBindReadyStatus(master, nodename string, timestamp time.Time) (agent *PocketSlaveStatus, err error) {
     _, gwifname, err := status.GetDefaultIP4Gateway(); if err != nil {
         return nil, err
     }
@@ -104,7 +104,7 @@ func SlaveBindReadyAgent(master, nodename string, timestamp time.Time) (agent *P
     ipaddrs, err := iface.IP4Addrs(); if err != nil {
         return nil, err
     }
-    agent = &PocketSlaveStatusAgent{
+    agent = &PocketSlaveStatus{
         Version         : SLAVE_STATUS_VERSION,
         MasterBoundAgent: master,
         SlaveResponse   : SLAVE_BIND_READY,
@@ -118,7 +118,7 @@ func SlaveBindReadyAgent(master, nodename string, timestamp time.Time) (agent *P
     return
 }
 
-func BoundedStatusAgent(master string, timestamp time.Time) (agent *PocketSlaveStatusAgent, err error) {
+func SlaveBoundedStatus(master string, timestamp time.Time) (agent *PocketSlaveStatus, err error) {
     _, gwifname, err := status.GetDefaultIP4Gateway()
     if err != nil {
         return nil, err
@@ -136,7 +136,7 @@ func BoundedStatusAgent(master string, timestamp time.Time) (agent *PocketSlaveS
     if err != nil {
         return nil, err
     }
-    agent = &PocketSlaveStatusAgent{
+    agent = &PocketSlaveStatus{
         Version         : SLAVE_STATUS_VERSION,
         MasterBoundAgent: master,
         SlaveResponse   : SLAVE_REPORT_STATUS,

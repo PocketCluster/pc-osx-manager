@@ -4,6 +4,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
     "fmt"
     "github.com/stkim1/pc-core/config"
+    "gopkg.in/vmihailenco/msgpack.v2"
 )
 
 /*
@@ -55,16 +56,25 @@ import (
 }
 */
 
-type PocketMasterDiscoveryRespond struct {
-    Version                 DiscoveryProtocol      `msgpack:"pc_ms_pd"`
-    MasterBoundAgent        string                 `msgpack:"pc_ms_ba"`
-    MasterCommandType       CommandType            `msgpack:"pc_ms_ct"`
-    MasterAddress           string                 `msgpack:"pc_ms_i4"`
+type PocketMasterRespond struct {
+    Version           RespondProtocol        `msgpack:"pc_ms_pr"`
+    MasterBoundAgent  string                 `msgpack:"pc_ms_ba"`
+    MasterCommandType CommandType            `msgpack:"pc_ms_ct"`
+    MasterAddress     string                 `msgpack:"pc_ms_i4"`
+}
+
+func PackedMasterRespond(meta *PocketMasterRespond) ([]byte, error) {
+    return msgpack.Marshal(meta)
+}
+
+func UnpackedMasterRespond(message []byte) (respond *PocketMasterRespond, err error) {
+    err = msgpack.Unmarshal(message, &respond)
+    return
 }
 
 // usd : unbounded slave discovery
-func IdentityInqueryRespond(usd *slagent.PocketSlaveDiscoveryAgent) (responder *PocketMasterDiscoveryRespond, err error) {
-    if string(usd.Version) != string(MASTER_DISCOVERY_VERSION) {
+func SlaveIdentityInqueryRespond(usd *slagent.PocketSlaveDiscovery) (responder *PocketMasterRespond, err error) {
+    if string(usd.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, fmt.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
     if len(usd.MasterBoundAgent) != 0 {
@@ -90,16 +100,47 @@ func IdentityInqueryRespond(usd *slagent.PocketSlaveDiscoveryAgent) (responder *
 
     // TODO : check ip address if this Slave can be bound
 
-    responder = &PocketMasterDiscoveryRespond{
-        Version          :MASTER_DISCOVERY_VERSION,
+    responder = &PocketMasterRespond{
+        Version          :MASTER_RESPOND_VERSION,
         MasterBoundAgent :sn,
-        MasterCommandType:COMMAND_WHO_R_U,
+        MasterCommandType:COMMAND_SLAVE_IDINQUERY,
         MasterAddress    :ia,
     }
-    err = nil
     return
 }
 
-func BindBrokenCheckRespond() (responder *PocketMasterDiscoveryRespond, err error) {
+func BrokenBindRecoverRespond(usd *slagent.PocketSlaveDiscovery) (responder *PocketMasterRespond, err error) {
+    if string(usd.Version) != string(MASTER_RESPOND_VERSION) {
+        return nil, fmt.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
+    }
+    if len(usd.MasterBoundAgent) == 0 {
+        return nil, fmt.Errorf("[ERR] Slave is not looking for master agent")
+    }
+    if usd.SlaveResponse != slagent.SLAVE_LOOKUP_AGENT {
+        return nil, fmt.Errorf("[ERR] Slave is not looking for Master")
+    }
+    if !usd.IsAppropriateSlaveInfo() {
+        return nil, fmt.Errorf("[ERR] Inappropriate Slave information")
+    }
+
+    // TODO : check if this agent could be bound
+
+    sn, err := config.MasterHostSerial()
+    if err != nil {
+        return nil, fmt.Errorf("[ERR] Cannot find out Master serial")
+    }
+    ia, err := config.MasterIPAddress()
+    if err != nil {
+        return nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
+    }
+
+    // TODO : check ip address if this Slave can be bound
+
+    responder = &PocketMasterRespond{
+        Version          :MASTER_RESPOND_VERSION,
+        MasterBoundAgent :sn,
+        MasterCommandType:COMMAND_RECOVER_BIND,
+        MasterAddress    :ia,
+    }
     return
 }

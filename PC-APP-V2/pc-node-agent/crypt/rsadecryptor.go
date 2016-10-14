@@ -24,6 +24,19 @@ func NewDecryptorFromKeyFiles(sendPubkeyPath, recvPrvkeyPath string) (RsaDecrypt
     }, nil
 }
 
+func NewDecryptorFromKeyData(sendPubkeyData, recvPrvkeyData []byte) (RsaDecryptor, error) {
+    pubkey, err := newPublicKeyFromData(sendPubkeyData); if err != nil {
+        return nil, err
+    }
+    prvkey, err := newPrivateKeyFromData(recvPrvkeyData); if err != nil {
+        return nil, err
+    }
+    return &decryption{
+        sendPubkey: pubkey,
+        recvPrvkey: prvkey,
+    }, nil
+}
+
 type decryption struct {
     sendPubkey      *rsaPublicKey
     recvPrvkey      *rsaPrivateKey
