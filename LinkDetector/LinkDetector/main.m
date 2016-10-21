@@ -9,14 +9,23 @@
 #import "PCInterfaceStatus.h"
 
 bool
-pc_interface_list(PCNetworkInterface** inetfaces, unsigned int count) {
+pc_interface_list(PCNetworkInterface** interfaces, unsigned int count) {
     NSLog(@"total address count %d", count);
+    for (unsigned int i = 0; i < count; i++) {
+        
+        PCNetworkInterface *iface = *(interfaces + i);
+
+        printf("%s : %s\n",iface->bsdName, iface->isActive ? "active" : "in-active");
+        printf("\t%s \n",iface->macAddress);
+        printf("\t%s \n",iface->mediaType);
+        printf("\t%s \n---------\n",iface->displayName);
+    }
     return true;
 }
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        interface_status(&pc_interface_list);
+        interface_status_with_callback(&pc_interface_list);
         sleep(1);
     }
     return 0;

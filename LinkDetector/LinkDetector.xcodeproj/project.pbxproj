@@ -16,9 +16,6 @@
 		04FF75F71DB4AAB800E7E1EF /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04FF75F61DB4AAB800E7E1EF /* CFNetwork.framework */; };
 		04FF761E1DB4ACC900E7E1EF /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04FF761D1DB4ACC900E7E1EF /* Foundation.framework */; };
 		04FF76201DB4ACCF00E7E1EF /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04FF761F1DB4ACCF00E7E1EF /* Cocoa.framework */; };
-		04FF76431DB4AD8C00E7E1EF /* LinkInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 04FF76301DB4AD8C00E7E1EF /* LinkInterface.m */; };
-		04FF76441DB4AD8C00E7E1EF /* LinkInterfaces.m in Sources */ = {isa = PBXBuildFile; fileRef = 04FF76321DB4AD8C00E7E1EF /* LinkInterfaces.m */; };
-		04FF76451DB4AD8C00E7E1EF /* LinkMACAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 04FF76341DB4AD8C00E7E1EF /* LinkMACAddress.m */; };
 		04FF76471DB4AD8C00E7E1EF /* LinkMACVendors.m in Sources */ = {isa = PBXBuildFile; fileRef = 04FF76381DB4AD8C00E7E1EF /* LinkMACVendors.m */; };
 		04FF76481DB4AD8C00E7E1EF /* LinkObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 04FF763A1DB4AD8C00E7E1EF /* LinkObserver.m */; };
 /* End PBXBuildFile section */
@@ -51,12 +48,6 @@
 		04FF75F61DB4AAB800E7E1EF /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		04FF761D1DB4ACC900E7E1EF /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		04FF761F1DB4ACCF00E7E1EF /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
-		04FF762F1DB4AD8C00E7E1EF /* LinkInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkInterface.h; sourceTree = "<group>"; };
-		04FF76301DB4AD8C00E7E1EF /* LinkInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkInterface.m; sourceTree = "<group>"; };
-		04FF76311DB4AD8C00E7E1EF /* LinkInterfaces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkInterfaces.h; sourceTree = "<group>"; };
-		04FF76321DB4AD8C00E7E1EF /* LinkInterfaces.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkInterfaces.m; sourceTree = "<group>"; usesTabs = 0; };
-		04FF76331DB4AD8C00E7E1EF /* LinkMACAddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkMACAddress.h; sourceTree = "<group>"; };
-		04FF76341DB4AD8C00E7E1EF /* LinkMACAddress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkMACAddress.m; sourceTree = "<group>"; };
 		04FF76371DB4AD8C00E7E1EF /* LinkMACVendors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkMACVendors.h; sourceTree = "<group>"; };
 		04FF76381DB4AD8C00E7E1EF /* LinkMACVendors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkMACVendors.m; sourceTree = "<group>"; };
 		04FF76391DB4AD8C00E7E1EF /* LinkObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkObserver.h; sourceTree = "<group>"; };
@@ -162,12 +153,6 @@
 		04FF762E1DB4AD8C00E7E1EF /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				04FF762F1DB4AD8C00E7E1EF /* LinkInterface.h */,
-				04FF76301DB4AD8C00E7E1EF /* LinkInterface.m */,
-				04FF76311DB4AD8C00E7E1EF /* LinkInterfaces.h */,
-				04FF76321DB4AD8C00E7E1EF /* LinkInterfaces.m */,
-				04FF76331DB4AD8C00E7E1EF /* LinkMACAddress.h */,
-				04FF76341DB4AD8C00E7E1EF /* LinkMACAddress.m */,
 				04FF76371DB4AD8C00E7E1EF /* LinkMACVendors.h */,
 				04FF76381DB4AD8C00E7E1EF /* LinkMACVendors.m */,
 				04FF76391DB4AD8C00E7E1EF /* LinkObserver.h */,
@@ -234,12 +219,9 @@
 			files = (
 				0427D11A1DB6218800FC456C /* SCNetworkInterfaces.c in Sources */,
 				04FF75EE1DB4AA2C00E7E1EF /* main.m in Sources */,
-				04FF76441DB4AD8C00E7E1EF /* LinkInterfaces.m in Sources */,
-				04FF76431DB4AD8C00E7E1EF /* LinkInterface.m in Sources */,
 				04FF76481DB4AD8C00E7E1EF /* LinkObserver.m in Sources */,
 				04FF76471DB4AD8C00E7E1EF /* LinkMACVendors.m in Sources */,
 				04BC594E1DB8896C00D632FA /* PCInterfaceStatus.m in Sources */,
-				04FF76451DB4AD8C00E7E1EF /* LinkMACAddress.m in Sources */,
 				049419B41DBA26040081A1FE /* util.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

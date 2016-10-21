@@ -12,7 +12,6 @@
 #include "SCNetworkTypes.h"
 
 typedef struct _PCNetworkInterface {
-    int                 bsdNumber;
     bool                wifiPowerOff;
     bool                isActive;
     
@@ -28,6 +27,9 @@ typedef struct _PCNetworkInterface {
 typedef bool (*pc_interface_callback)(PCNetworkInterface**, unsigned int);
 
 CF_EXPORT void
-interface_status(pc_interface_callback callback);
+interface_status_with_callback(pc_interface_callback callback);
+
+CF_EXPORT void
+interface_status_with_gocall();
 
 #endif
