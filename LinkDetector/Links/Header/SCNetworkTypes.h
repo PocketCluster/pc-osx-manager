@@ -14,17 +14,17 @@
 typedef struct _SCNIAddress {
     unsigned int       flags;
     unsigned char      family;
-    char*              addr;
-    char*              netmask;
-    char*              broadcast;
-    char*              peer;
+    const char*        addr;
+    const char*        netmask;
+    const char*        broadcast;
+    const char*        peer;
 } SCNIAddress;
 
 typedef struct _SCNIGateway {
     unsigned char      family;
     bool               is_default;
-    char*              ifname;
-    char*              addr;
+    const char*        ifname;
+    const char*        addr;
 } SCNIGateway;
 
 

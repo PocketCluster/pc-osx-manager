@@ -6,7 +6,7 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import "LinkInterface.h"
+#import "PCInterfaceTypes.h"
 
 @interface PCInterfaceStatus : NSObject
 - (void) startMonitoring;

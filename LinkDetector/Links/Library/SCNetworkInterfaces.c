@@ -21,6 +21,7 @@
  */
 
 #include "SCNetworkInterfaces.h"
+#include "util.h"
 
 // in general, it is recommended to copy struct data to CF- collection, but in
 // in order to reduce memory ops, we'll not going to copy struct.
@@ -694,24 +695,15 @@ ifaddresses (CFMutableArrayRef results, CFStringRef ifaName)
     }
 
     if (string_from_sockaddr (addr->ifa_addr, buffer, sizeof (buffer)) == 0) {
-      size_t addr_len = strlen(buffer);
-      char* addr_str = (char *) malloc (addr_len * sizeof(char));
-      memcpy(addr_str, buffer, addr_len);
-      address->addr = addr_str;
+      address->addr = copy_string(buffer);
     }
 
     if (string_from_netmask (addr->ifa_netmask, buffer, sizeof (buffer)) == 0) {
-      size_t netmask_len = strlen(buffer);
-      char* netmask_str = (char *) malloc (netmask_len * sizeof(char));
-      memcpy(netmask_str, buffer, netmask_len);
-      address->netmask = netmask_str;
+      address->netmask = copy_string(buffer);
     }
       
     if (string_from_sockaddr (addr->ifa_broadaddr, buffer, sizeof (buffer)) == 0) {
-      size_t braddr_len = strlen(buffer);
-      char* braddr_str = (char *) malloc (braddr_len * sizeof(char));
-      memcpy(braddr_str, buffer, braddr_len);
-      address->broadcast = braddr_str;
+      address->broadcast = copy_string(buffer);
     }
 
     /* Cygwin's implementation of getaddrinfo() is buggy and returns broadcast
@@ -720,7 +712,7 @@ ifaddresses (CFMutableArrayRef results, CFStringRef ifaName)
       struct sockaddr_in *sin = (struct sockaddr_in *)addr->ifa_addr;
       if ((ntohl(sin->sin_addr.s_addr) & 0xffff0000) == 0xa9fe0000) {
         if (address->broadcast != NULL && strlen(address->broadcast) != 0) {
-          free(address->broadcast);
+          free((void *)address->broadcast);
           address->broadcast = NULL;
         }
       }
@@ -761,34 +753,22 @@ _address_retain(CFAllocatorRef allocator, const void *ptr) {
     address->family = add_src->family;
     
     if (add_src->addr != NULL && strlen(add_src->addr) != 0) {
-        size_t str_len = strlen(add_src->addr);
-        char *str = (char *) malloc(sizeof(char) * str_len);
-        memcpy(str, add_src->addr, str_len);
-        address->addr = str;
+        address->addr = copy_string(add_src->addr);
     } else {
         address->addr = NULL;
     }
     if (add_src->netmask != NULL && strlen(add_src->netmask) != 0) {
-        size_t str_len = strlen(add_src->netmask);
-        char *str = (char *) malloc(sizeof(char) * str_len);
-        memcpy(str, add_src->netmask, str_len);
-        address->netmask = str;
+        address->netmask = copy_string(add_src->netmask);
     } else {
         address->netmask = NULL;
     }
     if (add_src->broadcast != NULL && strlen(add_src->broadcast) != 0) {
-        size_t str_len = strlen(add_src->broadcast);
-        char *str = (char *) malloc(sizeof(char) * str_len);
-        memcpy(str, add_src->broadcast, str_len);
-        address->broadcast = str;
+        address->broadcast = copy_string(add_src->broadcast);
     } else {
         address->broadcast = NULL;
     }
     if (add_src->peer != NULL && strlen(add_src->peer) != 0) {
-        size_t str_len = strlen(add_src->peer);
-        char *str = (char *) malloc(sizeof(char) * str_len);
-        memcpy(str, add_src->peer, str_len);
-        address->peer = str;
+        address->peer = copy_string(add_src->peer);
     } else {
         address->peer = NULL;
     }
@@ -807,16 +787,16 @@ _address_release(CFAllocatorRef allocator, const void *ptr) {
     SCNIAddress *address = (SCNIAddress *)ptr;
     if (address != NULL) {
         if (address->addr != NULL) {
-            free(address->addr);
+            free((void *)(address->addr));
         }
         if (address->netmask != NULL) {
-            free(address->netmask);
+            free((void *)(address->netmask));
         }
         if (address->broadcast != NULL) {
-            free(address->broadcast);
+            free((void *)(address->broadcast));
         }
         if (address->peer != NULL) {
-            free(address->peer);
+            free((void *)(address->peer));
         }
     }
     CFAllocatorDeallocate(allocator, (SCNIAddress *)ptr);
@@ -982,19 +962,10 @@ gateways(CFMutableArrayRef results)
           bool is_default = true;
 #endif
           gateway = (SCNIGateway *) calloc(1, sizeof (SCNIGateway));
-          
           gateway->is_default = is_default;
           gateway->family = sa->sa_family;
-            
-          size_t gw_addr_len = strlen(buffer);
-          char* gw_addr = (char *) malloc (gw_addr_len * sizeof(char));
-          memcpy(gw_addr, buffer, gw_addr_len);
-          gateway->addr = gw_addr;
-          
-          size_t gw_ifname_len = strlen(ifname);
-          char* gw_ifname = (char *) malloc (gw_ifname_len * sizeof(char));
-          memcpy(gw_ifname, ifname, gw_ifname_len);
-          gateway->ifname = gw_ifname;
+          gateway->addr = copy_string(buffer);
+          gateway->ifname = copy_string(ifname);
         }
           
         if (gateway != NULL) {
@@ -1028,18 +999,12 @@ _gateway_retain(CFAllocatorRef allocator, const void *ptr) {
     gateway->is_default = gw_src->is_default;
 
     if (gw_src->ifname != NULL && strlen(gw_src->ifname) != 0) {
-        size_t str_len = strlen(gw_src->ifname);
-        char *str = (char *) malloc(sizeof(char) * str_len);
-        memcpy(str, gw_src->ifname, str_len);
-        gateway->ifname = str;
+        gateway->ifname = copy_string(gw_src->ifname);
     } else {
         gateway->ifname = NULL;
     }
     if (gw_src->addr != NULL && strlen(gw_src->addr) != 0) {
-        size_t str_len = strlen(gw_src->addr);
-        char *str = (char *) malloc(sizeof(char) * str_len);
-        memcpy(str, gw_src->addr, str_len);
-        gateway->addr = str;
+        gateway->addr = copy_string(gw_src->addr);
     } else {
         gateway->addr = NULL;
     }
@@ -1055,10 +1020,10 @@ _gateway_release(CFAllocatorRef allocator, const void *ptr) {
     SCNIGateway *gateway = (SCNIGateway *)ptr;
     if (gateway != NULL) {
         if (gateway->ifname != NULL) {
-            free(gateway->ifname);
+            free((void *)(gateway->ifname));
         }
         if (gateway->addr != NULL) {
-            free(gateway->addr);
+            free((void *)(gateway->addr));
         }
     }
     CFAllocatorDeallocate(allocator, (SCNIGateway *)ptr);

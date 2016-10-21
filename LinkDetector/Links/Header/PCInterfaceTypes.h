@@ -11,21 +11,23 @@
 
 #include "SCNetworkTypes.h"
 
-typedef struct _pc_interface {
-    int                 bsd_number;
-    bool                wifi_power_off;
+typedef struct _PCNetworkInterface {
+    int                 bsdNumber;
+    bool                wifiPowerOff;
+    bool                isActive;
     
-    unsigned int        address_length;
+    unsigned int        addrCount;
     SCNIAddress**       address;
 
-    char*               bsd_name;
-    char*               display_name;
-    char*               mac_address;
-    char*               media_type;
-} pc_interface;
+    const char*         bsdName;
+    const char*         displayName;
+    const char*         macAddress;
+    const char*         mediaType;
+} PCNetworkInterface;
 
-typedef bool (*pc_interface_callback)(pc_interface**, unsigned int);
+typedef bool (*pc_interface_callback)(PCNetworkInterface**, unsigned int);
 
-extern void interface_status(pc_interface_callback callback);
+CF_EXPORT void
+interface_status(pc_interface_callback callback);
 
 #endif

@@ -7,10 +7,17 @@
 //
 
 #import "PCInterfaceStatus.h"
-#import "LinkInterfaces.h"
+
+bool
+pc_interface_list(PCNetworkInterface** inetfaces, unsigned int count) {
+    NSLog(@"total address count %d", count);
+    return true;
+}
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
+        interface_status(&pc_interface_list);
+        sleep(1);
     }
     return 0;
 }
