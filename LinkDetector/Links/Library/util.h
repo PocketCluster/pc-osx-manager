@@ -14,4 +14,7 @@
 const char*
 copy_string(const char* str_src);
 
+const char*
+CFStringCopyToCString(CFStringRef string);
+
 #endif /* __UTIL_H__ */

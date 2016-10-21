@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0427D11A1DB6218800FC456C /* SCNetworkInterfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = 0427D1191DB6218700FC456C /* SCNetworkInterfaces.c */; };
+		044223301DBAA5AE006012F6 /* util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0442232F1DBAA5AE006012F6 /* util.m */; };
 		048C90531DB4FA410096B304 /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 048C90521DB4FA410096B304 /* CoreWLAN.framework */; };
-		049419B41DBA26040081A1FE /* util.c in Sources */ = {isa = PBXBuildFile; fileRef = 049419B21DBA26040081A1FE /* util.c */; };
 		04BC594E1DB8896C00D632FA /* PCInterfaceStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = 04BC594D1DB8896C00D632FA /* PCInterfaceStatus.m */; };
 		04FF75EE1DB4AA2C00E7E1EF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 04FF75ED1DB4AA2C00E7E1EF /* main.m */; };
 		04FF75F51DB4AAA600E7E1EF /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04FF75F41DB4AAA600E7E1EF /* SystemConfiguration.framework */; };
@@ -35,8 +35,14 @@
 /* Begin PBXFileReference section */
 		0427D1181DB6218700FC456C /* SCNetworkInterfaces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCNetworkInterfaces.h; sourceTree = "<group>"; };
 		0427D1191DB6218700FC456C /* SCNetworkInterfaces.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SCNetworkInterfaces.c; sourceTree = "<group>"; };
+		044223291DBA8B97006012F6 /* qnetworkinfo_mac.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = qnetworkinfo_mac.mm; path = ../../../OSX_NETWORK/qnetworkinfo_mac.mm; sourceTree = "<group>"; };
+		0442232A1DBA8B97006012F6 /* STAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = STAppDelegate.m; path = ../../../OSX_NETWORK/STAppDelegate.m; sourceTree = "<group>"; };
+		0442232B1DBA8B97006012F6 /* EthernetController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = EthernetController.m; path = ../../../OSX_NETWORK/EthernetController.m; sourceTree = "<group>"; };
+		0442232C1DBA8B97006012F6 /* SCNetworkAdditionTest.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = SCNetworkAdditionTest.c; path = ../../../OSX_NETWORK/SCNetworkAdditionTest.c; sourceTree = "<group>"; };
+		0442232D1DBA8B97006012F6 /* NCInterfaceNode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = NCInterfaceNode.m; path = ../../../OSX_NETWORK/NCInterfaceNode.m; sourceTree = "<group>"; };
+		0442232E1DBA8B97006012F6 /* osx_platform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = osx_platform.cpp; path = ../../../OSX_NETWORK/osx_platform.cpp; sourceTree = "<group>"; };
+		0442232F1DBAA5AE006012F6 /* util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = util.m; sourceTree = "<group>"; };
 		048C90521DB4FA410096B304 /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
-		049419B21DBA26040081A1FE /* util.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = util.c; sourceTree = "<group>"; };
 		049419B31DBA26040081A1FE /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
 		04BC59451DB87F8B00D632FA /* SCNetworkTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCNetworkTypes.h; sourceTree = "<group>"; };
 		04BC59471DB8834F00D632FA /* PCInterfaceTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCInterfaceTypes.h; sourceTree = "<group>"; };
@@ -74,9 +80,9 @@
 		048C905D1DB5225A0096B304 /* Library */ = {
 			isa = PBXGroup;
 			children = (
-				0427D1191DB6218700FC456C /* SCNetworkInterfaces.c */,
 				0427D1181DB6218700FC456C /* SCNetworkInterfaces.h */,
-				049419B21DBA26040081A1FE /* util.c */,
+				0427D1191DB6218700FC456C /* SCNetworkInterfaces.c */,
+				0442232F1DBAA5AE006012F6 /* util.m */,
 				049419B31DBA26040081A1FE /* util.h */,
 			);
 			path = Library;
@@ -133,6 +139,12 @@
 		04FF75EC1DB4AA2C00E7E1EF /* LinkDetector */ = {
 			isa = PBXGroup;
 			children = (
+				044223291DBA8B97006012F6 /* qnetworkinfo_mac.mm */,
+				0442232A1DBA8B97006012F6 /* STAppDelegate.m */,
+				0442232B1DBA8B97006012F6 /* EthernetController.m */,
+				0442232C1DBA8B97006012F6 /* SCNetworkAdditionTest.c */,
+				0442232D1DBA8B97006012F6 /* NCInterfaceNode.m */,
+				0442232E1DBA8B97006012F6 /* osx_platform.cpp */,
 				04FF75ED1DB4AA2C00E7E1EF /* main.m */,
 				04FF764A1DB4ADB300E7E1EF /* common.pch */,
 			);
@@ -218,11 +230,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				0427D11A1DB6218800FC456C /* SCNetworkInterfaces.c in Sources */,
+				044223301DBAA5AE006012F6 /* util.m in Sources */,
 				04FF75EE1DB4AA2C00E7E1EF /* main.m in Sources */,
 				04FF76481DB4AD8C00E7E1EF /* LinkObserver.m in Sources */,
 				04FF76471DB4AD8C00E7E1EF /* LinkMACVendors.m in Sources */,
 				04BC594E1DB8896C00D632FA /* PCInterfaceStatus.m in Sources */,
-				049419B41DBA26040081A1FE /* util.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

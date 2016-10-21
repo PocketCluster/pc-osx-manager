@@ -14,6 +14,7 @@
 typedef struct _SCNIAddress {
     unsigned int       flags;
     unsigned char      family;
+    bool               is_primary;
     const char*        addr;
     const char*        netmask;
     const char*        broadcast;

@@ -15,8 +15,7 @@
 #import "LinkObserver.h"
 #import "util.h"
 
-static PCNetworkInterface**
-_interface_status(unsigned int*, CFMutableArrayRef);
+static const CFStringRef kPocketClusterPrimaryInterface = CFSTR("PocketClusterPrimary");
 
 static PCNetworkInterface*
 _pc_interface_new();
@@ -30,11 +29,17 @@ _pc_interface_array_new(unsigned int);
 static void
 _pc_interface_array_release(PCNetworkInterface**, unsigned int);
 
-SCNIAddress**
+static SCNIAddress**
 _SCNIAddressNewArrray(unsigned int length);
 
-SCNIGateway**
+static SCNIGateway**
 _SCNIGatewayNewArray(unsigned int length);
+
+static void
+_primary_interface_address(const char**, const char**);
+
+static PCNetworkInterface**
+_interface_status(unsigned int*, CFMutableArrayRef);
 
 void
 interface_status(pc_interface_callback);
@@ -170,93 +175,8 @@ interface_status(pc_interface_callback);
 }
 #endif
 
-//TODO : 2) Interface status 3) Address Status 4) Gateway object 5) Async notification 6) leak check 7) isprimary? 8) interface type (thunberbolt?)
-PCNetworkInterface**
-_interface_status(unsigned int* pcIfaceCount, CFMutableArrayRef totalAddress) {
-    
-    PCNetworkInterface** pcIfaceArray = NULL;
-    
-    @autoreleasepool {
-        CWWiFiClient *wifiClent = [CWWiFiClient sharedWiFiClient];
-        
-        // grap every *NETWORK* interface name
-        SCDynamicStoreRef storeRef = SCDynamicStoreCreate(NULL, (CFStringRef)@"FindCurrentInterfaceIpMac", NULL, NULL);
-        CFPropertyListRef global = SCDynamicStoreCopyValue(storeRef, CFSTR("State:/Network/Interface"));
-        NSArray *netIfaceArray = [(__bridge NSArray *)global valueForKey:@"Interfaces"];
-        NSUInteger netIfaceCount = [netIfaceArray count];
-        
-        *pcIfaceCount = (unsigned int) netIfaceCount;
-        pcIfaceArray = _pc_interface_array_new((unsigned int) netIfaceCount);
-        
-        for (NSUInteger i = 0; i < netIfaceCount; i++) {
-            NSString *bsdName = [netIfaceArray objectAtIndex:i];
-            PCNetworkInterface *pcIface = _pc_interface_new();
-            pcIface->bsdName = copy_string([bsdName UTF8String]);
-            *(pcIfaceArray + i) = pcIface;
-        }
-        
-        // match intefaces and idenfity their kind
-        CFArrayRef allIfaceArray = SCNetworkInterfaceCopyAll();
-        for (CFIndex aai = 0; aai < CFArrayGetCount(allIfaceArray); aai++) {
-            
-            SCNetworkInterfaceRef interface = CFArrayGetValueAtIndex(allIfaceArray, aai);
-            NSString *nsBsdName = (__bridge NSString*)SCNetworkInterfaceGetBSDName(interface);
-            
-            for (NSUInteger pci = 0; pci < netIfaceCount; pci++) {
-                PCNetworkInterface *pcIface = *(pcIfaceArray + pci);
-                
-                if (pcIface->bsdName != NULL && nsBsdName != nil && strcmp(pcIface->bsdName, [nsBsdName UTF8String]) == 0) {
-                    
-                    if (SCNetworkInterfaceMediaStatus(interface)) {
-                        pcIface->isActive = true;
-                    } else {
-                        pcIface->isActive = false;
-                    }
-                    
-                    NSString *displayName = (__bridge NSString*)SCNetworkInterfaceGetLocalizedDisplayName(interface);
-                    pcIface->displayName  = copy_string([displayName UTF8String]);
-                    
-                    NSString *hardMAC     = (__bridge NSString*)SCNetworkInterfaceGetHardwareAddressString(interface);
-                    pcIface->macAddress   = copy_string([hardMAC UTF8String]);
-                    
-                    NSString *kind        = (__bridge NSString*)SCNetworkInterfaceGetInterfaceType(interface);
-                    pcIface->mediaType    = copy_string([kind UTF8String]);
-                    
-                    if ([kind isEqualToString:@"IEEE80211"] || [displayName isEqualToString:@"Wi-Fi"]) {
-                        CWInterface *wifiIface = [wifiClent interfaceWithName:nsBsdName];
-                        if (wifiIface != nil) {
-                            pcIface->wifiPowerOff = !wifiIface.powerOn;
-                        }
-                    }
-                    
-                    CFMutableArrayRef scniAddr = SCNIMutableAddressArray();
-                    errno_t err = SCNetworkInterfaceAddresses(interface, scniAddr);
-                    CFIndex addrCount = CFArrayGetCount(scniAddr);
-                    
-                    if (err == 0 && 0 < addrCount) {
-                        SCNIAddress **address = _SCNIAddressNewArrray((unsigned int) addrCount);
-                        for (CFIndex scai = 0; scai < addrCount; scai++) {
-                            *(address + scai) = (SCNIAddress *) CFArrayGetValueAtIndex(scniAddr, scai);
-                        }
-                        pcIface->address = address;
-                        pcIface->addrCount = (unsigned int) addrCount;
-                        
-                        CFArrayAppendValue(totalAddress, scniAddr);
-                    } else {
-                        // since this array is empty, we'll release now.
-                        SCNetworkInterfaceAddressRelease(scniAddr);
-                    }
-                    
-                    // break-out from interface searching iteration
-                    break;
-                }
-            }
-        }
-    }
-    
-    return pcIfaceArray;
-}
 
+#pragma mark - ALLOCATION / RELEASE
 
 PCNetworkInterface*
 _pc_interface_new() {
@@ -344,6 +264,171 @@ interface_status_with_callback(pc_interface_callback callback) {
     CFRelease(totalAddress);
 }
 
+#pragma mark - STATUS ACQUISITION
+// http://lists.apple.com/archives/macnetworkprog/2006/Oct/msg00007.html
+void
+_primary_interface_address(const char** primary_interface, const char** primary_address) {
+    SCDynamicStoreRef       store = NULL;
+    CFStringRef             globalKeys = NULL;
+    CFDictionaryRef         ipv4State = NULL;
+    CFStringRef             primaryService = NULL;
+    CFStringRef             primaryInterface = NULL;
+    CFStringRef             ipv4Key = NULL;
+    CFDictionaryRef         serviceDict = NULL;
+    CFArrayRef              addresses = NULL;
+    CFStringRef             address = NULL;
+    
+    @autoreleasepool {
+        store = SCDynamicStoreCreate(NULL, kPocketClusterPrimaryInterface, NULL, NULL);
+        if (store != NULL) {
+            globalKeys = SCDynamicStoreKeyCreateNetworkGlobalEntity(kCFAllocatorDefault, kSCDynamicStoreDomainState, kSCEntNetIPv4);
+        }
+        if (globalKeys != NULL) {
+            ipv4State = (CFDictionaryRef) SCDynamicStoreCopyValue(store, globalKeys);
+        }
+        if (ipv4State != NULL) {
+            primaryService = (CFStringRef) CFDictionaryGetValue(ipv4State, kSCDynamicStorePropNetPrimaryService);
+            primaryInterface = (CFStringRef) CFDictionaryGetValue(ipv4State, kSCDynamicStorePropNetPrimaryInterface);
+        }
+        if (primaryInterface != NULL) {
+            *primary_interface = CFStringCopyToCString(primaryInterface);
+        }
+        if (primaryService != NULL) {
+            ipv4Key = SCDynamicStoreKeyCreateNetworkServiceEntity(NULL, kSCDynamicStoreDomainState, primaryService, kSCEntNetIPv4);
+        }
+        if (ipv4Key != NULL) {
+            serviceDict = SCDynamicStoreCopyValue(store, ipv4Key);
+        }
+        if (serviceDict != NULL) {
+            addresses = CFDictionaryGetValue(serviceDict, kSCPropNetIPv4Addresses);
+        }
+        if (addresses != NULL && CFArrayGetCount(addresses) != 0) {
+            address = CFArrayGetValueAtIndex(addresses, 0);
+        }
+        if (address != NULL) {
+            *primary_address = CFStringCopyToCString(address);
+        }
+        
+        if (serviceDict != NULL)        CFRelease(serviceDict);
+        if (ipv4Key != NULL)            CFRelease(ipv4Key);
+        if (ipv4State != NULL)          CFRelease(ipv4State);
+        if (globalKeys != NULL)         CFRelease(globalKeys);
+        if (store != NULL)              CFRelease(store);
+    }
+}
+
+PCNetworkInterface**
+_interface_status(unsigned int* pcIfaceCount, CFMutableArrayRef totalAddress) {
+    
+    static const CFStringRef kMediaTypeWIFI = CFSTR("Wi-Fi");
+    static const CFStringRef kMediaTypeIEEE80211 = CFSTR("IEEE80211");
+    static char ifaceBSDName[256];
+    
+    PCNetworkInterface** pcIfaceArray = NULL;
+    const char* primaryAddress;
+    const char* primaryInterface;
+    
+    _primary_interface_address(&primaryInterface, &primaryAddress);
+    
+    @autoreleasepool {
+        CWWiFiClient *wifiClent = [CWWiFiClient sharedWiFiClient];
+        
+        // grap every *NETWORK* interface name
+        SCDynamicStoreRef storeRef = SCDynamicStoreCreate(NULL, (CFStringRef)@"FindCurrentInterfaceIpMac", NULL, NULL);
+        CFPropertyListRef global = SCDynamicStoreCopyValue(storeRef, CFSTR("State:/Network/Interface"));
+        CFArrayRef netIfaceArray = (CFArrayRef) CFDictionaryGetValue(global, CFSTR("Interfaces"));
+        CFIndex netIfaceCount = CFArrayGetCount(netIfaceArray);
+        
+        *pcIfaceCount = (unsigned int) netIfaceCount;
+        pcIfaceArray = _pc_interface_array_new((unsigned int) netIfaceCount);
+        
+        for (CFIndex i = 0; i < netIfaceCount; i++) {
+            CFStringRef bsdName = (CFStringRef) CFArrayGetValueAtIndex(netIfaceArray, i);
+            PCNetworkInterface *pcIface = _pc_interface_new();
+            pcIface->bsdName = CFStringCopyToCString(bsdName);
+            if (primaryInterface != NULL && pcIface->bsdName != NULL && strcmp(primaryInterface, pcIface->bsdName) == 0) {
+                pcIface->isPrimary = true;
+            }
+            *(pcIfaceArray + i) = pcIface;
+        }
+        
+        // match intefaces and idenfity their kind
+        CFArrayRef allIfaceArray = SCNetworkInterfaceCopyAll();
+        for (CFIndex aai = 0; aai < CFArrayGetCount(allIfaceArray); aai++) {
+            // to reduce memory pressure, we'll have a nested autorelease pool
+            @autoreleasepool {
+                SCNetworkInterfaceRef interface = CFArrayGetValueAtIndex(allIfaceArray, aai);
+                CFStringRef bsdName = SCNetworkInterfaceGetBSDName(interface);
+                CFStringGetCString(bsdName, ifaceBSDName, 256, kCFStringEncodingUTF8);
+                
+                for (NSUInteger pci = 0; pci < netIfaceCount; pci++) {
+                    PCNetworkInterface *pcIface = *(pcIfaceArray + pci);
+                    
+                    if (pcIface->bsdName != NULL && strlen(ifaceBSDName) != 0 && strcmp(pcIface->bsdName, ifaceBSDName) == 0) {
+                        
+                        if (SCNetworkInterfaceMediaStatus(interface)) {
+                            pcIface->isActive = true;
+                        } else {
+                            pcIface->isActive = false;
+                        }
+                        
+                        CFStringRef displayName = SCNetworkInterfaceGetLocalizedDisplayName(interface);
+                        pcIface->displayName    = CFStringCopyToCString(displayName);
+                        
+                        CFStringRef hardMAC     = SCNetworkInterfaceGetHardwareAddressString(interface);
+                        pcIface->macAddress     = CFStringCopyToCString(hardMAC);
+                        
+                        CFStringRef mediaType   = SCNetworkInterfaceGetInterfaceType(interface);
+                        pcIface->mediaType      = CFStringCopyToCString(mediaType);
+                        
+                        
+                        if (CFStringCompare(mediaType, kMediaTypeIEEE80211, kCFCompareCaseInsensitive) == kCFCompareEqualTo ||
+                            CFStringCompare(displayName, kMediaTypeWIFI, kCFCompareCaseInsensitive) == kCFCompareEqualTo) {
+                            CWInterface *wifiIface = [wifiClent interfaceWithName:(__bridge NSString*)bsdName];
+                            if (wifiIface != nil) {
+                                pcIface->wifiPowerOff = !wifiIface.powerOn;
+                            }
+                        }
+                        
+                        CFMutableArrayRef scniAddr = SCNIMutableAddressArray();
+                        errno_t err = SCNetworkInterfaceAddresses(interface, scniAddr);
+                        CFIndex addrCount = CFArrayGetCount(scniAddr);
+                        
+                        if (err == 0 && 0 < addrCount) {
+                            SCNIAddress **address = _SCNIAddressNewArrray((unsigned int) addrCount);
+                            for (CFIndex scai = 0; scai < addrCount; scai++) {
+                                SCNIAddress *addr = (SCNIAddress *) CFArrayGetValueAtIndex(scniAddr, scai);
+                                if (primaryAddress != NULL && addr->addr != NULL && strcmp(primaryAddress, addr->addr) == 0) {
+                                    addr->is_primary = true;
+                                }
+                                *(address + scai) = addr;
+                            }
+                            pcIface->address = address;
+                            pcIface->addrCount = (unsigned int) addrCount;
+                            
+                            CFArrayAppendValue(totalAddress, scniAddr);
+                        } else {
+                            // since this array is empty, we'll release now.
+                            SCNetworkInterfaceAddressRelease(scniAddr);
+                        }
+                        
+                        // break-out from interface searching iteration
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    if (primaryAddress != NULL) {
+        free((void *) primaryAddress);
+    }
+    if (primaryInterface != NULL) {
+        free((void *) primaryInterface);
+    }
+    return pcIfaceArray;
+}
+
 void
 interface_status_with_gocall() {
     
@@ -364,3 +449,5 @@ interface_status_with_gocall() {
     }
     CFRelease(totalAddress);
 }
+
+//TODO : 2) Interface status 3) Address Status 4) Gateway object 5) Async notification 6) leak check 7) isprimary? 8) interface type (thunberbolt?)

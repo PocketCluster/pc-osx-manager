@@ -14,7 +14,7 @@
 typedef struct _PCNetworkInterface {
     bool                wifiPowerOff;
     bool                isActive;
-    
+    bool                isPrimary;
     unsigned int        addrCount;
     SCNIAddress**       address;
 

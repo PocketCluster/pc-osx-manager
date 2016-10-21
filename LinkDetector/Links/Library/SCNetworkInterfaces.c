@@ -663,7 +663,7 @@ ifaddresses (CFMutableArrayRef results, CFStringRef ifaName)
       continue;
       
     /* As it is ready to pull address inforation, we'll alloc an address */
-    address = (SCNIAddress *) calloc(1, sizeof (SCNIAddress));
+    address = (SCNIAddress *) calloc(1, sizeof(SCNIAddress));
     
 #if HAVE_IPV6_SOCKET_IOCTLS
     /* For IPv6 addresses we try to get the flags. */
