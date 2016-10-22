@@ -25,9 +25,29 @@ pc_interface_list(PCNetworkInterface** interfaces, unsigned int count) {
     return true;
 }
 
+bool
+gateway_list(SCNIGateway** gateways, unsigned int count) {
+    NSLog(@"Total gateway count %d", count);
+    for (unsigned int i = 0; i < count; i++) {
+        SCNIGateway *gw = *(gateways + i);
+        printf("%s : %s\n",gw->addr, gw->is_default ? "DEFAULT" : "AUXILLARY");
+        printf("\t%s \n---------\n", gw->ifname);
+    }
+    return true;
+}
+
+//TODO : 2) Interface status 3) Address Status 4) Gateway object 5) Async notification 6) leak check
 int main(int argc, const char * argv[]) {
+    
+    
+    if (CFStringCompare(CFSTR("ISTHISSAME"), CFSTR("ISTHISSAME"), kCFCompareCaseInsensitive) == kCFCompareEqualTo) {
+        NSLog(@"TWO SAME STRINGS");
+    }
+    
+    
     @autoreleasepool {
         interface_status_with_callback(&pc_interface_list);
+        gateway_status_with_callback(&gateway_list);
     }
     
     sleep(5);

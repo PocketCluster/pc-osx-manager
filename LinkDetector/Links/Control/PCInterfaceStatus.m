@@ -30,10 +30,13 @@ static void
 _pc_interface_array_release(PCNetworkInterface**, unsigned int);
 
 static SCNIAddress**
-_SCNIAddressNewArrray(unsigned int length);
+_SCNIAddressArrrayNew(unsigned int length);
 
 static SCNIGateway**
-_SCNIGatewayNewArray(unsigned int length);
+_SCNIGatewayArrayNew(unsigned int length);
+
+static void
+_SCNIGatewayArrayRelease(SCNIGateway**);
 
 static void
 _primary_interface_address(const char**, const char**);
@@ -41,8 +44,8 @@ _primary_interface_address(const char**, const char**);
 static PCNetworkInterface**
 _interface_status(unsigned int*, CFMutableArrayRef);
 
-void
-interface_status(pc_interface_callback);
+static SCNIGateway**
+_gateway_status(CFMutableArrayRef);
 
 @interface PCInterfaceStatus()
 @property (readonly) LinkObserver *linkObserver;
@@ -184,6 +187,7 @@ _pc_interface_new() {
 }
 
 void
+
 _pc_interface_release(PCNetworkInterface* interface) {
     if (interface != NULL) {
         if (interface->address != NULL) {
@@ -224,7 +228,7 @@ _pc_interface_array_release(PCNetworkInterface** interfaces, unsigned int length
 }
 
 SCNIAddress**
-_SCNIAddressNewArrray(unsigned int length) {
+_SCNIAddressArrrayNew(unsigned int length) {
     if (length == 0) {
         return NULL;
     }
@@ -232,7 +236,7 @@ _SCNIAddressNewArrray(unsigned int length) {
 }
 
 SCNIGateway**
-_SCNIGatewayNewArray(unsigned int length) {
+_SCNIGatewayArrayNew(unsigned int length) {
     if (length == 0) {
         return NULL;
     }
@@ -240,31 +244,13 @@ _SCNIGatewayNewArray(unsigned int length) {
 }
 
 void
-interface_status_with_callback(pc_interface_callback callback) {
-    if (callback == NULL) {
-        return;
+_SCNIGatewayArrayRelease(SCNIGateway** gatewayArray) {
+    if (gatewayArray != NULL) {
+        free((void *)gatewayArray);
     }
-    
-    unsigned int interfacesCount = 0;
-    CFMutableArrayRef totalAddress = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
-    PCNetworkInterface** interfaces = _interface_status(&interfacesCount, totalAddress);
-    
-    // we don't mind if Golang has successfully received the interface array. We only care
-    // if we can safely release all the memories
-    callback(interfaces, interfacesCount);
-    
-    // release phase
-    _pc_interface_array_release(interfaces, interfacesCount);
-    
-    for (CFIndex i = CFArrayGetCount(totalAddress) - 1; 0 <= i; i--) {
-        CFMutableArrayRef addr = (CFMutableArrayRef)CFArrayGetValueAtIndex(totalAddress, i);
-        CFArrayRemoveValueAtIndex(totalAddress, i);
-        SCNetworkInterfaceAddressRelease(addr);
-    }
-    CFRelease(totalAddress);
 }
 
-#pragma mark - STATUS ACQUISITION
+#pragma mark - INTERFACE STATUS ACQUISITION
 // http://lists.apple.com/archives/macnetworkprog/2006/Oct/msg00007.html
 void
 _primary_interface_address(const char** primary_interface, const char** primary_address) {
@@ -318,7 +304,7 @@ _primary_interface_address(const char** primary_interface, const char** primary_
 }
 
 PCNetworkInterface**
-_interface_status(unsigned int* pcIfaceCount, CFMutableArrayRef totalAddress) {
+_interface_status(unsigned int* pcIfaceCount, CFMutableArrayRef allAddresses) {
     
     static const CFStringRef kMediaTypeWIFI = CFSTR("Wi-Fi");
     static const CFStringRef kMediaTypeIEEE80211 = CFSTR("IEEE80211");
@@ -395,7 +381,7 @@ _interface_status(unsigned int* pcIfaceCount, CFMutableArrayRef totalAddress) {
                         CFIndex addrCount = CFArrayGetCount(scniAddr);
                         
                         if (err == 0 && 0 < addrCount) {
-                            SCNIAddress **address = _SCNIAddressNewArrray((unsigned int) addrCount);
+                            SCNIAddress **address = _SCNIAddressArrrayNew((unsigned int) addrCount);
                             for (CFIndex scai = 0; scai < addrCount; scai++) {
                                 SCNIAddress *addr = (SCNIAddress *) CFArrayGetValueAtIndex(scniAddr, scai);
                                 if (primaryAddress != NULL && addr->addr != NULL && strcmp(primaryAddress, addr->addr) == 0) {
@@ -406,7 +392,7 @@ _interface_status(unsigned int* pcIfaceCount, CFMutableArrayRef totalAddress) {
                             pcIface->address = address;
                             pcIface->addrCount = (unsigned int) addrCount;
                             
-                            CFArrayAppendValue(totalAddress, scniAddr);
+                            CFArrayAppendValue(allAddresses, scniAddr);
                         } else {
                             // since this array is empty, we'll release now.
                             SCNetworkInterfaceAddressRelease(scniAddr);
@@ -429,12 +415,42 @@ _interface_status(unsigned int* pcIfaceCount, CFMutableArrayRef totalAddress) {
     return pcIfaceArray;
 }
 
+
+void
+interface_status_with_callback(pc_interface_callback callback) {
+    if (callback == NULL) {
+        return;
+    }
+    
+    unsigned int interfacesCount = 0;
+    CFMutableArrayRef allAddresses = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
+    PCNetworkInterface** interfaces = _interface_status(&interfacesCount, allAddresses);
+    
+    // we don't mind if Golang has successfully received the interface array. We only care
+    // if we can safely release all the memories
+    if (interfaces != NULL && 0 < interfacesCount) {
+        callback(interfaces, interfacesCount);
+    } else {
+        callback(NULL, 0);
+    }
+    
+    // release phase
+    _pc_interface_array_release(interfaces, interfacesCount);
+    
+    for (CFIndex i = CFArrayGetCount(allAddresses) - 1; 0 <= i; i--) {
+        CFMutableArrayRef addr = (CFMutableArrayRef)CFArrayGetValueAtIndex(allAddresses, i);
+        CFArrayRemoveValueAtIndex(allAddresses, i);
+        SCNetworkInterfaceAddressRelease(addr);
+    }
+    CFRelease(allAddresses);
+}
+
 void
 interface_status_with_gocall() {
     
     unsigned int interfacesCount = 0;
-    CFMutableArrayRef totalAddress = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
-    PCNetworkInterface** interfaces = _interface_status(&interfacesCount, totalAddress);
+    CFMutableArrayRef allAddresses = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
+    PCNetworkInterface** interfaces = _interface_status(&interfacesCount, allAddresses);
     
     /* PLACE GOCALL here */
     
@@ -442,12 +458,55 @@ interface_status_with_gocall() {
     // release phase
     _pc_interface_array_release(interfaces, interfacesCount);
     
-    for (CFIndex i = CFArrayGetCount(totalAddress) - 1; 0 <= i; i--) {
-        CFMutableArrayRef addr = (CFMutableArrayRef)CFArrayGetValueAtIndex(totalAddress, i);
-        CFArrayRemoveValueAtIndex(totalAddress, i);
+    for (CFIndex i = CFArrayGetCount(allAddresses) - 1; 0 <= i; i--) {
+        CFMutableArrayRef addr = (CFMutableArrayRef)CFArrayGetValueAtIndex(allAddresses, i);
+        CFArrayRemoveValueAtIndex(allAddresses, i);
         SCNetworkInterfaceAddressRelease(addr);
     }
-    CFRelease(totalAddress);
+    CFRelease(allAddresses);
 }
 
-//TODO : 2) Interface status 3) Address Status 4) Gateway object 5) Async notification 6) leak check 7) isprimary? 8) interface type (thunberbolt?)
+#pragma mark - GATEWAY STATUS ACQUISITION
+
+SCNIGateway**
+_gateway_status(CFMutableArrayRef allGatways) {
+    SCNIGateway** scniGateways = NULL;
+    @autoreleasepool {
+        errno_t err = SCNetworkGateways(allGatways);
+        CFIndex count = CFArrayGetCount(allGatways);
+        if (err == 0 && 0 < count) {
+            scniGateways = _SCNIGatewayArrayNew((unsigned int) count);
+            for (CFIndex i = 0; i < count; i++) {
+                *(scniGateways + i) = (SCNIGateway*)CFArrayGetValueAtIndex(allGatways, i);
+            }
+        }
+    }
+    return scniGateways;
+}
+
+CF_EXPORT void
+gateway_status_with_callback(scni_gateway_callback callback) {
+    if (callback == NULL) {
+        return;
+    }
+
+    CFMutableArrayRef allGateways = SCNIMutableGatewayArray();
+    SCNIGateway** scniGateways = _gateway_status(allGateways);
+    unsigned int gatewayCount = (unsigned int) CFArrayGetCount(allGateways);
+    
+    if (scniGateways != NULL && 0 < gatewayCount) {
+        callback(scniGateways, gatewayCount);
+        _SCNIGatewayArrayRelease(scniGateways);
+    } else {
+        callback(NULL, 0);
+    }
+    
+    // release phase
+    SCNetworkGatewayRelease(allGateways);
+}
+
+void
+gateway_status_with_gocall() {
+
+    return;
+}
