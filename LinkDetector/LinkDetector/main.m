@@ -36,15 +36,8 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
     return true;
 }
 
-//TODO : 2) Interface status 3) Address Status 4) Gateway object 5) Async notification 6) leak check
+//TODO : 2) Interface status 3) Address Status 5) Async notification 6) leak check
 int main(int argc, const char * argv[]) {
-    
-    
-    if (CFStringCompare(CFSTR("ISTHISSAME"), CFSTR("ISTHISSAME"), kCFCompareCaseInsensitive) == kCFCompareEqualTo) {
-        NSLog(@"TWO SAME STRINGS");
-    }
-    
-    
     @autoreleasepool {
         interface_status_with_callback(&pc_interface_list);
         gateway_status_with_callback(&gateway_list);
