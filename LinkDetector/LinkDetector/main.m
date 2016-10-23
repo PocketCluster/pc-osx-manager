@@ -10,45 +10,61 @@
 
 bool
 pc_interface_list(PCNetworkInterface** interfaces, unsigned int count) {
-    NSLog(@"total address count %d", count);
+    printf("\n\ntotal intefaces count %d\n", count);
     for (unsigned int i = 0; i < count; i++) {
         
         PCNetworkInterface *iface = *(interfaces + i);
-        printf("%s : %s\n",iface->bsdName, iface->isActive ? "active" : "in-active");
-        if (iface->isPrimary) {
-            printf("\t!!!THIS IS PRIMARY INTERFACE!!!\n");
+        printf("wifiPowerOff : %d\n",iface->wifiPowerOff);
+        printf("isActive : %d\n",iface->isActive);
+        printf("isPrimary : %d\n",iface->isPrimary);
+        printf("addrCount: %d\n",iface->addrCount);
+        
+        if (iface->addrCount != 0) {
+            for (unsigned int i = 0; i < iface->addrCount; i++) {
+                SCNIAddress *addr = *(iface->address + i);
+                printf("\tflags  : %x\n", addr->flags);
+                printf("\tfamily : %d\n", addr->family);
+                printf("\tis_primary : %d\n", addr->is_primary);
+                printf("\taddr : %s\n", addr->addr);
+                printf("\tnetmask : %s\n", addr->netmask);
+                printf("\tbroadcast : %s\n", addr->broadcast);
+                printf("\tpeer : %s\n\t--------------------\n", addr->peer);
+            }
         }
-        printf("\t%s \n",iface->macAddress);
-        printf("\t%s \n",iface->mediaType);
-        printf("\t%s \n---------\n",iface->displayName);
+        
+        printf("bsdName : %s\n",iface->bsdName);
+        printf("displayName: %s\n",iface->displayName);
+        printf("macAddress: %s\n",iface->macAddress);
+        printf("mediaType: %s\n--------------------\n",iface->mediaType);
     }
     return true;
 }
 
 bool
 gateway_list(SCNIGateway** gateways, unsigned int count) {
-    NSLog(@"Total gateway count %d", count);
+    printf("\n\nTotal gateway count %d\n", count);
     for (unsigned int i = 0; i < count; i++) {
         SCNIGateway *gw = *(gateways + i);
-        printf("%s : %s\n",gw->addr, gw->is_default ? "DEFAULT" : "AUXILLARY");
-        printf("\t%s \n---------\n", gw->ifname);
+        printf("family : %d\n",gw->family);
+        printf("is_default : %d\n",gw->is_default);
+        printf("ifname : %s\n",gw->ifname);
+        printf("addr: %s\n",gw->addr);
     }
     return true;
 }
 
-//TODO : 2) Interface status 3) Address Status 5) Async notification 6) leak check
+//TODO : 5) Async notification 6) leak check
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
         
-        
-        
         interface_status_with_callback(&pc_interface_list);
         gateway_status_with_callback(&gateway_list);
+
         
         PCInterfaceStatus *status = [PCInterfaceStatus new];
         [status startMonitoring];
         unsigned int counter = 0;
-        while (counter < 120) {
+        while (counter < 2) {
             sleep(1);
             counter++;
         }

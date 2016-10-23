@@ -3,13 +3,6 @@
   <component name="ClojureProjectSettings">
     <option name="coloredParentheses" value="true" />
   </component>
-  <component name="MavenImportPreferences">
-    <option name="generalSettings">
-      <MavenGeneralSettings>
-        <option name="mavenHome" value="Bundled (Maven 3)" />
-      </MavenGeneralSettings>
-    </option>
-  </component>
   <component name="ProjectDictionaryState">
     <dictionary name="almightykim" />
   </component>

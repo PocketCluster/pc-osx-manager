@@ -11,6 +11,7 @@
 
 #include <stdbool.h>
 
+// TODO : we're supposed to a platform agnostic enum for family as the values of AF_INET/AF_INET6 differs from platform to platform
 typedef struct _SCNIAddress {
     unsigned int       flags;
     unsigned char      family;

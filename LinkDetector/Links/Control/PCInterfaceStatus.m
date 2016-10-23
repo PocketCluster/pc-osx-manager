@@ -6,6 +6,8 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
+#import <net/if.h>
+#import <sys/socket.h>
 #import <string.h>
 #import <CoreWLAN/CWWiFiClient.h>
 #import <CoreWLAN/CWInterface.h>
@@ -45,7 +47,7 @@ static PCNetworkInterface**
 _interface_status(unsigned int*, CFMutableArrayRef);
 
 static SCNIGateway**
-_gateway_status(CFMutableArrayRef);
+_gateway_status(CFMutableArrayRef, unsigned int*);
 
 @interface PCInterfaceStatus()
 @property (readonly) LinkObserver *linkObserver;
@@ -83,104 +85,7 @@ _gateway_status(CFMutableArrayRef);
 }
 @end
 
-#if 0
-+ (NSArray*) allInterfaces
-{
-    __block NSMutableArray *result = [NSMutableArray new];
-    @autoreleasepool {
-        
-        SCDynamicStoreRef storeRef = SCDynamicStoreCreate(NULL, (CFStringRef)@"FindCurrentInterfaceIpMac", NULL, NULL);
-        CFPropertyListRef global = SCDynamicStoreCopyValue(storeRef, CFSTR("State:/Network/Interface"));
-        NSArray *ifaceList = [(__bridge NSArray *)global valueForKey:@"Interfaces"];
-        
-        // grap every interface name
-        for(NSString *iface in ifaceList) {
-            LinkInterface* interface = [LinkInterface new];
-            [interface setBSDName:iface];
-            [result addObject:interface];
-        }
-        
-        // match intefaces and idenfity their kind
-        NSArray *scIfaceList = (NSArray*) CFBridgingRelease(SCNetworkInterfaceCopyAll());
-        for (id iface in scIfaceList) {
-            SCNetworkInterfaceRef interfaceRef = (__bridge SCNetworkInterfaceRef)iface;
-            NSString *bsdName = (__bridge NSString*)SCNetworkInterfaceGetBSDName(interfaceRef);
-            [result enumerateObjectsUsingBlock:^(LinkInterface *link, NSUInteger idx, BOOL *stop) {
-                if ([[link BSDName] isEqualToString:bsdName]) {
-                    link.displayName = (__bridge NSString*)SCNetworkInterfaceGetLocalizedDisplayName(interfaceRef);
-                    link.hardMAC = (__bridge NSString*)SCNetworkInterfaceGetHardwareAddressString(interfaceRef);
-                    link.kind = (__bridge NSString*)SCNetworkInterfaceGetInterfaceType(interfaceRef);
-                    *stop = YES;
-                }
-            }];
-        }
-        
-        // Get list of all interfaces on the local machine & match ip addresses:
-        struct ifaddrs *allInterfaces;
-        if (getifaddrs(&allInterfaces) == 0) {
-            
-            struct ifaddrs *interface;
-            
-            // For each interface ...
-            for (interface = allInterfaces; interface != NULL; interface = interface->ifa_next) {
-                unsigned int flags = interface->ifa_flags;
-                struct sockaddr *addr = interface->ifa_addr;
-                
-                // Check for running IPv4, IPv6 interfaces. Skip the loopback interface.
-                if ((flags & (IFF_UP|IFF_RUNNING|IFF_LOOPBACK)) == (IFF_UP|IFF_RUNNING)) {
-                    
-                    if (addr->sa_family == AF_INET) {
-                        
-                        // Convert interface address to a human readable string:
-                        char host[NI_MAXHOST];
-                        getnameinfo(addr, addr->sa_len, host, sizeof(host), NULL, 0, NI_NUMERICHOST);
-                        
-                        if(strlen(host) != 0){
-                            
-                            NSString *bsdName = [NSString stringWithCString:interface->ifa_name encoding:NSUTF8StringEncoding];
-                            NSString *ip4Address = [NSString stringWithCString:host encoding:NSUTF8StringEncoding];
-                            
-                            [result enumerateObjectsUsingBlock:^(LinkInterface *link, NSUInteger idx, BOOL *stop) {
-                                if([[link BSDName] isEqualToString:bsdName]){
-                                    [link setIp4Address:ip4Address];
-                                    *stop = YES;
-                                }
-                            }];
-                        }
-                    }
-                    
-                    if (addr->sa_family == AF_INET6) {
-                        // Convert interface address to a human readable string:
-                        char host[NI_MAXHOST];
-                        getnameinfo(addr, addr->sa_len, host, sizeof(host), NULL, 0, NI_NUMERICHOST);
-                        
-                        if(strlen(host) != 0){
-                            NSString *bsdName = [NSString stringWithCString:interface->ifa_name encoding:NSUTF8StringEncoding];
-                            NSString *ip6Address = [NSString stringWithCString:host encoding:NSUTF8StringEncoding];
-                            [result enumerateObjectsUsingBlock:^(LinkInterface *link, NSUInteger idx, BOOL *stop) {
-                                if([[link BSDName] isEqualToString:bsdName]){
-                                    [link setIp6Address:ip6Address];
-                                    *stop = YES;
-                                }
-                            }];
-                        }
-                    }
-                }
-            }
-            freeifaddrs(allInterfaces);
-        }
-        
-        CFRelease(global);
-        CFRelease(storeRef);
-    }
-    
-    return (NSArray*)result;
-}
-#endif
-
-
 #pragma mark - ALLOCATION / RELEASE
-
 PCNetworkInterface*
 _pc_interface_new() {
     return (PCNetworkInterface *) calloc(1, sizeof(PCNetworkInterface));
@@ -303,6 +208,14 @@ _primary_interface_address(const char** primary_interface, const char** primary_
     }
 }
 
+
+/*!
+	@function _interface_status
+	@discussion Returns interfaces with ipv4 (dotted format) addresses (no ipv6) linked to the interfaces.
+	@param pcIfaceCount interface count
+           allAddresses A mutable CF array where addresses should be contained to be released later
+	@result The list of interfaces
+ */
 PCNetworkInterface**
 _interface_status(unsigned int* pcIfaceCount, CFMutableArrayRef allAddresses) {
     
@@ -381,18 +294,45 @@ _interface_status(unsigned int* pcIfaceCount, CFMutableArrayRef allAddresses) {
                         CFIndex addrCount = CFArrayGetCount(scniAddr);
                         
                         if (err == 0 && 0 < addrCount) {
-                            SCNIAddress **address = _SCNIAddressArrrayNew((unsigned int) addrCount);
+
+                            // TODO : this should be refactored into using realloc. Iterating twice on the same array is kind of ¯\_(ツ)_/¯
+                            // we only take IPv4 and Valid (UP & RUNNING) addresses. IPv6 will be counted later
+                            unsigned int validAddrCount = 0;
+                            
                             for (CFIndex scai = 0; scai < addrCount; scai++) {
                                 SCNIAddress *addr = (SCNIAddress *) CFArrayGetValueAtIndex(scniAddr, scai);
-                                if (primaryAddress != NULL && addr->addr != NULL && strcmp(primaryAddress, addr->addr) == 0) {
-                                    addr->is_primary = true;
+                                if ((addr->flags & (IFF_UP|IFF_RUNNING|IFF_LOOPBACK)) == (IFF_UP|IFF_RUNNING)) {
+                                    if (addr->family == AF_INET) {
+                                        validAddrCount++;
+                                    }
                                 }
-                                *(address + scai) = addr;
                             }
-                            pcIface->address = address;
-                            pcIface->addrCount = (unsigned int) addrCount;
                             
-                            CFArrayAppendValue(allAddresses, scniAddr);
+                            if (0 < validAddrCount) {
+                                unsigned int addressIndex = 0;
+                                SCNIAddress **address = _SCNIAddressArrrayNew(validAddrCount);
+                                
+                                for (CFIndex scai = 0; scai < addrCount; scai++) {
+                                    SCNIAddress *addr = (SCNIAddress *) CFArrayGetValueAtIndex(scniAddr, scai);
+                                    if ((addr->flags & (IFF_UP|IFF_RUNNING|IFF_LOOPBACK)) == (IFF_UP|IFF_RUNNING)) {
+                                        if (addr->family == AF_INET) {
+                                            if (primaryAddress != NULL && addr->addr != NULL && strcmp(primaryAddress, addr->addr) == 0) {
+                                                addr->is_primary = true;
+                                            }
+                                            *(address + addressIndex) = addr;
+                                            addressIndex++;
+                                        }
+                                    }
+                                }
+                                pcIface->address = address;
+                                pcIface->addrCount = validAddrCount;
+                                
+                                CFArrayAppendValue(allAddresses, scniAddr);
+                            } else {
+                                // since there is no valid address, we'll release now.
+                                SCNetworkInterfaceAddressRelease(scniAddr);
+                            }
+
                         } else {
                             // since this array is empty, we'll release now.
                             SCNetworkInterfaceAddressRelease(scniAddr);
@@ -469,15 +409,34 @@ interface_status_with_gocall() {
 #pragma mark - GATEWAY STATUS ACQUISITION
 
 SCNIGateway**
-_gateway_status(CFMutableArrayRef allGatways) {
+_gateway_status(CFMutableArrayRef allGatways, unsigned int *gatewayCount) {
     SCNIGateway** scniGateways = NULL;
     @autoreleasepool {
         errno_t err = SCNetworkGateways(allGatways);
         CFIndex count = CFArrayGetCount(allGatways);
         if (err == 0 && 0 < count) {
-            scniGateways = _SCNIGatewayArrayNew((unsigned int) count);
+            
+            // TODO : this should be refactored into using realloc.
+            // we only take IPv4 gateways. IPv6 will be counted later
+            unsigned int validGateways = 0;
             for (CFIndex i = 0; i < count; i++) {
-                *(scniGateways + i) = (SCNIGateway*)CFArrayGetValueAtIndex(allGatways, i);
+                SCNIGateway *gw = (SCNIGateway*)CFArrayGetValueAtIndex(allGatways, i);
+                if (gw->family == AF_INET) {
+                    validGateways++;
+                }
+            }
+
+            if (0 < validGateways) {
+                unsigned int gwIndex = 0;
+                scniGateways = _SCNIGatewayArrayNew(validGateways);
+                for (CFIndex i = 0; i < count; i++) {
+                    SCNIGateway *gw = (SCNIGateway*)CFArrayGetValueAtIndex(allGatways, i);
+                    if (gw->family == AF_INET) {
+                        *(scniGateways + gwIndex) = gw;
+                        gwIndex++;
+                    }
+                }
+                *gatewayCount = validGateways;
             }
         }
     }
@@ -490,16 +449,18 @@ gateway_status_with_callback(scni_gateway_callback callback) {
         return;
     }
 
+    unsigned int gatewayCount = 0;
     CFMutableArrayRef allGateways = SCNIMutableGatewayArray();
-    SCNIGateway** scniGateways = _gateway_status(allGateways);
-    unsigned int gatewayCount = (unsigned int) CFArrayGetCount(allGateways);
+    SCNIGateway** scniGateways = _gateway_status(allGateways, &gatewayCount);
     
     if (scniGateways != NULL && 0 < gatewayCount) {
         callback(scniGateways, gatewayCount);
-        _SCNIGatewayArrayRelease(scniGateways);
     } else {
         callback(NULL, 0);
     }
+    
+    // release phase
+    _SCNIGatewayArrayRelease(scniGateways);
     
     // release phase
     SCNetworkGatewayRelease(allGateways);

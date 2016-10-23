@@ -4,7 +4,7 @@ type SCNIAddress struct {
     Flags               uint
     Family              uint8
     IsPrimary           bool
-    Addr                string
+    Address             string
     Netmask             string
     Broadcast           string
     Peer                string
