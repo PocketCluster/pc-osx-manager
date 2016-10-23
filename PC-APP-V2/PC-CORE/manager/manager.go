@@ -1,8 +1,9 @@
 package manager
 
 import (
-    "github.com/stkim1/pc-node-agent/slagent"
     "time"
+
+    "github.com/stkim1/pc-node-agent/slagent"
 )
 
 type MMState int
