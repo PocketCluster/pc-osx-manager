@@ -39,8 +39,20 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
 //TODO : 2) Interface status 3) Address Status 5) Async notification 6) leak check
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
+        
+        
+        
         interface_status_with_callback(&pc_interface_list);
         gateway_status_with_callback(&gateway_list);
+        
+        PCInterfaceStatus *status = [PCInterfaceStatus new];
+        [status startMonitoring];
+        unsigned int counter = 0;
+        while (counter < 120) {
+            sleep(1);
+            counter++;
+        }
+        [status stopMonitoring];
     }
     
     sleep(5);

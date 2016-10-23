@@ -26,18 +26,18 @@ typedef struct _PCNetworkInterface {
 
 typedef bool (*pc_interface_callback)(PCNetworkInterface**, unsigned int);
 
-CF_EXPORT void
+extern void
 interface_status_with_callback(pc_interface_callback);
 
-CF_EXPORT void
+extern void
 interface_status_with_gocall();
 
 typedef bool (*scni_gateway_callback)(SCNIGateway**, unsigned int);
 
-CF_EXPORT void
+extern void
 gateway_status_with_callback(scni_gateway_callback);
 
-CF_EXPORT void
+extern void
 gateway_status_with_gocall();
 
 #endif

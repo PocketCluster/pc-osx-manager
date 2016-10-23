@@ -1,0 +1,1 @@
+/Users/almightykim/Workspace/POCKET/CODE/pc-osx-manager/LinkDetector/Links/Header/SCNetworkTypes.h
