@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		042F33371DBD726C0023DE9E /* util.m in Sources */ = {isa = PBXBuildFile; fileRef = 042F33361DBD726C0023DE9E /* util.m */; };
 		045B52C51DBD27CD00EF7342 /* PCInterfaceStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = 045B52B71DBD27CD00EF7342 /* PCInterfaceStatus.m */; };
 		045B52C61DBD27CD00EF7342 /* SCNetworkInterfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = 045B52BC1DBD27CD00EF7342 /* SCNetworkInterfaces.c */; };
 		045B52C81DBD27CD00EF7342 /* LinkMACVendors.m in Sources */ = {isa = PBXBuildFile; fileRef = 045B52C21DBD27CD00EF7342 /* LinkMACVendors.m */; };
 		045B52C91DBD27CD00EF7342 /* LinkObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 045B52C41DBD27CD00EF7342 /* LinkObserver.m */; };
-		045B52CD1DBD27D800EF7342 /* util.m in Sources */ = {isa = PBXBuildFile; fileRef = 045B52CC1DBD27D800EF7342 /* util.m */; };
 		048C90531DB4FA410096B304 /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 048C90521DB4FA410096B304 /* CoreWLAN.framework */; };
 		04FF75EE1DB4AA2C00E7E1EF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 04FF75ED1DB4AA2C00E7E1EF /* main.m */; };
 		04FF75F51DB4AAA600E7E1EF /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04FF75F41DB4AAA600E7E1EF /* SystemConfiguration.framework */; };
@@ -33,6 +33,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		042F33351DBD726C0023DE9E /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
+		042F33361DBD726C0023DE9E /* util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = util.m; sourceTree = "<group>"; };
 		045B52B61DBD27CD00EF7342 /* PCInterfaceStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCInterfaceStatus.h; sourceTree = "<group>"; };
 		045B52B71DBD27CD00EF7342 /* PCInterfaceStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCInterfaceStatus.m; sourceTree = "<group>"; };
 		045B52B91DBD27CD00EF7342 /* PCInterfaceTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCInterfaceTypes.h; sourceTree = "<group>"; };
@@ -43,8 +45,6 @@
 		045B52C21DBD27CD00EF7342 /* LinkMACVendors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkMACVendors.m; sourceTree = "<group>"; };
 		045B52C31DBD27CD00EF7342 /* LinkObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkObserver.h; sourceTree = "<group>"; };
 		045B52C41DBD27CD00EF7342 /* LinkObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkObserver.m; sourceTree = "<group>"; };
-		045B52CB1DBD27D800EF7342 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
-		045B52CC1DBD27D800EF7342 /* util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = util.m; sourceTree = "<group>"; };
 		048C90521DB4FA410096B304 /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
 		04FF75EA1DB4AA2C00E7E1EF /* LinkDetector */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = LinkDetector; sourceTree = BUILT_PRODUCTS_DIR; };
 		04FF75ED1DB4AA2C00E7E1EF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -71,6 +71,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		042F33341DBD726C0023DE9E /* util */ = {
+			isa = PBXGroup;
+			children = (
+				042F33351DBD726C0023DE9E /* util.h */,
+				042F33361DBD726C0023DE9E /* util.m */,
+			);
+			name = util;
+			path = ../../util;
+			sourceTree = "<group>";
+		};
 		045B52B41DBD27CD00EF7342 /* network */ = {
 			isa = PBXGroup;
 			children = (
@@ -121,16 +131,6 @@
 			path = model;
 			sourceTree = "<group>";
 		};
-		045B52CA1DBD27D800EF7342 /* common */ = {
-			isa = PBXGroup;
-			children = (
-				045B52CB1DBD27D800EF7342 /* util.h */,
-				045B52CC1DBD27D800EF7342 /* util.m */,
-			);
-			name = common;
-			path = ../../common;
-			sourceTree = "<group>";
-		};
 		04BC59411DB87DA900D632FA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -147,7 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				04BC59411DB87DA900D632FA /* Frameworks */,
-				045B52CA1DBD27D800EF7342 /* common */,
+				042F33341DBD726C0023DE9E /* util */,
 				045B52B41DBD27CD00EF7342 /* network */,
 				04FF75EB1DB4AA2C00E7E1EF /* Products */,
 				04FF75EC1DB4AA2C00E7E1EF /* LinkDetector */,
@@ -228,7 +228,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				045B52C81DBD27CD00EF7342 /* LinkMACVendors.m in Sources */,
-				045B52CD1DBD27D800EF7342 /* util.m in Sources */,
+				042F33371DBD726C0023DE9E /* util.m in Sources */,
 				045B52C91DBD27CD00EF7342 /* LinkObserver.m in Sources */,
 				045B52C51DBD27CD00EF7342 /* PCInterfaceStatus.m in Sources */,
 				045B52C61DBD27CD00EF7342 /* SCNetworkInterfaces.c in Sources */,
