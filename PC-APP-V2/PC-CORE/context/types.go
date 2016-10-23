@@ -1,6 +1,6 @@
 package context
 
-type SCNIAddress struct {
+type HostIPAddress struct {
     Flags               uint
     Family              uint8
     IsPrimary           bool
@@ -10,19 +10,19 @@ type SCNIAddress struct {
     Peer                string
 }
 
-type PCNetworkInterface struct {
+type HostNetworkInterface struct {
     WifiPowerOff        bool
     IsActive            bool
     IsPrimary           bool
     AddrCount           uint
-    Address             []*SCNIAddress
+    Address             []*HostIPAddress
     BsdName             string
     DisplayName         string
     MacAddress          string
     MediaType           string
 }
 
-type SCNIGateway struct {
+type HostNetworkGateway struct {
     Family              uint8
     IsDefault           bool
     IfaceName           string

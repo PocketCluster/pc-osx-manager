@@ -1,6 +1,8 @@
 **This is where interface maintaiing policy resides**
 
-## Selection Logic
+## Selection Logic 
+
+**THIS IS NOT IMPLEMENTED IN v0.1.4**
 
 1. find primary interface & address from wifi and ethernet.  
 2. Assume that the client connection would come though this addresses. 

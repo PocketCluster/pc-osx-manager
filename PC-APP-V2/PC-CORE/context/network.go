@@ -1,9 +1,14 @@
 package context
 
-func MasterIPAddress() (string, error) {
-    return "192.168.1.236", nil
+import "fmt"
+
+func HostPrimaryIPAddress() (string, error) {
+    addr := singletonContextInstance().primaryAddress
+    if addr != nil {
+        return addr.Address, nil
+    }
+
+    return "", fmt.Errorf("[ERR] No address has been found")
 }
 
-func MasterLiveInterface() ([]string, error) {
-    return []string{"en0"}, nil
-}
+

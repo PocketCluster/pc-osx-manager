@@ -11,7 +11,7 @@ import (
 var repository *modelRepo
 var once sync.Once
 
-func ModelRepoInstance() (repo ModelRepo) {
+func SharedModelRepoInstance() (repo ModelRepo) {
     repo = singletonModelRepoInstance()
     return
 }
@@ -21,7 +21,7 @@ func CloseModelRepo() {
     repository = nil
 }
 
-func singletonModelRepoInstance() (repo *modelRepo) {
+func singletonModelRepoInstance() (*modelRepo) {
     once.Do(func() {
         repository = &modelRepo{}
         initializeModelRepo(repository)

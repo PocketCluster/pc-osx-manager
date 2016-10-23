@@ -54,7 +54,7 @@ func (SlaveNode) TableName() string {
 }
 
 func InsertSlaveNode(slave *SlaveNode) (err error) {
-    db, err := ModelRepoInstance().Session()
+    db, err := SharedModelRepoInstance().Session()
     if err != nil {
         return
     }
@@ -63,7 +63,7 @@ func InsertSlaveNode(slave *SlaveNode) (err error) {
 }
 
 func FindAllSlaveNode() (nodes []SlaveNode, err error) {
-    db, err := ModelRepoInstance().Session()
+    db, err := SharedModelRepoInstance().Session()
     if err != nil {
         return
     }
@@ -72,7 +72,7 @@ func FindAllSlaveNode() (nodes []SlaveNode, err error) {
 }
 
 func FindSlaveNode(query interface{}, args ...interface{}) (nodes []SlaveNode, err error) {
-    db, err := ModelRepoInstance().Session()
+    db, err := SharedModelRepoInstance().Session()
     if err != nil {
         return
     }
@@ -81,7 +81,7 @@ func FindSlaveNode(query interface{}, args ...interface{}) (nodes []SlaveNode, e
 }
 
 func UpdateSlaveNode(slave *SlaveNode) (err error) {
-    db, err := ModelRepoInstance().Session()
+    db, err := SharedModelRepoInstance().Session()
     if err != nil {
         return
     }
@@ -90,7 +90,7 @@ func UpdateSlaveNode(slave *SlaveNode) (err error) {
 }
 
 func DeleteAllSlaveNode() (err error) {
-    db, err := ModelRepoInstance().Session()
+    db, err := SharedModelRepoInstance().Session()
     if err != nil {
         return
     }

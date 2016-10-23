@@ -5,5 +5,5 @@ func MasterHostSerial() (string, error) {
 }
 
 func MasterApplicationHomePath() (string, error) {
-    return "/User/almightykim/.pocket"
+    return "/User/almightykim/.pocket", nil
 }

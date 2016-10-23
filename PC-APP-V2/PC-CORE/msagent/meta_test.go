@@ -8,7 +8,7 @@ import (
 
     "github.com/stkim1/pc-node-agent/crypt"
     "github.com/stkim1/pc-node-agent/slagent"
-    "github.com/stkim1/pc-core/config"
+    "github.com/stkim1/pc-core/context"
 )
 
 func testMasterPublicKey() []byte {
@@ -67,7 +67,7 @@ G6aFKaqQfOXKCyWoUiVknQJAXrlgySFci/2ueKlIE1QqIiLSZ8V8OlpFLRnb1pzI
 
 var aeskey []byte = []byte("longer means more possible keys ")
 var aesenc, _ = crypt.NewAESCrypto(aeskey)
-var masterAgentName, _ = config.MasterHostSerial()
+var masterAgentName, _ = context.MasterHostSerial()
 var slaveNodeName string = "pc-node1"
 
 

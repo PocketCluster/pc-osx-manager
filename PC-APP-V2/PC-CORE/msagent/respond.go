@@ -3,7 +3,7 @@ package msagent
 import (
     "github.com/stkim1/pc-node-agent/slagent"
     "fmt"
-    "github.com/stkim1/pc-core/config"
+    "github.com/stkim1/pc-core/context"
     "gopkg.in/vmihailenco/msgpack.v2"
 )
 
@@ -89,11 +89,11 @@ func SlaveIdentityInqueryRespond(usd *slagent.PocketSlaveDiscovery) (responder *
 
     // TODO : check if this agent could be bound
 
-    sn, err := config.MasterHostSerial()
+    sn, err := context.MasterHostSerial()
     if err != nil {
         return nil, fmt.Errorf("[ERR] Cannot find out Master serial")
     }
-    ia, err := config.MasterIPAddress()
+    ia, err := context.HostPrimaryIPAddress()
     if err != nil {
         return nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
     }
@@ -125,11 +125,11 @@ func BrokenBindRecoverRespond(usd *slagent.PocketSlaveDiscovery) (responder *Poc
 
     // TODO : check if this agent could be bound
 
-    sn, err := config.MasterHostSerial()
+    sn, err := context.MasterHostSerial()
     if err != nil {
         return nil, fmt.Errorf("[ERR] Cannot find out Master serial")
     }
-    ia, err := config.MasterIPAddress()
+    ia, err := context.HostPrimaryIPAddress()
     if err != nil {
         return nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
     }
