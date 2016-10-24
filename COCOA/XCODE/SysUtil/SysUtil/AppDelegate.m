@@ -7,6 +7,9 @@
 //
 
 #import "AppDelegate.h"
+#import "NSResourcePath.h"
+#import "PCDeviceSerial.h"
+#import "PCUserEnvironment.h"
 
 
 @interface AppDelegate ()
@@ -17,7 +20,20 @@
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-    // Insert code here to initialize your application
+
+    PCApplicationSupportDirectory();
+    PCApplicationDocumentsDirectory();
+    PCApplicationTemporaryDirectory();
+    PCApplicationLibraryCacheDirectory();
+    PCApplicationResourceDirectory();
+    PCApplicationExecutableDirectory();
+    PCDeviceSerialNumber();
+    PCEnvironmentCocoaHomeDirectory();
+
+    PCEnvironmentPosixHomeDirectory();
+    PCEnvironmentFullUserName();
+    PCEnvironmentUserTemporaryDirectory();
+    PCEnvironmentLoginUserName();
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {

@@ -10,7 +10,10 @@
 #define __PCUSERENVIRONMENT_H__
 
 extern const char*
-PCEnvironmentHomeDirectory(void);
+PCEnvironmentCocoaHomeDirectory(void);
+
+extern const char*
+PCEnvironmentPosixHomeDirectory(void);
 
 extern const char*
 PCEnvironmentFullUserName(void);

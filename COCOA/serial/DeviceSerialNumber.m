@@ -30,7 +30,7 @@ CFTypeRef CopySerialNumber()
 
 const char*
 PCDeviceSerialNumber(void) {
-    NSString *sn = [(__bridge NSString*)((CFStringRef)CopySerialNumber()) uppercaseString];
+    __autoreleasing NSString *sn = [(__bridge NSString*)((CFStringRef)CopySerialNumber()) uppercaseString];
     return [sn UTF8String];
 }
 

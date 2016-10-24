@@ -48,7 +48,8 @@
 
 - (void)testDeviceSerial {
     [self setUp];
-    
+
+    NSLog(@"%s", PCDeviceSerialNumber());
     static const char* expected_device_serial = "G8815052XYL";
     XCTAssert(strcmp(PCDeviceSerialNumber(), expected_device_serial) == 0, @"Incorrect Serial number. Expecting G8815052XYL");
     
@@ -58,10 +59,14 @@
 - (void)testUserEnvironment {
     [self setUp];
     
-    NSLog(@"%s", PCEnvironmentHomeDirectory());
+    NSLog(@"%s", PCEnvironmentCocoaHomeDirectory());
     const char* home_directory = "/Users/almightykim";
-    XCTAssert(strcmp(home_directory, PCEnvironmentHomeDirectory()) == 0, @"Incorrect Home directory");
+    XCTAssert(strcmp(home_directory, PCEnvironmentCocoaHomeDirectory()) == 0, @"Incorrect Home directory");
 
+    NSLog(@"%s", PCEnvironmentPosixHomeDirectory());
+    const char* posix_home_directory = "/Users/almightykim";
+    XCTAssert(strcmp(posix_home_directory, PCEnvironmentPosixHomeDirectory()) == 0, @"Incorrect Home directory");
+    
     NSLog(@"%s", PCEnvironmentFullUserName());
     const char* full_name = "Almighty Kim";
     XCTAssert(strcmp(full_name, PCEnvironmentFullUserName()) == 0, @"Incorrect Full username");

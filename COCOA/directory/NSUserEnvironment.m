@@ -6,13 +6,22 @@
 //  Copyright © 2016 PocketCluster. All rights reserved.
 //
 
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
 #import <Foundation/Foundation.h>
 #import "PCUSerEnvironment.h"
 
 const char*
-PCEnvironmentHomeDirectory(void) {
+PCEnvironmentCocoaHomeDirectory(void) {
     NSString* path = NSHomeDirectory();
     return [path UTF8String];
+}
+
+extern const char*
+PCEnvironmentPosixHomeDirectory(void) {
+    struct passwd *pw = getpwuid(getuid());
+    return pw->pw_dir;
 }
 
 const char*
