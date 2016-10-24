@@ -9,6 +9,7 @@
 #import <XCTest/XCTest.h>
 #import <string.h>
 #import "NSResourcePath.h"
+#import "PCDeviceSerial.h"
 
 @interface SysUtilTests : XCTestCase
 
@@ -38,6 +39,9 @@
     XCTAssert([[NSString stringWithUTF8String:PCApplicationResourceDirectory()] hasSuffix:@"SysUtil.app/Contents/Resources"], @"Application Resource path is incorrect");
     
     XCTAssert([[NSString stringWithUTF8String:PCApplicationExecutableDirectory()] hasSuffix:@"/SysUtil"], @"Applicatiopn Executable path is incorrect");
+    
+    static const char* expected_device_serial = "G8815052XYL";
+    XCTAssert(strcmp(PCDeviceSerialNumber(), expected_device_serial) == 0, @"Incorrect Serial number. Expecting G8815052XYL");
 }
 
 @end

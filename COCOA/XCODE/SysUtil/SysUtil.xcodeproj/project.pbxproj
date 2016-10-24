@@ -19,6 +19,8 @@
 		042F33861DBD7E8F0023DE9E /* NSBundle+DirectoryPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 042F33671DBD7DCA0023DE9E /* NSBundle+DirectoryPath.m */; };
 		042F33871DBD7E8F0023DE9E /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = 042F33691DBD7DCA0023DE9E /* NSFileManager+DirectoryLocations.m */; };
 		042F33881DBD7E8F0023DE9E /* NSResourcePath.m in Sources */ = {isa = PBXBuildFile; fileRef = 042F336B1DBD7DCA0023DE9E /* NSResourcePath.m */; };
+		04F59C921DBDDE5D00BA9707 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F59C901DBDDE5D00BA9707 /* DeviceSerialNumber.m */; };
+		04F59C931DBDDE5D00BA9707 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F59C901DBDDE5D00BA9707 /* DeviceSerialNumber.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +58,9 @@
 		042F337C1DBD7E540023DE9E /* SysUtilTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SysUtilTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		042F337E1DBD7E540023DE9E /* SysUtilTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SysUtilTests.m; sourceTree = "<group>"; };
 		042F33801DBD7E540023DE9E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		04F59C8F1DBDDE5D00BA9707 /* DeviceSerialNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceSerialNumber.h; sourceTree = "<group>"; };
+		04F59C901DBDDE5D00BA9707 /* DeviceSerialNumber.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceSerialNumber.m; sourceTree = "<group>"; };
+		04F59C941DBDDEDE00BA9707 /* PCDeviceSerial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCDeviceSerial.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +84,7 @@
 		042F33441DBD7B3B0023DE9E = {
 			isa = PBXGroup;
 			children = (
+				04F59C8E1DBDDE5D00BA9707 /* serial */,
 				042F33631DBD7DCA0023DE9E /* directory */,
 				042F336C1DBD7DCA0023DE9E /* macro */,
 				042F33711DBD7DCA0023DE9E /* util */,
@@ -171,6 +177,25 @@
 				042F33801DBD7E540023DE9E /* Info.plist */,
 			);
 			path = SysUtilTests;
+			sourceTree = "<group>";
+		};
+		04F59C8E1DBDDE5D00BA9707 /* serial */ = {
+			isa = PBXGroup;
+			children = (
+				04F59C8F1DBDDE5D00BA9707 /* DeviceSerialNumber.h */,
+				04F59C901DBDDE5D00BA9707 /* DeviceSerialNumber.m */,
+				04F59C911DBDDE5D00BA9707 /* header */,
+			);
+			name = serial;
+			path = ../../serial;
+			sourceTree = "<group>";
+		};
+		04F59C911DBDDE5D00BA9707 /* header */ = {
+			isa = PBXGroup;
+			children = (
+				04F59C941DBDDEDE00BA9707 /* PCDeviceSerial.h */,
+			);
+			path = header;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -277,6 +302,7 @@
 				042F33761DBD7DCA0023DE9E /* NSResourcePath.m in Sources */,
 				042F33751DBD7DCA0023DE9E /* NSFileManager+DirectoryLocations.m in Sources */,
 				042F33741DBD7DCA0023DE9E /* NSBundle+DirectoryPath.m in Sources */,
+				04F59C921DBDDE5D00BA9707 /* DeviceSerialNumber.m in Sources */,
 				042F33521DBD7B3B0023DE9E /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -288,6 +314,7 @@
 				042F337F1DBD7E540023DE9E /* SysUtilTests.m in Sources */,
 				042F33861DBD7E8F0023DE9E /* NSBundle+DirectoryPath.m in Sources */,
 				042F33871DBD7E8F0023DE9E /* NSFileManager+DirectoryLocations.m in Sources */,
+				04F59C931DBDDE5D00BA9707 /* DeviceSerialNumber.m in Sources */,
 				042F33881DBD7E8F0023DE9E /* NSResourcePath.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -466,6 +493,7 @@
 				042F33601DBD7B3B0023DE9E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		042F33831DBD7E540023DE9E /* Build configuration list for PBXNativeTarget "SysUtilTests" */ = {
 			isa = XCConfigurationList;
@@ -474,6 +502,7 @@
 				042F33851DBD7E540023DE9E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
