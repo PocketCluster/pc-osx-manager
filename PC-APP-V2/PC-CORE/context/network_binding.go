@@ -2,7 +2,7 @@ package context
 
 /*
 #cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -Wl,-U,_interface_status_with_callback,-U,_interface_status_with_gocall,-U,_gateway_status_with_callback,-U,_gateway_status_with_gocall  -framework Cocoa
+#cgo LDFLAGS: -Wl,-U,_interface_status_with_callback,-U,_interface_status_with_gocall,-U,_gateway_status_with_callback,-U,_gateway_status_with_gocall
 
 #include "SCNetworkTypes.h"
 #include "PCInterfaceTypes.h"

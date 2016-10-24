@@ -1,5 +1,6 @@
 package msagent
 
+/*
 import (
     "fmt"
     "time"
@@ -210,13 +211,11 @@ func TestMasterDeclarationMeta(t *testing.T) {
         return
     }
 
-    // TODO need to check msater address, timestamp, timezone
-/*
-    if meta.StatusCommand.MasterAddress != "" {
-    }
-    if meta.StatusCommand.MasterTimestamp.String() != "" {
-    }
-*/
+//    TODO need to check msater address, timestamp, timezone
+//    if meta.StatusCommand.MasterAddress != "" {
+//    }
+//    if meta.StatusCommand.MasterTimestamp.String() != "" {
+//    }
 
     mp, err := PackedMasterMeta(meta)
     if err != nil {
@@ -526,3 +525,4 @@ func TestBoundedStatusMeta(t *testing.T) {
 
 func ExampleBindBrokenMeta() {
 }
+*/
