@@ -21,6 +21,8 @@
 		042F33881DBD7E8F0023DE9E /* NSResourcePath.m in Sources */ = {isa = PBXBuildFile; fileRef = 042F336B1DBD7DCA0023DE9E /* NSResourcePath.m */; };
 		04F59C921DBDDE5D00BA9707 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F59C901DBDDE5D00BA9707 /* DeviceSerialNumber.m */; };
 		04F59C931DBDDE5D00BA9707 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F59C901DBDDE5D00BA9707 /* DeviceSerialNumber.m */; };
+		04F59C971DBDE3C800BA9707 /* NSUserEnvironment.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F59C961DBDE3C800BA9707 /* NSUserEnvironment.m */; };
+		04F59C981DBDE3C800BA9707 /* NSUserEnvironment.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F59C961DBDE3C800BA9707 /* NSUserEnvironment.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +63,8 @@
 		04F59C8F1DBDDE5D00BA9707 /* DeviceSerialNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceSerialNumber.h; sourceTree = "<group>"; };
 		04F59C901DBDDE5D00BA9707 /* DeviceSerialNumber.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceSerialNumber.m; sourceTree = "<group>"; };
 		04F59C941DBDDEDE00BA9707 /* PCDeviceSerial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCDeviceSerial.h; sourceTree = "<group>"; };
+		04F59C951DBDE3B300BA9707 /* PCUserEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCUserEnvironment.h; sourceTree = "<group>"; };
+		04F59C961DBDE3C800BA9707 /* NSUserEnvironment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSUserEnvironment.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,6 +139,7 @@
 				042F33691DBD7DCA0023DE9E /* NSFileManager+DirectoryLocations.m */,
 				042F336A1DBD7DCA0023DE9E /* NSResourcePath.h */,
 				042F336B1DBD7DCA0023DE9E /* NSResourcePath.m */,
+				04F59C961DBDE3C800BA9707 /* NSUserEnvironment.m */,
 			);
 			name = directory;
 			path = ../../directory;
@@ -144,6 +149,7 @@
 			isa = PBXGroup;
 			children = (
 				042F33651DBD7DCA0023DE9E /* PCApplicationPath.h */,
+				04F59C951DBDE3B300BA9707 /* PCUserEnvironment.h */,
 			);
 			path = header;
 			sourceTree = "<group>";
@@ -300,6 +306,7 @@
 				042F33551DBD7B3B0023DE9E /* main.m in Sources */,
 				042F33771DBD7DCA0023DE9E /* util.m in Sources */,
 				042F33761DBD7DCA0023DE9E /* NSResourcePath.m in Sources */,
+				04F59C971DBDE3C800BA9707 /* NSUserEnvironment.m in Sources */,
 				042F33751DBD7DCA0023DE9E /* NSFileManager+DirectoryLocations.m in Sources */,
 				042F33741DBD7DCA0023DE9E /* NSBundle+DirectoryPath.m in Sources */,
 				04F59C921DBDDE5D00BA9707 /* DeviceSerialNumber.m in Sources */,
@@ -316,6 +323,7 @@
 				042F33871DBD7E8F0023DE9E /* NSFileManager+DirectoryLocations.m in Sources */,
 				04F59C931DBDDE5D00BA9707 /* DeviceSerialNumber.m in Sources */,
 				042F33881DBD7E8F0023DE9E /* NSResourcePath.m in Sources */,
+				04F59C981DBDE3C800BA9707 /* NSUserEnvironment.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

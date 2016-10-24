@@ -10,6 +10,7 @@
 #import <string.h>
 #import "NSResourcePath.h"
 #import "PCDeviceSerial.h"
+#import "PCUserEnvironment.h"
 
 @interface SysUtilTests : XCTestCase
 
@@ -26,6 +27,8 @@
 }
 
 - (void)testPathes {
+    [self setUp];
+    
     static const char* app_support_path = "/Users/almightykim/Library/Application Support/SysUtil";
     XCTAssert(strcmp(app_support_path, PCApplicationSupportDirectory()) == 0, @"Application Support path is incorrect");
 
@@ -40,8 +43,36 @@
     
     XCTAssert([[NSString stringWithUTF8String:PCApplicationExecutableDirectory()] hasSuffix:@"/SysUtil"], @"Applicatiopn Executable path is incorrect");
     
+    [self tearDown];
+}
+
+- (void)testDeviceSerial {
+    [self setUp];
+    
     static const char* expected_device_serial = "G8815052XYL";
     XCTAssert(strcmp(PCDeviceSerialNumber(), expected_device_serial) == 0, @"Incorrect Serial number. Expecting G8815052XYL");
+    
+    [self tearDown];
+}
+
+- (void)testUserEnvironment {
+    [self setUp];
+    
+    NSLog(@"%s", PCEnvironmentHomeDirectory());
+    const char* home_directory = "/Users/almightykim";
+    XCTAssert(strcmp(home_directory, PCEnvironmentHomeDirectory()) == 0, @"Incorrect Home directory");
+
+    NSLog(@"%s", PCEnvironmentFullUserName());
+    const char* full_name = "Almighty Kim";
+    XCTAssert(strcmp(full_name, PCEnvironmentFullUserName()) == 0, @"Incorrect Full username");
+    
+    NSLog(@"%s", PCEnvironmentUserTemporaryDirectory());
+    
+    NSLog(@"%s", PCEnvironmentLoginUserName());
+    const char* login_name = "almightykim";
+    XCTAssert(strcmp(login_name, PCEnvironmentLoginUserName()) == 0, @"Incorrect login username");
+    
+    [self tearDown];
 }
 
 @end
