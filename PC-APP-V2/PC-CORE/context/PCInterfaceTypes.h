@@ -1,1 +1,1 @@
-/Users/almightykim/Workspace/POCKET/CODE/pc-osx-manager/COCOA/network/header/PCInterfaceTypes.h
+../../../COCOA/network/header/PCInterfaceTypes.h

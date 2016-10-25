@@ -33,8 +33,8 @@ CFMutableArrayRef SCNIMutableAddressArray(void);
 /*!
 	@function SCNetworkInterfaceAddresses
 	@discussion Returns ipv4/v6 addresses (dotted format) linked to the interface.
-	@param interface The network interface.
-            A mutable CF array where addresses should be contained
+	@param interface The targetted network interface.
+    @param results A mutable CF array where addresses should be contained
 	@result The list of ipv4/v6 addresses linked the interface;
             0 length CFArray if no ipv4/v6 addresses are supported or linked.
  */
@@ -44,7 +44,7 @@ errno_t SCNetworkInterfaceAddresses(SCNetworkInterfaceRef interface, CFMutableAr
 /*!
 	@function SCNetworkInterfaceAddressRelease
 	@discussion Releases results addresses in a mutable array
-	@param A mutable array containing all addresses
+	@param results A mutable array containing all addresses
  */
 CF_EXPORT
 void SCNetworkInterfaceAddressRelease(CFMutableArrayRef results);

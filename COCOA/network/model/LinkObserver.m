@@ -27,32 +27,90 @@ static void observerNotificationProxy(SCDynamicStoreRef store, CFArrayRef trigge
   }
 }
 
-@implementation LinkObserver
-
-@synthesize dynamicStore, runLoop;
-
-- (instancetype) init {
-  self = [super init];
-  if (self) {
-    CFRunLoopAddSource([[NSRunLoop currentRunLoop] getCFRunLoop], self.runLoop, kCFRunLoopCommonModes);
-    SCDynamicStoreSetNotificationKeys(self.dynamicStore, NULL, (__bridge CFArrayRef)@[@".*"]);
-  }
-  return self;
+static void _appendNotificationPattenKey(CFMutableArrayRef keysArray, CFMutableArrayRef patternArray, CFStringRef patternKey) {
+    CFStringRef storeKey;
+    storeKey = SCDynamicStoreKeyCreateNetworkGlobalEntity(NULL,
+                                                          kSCDynamicStoreDomainState,
+                                                          patternKey);
+    CFArrayAppendValue(keysArray, storeKey);
+    CFRelease(storeKey);
+    
+    storeKey = SCDynamicStoreKeyCreateNetworkServiceEntity(NULL,
+                                                           kSCDynamicStoreDomainState,
+                                                           kSCCompAnyRegex,
+                                                           patternKey);
+    CFArrayAppendValue(patternArray, storeKey);
+    CFRelease(storeKey);
 }
 
-// Internal
+
+@implementation LinkObserver
+@synthesize dynamicStore;
+@synthesize runLoop;
+
+- (instancetype) init {
+    self = [super init];
+    if (self) {
+        //CFRunLoopAddSource([[NSRunLoop currentRunLoop] getCFRunLoop], self.runLoop, kCFRunLoopCommonModes);
+        //SCDynamicStoreSetNotificationKeys(self.dynamicStore, NULL, (__bridge CFArrayRef)@[@".*"]);
+        
+        // Although this is not specifically designed to run on main runloop, it is desired to do so.
+        // in that case, it is beneficial to be in common mode than default mode.
+        // http://stackoverflow.com/questions/7222449/nsdefaultrunloopmode-vs-nsrunloopcommonmodes
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), self.runLoop, kCFRunLoopCommonModes);
+    }
+    return self;
+}
+
+- (void)dealloc {
+    CFRunLoopRemoveSource(CFRunLoopGetCurrent(), self.runLoop, kCFRunLoopCommonModes);
+    if (runLoop != NULL) {
+        CFRelease(runLoop);
+    }
+    if (dynamicStore != NULL) {
+        CFRelease(dynamicStore);
+    }
+}
 
 - (SCDynamicStoreRef) dynamicStore {
-  if (dynamicStore) return dynamicStore;
-  SCDynamicStoreContext context = {0, (__bridge void *)(self), NULL, NULL, NULL};
-  dynamicStore = SCDynamicStoreCreate(NULL, (__bridge CFStringRef) [[NSBundle mainBundle] bundleIdentifier], observerNotificationProxy, &context);
-  return dynamicStore;
+    if (dynamicStore) {
+        return dynamicStore;
+    }
+    SCDynamicStoreContext context = {0, (__bridge void *)(self), NULL, NULL, NULL};
+    dynamicStore = SCDynamicStoreCreate(NULL,
+                                        CFSTR("PocketClusterNetworkChangedCallback"),
+                                        observerNotificationProxy,
+                                        &context);
+    
+    CFMutableArrayRef keysArray = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
+    CFMutableArrayRef regexArray = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
+    
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetLink);
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetDNS);
+    // TODO : IPv6 is not supported.
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetIPv4);
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetAirPort);
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetDHCP);
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetEthernet);
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetFireWire);
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetInterface);
+    
+    if (!SCDynamicStoreSetNotificationKeys(dynamicStore, keysArray, regexArray)) {
+        CFRelease(dynamicStore);
+        dynamicStore = NULL;
+    }
+    
+    CFRelease(keysArray);
+    CFRelease(regexArray);
+    return dynamicStore;
 }
 
 - (CFRunLoopSourceRef) runLoop {
-  if (runLoop) return runLoop;
-  runLoop = SCDynamicStoreCreateRunLoopSource(NULL, self.dynamicStore, 0);
-  return runLoop;
+    if (runLoop) {
+        return runLoop;
+    }
+    runLoop = SCDynamicStoreCreateRunLoopSource(NULL, self.dynamicStore, 0);
+    return runLoop;
 }
 
 @end

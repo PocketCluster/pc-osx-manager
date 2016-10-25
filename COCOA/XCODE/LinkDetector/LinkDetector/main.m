@@ -10,7 +10,7 @@
 
 bool
 pc_interface_list(PCNetworkInterface** interfaces, unsigned int count) {
-    printf("\n\ntotal intefaces count %d\n", count);
+    printf("\n\n---- total intefaces count %d ----\n\n", count);
     for (unsigned int i = 0; i < count; i++) {
         
         PCNetworkInterface *iface = *(interfaces + i);
@@ -37,18 +37,29 @@ pc_interface_list(PCNetworkInterface** interfaces, unsigned int count) {
         printf("macAddress: %s\n",iface->macAddress);
         printf("mediaType: %s\n--------------------\n",iface->mediaType);
     }
+    
+    if ([NSThread isMainThread]) {
+        printf("!!! THIS IS M.A.I.N THREAD!!!\n\n");
+    } else {
+        printf("!!! this not main thread!!!\n\n");
+    }
     return true;
 }
 
 bool
 gateway_list(SCNIGateway** gateways, unsigned int count) {
-    printf("\n\nTotal gateway count %d\n", count);
+    printf("\n\n---- Total gateway count %d ----\n", count);
     for (unsigned int i = 0; i < count; i++) {
         SCNIGateway *gw = *(gateways + i);
         printf("family : %d\n",gw->family);
         printf("is_default : %d\n",gw->is_default);
         printf("ifname : %s\n",gw->ifname);
         printf("addr: %s\n",gw->addr);
+    }
+    if ([NSThread isMainThread]) {
+        printf("!!! THIS IS M.A.I.N THREAD!!!\n\n");
+    } else {
+        printf("!!! this not main thread!!!\n\n");
     }
     return true;
 }
@@ -64,9 +75,11 @@ int main(int argc, const char * argv[]) {
         PCInterfaceStatus *status = [PCInterfaceStatus new];
         [status startMonitoring];
         unsigned int counter = 0;
-        while (counter < 2) {
+        while (counter < 60) {
             sleep(1);
-            counter++;
+            if (!(++counter % 4)) {
+                printf("counting %d\n", counter);
+            }
         }
         [status stopMonitoring];
     }
