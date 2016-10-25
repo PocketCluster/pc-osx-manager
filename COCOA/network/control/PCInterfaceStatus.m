@@ -89,8 +89,8 @@ _gateway_status(CFMutableArrayRef, unsigned int*);
     NSLog(@"Network configuration has changed");
 }
 
-- (void)networkConfigurationDidChange:(LinkObserver *)observer {
-    NSLog(@"Network configuration has changed %@ - %@", observer, [[NSDate date] description]);
+- (void)networkConfigurationDidChangeForKey:(NSString *)configKey {
+    NSLog(@"Network configuration has changed %@ - %@", configKey, [[NSDate date] description]);
     if ([NSThread isMainThread]) {
         printf("!!! THIS IS M.A.I.N THREAD!!!\n\n");
     } else {

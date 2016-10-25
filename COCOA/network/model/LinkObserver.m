@@ -15,6 +15,9 @@
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+//#define SHOULD_FILTER_EVENT 1
+//#define SHOULD_DELIVER_ALLVALUES 1
+
 #import "LinkObserver.h"
 
 static void
@@ -42,13 +45,21 @@ _observerNotificationProxy(SCDynamicStoreRef store, CFArrayRef triggeredKeys, vo
     }
 #else
     // since we only need to deliever the event itself, we'll reduce as much as it's possible. Plus, no actual value would be delievered
-    if ([notification respondsToSelector:@selector(networkConfigurationDidChange:)]) {
-        [NSObject cancelPreviousPerformRequestsWithTarget:notification selector:@selector(networkConfigurationDidChange:) object:nil];
-        [notification performSelector:@selector(networkConfigurationDidChange:) withObject:observer afterDelay:1.0 inModes:@[NSRunLoopCommonModes]];
+    if ([notification respondsToSelector:@selector(networkConfigurationDidChangeForKey:)]) {
+        
+        //TODO : filter the same key goes out in a time window.
+        //[NSObject cancelPreviousPerformRequestsWithTarget:notification selector:@selector(networkConfigurationDidChangeForKey:) object:nil];
+        //[notification performSelector:@selector(networkConfigurationDidChangeForKey:) withObject:observer afterDelay:1.0 inModes:@[NSRunLoopCommonModes]];
+        
+        for (CFIndex idx = 0; idx < CFArrayGetCount(triggeredKeys); idx++) {
+            CFStringRef key = (CFStringRef)CFArrayGetValueAtIndex(triggeredKeys, idx);
+            [notification performSelector:@selector(networkConfigurationDidChangeForKey:) withObject:(__bridge NSString *)key afterDelay:0 inModes:@[NSRunLoopCommonModes]];
+        }
     }
 #endif
 }
 
+#ifdef SHOULD_FILTER_EVENT
 static void
 _appendNotificationPattenKey(CFMutableArrayRef keysArray, CFMutableArrayRef patternArray, CFStringRef patternKey) {
     CFStringRef storeKey;
@@ -65,6 +76,12 @@ _appendNotificationPattenKey(CFMutableArrayRef keysArray, CFMutableArrayRef patt
     CFArrayAppendValue(patternArray, storeKey);
     CFRelease(storeKey);
 }
+#endif
+
+@interface LinkObserver()
+@property (readonly) SCDynamicStoreRef dynamicStore;
+@property (readonly) CFRunLoopSourceRef runLoop;
+@end
 
 @implementation LinkObserver
 @synthesize dynamicStore;
@@ -77,6 +94,9 @@ _appendNotificationPattenKey(CFMutableArrayRef keysArray, CFMutableArrayRef patt
         // in that case, it is beneficial to be in common mode than default mode.
         // http://stackoverflow.com/questions/7222449/nsdefaultrunloopmode-vs-nsrunloopcommonmodes
         CFRunLoopAddSource(CFRunLoopGetCurrent(), self.runLoop, kCFRunLoopCommonModes);
+#ifndef SHOULD_FILTER_EVENT
+        SCDynamicStoreSetNotificationKeys(self.dynamicStore, NULL, (__bridge CFArrayRef)@[@".*"]);
+#endif
     }
     return self;
 }
@@ -100,14 +120,11 @@ _appendNotificationPattenKey(CFMutableArrayRef keysArray, CFMutableArrayRef patt
                                         CFSTR("PocketClusterNetworkChangedCallback"),
                                         _observerNotificationProxy,
                                         &context);
-    
+
+#ifdef SHOULD_FILTER_EVENT
     CFMutableArrayRef keysArray = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
     CFMutableArrayRef regexArray = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
-    
-    // TODO : IPv6 is not supported.
-    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetIPv4);
 
-#if 0
     _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetLink);
     _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetDNS);
     _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetAirPort);
@@ -115,7 +132,9 @@ _appendNotificationPattenKey(CFMutableArrayRef keysArray, CFMutableArrayRef patt
     _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetEthernet);
     _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetFireWire);
     _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetInterface);
-#endif
+    
+    // TODO : IPv6 is not supported.
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetIPv4);
     
     if (!SCDynamicStoreSetNotificationKeys(dynamicStore, keysArray, regexArray)) {
         CFRelease(dynamicStore);
@@ -124,6 +143,8 @@ _appendNotificationPattenKey(CFMutableArrayRef keysArray, CFMutableArrayRef patt
     
     CFRelease(keysArray);
     CFRelease(regexArray);
+#endif
+    
     return dynamicStore;
 }
 
