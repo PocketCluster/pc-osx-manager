@@ -16,8 +16,15 @@
 
 #import <SystemConfiguration/SystemConfiguration.h>
 
+@class LinkObserver;
+@protocol LinkObserverNotification <NSObject>
+- (void)networkConfigurationDidChange:(LinkObserver *)observer configChanged:(NSDictionary *)configChanged;
+- (void)networkConfigurationDidChange:(LinkObserver *)observer;
+@end
+
 @interface LinkObserver : NSObject
 
+@property (weak)     NSObject<LinkObserverNotification> *delegate;
 @property (readonly) SCDynamicStoreRef dynamicStore;
 @property (readonly) CFRunLoopSourceRef runLoop;
 

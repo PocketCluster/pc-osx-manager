@@ -70,7 +70,7 @@ errno_t SCNetworkGateways(CFMutableArrayRef results);
 /*!
 	@function SCNetworkInteraceGatewayRelease
 	@discussion Releases results addresses in a mutable array
-	@param A mutable array containing all addresses
+	@param results A mutable array containing all addresses
  */
 CF_EXPORT
 void SCNetworkGatewayRelease(CFMutableArrayRef results);

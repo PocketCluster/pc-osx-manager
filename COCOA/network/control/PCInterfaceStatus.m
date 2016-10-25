@@ -49,40 +49,55 @@ _interface_status(unsigned int*, CFMutableArrayRef);
 static SCNIGateway**
 _gateway_status(CFMutableArrayRef, unsigned int*);
 
-@interface PCInterfaceStatus()
+@interface PCInterfaceStatus()<LinkObserverNotification>
 @property (readonly) LinkObserver *linkObserver;
 @end
 
-@implementation PCInterfaceStatus
+@implementation PCInterfaceStatus {
+    BOOL    _shouldStartMonitor;
+}
 @synthesize linkObserver;
+-(instancetype)init {
+    self = [super init];
+    if (self) {
+        _shouldStartMonitor = NO;
+        [self.linkObserver setDelegate:self];
+    }
+    return self;
+}
 
 #pragma mark - PROPERTIES
 - (LinkObserver*) linkObserver {
-    if (linkObserver) return linkObserver;
+    if (linkObserver) {
+        return linkObserver;
+    }
     linkObserver = [LinkObserver new];
     return linkObserver;
 }
 
 #pragma mark - METHODS
-- (void) interfacesDidChange:(NSNotification*)notififcation {
-    NSLog(@"Interface change detected...");
+- (void)startMonitoring {
+    _shouldStartMonitor = YES;
 }
 
-- (void) startMonitoring {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(interfacesDidChange:) name:@"State:/Network/Interface" object:self.linkObserver];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(interfacesDidChange:) name:@"State:/Network/Interface/en0/AirPort" object:self.linkObserver];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(interfacesDidChange:) name:@"State:/Network/Interface/en1/AirPort" object:self.linkObserver];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(interfacesDidChange:) name:@"State:/Network/Interface/en2/AirPort" object:self.linkObserver];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(interfacesDidChange:) name:@"State:/Network/Interface/en3/AirPort" object:self.linkObserver];
+- (void)stopMonitoring {
+    _shouldStartMonitor = NO;
 }
 
-- (void) stopMonitoring {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"State:/Network/Interface" object:self.linkObserver];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"State:/Network/Interface/en0/AirPort" object:self.linkObserver];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"State:/Network/Interface/en1/AirPort" object:self.linkObserver];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"State:/Network/Interface/en2/AirPort" object:self.linkObserver];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"State:/Network/Interface/en3/AirPort" object:self.linkObserver];
+#pragma mark - LinkObserverNotification protocol
+- (void)networkConfigurationDidChange:(LinkObserver *)observer configChanged:(NSDictionary *)configChanged {
+    NSLog(@"Network configuration has changed");
 }
+
+- (void)networkConfigurationDidChange:(LinkObserver *)observer {
+    NSLog(@"Network configuration has changed %@ - %@", observer, [[NSDate date] description]);
+    if ([NSThread isMainThread]) {
+        printf("!!! THIS IS M.A.I.N THREAD!!!\n\n");
+    } else {
+        printf("!!! this not main thread!!!\n\n");
+    }
+}
+
 @end
 
 #pragma mark - ALLOCATION / RELEASE
@@ -92,7 +107,6 @@ _pc_interface_new() {
 }
 
 void
-
 _pc_interface_release(PCNetworkInterface* interface) {
     if (interface != NULL) {
         if (interface->address != NULL) {

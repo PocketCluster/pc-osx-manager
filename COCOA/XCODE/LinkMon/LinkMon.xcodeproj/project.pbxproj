@@ -1,0 +1,548 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0497C5551DC00254006FEE0F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5541DC00254006FEE0F /* AppDelegate.m */; };
+		0497C5581DC00254006FEE0F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5571DC00254006FEE0F /* main.m */; };
+		0497C55A1DC00254006FEE0F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0497C5591DC00254006FEE0F /* Assets.xcassets */; };
+		0497C55D1DC00255006FEE0F /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0497C55B1DC00255006FEE0F /* MainMenu.xib */; };
+		0497C5681DC00255006FEE0F /* LinkMonTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5671DC00255006FEE0F /* LinkMonTests.m */; };
+		0497C5781DC0026D006FEE0F /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0497C5731DC0026D006FEE0F /* CoreWLAN.framework */; };
+		0497C5791DC0026D006FEE0F /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0497C5731DC0026D006FEE0F /* CoreWLAN.framework */; };
+		0497C57A1DC0026D006FEE0F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0497C5741DC0026D006FEE0F /* Cocoa.framework */; };
+		0497C57B1DC0026D006FEE0F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0497C5741DC0026D006FEE0F /* Cocoa.framework */; };
+		0497C57C1DC0026D006FEE0F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0497C5751DC0026D006FEE0F /* Foundation.framework */; };
+		0497C57D1DC0026D006FEE0F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0497C5751DC0026D006FEE0F /* Foundation.framework */; };
+		0497C57E1DC0026D006FEE0F /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0497C5761DC0026D006FEE0F /* CFNetwork.framework */; };
+		0497C57F1DC0026D006FEE0F /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0497C5761DC0026D006FEE0F /* CFNetwork.framework */; };
+		0497C5801DC0026D006FEE0F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0497C5771DC0026D006FEE0F /* SystemConfiguration.framework */; };
+		0497C5811DC0026D006FEE0F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0497C5771DC0026D006FEE0F /* SystemConfiguration.framework */; };
+		0497C5961DC0027F006FEE0F /* PCInterfaceStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5851DC0027F006FEE0F /* PCInterfaceStatus.m */; };
+		0497C5971DC0027F006FEE0F /* PCInterfaceStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5851DC0027F006FEE0F /* PCInterfaceStatus.m */; };
+		0497C5981DC0027F006FEE0F /* SCNetworkInterfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = 0497C58A1DC0027F006FEE0F /* SCNetworkInterfaces.c */; };
+		0497C5991DC0027F006FEE0F /* SCNetworkInterfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = 0497C58A1DC0027F006FEE0F /* SCNetworkInterfaces.c */; };
+		0497C59C1DC0027F006FEE0F /* LinkMACVendors.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5901DC0027F006FEE0F /* LinkMACVendors.m */; };
+		0497C59D1DC0027F006FEE0F /* LinkMACVendors.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5901DC0027F006FEE0F /* LinkMACVendors.m */; };
+		0497C59E1DC0027F006FEE0F /* LinkObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5921DC0027F006FEE0F /* LinkObserver.m */; };
+		0497C59F1DC0027F006FEE0F /* LinkObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5921DC0027F006FEE0F /* LinkObserver.m */; };
+		0497C5A01DC0027F006FEE0F /* util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5951DC0027F006FEE0F /* util.m */; };
+		0497C5A11DC0027F006FEE0F /* util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5951DC0027F006FEE0F /* util.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0497C5641DC00255006FEE0F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0497C5481DC00254006FEE0F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0497C54F1DC00254006FEE0F;
+			remoteInfo = LinkMon;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0497C5501DC00254006FEE0F /* LinkMon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LinkMon.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0497C5531DC00254006FEE0F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		0497C5541DC00254006FEE0F /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		0497C5571DC00254006FEE0F /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		0497C5591DC00254006FEE0F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		0497C55C1DC00255006FEE0F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		0497C55E1DC00255006FEE0F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0497C5631DC00255006FEE0F /* LinkMonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LinkMonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0497C5671DC00255006FEE0F /* LinkMonTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LinkMonTests.m; sourceTree = "<group>"; };
+		0497C5691DC00255006FEE0F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0497C5731DC0026D006FEE0F /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
+		0497C5741DC0026D006FEE0F /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		0497C5751DC0026D006FEE0F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		0497C5761DC0026D006FEE0F /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		0497C5771DC0026D006FEE0F /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		0497C5841DC0027F006FEE0F /* PCInterfaceStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCInterfaceStatus.h; sourceTree = "<group>"; };
+		0497C5851DC0027F006FEE0F /* PCInterfaceStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCInterfaceStatus.m; sourceTree = "<group>"; };
+		0497C5871DC0027F006FEE0F /* PCInterfaceTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCInterfaceTypes.h; sourceTree = "<group>"; };
+		0497C5881DC0027F006FEE0F /* SCNetworkTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCNetworkTypes.h; sourceTree = "<group>"; };
+		0497C58A1DC0027F006FEE0F /* SCNetworkInterfaces.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SCNetworkInterfaces.c; sourceTree = "<group>"; };
+		0497C58B1DC0027F006FEE0F /* SCNetworkInterfaces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCNetworkInterfaces.h; sourceTree = "<group>"; };
+		0497C58F1DC0027F006FEE0F /* LinkMACVendors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkMACVendors.h; sourceTree = "<group>"; };
+		0497C5901DC0027F006FEE0F /* LinkMACVendors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkMACVendors.m; sourceTree = "<group>"; };
+		0497C5911DC0027F006FEE0F /* LinkObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkObserver.h; sourceTree = "<group>"; };
+		0497C5921DC0027F006FEE0F /* LinkObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkObserver.m; sourceTree = "<group>"; };
+		0497C5941DC0027F006FEE0F /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
+		0497C5951DC0027F006FEE0F /* util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = util.m; sourceTree = "<group>"; };
+		0497C5A21DC002A6006FEE0F /* common.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.pch; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0497C54D1DC00254006FEE0F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0497C57A1DC0026D006FEE0F /* Cocoa.framework in Frameworks */,
+				0497C5801DC0026D006FEE0F /* SystemConfiguration.framework in Frameworks */,
+				0497C57C1DC0026D006FEE0F /* Foundation.framework in Frameworks */,
+				0497C57E1DC0026D006FEE0F /* CFNetwork.framework in Frameworks */,
+				0497C5781DC0026D006FEE0F /* CoreWLAN.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0497C5601DC00255006FEE0F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0497C57B1DC0026D006FEE0F /* Cocoa.framework in Frameworks */,
+				0497C5811DC0026D006FEE0F /* SystemConfiguration.framework in Frameworks */,
+				0497C57D1DC0026D006FEE0F /* Foundation.framework in Frameworks */,
+				0497C57F1DC0026D006FEE0F /* CFNetwork.framework in Frameworks */,
+				0497C5791DC0026D006FEE0F /* CoreWLAN.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0497C5471DC00254006FEE0F = {
+			isa = PBXGroup;
+			children = (
+				0497C5721DC00261006FEE0F /* Framework */,
+				0497C5821DC0027F006FEE0F /* network */,
+				0497C5931DC0027F006FEE0F /* util */,
+				0497C5521DC00254006FEE0F /* LinkMon */,
+				0497C5661DC00255006FEE0F /* LinkMonTests */,
+				0497C5511DC00254006FEE0F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		0497C5511DC00254006FEE0F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0497C5501DC00254006FEE0F /* LinkMon.app */,
+				0497C5631DC00255006FEE0F /* LinkMonTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		0497C5521DC00254006FEE0F /* LinkMon */ = {
+			isa = PBXGroup;
+			children = (
+				0497C5531DC00254006FEE0F /* AppDelegate.h */,
+				0497C5541DC00254006FEE0F /* AppDelegate.m */,
+				0497C5591DC00254006FEE0F /* Assets.xcassets */,
+				0497C55B1DC00255006FEE0F /* MainMenu.xib */,
+				0497C55E1DC00255006FEE0F /* Info.plist */,
+				0497C5561DC00254006FEE0F /* Supporting Files */,
+			);
+			path = LinkMon;
+			sourceTree = "<group>";
+		};
+		0497C5561DC00254006FEE0F /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				0497C5A21DC002A6006FEE0F /* common.pch */,
+				0497C5571DC00254006FEE0F /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		0497C5661DC00255006FEE0F /* LinkMonTests */ = {
+			isa = PBXGroup;
+			children = (
+				0497C5671DC00255006FEE0F /* LinkMonTests.m */,
+				0497C5691DC00255006FEE0F /* Info.plist */,
+			);
+			path = LinkMonTests;
+			sourceTree = "<group>";
+		};
+		0497C5721DC00261006FEE0F /* Framework */ = {
+			isa = PBXGroup;
+			children = (
+				0497C5731DC0026D006FEE0F /* CoreWLAN.framework */,
+				0497C5741DC0026D006FEE0F /* Cocoa.framework */,
+				0497C5751DC0026D006FEE0F /* Foundation.framework */,
+				0497C5761DC0026D006FEE0F /* CFNetwork.framework */,
+				0497C5771DC0026D006FEE0F /* SystemConfiguration.framework */,
+			);
+			name = Framework;
+			sourceTree = "<group>";
+		};
+		0497C5821DC0027F006FEE0F /* network */ = {
+			isa = PBXGroup;
+			children = (
+				0497C5831DC0027F006FEE0F /* control */,
+				0497C5861DC0027F006FEE0F /* header */,
+				0497C5891DC0027F006FEE0F /* library */,
+				0497C58C1DC0027F006FEE0F /* model */,
+			);
+			name = network;
+			path = ../../network;
+			sourceTree = "<group>";
+		};
+		0497C5831DC0027F006FEE0F /* control */ = {
+			isa = PBXGroup;
+			children = (
+				0497C5841DC0027F006FEE0F /* PCInterfaceStatus.h */,
+				0497C5851DC0027F006FEE0F /* PCInterfaceStatus.m */,
+			);
+			path = control;
+			sourceTree = "<group>";
+		};
+		0497C5861DC0027F006FEE0F /* header */ = {
+			isa = PBXGroup;
+			children = (
+				0497C5871DC0027F006FEE0F /* PCInterfaceTypes.h */,
+				0497C5881DC0027F006FEE0F /* SCNetworkTypes.h */,
+			);
+			path = header;
+			sourceTree = "<group>";
+		};
+		0497C5891DC0027F006FEE0F /* library */ = {
+			isa = PBXGroup;
+			children = (
+				0497C58A1DC0027F006FEE0F /* SCNetworkInterfaces.c */,
+				0497C58B1DC0027F006FEE0F /* SCNetworkInterfaces.h */,
+			);
+			path = library;
+			sourceTree = "<group>";
+		};
+		0497C58C1DC0027F006FEE0F /* model */ = {
+			isa = PBXGroup;
+			children = (
+				0497C58F1DC0027F006FEE0F /* LinkMACVendors.h */,
+				0497C5901DC0027F006FEE0F /* LinkMACVendors.m */,
+				0497C5911DC0027F006FEE0F /* LinkObserver.h */,
+				0497C5921DC0027F006FEE0F /* LinkObserver.m */,
+			);
+			path = model;
+			sourceTree = "<group>";
+		};
+		0497C5931DC0027F006FEE0F /* util */ = {
+			isa = PBXGroup;
+			children = (
+				0497C5941DC0027F006FEE0F /* util.h */,
+				0497C5951DC0027F006FEE0F /* util.m */,
+			);
+			name = util;
+			path = ../../util;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0497C54F1DC00254006FEE0F /* LinkMon */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0497C56C1DC00255006FEE0F /* Build configuration list for PBXNativeTarget "LinkMon" */;
+			buildPhases = (
+				0497C54C1DC00254006FEE0F /* Sources */,
+				0497C54D1DC00254006FEE0F /* Frameworks */,
+				0497C54E1DC00254006FEE0F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LinkMon;
+			productName = LinkMon;
+			productReference = 0497C5501DC00254006FEE0F /* LinkMon.app */;
+			productType = "com.apple.product-type.application";
+		};
+		0497C5621DC00255006FEE0F /* LinkMonTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0497C56F1DC00255006FEE0F /* Build configuration list for PBXNativeTarget "LinkMonTests" */;
+			buildPhases = (
+				0497C55F1DC00255006FEE0F /* Sources */,
+				0497C5601DC00255006FEE0F /* Frameworks */,
+				0497C5611DC00255006FEE0F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0497C5651DC00255006FEE0F /* PBXTargetDependency */,
+			);
+			name = LinkMonTests;
+			productName = LinkMonTests;
+			productReference = 0497C5631DC00255006FEE0F /* LinkMonTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0497C5481DC00254006FEE0F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0800;
+				ORGANIZATIONNAME = PocketCluster;
+				TargetAttributes = {
+					0497C54F1DC00254006FEE0F = {
+						CreatedOnToolsVersion = 8.0;
+						ProvisioningStyle = Automatic;
+					};
+					0497C5621DC00255006FEE0F = {
+						CreatedOnToolsVersion = 8.0;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 0497C54F1DC00254006FEE0F;
+					};
+				};
+			};
+			buildConfigurationList = 0497C54B1DC00254006FEE0F /* Build configuration list for PBXProject "LinkMon" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 0497C5471DC00254006FEE0F;
+			productRefGroup = 0497C5511DC00254006FEE0F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0497C54F1DC00254006FEE0F /* LinkMon */,
+				0497C5621DC00255006FEE0F /* LinkMonTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0497C54E1DC00254006FEE0F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0497C55A1DC00254006FEE0F /* Assets.xcassets in Resources */,
+				0497C55D1DC00255006FEE0F /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0497C5611DC00255006FEE0F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0497C54C1DC00254006FEE0F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0497C5961DC0027F006FEE0F /* PCInterfaceStatus.m in Sources */,
+				0497C59C1DC0027F006FEE0F /* LinkMACVendors.m in Sources */,
+				0497C5581DC00254006FEE0F /* main.m in Sources */,
+				0497C5981DC0027F006FEE0F /* SCNetworkInterfaces.c in Sources */,
+				0497C59E1DC0027F006FEE0F /* LinkObserver.m in Sources */,
+				0497C5551DC00254006FEE0F /* AppDelegate.m in Sources */,
+				0497C5A01DC0027F006FEE0F /* util.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0497C55F1DC00255006FEE0F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0497C59D1DC0027F006FEE0F /* LinkMACVendors.m in Sources */,
+				0497C5A11DC0027F006FEE0F /* util.m in Sources */,
+				0497C59F1DC0027F006FEE0F /* LinkObserver.m in Sources */,
+				0497C5971DC0027F006FEE0F /* PCInterfaceStatus.m in Sources */,
+				0497C5991DC0027F006FEE0F /* SCNetworkInterfaces.c in Sources */,
+				0497C5681DC00255006FEE0F /* LinkMonTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0497C5651DC00255006FEE0F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0497C54F1DC00254006FEE0F /* LinkMon */;
+			targetProxy = 0497C5641DC00255006FEE0F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		0497C55B1DC00255006FEE0F /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0497C55C1DC00255006FEE0F /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		0497C56A1DC00255006FEE0F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		0497C56B1DC00255006FEE0F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		0497C56D1DC00255006FEE0F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PREFIX_HEADER = LinkMon/common.pch;
+				INFOPLIST_FILE = LinkMon/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.LinkMon;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		0497C56E1DC00255006FEE0F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PREFIX_HEADER = LinkMon/common.pch;
+				INFOPLIST_FILE = LinkMon/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.LinkMon;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		0497C5701DC00255006FEE0F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PREFIX_HEADER = LinkMon/common.pch;
+				INFOPLIST_FILE = LinkMonTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.LinkMonTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LinkMon.app/Contents/MacOS/LinkMon";
+			};
+			name = Debug;
+		};
+		0497C5711DC00255006FEE0F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PREFIX_HEADER = LinkMon/common.pch;
+				INFOPLIST_FILE = LinkMonTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.LinkMonTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LinkMon.app/Contents/MacOS/LinkMon";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0497C54B1DC00254006FEE0F /* Build configuration list for PBXProject "LinkMon" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0497C56A1DC00255006FEE0F /* Debug */,
+				0497C56B1DC00255006FEE0F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0497C56C1DC00255006FEE0F /* Build configuration list for PBXNativeTarget "LinkMon" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0497C56D1DC00255006FEE0F /* Debug */,
+				0497C56E1DC00255006FEE0F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		0497C56F1DC00255006FEE0F /* Build configuration list for PBXNativeTarget "LinkMonTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0497C5701DC00255006FEE0F /* Debug */,
+				0497C5711DC00255006FEE0F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0497C5481DC00254006FEE0F /* Project object */;
+}
