@@ -15,7 +15,7 @@
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-//#define SHOULD_FILTER_EVENT 1
+#define SHOULD_FILTER_EVENT 1
 //#define SHOULD_DELIVER_ALLVALUES 1
 
 #import "LinkObserver.h"
@@ -124,18 +124,19 @@ _appendNotificationPattenKey(CFMutableArrayRef keysArray, CFMutableArrayRef patt
 #ifdef SHOULD_FILTER_EVENT
     CFMutableArrayRef keysArray = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
     CFMutableArrayRef regexArray = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
-
-    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetLink);
-    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetDNS);
-    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetAirPort);
-    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetDHCP);
-    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetEthernet);
-    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetFireWire);
-    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetInterface);
     
     // TODO : IPv6 is not supported.
     _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetIPv4);
-    
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetDHCP);
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetLink);
+#ifdef OPTIONAL_FILTERS
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetDNS);
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetAirPort);
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetEthernet);
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetFireWire);
+    _appendNotificationPattenKey(keysArray, regexArray, kSCEntNetInterface);
+#endif
+
     if (!SCDynamicStoreSetNotificationKeys(dynamicStore, keysArray, regexArray)) {
         CFRelease(dynamicStore);
         dynamicStore = NULL;

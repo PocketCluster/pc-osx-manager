@@ -533,6 +533,7 @@
 				0497C56E1DC00255006FEE0F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0497C56F1DC00255006FEE0F /* Build configuration list for PBXNativeTarget "LinkMonTests" */ = {
 			isa = XCConfigurationList;
@@ -541,6 +542,7 @@
 				0497C5711DC00255006FEE0F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

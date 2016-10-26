@@ -91,6 +91,10 @@ _gateway_status(CFMutableArrayRef, unsigned int*);
 
 - (void)networkConfigurationDidChangeForKey:(NSString *)configKey {
     NSLog(@"Network configuration has changed %@ - %@", configKey, [[NSDate date] description]);
+    if (![configKey hasPrefix:@"State:/Network/Global/IPv4"]) {
+        // anything other than network *interface* status will be ignored
+        return;
+    }
     if ([NSThread isMainThread]) {
         printf("!!! THIS IS M.A.I.N THREAD!!!\n\n");
     } else {
