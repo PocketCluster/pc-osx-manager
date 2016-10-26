@@ -7,10 +7,9 @@ import (
 )
 
 func setup() (ModelRepo) {
-    r := &modelRepo{}
-    initializeModelRepo(r)
-    repository = r
-    return r
+    repository = &modelRepo{}
+    initializeModelRepo(repository)
+    return repository
 }
 
 func teardown() {

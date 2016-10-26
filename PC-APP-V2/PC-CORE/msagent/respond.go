@@ -89,11 +89,11 @@ func SlaveIdentityInqueryRespond(usd *slagent.PocketSlaveDiscovery) (responder *
 
     // TODO : check if this agent could be bound
 
-    sn, err := context.MasterHostSerial()
+    sn, err := context.SharedHostContext().HostDeviceSerial()
     if err != nil {
-        return nil, fmt.Errorf("[ERR] Cannot find out Master serial")
+        return
     }
-    ia, err := context.HostPrimaryIPAddress()
+    ia, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil {
         return nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
     }
@@ -125,11 +125,11 @@ func BrokenBindRecoverRespond(usd *slagent.PocketSlaveDiscovery) (responder *Poc
 
     // TODO : check if this agent could be bound
 
-    sn, err := context.MasterHostSerial()
+    sn, err := context.SharedHostContext().HostDeviceSerial()
     if err != nil {
-        return nil, fmt.Errorf("[ERR] Cannot find out Master serial")
+        return
     }
-    ia, err := context.HostPrimaryIPAddress()
+    ia, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil {
         return nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
     }

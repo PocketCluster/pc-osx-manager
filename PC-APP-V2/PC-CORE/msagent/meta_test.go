@@ -1,6 +1,5 @@
 package msagent
 
-/*
 import (
     "fmt"
     "time"
@@ -68,11 +67,23 @@ G6aFKaqQfOXKCyWoUiVknQJAXrlgySFci/2ueKlIE1QqIiLSZ8V8OlpFLRnb1pzI
 
 var aeskey []byte = []byte("longer means more possible keys ")
 var aesenc, _ = crypt.NewAESCrypto(aeskey)
-var masterAgentName, _ = context.MasterHostSerial()
+var masterAgentName = ""
 var slaveNodeName string = "pc-node1"
 
+func setup() {
+    context.DebugContextPrepared()
+    sn, _ := context.SharedHostContext().HostDeviceSerial()
+    masterAgentName = sn
+}
+
+func destroy() {
+    context.DebugContextDestroyed()
+}
 
 func TestUnboundedInqueryMeta(t *testing.T) {
+    setup()
+    defer destroy()
+
     // Let's Suppose you've received an unbounded inquery from a node over multicast net.
     ua, err := slagent.UnboundedMasterSearchDiscovery()
     if err != nil {
@@ -92,6 +103,10 @@ func TestUnboundedInqueryMeta(t *testing.T) {
     }
     // TODO : we need ways to identify if what this package is
     cmd, err := SlaveIdentityInqueryRespond(usm.DiscoveryAgent)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
     meta := SlaveIdentityInquiryMeta(cmd)
     mp, err := PackedMasterMeta(meta)
     if err != nil {
@@ -99,8 +114,10 @@ func TestUnboundedInqueryMeta(t *testing.T) {
         return
     }
     if cmd.MasterCommandType != COMMAND_SLAVE_IDINQUERY {
+        t.Error("[ERR] Incorrect command type. " + COMMAND_SLAVE_IDINQUERY + " is expected")
+        return
     }
-    if len(mp) != 174 {
+    if len(mp) != 173 {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
         return
     }
@@ -154,6 +171,9 @@ func TestUnboundedInqueryMeta(t *testing.T) {
 }
 
 func TestMasterDeclarationMeta(t *testing.T) {
+    setup()
+    defer destroy()
+
     // suppose slave agent has answered question who it is
     timestmap, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
     if err != nil {
@@ -257,6 +277,9 @@ func TestMasterDeclarationMeta(t *testing.T) {
 
 
 func TestExecKeyExchangeMeta(t *testing.T) {
+    setup()
+    defer destroy()
+
     timestmap, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
     if err != nil {
         t.Error(err.Error())
@@ -323,9 +346,8 @@ func TestExecKeyExchangeMeta(t *testing.T) {
         t.Error("[ERR] Master Command is not 'COMMAND_EXCHANGE_CRPTKEY'")
         return
     }
-    if len(mp) != 491 {
+    if len(mp) != 490 {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
-        return
     }
     if meta.MetaVersion != umeta.MetaVersion {
         t.Errorf("[ERR] package/unpacked meta version differs")
@@ -350,6 +372,9 @@ func TestExecKeyExchangeMeta(t *testing.T) {
 }
 
 func TestSendCryptoCheckMeta(t *testing.T) {
+    setup()
+    defer destroy()
+
     timestmap, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
     if err != nil {
         t.Error(err.Error())
@@ -422,9 +447,8 @@ func TestSendCryptoCheckMeta(t *testing.T) {
         t.Error("Master Command is not 'COMMAND_MASTER_BIND_READY'")
         return
     }
-    if len(mp) != 208 {
+    if len(mp) != 207 {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
-        return
     }
     if meta.MetaVersion != umeta.MetaVersion {
         t.Errorf("[ERR] package/unpacked meta version differs")
@@ -437,6 +461,9 @@ func TestSendCryptoCheckMeta(t *testing.T) {
 }
 
 func TestBoundedStatusMeta(t *testing.T) {
+    setup()
+    defer destroy()
+
     timestmap, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
     if err != nil {
         t.Error(err.Error())
@@ -509,7 +536,7 @@ func TestBoundedStatusMeta(t *testing.T) {
         t.Error("[ERR] Master Command is not 'COMMAND_SLAVE_ACK'")
         return
     }
-    if len(mp) != 208 {
+    if len(mp) != 207 {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
         return
     }
@@ -525,4 +552,3 @@ func TestBoundedStatusMeta(t *testing.T) {
 
 func ExampleBindBrokenMeta() {
 }
-*/

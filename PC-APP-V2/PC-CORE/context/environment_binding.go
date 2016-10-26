@@ -21,10 +21,10 @@ func findFullUserName() string {
     return C.GoString(C.PCEnvironmentFullUserName())
 }
 
-func findUserTemporaryDirectory() string {
-    return C.GoString(C.PCEnvironmentUserTemporaryDirectory())
-}
-
 func findLoginUserName() string {
     return C.GoString(C.PCEnvironmentLoginUserName())
+}
+
+func findUserTemporaryDirectory() string {
+    return C.GoString(C.PCEnvironmentUserTemporaryDirectory())
 }

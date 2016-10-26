@@ -1,10 +1,7 @@
+//+build !build
 package context
 
-import (
-    "testing"
-)
-
-var intefaces0 = []*HostNetworkInterface{
+var test_intefaces = []*HostNetworkInterface{
     {
         WifiPowerOff        : false,
         IsActive            : true,
@@ -58,7 +55,7 @@ var intefaces0 = []*HostNetworkInterface{
     },
 }
 
-var gateways0 = []*HostNetworkGateway{
+var test_gateways = []*HostNetworkGateway{
     {
         Family              : 2,
         IsDefault           : true,
@@ -67,31 +64,39 @@ var gateways0 = []*HostNetworkGateway{
     },
 }
 
-
-func setup() (*hostContext) {
-    ctx := &hostContext{}
-    initializeHostContext(ctx)
-    _context = ctx
-    return ctx
+func debugContextSetup() (*hostContext) {
+    context = &hostContext{}
+    initializeHostContext(context)
+    return context
 }
 
-func teardown() {
-    _context = nil
+func debugContextTeardown() {
+    context = nil
 }
 
+func DebugContextPrepared() (HostContext) {
+    hostContext := singletonContextInstance()
 
-func TestSearchPrimaryIPCandidate(t *testing.T) {
-    setup()
-    defer teardown()
+    hostContext.cocoaHomePath               = "/Users/almightykim"
+    hostContext.posixHomePath               = "/Users/almightykim"
+    hostContext.fullUserName                = "Almighty Kim"
+    hostContext.loginUserName               = "almightykim"
+    hostContext.userTempPath                = "/var/folders/1s/nn_7b2vd75g6lfs5_vxcgt_c0000gn/T/"
 
-    singletonContextInstance().monitorNetworkInterfaces(intefaces0)
+    hostContext.applicationSupportPath      = "/Users/almightykim/Library/Application Support/SysUtil"
+    hostContext.applicationDocumentPath     = "/Users/almightykim/Documents"
+    hostContext.applicationTempPath         = "/var/folders/1s/nn_7b2vd75g6lfs5_vxcgt_c0000gn/T/"
+    hostContext.applicationLibCachePath     = "/Users/almightykim/Library/Caches"
+    hostContext.applicationResourcePath     = "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/Resources"
+    hostContext.applicationExecutablePath   = "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/MacOS/SysUtil"
 
-    ip, err := HostPrimaryIPAddress()
-    if err != nil {
-        t.Error(err.Error())
-    }
+    hostContext.hostDeviceSerial            = "G8815052XYL"
 
-    if ip != "192.168.1.248" {
-        t.Error("[ERR] wrong ip address has selected! It's supposed to be 192.168.1.248")
-    }
+    hostContext.monitorNetworkGateways(test_gateways)
+    hostContext.monitorNetworkInterfaces(test_intefaces)
+
+    return hostContext
+}
+
+func DebugContextDestroyed() {
 }

@@ -21,19 +21,20 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
 
-    PCApplicationSupportDirectory();
-    PCApplicationDocumentsDirectory();
-    PCApplicationTemporaryDirectory();
-    PCApplicationLibraryCacheDirectory();
-    PCApplicationResourceDirectory();
-    PCApplicationExecutableDirectory();
-    PCDeviceSerialNumber();
-    PCEnvironmentCocoaHomeDirectory();
-
-    PCEnvironmentPosixHomeDirectory();
-    PCEnvironmentFullUserName();
-    PCEnvironmentUserTemporaryDirectory();
-    PCEnvironmentLoginUserName();
+    printf("%s\n", PCEnvironmentCocoaHomeDirectory());
+    printf("%s\n", PCEnvironmentPosixHomeDirectory());
+    printf("%s\n", PCEnvironmentFullUserName());
+    printf("%s\n", PCEnvironmentLoginUserName());
+    printf("%s\n", PCEnvironmentUserTemporaryDirectory());
+    
+    printf("%s\n", PCApplicationSupportDirectory());
+    printf("%s\n", PCApplicationDocumentsDirectory());
+    printf("%s\n", PCApplicationTemporaryDirectory());
+    printf("%s\n", PCApplicationLibraryCacheDirectory());
+    printf("%s\n", PCApplicationResourceDirectory());
+    printf("%s\n", PCApplicationExecutableDirectory());
+    
+    printf("%s\n", PCDeviceSerialNumber());
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
