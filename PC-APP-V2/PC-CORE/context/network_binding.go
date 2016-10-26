@@ -11,7 +11,6 @@ package context
 import "C"
 import (
     "unsafe"
-    "fmt"
 )
 
 //export passGatewayArray
@@ -23,8 +22,8 @@ func passGatewayArray(gatewayArray **C.SCNIGateway, length C.uint) C.bool {
 
     var gatewaySlice []*C.SCNIGateway = (*[1 << 10]*C.SCNIGateway)(unsafe.Pointer(gatewayArray))[:arrayLen:arrayLen]
     var hostGateways []*HostNetworkGateway = make([]*HostNetworkGateway, arrayLen, arrayLen)
+
     for idx, gw := range gatewaySlice {
-        fmt.Printf("gw address %s\n", C.GoString(gw.addr))
         hostGateways[idx] = &HostNetworkGateway{
             Family      : uint8(gw.family),
             IsDefault   : bool(gw.is_default),
@@ -50,6 +49,7 @@ func convertAddressStruct(addrArray **C.SCNIAddress, addrCount C.uint) (addresse
     var addrLength uint = uint(addrCount)
     var addrSlice []*C.SCNIAddress = (*[1 << 10]*C.SCNIAddress)(unsafe.Pointer(addrArray))[:addrLength:addrLength]
     addresses = make([]*HostIPAddress, addrLength, addrLength)
+
     for idx, addr := range addrSlice {
         addresses[idx] = &HostIPAddress{
             Flags       : uint(addr.flags),
