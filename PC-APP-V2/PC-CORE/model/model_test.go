@@ -3,19 +3,14 @@ package model
 import (
     "testing"
     "time"
-    "os"
 )
 
 func setup() (ModelRepo) {
-    repository = &modelRepo{}
-    initializeModelRepo(repository)
-    return repository
+    return DebugModelRepoOpen()
 }
 
 func teardown() {
-    CloseModelRepo()
-    repository = nil
-    os.Remove("pc-core.db")
+    DebugModelRepoClose()
 }
 
 func TestSlaveNodeCRUD(t *testing.T) {

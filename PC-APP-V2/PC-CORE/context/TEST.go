@@ -75,7 +75,10 @@ func debugContextTeardown() {
 }
 
 func DebugContextPrepared() (HostContext) {
-    hostContext := singletonContextInstance()
+
+    // once singleton is assigned, it will not assign again. This is how we invalidate singleton ops
+    singletonContextInstance()
+    hostContext := debugContextSetup();
 
     hostContext.cocoaHomePath               = "/Users/almightykim"
     hostContext.posixHomePath               = "/Users/almightykim"
@@ -99,4 +102,5 @@ func DebugContextPrepared() (HostContext) {
 }
 
 func DebugContextDestroyed() {
+    debugContextTeardown()
 }

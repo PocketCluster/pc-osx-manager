@@ -8,7 +8,7 @@ import (
     _ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
-var repository *modelRepo
+var repository *modelRepo = nil
 var once sync.Once
 
 func SharedModelRepoInstance() (repo ModelRepo) {
