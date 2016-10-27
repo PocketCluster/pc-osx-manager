@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0401E93E1DC1EFA800E21975 /* PCSystemInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 0401E93D1DC1EFA800E21975 /* PCSystemInfo.m */; };
+		0401E93F1DC1EFA800E21975 /* PCSystemInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 0401E93D1DC1EFA800E21975 /* PCSystemInfo.m */; };
 		042F33521DBD7B3B0023DE9E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 042F33511DBD7B3B0023DE9E /* AppDelegate.m */; };
 		042F33551DBD7B3B0023DE9E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 042F33541DBD7B3B0023DE9E /* main.m */; };
 		042F33571DBD7B3B0023DE9E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 042F33561DBD7B3B0023DE9E /* Assets.xcassets */; };
@@ -36,6 +38,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0401E93C1DC1EF9B00E21975 /* PCSystemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSystemInfo.h; sourceTree = "<group>"; };
+		0401E93D1DC1EFA800E21975 /* PCSystemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSystemInfo.m; sourceTree = "<group>"; };
 		042F334D1DBD7B3B0023DE9E /* SysUtil.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SysUtil.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		042F33501DBD7B3B0023DE9E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		042F33511DBD7B3B0023DE9E /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -85,9 +89,28 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0401E93A1DC1EF6D00E21975 /* system */ = {
+			isa = PBXGroup;
+			children = (
+				0401E93B1DC1EF8300E21975 /* header */,
+				0401E93D1DC1EFA800E21975 /* PCSystemInfo.m */,
+			);
+			name = system;
+			path = ../../system;
+			sourceTree = "<group>";
+		};
+		0401E93B1DC1EF8300E21975 /* header */ = {
+			isa = PBXGroup;
+			children = (
+				0401E93C1DC1EF9B00E21975 /* PCSystemInfo.h */,
+			);
+			path = header;
+			sourceTree = "<group>";
+		};
 		042F33441DBD7B3B0023DE9E = {
 			isa = PBXGroup;
 			children = (
+				0401E93A1DC1EF6D00E21975 /* system */,
 				04F59C8E1DBDDE5D00BA9707 /* serial */,
 				042F33631DBD7DCA0023DE9E /* directory */,
 				042F336C1DBD7DCA0023DE9E /* macro */,
@@ -308,6 +331,7 @@
 				042F33761DBD7DCA0023DE9E /* NSResourcePath.m in Sources */,
 				04F59C971DBDE3C800BA9707 /* NSUserEnvironment.m in Sources */,
 				042F33751DBD7DCA0023DE9E /* NSFileManager+DirectoryLocations.m in Sources */,
+				0401E93E1DC1EFA800E21975 /* PCSystemInfo.m in Sources */,
 				042F33741DBD7DCA0023DE9E /* NSBundle+DirectoryPath.m in Sources */,
 				04F59C921DBDDE5D00BA9707 /* DeviceSerialNumber.m in Sources */,
 				042F33521DBD7B3B0023DE9E /* AppDelegate.m in Sources */,
@@ -323,6 +347,7 @@
 				042F33871DBD7E8F0023DE9E /* NSFileManager+DirectoryLocations.m in Sources */,
 				04F59C931DBDDE5D00BA9707 /* DeviceSerialNumber.m in Sources */,
 				042F33881DBD7E8F0023DE9E /* NSResourcePath.m in Sources */,
+				0401E93F1DC1EFA800E21975 /* PCSystemInfo.m in Sources */,
 				04F59C981DBDE3C800BA9707 /* NSUserEnvironment.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

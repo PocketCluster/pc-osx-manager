@@ -11,6 +11,7 @@
 #import "NSResourcePath.h"
 #import "PCDeviceSerial.h"
 #import "PCUserEnvironment.h"
+#import "PCSystemInfo.h"
 
 @interface SysUtilTests : XCTestCase
 
@@ -76,6 +77,17 @@
     NSLog(@"%s", PCEnvironmentLoginUserName());
     const char* login_name = "almightykim";
     XCTAssert(strcmp(login_name, PCEnvironmentLoginUserName()) == 0, @"Incorrect login username");
+    
+    [self tearDown];
+}
+
+
+-(void)testSystemInfo {
+    [self setUp];
+    
+    NSLog(@"%ld", PCSystemProcessorCount());
+    NSLog(@"%ld", PCSystemActiveProcessorCount());
+    NSLog(@"%lld", PCSystemPhysicalMemorySize());
     
     [self tearDown];
 }

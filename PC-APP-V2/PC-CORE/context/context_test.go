@@ -2,6 +2,7 @@ package context
 
 import (
     "testing"
+    "log"
 )
 
 func TestSearchPrimaryIPCandidate(t *testing.T) {
@@ -32,4 +33,21 @@ func TestDefaultGateway(t *testing.T) {
     if addr != "192.168.1.1" {
         t.Error("[ERR] Incrrect default gateway address. It's supposed to be 192.168.1.1");
     }
+}
+
+func ExampleFreeSpace() {
+    debugContextSetup()
+    defer debugContextTeardown()
+
+    SharedHostContext().StorageSpaceStatus()
+}
+
+func ExampleSystemInfo() {
+    debugContextSetup()
+    defer debugContextTeardown()
+
+    log.Println(SharedHostContext().ProcessorCount())
+    log.Println(SharedHostContext().ActiveProcessorCount())
+    log.Println(SharedHostContext().PhysicalMemorySize())
+    //Output:
 }

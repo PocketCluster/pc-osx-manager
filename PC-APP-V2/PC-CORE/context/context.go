@@ -4,6 +4,8 @@ package context
 import (
     "sync"
     "fmt"
+
+    "github.com/ricochet2200/go-disk-usage/du"
 )
 
 type HostContext interface {
@@ -26,6 +28,12 @@ type HostContext interface {
 
     HostPrimaryAddress() (string, error)
     HostDefaultGatewayAddress() (string, error)
+
+    ProcessorCount() uint
+    ActiveProcessorCount() uint
+    PhysicalMemorySize() uint64
+
+    StorageSpaceStatus() (total uint64, available uint64)
 }
 
 type hostContext struct {
@@ -50,6 +58,10 @@ type hostContext struct {
     applicationExecutablePath   string
 
     hostDeviceSerial            string
+
+    processorCount              uint
+    activeProcessorCount        uint
+    physicalMemorySize          uint64
 }
 
 // singleton initialization
@@ -127,6 +139,11 @@ func (ctx *hostContext) RefreshStatus() error {
     ctx.applicationExecutablePath   = findApplicationExecutableDirectory()
 
     ctx.hostDeviceSerial            = findSerialNumber()
+
+    ctx.processorCount              = findSystemProcessorCount()
+    ctx.activeProcessorCount        = findSystemActiveProcessorCount()
+    ctx.physicalMemorySize          = findSystemPhysicalMemorySize()
+
     return nil
 }
 
@@ -230,4 +247,33 @@ func (ctx *hostContext) HostDefaultGatewayAddress() (string, error) {
     }
 
     return "", fmt.Errorf("[ERR] No default gateway is found")
+}
+
+func (ctx *hostContext) ProcessorCount() uint {
+    return ctx.processorCount
+}
+
+func (ctx *hostContext) ActiveProcessorCount() uint {
+    return ctx.activeProcessorCount
+}
+
+func (ctx *hostContext) PhysicalMemorySize() uint64 {
+    var MB = uint64(1024 * 1024)
+    return uint64(ctx.physicalMemorySize / MB)
+}
+
+func (ctx *hostContext) StorageSpaceStatus() (total uint64, available uint64) {
+    var MB = uint64(1024 * 1024)
+    usage := du.NewDiskUsage("/")
+/*
+    fmt.Println("Free:", usage.Free()/(MB))
+    fmt.Println("Available:", usage.Available()/(MB))
+    fmt.Println("Size:", usage.Size()/(MB))
+    fmt.Println("Used:", usage.Used()/(MB))
+    fmt.Println("Usage:", usage.Usage()*100, "%")
+*/
+
+    total = uint64(usage.Size()/(MB))
+    available = uint64(usage.Available()/(MB))
+    return
 }

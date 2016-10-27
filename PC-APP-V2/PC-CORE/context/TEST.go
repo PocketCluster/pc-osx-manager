@@ -95,6 +95,10 @@ func DebugContextPrepared() (HostContext) {
 
     hostContext.hostDeviceSerial            = "G8815052XYL"
 
+    hostContext.processorCount              = 8
+    hostContext.activeProcessorCount        = 8
+    hostContext.physicalMemorySize          = 34359738368
+
     hostContext.monitorNetworkGateways(test_gateways)
     hostContext.monitorNetworkInterfaces(test_intefaces)
 
