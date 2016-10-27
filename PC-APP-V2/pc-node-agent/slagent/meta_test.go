@@ -1,20 +1,49 @@
 package slagent
 
-/*
 import (
     "fmt"
     "time"
     "testing"
-    "runtime"
+    //"runtime"
 
-    "github.com/stkim1/pc-node-agent/crypt"
+    //"github.com/stkim1/pc-node-agent/crypt"
     "github.com/stkim1/pc-node-agent/status"
+    "github.com/stkim1/pc-core/context"
 )
 
-const masterBoundAgentName string = "master-yoda"
-var initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
+var masterBoundAgentName string
+var initSendTimestmap time.Time
 
-func ExampleUnboundedBroadcastMeta() {
+func setUp() {
+    masterBoundAgentName, _ = context.DebugContextPrepared().MasterAgentName()
+    initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
+}
+
+func tearDown() {
+    context.DebugContextDestroyed()
+}
+
+func TestUnboundedBroadcastMeta(t *testing.T) {
+    setUp()
+    defer tearDown()
+
+    gwaddr, gwifname, err := status.GetDefaultIP4Gateway()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    iface, err := status.InterfaceByName(gwifname)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    ipaddrs, err := iface.IP4Addrs()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    //--- testing body ---
     ua, err := UnboundedMasterSearchDiscovery()
     if err != nil {
         fmt.Printf(err.Error())
@@ -23,70 +52,83 @@ func ExampleUnboundedBroadcastMeta() {
     ma := UnboundedMasterSearchMeta(ua)
 
     if ma.MetaVersion != SLAVE_META_VERSION {
+        t.Error("[ERR] Incorrect MetaVersion " + ma.MetaVersion + ". Expected : " + SLAVE_META_VERSION)
+        return
     }
     if ma.DiscoveryAgent.Version != SLAVE_DISCOVER_VERSION {
+        t.Error("[ERR] Incorrect DiscoveryAgent.Version : " + ma.DiscoveryAgent.Version + " Expected : " + SLAVE_DISCOVER_VERSION)
+        return
     }
     if ma.DiscoveryAgent.SlaveResponse != SLAVE_LOOKUP_AGENT {
+        t.Error("[ERR] Incorrect DiscoveryAgent.SlaveResponse : " + ma.DiscoveryAgent.SlaveResponse + " Expected : " + SLAVE_LOOKUP_AGENT)
     }
-    if ma.DiscoveryAgent.SlaveAddress != ""{
+    if len(ma.DiscoveryAgent.SlaveAddress) == 0 || ma.DiscoveryAgent.SlaveAddress != ipaddrs[0].IP.String() {
+        t.Error("[ERR] Incorrect DiscoveryAgent.SlaveAddress")
+        return
     }
-    if ma.DiscoveryAgent.SlaveGateway != "" {
+    if len(ma.DiscoveryAgent.SlaveGateway) == 0 || ma.DiscoveryAgent.SlaveGateway != gwaddr {
+        t.Error("[ERR] Incorrect DiscoveryAgent.SlaveGateway")
+        return
     }
-    if ma.DiscoveryAgent.SlaveNetmask != "" {
+    if len(ma.DiscoveryAgent.SlaveNetmask) == 0 || ma.DiscoveryAgent.SlaveNetmask != ipaddrs[0].IPMask.String() {
+        t.Error("[ERR] Incorrect DiscoveryAgent.SlaveNetmask")
+        return
     }
-    if ma.DiscoveryAgent.SlaveNodeMacAddr != "" {
+    if len(ma.DiscoveryAgent.SlaveNodeMacAddr) == 0 || ma.DiscoveryAgent.SlaveNodeMacAddr != iface.HardwareAddr.String() {
+        t.Error("[ERR] Incorrect DiscoveryAgent.SlaveNetmask")
+        return
     }
-
-
-    fmt.Printf("MetaVersion : %v\n",                        ma.MetaVersion)
-    fmt.Printf("DiscoveryAgent.Version : %s\n",             ma.DiscoveryAgent.Version)
-    fmt.Printf("DiscoveryAgent.SlaveResponse : %s\n",       ma.DiscoveryAgent.SlaveResponse)
-    fmt.Printf("DiscoveryAgent.SlaveAddress : %s\n",        ma.DiscoveryAgent.SlaveAddress)
-    fmt.Printf("DiscoveryAgent.SlaveGateway : %s\n",        ma.DiscoveryAgent.SlaveGateway)
-    fmt.Printf("DiscoveryAgent.SlaveNetmask : %s\n",        ma.DiscoveryAgent.SlaveNetmask)
-    fmt.Printf("DiscoveryAgent.SlaveNodeMacAddr : %s\n",    ma.DiscoveryAgent.SlaveNodeMacAddr)
 
     mp, err := PackedSlaveMeta(ma)
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
-    fmt.Print("------------------\n")
-    fmt.Printf("MsgPack Length : %d\n", len(mp))
-    fmt.Print("------------------\n")
+    if len(mp) != 183 {
+        t.Errorf("[ERR] Package message length does not match an expectation [%d]", len(mp))
+        return
+    }
+
     up, err := UnpackedSlaveMeta(mp)
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
-    fmt.Printf("MetaVersion : %v\n",                        up.MetaVersion)
-    fmt.Printf("DiscoveryAgent.Version : %s\n",             up.DiscoveryAgent.Version)
-    fmt.Printf("DiscoveryAgent.SlaveResponse : %s\n",       up.DiscoveryAgent.SlaveResponse)
-    fmt.Printf("DiscoveryAgent.SlaveAddress : %s\n",        up.DiscoveryAgent.SlaveAddress)
-    fmt.Printf("DiscoveryAgent.SlaveGateway : %s\n",        up.DiscoveryAgent.SlaveGateway)
-    fmt.Printf("DiscoveryAgent.SlaveNetmask : %s\n",        up.DiscoveryAgent.SlaveNetmask)
-    fmt.Printf("DiscoveryAgent.SlaveNodeMacAddr : %s\n",    up.DiscoveryAgent.SlaveNodeMacAddr)
-    // Output:
-    // MetaVersion : 1.0.1
-    // DiscoveryAgent.Version : 1.0.1
-    // DiscoveryAgent.SlaveResponse : pc_sl_la
-    // DiscoveryAgent.SlaveAddress : 192.168.1.236
-    // DiscoveryAgent.SlaveGateway : 192.168.1.1
-    // DiscoveryAgent.SlaveNetmask : ffffff00
-    // DiscoveryAgent.SlaveNodeMacAddr : ac:bc:32:9a:8d:69
-    // ------------------
-    // MsgPack Length : 183
-    // ------------------
-    // MetaVersion : 1.0.1
-    // DiscoveryAgent.Version : 1.0.1
-    // DiscoveryAgent.SlaveResponse : pc_sl_la
-    // DiscoveryAgent.SlaveAddress : 192.168.1.236
-    // DiscoveryAgent.SlaveGateway : 192.168.1.1
-    // DiscoveryAgent.SlaveNetmask : ffffff00
-    // DiscoveryAgent.SlaveNodeMacAddr : ac:bc:32:9a:8d:69
+    if ma.MetaVersion != up.MetaVersion {
+        t.Error("[ERR] Unidentical MetaVersion")
+        return
+    }
+    if ma.DiscoveryAgent.Version != up.DiscoveryAgent.Version {
+        t.Error("[ERR] Unidentical DiscoveryAgent.Version")
+        return
+    }
+    if ma.DiscoveryAgent.SlaveResponse != up.DiscoveryAgent.SlaveResponse {
+        t.Error("[ERR] Unidentical DiscoveryAgent.SlaveResponse")
+        return
+    }
+    if ma.DiscoveryAgent.SlaveAddress != up.DiscoveryAgent.SlaveAddress {
+        t.Error("[ERR] Unidentical DiscoveryAgent.SlaveAddress")
+        return
+    }
+    if ma.DiscoveryAgent.SlaveGateway != up.DiscoveryAgent.SlaveGateway {
+        t.Error("[ERR] Unidentical ma.DiscoveryAgent.SlaveGateway")
+        return
+    }
+    if ma.DiscoveryAgent.SlaveNetmask != up.DiscoveryAgent.SlaveNetmask {
+        t.Error("[ERR] Unidentical ma.DiscoveryAgent.SlaveNetmask")
+        return
+    }
+    if ma.DiscoveryAgent.SlaveNodeMacAddr != up.DiscoveryAgent.SlaveNodeMacAddr {
+        t.Error("[ERR] Unidentical DiscoveryAgent.SlaveNodeMacAddr")
+        return
+    }
 }
 
+/*
 func ExampleInquiredMetaAgent() {
+    setUp()
+    defer tearDown()
+
     timestmap, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
     if err != nil {
         fmt.Printf(err.Error())
@@ -163,6 +205,9 @@ oYi+1hqp1fIekaxsyQIDAQAB
 }
 
 func TestKeyExchangeMetaAgent(t *testing.T) {
+    setUp()
+    defer tearDown()
+
     agent, err := KeyExchangeStatus(masterBoundAgentName, initSendTimestmap)
     if err != nil {
         fmt.Printf(err.Error())
@@ -224,6 +269,9 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
 }
 
 func TestSlaveBindReadyAgent(t *testing.T) {
+    setUp()
+    defer tearDown()
+
     key := []byte("longer means more possible keys ")
     sa, err := SlaveBindReadyStatus("master-yoda", "jedi-obiwan", initSendTimestmap)
     if err != nil {
@@ -250,6 +298,9 @@ func TestSlaveBindReadyAgent(t *testing.T) {
 
 // becuase the encrypted output differs everytime, we can only check by decrypt it.
 func TestBoundedStatusMetaAgent(t *testing.T) {
+    setUp()
+    defer tearDown()
+
     key := []byte("longer means more possible keys ")
     sa, err := SlaveBoundedStatus("master-yoda", initSendTimestmap)
     if err != nil {
@@ -274,6 +325,9 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
 }
 
 func TestBindBrokenBroadcastMeta(t *testing.T) {
+    setUp()
+    defer tearDown()
+
     ba, err := BrokenBindDiscovery("master-yoda")
     if err != nil {
         fmt.Printf(err.Error())

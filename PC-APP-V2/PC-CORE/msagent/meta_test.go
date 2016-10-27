@@ -11,69 +11,14 @@ import (
     "github.com/stkim1/pc-core/context"
 )
 
-func testMasterPublicKey() []byte {
-    return []byte(`-----BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCFENGw33yGihy92pDjZQhl0C3
-6rPJj+CvfSC8+q28hxA161QFNUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6
-Z4UMR7EOcpfdUE9Hf3m/hs+FUR45uBJeDK1HSFHD8bHKD6kv8FPGfJTotc+2xjJw
-oYi+1hqp1fIekaxsyQIDAQAB
------END PUBLIC KEY-----`)
-}
-
-func testMasterPrivateKey() []byte {
-    return []byte(`-----BEGIN RSA PRIVATE KEY-----
-MIICXgIBAAKBgQDCFENGw33yGihy92pDjZQhl0C36rPJj+CvfSC8+q28hxA161QF
-NUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6Z4UMR7EOcpfdUE9Hf3m/hs+F
-UR45uBJeDK1HSFHD8bHKD6kv8FPGfJTotc+2xjJwoYi+1hqp1fIekaxsyQIDAQAB
-AoGBAJR8ZkCUvx5kzv+utdl7T5MnordT1TvoXXJGXK7ZZ+UuvMNUCdN2QPc4sBiA
-QWvLw1cSKt5DsKZ8UETpYPy8pPYnnDEz2dDYiaew9+xEpubyeW2oH4Zx71wqBtOK
-kqwrXa/pzdpiucRRjk6vE6YY7EBBs/g7uanVpGibOVAEsqH1AkEA7DkjVH28WDUg
-f1nqvfn2Kj6CT7nIcE3jGJsZZ7zlZmBmHFDONMLUrXR/Zm3pR5m0tCmBqa5RK95u
-412jt1dPIwJBANJT3v8pnkth48bQo/fKel6uEYyboRtA5/uHuHkZ6FQF7OUkGogc
-mSJluOdc5t6hI1VsLn0QZEjQZMEOWr+wKSMCQQCC4kXJEsHAve77oP6HtG/IiEn7
-kpyUXRNvFsDE0czpJJBvL/aRFUJxuRK91jhjC68sA7NsKMGg5OXb5I5Jj36xAkEA
-gIT7aFOYBFwGgQAQkWNKLvySgKbAZRTeLBacpHMuQdl1DfdntvAyqpAZ0lY0RKmW
-G6aFKaqQfOXKCyWoUiVknQJAXrlgySFci/2ueKlIE1QqIiLSZ8V8OlpFLRnb1pzI
-7U1yQXnTAEFYM560yJlzUpOb1V4cScGd365tiSMvxLOvTA==
------END RSA PRIVATE KEY-----`)
-}
-
-func testSlavePublicKey() []byte {
-    return []byte(`-----BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCFENGw33yGihy92pDjZQhl0C3
-6rPJj+CvfSC8+q28hxA161QFNUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6
-Z4UMR7EOcpfdUE9Hf3m/hs+FUR45uBJeDK1HSFHD8bHKD6kv8FPGfJTotc+2xjJw
-oYi+1hqp1fIekaxsyQIDAQAB
------END PUBLIC KEY-----`)
-}
-
-func testSlavePrivateKey() []byte {
-    return []byte(`-----BEGIN RSA PRIVATE KEY-----
-MIICXgIBAAKBgQDCFENGw33yGihy92pDjZQhl0C36rPJj+CvfSC8+q28hxA161QF
-NUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6Z4UMR7EOcpfdUE9Hf3m/hs+F
-UR45uBJeDK1HSFHD8bHKD6kv8FPGfJTotc+2xjJwoYi+1hqp1fIekaxsyQIDAQAB
-AoGBAJR8ZkCUvx5kzv+utdl7T5MnordT1TvoXXJGXK7ZZ+UuvMNUCdN2QPc4sBiA
-QWvLw1cSKt5DsKZ8UETpYPy8pPYnnDEz2dDYiaew9+xEpubyeW2oH4Zx71wqBtOK
-kqwrXa/pzdpiucRRjk6vE6YY7EBBs/g7uanVpGibOVAEsqH1AkEA7DkjVH28WDUg
-f1nqvfn2Kj6CT7nIcE3jGJsZZ7zlZmBmHFDONMLUrXR/Zm3pR5m0tCmBqa5RK95u
-412jt1dPIwJBANJT3v8pnkth48bQo/fKel6uEYyboRtA5/uHuHkZ6FQF7OUkGogc
-mSJluOdc5t6hI1VsLn0QZEjQZMEOWr+wKSMCQQCC4kXJEsHAve77oP6HtG/IiEn7
-kpyUXRNvFsDE0czpJJBvL/aRFUJxuRK91jhjC68sA7NsKMGg5OXb5I5Jj36xAkEA
-gIT7aFOYBFwGgQAQkWNKLvySgKbAZRTeLBacpHMuQdl1DfdntvAyqpAZ0lY0RKmW
-G6aFKaqQfOXKCyWoUiVknQJAXrlgySFci/2ueKlIE1QqIiLSZ8V8OlpFLRnb1pzI
-7U1yQXnTAEFYM560yJlzUpOb1V4cScGd365tiSMvxLOvTA==
------END RSA PRIVATE KEY-----`)
-}
-
-var aeskey []byte = []byte("longer means more possible keys ")
-var aesenc, _ = crypt.NewAESCrypto(aeskey)
-var masterAgentName = ""
-var slaveNodeName string = "pc-node1"
+var masterAgentName string
+var slaveNodeName string
 
 func setup() {
     context.DebugContextPrepared()
-    sn, _ := context.SharedHostContext().HostDeviceSerial()
+    sn, _ := context.SharedHostContext().MasterAgentName()
     masterAgentName = sn
+    slaveNodeName = "pc-node1"
 }
 
 func destroy() {
@@ -212,7 +157,7 @@ func TestMasterDeclarationMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    meta := MasterDeclarationMeta(cmd, testMasterPublicKey())
+    meta := MasterDeclarationMeta(cmd, crypt.TestMasterPublicKey())
 
     if meta.MetaVersion != MASTER_META_VERSION {
         t.Error(fmt.Errorf("[ERR] wrong master meta version").Error())
@@ -290,7 +235,7 @@ func TestExecKeyExchangeMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    msa, err := slagent.KeyExchangeMeta(agent, testSlavePublicKey())
+    msa, err := slagent.KeyExchangeMeta(agent, crypt.TestSlavePublicKey())
     if err != nil {
         t.Error(err.Error())
         return
@@ -314,7 +259,7 @@ func TestExecKeyExchangeMeta(t *testing.T) {
         return
     }
     // encryptor
-    rsaenc ,err := crypt.NewEncryptorFromKeyData(testSlavePublicKey(), testMasterPrivateKey())
+    rsaenc ,err := crypt.NewEncryptorFromKeyData(crypt.TestSlavePublicKey(), crypt.TestMasterPrivateKey())
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -325,7 +270,7 @@ func TestExecKeyExchangeMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    meta, err := ExchangeCryptoKeyAndNameMeta(cmd, slvstat, aeskey, aesenc, rsaenc)
+    meta, err := ExchangeCryptoKeyAndNameMeta(cmd, slvstat, crypt.TestAESKey, crypt.TestAESEncryptor, rsaenc)
     if err != nil {
         t.Error(err.Error())
         return
@@ -385,7 +330,7 @@ func TestSendCryptoCheckMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    msa, err := slagent.SlaveBindReadyMeta(agent, aesenc)
+    msa, err := slagent.SlaveBindReadyMeta(agent, crypt.TestAESEncryptor)
     if err != nil {
         t.Error(err.Error())
         return
@@ -403,7 +348,7 @@ func TestSendCryptoCheckMeta(t *testing.T) {
         return
     }
     // marshaled, descrypted, slave-status
-    mdsa, err := aesenc.Decrypt(usm.EncryptedStatus)
+    mdsa, err := crypt.TestAESEncryptor.Decrypt(usm.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return
@@ -426,7 +371,7 @@ func TestSendCryptoCheckMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    meta, err := MasterBindReadyMeta(cmd, aesenc)
+    meta, err := MasterBindReadyMeta(cmd, crypt.TestAESEncryptor)
     if err != nil {
         t.Error(err.Error())
         return
@@ -474,7 +419,7 @@ func TestBoundedStatusMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    msa, err := slagent.SlaveBoundedMeta(agent, aesenc)
+    msa, err := slagent.SlaveBoundedMeta(agent, crypt.TestAESEncryptor)
     if err != nil {
         t.Error(err.Error())
         return
@@ -492,7 +437,7 @@ func TestBoundedStatusMeta(t *testing.T) {
         return
     }
     // marshaled, descrypted, slave-status
-    mdsa, err := aesenc.Decrypt(usm.EncryptedStatus)
+    mdsa, err := crypt.TestAESEncryptor.Decrypt(usm.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return
@@ -515,7 +460,7 @@ func TestBoundedStatusMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    meta, err := BoundedSlaveAckMeta(cmd, aesenc)
+    meta, err := BoundedSlaveAckMeta(cmd, crypt.TestAESEncryptor)
     if err != nil {
         t.Error(err.Error())
         return

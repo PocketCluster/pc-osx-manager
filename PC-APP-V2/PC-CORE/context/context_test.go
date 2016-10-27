@@ -39,15 +39,15 @@ func ExampleFreeSpace() {
     debugContextSetup()
     defer debugContextTeardown()
 
-    SharedHostContext().StorageSpaceStatus()
+    SharedHostContext().HostStorageSpaceStatus()
 }
 
 func ExampleSystemInfo() {
     debugContextSetup()
     defer debugContextTeardown()
 
-    log.Println(SharedHostContext().ProcessorCount())
-    log.Println(SharedHostContext().ActiveProcessorCount())
-    log.Println(SharedHostContext().PhysicalMemorySize())
+    log.Println(SharedHostContext().HostProcessorCount())
+    log.Println(SharedHostContext().HostActiveProcessorCount())
+    log.Println(SharedHostContext().HostPhysicalMemorySize())
     //Output:
 }

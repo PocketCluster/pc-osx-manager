@@ -80,7 +80,7 @@ func MasterDeclarationCommand(uss *slagent.PocketSlaveStatus, timestamp time.Tim
     if !uss.IsAppropriateSlaveInfo() {
         return nil, fmt.Errorf("[ERR] Inappropriate Slave information")
     }
-    sn, err := context.SharedHostContext().HostDeviceSerial()
+    sn, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
         return nil, fmt.Errorf(err.Error())
     }
@@ -115,7 +115,7 @@ func ExchangeCryptoKeyAndNameCommand(uss *slagent.PocketSlaveStatus, slavename s
     if !uss.IsAppropriateSlaveInfo() {
         return nil, nil, fmt.Errorf("[ERR] Inappropriate Slave information")
     }
-    sn, err := context.SharedHostContext().HostDeviceSerial()
+    sn, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
         return nil, nil, fmt.Errorf(err.Error())
     }
@@ -157,7 +157,7 @@ func MasterBindReadyCommand(uss *slagent.PocketSlaveStatus, timestamp time.Time)
     if !uss.IsAppropriateSlaveInfo() {
         return nil, fmt.Errorf("[ERR] Inappropriate Slave information")
     }
-    sn, err := context.SharedHostContext().HostDeviceSerial()
+    sn, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
         return nil, fmt.Errorf(err.Error())
     }
@@ -188,7 +188,7 @@ func BoundedSlaveAckCommand(uss *slagent.PocketSlaveStatus, timestamp time.Time)
     if !uss.IsAppropriateSlaveInfo() {
         return nil, fmt.Errorf("[ERR] Inappropriate Slave information")
     }
-    sn, err := context.SharedHostContext().HostDeviceSerial()
+    sn, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
         return nil, fmt.Errorf(err.Error())
     }

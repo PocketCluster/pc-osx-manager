@@ -8,34 +8,6 @@ import (
     "reflect"
 )
 
-// loadTestPublicKey loads an parses a PEM encoded public key file.
-func testPublicKey() []byte {
-    return []byte(`-----BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCFENGw33yGihy92pDjZQhl0C3
-6rPJj+CvfSC8+q28hxA161QFNUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6
-Z4UMR7EOcpfdUE9Hf3m/hs+FUR45uBJeDK1HSFHD8bHKD6kv8FPGfJTotc+2xjJw
-oYi+1hqp1fIekaxsyQIDAQAB
------END PUBLIC KEY-----`)
-}
-
-func testPrivateKey() []byte {
-    return []byte(`-----BEGIN RSA PRIVATE KEY-----
-MIICXgIBAAKBgQDCFENGw33yGihy92pDjZQhl0C36rPJj+CvfSC8+q28hxA161QF
-NUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6Z4UMR7EOcpfdUE9Hf3m/hs+F
-UR45uBJeDK1HSFHD8bHKD6kv8FPGfJTotc+2xjJwoYi+1hqp1fIekaxsyQIDAQAB
-AoGBAJR8ZkCUvx5kzv+utdl7T5MnordT1TvoXXJGXK7ZZ+UuvMNUCdN2QPc4sBiA
-QWvLw1cSKt5DsKZ8UETpYPy8pPYnnDEz2dDYiaew9+xEpubyeW2oH4Zx71wqBtOK
-kqwrXa/pzdpiucRRjk6vE6YY7EBBs/g7uanVpGibOVAEsqH1AkEA7DkjVH28WDUg
-f1nqvfn2Kj6CT7nIcE3jGJsZZ7zlZmBmHFDONMLUrXR/Zm3pR5m0tCmBqa5RK95u
-412jt1dPIwJBANJT3v8pnkth48bQo/fKel6uEYyboRtA5/uHuHkZ6FQF7OUkGogc
-mSJluOdc5t6hI1VsLn0QZEjQZMEOWr+wKSMCQQCC4kXJEsHAve77oP6HtG/IiEn7
-kpyUXRNvFsDE0czpJJBvL/aRFUJxuRK91jhjC68sA7NsKMGg5OXb5I5Jj36xAkEA
-gIT7aFOYBFwGgQAQkWNKLvySgKbAZRTeLBacpHMuQdl1DfdntvAyqpAZ0lY0RKmW
-G6aFKaqQfOXKCyWoUiVknQJAXrlgySFci/2ueKlIE1QqIiLSZ8V8OlpFLRnb1pzI
-7U1yQXnTAEFYM560yJlzUpOb1V4cScGd365tiSMvxLOvTA==
------END RSA PRIVATE KEY-----`)
-}
-
 func TestKeyGeneration(t *testing.T) {
     var toSign []byte = []byte("date: Thu, 05 Jan 2012 21:31:40 GMT")
     if err := GenerateKeyPair("test.pub", "test.pem", "test.ssh", ); err != nil {
@@ -62,11 +34,10 @@ func TestKeyGeneration(t *testing.T) {
 }
 
 func TestSignatureGeneration(t *testing.T) {
-    const testSig string = "K9crXmaFVpvoXAEB/QUguOENDIJ2AhWTgbj8JAPAHbatQqaes19ycSaZgGCrg5NhGvgP13Wf/zR0ny6PR0V8FTUjzxaK2fGDElythqwW7QISyRPKFayRSNjGOC9/d74d31JB2/05Tuk4hksb5u90bc1y+t5RYMArDn8aJjx2GA8="
-    if err := ioutil.WriteFile("test.pub", testPublicKey(), os.ModePerm); err != nil {
+    if err := ioutil.WriteFile("test.pub", TestMasterPublicKey(), os.ModePerm); err != nil {
         t.Errorf("Fail to write public key %v", err)
     }
-    if err := ioutil.WriteFile("test.pem", testPrivateKey(), os.ModePerm); err != nil {
+    if err := ioutil.WriteFile("test.pem", TestMasterPrivateKey(), os.ModePerm); err != nil {
         t.Errorf("Fail to write private key %v", err)
     }
 
@@ -77,7 +48,7 @@ func TestSignatureGeneration(t *testing.T) {
     if len(sig) == 0 {
         t.Error("Empty Signature generated")
     }
-    if base64.StdEncoding.EncodeToString(sig) != testSig {
+    if base64.StdEncoding.EncodeToString(sig) != TestKeySignature {
         t.Error("Wrong Signature generated")
     }
 
@@ -85,11 +56,11 @@ func TestSignatureGeneration(t *testing.T) {
 }
 
 func TestSignatureVerification(t *testing.T) {
-    var orgMsg []byte = testPublicKey()
-    if err := ioutil.WriteFile("test.pub", testPublicKey(), os.ModePerm); err != nil {
+    var orgMsg []byte = TestMasterPublicKey()
+    if err := ioutil.WriteFile("test.pub", TestMasterPublicKey(), os.ModePerm); err != nil {
         t.Errorf("Fail to write public key %v", err)
     }
-    if err := ioutil.WriteFile("test.pem", testPrivateKey(), os.ModePerm); err != nil {
+    if err := ioutil.WriteFile("test.pem", TestMasterPrivateKey(), os.ModePerm); err != nil {
         t.Errorf("Fail to write private key %v", err)
     }
 
@@ -107,10 +78,10 @@ func TestSignatureVerification(t *testing.T) {
 
 func TestMessageSigning(t *testing.T) {
     var orgMsg []byte = []byte("date: Thu, 05 Jan 2012 21:31:40 GMT")
-    if err := ioutil.WriteFile("test.pub", testPublicKey(), os.ModePerm); err != nil {
+    if err := ioutil.WriteFile("test.pub", TestMasterPublicKey(), os.ModePerm); err != nil {
         t.Errorf("Fail to write public key %v", err)
     }
-    if err := ioutil.WriteFile("test.pem", testPrivateKey(), os.ModePerm); err != nil {
+    if err := ioutil.WriteFile("test.pem", TestMasterPrivateKey(), os.ModePerm); err != nil {
         t.Errorf("Fail to write private key %v", err)
     }
 
@@ -128,10 +99,10 @@ func TestMessageSigning(t *testing.T) {
 
 func TestEncDecMessageWithFile(t *testing.T) {
     var orgMsg []byte = []byte("date: Thu, 05 Jan 2012 21:31:40 GMT")
-    if err := ioutil.WriteFile("sendtest.pub", testPublicKey(), os.ModePerm); err != nil {
+    if err := ioutil.WriteFile("sendtest.pub", TestMasterPublicKey(), os.ModePerm); err != nil {
         t.Errorf("Fail to write public key %v", err)
     }
-    if err := ioutil.WriteFile("sendtest.pem", testPrivateKey(), os.ModePerm); err != nil {
+    if err := ioutil.WriteFile("sendtest.pem", TestMasterPrivateKey(), os.ModePerm); err != nil {
         t.Errorf("Fail to write private key %v", err)
     }
     if err := GenerateKeyPair("recvtest.pub", "recvtest.pem", "recvtest.ssh"); err != nil {
@@ -166,8 +137,8 @@ func TestEncDecMessageWithData(t *testing.T) {
     if err := GenerateKeyPair("recvtest.pub", "recvtest.pem", "recvtest.ssh"); err != nil {
         t.Errorf("failed to generate a key pair %v", err)
     }
-    sendTestPubKey := testPublicKey()
-    sendTestPrvKey := testPrivateKey()
+    sendTestPubKey := TestMasterPublicKey()
+    sendTestPrvKey := TestMasterPrivateKey()
     recvTestPubKey, err := ioutil.ReadFile("recvtest.pub")
     if err != nil {
         t.Error(err.Error())

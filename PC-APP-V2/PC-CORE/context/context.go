@@ -23,19 +23,18 @@ type HostContext interface {
     ApplicationLibraryCacheDirectory() (string, error)
     ApplicationResourceDirectory() (string, error)
     ApplicationExecutableDirectory() (string, error)
-
     ApplicationUserDataDirectory() (string, error)
 
     HostDeviceSerial() (string, error)
-
     HostPrimaryAddress() (string, error)
     HostDefaultGatewayAddress() (string, error)
 
-    ProcessorCount() uint
-    ActiveProcessorCount() uint
-    PhysicalMemorySize() uint64
+    HostProcessorCount() uint
+    HostActiveProcessorCount() uint
+    HostPhysicalMemorySize() uint64
+    HostStorageSpaceStatus() (total uint64, available uint64)
 
-    StorageSpaceStatus() (total uint64, available uint64)
+    MasterAgentName() (string, error)
 }
 
 type hostContext struct {
@@ -260,20 +259,20 @@ func (ctx *hostContext) HostDefaultGatewayAddress() (string, error) {
     return "", fmt.Errorf("[ERR] No default gateway is found")
 }
 
-func (ctx *hostContext) ProcessorCount() uint {
+func (ctx *hostContext) HostProcessorCount() uint {
     return ctx.processorCount
 }
 
-func (ctx *hostContext) ActiveProcessorCount() uint {
+func (ctx *hostContext) HostActiveProcessorCount() uint {
     return ctx.activeProcessorCount
 }
 
-func (ctx *hostContext) PhysicalMemorySize() uint64 {
+func (ctx *hostContext) HostPhysicalMemorySize() uint64 {
     var MB = uint64(1024 * 1024)
     return uint64(ctx.physicalMemorySize / MB)
 }
 
-func (ctx *hostContext) StorageSpaceStatus() (total uint64, available uint64) {
+func (ctx *hostContext) HostStorageSpaceStatus() (total uint64, available uint64) {
     var MB = uint64(1024 * 1024)
     usage := du.NewDiskUsage("/")
 /*
@@ -287,4 +286,12 @@ func (ctx *hostContext) StorageSpaceStatus() (total uint64, available uint64) {
     total = uint64(usage.Size()/(MB))
     available = uint64(usage.Available()/(MB))
     return
+}
+
+//TODO : master specific identifier is necessary
+func (ctx *hostContext) MasterAgentName() (string, error) {
+    if len(ctx.hostDeviceSerial) == 0 {
+        return "", fmt.Errorf("[ERR] Invalid host device serial")
+    }
+    return ctx.hostDeviceSerial, nil
 }

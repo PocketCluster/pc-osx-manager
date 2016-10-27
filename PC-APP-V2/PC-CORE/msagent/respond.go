@@ -89,7 +89,7 @@ func SlaveIdentityInqueryRespond(usd *slagent.PocketSlaveDiscovery) (responder *
 
     // TODO : check if this agent could be bound
 
-    sn, err := context.SharedHostContext().HostDeviceSerial()
+    sn, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
         return
     }
@@ -125,7 +125,7 @@ func BrokenBindRecoverRespond(usd *slagent.PocketSlaveDiscovery) (responder *Poc
 
     // TODO : check if this agent could be bound
 
-    sn, err := context.SharedHostContext().HostDeviceSerial()
+    sn, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
         return
     }
