@@ -15,6 +15,7 @@ PCSystemProcessorCount(void);
 extern unsigned long
 PCSystemActiveProcessorCount(void);
 
+// memory size in Byte
 extern unsigned long long
 PCSystemPhysicalMemorySize(void);
 

@@ -24,6 +24,8 @@ type HostContext interface {
     ApplicationResourceDirectory() (string, error)
     ApplicationExecutableDirectory() (string, error)
 
+    ApplicationUserDataDirectory() (string, error)
+
     HostDeviceSerial() (string, error)
 
     HostPrimaryAddress() (string, error)
@@ -222,6 +224,15 @@ func (ctx *hostContext) ApplicationExecutableDirectory() (string, error) {
         return "", fmt.Errorf("[ERR] Invalid app exec directory")
     }
     return ctx.applicationExecutablePath, nil
+}
+
+func (ctx *hostContext) ApplicationUserDataDirectory() (dataPath string, err error) {
+    pHome, err := ctx.PosixHomeDirectory()
+    if err != nil {
+        return
+    }
+    dataPath = pHome + "/.pocket"
+    return
 }
 
 func (ctx *hostContext) HostDeviceSerial() (string, error) {

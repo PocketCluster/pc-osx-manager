@@ -1,11 +1,15 @@
 package model
 
-import "os"
+import (
+    "os"
+    "github.com/stkim1/pc-core/context"
+)
 
 func DebugModelRepoOpen() (ModelRepo) {
-    singletonModelRepoInstance()
+    context.DebugContextPrepared()
 
     // invalidate singleton instance
+    singletonModelRepoInstance()
     repository = &modelRepo{}
     initializeModelRepo(repository)
     return repository
@@ -13,7 +17,8 @@ func DebugModelRepoOpen() (ModelRepo) {
 
 func DebugModelRepoClose() {
     CloseModelRepo()
+    userDataPath, _ := context.SharedHostContext().ApplicationUserDataDirectory()
+    os.Remove(userDataPath + "/core/pc-core.db")
     repository = nil
-    os.Remove("pc-core.db")
 }
 
