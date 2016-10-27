@@ -8,8 +8,8 @@ import (
 
 type PocketSlaveAgentMeta struct {
     MetaVersion         MetaProtocol                `msgpack:"pc_sl_pm"`
-    DiscoveryAgent      *PocketSlaveDiscovery  `msgpack:"pc_sl_ad, inline, omitempty"`
-    StatusAgent         *PocketSlaveStatus     `msgpack:"pc_sl_as, inline, omitempty"`
+    DiscoveryAgent      *PocketSlaveDiscovery       `msgpack:"pc_sl_ad, inline, omitempty"`
+    StatusAgent         *PocketSlaveStatus          `msgpack:"pc_sl_as, inline, omitempty"`
     EncryptedStatus     []byte                      `msgpack:"pc_sl_es, omitempty"`
     SlavePubKey         []byte                      `msgpack:"pc_sl_pk, omitempty"`
 }
