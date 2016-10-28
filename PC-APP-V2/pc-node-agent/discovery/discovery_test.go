@@ -30,7 +30,7 @@ func TestUnboundedState_InquiredTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, err := MasterIdentityInqueryRespond()
+    meta, err := TestMasterIdentityInqueryRespond()
     if err != nil {
         t.Error(err.Error())
         return
@@ -53,7 +53,7 @@ func TestInquired_KeyExchangeTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, err := MasterIdentityFixationRespond(initSendTimestmap)
+    meta, err := TestMasterIdentityFixationRespond(initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -78,7 +78,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, err := MasterIdentityFixationRespond(initSendTimestmap)
+    meta, err := TestMasterIdentityFixationRespond(initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -100,7 +100,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
     }
 
     // get master meta with aeskey
-    meta, err = MasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName, initSendTimestmap.Add(time.Second * 3))
+    meta, err = TestMasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName, initSendTimestmap.Add(time.Second * 3))
     if err != nil {
         t.Error(err.Error())
         return
@@ -136,7 +136,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, err := MasterIdentityFixationRespond(initSendTimestmap)
+    meta, err := TestMasterIdentityFixationRespond(initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -154,7 +154,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
     }
 
     // get master meta with aeskey
-    meta, err = MasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName, initSendTimestmap.Add(time.Second * 3))
+    meta, err = TestMasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName, initSendTimestmap.Add(time.Second * 3))
     if err != nil {
         t.Error(err.Error())
         return
@@ -171,7 +171,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
     }
 
     // get master bind ready
-    meta, err = MasterCryptoCheckCommand(masterBoundAgentName, slaveNodeName, initSendTimestmap.Add(time.Second * 5))
+    meta, err = TestMasterCryptoCheckCommand(masterBoundAgentName, slaveNodeName, initSendTimestmap.Add(time.Second * 5))
     if err != nil {
         t.Error(err.Error())
         return
@@ -187,7 +187,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
         return
     }
 
-    meta, err = MasterBrokenBindRecoveryCommand(masterBoundAgentName, initSendTimestmap.Add(time.Second * 7))
+    meta, err = TestMasterBrokenBindRecoveryCommand(masterBoundAgentName, initSendTimestmap.Add(time.Second * 7))
     if err != nil {
         t.Error(err.Error())
         return

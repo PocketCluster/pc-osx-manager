@@ -8,7 +8,7 @@ import (
     "github.com/stkim1/pc-node-agent/crypt"
 )
 
-func MasterIdentityInqueryRespond() (meta *msagent.PocketMasterAgentMeta, err error) {
+func TestMasterIdentityInqueryRespond() (meta *msagent.PocketMasterAgentMeta, err error) {
     // ------------- Let's Suppose you've sent an unbounded inquery from a node over multicast net ---------------------
     ua, err := slagent.UnboundedMasterSearchDiscovery()
     if err != nil {
@@ -23,7 +23,7 @@ func MasterIdentityInqueryRespond() (meta *msagent.PocketMasterAgentMeta, err er
     return
 }
 
-func MasterIdentityFixationRespond(begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
+func TestMasterIdentityFixationRespond(begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
     agent, err := slagent.AnswerMasterInquiryStatus(begin)
     if err != nil {
         return
@@ -41,7 +41,7 @@ func MasterIdentityFixationRespond(begin time.Time) (meta *msagent.PocketMasterA
     return
 }
 
-func MasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName string, begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
+func TestMasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName string, begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
     agent, err := slagent.KeyExchangeStatus(masterBoundAgentName, begin)
     if err != nil {
         return
@@ -66,7 +66,7 @@ func MasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName string, begin 
     return
 }
 
-func MasterCryptoCheckCommand(masterBoundAgentName, slaveNodeName string, begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
+func TestMasterCryptoCheckCommand(masterBoundAgentName, slaveNodeName string, begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
     agent, err := slagent.SlaveBindReadyStatus(masterBoundAgentName, slaveNodeName, begin)
     if err != nil {
         return
@@ -99,7 +99,7 @@ func MasterCryptoCheckCommand(masterBoundAgentName, slaveNodeName string, begin 
     return
 }
 
-func MasterBrokenBindRecoveryCommand(masterBoundAgentName string, begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
+func TestMasterBrokenBindRecoveryCommand(masterBoundAgentName string, begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
     agent, err := slagent.BrokenBindDiscovery(masterBoundAgentName)
     if err != nil {
         return
