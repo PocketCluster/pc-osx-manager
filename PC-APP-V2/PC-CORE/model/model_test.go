@@ -6,11 +6,11 @@ import (
 )
 
 func setup() (ModelRepo) {
-    return DebugModelRepoOpen()
+    return DebugModelRepoPrepare()
 }
 
 func teardown() {
-    DebugModelRepoClose()
+    DebugModelRepoDestroy()
 }
 
 func TestSlaveNodeCRUD(t *testing.T) {

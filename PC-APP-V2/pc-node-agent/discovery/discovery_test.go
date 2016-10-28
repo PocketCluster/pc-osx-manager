@@ -15,13 +15,15 @@ var slaveNodeName string
 var initSendTimestmap time.Time
 
 func setUp() {
-    masterBoundAgentName, _ = context.DebugContextPrepared().MasterAgentName()
+    masterBoundAgentName, _ = context.DebugContextPrepare().MasterAgentName()
     slaveNodeName = "pc-node1"
     initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
+    slcontext.DebugSlcontextPrepare()
 }
 
 func tearDown() {
-    context.DebugContextDestroyed()
+    slcontext.DebugSlcontextDestroy()
+    context.DebugContextDestroy()
 }
 
 func TestUnboundedState_InquiredTransition(t *testing.T) {
@@ -34,8 +36,7 @@ func TestUnboundedState_InquiredTransition(t *testing.T) {
         return
     }
 
-    context := slcontext.DebugSlaveContext(crypt.TestSlavePublicKey(), crypt.TestSlavePrivateKey())
-    ssd := NewSlaveDiscovery(context)
+    ssd := NewSlaveDiscovery()
     err = ssd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 2))
     if err != nil {
         t.Error(err.Error())
@@ -59,8 +60,7 @@ func TestInquired_KeyExchangeTransition(t *testing.T) {
     }
 
     // set to slave discovery state to "Inquired"
-    context := slcontext.DebugSlaveContext(crypt.TestSlavePublicKey(), crypt.TestSlavePrivateKey())
-    sd := NewSlaveDiscovery(context)
+    sd := NewSlaveDiscovery()
     sd.(*slaveDiscovery).discoveryState = SlaveInquired
 
     // execute state transition
@@ -85,8 +85,8 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
     }
 
     // set to slave discovery state to "Inquired"
-    context := slcontext.DebugSlaveContext(crypt.TestSlavePublicKey(), crypt.TestSlavePrivateKey())
-    sd := NewSlaveDiscovery(context)
+    context := slcontext.SharedSlaveContext()
+    sd := NewSlaveDiscovery()
     sd.(*slaveDiscovery).discoveryState = SlaveInquired
 
     // execute state transition
@@ -143,8 +143,8 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
     }
 
     // set to slave discovery state to "Inquired"
-    context := slcontext.DebugSlaveContext(crypt.TestSlavePublicKey(), crypt.TestSlavePrivateKey())
-    sd := NewSlaveDiscovery(context)
+    context := slcontext.SharedSlaveContext()
+    sd := NewSlaveDiscovery()
     sd.(*slaveDiscovery).discoveryState = SlaveInquired
 
     // execute state transition

@@ -5,8 +5,8 @@ import (
     "os"
     "time"
 
-    "github.com/stkim1/pc-node-agent/status"
     "gopkg.in/vmihailenco/msgpack.v2"
+    "github.com/stkim1/pc-node-agent/slcontext"
 )
 
 type PocketSlaveStatus struct {
@@ -35,100 +35,62 @@ func PackedSlaveStatus(status *PocketSlaveStatus) ([]byte, error) {
     return msgpack.Marshal(status)
 }
 
-func UnpackedSlaveStatus(message []byte) (*PocketSlaveStatus, error) {
-    var status *PocketSlaveStatus
-    err := msgpack.Unmarshal(message, &status)
+func UnpackedSlaveStatus(message []byte) (status *PocketSlaveStatus, err error) {
+    err = msgpack.Unmarshal(message, &status)
+    return
+}
+
+// Unbounded
+func AnswerMasterInquiryStatus(timestamp time.Time) (*PocketSlaveStatus, error) {
+    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
     if err != nil {
         return nil, err
     }
-    return status, err
-}
-
-
-// Unbounded
-func AnswerMasterInquiryStatus(timestamp time.Time) (agent *PocketSlaveStatus, err error) {
-    _, gwifname, err := status.GetDefaultIP4Gateway(); if err != nil {
-        return nil, err
-    }
-    // TODO : should this be fixed to have "eth0"?
-    iface, err := status.InterfaceByName(gwifname); if err != nil {
-        return nil, err
-    }
-    ipaddrs, err := iface.IP4Addrs(); if err != nil {
-        return nil, err
-    }
-    agent = &PocketSlaveStatus{
+    return &PocketSlaveStatus{
         Version         : SLAVE_STATUS_VERSION,
         SlaveResponse   : SLAVE_WHO_I_AM,
-        SlaveAddress    : ipaddrs[0].IP.String(),
-        SlaveNodeMacAddr: iface.HardwareAddr.String(),
+        SlaveAddress    : piface.IP.String(),
+        SlaveNodeMacAddr: piface.HardwareAddr.String(),
         SlaveHardware   : runtime.GOARCH,
         SlaveTimestamp  : timestamp,
-    }
-    err = nil
-    return
+    }, nil
 }
 
-func KeyExchangeStatus(master string, timestamp time.Time) (agent *PocketSlaveStatus, err error) {
-    _, gwifname, err := status.GetDefaultIP4Gateway(); if err != nil {
+func KeyExchangeStatus(master string, timestamp time.Time) (*PocketSlaveStatus, error) {
+    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    if err != nil {
         return nil, err
     }
-    // TODO : should this be fixed to have "eth0"?
-    iface, err := status.InterfaceByName(gwifname); if err != nil {
-        return nil, err
-    }
-    ipaddrs, err := iface.IP4Addrs(); if err != nil {
-        return nil, err
-    }
-    agent = &PocketSlaveStatus{
+    return &PocketSlaveStatus{
         Version         : SLAVE_STATUS_VERSION,
         MasterBoundAgent: master,
         SlaveResponse   : SLAVE_SEND_PUBKEY,
-        SlaveAddress    : ipaddrs[0].IP.String(),
-        SlaveNodeMacAddr: iface.HardwareAddr.String(),
+        SlaveAddress    : piface.IP.String(),
+        SlaveNodeMacAddr: piface.HardwareAddr.String(),
         SlaveHardware   : runtime.GOARCH,
         SlaveTimestamp  : timestamp,
-    }
-    err = nil
-    return
+    }, nil
 }
 
-func SlaveBindReadyStatus(master, nodename string, timestamp time.Time) (agent *PocketSlaveStatus, err error) {
-    _, gwifname, err := status.GetDefaultIP4Gateway(); if err != nil {
+func SlaveBindReadyStatus(master, nodename string, timestamp time.Time) (*PocketSlaveStatus, error) {
+    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    if err != nil {
         return nil, err
     }
-    // TODO : should this be fixed to have "eth0"?
-    iface, err := status.InterfaceByName(gwifname); if err != nil {
-        return nil, err
-    }
-    ipaddrs, err := iface.IP4Addrs(); if err != nil {
-        return nil, err
-    }
-    agent = &PocketSlaveStatus{
+    return &PocketSlaveStatus{
         Version         : SLAVE_STATUS_VERSION,
         MasterBoundAgent: master,
         SlaveResponse   : SLAVE_BIND_READY,
         SlaveNodeName   : nodename,
-        SlaveAddress    : ipaddrs[0].IP.String(),
-        SlaveNodeMacAddr: iface.HardwareAddr.String(),
+        SlaveAddress    : piface.IP.String(),
+        SlaveNodeMacAddr: piface.HardwareAddr.String(),
         SlaveHardware   : runtime.GOARCH,
         SlaveTimestamp  : timestamp,
-    }
-    err = nil
-    return
+    }, nil
 }
 
-func SlaveBoundedStatus(master string, timestamp time.Time) (agent *PocketSlaveStatus, err error) {
-    _, gwifname, err := status.GetDefaultIP4Gateway()
-    if err != nil {
-        return nil, err
-    }
-    // TODO : should this be fixed to have "eth0"?
-    iface, err := status.InterfaceByName(gwifname)
-    if err != nil {
-        return nil, err
-    }
-    ipaddrs, err := iface.IP4Addrs()
+func SlaveBoundedStatus(master string, timestamp time.Time) (*PocketSlaveStatus, error) {
+    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
     if err != nil {
         return nil, err
     }
@@ -136,16 +98,14 @@ func SlaveBoundedStatus(master string, timestamp time.Time) (agent *PocketSlaveS
     if err != nil {
         return nil, err
     }
-    agent = &PocketSlaveStatus{
+    return &PocketSlaveStatus{
         Version         : SLAVE_STATUS_VERSION,
         MasterBoundAgent: master,
         SlaveResponse   : SLAVE_REPORT_STATUS,
         SlaveNodeName   : hostname,
-        SlaveAddress    : ipaddrs[0].IP.String(),
-        SlaveNodeMacAddr: iface.HardwareAddr.String(),
+        SlaveAddress    : piface.IP.String(),
+        SlaveNodeMacAddr: piface.HardwareAddr.String(),
         SlaveHardware   : runtime.GOARCH,
         SlaveTimestamp  : timestamp,
-    }
-    err = nil
-    return
+    }, nil
 }

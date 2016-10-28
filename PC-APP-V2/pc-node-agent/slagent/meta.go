@@ -18,13 +18,9 @@ func PackedSlaveMeta(meta *PocketSlaveAgentMeta) ([]byte, error) {
     return msgpack.Marshal(meta)
 }
 
-func UnpackedSlaveMeta(message []byte) (*PocketSlaveAgentMeta, error) {
-    var meta *PocketSlaveAgentMeta
-    err := msgpack.Unmarshal(message, &meta)
-    if err != nil {
-        return nil, err
-    }
-    return meta, nil
+func UnpackedSlaveMeta(message []byte) (meta *PocketSlaveAgentMeta, err error) {
+    err = msgpack.Unmarshal(message, &meta)
+    return
 }
 
 // --- per-state meta funcs
@@ -36,31 +32,26 @@ func UnboundedMasterSearchMeta(agent *PocketSlaveDiscovery) (*PocketSlaveAgentMe
     }
 }
 
-func AnswerMasterInquiryMeta(agent *PocketSlaveStatus) (meta *PocketSlaveAgentMeta, err error) {
-    meta = &PocketSlaveAgentMeta{
+func AnswerMasterInquiryMeta(agent *PocketSlaveStatus) (*PocketSlaveAgentMeta, error) {
+    return &PocketSlaveAgentMeta{
         MetaVersion: SLAVE_META_VERSION,
         StatusAgent: agent,
-    }
-    err = nil
-    return
+    }, nil
 }
 
-func KeyExchangeMeta(agent *PocketSlaveStatus, pubkey []byte) (meta *PocketSlaveAgentMeta, err error) {
+func KeyExchangeMeta(agent *PocketSlaveStatus, pubkey []byte) (*PocketSlaveAgentMeta, error) {
     if pubkey == nil {
-        err = fmt.Errorf("[ERR] You cannot pass an empty pubkey")
-        return
+        return nil, fmt.Errorf("[ERR] You cannot pass an empty pubkey")
     }
-    meta = &PocketSlaveAgentMeta{
+    return &PocketSlaveAgentMeta{
         MetaVersion: SLAVE_META_VERSION,
         StatusAgent: agent,
         SlavePubKey: pubkey,
-    }
-    err = nil
-    return
+    }, nil
 }
 
 
-func SlaveBindReadyMeta(agent *PocketSlaveStatus, aescrypto crypt.AESCryptor) (meta *PocketSlaveAgentMeta, err error) {
+func SlaveBindReadyMeta(agent *PocketSlaveStatus, aescrypto crypt.AESCryptor) (*PocketSlaveAgentMeta, error) {
     mp, err := PackedSlaveStatus(agent)
     if err != nil {
         return nil, err
@@ -69,15 +60,13 @@ func SlaveBindReadyMeta(agent *PocketSlaveStatus, aescrypto crypt.AESCryptor) (m
     if err != nil {
         return nil, err
     }
-    meta = &PocketSlaveAgentMeta{
+    return &PocketSlaveAgentMeta{
         MetaVersion: SLAVE_META_VERSION,
         EncryptedStatus: crypted,
-    }
-    err = nil
-    return
+    }, nil
 }
 
-func SlaveBoundedMeta(agent *PocketSlaveStatus, aescrypto crypt.AESCryptor) (meta *PocketSlaveAgentMeta, err error) {
+func SlaveBoundedMeta(agent *PocketSlaveStatus, aescrypto crypt.AESCryptor) (*PocketSlaveAgentMeta, error) {
     mp, err := PackedSlaveStatus(agent)
     if err != nil {
         return nil, err
@@ -86,12 +75,10 @@ func SlaveBoundedMeta(agent *PocketSlaveStatus, aescrypto crypt.AESCryptor) (met
     if err != nil {
         return nil, err
     }
-    meta = &PocketSlaveAgentMeta{
+    return &PocketSlaveAgentMeta{
         MetaVersion: SLAVE_META_VERSION,
         EncryptedStatus: crypted,
-    }
-    err = nil
-    return
+    }, nil
 }
 
 func BrokenBindMeta(agent *PocketSlaveDiscovery) (*PocketSlaveAgentMeta) {

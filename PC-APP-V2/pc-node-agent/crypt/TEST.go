@@ -29,8 +29,6 @@ G6aFKaqQfOXKCyWoUiVknQJAXrlgySFci/2ueKlIE1QqIiLSZ8V8OlpFLRnb1pzI
 -----END RSA PRIVATE KEY-----`)
 }
 
-
-
 func TestSlavePublicKey() []byte {
     return []byte(`-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCFENGw33yGihy92pDjZQhl0C3

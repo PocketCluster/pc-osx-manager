@@ -74,7 +74,7 @@ func debugContextTeardown() {
     context = nil
 }
 
-func DebugContextPrepared() (HostContext) {
+func DebugContextPrepare() (HostContext) {
 
     // once singleton is assigned, it will not assign again. This is how we invalidate singleton ops
     singletonContextInstance()
@@ -105,6 +105,6 @@ func DebugContextPrepared() (HostContext) {
     return hostContext
 }
 
-func DebugContextDestroyed() {
+func DebugContextDestroy() {
     debugContextTeardown()
 }

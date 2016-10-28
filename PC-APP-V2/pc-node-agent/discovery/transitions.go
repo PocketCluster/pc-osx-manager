@@ -57,9 +57,9 @@ type slaveDiscovery struct {
     discoveryState         SDState
 }
 
-func NewSlaveDiscovery(context slcontext.PocketSlaveContext) (sd SlaveDiscovery) {
+func NewSlaveDiscovery() (sd SlaveDiscovery) {
     sd = &slaveDiscovery{
-        slaveContext: context,
+        slaveContext: slcontext.SharedSlaveContext(),
         discoveryState:SlaveUnbounded,
     }
     return

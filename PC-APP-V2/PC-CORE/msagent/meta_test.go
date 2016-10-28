@@ -15,14 +15,14 @@ var masterAgentName string
 var slaveNodeName string
 
 func setup() {
-    context.DebugContextPrepared()
+    context.DebugContextPrepare()
     sn, _ := context.SharedHostContext().MasterAgentName()
     masterAgentName = sn
     slaveNodeName = "pc-node1"
 }
 
 func destroy() {
-    context.DebugContextDestroyed()
+    context.DebugContextDestroy()
 }
 
 func TestUnboundedInqueryMeta(t *testing.T) {

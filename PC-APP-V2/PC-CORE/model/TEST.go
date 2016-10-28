@@ -5,8 +5,8 @@ import (
     "github.com/stkim1/pc-core/context"
 )
 
-func DebugModelRepoOpen() (ModelRepo) {
-    context.DebugContextPrepared()
+func DebugModelRepoPrepare() (ModelRepo) {
+    context.DebugContextPrepare()
 
     // invalidate singleton instance
     singletonModelRepoInstance()
@@ -15,7 +15,7 @@ func DebugModelRepoOpen() (ModelRepo) {
     return repository
 }
 
-func DebugModelRepoClose() {
+func DebugModelRepoDestroy() {
     CloseModelRepo()
     userDataPath, _ := context.SharedHostContext().ApplicationUserDataDirectory()
     os.Remove(userDataPath + "/core/pc-core.db")

@@ -7,29 +7,29 @@ import (
     "runtime"
 
     "github.com/stkim1/pc-node-agent/crypt"
-    "github.com/stkim1/pc-node-agent/status"
     "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-node-agent/slcontext"
 )
 
 var masterBoundAgentName string
 var initSendTimestmap time.Time
 
 func setUp() {
-    masterBoundAgentName, _ = context.DebugContextPrepared().MasterAgentName()
+    slcontext.DebugSlcontextPrepare()
+    masterBoundAgentName, _ = context.DebugContextPrepare().MasterAgentName()
     initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 }
 
 func tearDown() {
-    context.DebugContextDestroyed()
+    context.DebugContextDestroy()
+    slcontext.DebugSlcontextDestroy()
 }
 
 func TestUnboundedBroadcastMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    gwaddr, gwifname, _ := status.GetDefaultIP4Gateway()
-    iface, _ := status.InterfaceByName(gwifname)
-    ipaddrs, _ := iface.IP4Addrs()
+    piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
 
     //--- testing body ---
     ua, err := UnboundedMasterSearchDiscovery()
@@ -50,19 +50,19 @@ func TestUnboundedBroadcastMeta(t *testing.T) {
     if ma.DiscoveryAgent.SlaveResponse != SLAVE_LOOKUP_AGENT {
         t.Error("[ERR] Incorrect DiscoveryAgent.SlaveResponse : " + ma.DiscoveryAgent.SlaveResponse + " Expected : " + SLAVE_LOOKUP_AGENT)
     }
-    if len(ma.DiscoveryAgent.SlaveAddress) == 0 || ma.DiscoveryAgent.SlaveAddress != ipaddrs[0].IP.String() {
+    if len(ma.DiscoveryAgent.SlaveAddress) == 0 || ma.DiscoveryAgent.SlaveAddress != piface.IP.String() {
         t.Error("[ERR] Incorrect DiscoveryAgent.SlaveAddress")
         return
     }
-    if len(ma.DiscoveryAgent.SlaveGateway) == 0 || ma.DiscoveryAgent.SlaveGateway != gwaddr {
+    if len(ma.DiscoveryAgent.SlaveGateway) == 0 || ma.DiscoveryAgent.SlaveGateway != piface.GatewayAddr {
         t.Error("[ERR] Incorrect DiscoveryAgent.SlaveGateway")
         return
     }
-    if len(ma.DiscoveryAgent.SlaveNetmask) == 0 || ma.DiscoveryAgent.SlaveNetmask != ipaddrs[0].IPMask.String() {
+    if len(ma.DiscoveryAgent.SlaveNetmask) == 0 || ma.DiscoveryAgent.SlaveNetmask != piface.IPMask.String() {
         t.Error("[ERR] Incorrect DiscoveryAgent.SlaveNetmask")
         return
     }
-    if len(ma.DiscoveryAgent.SlaveNodeMacAddr) == 0 || ma.DiscoveryAgent.SlaveNodeMacAddr != iface.HardwareAddr.String() {
+    if len(ma.DiscoveryAgent.SlaveNodeMacAddr) == 0 || ma.DiscoveryAgent.SlaveNodeMacAddr != piface.HardwareAddr.String() {
         t.Error("[ERR] Incorrect DiscoveryAgent.SlaveNetmask")
         return
     }
@@ -116,9 +116,7 @@ func TestInquiredMetaAgent(t *testing.T) {
     setUp()
     defer tearDown()
 
-    _, gwifname, _ := status.GetDefaultIP4Gateway()
-    iface, _ := status.InterfaceByName(gwifname)
-    ipaddrs, _ := iface.IP4Addrs()
+    piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
 
     agent, err := AnswerMasterInquiryStatus(initSendTimestmap)
     if err != nil {
@@ -142,11 +140,11 @@ func TestInquiredMetaAgent(t *testing.T) {
     if ma.StatusAgent.SlaveResponse != SLAVE_WHO_I_AM {
         t.Error("[ERR] Incorrect StatusAgent.SlaveResponse : " + ma.StatusAgent.SlaveResponse + " Expected : " + SLAVE_WHO_I_AM)
     }
-    if len(ma.StatusAgent.SlaveAddress) == 0 || ma.StatusAgent.SlaveAddress != ipaddrs[0].IP.String() {
+    if len(ma.StatusAgent.SlaveAddress) == 0 || ma.StatusAgent.SlaveAddress != piface.IP.String() {
         t.Error("[ERR] Incorrect StatusAgent.SlaveAddress")
         return
     }
-    if len(ma.StatusAgent.SlaveNodeMacAddr) == 0 || ma.StatusAgent.SlaveNodeMacAddr != iface.HardwareAddr.String() {
+    if len(ma.StatusAgent.SlaveNodeMacAddr) == 0 || ma.StatusAgent.SlaveNodeMacAddr != piface.HardwareAddr.String() {
         t.Error("[ERR] Incorrect StatusAgent.SlaveNodeMacAddr")
         return
     }
@@ -223,9 +221,7 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
     }
 
     // test comparison
-    _, gwifname, _ := status.GetDefaultIP4Gateway()
-    iface, _ := status.InterfaceByName(gwifname)
-    ipaddrs, _ := iface.IP4Addrs()
+    piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
 
     if ma.MetaVersion != SLAVE_META_VERSION {
         t.Errorf("[ERR] Incorrect slave meta version %s\n", SLAVE_META_VERSION)
@@ -239,12 +235,12 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave status %s\n", SLAVE_SEND_PUBKEY)
         return
     }
-    if ma.StatusAgent.SlaveAddress != ipaddrs[0].IP.String() || len(ma.StatusAgent.SlaveAddress) == 0 {
-        t.Errorf("[ERR] Incorrect slave address %s\n", ipaddrs[0].IP.String())
+    if ma.StatusAgent.SlaveAddress != piface.IP.String() || len(ma.StatusAgent.SlaveAddress) == 0 {
+        t.Errorf("[ERR] Incorrect slave address %s\n", piface.IP.String())
         return
     }
-    if ma.StatusAgent.SlaveNodeMacAddr != iface.HardwareAddr.String() || len(ma.StatusAgent.SlaveNodeMacAddr) == 0 {
-        t.Errorf("[ERR] Incorrect slave mac address %s\n", iface.HardwareAddr.String())
+    if ma.StatusAgent.SlaveNodeMacAddr != piface.HardwareAddr.String() || len(ma.StatusAgent.SlaveNodeMacAddr) == 0 {
+        t.Errorf("[ERR] Incorrect slave mac address %s\n", piface.HardwareAddr.String())
         return
     }
     if ma.StatusAgent.SlaveHardware != runtime.GOARCH {
@@ -369,9 +365,7 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
     ma := BrokenBindMeta(ba)
 
     // test comparison
-    gwaddr, gwifname, _ := status.GetDefaultIP4Gateway()
-    iface, _ := status.InterfaceByName(gwifname)
-    ipaddrs, _ := iface.IP4Addrs()
+    piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
 
     if ma.MetaVersion != SLAVE_META_VERSION {
         t.Errorf("[ERR] slave meta protocol version differs from %s\n", SLAVE_META_VERSION)
@@ -385,17 +379,17 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
     if ma.DiscoveryAgent.SlaveResponse != SLAVE_LOOKUP_AGENT {
         t.Errorf("[ERR] Slave is not in correct state %s\n", SLAVE_LOOKUP_AGENT)
     }
-    if ma.DiscoveryAgent.SlaveAddress != ipaddrs[0].IP.String() || len(ma.DiscoveryAgent.SlaveAddress) == 0 {
-        t.Errorf("[ERR] Slave address is incorrect %s\n", ipaddrs[0].IP.String())
+    if ma.DiscoveryAgent.SlaveAddress != piface.IP.String() || len(ma.DiscoveryAgent.SlaveAddress) == 0 {
+        t.Errorf("[ERR] Slave address is incorrect %s\n", piface.IP.String())
     }
-    if ma.DiscoveryAgent.SlaveGateway != gwaddr || len(ma.DiscoveryAgent.SlaveGateway) == 0 {
-        t.Errorf("[ERR] Slave gateway is incorrect %s\n", gwaddr)
+    if ma.DiscoveryAgent.SlaveGateway != piface.GatewayAddr || len(ma.DiscoveryAgent.SlaveGateway) == 0 {
+        t.Errorf("[ERR] Slave gateway is incorrect %s\n", piface.GatewayAddr)
     }
-    if ma.DiscoveryAgent.SlaveNetmask != ipaddrs[0].IPMask.String() || len(ma.DiscoveryAgent.SlaveNetmask) == 0 {
-        t.Errorf("[ERR] Slave netmask is incorrect %s\n", ipaddrs[0].IPMask.String())
+    if ma.DiscoveryAgent.SlaveNetmask != piface.IPMask.String() || len(ma.DiscoveryAgent.SlaveNetmask) == 0 {
+        t.Errorf("[ERR] Slave netmask is incorrect %s\n", piface.IPMask.String())
     }
-    if ma.DiscoveryAgent.SlaveNodeMacAddr != iface.HardwareAddr.String() || len(ma.DiscoveryAgent.SlaveNodeMacAddr) == 0 {
-        t.Errorf("[ERR] Slave MAC address is incorrect %s\n", ipaddrs[0].IPMask.String())
+    if ma.DiscoveryAgent.SlaveNodeMacAddr != piface.HardwareAddr.String() || len(ma.DiscoveryAgent.SlaveNodeMacAddr) == 0 {
+        t.Errorf("[ERR] Slave MAC address is incorrect %s\n",piface.IPMask.String())
     }
     mp, err := PackedSlaveMeta(ma)
     if err != nil {

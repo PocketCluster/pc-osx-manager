@@ -1,6 +1,8 @@
 package slagent
 
-import "github.com/stkim1/pc-node-agent/status"
+import (
+    "github.com/stkim1/pc-node-agent/slcontext"
+)
 
 type PocketSlaveDiscovery struct {
     Version             DiscoveryProtocol    `msgpack:"pc_sl_pd"`
@@ -27,55 +29,34 @@ func (sda *PocketSlaveDiscovery) IsAppropriateSlaveInfo() bool {
     return true
 }
 
-func UnboundedMasterSearchDiscovery() (agent *PocketSlaveDiscovery, err error) {
-    gwaddr, gwifname, err := status.GetDefaultIP4Gateway()
+func UnboundedMasterSearchDiscovery() (*PocketSlaveDiscovery, error) {
+    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
     if err != nil {
         return nil, err
     }
-    // TODO : should this be fixed to have "eth0"?
-    iface, err := status.InterfaceByName(gwifname)
-    if err != nil {
-        return nil, err
-    }
-    ipaddrs, err := iface.IP4Addrs()
-    if err != nil {
-        return nil, err
-    }
-    agent = &PocketSlaveDiscovery {
+    return &PocketSlaveDiscovery {
         Version         : SLAVE_DISCOVER_VERSION,
         SlaveResponse   : SLAVE_LOOKUP_AGENT,
-        SlaveAddress    : ipaddrs[0].IP.String(),
-        SlaveGateway    : gwaddr,
-        SlaveNetmask    : ipaddrs[0].IPMask.String(),
-        SlaveNodeMacAddr: iface.HardwareAddr.String(),
-    }
-    err = nil
-    return
+        SlaveAddress    : piface.IP.String(),
+        SlaveGateway    : piface.GatewayAddr,
+        SlaveNetmask    : piface.IPMask.String(),
+        SlaveNodeMacAddr: piface.HardwareAddr.String(),
+    }, nil
 }
 
-func BrokenBindDiscovery(master string) (agent *PocketSlaveDiscovery, err error) {
-    gwaddr, gwifname, err := status.GetDefaultIP4Gateway()
+func BrokenBindDiscovery(master string) (*PocketSlaveDiscovery, error) {
+    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
     if err != nil {
         return nil, err
     }
-    // TODO : should this be fixed to have "eth0"?
-    iface, err := status.InterfaceByName(gwifname)
-    if err != nil {
-        return nil, err
-    }
-    ipaddrs, err := iface.IP4Addrs()
-    if err != nil {
-        return nil, err
-    }
-    agent = &PocketSlaveDiscovery {
+
+    return &PocketSlaveDiscovery {
         Version         : SLAVE_DISCOVER_VERSION,
         MasterBoundAgent: master,
         SlaveResponse   : SLAVE_LOOKUP_AGENT,
-        SlaveAddress    : ipaddrs[0].IP.String(),
-        SlaveGateway    : gwaddr,
-        SlaveNetmask    : ipaddrs[0].IPMask.String(),
-        SlaveNodeMacAddr: iface.HardwareAddr.String(),
-    }
-    err = nil
-    return
+        SlaveAddress    : piface.IP.String(),
+        SlaveGateway    : piface.GatewayAddr,
+        SlaveNetmask    : piface.IPMask.String(),
+        SlaveNodeMacAddr: piface.HardwareAddr.String(),
+    }, nil
 }

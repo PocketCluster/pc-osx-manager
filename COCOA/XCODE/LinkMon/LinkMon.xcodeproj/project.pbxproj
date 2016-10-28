@@ -468,6 +468,7 @@
 				GCC_PREFIX_HEADER = LinkMon/common.pch;
 				INFOPLIST_FILE = LinkMon/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.LinkMon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -481,6 +482,7 @@
 				GCC_PREFIX_HEADER = LinkMon/common.pch;
 				INFOPLIST_FILE = LinkMon/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.LinkMon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

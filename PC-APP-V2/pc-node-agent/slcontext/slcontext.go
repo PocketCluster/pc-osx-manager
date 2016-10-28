@@ -1,6 +1,17 @@
 package slcontext
 
-import "github.com/stkim1/pc-node-agent/crypt"
+import (
+    "github.com/stkim1/pc-node-agent/crypt"
+    "net"
+)
+
+type NetworkInterface struct {
+    *net.Interface
+    *net.IP
+    *net.IPMask
+    *net.HardwareAddr
+    GatewayAddr             string
+}
 
 type PocketSlaveContext interface {
     GetPublicKey() (pubkey []byte)
@@ -32,6 +43,8 @@ type PocketSlaveContext interface {
     GetSlaveNodeName() (nodeName string, err error)
     SyncSlaveNodeName() (err error)
     DiscardSlaveNodeName() (err error)
+
+    PrimaryNetworkInterface() (status *NetworkInterface, err error)
 
     SyncAll() (err error)
     DiscardAll() (err error)
