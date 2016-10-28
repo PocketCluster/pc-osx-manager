@@ -148,7 +148,6 @@ func TestEncDecMessageWithData(t *testing.T) {
         t.Error(err.Error())
     }
 
-
     // encryptor
     encr ,err := NewEncryptorFromKeyData(recvTestPubKey, sendTestPrvKey); if  err != nil {
         t.Errorf(err.Error())
@@ -170,7 +169,7 @@ func TestEncDecMessageWithData(t *testing.T) {
     os.Remove("recvtest.pem");os.Remove("recvtest.pub");os.Remove("recvtest.ssh")
 }
 
-func TestAES_EncDec(t *testing.T) {
+func TestAESEncyptionDecryption(t *testing.T) {
     key := []byte("longer means more possible keys ")
     text := []byte("This is the unecrypted data. Referring to it as plain text.")
 

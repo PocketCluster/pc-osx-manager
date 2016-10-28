@@ -10,14 +10,14 @@ import (
     "github.com/stkim1/pc-core/context"
 )
 
-var masterBoundAgentName string = ""
-const slaveNodeName string = "pc-node1"
-var initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
-
-//--
+var masterBoundAgentName string
+var slaveNodeName string
+var initSendTimestmap time.Time
 
 func setUp() {
     masterBoundAgentName, _ = context.DebugContextPrepared().MasterAgentName()
+    slaveNodeName = "pc-node1"
+    initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 }
 
 func tearDown() {
