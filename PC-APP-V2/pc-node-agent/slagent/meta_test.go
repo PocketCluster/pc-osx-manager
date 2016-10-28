@@ -331,7 +331,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
     defer tearDown()
 
     key := []byte("longer means more possible keys ")
-    sa, err := SlaveBoundedStatus("master-yoda", initSendTimestmap)
+    sa, err := SlaveBoundedStatus(masterBoundAgentName, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
