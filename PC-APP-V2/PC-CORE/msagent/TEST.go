@@ -8,7 +8,7 @@ import (
 )
 
 // Let's Suppose you've received an unbounded inquery from a node over multicast net.
-func TestSlaveIdentityInqueryRespond() (*PocketMasterAgentMeta, error) {
+func TestMasterInquireSlaveRespond() (*PocketMasterAgentMeta, error) {
     msa, err := slagent.TestSlaveUnboundedMasterSearchDiscovery()
     if err != nil {
         return nil, err
@@ -31,7 +31,7 @@ func TestSlaveIdentityInqueryRespond() (*PocketMasterAgentMeta, error) {
     return SlaveIdentityInquiryMeta(cmd), nil
 }
 
-func TestMasterDeclarationCommand(begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+func TestMasterAgentDeclarationCommand(begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
     msa, end, err := slagent.TestSlaveAnswerMasterInquiry(begin)
     if err != nil {
         return nil, begin, err
@@ -121,7 +121,7 @@ func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, begin t
     return meta, end, nil
 }
 
-func TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName string, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+func TestMasterBoundedStatusCommand(slaveNodeName string, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
     msa, end, err := slagent.TestSlaveBoundedStatus(slaveNodeName, begin)
     if err != nil {
         return nil, begin, err
@@ -158,3 +158,20 @@ func TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName string, begin
     }
     return meta, end, nil
 }
+
+func TestMasterBrokenBindRecoveryCommand(masterBoundAgentName string) (meta *PocketMasterAgentMeta, err error) {
+    agent, err := slagent.BrokenBindDiscovery(masterBoundAgentName)
+    if err != nil {
+        return
+    }
+    sam := slagent.BrokenBindMeta(agent)
+    //-------------- over master, we've received the message ----------------------
+    // master preperation
+    cmd, err := BrokenBindRecoverRespond(sam.DiscoveryAgent)
+    if err != nil {
+        return
+    }
+    // encryptor
+    return BrokenBindRecoverMeta(cmd, crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSACryptor)
+}
+

@@ -37,7 +37,7 @@ func TestUnboundedInqueryMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    meta, err := TestSlaveIdentityInqueryRespond()
+    meta, err := TestMasterInquireSlaveRespond()
     if err != nil {
         t.Error(err.Error())
         return
@@ -115,7 +115,7 @@ func TestMasterDeclarationMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    meta, end, err := TestMasterDeclarationCommand(initTime)
+    meta, end, err := TestMasterAgentDeclarationCommand(initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -277,7 +277,7 @@ func TestBoundedStatusMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, initTime)
+    meta, _, err := TestMasterBoundedStatusCommand(slaveNodeName, initTime)
     if err != nil {
         t.Error(err.Error())
         return

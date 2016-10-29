@@ -8,7 +8,7 @@ import (
     "github.com/stkim1/pc-node-agent/crypt"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-core/context"
-    "github.com/stkim1/pc-core/beacon"
+    "github.com/stkim1/pc-core/msagent"
 )
 
 var masterBoundAgentName string
@@ -31,7 +31,7 @@ func TestUnboundedState_InquiredTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, err := beacon.TestMasterIdentityInqueryRespond()
+    meta, err := msagent.TestMasterInquireSlaveRespond()
     if err != nil {
         t.Error(err.Error())
         return
@@ -54,7 +54,7 @@ func TestInquired_KeyExchangeTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, endTime, err := beacon.TestMasterIdentityFixationRespond(initSendTimestmap)
+    meta, endTime, err := msagent.TestMasterAgentDeclarationCommand(initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -79,7 +79,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, masterTS, err := beacon.TestMasterIdentityFixationRespond(initSendTimestmap)
+    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -103,7 +103,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
 
     // get master meta with aeskey
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = beacon.TestMasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName, masterTS)
+    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -140,7 +140,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, masterTS, err := beacon.TestMasterIdentityFixationRespond(initSendTimestmap)
+    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -160,7 +160,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
 
     // get master meta with aeskey
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = beacon.TestMasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName, masterTS)
+    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -179,7 +179,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
 
     // get master bind ready
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = beacon.TestMasterCryptoCheckCommand(masterBoundAgentName, slaveNodeName, masterTS)
+    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterBoundAgentName, slaveNodeName, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -196,7 +196,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
         return
     }
 
-    meta, err = beacon.TestMasterBrokenBindRecoveryCommand(masterBoundAgentName)
+    meta, err = msagent.TestMasterBrokenBindRecoveryCommand(masterBoundAgentName)
     if err != nil {
         t.Error(err.Error())
         return
