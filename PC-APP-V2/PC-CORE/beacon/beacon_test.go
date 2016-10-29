@@ -39,22 +39,91 @@ func Test_Unbounded_Inquired_Transition(t *testing.T) {
 
     // TODO : how to find out this is discovery inquery?
     mb := NewBeaconForSlaveNode()
+    if mb.CurrentState() != MasterUnbounded {
+        t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+
     mb.TranstionWithSlaveMeta(sm, initSendTimestmap)
+    if mb.CurrentState() != MasterInquired {
+        t.Error("[ERR] Master state is expected to be " + MasterInquired.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
 }
 
 func Test_Inquired_KeyExchange_Transition(t *testing.T) {
     setUp()
     defer tearDown()
 
+    sa, end, err := slagent.TestSlaveAnswerMasterInquiry(initSendTimestmap)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    masterTS := end.Add(time.Second)
+    mb := NewBeaconForSlaveNode()
+    mb.(*masterBeacon).beaconState = MasterInquired
+    if err := mb.TranstionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    if mb.CurrentState() != MasterKeyExchange {
+        t.Error("[ERR] Master state is expected to be " + MasterKeyExchange.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
 }
 
 func Test_KeyExchange_CryptoCheck_Transition(t *testing.T) {
     setUp()
     defer tearDown()
+
+    sa, end, err := slagent.TestSlaveKeyExchangeStatus(masterAgentName, initSendTimestmap)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    masterTS := end.Add(time.Second)
+    mb := NewBeaconForSlaveNode()
+    mb.(*masterBeacon).beaconState = MasterKeyExchange
+    if err := mb.TranstionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    if mb.CurrentState() != MasterCryptoCheck {
+        t.Error("[ERR] Master state is expected to be " + MasterCryptoCheck.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
 }
 
-
 func Test_CryptoCheck_Bounded_Transition(t *testing.T) {
+    setUp()
+    defer tearDown()
+
+    sa, end, err := slagent.TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, initSendTimestmap)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    masterTS := end.Add(time.Second)
+    mb := NewBeaconForSlaveNode()
+    mb.(*masterBeacon).beaconState = MasterCryptoCheck
+    if err := mb.TranstionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    if mb.CurrentState() != MasterBounded {
+        t.Error("[ERR] Master state is expected to be " + MasterBounded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+}
+
+func Test_Bounded_BindBroken_Transition(t *testing.T) {
     setUp()
     defer tearDown()
 }
