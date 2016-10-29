@@ -63,7 +63,7 @@ func TestMasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName string, be
     if err != nil {
         return
     }
-    meta, err = msagent.ExchangeCryptoKeyAndNameMeta(cmd, slvstat, crypt.TestAESKey, crypt.TestAESEncryptor, rsaenc)
+    meta, err = msagent.ExchangeCryptoKeyAndNameMeta(cmd, slvstat, crypt.TestAESKey, crypt.TestAESCryptor, rsaenc)
     return
 }
 
@@ -72,12 +72,12 @@ func TestMasterCryptoCheckCommand(masterBoundAgentName, slaveNodeName string, be
     if err != nil {
         return
     }
-    msa, err := slagent.CheckSlaveCryptoMeta(agent, crypt.TestAESEncryptor)
+    msa, err := slagent.CheckSlaveCryptoMeta(agent, crypt.TestAESCryptor)
     if err != nil {
         return
     }
     //-------------- over master, we've received the message ----------------------
-    mdsa, err := crypt.TestAESEncryptor.Decrypt(msa.EncryptedStatus)
+    mdsa, err := crypt.TestAESCryptor.Decrypt(msa.EncryptedStatus)
     if err != nil {
         return
     }
@@ -92,7 +92,7 @@ func TestMasterCryptoCheckCommand(masterBoundAgentName, slaveNodeName string, be
     if err != nil {
         return
     }
-    meta, err = msagent.MasterBindReadyMeta(cmd, crypt.TestAESEncryptor)
+    meta, err = msagent.MasterBindReadyMeta(cmd, crypt.TestAESCryptor)
     return
 }
 
@@ -113,7 +113,7 @@ func TestMasterBrokenBindRecoveryCommand(masterBoundAgentName string) (meta *msa
     if err != nil {
         return
     }
-    meta, err = msagent.BrokenBindRecoverMeta(cmd, crypt.TestAESKey, crypt.TestAESEncryptor, rsaenc)
+    meta, err = msagent.BrokenBindRecoverMeta(cmd, crypt.TestAESKey, crypt.TestAESCryptor, rsaenc)
     return
 }
 

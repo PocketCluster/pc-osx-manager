@@ -289,7 +289,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
     defer tearDown()
 
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
-    ma, _, err := TestCheckSlaveCryptoStatus(masterAgentName, slaveNodeName, crypt.TestAESEncryptor, initSendTimestmap)
+    ma, _, err := TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -303,7 +303,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave status data %s\n", len(ma.EncryptedStatus))
         return
     }
-    esd, err := crypt.TestAESEncryptor.Decrypt(ma.EncryptedStatus)
+    esd, err := crypt.TestAESCryptor.Decrypt(ma.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return
@@ -372,7 +372,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         return
     }
 
-    esd, err = crypt.TestAESEncryptor.Decrypt(up.EncryptedStatus)
+    esd, err = crypt.TestAESCryptor.Decrypt(up.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return
@@ -424,7 +424,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
     defer tearDown()
 
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
-    ma, _, err := TestSlaveBoundedStatus(slaveNodeName, crypt.TestAESEncryptor, initSendTimestmap)
+    ma, _, err := TestSlaveBoundedStatus(slaveNodeName, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -437,7 +437,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave status data %s\n", len(ma.EncryptedStatus))
         return
     }
-    esd, err := crypt.TestAESEncryptor.Decrypt(ma.EncryptedStatus)
+    esd, err := crypt.TestAESCryptor.Decrypt(ma.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return
@@ -506,7 +506,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         return
     }
 
-    esd, err = crypt.TestAESEncryptor.Decrypt(up.EncryptedStatus)
+    esd, err = crypt.TestAESCryptor.Decrypt(up.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return

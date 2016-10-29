@@ -6,73 +6,52 @@ import (
     "testing"
     "bytes"
 
-    "github.com/stkim1/pc-node-agent/crypt"
-    "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-node-agent/slcontext"
 )
 
 var masterAgentName string
 var slaveNodeName string
+var initTime time.Time
 
-func setup() {
+func setUp() {
     context.DebugContextPrepare()
+    slcontext.DebugSlcontextPrepare()
     sn, _ := context.SharedHostContext().MasterAgentName()
     masterAgentName = sn
     slaveNodeName = "pc-node1"
+    initTime, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 }
 
-func destroy() {
+func tearDown() {
+    slcontext.DebugSlcontextDestroy()
     context.DebugContextDestroy()
 }
 
 func TestUnboundedInqueryMeta(t *testing.T) {
-    setup()
-    defer destroy()
+    setUp()
+    defer tearDown()
 
-    // Let's Suppose you've received an unbounded inquery from a node over multicast net.
-    ua, err := slagent.UnboundedMasterDiscovery()
+    paddr, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil {
         t.Error(err.Error())
         return
     }
-    psm, err := slagent.PackedSlaveMeta(slagent.UnboundedMasterDiscoveryMeta(ua))
+    meta, err := TestSlaveIdentityInqueryRespond()
     if err != nil {
         t.Error(err.Error())
         return
     }
-    //-------------- over master, we've received the message and need to make an inquiry "Who R U"? --------------------
-    usm, err := slagent.UnpackedSlaveMeta(psm)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    // TODO : we need ways to identify if what this package is
-    cmd, err := SlaveIdentityInqueryRespond(usm.DiscoveryAgent)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    meta := SlaveIdentityInquiryMeta(cmd)
-    mp, err := PackedMasterMeta(meta)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    if cmd.MasterCommandType != COMMAND_SLAVE_IDINQUERY {
-        t.Error("[ERR] Incorrect command type. " + COMMAND_SLAVE_IDINQUERY + " is expected")
-        return
-    }
-    if 512 <= len(mp) {
-        t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
-        return
-    }
-
     if meta.MetaVersion != MASTER_META_VERSION {
         t.Errorf("[ERR] Incorrect master meta version")
         return
     }
     if meta.DiscoveryRespond.Version != MASTER_RESPOND_VERSION {
         t.Errorf("[ERR] Incorrect master respond version")
+        return
+    }
+    if meta.DiscoveryRespond.MasterCommandType != COMMAND_SLAVE_IDINQUERY {
+        t.Error("[ERR] Incorrect command type. " + COMMAND_SLAVE_IDINQUERY + " is expected")
         return
     }
     if meta.DiscoveryRespond.MasterBoundAgent != masterAgentName {
@@ -84,8 +63,20 @@ func TestUnboundedInqueryMeta(t *testing.T) {
         return
     }
     // TODO : check respond ip address
-    // meta.DiscoveryRespond.MasterAddress
+    if meta.DiscoveryRespond.MasterAddress != paddr {
+        t.Error("[ERR] Master Address is not " + paddr)
+        return
+    }
 
+    mp, err := PackedMasterMeta(meta)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if 512 <= len(mp) {
+        t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
+        return
+    }
     // msgpack verfication
     umeta, err := UnpackedMasterMeta(mp)
     if err != nil {
@@ -116,49 +107,19 @@ func TestUnboundedInqueryMeta(t *testing.T) {
 }
 
 func TestMasterDeclarationMeta(t *testing.T) {
-    setup()
-    defer destroy()
+    setUp()
+    defer tearDown()
 
-    // suppose slave agent has answered question who it is
-    timestmap, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
+    paddr, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil {
         t.Error(err.Error())
         return
     }
-    agent, err := slagent.AnswerMasterInquiryStatus(timestmap)
+    meta, end, err := TestMasterDeclarationCommand(initTime)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    msa, err := slagent.AnswerMasterInquiryMeta(agent)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    mpsm, err := slagent.PackedSlaveMeta(msa)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    //-------------- over master, we've received the message ----------------------
-    // suppose we've sort out what this is.
-    usm, err := slagent.UnpackedSlaveMeta(mpsm)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    timestmap, err = time.Parse(time.RFC3339, "2012-11-01T22:08:42+00:00")
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    cmd, err := MasterDeclarationCommand(usm.StatusAgent, timestmap)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    meta := MasterDeclarationMeta(cmd, crypt.TestMasterPublicKey())
-
     if meta.MetaVersion != MASTER_META_VERSION {
         t.Error(fmt.Errorf("[ERR] wrong master meta version").Error())
         return
@@ -175,25 +136,32 @@ func TestMasterDeclarationMeta(t *testing.T) {
         t.Error("[ERR] Master Command is not 'COMMAND_MASTER_DECLARE'")
         return
     }
-
-//    TODO need to check msater address, timestamp, timezone
-//    if meta.StatusCommand.MasterAddress != "" {
-//    }
-//    if meta.StatusCommand.MasterTimestamp.String() != "" {
-//    }
+    if meta.StatusCommand.MasterAddress != paddr {
+        t.Error("[ERR] Incorrect Master ip address")
+        return
+    }
+    // TODO need to check msater timezone
+    if !meta.StatusCommand.MasterTimestamp.Equal(end) {
+        t.Error("[ERR] Incorrect Master TimeStamp")
+        return
+    }
 
     mp, err := PackedMasterMeta(meta)
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
+    if 512 <= len(mp) {
+        t.Errorf("[ERR] Package message length does not match an expectation [%d]", len(mp))
+        return
+    }
+
     // verification step
     umeta, err := UnpackedMasterMeta(mp)
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
-
     if meta.MetaVersion != umeta.MetaVersion {
         t.Error(fmt.Errorf("[ERR] incorrectly unpacked master meta version").Error())
         return
@@ -222,55 +190,10 @@ func TestMasterDeclarationMeta(t *testing.T) {
 
 
 func TestExecKeyExchangeMeta(t *testing.T) {
-    setup()
-    defer destroy()
+    setUp()
+    defer tearDown()
 
-    timestmap, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    agent, err := slagent.KeyExchangeStatus(masterAgentName, timestmap)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    msa, err := slagent.KeyExchangeMeta(agent, crypt.TestSlavePublicKey())
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    psm, err := slagent.PackedSlaveMeta(msa)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    //-------------- over master, we've received the message ----------------------
-    // suppose we've sort out what this is.
-    usm, err := slagent.UnpackedSlaveMeta(psm)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    // master preperation
-    timestmap, err = time.Parse(time.RFC3339, "2012-11-01T22:08:42+00:00")
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    // encryptor
-    rsaenc ,err := crypt.NewEncryptorFromKeyData(crypt.TestSlavePublicKey(), crypt.TestMasterPrivateKey())
-    if err != nil {
-        t.Errorf(err.Error())
-        return
-    }
-    // responding commnad
-    cmd, slvstat, err := ExchangeCryptoKeyAndNameCommand(usm.StatusAgent, slaveNodeName, timestmap)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    meta, err := ExchangeCryptoKeyAndNameMeta(cmd, slvstat, crypt.TestAESKey, crypt.TestAESEncryptor, rsaenc)
+    meta, _, err := TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -280,24 +203,25 @@ func TestExecKeyExchangeMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    if 512 <= len(mp) {
+        t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
+    }
     // verification step
     umeta, err := UnpackedMasterMeta(mp)
     if err != nil {
         fmt.Printf(err.Error())
         return
     }
-
-    if cmd.MasterCommandType != COMMAND_EXCHANGE_CRPTKEY {
-        t.Error("[ERR] Master Command is not 'COMMAND_EXCHANGE_CRPTKEY'")
-        return
-    }
-    if 512 <= len(mp) {
-        t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
-    }
     if meta.MetaVersion != umeta.MetaVersion {
         t.Errorf("[ERR] package/unpacked meta version differs")
         return
     }
+/*
+    if meta.StatusCommand.MasterCommandType != COMMAND_EXCHANGE_CRPTKEY {
+        t.Error("[ERR] Master Command is not 'COMMAND_EXCHANGE_CRPTKEY'")
+        return
+    }
+*/
     if bytes.Compare(meta.EncryptedMasterCommand, umeta.EncryptedMasterCommand) != 0{
         t.Errorf("[ERR] package/unpacked encrypted command differs")
         return
@@ -317,61 +241,10 @@ func TestExecKeyExchangeMeta(t *testing.T) {
 }
 
 func TestSendCryptoCheckMeta(t *testing.T) {
-    setup()
-    defer destroy()
+    setUp()
+    defer tearDown()
 
-    timestmap, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    agent, err := slagent.CheckSlaveCryptoStatus(masterAgentName, slaveNodeName, timestmap)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    msa, err := slagent.CheckSlaveCryptoMeta(agent, crypt.TestAESEncryptor)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    psm, err := slagent.PackedSlaveMeta(msa)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    //-------------- over master, we've received the message ----------------------
-    // suppose we've sort out what this is.
-    usm, err := slagent.UnpackedSlaveMeta(psm)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    // marshaled, descrypted, slave-status
-    mdsa, err := crypt.TestAESEncryptor.Decrypt(usm.EncryptedStatus)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    // unmarshaled, slave-status
-    ussa, err := slagent.UnpackedSlaveStatus(mdsa)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    // master preperation
-    timestmap, err = time.Parse(time.RFC3339, "2012-11-01T22:08:42+00:00")
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    // master crypto check state command
-    cmd, err := MasterBindReadyCommand(ussa, timestmap)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    meta, err := MasterBindReadyMeta(cmd, crypt.TestAESEncryptor)
+    meta, _, err := TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -381,19 +254,14 @@ func TestSendCryptoCheckMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    if 512 <= len(mp) {
+        t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
+    }
     // verification step
     umeta, err := UnpackedMasterMeta(mp)
     if err != nil {
         fmt.Printf(err.Error())
         return
-    }
-
-    if cmd.MasterCommandType != COMMAND_MASTER_BIND_READY {
-        t.Error("Master Command is not 'COMMAND_MASTER_BIND_READY'")
-        return
-    }
-    if 512 <= len(mp) {
-        t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
     }
     if meta.MetaVersion != umeta.MetaVersion {
         t.Errorf("[ERR] package/unpacked meta version differs")
@@ -406,61 +274,10 @@ func TestSendCryptoCheckMeta(t *testing.T) {
 }
 
 func TestBoundedStatusMeta(t *testing.T) {
-    setup()
-    defer destroy()
+    setUp()
+    defer tearDown()
 
-    timestmap, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    agent, err := slagent.SlaveBoundedStatus(masterAgentName, slaveNodeName, timestmap)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    msa, err := slagent.SlaveBoundedMeta(agent, crypt.TestAESEncryptor)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    psm, err := slagent.PackedSlaveMeta(msa)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    //-------------- over master, we've received the message ----------------------
-    // suppose we've sort out what this is.
-    usm, err := slagent.UnpackedSlaveMeta(psm)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    // marshaled, descrypted, slave-status
-    mdsa, err := crypt.TestAESEncryptor.Decrypt(usm.EncryptedStatus)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    // unmarshaled, slave-status
-    ussa, err := slagent.UnpackedSlaveStatus(mdsa)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    // master preperation
-    timestmap, err = time.Parse(time.RFC3339, "2012-11-01T22:08:42+00:00")
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    // master crypto check state command
-    cmd, err := BoundedSlaveAckCommand(ussa, timestmap)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    meta, err := BoundedSlaveAckMeta(cmd, crypt.TestAESEncryptor)
+    meta, _, err := TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -470,19 +287,14 @@ func TestBoundedStatusMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    if 512 <= len(mp) {
+        t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
+        return
+    }
     // verification step
     umeta, err := UnpackedMasterMeta(mp)
     if err != nil {
         fmt.Printf(err.Error())
-        return
-    }
-
-    if cmd.MasterCommandType != COMMAND_SLAVE_ACK {
-        t.Error("[ERR] Master Command is not 'COMMAND_SLAVE_ACK'")
-        return
-    }
-    if 512 <= len(mp) {
-        t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
         return
     }
     if meta.MetaVersion != umeta.MetaVersion {
@@ -495,5 +307,5 @@ func TestBoundedStatusMeta(t *testing.T) {
     }
 }
 
-func ExampleBindBrokenMeta() {
+func TestBindBrokenMeta(t *testing.T) {
 }

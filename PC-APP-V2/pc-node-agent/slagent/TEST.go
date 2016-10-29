@@ -40,19 +40,19 @@ func TestSlaveKeyExchangeStatus(masterAgentName string, begin time.Time) (*Pocke
     return ma, begin, err
 }
 
-func TestCheckSlaveCryptoStatus(masterAgentName, slaveAgentName string, aesEnc crypt.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
+func TestSlaveCheckCryptoStatus(masterAgentName, slaveAgentName string, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
     sa, err := CheckSlaveCryptoStatus(masterAgentName, slaveAgentName, begin)
     if err != nil {
         return nil, begin, err
     }
-    ma, err := CheckSlaveCryptoMeta(sa, aesEnc)
+    ma, err := CheckSlaveCryptoMeta(sa, crypt.TestAESCryptor)
     if err != nil {
         return nil, begin, err
     }
     return ma, begin, nil
 }
 
-func TestSlaveBoundedStatus(slaveNodeName string, aesEnc crypt.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
+func TestSlaveBoundedStatus(slaveNodeName string, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
     masterAgentName, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
         return nil, begin, err
@@ -61,7 +61,7 @@ func TestSlaveBoundedStatus(slaveNodeName string, aesEnc crypt.AESCryptor, begin
     if err != nil {
         return nil, begin, err
     }
-    ma, err := SlaveBoundedMeta(sa, aesEnc)
+    ma, err := SlaveBoundedMeta(sa, crypt.TestAESCryptor)
     if err != nil {
         return nil, begin, err
     }
