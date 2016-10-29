@@ -1,4 +1,4 @@
-package manager
+package beacon
 
 import (
     "time"
@@ -6,9 +6,9 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
-type MMState int
+type MasterBeaconState int
 const (
-    MasterUnbounded         MMState = iota
+    MasterUnbounded         MasterBeaconState = iota
     MasterInquired
     MasterKeyExchange
     MasterCryptoCheck
@@ -16,14 +16,14 @@ const (
     MasterBindBroken
 )
 
-type MMTranstion int
+type MasterBeaconTranstion int
 const (
-    MasterTransitionFail    MMTranstion = iota
+    MasterTransitionFail    MasterBeaconTranstion = iota
     MasterTransitionOk
     MasterTransitionIdle
 )
 
-func (st MMState) String() string {
+func (st MasterBeaconState) String() string {
     var state string
     switch st {
         case MasterUnbounded:
@@ -42,8 +42,8 @@ func (st MMState) String() string {
     return state
 }
 
-type MasterManagement interface {
-    CurrentState() MMState
+type MasterBeacon interface {
+    CurrentState() MasterBeaconState
     TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error)
 }
 

@@ -1,4 +1,4 @@
-package manager
+package beacon
 
 import (
     "fmt"
@@ -7,7 +7,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
-func stateTransition(currState MMState, nextCondition MMTranstion) (nextState MMState, err error) {
+func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTranstion) (nextState MasterBeaconState, err error) {
     // successfully transition to the next
     if nextCondition == MasterTransitionOk {
         switch currState {
@@ -51,22 +51,22 @@ func stateTransition(currState MMState, nextCondition MMTranstion) (nextState MM
     return
 }
 
-func NewManagerForSlaveNode(slaveNode *slagent.PocketSlaveAgentMeta) (manager MasterManagement) {
-    return &masterManagement{
+func NewBeaconForSlaveNode(slaveNode *slagent.PocketSlaveAgentMeta) (manager MasterBeacon) {
+    return &masterBeacon{
         managmentState: MasterUnbounded,
     }
 }
 
-type masterManagement struct {
-    lastSuccess       time.Time
-    managmentState    MMState
+type masterBeacon struct {
+    lastSuccess    time.Time
+    managmentState MasterBeaconState
 }
 
-func (mm *masterManagement) CurrentState() MMState {
+func (mm *masterBeacon) CurrentState() MasterBeaconState {
     return mm.managmentState
 }
 
-func (mm *masterManagement) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
+func (mm *masterBeacon) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
     switch mm.managmentState {
     case MasterUnbounded:
         return mm.unbounded(meta, timestamp)
@@ -86,26 +86,26 @@ func (mm *masterManagement) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgen
     return
 }
 
-func (mm *masterManagement) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
+func (mm *masterBeacon) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
     return
 }
 
-func (mm *masterManagement) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
+func (mm *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
     return
 }
 
-func (mm *masterManagement) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
+func (mm *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
     return
 }
 
-func (mm *masterManagement) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
+func (mm *masterBeacon) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
     return
 }
 
-func (mm *masterManagement) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
+func (mm *masterBeacon) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
     return
 }
 
-func (mm *masterManagement) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
+func (mm *masterBeacon) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
     return
 }

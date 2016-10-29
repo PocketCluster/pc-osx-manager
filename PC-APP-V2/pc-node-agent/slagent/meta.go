@@ -25,7 +25,7 @@ func UnpackedSlaveMeta(message []byte) (meta *PocketSlaveAgentMeta, err error) {
 
 // --- per-state meta funcs
 
-func UnboundedMasterSearchMeta(agent *PocketSlaveDiscovery) (*PocketSlaveAgentMeta) {
+func UnboundedMasterDiscoveryMeta(agent *PocketSlaveDiscovery) (*PocketSlaveAgentMeta) {
     return &PocketSlaveAgentMeta{
         MetaVersion:    SLAVE_META_VERSION,
         DiscoveryAgent: agent,
@@ -51,7 +51,7 @@ func KeyExchangeMeta(agent *PocketSlaveStatus, pubkey []byte) (*PocketSlaveAgent
 }
 
 
-func SlaveBindReadyMeta(agent *PocketSlaveStatus, aescrypto crypt.AESCryptor) (*PocketSlaveAgentMeta, error) {
+func CheckSlaveCryptoMeta(agent *PocketSlaveStatus, aescrypto crypt.AESCryptor) (*PocketSlaveAgentMeta, error) {
     mp, err := PackedSlaveStatus(agent)
     if err != nil {
         return nil, err

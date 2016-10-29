@@ -30,12 +30,12 @@ func TestUnboundedInqueryMeta(t *testing.T) {
     defer destroy()
 
     // Let's Suppose you've received an unbounded inquery from a node over multicast net.
-    ua, err := slagent.UnboundedMasterSearchDiscovery()
+    ua, err := slagent.UnboundedMasterDiscovery()
     if err != nil {
         t.Error(err.Error())
         return
     }
-    psm, err := slagent.PackedSlaveMeta(slagent.UnboundedMasterSearchMeta(ua))
+    psm, err := slagent.PackedSlaveMeta(slagent.UnboundedMasterDiscoveryMeta(ua))
     if err != nil {
         t.Error(err.Error())
         return
@@ -62,7 +62,7 @@ func TestUnboundedInqueryMeta(t *testing.T) {
         t.Error("[ERR] Incorrect command type. " + COMMAND_SLAVE_IDINQUERY + " is expected")
         return
     }
-    if len(mp) != 173 {
+    if 512 <= len(mp) {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
         return
     }
@@ -291,7 +291,7 @@ func TestExecKeyExchangeMeta(t *testing.T) {
         t.Error("[ERR] Master Command is not 'COMMAND_EXCHANGE_CRPTKEY'")
         return
     }
-    if len(mp) != 490 {
+    if 512 <= len(mp) {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
     }
     if meta.MetaVersion != umeta.MetaVersion {
@@ -325,12 +325,12 @@ func TestSendCryptoCheckMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    agent, err := slagent.SlaveBindReadyStatus(masterAgentName, slaveNodeName, timestmap)
+    agent, err := slagent.CheckSlaveCryptoStatus(masterAgentName, slaveNodeName, timestmap)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    msa, err := slagent.SlaveBindReadyMeta(agent, crypt.TestAESEncryptor)
+    msa, err := slagent.CheckSlaveCryptoMeta(agent, crypt.TestAESEncryptor)
     if err != nil {
         t.Error(err.Error())
         return
@@ -392,7 +392,7 @@ func TestSendCryptoCheckMeta(t *testing.T) {
         t.Error("Master Command is not 'COMMAND_MASTER_BIND_READY'")
         return
     }
-    if len(mp) != 207 {
+    if 512 <= len(mp) {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
     }
     if meta.MetaVersion != umeta.MetaVersion {
@@ -481,7 +481,7 @@ func TestBoundedStatusMeta(t *testing.T) {
         t.Error("[ERR] Master Command is not 'COMMAND_SLAVE_ACK'")
         return
     }
-    if len(mp) != 207 {
+    if 512 <= len(mp) {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
         return
     }

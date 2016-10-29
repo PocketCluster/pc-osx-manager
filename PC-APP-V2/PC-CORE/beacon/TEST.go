@@ -1,20 +1,20 @@
-package discovery
+package beacon
 
 import (
     "time"
 
-    "github.com/stkim1/pc-node-agent/slagent"
-    "github.com/stkim1/pc-core/msagent"
     "github.com/stkim1/pc-node-agent/crypt"
+    "github.com/stkim1/pc-core/msagent"
+    "github.com/stkim1/pc-node-agent/slagent"
 )
 
 func TestMasterIdentityInqueryRespond() (meta *msagent.PocketMasterAgentMeta, err error) {
     // ------------- Let's Suppose you've sent an unbounded inquery from a node over multicast net ---------------------
-    ua, err := slagent.UnboundedMasterSearchDiscovery()
+    ua, err := slagent.UnboundedMasterDiscovery()
     if err != nil {
         return
     }
-    usm := slagent.UnboundedMasterSearchMeta(ua)
+    usm := slagent.UnboundedMasterDiscoveryMeta(ua)
     cmd, err := msagent.SlaveIdentityInqueryRespond(usm.DiscoveryAgent)
     if err != nil {
         return
@@ -23,7 +23,7 @@ func TestMasterIdentityInqueryRespond() (meta *msagent.PocketMasterAgentMeta, er
     return
 }
 
-func TestMasterIdentityFixationRespond(begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
+func TestMasterIdentityFixationRespond(begin time.Time) (meta *msagent.PocketMasterAgentMeta, end time.Time, err error) {
     agent, err := slagent.AnswerMasterInquiryStatus(begin)
     if err != nil {
         return
@@ -33,7 +33,8 @@ func TestMasterIdentityFixationRespond(begin time.Time) (meta *msagent.PocketMas
         return
     }
     // --- over master side
-    cmd, err := msagent.MasterDeclarationCommand(msa.StatusAgent, begin.Add(time.Second))
+    end = begin.Add(time.Second)
+    cmd, err := msagent.MasterDeclarationCommand(msa.StatusAgent, end)
     if err != nil {
         return
     }
@@ -41,7 +42,7 @@ func TestMasterIdentityFixationRespond(begin time.Time) (meta *msagent.PocketMas
     return
 }
 
-func TestMasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName string, begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
+func TestMasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName string, begin time.Time) (meta *msagent.PocketMasterAgentMeta, end time.Time, err error) {
     agent, err := slagent.KeyExchangeStatus(masterBoundAgentName, begin)
     if err != nil {
         return
@@ -51,14 +52,14 @@ func TestMasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName string, be
         return
     }
     // --- over master side ---
-    timestmap := begin.Add(time.Second)
+    end = begin.Add(time.Second)
     // encryptor
     rsaenc ,err := crypt.NewEncryptorFromKeyData(sam.SlavePubKey, crypt.TestMasterPrivateKey())
     if err != nil {
         return
     }
     // responding commnad
-    cmd, slvstat, err := msagent.ExchangeCryptoKeyAndNameCommand(sam.StatusAgent, slaveNodeName, timestmap)
+    cmd, slvstat, err := msagent.ExchangeCryptoKeyAndNameCommand(sam.StatusAgent, slaveNodeName, end)
     if err != nil {
         return
     }
@@ -66,12 +67,12 @@ func TestMasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName string, be
     return
 }
 
-func TestMasterCryptoCheckCommand(masterBoundAgentName, slaveNodeName string, begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
-    agent, err := slagent.SlaveBindReadyStatus(masterBoundAgentName, slaveNodeName, begin)
+func TestMasterCryptoCheckCommand(masterBoundAgentName, slaveNodeName string, begin time.Time) (meta *msagent.PocketMasterAgentMeta, end time.Time, err error) {
+    agent, err := slagent.CheckSlaveCryptoStatus(masterBoundAgentName, slaveNodeName, begin)
     if err != nil {
         return
     }
-    msa, err := slagent.SlaveBindReadyMeta(agent, crypt.TestAESEncryptor)
+    msa, err := slagent.CheckSlaveCryptoMeta(agent, crypt.TestAESEncryptor)
     if err != nil {
         return
     }
@@ -86,12 +87,8 @@ func TestMasterCryptoCheckCommand(masterBoundAgentName, slaveNodeName string, be
         return
     }
     // master preperation
-    timestmap := begin.Add(time.Second)
-    if err != nil {
-        return
-    }
-    // master crypto check state command
-    cmd, err := msagent.MasterBindReadyCommand(ussa, timestmap)
+    end = begin.Add(time.Second)
+    cmd, err := msagent.MasterBindReadyCommand(ussa, end)
     if err != nil {
         return
     }
@@ -99,7 +96,7 @@ func TestMasterCryptoCheckCommand(masterBoundAgentName, slaveNodeName string, be
     return
 }
 
-func TestMasterBrokenBindRecoveryCommand(masterBoundAgentName string, begin time.Time) (meta *msagent.PocketMasterAgentMeta, err error) {
+func TestMasterBrokenBindRecoveryCommand(masterBoundAgentName string) (meta *msagent.PocketMasterAgentMeta, err error) {
     agent, err := slagent.BrokenBindDiscovery(masterBoundAgentName)
     if err != nil {
         return
@@ -119,3 +116,4 @@ func TestMasterBrokenBindRecoveryCommand(masterBoundAgentName string, begin time
     meta, err = msagent.BrokenBindRecoverMeta(cmd, crypt.TestAESKey, crypt.TestAESEncryptor, rsaenc)
     return
 }
+

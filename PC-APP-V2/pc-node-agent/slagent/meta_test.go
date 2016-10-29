@@ -1,7 +1,6 @@
 package slagent
 
 import (
-    "fmt"
     "time"
     "testing"
     "runtime"
@@ -11,12 +10,14 @@ import (
     "github.com/stkim1/pc-node-agent/slcontext"
 )
 
-var masterBoundAgentName string
+var masterAgentName string
+var slaveNodeName string
 var initSendTimestmap time.Time
 
 func setUp() {
     slcontext.DebugSlcontextPrepare()
-    masterBoundAgentName, _ = context.DebugContextPrepare().MasterAgentName()
+    masterAgentName, _ = context.DebugContextPrepare().MasterAgentName()
+    slaveNodeName = "pc-node1"
     initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 }
 
@@ -32,12 +33,11 @@ func TestUnboundedBroadcastMeta(t *testing.T) {
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
 
     //--- testing body ---
-    ua, err := UnboundedMasterSearchDiscovery()
+    ma, err := TestSlaveUnboundedMasterSearchDiscovery()
     if err != nil {
-        fmt.Printf(err.Error())
+        t.Error(err.Error())
         return
     }
-    ma := UnboundedMasterSearchMeta(ua)
 
     if ma.MetaVersion != SLAVE_META_VERSION {
         t.Error("[ERR] Incorrect MetaVersion " + ma.MetaVersion + ". Expected : " + SLAVE_META_VERSION)
@@ -69,7 +69,7 @@ func TestUnboundedBroadcastMeta(t *testing.T) {
 
     mp, err := PackedSlaveMeta(ma)
     if err != nil {
-        fmt.Printf(err.Error())
+        t.Error(err.Error())
         return
     }
     if 512 <= len(mp) {
@@ -79,7 +79,7 @@ func TestUnboundedBroadcastMeta(t *testing.T) {
 
     up, err := UnpackedSlaveMeta(mp)
     if err != nil {
-        fmt.Printf(err.Error())
+        t.Error(err.Error())
         return
     }
     if ma.MetaVersion != up.MetaVersion {
@@ -117,15 +117,9 @@ func TestInquiredMetaAgent(t *testing.T) {
     defer tearDown()
 
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
-
-    agent, err := AnswerMasterInquiryStatus(initSendTimestmap)
+    ma, _, err := TestSlaveAnswerMasterInquiry(initSendTimestmap)
     if err != nil {
-        fmt.Printf(err.Error())
-        return
-    }
-    ma, err := AnswerMasterInquiryMeta(agent)
-    if err != nil {
-        fmt.Printf(err.Error())
+        t.Error(err.Error())
         return
     }
 
@@ -169,7 +163,7 @@ func TestInquiredMetaAgent(t *testing.T) {
 
     up, err := UnpackedSlaveMeta(mp)
     if err != nil {
-        fmt.Printf(err.Error())
+        t.Error(err.Error())
         return
     }
 
@@ -198,8 +192,8 @@ func TestInquiredMetaAgent(t *testing.T) {
         return
     }
     // TODO : need to fix slave timeout
-    if ma.StatusAgent.SlaveTimestamp != up.StatusAgent.SlaveTimestamp {
-        t.Error("[ERR] Unidentical StatusAgent.SlaveTimestamp")
+    if ma.StatusAgent.SlaveTimestamp.Equal(up.StatusAgent.SlaveTimestamp) {
+        t.Skip("[ERR] Unidentical StatusAgent.SlaveTimestamp")
         return
     }
 }
@@ -208,20 +202,13 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
     setUp()
     defer tearDown()
 
-    agent, err := KeyExchangeStatus(masterBoundAgentName, initSendTimestmap)
-    if err != nil {
-        fmt.Printf(err.Error())
-        return
-    }
-
-    ma, err := KeyExchangeMeta(agent, crypt.TestSlavePublicKey())
-    if err != nil {
-        fmt.Printf(err.Error())
-        return
-    }
-
     // test comparison
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    ma, _, err := TestSlaveKeyExchangeStatus(masterAgentName, initSendTimestmap)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
 
     if ma.MetaVersion != SLAVE_META_VERSION {
         t.Errorf("[ERR] Incorrect slave meta version %s\n", SLAVE_META_VERSION)
@@ -253,7 +240,7 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
     }
     mp, err := PackedSlaveMeta(ma)
     if err != nil {
-        fmt.Printf(err.Error())
+        t.Error(err.Error())
         return
     }
     if  512 <= len(mp) {
@@ -263,7 +250,7 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
 
     up, err := UnpackedSlaveMeta(mp)
     if err != nil {
-        fmt.Printf(err.Error())
+        t.Error(err.Error())
         return
     }
     if ma.MetaVersion != up.MetaVersion {
@@ -291,64 +278,276 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
         return
     }
     // TODO : need to fix slave timeout
-    if ma.StatusAgent.SlaveTimestamp != up.StatusAgent.SlaveTimestamp {
-        t.Error("[ERR] Unidentical StatusAgent.SlaveTimestamp")
+    if ma.StatusAgent.SlaveTimestamp.Equal(up.StatusAgent.SlaveTimestamp) {
+        t.Skip("[ERR] Unidentical StatusAgent.SlaveTimestamp")
         return
     }
 }
 
-func TestSlaveBindReadyAgent(t *testing.T) {
+func TestSlaveCheckCryptoAgent(t *testing.T) {
     setUp()
     defer tearDown()
 
-    key := []byte("longer means more possible keys ")
-    sa, err := SlaveBindReadyStatus("master-yoda", "jedi-obiwan", initSendTimestmap)
+    piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    ma, _, err := TestCheckSlaveCryptoStatus(masterAgentName, slaveNodeName, crypt.TestAESEncryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    ac, err := crypt.NewAESCrypto(key)
+
+    if ma.MetaVersion != SLAVE_META_VERSION {
+        t.Errorf("[ERR] Incorrect slave meta version %s\n", SLAVE_META_VERSION)
+        return
+    }
+    if len(ma.EncryptedStatus) == 0 {
+        t.Errorf("[ERR] Incorrect slave status data %s\n", len(ma.EncryptedStatus))
+        return
+    }
+    esd, err := crypt.TestAESEncryptor.Decrypt(ma.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    ma, err := SlaveBindReadyMeta(sa, ac)
+    sd, err := UnpackedSlaveStatus(esd)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    _, err = PackedSlaveMeta(ma)
+    if sd.Version != SLAVE_STATUS_VERSION {
+        t.Errorf("[ERR] Incorrect slave status version %s\n", SLAVE_STATUS_VERSION)
+        return
+    }
+    if sd.MasterBoundAgent != masterAgentName {
+        t.Errorf("[ERR] Incorrect master agent name %s\n", masterAgentName)
+        return
+    }
+    if sd.SlaveResponse != SLAVE_CHECK_CRYPTO {
+        t.Errorf("[ERR] Incorrect slave status %s\n", SLAVE_CHECK_CRYPTO)
+        return
+    }
+    if sd.SlaveNodeName != slaveNodeName {
+        t.Errorf("[ERR] Incorrect slave agent name %s\n", slaveNodeName)
+        return
+    }
+    if sd.SlaveAddress != piface.IP.String()  {
+        t.Errorf("[ERR] Incorrect slave address %s\n", piface.IP.String())
+        return
+    }
+    if sd.SlaveNodeMacAddr != piface.HardwareAddr.String() {
+        t.Errorf("[ERR] Incorrect slave mac address %s\n", piface.HardwareAddr.String())
+        return
+    }
+    if sd.SlaveHardware != runtime.GOARCH {
+        t.Errorf("[ERR] in correct slave hardware %s\n", runtime.GOARCH)
+        return
+    }
+    if !sd.SlaveTimestamp.Equal(initSendTimestmap) {
+        t.Errorf("[ERR] Incorrect slave timestamp %s\n", ma.StatusAgent.SlaveTimestamp.String())
+        return
+    }
+
+    mp, err := PackedSlaveMeta(ma)
     if err != nil {
         t.Error(err.Error())
+        return
+    }
+    if 512 <= len(mp) {
+        t.Errorf("[ERR] Package message length [%d] exceeds an expectation", len(mp))
+        return
+    }
+
+    // unpack message data
+    up, err := UnpackedSlaveMeta(mp)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    if ma.MetaVersion != up.MetaVersion {
+        t.Error("[ERR] Unidentical MetaVersion")
+        return
+    }
+    if len(up.EncryptedStatus) == 0 {
+        t.Errorf("[ERR] Incorrect slave status data %s\n", len(up.EncryptedStatus))
+        return
+    }
+
+    esd, err = crypt.TestAESEncryptor.Decrypt(up.EncryptedStatus)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    usd, err := UnpackedSlaveStatus(esd)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    if sd.Version != usd.Version {
+        t.Error("[ERR] Unidentical StatusAgent.Version")
+        return
+    }
+    if sd.MasterBoundAgent != usd.MasterBoundAgent {
+        t.Error("[ERR] Unidentical StatusAgent.MasterBoundAgent")
+        return
+    }
+    if sd.SlaveResponse != usd.SlaveResponse {
+        t.Error("[ERR] Unidentical StatusAgent.SlaveResponse")
+        return
+    }
+    if sd.SlaveNodeName != usd.SlaveNodeName {
+        t.Error("[ERR] Unidentical StatusAgent.SlaveNodeName")
+        return
+    }
+    if sd.SlaveAddress != usd.SlaveAddress {
+        t.Error("[ERR] Unidentical StatusAgent.SlaveAddress")
+        return
+    }
+    if sd.SlaveNodeMacAddr != usd.SlaveNodeMacAddr {
+        t.Error("[ERR] Unidentical StatusAgent.SlaveNodeMacAddr")
+        return
+    }
+    if sd.SlaveHardware != usd.SlaveHardware {
+        t.Error("[ERR] Unidentical StatusAgent.SlaveHardware")
+        return
+    }
+    // TODO : need to fix slave timeout
+    if sd.SlaveTimestamp.Equal(usd.SlaveTimestamp) {
+        t.Skip("[ERR] Unidentical StatusAgent.SlaveTimestamp")
         return
     }
 }
-
 
 // becuase the encrypted output differs everytime, we can only check by decrypt it.
 func TestBoundedStatusMetaAgent(t *testing.T) {
     setUp()
     defer tearDown()
 
-    key := []byte("longer means more possible keys ")
-    sa, err := SlaveBoundedStatus(masterBoundAgentName, initSendTimestmap)
+    piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    ma, _, err := TestSlaveBoundedStatus(slaveNodeName, crypt.TestAESEncryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    ac, err := crypt.NewAESCrypto(key)
+    if ma.MetaVersion != SLAVE_META_VERSION {
+        t.Errorf("[ERR] Incorrect slave meta version %s\n", SLAVE_META_VERSION)
+        return
+    }
+    if len(ma.EncryptedStatus) == 0 {
+        t.Errorf("[ERR] Incorrect slave status data %s\n", len(ma.EncryptedStatus))
+        return
+    }
+    esd, err := crypt.TestAESEncryptor.Decrypt(ma.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    ma, err := SlaveBoundedMeta(sa, ac)
+    sd, err := UnpackedSlaveStatus(esd)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    _, err = PackedSlaveMeta(ma)
+    if sd.Version != SLAVE_STATUS_VERSION {
+        t.Errorf("[ERR] Incorrect slave status version %s\n", SLAVE_STATUS_VERSION)
+        return
+    }
+    if sd.MasterBoundAgent != masterAgentName {
+        t.Errorf("[ERR] Incorrect master agent name %s\n", masterAgentName)
+        return
+    }
+    if sd.SlaveResponse != SLAVE_REPORT_STATUS {
+        t.Errorf("[ERR] Incorrect slave status %s\n", SLAVE_REPORT_STATUS)
+        return
+    }
+    if sd.SlaveNodeName != slaveNodeName {
+        t.Errorf("[ERR] Incorrect slave agent name %s\n", slaveNodeName)
+        return
+    }
+    if sd.SlaveAddress != piface.IP.String()  {
+        t.Errorf("[ERR] Incorrect slave address %s\n", piface.IP.String())
+        return
+    }
+    if sd.SlaveNodeMacAddr != piface.HardwareAddr.String() {
+        t.Errorf("[ERR] Incorrect slave mac address %s\n", piface.HardwareAddr.String())
+        return
+    }
+    if sd.SlaveHardware != runtime.GOARCH {
+        t.Errorf("[ERR] in correct slave hardware %s\n", runtime.GOARCH)
+        return
+    }
+    if !sd.SlaveTimestamp.Equal(initSendTimestmap) {
+        t.Errorf("[ERR] Incorrect slave timestamp %s\n", ma.StatusAgent.SlaveTimestamp.String())
+        return
+    }
+
+    mp, err := PackedSlaveMeta(ma)
     if err != nil {
         t.Error(err.Error())
+        return
+    }
+    if 512 <= len(mp) {
+        t.Errorf("[ERR] Package message length [%d] exceeds an expectation", len(mp))
+        return
+    }
+
+    // unpack message data
+    up, err := UnpackedSlaveMeta(mp)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    if ma.MetaVersion != up.MetaVersion {
+        t.Error("[ERR] Unidentical MetaVersion")
+        return
+    }
+    if len(up.EncryptedStatus) == 0 {
+        t.Errorf("[ERR] Incorrect slave status data %s\n", len(up.EncryptedStatus))
+        return
+    }
+
+    esd, err = crypt.TestAESEncryptor.Decrypt(up.EncryptedStatus)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    usd, err := UnpackedSlaveStatus(esd)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    if sd.Version != usd.Version {
+        t.Error("[ERR] Unidentical StatusAgent.Version")
+        return
+    }
+    if sd.MasterBoundAgent != usd.MasterBoundAgent {
+        t.Error("[ERR] Unidentical StatusAgent.MasterBoundAgent")
+        return
+    }
+    if sd.SlaveResponse != usd.SlaveResponse {
+        t.Error("[ERR] Unidentical StatusAgent.SlaveResponse")
+        return
+    }
+    if sd.SlaveNodeName != usd.SlaveNodeName {
+        t.Error("[ERR] Unidentical StatusAgent.SlaveNodeName")
+        return
+    }
+    if sd.SlaveAddress != usd.SlaveAddress {
+        t.Error("[ERR] Unidentical StatusAgent.SlaveAddress")
+        return
+    }
+    if sd.SlaveNodeMacAddr != usd.SlaveNodeMacAddr {
+        t.Error("[ERR] Unidentical StatusAgent.SlaveNodeMacAddr")
+        return
+    }
+    if sd.SlaveHardware != usd.SlaveHardware {
+        t.Error("[ERR] Unidentical StatusAgent.SlaveHardware")
+        return
+    }
+    // TODO : need to fix slave timeout
+    if sd.SlaveTimestamp.Equal(usd.SlaveTimestamp) {
+        t.Skip("[ERR] Unidentical StatusAgent.SlaveTimestamp")
         return
     }
 }
@@ -357,15 +556,13 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    ba, err := BrokenBindDiscovery(masterBoundAgentName)
-    if err != nil {
-        fmt.Printf(err.Error())
-        return
-    }
-    ma := BrokenBindMeta(ba)
-
     // test comparison
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    ma, err := TestSlaveBindBroken(masterAgentName)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
 
     if ma.MetaVersion != SLAVE_META_VERSION {
         t.Errorf("[ERR] slave meta protocol version differs from %s\n", SLAVE_META_VERSION)
@@ -373,8 +570,8 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
     if ma.DiscoveryAgent.Version != SLAVE_DISCOVER_VERSION {
         t.Errorf("[ERR] slave discovery protocol version differs from %s\n", SLAVE_DISCOVER_VERSION)
     }
-    if ma.DiscoveryAgent.MasterBoundAgent != masterBoundAgentName {
-        t.Errorf("[ERR] master bound agent name differs from %s\n", masterBoundAgentName)
+    if ma.DiscoveryAgent.MasterBoundAgent != masterAgentName {
+        t.Errorf("[ERR] master bound agent name differs from %s\n", masterAgentName)
     }
     if ma.DiscoveryAgent.SlaveResponse != SLAVE_LOOKUP_AGENT {
         t.Errorf("[ERR] Slave is not in correct state %s\n", SLAVE_LOOKUP_AGENT)

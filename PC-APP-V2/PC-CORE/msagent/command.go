@@ -151,7 +151,7 @@ func MasterBindReadyCommand(uss *slagent.PocketSlaveStatus, timestamp time.Time)
     if len(uss.MasterBoundAgent) == 0 {
         return nil, fmt.Errorf("[ERR] Slave doesn't know its master")
     }
-    if uss.SlaveResponse != slagent.SLAVE_BIND_READY {
+    if uss.SlaveResponse != slagent.SLAVE_CHECK_CRYPTO {
         return nil, fmt.Errorf("[ERR] Slave is not ready for binding")
     }
     if !uss.IsAppropriateSlaveInfo() {

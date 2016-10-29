@@ -41,7 +41,7 @@ const (
     // checking slave node public key
     SLAVE_SEND_PUBKEY       ResponseType = "pc_sl_sp"
     // slave node ready for binding
-    SLAVE_BIND_READY        ResponseType = "pc_sl_br"
+    SLAVE_CHECK_CRYPTO      ResponseType = "pc_sl_br"
     // slave node report status to the master agent
     SLAVE_REPORT_STATUS     ResponseType = "pc_sl_rs"
 )

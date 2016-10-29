@@ -29,7 +29,7 @@ func (sda *PocketSlaveDiscovery) IsAppropriateSlaveInfo() bool {
     return true
 }
 
-func UnboundedMasterSearchDiscovery() (*PocketSlaveDiscovery, error) {
+func UnboundedMasterDiscovery() (*PocketSlaveDiscovery, error) {
     piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
     if err != nil {
         return nil, err

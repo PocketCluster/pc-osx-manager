@@ -2,7 +2,6 @@ package slagent
 
 import (
     "runtime"
-    "os"
     "time"
 
     "gopkg.in/vmihailenco/msgpack.v2"
@@ -72,7 +71,7 @@ func KeyExchangeStatus(master string, timestamp time.Time) (*PocketSlaveStatus, 
     }, nil
 }
 
-func SlaveBindReadyStatus(master, nodename string, timestamp time.Time) (*PocketSlaveStatus, error) {
+func CheckSlaveCryptoStatus(master, nodename string, timestamp time.Time) (*PocketSlaveStatus, error) {
     piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
     if err != nil {
         return nil, err
@@ -80,7 +79,7 @@ func SlaveBindReadyStatus(master, nodename string, timestamp time.Time) (*Pocket
     return &PocketSlaveStatus{
         Version         : SLAVE_STATUS_VERSION,
         MasterBoundAgent: master,
-        SlaveResponse   : SLAVE_BIND_READY,
+        SlaveResponse   : SLAVE_CHECK_CRYPTO,
         SlaveNodeName   : nodename,
         SlaveAddress    : piface.IP.String(),
         SlaveNodeMacAddr: piface.HardwareAddr.String(),
@@ -89,20 +88,24 @@ func SlaveBindReadyStatus(master, nodename string, timestamp time.Time) (*Pocket
     }, nil
 }
 
-func SlaveBoundedStatus(master string, timestamp time.Time) (*PocketSlaveStatus, error) {
+func SlaveBoundedStatus(timestamp time.Time) (*PocketSlaveStatus, error) {
     piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
     if err != nil {
         return nil, err
     }
-    hostname, err := os.Hostname()
+    masterAgentName, err := slcontext.SharedSlaveContext().GetMasterAgent()
+    if err != nil {
+        return nil, err
+    }
+    slaveNodeName, err := slcontext.SharedSlaveContext().GetSlaveNodeName()
     if err != nil {
         return nil, err
     }
     return &PocketSlaveStatus{
         Version         : SLAVE_STATUS_VERSION,
-        MasterBoundAgent: master,
+        MasterBoundAgent: masterAgentName,
         SlaveResponse   : SLAVE_REPORT_STATUS,
-        SlaveNodeName   : hostname,
+        SlaveNodeName   : slaveNodeName,
         SlaveAddress    : piface.IP.String(),
         SlaveNodeMacAddr: piface.HardwareAddr.String(),
         SlaveHardware   : runtime.GOARCH,
