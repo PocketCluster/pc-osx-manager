@@ -51,7 +51,7 @@ func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTran
     return
 }
 
-func NewBeaconForSlaveNode(slaveNode *slagent.PocketSlaveAgentMeta) (manager MasterBeacon) {
+func NewBeaconForSlaveNode() MasterBeacon {
     return &masterBeacon{
         managmentState: MasterUnbounded,
     }
@@ -62,24 +62,24 @@ type masterBeacon struct {
     managmentState MasterBeaconState
 }
 
-func (mm *masterBeacon) CurrentState() MasterBeaconState {
-    return mm.managmentState
+func (mb *masterBeacon) CurrentState() MasterBeaconState {
+    return mb.managmentState
 }
 
-func (mm *masterBeacon) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
-    switch mm.managmentState {
+func (mb *masterBeacon) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error) {
+    switch mb.managmentState {
     case MasterUnbounded:
-        return mm.unbounded(meta, timestamp)
+        return mb.unbounded(meta, timestamp)
     case MasterInquired:
-        return mm.inquired(meta, timestamp)
+        return mb.inquired(meta, timestamp)
     case MasterKeyExchange:
-        return mm.keyExchange(meta, timestamp)
+        return mb.keyExchange(meta, timestamp)
     case MasterCryptoCheck:
-        return mm.cryptoCheck(meta, timestamp)
+        return mb.cryptoCheck(meta, timestamp)
     case MasterBounded:
-        return mm.bounded(meta, timestamp)
+        return mb.bounded(meta, timestamp)
     case MasterBindBroken:
-        return mm.bindBroken(meta, timestamp)
+        return mb.bindBroken(meta, timestamp)
     default:
         err = fmt.Errorf("[ERR] managmentState cannot default")
     }

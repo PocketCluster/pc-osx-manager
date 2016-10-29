@@ -88,24 +88,16 @@ func CheckSlaveCryptoStatus(master, nodename string, timestamp time.Time) (*Pock
     }, nil
 }
 
-func SlaveBoundedStatus(timestamp time.Time) (*PocketSlaveStatus, error) {
+func SlaveBoundedStatus(master, nodename string, timestamp time.Time) (*PocketSlaveStatus, error) {
     piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
-    if err != nil {
-        return nil, err
-    }
-    masterAgentName, err := slcontext.SharedSlaveContext().GetMasterAgent()
-    if err != nil {
-        return nil, err
-    }
-    slaveNodeName, err := slcontext.SharedSlaveContext().GetSlaveNodeName()
     if err != nil {
         return nil, err
     }
     return &PocketSlaveStatus{
         Version         : SLAVE_STATUS_VERSION,
-        MasterBoundAgent: masterAgentName,
+        MasterBoundAgent: master,
         SlaveResponse   : SLAVE_REPORT_STATUS,
-        SlaveNodeName   : slaveNodeName,
+        SlaveNodeName   : nodename,
         SlaveAddress    : piface.IP.String(),
         SlaveNodeMacAddr: piface.HardwareAddr.String(),
         SlaveHardware   : runtime.GOARCH,

@@ -4,7 +4,6 @@ import (
     "time"
 
     "github.com/stkim1/pc-node-agent/crypt"
-    "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-core/context"
 )
 
@@ -58,13 +57,7 @@ func TestSlaveBoundedStatus(slaveNodeName string, aesEnc crypt.AESCryptor, begin
     if err != nil {
         return nil, begin, err
     }
-    if err = slcontext.SharedSlaveContext().SetMasterAgent(masterAgentName); err != nil {
-        return nil, begin, err
-    }
-    if err = slcontext.SharedSlaveContext().SetSlaveNodeName(slaveNodeName); err != nil {
-        return nil, begin, err
-    }
-    sa, err := SlaveBoundedStatus(begin)
+    sa, err := SlaveBoundedStatus(masterAgentName, slaveNodeName, begin)
     if err != nil {
         return nil, begin, err
     }

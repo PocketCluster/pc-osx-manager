@@ -414,7 +414,7 @@ func TestBoundedStatusMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    agent, err := slagent.SlaveBoundedStatus(masterAgentName, timestmap)
+    agent, err := slagent.SlaveBoundedStatus(masterAgentName, slaveNodeName, timestmap)
     if err != nil {
         t.Error(err.Error())
         return
