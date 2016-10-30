@@ -1,6 +1,8 @@
 //+build !build
 package context
 
+import "github.com/stkim1/pc-node-agent/crypt"
+
 var test_intefaces = []*HostNetworkInterface{
     {
         WifiPowerOff        : false,
@@ -101,6 +103,9 @@ func DebugContextPrepare() (HostContext) {
 
     hostContext.monitorNetworkGateways(test_gateways)
     hostContext.monitorNetworkInterfaces(test_intefaces)
+
+    hostContext.publicKeyData               = crypt.TestMasterPublicKey()
+    hostContext.privateKeyData              = crypt.TestMasterPrivateKey()
 
     return hostContext
 }

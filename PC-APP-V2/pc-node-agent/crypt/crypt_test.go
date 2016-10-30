@@ -186,3 +186,35 @@ func TestAESEncyptionDecryption(t *testing.T) {
         t.Errorf("Orinal and decrypted are different")
     }
 }
+
+func TestAESKeyGeneration(t *testing.T) {
+    var key1 []byte = NewAESKey32Byte()
+    var key2 []byte = NewAESKey32Byte()
+
+    // `go test -v ./…` to view log
+    t.Log("Key 1 - randBytesWithMask : " + string(key1))
+    t.Log("Key 2 - randBytesWithMask : " + string(key2))
+    t.Log("Key 3 - randBytesWithMaskSrc : " + string(randBytesWithMaskSrc(32)))
+    t.Log("Key 4 - randBytesWithMaskSrc: " + string(randBytesWithMaskSrc(32)))
+    key, _ := randCryptoBytes(32)
+    t.Log("Key 5 - randCryptoBytes: " + string(key))
+    key, _ = randCryptoBytes(32)
+    t.Log("Key 6 - randCryptoBytes: " + string(key))
+
+    if reflect.DeepEqual(key1, key2) {
+        t.Error("Randome AES Keys are not different enough")
+    }
+}
+
+func BenchmarkRandBytesWithMask(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        randBytesWithMask(32)
+    }
+}
+
+// this is 10 times slower than BenchmarkRandBytesWithMask
+func BenchmarkRandCryptoByte(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        randCryptoBytes(32)
+    }
+}

@@ -7,6 +7,7 @@ import (
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/pc-core/model"
 )
 
 var masterAgentName string
@@ -16,6 +17,7 @@ var initSendTimestmap time.Time
 func setUp() {
     mctx := context.DebugContextPrepare()
     slcontext.DebugSlcontextPrepare()
+    model.DebugModelRepoPrepare()
 
     masterAgentName, _ = mctx.MasterAgentName()
     slaveNodeName = "pc-node1"
@@ -23,6 +25,7 @@ func setUp() {
 }
 
 func tearDown() {
+    model.DebugModelRepoDestroy()
     slcontext.DebugSlcontextDestroy()
     context.DebugContextDestroy()
 }

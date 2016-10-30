@@ -58,5 +58,9 @@ G6aFKaqQfOXKCyWoUiVknQJAXrlgySFci/2ueKlIE1QqIiLSZ8V8OlpFLRnb1pzI
 
 var TestAESKey []byte = []byte("longer means more possible keys ")
 var TestAESCryptor, _ = NewAESCrypto(TestAESKey)
-var TestMasterRSACryptor, _ = NewEncryptorFromKeyData(TestSlavePublicKey(), TestMasterPrivateKey())
-var TestSlaveRSACryptor, _ = NewEncryptorFromKeyData(TestMasterPublicKey(), TestSlavePrivateKey())
+
+var TestMasterRSAEncryptor, _ = NewEncryptorFromKeyData(TestSlavePublicKey(), TestMasterPrivateKey())
+var TestMasterRSADecryptor, _ = NewDecryptorFromKeyData(TestSlavePublicKey(), TestMasterPrivateKey())
+
+var TestSlaveRSAEncryptor, _ = NewEncryptorFromKeyData(TestMasterPublicKey(), TestSlavePrivateKey())
+var TestSlaveRSADecryptor, _ = NewEncryptorFromKeyData(TestMasterPublicKey(), TestSlavePrivateKey())

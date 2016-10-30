@@ -54,7 +54,7 @@ func TestMasterAgentDeclarationCommand(begin time.Time) (*PocketMasterAgentMeta,
     return MasterDeclarationMeta(cmd, crypt.TestMasterPublicKey()), end, nil
 }
 
-func TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName string, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+func TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName string, aesKey []byte, aesCryptor crypt.AESCryptor, rsaEncryptor crypt.RsaEncryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
     msa, end, err := slagent.TestSlaveKeyExchangeStatus(masterAgentName, begin)
     if err != nil {
         return nil, begin, err
@@ -75,7 +75,7 @@ func TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName string, begin t
     if err != nil {
         return nil, begin, err
     }
-    meta, err := ExchangeCryptoKeyAndNameMeta(cmd, slvstat, crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSACryptor)
+    meta, err := ExchangeCryptoKeyAndNameMeta(cmd, slvstat, aesKey, aesCryptor, rsaEncryptor)
     if err != nil {
         return nil, begin, err
     }
@@ -172,6 +172,6 @@ func TestMasterBrokenBindRecoveryCommand(masterBoundAgentName string) (meta *Poc
         return
     }
     // encryptor
-    return BrokenBindRecoverMeta(cmd, crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSACryptor)
+    return BrokenBindRecoverMeta(cmd, crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor)
 }
 

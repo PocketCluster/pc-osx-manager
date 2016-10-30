@@ -11,12 +11,12 @@ import (
     "github.com/stkim1/pc-core/msagent"
 )
 
-var masterBoundAgentName string
+var masterAgentName string
 var slaveNodeName string
 var initSendTimestmap time.Time
 
 func setUp() {
-    masterBoundAgentName, _ = context.DebugContextPrepare().MasterAgentName()
+    masterAgentName, _ = context.DebugContextPrepare().MasterAgentName()
     slaveNodeName = "pc-node1"
     initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
     slcontext.DebugSlcontextPrepare()
@@ -103,7 +103,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
 
     // get master meta with aeskey
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName, masterTS)
+    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -122,7 +122,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
 
 
     // Verification
-    if msName, _ := context.GetMasterAgent(); msName != masterBoundAgentName {
+    if msName, _ := context.GetMasterAgent(); msName != masterAgentName {
         t.Errorf("[ERR] master node name is setup inappropriately | Current : %s\n", msName)
         return
     }
@@ -160,7 +160,8 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
 
     // get master meta with aeskey
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterBoundAgentName, slaveNodeName, masterTS)
+    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor, masterTS)
+
     if err != nil {
         t.Error(err.Error())
         return
@@ -179,7 +180,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
 
     // get master bind ready
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterBoundAgentName, slaveNodeName, masterTS)
+    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -196,7 +197,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
         return
     }
 
-    meta, err = msagent.TestMasterBrokenBindRecoveryCommand(masterBoundAgentName)
+    meta, err = msagent.TestMasterBrokenBindRecoveryCommand(masterAgentName)
     if err != nil {
         t.Error(err.Error())
         return
@@ -214,7 +215,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
     }
 
     // Verification
-    if msName, _ := context.GetMasterAgent(); msName != masterBoundAgentName {
+    if msName, _ := context.GetMasterAgent(); msName != masterAgentName {
         t.Errorf("[ERR] master node name is setup inappropriately | Current : %s\n", msName)
         return
     }

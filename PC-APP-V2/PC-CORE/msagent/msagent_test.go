@@ -8,6 +8,7 @@ import (
 
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-node-agent/slcontext"
+    "github.com/stkim1/pc-node-agent/crypt"
 )
 
 var masterAgentName string
@@ -193,7 +194,7 @@ func TestExecKeyExchangeMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, initTime)
+    meta, _, err := TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return

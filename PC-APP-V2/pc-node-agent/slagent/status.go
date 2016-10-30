@@ -45,7 +45,7 @@ func AnswerMasterInquiryStatus(timestamp time.Time) (*PocketSlaveStatus, error) 
     if err != nil {
         return nil, err
     }
-    return &PocketSlaveStatus{
+    return &PocketSlaveStatus {
         Version         : SLAVE_STATUS_VERSION,
         SlaveResponse   : SLAVE_WHO_I_AM,
         SlaveAddress    : piface.IP.String(),
@@ -60,7 +60,7 @@ func KeyExchangeStatus(master string, timestamp time.Time) (*PocketSlaveStatus, 
     if err != nil {
         return nil, err
     }
-    return &PocketSlaveStatus{
+    return &PocketSlaveStatus {
         Version         : SLAVE_STATUS_VERSION,
         MasterBoundAgent: master,
         SlaveResponse   : SLAVE_SEND_PUBKEY,
@@ -76,7 +76,7 @@ func CheckSlaveCryptoStatus(master, nodename string, timestamp time.Time) (*Pock
     if err != nil {
         return nil, err
     }
-    return &PocketSlaveStatus{
+    return &PocketSlaveStatus {
         Version         : SLAVE_STATUS_VERSION,
         MasterBoundAgent: master,
         SlaveResponse   : SLAVE_CHECK_CRYPTO,
@@ -93,7 +93,7 @@ func SlaveBoundedStatus(master, nodename string, timestamp time.Time) (*PocketSl
     if err != nil {
         return nil, err
     }
-    return &PocketSlaveStatus{
+    return &PocketSlaveStatus {
         Version         : SLAVE_STATUS_VERSION,
         MasterBoundAgent: master,
         SlaveResponse   : SLAVE_REPORT_STATUS,

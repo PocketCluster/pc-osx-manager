@@ -11,9 +11,6 @@ import (
     "io/ioutil"
     "os"
     "golang.org/x/crypto/ssh"
-    "crypto/cipher"
-    "crypto/aes"
-    "io"
 )
 
 type Signature []byte
@@ -238,42 +235,4 @@ func GenerateKeyPair(pubKeyPath, prvkeyPath, sshPubkeyPath string) error {
         return err
     }
     return ioutil.WriteFile(sshPubkeyPath, ssh.MarshalAuthorizedKey(pub), 0655)
-}
-
-
-//------------------------------------------------ AES CRYPTOR ---------------------------------------------------------
-
-type aesCrpytor struct {
-    cipher.Block
-}
-
-func (ac *aesCrpytor) Encrypt(plain []byte) (crypted []byte, err error) {
-    crypted = make([]byte, aes.BlockSize + len(string(plain)))
-
-    // iv : initialization vector
-    iv := crypted[:aes.BlockSize]
-    if _, err = io.ReadFull(rand.Reader, iv); err != nil {
-        return nil, err
-    }
-
-    cfb := cipher.NewCFBEncrypter(ac.Block, iv)
-    cfb.XORKeyStream(crypted[aes.BlockSize:], plain)
-    return crypted, nil
-}
-
-func (ac *aesCrpytor) Decrypt(crypted []byte) (plain []byte, err error) {
-
-    if len(crypted) < aes.BlockSize {
-        err = errors.New("[ERR] ciphertext too short")
-        return nil, err
-    }
-
-    iv := crypted[:aes.BlockSize]
-    plain = make([]byte, len(crypted[aes.BlockSize:]))
-    copy(plain, crypted[aes.BlockSize:])
-
-    cfb := cipher.NewCFBDecrypter(ac.Block, iv)
-    cfb.XORKeyStream(plain, plain)
-
-    return plain, err
 }

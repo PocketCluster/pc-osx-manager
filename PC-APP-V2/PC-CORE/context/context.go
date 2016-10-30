@@ -35,9 +35,14 @@ type HostContext interface {
     HostStorageSpaceStatus() (total uint64, available uint64)
 
     MasterAgentName() (string, error)
+    MasterPublicKey() ([]byte, error)
+    MasterPrivateKey() ([]byte, error)
 }
 
 type hostContext struct {
+    publicKeyData               []byte
+    privateKeyData              []byte
+
     hostInterfaces              *[]*HostNetworkInterface
     hostGateways                *[]*HostNetworkGateway
 
@@ -294,4 +299,18 @@ func (ctx *hostContext) MasterAgentName() (string, error) {
         return "", fmt.Errorf("[ERR] Invalid host device serial")
     }
     return ctx.hostDeviceSerial, nil
+}
+
+func (ctx *hostContext) MasterPublicKey() ([]byte, error) {
+    if len(ctx.publicKeyData) == 0 {
+        return nil, fmt.Errorf("[ERR] Invalid master public key data")
+    }
+    return ctx.publicKeyData, nil
+}
+
+func (ctx *hostContext) MasterPrivateKey() ([]byte, error) {
+    if len(ctx.privateKeyData) == 0 {
+        return nil, fmt.Errorf("[ERR] Invalid master private key data")
+    }
+    return ctx.privateKeyData, nil
 }

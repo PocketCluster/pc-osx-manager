@@ -242,6 +242,12 @@ func (sc *slaveContext) PrimaryNetworkInterface() (*NetworkInterface, error) {
     if err != nil {
         return nil, err
     }
+    if len(gwaddr) == 0 {
+        return nil, fmt.Errorf("[ERR] Inappropriate gateway adress")
+    }
+    if len(gwiface) == 0 {
+        return nil, fmt.Errorf("[ERR] Inappropriate gateway interface")
+    }
     iface, err := net.InterfaceByName(gwiface)
     if err != nil {
         return nil, err
@@ -249,6 +255,9 @@ func (sc *slaveContext) PrimaryNetworkInterface() (*NetworkInterface, error) {
     ipaddrs, err := ip4Address(iface)
     if err != nil {
         return nil, err
+    }
+    if len(ipaddrs) == 0 {
+        return nil, fmt.Errorf("[ERR] No IP Address is available")
     }
 
     return &NetworkInterface{

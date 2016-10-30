@@ -42,6 +42,7 @@ func (st MasterBeaconState) String() string {
     return state
 }
 
+// MasterBeacon is assigned individually for each slave node.
 type MasterBeacon interface {
     CurrentState() MasterBeaconState
     TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error)

@@ -49,7 +49,6 @@ func BrokenBindDiscovery(master string) (*PocketSlaveDiscovery, error) {
     if err != nil {
         return nil, err
     }
-
     return &PocketSlaveDiscovery {
         Version         : SLAVE_DISCOVER_VERSION,
         MasterBoundAgent: master,
