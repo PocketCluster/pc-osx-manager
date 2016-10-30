@@ -185,7 +185,7 @@ func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp t
         return fmt.Errorf("[ERR] Incorrect slave architecture")
     }
     if len(meta.SlavePubKey) != 0 {
-        masterPrvKey, err := context.SharedHostContext().MasterPublicKey()
+        masterPrvKey, err := context.SharedHostContext().MasterPrivateKey()
         if err != nil {
             return err
         }
@@ -251,7 +251,7 @@ func (mb *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestam
         return fmt.Errorf("[ERR] Incorrect master agent name from slave")
     }
     if mb.slaveNode.NodeName != usm.SlaveNodeName {
-        return fmt.Errorf("[ERR] Incorrect slave master agent")
+        return fmt.Errorf("[ERR] Incorrect slave node name beacon [%s] / slave master [%s] ", mb.slaveNode.NodeName, usm.SlaveNodeName)
     }
     if mb.slaveNode.IP4Address != usm.SlaveAddress {
         return fmt.Errorf("[ERR] Incorrect slave ip address")

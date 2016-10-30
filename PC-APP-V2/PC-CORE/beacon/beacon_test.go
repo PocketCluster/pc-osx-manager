@@ -13,7 +13,7 @@ import (
 
 var masterAgentName string
 var slaveNodeName string
-var initSendTimestmap time.Time
+var initTime time.Time
 
 func setUp() {
     mctx := context.DebugContextPrepare()
@@ -22,7 +22,7 @@ func setUp() {
 
     masterAgentName, _ = mctx.MasterAgentName()
     slaveNodeName = "pc-node1"
-    initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
+    initTime, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 }
 
 func tearDown() {
@@ -35,7 +35,7 @@ func Test_Init_Unbound_Transition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    sm, err := slagent.TestSlaveUnboundedMasterSearchDiscovery()
+    sa, err := slagent.TestSlaveUnboundedMasterSearchDiscovery()
     if err != nil {
         t.Error(err.Error())
         return
@@ -47,8 +47,10 @@ func Test_Init_Unbound_Transition(t *testing.T) {
         t.Error("[ERR] Master state is expected to be " + MasterInit.String() + ". Current : " + mb.CurrentState().String())
         return
     }
-
-    mb.TranstionWithSlaveMeta(sm, initSendTimestmap)
+    if err := mb.TranstionWithSlaveMeta(sa, initTime); err != nil {
+        t.Error(err.Error())
+        return
+    }
     if mb.CurrentState() != MasterUnbounded {
         t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
         return
@@ -60,16 +62,34 @@ func Test_Unbounded_Inquired_Transition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    sa, end, err := slagent.TestSlaveAnswerMasterInquiry(initSendTimestmap)
+    mb := NewBeaconForSlaveNode()
+    if mb.CurrentState() != MasterInit {
+        t.Error("[ERR] Master state is expected to be " + MasterInit.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+
+    sa, err := slagent.TestSlaveUnboundedMasterSearchDiscovery()
     if err != nil {
         t.Error(err.Error())
         return
     }
+    masterTS := initTime
+    if err := mb.TranstionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if mb.CurrentState() != MasterUnbounded {
+        t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
 
-    masterTS := end.Add(time.Second)
-    mb := NewBeaconForSlaveNode()
-    mb.(*masterBeacon).beaconState = MasterUnbounded
-
+    slaveTS := masterTS.Add(time.Second)
+    sa, end, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
     if err := mb.TranstionWithSlaveMeta(sa, masterTS); err != nil {
         t.Error(err.Error())
         return
@@ -84,20 +104,54 @@ func Test_Inquired_KeyExchange_Transition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    sa, end, err := slagent.TestSlaveKeyExchangeStatus(masterAgentName, crypt.TestSlavePublicKey(), initSendTimestmap)
+    // new beacon
+    mb := NewBeaconForSlaveNode()
+    if mb.CurrentState() != MasterInit {
+        t.Error("[ERR] Master state is expected to be " + MasterInit.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+
+    // slave lookup master
+    sa, err := slagent.TestSlaveUnboundedMasterSearchDiscovery()
     if err != nil {
         t.Error(err.Error())
         return
     }
+    masterTS := initTime
+    mb.TranstionWithSlaveMeta(sa, masterTS)
+    if mb.CurrentState() != MasterUnbounded {
+        t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
 
-    masterTS := end.Add(time.Second)
-    mb := NewBeaconForSlaveNode()
-    mb.(*masterBeacon).beaconState = MasterInquired
+    // slave answer master inquiry
+    slaveTS := initTime.Add(time.Second)
+    sa, end, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
     if err := mb.TranstionWithSlaveMeta(sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
+    if mb.CurrentState() != MasterInquired {
+        t.Error("[ERR] Master state is expected to be " + MasterInquired.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
 
+    // slave tries to key exchange
+    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, crypt.TestSlavePublicKey(), initTime)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TranstionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
     if mb.CurrentState() != MasterKeyExchange {
         t.Error("[ERR] Master state is expected to be " + MasterKeyExchange.String() + ". Current : " + mb.CurrentState().String())
         return
@@ -108,16 +162,74 @@ func Test_KeyExchange_CryptoCheck_Transition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    sa, end, err := slagent.TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, crypt.TestAESCryptor, initSendTimestmap)
+    setUp()
+    defer tearDown()
+
+    // new beacon
+    mb := NewBeaconForSlaveNode()
+    if mb.CurrentState() != MasterInit {
+        t.Error("[ERR] Master state is expected to be " + MasterInit.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+
+    // --- slave lookup master
+    sa, err := slagent.TestSlaveUnboundedMasterSearchDiscovery()
     if err != nil {
         t.Error(err.Error())
         return
     }
+    masterTS := initTime
+    mb.TranstionWithSlaveMeta(sa, masterTS)
+    if mb.CurrentState() != MasterUnbounded {
+        t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
 
-    masterTS := end.Add(time.Second)
-    mb := NewBeaconForSlaveNode()
-    mb.(*masterBeacon).beaconState = MasterKeyExchange
+    // --- slave answer master inquiry
+    slaveTS := initTime.Add(time.Second)
+    sa, end, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TranstionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if mb.CurrentState() != MasterInquired {
+        t.Error("[ERR] Master state is expected to be " + MasterInquired.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
 
+    // --- slave tries to key exchange
+    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, crypt.TestSlavePublicKey(), initTime)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TranstionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if mb.CurrentState() != MasterKeyExchange {
+        t.Error("[ERR] Master state is expected to be " + MasterKeyExchange.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+
+    // --- slave checks crypto
+    t.Logf("[INFO] masterAgentName %s ", masterAgentName)
+    if mb.(*masterBeacon).aesCryptor == nil {
+        t.Error("[ERR] AES Cryptor is nil. Should not happen.")
+        return
+    }
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, mb.(*masterBeacon).aesCryptor, initTime)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
     if err := mb.TranstionWithSlaveMeta(sa, masterTS); err != nil {
         t.Error(err.Error())
         return
@@ -133,7 +245,7 @@ func Test_CryptoCheck_Bounded_Transition(t *testing.T) {
     defer tearDown()
 
 
-    sa, end, err := slagent.TestSlaveBoundedStatus(slaveNodeName, crypt.TestAESCryptor, initSendTimestmap)
+    sa, end, err := slagent.TestSlaveBoundedStatus(slaveNodeName, crypt.TestAESCryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return
