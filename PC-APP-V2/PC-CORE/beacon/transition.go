@@ -14,6 +14,8 @@ func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTran
     // successfully transition to the next
     if nextCondition == MasterTransitionOk {
         switch currState {
+        case MasterInit:
+            nextState = MasterUnbounded
         case MasterUnbounded:
             nextState = MasterInquired
         case MasterInquired:
@@ -32,16 +34,18 @@ func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTran
         // failed to transit
     } else if nextCondition == MasterTransitionFail {
         switch currState {
+        case MasterInit:
+            nextState = MasterDiscarded
         case MasterUnbounded:
-            nextState = MasterUnbounded
+            nextState = MasterDiscarded
         case MasterInquired:
-            nextState = MasterUnbounded
+            nextState = MasterDiscarded
         case MasterKeyExchange:
-            nextState = MasterUnbounded
+            nextState = MasterDiscarded
         case MasterCryptoCheck:
-            nextState = MasterUnbounded
+            nextState = MasterDiscarded
         case MasterBounded:
-            nextState = MasterBounded
+            nextState = MasterBindBroken
         case MasterBindBroken:
             nextState = MasterBindBroken
         default:
@@ -80,6 +84,9 @@ func (mb *masterBeacon) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMet
         return fmt.Errorf("[ERR] Null or incorrect version of slave meta")
     }
     switch mb.beaconState {
+    case MasterInit:
+        return mb.beaconInit(meta, timestamp)
+
     case MasterUnbounded:
         return mb.unbounded(meta, timestamp)
 
@@ -103,7 +110,7 @@ func (mb *masterBeacon) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMet
     }
 }
 
-func (mb *masterBeacon) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+func (mb *masterBeacon) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
     if meta.DiscoveryAgent == nil || meta.DiscoveryAgent.Version != slagent.SLAVE_DISCOVER_VERSION {
         return fmt.Errorf("[ERR] Null or incorrect version of slave discovery")
     }
@@ -140,7 +147,7 @@ func (mb *masterBeacon) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp 
     return nil
 }
 
-func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+func (mb *masterBeacon) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
     if meta.StatusAgent == nil || meta.StatusAgent.Version != slagent.SLAVE_STATUS_VERSION {
         return fmt.Errorf("[ERR] Null or incorrect version of slave status")
     }
@@ -169,7 +176,7 @@ func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp t
     return nil
 }
 
-func (mb *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
     if meta.StatusAgent == nil || meta.StatusAgent.Version != slagent.SLAVE_STATUS_VERSION {
         return fmt.Errorf("[ERR] Null or incorrect version of slave status")
     }
@@ -194,7 +201,12 @@ func (mb *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestam
         return fmt.Errorf("[ERR] Incorrect slave architecture")
     }
     if len(meta.SlavePubKey) != 0 {
-        mb.slaveNode.PublicKey = meta.SlavePubKey
+        // TODO fix PublicKey to []byte
+        // mb.slaveNode.PublicKey = meta.SlavePubKey
+        
+        //TODO : build RSA enc/decryptor
+        //mb.rsaDecryptor = crypt.RsaEncryptor()
+        //mb.rsaDecryptor = crypt.RsaDecryptor()
     } else {
         return fmt.Errorf("[ERR] Inappropriate slave public key")
     }
@@ -207,6 +219,60 @@ func (mb *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestam
     mb.aesCryptor = aesCryptor
 
     // TODO : generate node name
+    // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
+    state, err := stateTransition(mb.beaconState, MasterTransitionOk)
+    if err != nil {
+        return err
+    }
+    mb.beaconState = state
+    return nil
+}
+
+func (mb *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+    if len(meta.EncryptedStatus) == 0 {
+        return fmt.Errorf("[ERR] Null encrypted slave status")
+    }
+    if mb.aesCryptor == nil {
+        return fmt.Errorf("[ERR] AES Cryptor is null. This should not happen")
+    }
+    if mb.aesKey == nil {
+        return fmt.Errorf("[ERR] AES Key is null. This should not happen")
+    }
+    plain, err := mb.aesCryptor.Decrypt(meta.EncryptedStatus)
+    if err != nil {
+        return err
+    }
+    usm, err := slagent.UnpackedSlaveStatus(plain)
+    if err != nil {
+        return err
+    }
+    if usm == nil || usm.Version != slagent.SLAVE_STATUS_VERSION {
+        return fmt.Errorf("[ERR] Null or incorrect version of slave status")
+    }
+    // check if slave response is what we look for
+    if usm.SlaveResponse != slagent.SLAVE_CHECK_CRYPTO {
+        return nil
+    }
+    masterAgentName, err := context.SharedHostContext().MasterAgentName()
+    if err != nil {
+        return err
+    }
+    if masterAgentName != usm.MasterBoundAgent {
+        return fmt.Errorf("[ERR] Incorrect master agent name from slave")
+    }
+    if mb.slaveNode.NodeName != usm.SlaveNodeName {
+        return fmt.Errorf("[ERR] Incorrect slave master agent")
+    }
+    if mb.slaveNode.IP4Address != usm.SlaveAddress {
+        return fmt.Errorf("[ERR] Incorrect slave ip address")
+    }
+    if mb.slaveNode.MacAddress != usm.SlaveNodeMacAddr {
+        return fmt.Errorf("[ERR] Incorrect slave MAC address")
+    }
+    if mb.slaveNode.Arch != usm.SlaveHardware {
+        return fmt.Errorf("[ERR] Incorrect slave architecture")
+    }
+
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     state, err := stateTransition(mb.beaconState, MasterTransitionOk)
     if err != nil {
@@ -238,7 +304,7 @@ func (mb *masterBeacon) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestam
         return fmt.Errorf("[ERR] Null or incorrect version of slave status")
     }
     // check if slave response is what we look for
-    if usm.SlaveResponse != slagent.SLAVE_CHECK_CRYPTO {
+    if usm.SlaveResponse != slagent.SLAVE_REPORT_STATUS {
         return nil
     }
     masterAgentName, err := context.SharedHostContext().MasterAgentName()
@@ -325,7 +391,7 @@ func (mb *masterBeacon) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp ti
 }
 
 func (mb *masterBeacon) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
-    if meta.DiscoveryAgent == nil || meta.DiscoveryAgent.Version != slagent.SLAVE_META_VERSION {
+    if meta.DiscoveryAgent == nil || meta.DiscoveryAgent.Version != slagent.SLAVE_DISCOVER_VERSION {
         return fmt.Errorf("[ERR] Null or incorrect version of slave status")
     }
     // if slave isn't looking for agent, then just return. this is not for this state.

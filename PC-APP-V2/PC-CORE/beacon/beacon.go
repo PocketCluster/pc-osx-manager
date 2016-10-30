@@ -8,12 +8,14 @@ import (
 
 type MasterBeaconState int
 const (
-    MasterUnbounded         MasterBeaconState = iota
+    MasterInit              MasterBeaconState = iota
+    MasterUnbounded
     MasterInquired
     MasterKeyExchange
     MasterCryptoCheck
     MasterBounded
     MasterBindBroken
+    MasterDiscarded
 )
 
 type MasterBeaconTranstion int
@@ -26,6 +28,8 @@ const (
 func (st MasterBeaconState) String() string {
     var state string
     switch st {
+        case MasterInit:
+            state = "MasterInit"
         case MasterUnbounded:
             state = "MasterUnbounded"
         case MasterInquired:
@@ -38,6 +42,8 @@ func (st MasterBeaconState) String() string {
             state = "MasterBounded"
         case MasterBindBroken:
             state = "MasterBindBroken"
+        case MasterDiscarded:
+            state = "MasterDiscarded"
     }
     return state
 }
