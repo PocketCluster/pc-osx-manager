@@ -54,6 +54,9 @@ func (mb *masterBeacon) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMet
     if meta == nil || meta.MetaVersion != slagent.SLAVE_META_VERSION {
         return fmt.Errorf("[ERR] Null or incorrect version of slave meta")
     }
+    if len(meta.SlaveID) == 0 {
+        return fmt.Errorf("[ERR] Null or incorrect slave ID")
+    }
     switch mb.beaconState {
     case MasterInit:
         return mb.beaconInit(meta, timestamp)
@@ -104,11 +107,15 @@ func (mb *masterBeacon) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp
     } else {
         return fmt.Errorf("[ERR] Inappropriate slave node netmask")
     }
+    if meta.SlaveID != meta.DiscoveryAgent.SlaveNodeMacAddr {
+        return fmt.Errorf("[ERR] Inappropriate slave ID")
+    }
     if len(meta.DiscoveryAgent.SlaveNodeMacAddr) != 0 {
         mb.slaveNode.MacAddress = meta.DiscoveryAgent.SlaveNodeMacAddr
     } else {
         return fmt.Errorf("[ERR] Inappropriate slave MAC address")
     }
+
 
     state, err := stateTransition(mb.beaconState, MasterTransitionOk)
     if err != nil {
@@ -125,6 +132,9 @@ func (mb *masterBeacon) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp 
     // check if slave response is what we look for
     if meta.StatusAgent.SlaveResponse != slagent.SLAVE_WHO_I_AM {
         return nil
+    }
+    if meta.SlaveID != meta.StatusAgent.SlaveNodeMacAddr {
+        return fmt.Errorf("[ERR] Inappropriate slave ID")
     }
     if mb.slaveNode.IP4Address != meta.StatusAgent.SlaveAddress {
         return fmt.Errorf("[ERR] Incorrect slave ip address")
@@ -164,6 +174,9 @@ func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp t
     }
     if mb.slaveNode.IP4Address != meta.StatusAgent.SlaveAddress {
         return fmt.Errorf("[ERR] Incorrect slave ip address")
+    }
+    if meta.SlaveID != meta.StatusAgent.SlaveNodeMacAddr {
+        return fmt.Errorf("[ERR] Inappropriate slave ID")
     }
     if mb.slaveNode.MacAddress != meta.StatusAgent.SlaveNodeMacAddr {
         return fmt.Errorf("[ERR] Incorrect slave MAC address")
@@ -243,6 +256,9 @@ func (mb *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestam
     if mb.slaveNode.IP4Address != usm.SlaveAddress {
         return fmt.Errorf("[ERR] Incorrect slave ip address")
     }
+    if meta.SlaveID != usm.SlaveNodeMacAddr {
+        return fmt.Errorf("[ERR] Inappropriate slave ID")
+    }
     if mb.slaveNode.MacAddress != usm.SlaveNodeMacAddr {
         return fmt.Errorf("[ERR] Incorrect slave MAC address")
     }
@@ -296,6 +312,9 @@ func (mb *masterBeacon) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestam
     }
     if mb.slaveNode.IP4Address != usm.SlaveAddress {
         return fmt.Errorf("[ERR] Incorrect slave ip address")
+    }
+    if meta.SlaveID != usm.SlaveNodeMacAddr {
+        return fmt.Errorf("[ERR] Inappropriate slave ID")
     }
     if mb.slaveNode.MacAddress != usm.SlaveNodeMacAddr {
         return fmt.Errorf("[ERR] Incorrect slave MAC address")
@@ -351,6 +370,9 @@ func (mb *masterBeacon) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp ti
     if mb.slaveNode.IP4Address != usm.SlaveAddress {
         return fmt.Errorf("[ERR] Incorrect slave ip address")
     }
+    if meta.SlaveID != usm.SlaveNodeMacAddr {
+        return fmt.Errorf("[ERR] Inappropriate slave ID")
+    }
     if mb.slaveNode.MacAddress != usm.SlaveNodeMacAddr {
         return fmt.Errorf("[ERR] Incorrect slave MAC address")
     }
@@ -391,6 +413,9 @@ func (mb *masterBeacon) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp
     }
     if mb.slaveNode.IP4Netmask != meta.DiscoveryAgent.SlaveNetmask {
         return fmt.Errorf("[ERR] Incorrect slave netmask address")
+    }
+    if meta.SlaveID != meta.DiscoveryAgent.SlaveNodeMacAddr {
+        return fmt.Errorf("[ERR] Inappropriate slave ID")
     }
     if mb.slaveNode.MacAddress != meta.DiscoveryAgent.SlaveNodeMacAddr {
         return fmt.Errorf("[ERR] Incorrect slave MAC address")

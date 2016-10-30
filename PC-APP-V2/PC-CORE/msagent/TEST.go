@@ -160,14 +160,22 @@ func TestMasterBoundedStatusCommand(slaveNodeName string, aesCryptor crypt.AESCr
 }
 
 func TestMasterBrokenBindRecoveryCommand(masterBoundAgentName string, aesKey []byte, aesCryptor crypt.AESCryptor, rsaEncryptor crypt.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
-    agent, err := slagent.BrokenBindDiscovery(masterBoundAgentName)
+    sam, err := slagent.TestSlaveBindBroken(masterBoundAgentName)
     if err != nil {
         return
     }
-    sam := slagent.BrokenBindMeta(agent)
+    psm, err := slagent.PackedSlaveMeta(sam)
+    if err != nil {
+        return nil, err
+    }
     //-------------- over master, we've received the message ----------------------
+    // suppose we've sort out what this is.
+    usm, err := slagent.UnpackedSlaveMeta(psm)
+    if err != nil {
+        return nil, err
+    }
     // master preperation
-    cmd, err := BrokenBindRecoverRespond(sam.DiscoveryAgent)
+    cmd, err := BrokenBindRecoverRespond(usm.DiscoveryAgent)
     if err != nil {
         return
     }

@@ -12,7 +12,11 @@ func TestSlaveUnboundedMasterSearchDiscovery() (*PocketSlaveAgentMeta, error) {
     if err != nil {
         return nil, err
     }
-    return UnboundedMasterDiscoveryMeta(ua), nil
+    sm, err := UnboundedMasterDiscoveryMeta(ua)
+    if err != nil {
+        return nil, err
+    }
+    return sm, nil
 }
 
 func TestSlaveAnswerMasterInquiry(begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
@@ -73,5 +77,9 @@ func TestSlaveBindBroken(masterAgentName string) (*PocketSlaveAgentMeta, error) 
     if err != nil {
         return nil, err
     }
-    return BrokenBindMeta(ba), nil
+    bm, err := BrokenBindMeta(ba)
+    if err != nil {
+        return nil, err
+    }
+    return bm, nil
 }

@@ -24,6 +24,7 @@ const (
 
 // Meta Agent field
 const (
+    SLAVE_MAC_ADDR          = "pc_sl_id"
     SLAVE_DISCOVER_AGENT    = "pc_sl_ad"
     SLAVE_STATUS_AGENT      = "pc_sl_as"
     SLAVE_ENCRYPTED_STATUS  = "pc_sl_es"
