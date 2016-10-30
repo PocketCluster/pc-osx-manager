@@ -204,7 +204,7 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
 
     // test comparison
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
-    ma, _, err := TestSlaveKeyExchangeStatus(masterAgentName, initSendTimestmap)
+    ma, _, err := TestSlaveKeyExchangeStatus(masterAgentName, crypt.TestSlavePublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -289,7 +289,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
     defer tearDown()
 
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
-    ma, _, err := TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, initSendTimestmap)
+    ma, _, err := TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, crypt.TestAESCryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -424,7 +424,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
     defer tearDown()
 
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
-    ma, _, err := TestSlaveBoundedStatus(slaveNodeName, initSendTimestmap)
+    ma, _, err := TestSlaveBoundedStatus(slaveNodeName, crypt.TestAESCryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return

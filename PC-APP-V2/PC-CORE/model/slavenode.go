@@ -29,8 +29,8 @@ type SlaveNode struct {
     IP4Gateway      string       `gorm:"column:ip4_gateway;type:VARCHAR(32)"`
     IP4Netmask      string       `gorm:"column:ip4_netmask;type:VARCHAR(32)"`
 
-    PublicKey       string       `gorm:"column:public_key;type:TEXT"`
-    PrivateKey      string       `gorm:"column:private_key;type:TEXT"`
+    PublicKey       []byte       `gorm:"column:public_key;type:BLOB"`
+    PrivateKey      []byte       `gorm:"column:private_key;type:BLOB"`
 }
 
 const (

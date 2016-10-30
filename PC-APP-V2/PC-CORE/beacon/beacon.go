@@ -4,6 +4,7 @@ import (
     "time"
 
     "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/pc-node-agent/crypt"
 )
 
 type MasterBeaconState int
@@ -52,5 +53,9 @@ func (st MasterBeaconState) String() string {
 type MasterBeacon interface {
     CurrentState() MasterBeaconState
     TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (err error)
+
+    AESKey() ([]byte, error)
+    AESCryptor() (crypt.AESCryptor, error)
+    RSAEncryptor() (crypt.RsaEncryptor, error)
 }
 

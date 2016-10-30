@@ -3,6 +3,8 @@ package model
 import (
     "testing"
     "time"
+    "github.com/stkim1/pc-node-agent/crypt"
+    "reflect"
 )
 
 func setup() (ModelRepo) {
@@ -31,6 +33,8 @@ func TestSlaveNodeCRUD(t *testing.T) {
         Departed    :timestmap,
         LastAlive   :timestmap,
         NodeName    :"pc-node2",
+        PublicKey   :crypt.TestMasterPublicKey(),
+        PrivateKey  :crypt.TestMasterPrivateKey(),
     }
     err = InsertSlaveNode(testSlave)
     if err != nil {
@@ -54,6 +58,8 @@ func TestSlaveNodeCRUD(t *testing.T) {
         Departed    :timestmap2,
         LastAlive   :timestmap2,
         NodeName    :"pc-node3",
+        PublicKey   :crypt.TestSlavePublicKey(),
+        PrivateKey  :crypt.TestSlavePrivateKey(),
     }
     err = InsertSlaveNode(testSlave2)
     if err != nil {
@@ -68,6 +74,26 @@ func TestSlaveNodeCRUD(t *testing.T) {
     if len(nodes) != 2 {
         t.Errorf("We don't have correct # of nodes record : %d\n", len(nodes))
         return
+    }
+
+    for _, node := range nodes {
+        if node.NodeName == "pc-node2" {
+            if !reflect.DeepEqual(node.PublicKey, crypt.TestMasterPublicKey()) {
+                t.Error("[ERR] saved public key is different from loaded public key")
+            }
+            if !reflect.DeepEqual(node.PrivateKey, crypt.TestMasterPrivateKey()) {
+                t.Error("[ERR] saved public key is different from loaded public key")
+            }
+        }
+
+        if node.NodeName == "pc-node3" {
+            if !reflect.DeepEqual(node.PublicKey, crypt.TestSlavePublicKey()) {
+                t.Error("[ERR] saved public key is different from loaded public key")
+            }
+            if !reflect.DeepEqual(node.PrivateKey, crypt.TestSlavePrivateKey()) {
+                t.Error("[ERR] saved public key is different from loaded public key")
+            }
+        }
     }
 
     // update #1

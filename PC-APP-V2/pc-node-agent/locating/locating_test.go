@@ -54,7 +54,7 @@ func TestInquired_KeyExchangeTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, endTime, err := msagent.TestMasterAgentDeclarationCommand(initSendTimestmap)
+    meta, endTime, err := msagent.TestMasterAgentDeclarationCommand(crypt.TestMasterPublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -79,7 +79,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(initSendTimestmap)
+    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(crypt.TestMasterPublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -103,7 +103,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
 
     // get master meta with aeskey
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, crypt.TestSlavePublicKey(), crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -140,7 +140,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(initSendTimestmap)
+    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(crypt.TestMasterPublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -160,7 +160,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
 
     // get master meta with aeskey
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, crypt.TestSlavePublicKey(), crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor, masterTS)
 
     if err != nil {
         t.Error(err.Error())
@@ -180,7 +180,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
 
     // get master bind ready
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, masterTS)
+    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, crypt.TestAESCryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -197,7 +197,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
         return
     }
 
-    meta, err = msagent.TestMasterBrokenBindRecoveryCommand(masterAgentName)
+    meta, err = msagent.TestMasterBrokenBindRecoveryCommand(masterAgentName, crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor)
     if err != nil {
         t.Error(err.Error())
         return

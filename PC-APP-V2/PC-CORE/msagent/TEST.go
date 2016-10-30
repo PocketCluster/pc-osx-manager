@@ -31,7 +31,7 @@ func TestMasterInquireSlaveRespond() (*PocketMasterAgentMeta, error) {
     return SlaveIdentityInquiryMeta(cmd), nil
 }
 
-func TestMasterAgentDeclarationCommand(begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+func TestMasterAgentDeclarationCommand(masterPubKey []byte, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
     msa, end, err := slagent.TestSlaveAnswerMasterInquiry(begin)
     if err != nil {
         return nil, begin, err
@@ -51,11 +51,11 @@ func TestMasterAgentDeclarationCommand(begin time.Time) (*PocketMasterAgentMeta,
     if err != nil {
         return nil, begin, err
     }
-    return MasterDeclarationMeta(cmd, crypt.TestMasterPublicKey()), end, nil
+    return MasterDeclarationMeta(cmd, masterPubKey), end, nil
 }
 
-func TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName string, aesKey []byte, aesCryptor crypt.AESCryptor, rsaEncryptor crypt.RsaEncryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
-    msa, end, err := slagent.TestSlaveKeyExchangeStatus(masterAgentName, begin)
+func TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName string, slavePubKey []byte, aesKey []byte, aesCryptor crypt.AESCryptor, rsaEncryptor crypt.RsaEncryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+    msa, end, err := slagent.TestSlaveKeyExchangeStatus(masterAgentName, slavePubKey, begin)
     if err != nil {
         return nil, begin, err
     }
@@ -82,8 +82,8 @@ func TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName string, aesKey 
     return meta, begin, nil
 }
 
-func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
-    msa, end, err := slagent.TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, begin)
+func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, aesCryptor crypt.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+    msa, end, err := slagent.TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, aesCryptor, begin)
     if err != nil {
         return nil, begin, err
     }
@@ -98,7 +98,7 @@ func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, begin t
         return nil, begin, err
     }
     // marshaled, descrypted, slave-status
-    mdsa, err := crypt.TestAESCryptor.Decrypt(usm.EncryptedStatus)
+    mdsa, err := aesCryptor.Decrypt(usm.EncryptedStatus)
     if err != nil {
         return nil, begin, err
     }
@@ -114,15 +114,15 @@ func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, begin t
     if err != nil {
         return nil, begin, err
     }
-    meta, err := MasterBindReadyMeta(cmd, crypt.TestAESCryptor)
+    meta, err := MasterBindReadyMeta(cmd, aesCryptor)
     if err != nil {
         return nil, begin, err
     }
     return meta, end, nil
 }
 
-func TestMasterBoundedStatusCommand(slaveNodeName string, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
-    msa, end, err := slagent.TestSlaveBoundedStatus(slaveNodeName, begin)
+func TestMasterBoundedStatusCommand(slaveNodeName string, aesCryptor crypt.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+    msa, end, err := slagent.TestSlaveBoundedStatus(slaveNodeName, aesCryptor, begin)
     if err != nil {
         return nil, begin, err
     }
@@ -137,7 +137,7 @@ func TestMasterBoundedStatusCommand(slaveNodeName string, begin time.Time) (*Poc
         return nil, begin, err
     }
     // marshaled, descrypted, slave-status
-    mdsa, err := crypt.TestAESCryptor.Decrypt(usm.EncryptedStatus)
+    mdsa, err := aesCryptor.Decrypt(usm.EncryptedStatus)
     if err != nil {
         return nil, begin, err
     }
@@ -152,14 +152,14 @@ func TestMasterBoundedStatusCommand(slaveNodeName string, begin time.Time) (*Poc
     if err != nil {
         return nil, begin, err
     }
-    meta, err := BoundedSlaveAckMeta(cmd, crypt.TestAESCryptor)
+    meta, err := BoundedSlaveAckMeta(cmd, aesCryptor)
     if err != nil {
         return nil, begin, err
     }
     return meta, end, nil
 }
 
-func TestMasterBrokenBindRecoveryCommand(masterBoundAgentName string) (meta *PocketMasterAgentMeta, err error) {
+func TestMasterBrokenBindRecoveryCommand(masterBoundAgentName string, aesKey []byte, aesCryptor crypt.AESCryptor, rsaEncryptor crypt.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
     agent, err := slagent.BrokenBindDiscovery(masterBoundAgentName)
     if err != nil {
         return
@@ -172,6 +172,6 @@ func TestMasterBrokenBindRecoveryCommand(masterBoundAgentName string) (meta *Poc
         return
     }
     // encryptor
-    return BrokenBindRecoverMeta(cmd, crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor)
+    return BrokenBindRecoverMeta(cmd, aesKey, aesCryptor, rsaEncryptor)
 }
 

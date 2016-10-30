@@ -27,32 +27,32 @@ func TestSlaveAnswerMasterInquiry(begin time.Time) (*PocketSlaveAgentMeta, time.
     return ma, begin, nil
 }
 
-func TestSlaveKeyExchangeStatus(masterAgentName string, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
+func TestSlaveKeyExchangeStatus(masterAgentName string, pubKey []byte, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
     agent, err := KeyExchangeStatus(masterAgentName, begin)
     if err != nil {
         return nil, begin, err
     }
 
-    ma, err := KeyExchangeMeta(agent, crypt.TestSlavePublicKey())
+    ma, err := KeyExchangeMeta(agent, pubKey)
     if err != nil {
         return nil, begin, err
     }
     return ma, begin, err
 }
 
-func TestSlaveCheckCryptoStatus(masterAgentName, slaveAgentName string, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
+func TestSlaveCheckCryptoStatus(masterAgentName, slaveAgentName string, aesCryptor crypt.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
     sa, err := CheckSlaveCryptoStatus(masterAgentName, slaveAgentName, begin)
     if err != nil {
         return nil, begin, err
     }
-    ma, err := CheckSlaveCryptoMeta(sa, crypt.TestAESCryptor)
+    ma, err := CheckSlaveCryptoMeta(sa, aesCryptor)
     if err != nil {
         return nil, begin, err
     }
     return ma, begin, nil
 }
 
-func TestSlaveBoundedStatus(slaveNodeName string, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
+func TestSlaveBoundedStatus(slaveNodeName string, aesCryptor crypt.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
     masterAgentName, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
         return nil, begin, err
@@ -61,7 +61,7 @@ func TestSlaveBoundedStatus(slaveNodeName string, begin time.Time) (*PocketSlave
     if err != nil {
         return nil, begin, err
     }
-    ma, err := SlaveBoundedMeta(sa, crypt.TestAESCryptor)
+    ma, err := SlaveBoundedMeta(sa, aesCryptor)
     if err != nil {
         return nil, begin, err
     }

@@ -116,7 +116,7 @@ func TestMasterDeclarationMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    meta, end, err := TestMasterAgentDeclarationCommand(initTime)
+    meta, end, err := TestMasterAgentDeclarationCommand(crypt.TestMasterPublicKey(), initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -194,7 +194,7 @@ func TestExecKeyExchangeMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor, initTime)
+    meta, _, err := TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, crypt.TestSlavePublicKey(), crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -245,7 +245,7 @@ func TestSendCryptoCheckMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, initTime)
+    meta, _, err := TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, crypt.TestAESCryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -278,7 +278,7 @@ func TestBoundedStatusMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterBoundedStatusCommand(slaveNodeName, initTime)
+    meta, _, err := TestMasterBoundedStatusCommand(slaveNodeName, crypt.TestAESCryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return

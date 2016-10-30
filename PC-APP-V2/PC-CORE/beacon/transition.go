@@ -10,57 +10,9 @@ import (
     "github.com/stkim1/pc-core/context"
 )
 
-func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTranstion) (nextState MasterBeaconState, err error) {
-    // successfully transition to the next
-    if nextCondition == MasterTransitionOk {
-        switch currState {
-        case MasterInit:
-            nextState = MasterUnbounded
-        case MasterUnbounded:
-            nextState = MasterInquired
-        case MasterInquired:
-            nextState = MasterKeyExchange
-        case MasterKeyExchange:
-            nextState = MasterCryptoCheck
-        case MasterCryptoCheck:
-            nextState = MasterBounded
-        case MasterBounded:
-            nextState = MasterBounded
-        case MasterBindBroken:
-            nextState = MasterBounded
-        default:
-            err = fmt.Errorf("[ERR] 'nextCondition is true and hit default' cannot happen")
-        }
-        // failed to transit
-    } else if nextCondition == MasterTransitionFail {
-        switch currState {
-        case MasterInit:
-            nextState = MasterDiscarded
-        case MasterUnbounded:
-            nextState = MasterDiscarded
-        case MasterInquired:
-            nextState = MasterDiscarded
-        case MasterKeyExchange:
-            nextState = MasterDiscarded
-        case MasterCryptoCheck:
-            nextState = MasterDiscarded
-        case MasterBounded:
-            nextState = MasterBindBroken
-        case MasterBindBroken:
-            nextState = MasterBindBroken
-        default:
-            err = fmt.Errorf("[ERR] 'nextCondition is true and hit default' cannot happen")
-        }
-        // idle
-    } else  {
-        nextState = currState
-    }
-    return
-}
-
 func NewBeaconForSlaveNode() MasterBeacon {
     return &masterBeacon{
-        beaconState    : MasterUnbounded,
+        beaconState    : MasterInit,
         slaveNode      : &model.SlaveNode{},
     }
 }
@@ -72,11 +24,30 @@ type masterBeacon struct {
     aesKey              []byte
     aesCryptor          crypt.AESCryptor
     rsaEncryptor        crypt.RsaEncryptor
-    rsaDecryptor        crypt.RsaDecryptor
 }
 
 func (mb *masterBeacon) CurrentState() MasterBeaconState {
     return mb.beaconState
+}
+
+func (mb *masterBeacon) AESKey() ([]byte, error) {
+    if len(mb.aesKey) == 0 {
+        return nil, fmt.Errorf("[ERR] Empty AES Key")
+    }
+    return mb.aesKey, nil
+}
+func (mb *masterBeacon) AESCryptor() (crypt.AESCryptor, error) {
+    if mb.aesCryptor == nil {
+        return nil, fmt.Errorf("[ERR] Null AES cryptor")
+    }
+    return mb.aesCryptor, nil
+}
+
+func (mb *masterBeacon) RSAEncryptor() (crypt.RsaEncryptor, error) {
+    if mb.rsaEncryptor == nil {
+        return nil, fmt.Errorf("[ERR] Null RSA encryptor")
+    }
+    return mb.rsaEncryptor, nil
 }
 
 func (mb *masterBeacon) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
@@ -201,15 +172,20 @@ func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp t
         return fmt.Errorf("[ERR] Incorrect slave architecture")
     }
     if len(meta.SlavePubKey) != 0 {
-        // TODO fix PublicKey to []byte
-        // mb.slaveNode.PublicKey = meta.SlavePubKey
-        
-        //TODO : build RSA enc/decryptor
-        //mb.rsaDecryptor = crypt.RsaEncryptor()
-        //mb.rsaDecryptor = crypt.RsaDecryptor()
+        masterPrvKey, err := context.SharedHostContext().MasterPublicKey()
+        if err != nil {
+            return err
+        }
+        encryptor, err := crypt.NewEncryptorFromKeyData(meta.SlavePubKey, masterPrvKey)
+        if err != nil {
+            return err
+        }
+        mb.slaveNode.PublicKey = meta.SlavePubKey
+        mb.rsaEncryptor = encryptor
     } else {
         return fmt.Errorf("[ERR] Inappropriate slave public key")
     }
+
     aesKey := crypt.NewAESKey32Byte()
     aesCryptor, err := crypt.NewAESCrypto(aesKey)
     if err != nil {
@@ -219,6 +195,7 @@ func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp t
     mb.aesCryptor = aesCryptor
 
     // TODO : generate node name
+
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     state, err := stateTransition(mb.beaconState, MasterTransitionOk)
     if err != nil {
@@ -426,4 +403,52 @@ func (mb *masterBeacon) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp
     }
     mb.beaconState = state
     return nil
+}
+
+func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTranstion) (nextState MasterBeaconState, err error) {
+    // successfully transition to the next
+    if nextCondition == MasterTransitionOk {
+        switch currState {
+        case MasterInit:
+            nextState = MasterUnbounded
+        case MasterUnbounded:
+            nextState = MasterInquired
+        case MasterInquired:
+            nextState = MasterKeyExchange
+        case MasterKeyExchange:
+            nextState = MasterCryptoCheck
+        case MasterCryptoCheck:
+            nextState = MasterBounded
+        case MasterBounded:
+            nextState = MasterBounded
+        case MasterBindBroken:
+            nextState = MasterBounded
+        default:
+            err = fmt.Errorf("[ERR] 'nextCondition is true and hit default' cannot happen")
+        }
+        // failed to transit
+    } else if nextCondition == MasterTransitionFail {
+        switch currState {
+        case MasterInit:
+            nextState = MasterDiscarded
+        case MasterUnbounded:
+            nextState = MasterDiscarded
+        case MasterInquired:
+            nextState = MasterDiscarded
+        case MasterKeyExchange:
+            nextState = MasterDiscarded
+        case MasterCryptoCheck:
+            nextState = MasterDiscarded
+        case MasterBounded:
+            nextState = MasterBindBroken
+        case MasterBindBroken:
+            nextState = MasterBindBroken
+        default:
+            err = fmt.Errorf("[ERR] 'nextCondition is true and hit default' cannot happen")
+        }
+        // idle
+    } else  {
+        nextState = currState
+    }
+    return
 }
