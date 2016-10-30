@@ -5,6 +5,7 @@ import (
 
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-node-agent/crypt"
+    "github.com/stkim1/pc-core/model"
 )
 
 type MasterBeaconState int
@@ -57,5 +58,7 @@ type MasterBeacon interface {
     AESKey() ([]byte, error)
     AESCryptor() (crypt.AESCryptor, error)
     RSAEncryptor() (crypt.RsaEncryptor, error)
+
+    SlaveNode() *model.SlaveNode
 }
 

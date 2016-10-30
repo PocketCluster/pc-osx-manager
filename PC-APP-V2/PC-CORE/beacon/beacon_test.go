@@ -224,7 +224,11 @@ func Test_KeyExchange_CryptoCheck_Transition(t *testing.T) {
         t.Error("[ERR] AES Cryptor is nil. Should not happen.")
         return
     }
-    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, mb.(*masterBeacon).aesCryptor, initTime)
+    if len(mb.SlaveNode().NodeName) == 0 {
+        t.Errorf("[ERR] Slave node name should not be empty")
+        return
+    }
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, mb.(*masterBeacon).aesCryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return

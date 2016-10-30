@@ -13,7 +13,7 @@ import (
 func NewBeaconForSlaveNode() MasterBeacon {
     return &masterBeacon{
         beaconState    : MasterInit,
-        slaveNode      : &model.SlaveNode{},
+        slaveNode      : model.NewSlaveNode(),
     }
 }
 
@@ -48,6 +48,11 @@ func (mb *masterBeacon) RSAEncryptor() (crypt.RsaEncryptor, error) {
         return nil, fmt.Errorf("[ERR] Null RSA encryptor")
     }
     return mb.rsaEncryptor, nil
+}
+
+func (mb *masterBeacon) SlaveNode() (*model.SlaveNode) {
+    // TODO : copy struct that the return value is read-only
+    return mb.slaveNode
 }
 
 func (mb *masterBeacon) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
@@ -207,7 +212,11 @@ func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp t
     mb.aesKey = aesKey
     mb.aesCryptor = aesCryptor
 
-    // TODO : generate node name
+    nodeName, err := model.FindSlaveNameCandiate()
+    if err != nil {
+        return err
+    }
+    mb.slaveNode.NodeName = nodeName
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     state, err := stateTransition(mb.beaconState, MasterTransitionOk)

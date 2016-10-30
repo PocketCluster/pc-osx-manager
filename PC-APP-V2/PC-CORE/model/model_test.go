@@ -29,10 +29,12 @@ func TestSlaveNodeCRUD(t *testing.T) {
 
     // 1st node
     testSlave := &SlaveNode{
+        ModelVersion:SlaveNodeModelVersion,
         Joined      :timestmap,
         Departed    :timestmap,
         LastAlive   :timestmap,
         NodeName    :"pc-node2",
+        State       :SNMStateJoined,
         PublicKey   :crypt.TestMasterPublicKey(),
         PrivateKey  :crypt.TestMasterPrivateKey(),
     }
@@ -53,14 +55,15 @@ func TestSlaveNodeCRUD(t *testing.T) {
 
     // 2nd node
     timestmap2 := timestmap.Add(time.Second)
-    testSlave2 := &SlaveNode{
-        Joined      :timestmap2,
-        Departed    :timestmap2,
-        LastAlive   :timestmap2,
-        NodeName    :"pc-node3",
-        PublicKey   :crypt.TestSlavePublicKey(),
-        PrivateKey  :crypt.TestSlavePrivateKey(),
-    }
+    testSlave2 := NewSlaveNode()
+    testSlave2.Joined       = timestmap2
+    testSlave2.Departed     = timestmap2
+    testSlave2.LastAlive    = timestmap2
+    testSlave2.NodeName     = "pc-node3"
+    testSlave2.State        = SNMStateJoined
+    testSlave2.PublicKey    = crypt.TestSlavePublicKey()
+    testSlave2.PrivateKey   = crypt.TestSlavePrivateKey()
+
     err = InsertSlaveNode(testSlave2)
     if err != nil {
         t.Error(err.Error())
@@ -73,6 +76,10 @@ func TestSlaveNodeCRUD(t *testing.T) {
     }
     if len(nodes) != 2 {
         t.Errorf("We don't have correct # of nodes record : %d\n", len(nodes))
+        return
+    }
+    if nodeName, err := FindSlaveNameCandiate(); nodeName != "pc-node3" || err != nil {
+        t.Errorf("We don't have correct # of nodes record : " + nodeName)
         return
     }
 
@@ -104,7 +111,7 @@ func TestSlaveNodeCRUD(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    nodes, err = FindSlaveNode(string(NodeName + " = ?"), testSlaveName)
+    nodes, err = FindSlaveNode(string(SNMFieldNodeName + " = ?"), testSlaveName)
     if err != nil {
         t.Error(err.Error())
         return

@@ -1,6 +1,8 @@
 package model
 
 import (
+    "fmt"
+    "strconv"
     "time"
 
     "github.com/jinzhu/gorm"
@@ -10,6 +12,30 @@ const slaveNodeCreation string = `CREATE TABLE IF NOT EXISTS slavenode (id INTEG
 
 const slaveNodeTable string = `slavenode`
 
+const SlaveNodeModelVersion = "0.1.4"
+
+const (
+    SNMFieldId              = "id"
+    SNMFieldJoined          = "joined"
+    SNMFieldDeparted        = "departed"
+    SNMFieldLastAlive       = "last_alive"
+    SNMFieldMacAddress      = "mac_address"
+    SNMFieldArch            = "arch"
+    SNMFieldNodeName        = "node_name"
+    SNMFieldState           = "state"
+    SNMFieldIP4Address      = "ip4_address"
+    SNMFieldIP4Gateway      = "ip4_gateway"
+    SNMFieldIP4Netmask      = "ip4_netmask"
+    SNMFieldUserMadeName    = "user_made_name"
+    SNMFieldPublicKey       = "public_key"
+    SNMFieldPrivateKey      = "private_key"
+)
+
+const (
+    SNMStateJoined          = "node_joined"
+    SNMStateDeparted        = "node_departed"
+)
+
 type SlaveNode struct {
     gorm.Model
 
@@ -18,42 +44,44 @@ type SlaveNode struct {
     Departed        time.Time    `gorm:"column:departed;type:DATETIME"`
     LastAlive       time.Time    `gorm:"column:last_alive;type:DATETIME"`
 
+    ModelVersion    string       `gorm:"column:model_version;type:VARCHAR(8)"`
     MacAddress      string       `gorm:"column:mac_address;type:VARCHAR(32)"`
     Arch            string       `gorm:"column:arch;type:VARCHAR(32)"`
     NodeName        string       `gorm:"column:node_name;type:VARCHAR(64)"`
 
-    // slave node s tate : joined/ departed/ more in the future
+    // slave node       s tate : joined/ departed/ more in the future
     State           string       `gorm:"column:state;type:VARCHAR(32)"`
 
     IP4Address      string       `gorm:"column:ip4_address;type:VARCHAR(32)"`
     IP4Gateway      string       `gorm:"column:ip4_gateway;type:VARCHAR(32)"`
     IP4Netmask      string       `gorm:"column:ip4_netmask;type:VARCHAR(32)"`
 
+    UserMadeName    string       `gorm:"column:user_made_name;type:VARCHAR(256)"`
     PublicKey       []byte       `gorm:"column:public_key;type:BLOB"`
     PrivateKey      []byte       `gorm:"column:private_key;type:BLOB"`
 }
-
-const (
-    Id              = "id"
-    Joined          = "joined"
-    Departed        = "departed"
-    LastAlive       = "last_alive"
-    MacAddress      = "mac_address"
-    Arch            = "arch"
-    NodeName        = "node_name"
-    State           = "state"
-    IP4Address      = "ip4_address"
-    IP4Gateway      = "ip4_gateway"
-    IP4Netmask      = "ip4_netmask"
-    PublicKey       = "public_key"
-    PrivateKey      = "private_key"
-)
 
 func (SlaveNode) TableName() string {
     return slaveNodeTable
 }
 
+func NewSlaveNode() *SlaveNode {
+    return &SlaveNode{
+        ModelVersion: SlaveNodeModelVersion,
+        State       : SNMStateJoined,
+    }
+}
+
 func InsertSlaveNode(slave *SlaveNode) (err error) {
+    if slave == nil {
+        return fmt.Errorf("[ERR] Slave node is null")
+    }
+    if slave.State != SNMStateJoined {
+        return fmt.Errorf("[ERR] Slave node state is not SNMStateJoined : " + slave.State)
+    }
+    if slave.ModelVersion != SlaveNodeModelVersion {
+        return fmt.Errorf("[ERR] ")
+    }
     db, err := SharedModelRepoInstance().Session()
     if err != nil {
         return
@@ -78,6 +106,16 @@ func FindSlaveNode(query interface{}, args ...interface{}) (nodes []SlaveNode, e
     }
     db.Where(query, args).Find(&nodes)
     return
+}
+
+func FindSlaveNameCandiate() (string, error) {
+    db, err := SharedModelRepoInstance().Session()
+    if err != nil {
+        return "", err
+    }
+    var nodes []SlaveNode
+    db.Where(string(SNMFieldState + " = ?"), SNMStateJoined).Find(&nodes)
+    return "pc-node" + strconv.Itoa(len(nodes) + 1), nil
 }
 
 func UpdateSlaveNode(slave *SlaveNode) (err error) {
