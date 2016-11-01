@@ -50,7 +50,7 @@ func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
         return
     }
     masterTS := initTime
-    mb.TranstionWithSlaveMeta(sa, masterTS)
+    mb.TransitionWithSlaveMeta(sa, masterTS)
     if mb.CurrentState() != MasterUnbounded {
         t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
         return
@@ -64,7 +64,7 @@ func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TranstionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -81,7 +81,7 @@ func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TranstionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -106,7 +106,7 @@ func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TranstionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -123,7 +123,7 @@ func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TranstionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -131,6 +131,138 @@ func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
         t.Error("[ERR] Master state is expected to be " + MasterBounded.String() + ". Current : " + mb.CurrentState().String())
         return
     }
+}
+
+func Test_Init_Unbounded_Transition_Fail(t *testing.T) {
+    setUp()
+    defer tearDown()
+
+    // test var preperations
+    mb := NewBeaconForSlaveNode()
+    if mb.CurrentState() != MasterInit {
+        t.Error("[ERR] Master state is expected to be " + MasterInit.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+
+    // --- TIMEOUT FAILURE ---
+    sa, err := slagent.TestSlaveBindBroken(masterAgentName)
+    if err != nil {
+        t.Skip(err.Error())
+    }
+
+    // 1st trial with incorrect slave meta
+    masterTS := time.Now()
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+        t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
+        return
+    } else {
+        t.Logf(err.Error())
+    }
+    if mb.CurrentState() != MasterInit {
+        t.Error("[ERR] Master state is expected to be " + MasterInit.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    if mb.(*masterBeacon).trialFailCount != 1 {
+        t.Error("[ERR] Master fail count should have increased")
+        return
+    }
+    // 2nd trial with TS +1 sec
+    masterTS = masterTS.Add(time.Second)
+    if err := mb.TransitionWithTimestamp(masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    // 3th trial with TS +10 sec. This will fail
+    masterTS = masterTS.Add(time.Second * 10)
+    if err := mb.TransitionWithTimestamp(masterTS); err != nil {
+        t.Log(err.Error())
+    }
+    if mb.(*masterBeacon).trialFailCount != 1 {
+        t.Errorf("[ERR] Master fail count should have increased. Current count %d", mb.(*masterBeacon).trialFailCount)
+        return
+    }
+    if mb.CurrentState() != MasterDiscarded {
+        t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+
+    // --- TOO MANY TIMES FAILURE ---
+    mb = NewBeaconForSlaveNode()
+    if mb.CurrentState() != MasterInit {
+        t.Error("[ERR] Master state is expected to be " + MasterInit.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+
+    // --- slave lookup master
+    sa, err = slagent.TestSlaveBindBroken(masterAgentName)
+    if err != nil {
+        t.Skip(err.Error())
+    }
+
+    // 1st trial with incorrect slave meta
+    masterTS = time.Now()
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+        t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
+        return
+    }
+    // 2nd trial with incorrect slave meta
+    masterTS = masterTS.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+        t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
+        return
+    }
+    // 3rd trial with incorrect slave meta
+    masterTS = masterTS.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+        t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
+        return
+    }
+    // 4th trial with incorrect slave meta
+    masterTS = masterTS.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+        t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
+        return
+    }
+    // 5th trial with incorrect slave meta
+    masterTS = masterTS.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+        t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
+        return
+    }
+    // 6th trial with incorrect slave meta
+    masterTS = masterTS.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+        t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
+        return
+    }
+    if mb.CurrentState() != MasterDiscarded {
+        t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    if mb.(*masterBeacon).trialFailCount != 5 {
+        t.Error("[ERR] Master fail count should have increased")
+        return
+    }
+}
+
+func Test_Unbounded_Inquired_Transition_Fail(t *testing.T) {
+    setUp()
+    defer tearDown()
+}
+
+func Test_Inquired_KeyExchange_Fail(t *testing.T) {
+    setUp()
+    defer tearDown()
+}
+
+func Test_KeyExchange_CryptoCheck_Fail(t *testing.T) {
+    setUp()
+    defer tearDown()
+}
+
+func Test_KeyExchange_Bounded_Fail(t *testing.T) {
+    setUp()
+    defer tearDown()
 }
 
 func Test_Bounded_BindBroken_Transition(t *testing.T) {

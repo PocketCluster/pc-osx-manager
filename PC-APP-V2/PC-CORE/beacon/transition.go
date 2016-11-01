@@ -10,7 +10,7 @@ import (
     "github.com/stkim1/pc-core/context"
 )
 
-const allowedTimesOfFailure int = 5
+const allowedTimesOfFailure int = 4
 const timeOutWindow time.Duration = time.Second * 10
 
 func NewBeaconForSlaveNode() MasterBeacon {
@@ -64,7 +64,17 @@ func (mb *masterBeacon) SlaveNode() (*model.SlaveNode) {
     return mb.slaveNode
 }
 
-func (mb *masterBeacon) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+
+func (mb *masterBeacon) TransitionWithTimestamp(timestamp time.Time) error {
+    if err := mb.isTransitionPossible(timestamp); err != nil {
+        // transition is not possible anymore, and will fail no matter what
+        mb.beaconState = stateTransition(mb.beaconState, MasterTransitionFail)
+        return err
+    }
+    return nil
+}
+
+func (mb *masterBeacon) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
     var transition MasterBeaconTranstion
     var err error = nil
 
@@ -104,6 +114,8 @@ func (mb *masterBeacon) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMet
         transition, err = mb.bindBroken(meta, timestamp)
         break
     }
+    case MasterDiscarded:
+        fallthrough
     default:
         transition, err = MasterTransitionFail, fmt.Errorf("[ERR] managmentState should never reach default")
     }
@@ -129,7 +141,7 @@ func (mb *masterBeacon) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMet
     return err
 }
 
-func (mb *masterBeacon) IsTransitionPossible(timestamp time.Time) error {
+func (mb *masterBeacon) isTransitionPossible(timestamp time.Time) error {
     if allowedTimesOfFailure < mb.trialFailCount {
         return fmt.Errorf("[ERR] Transition failed too many times")
     }
@@ -140,7 +152,7 @@ func (mb *masterBeacon) IsTransitionPossible(timestamp time.Time) error {
 }
 
 func (mb *masterBeacon) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
-    if err := mb.IsTransitionPossible(timestamp); err != nil {
+    if err := mb.isTransitionPossible(timestamp); err != nil {
         return MasterTransitionFail, err
     }
     if meta.DiscoveryAgent == nil || meta.DiscoveryAgent.Version != slagent.SLAVE_DISCOVER_VERSION {
@@ -149,6 +161,9 @@ func (mb *masterBeacon) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp
     // if slave isn't looking for agent, then just return. this is not for this state.
     if meta.DiscoveryAgent.SlaveResponse != slagent.SLAVE_LOOKUP_AGENT {
         return MasterTransitionIdle, nil
+    }
+    if len(meta.DiscoveryAgent.MasterBoundAgent) != 0 {
+        return MasterTransitionIdle, fmt.Errorf("[ERR] Incorrect slave bind. Slave should not be bound to a master when it looks for joining")
     }
     if len(meta.DiscoveryAgent.SlaveAddress) != 0 {
         mb.slaveNode.IP4Address = meta.DiscoveryAgent.SlaveAddress
@@ -178,7 +193,7 @@ func (mb *masterBeacon) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp
 }
 
 func (mb *masterBeacon) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
-    if err := mb.IsTransitionPossible(timestamp); err != nil {
+    if err := mb.isTransitionPossible(timestamp); err != nil {
         return MasterTransitionFail, err
     }
     if meta.StatusAgent == nil || meta.StatusAgent.Version != slagent.SLAVE_STATUS_VERSION {
@@ -208,7 +223,7 @@ func (mb *masterBeacon) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp 
 }
 
 func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
-    if err := mb.IsTransitionPossible(timestamp); err != nil {
+    if err := mb.isTransitionPossible(timestamp); err != nil {
         return MasterTransitionFail, err
     }
     if meta.StatusAgent == nil || meta.StatusAgent.Version != slagent.SLAVE_STATUS_VERSION {
@@ -271,7 +286,7 @@ func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp t
 }
 
 func (mb *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
-    if err := mb.IsTransitionPossible(timestamp); err != nil {
+    if err := mb.isTransitionPossible(timestamp); err != nil {
         return MasterTransitionFail, err
     }
     if len(meta.EncryptedStatus) == 0 {
@@ -326,7 +341,7 @@ func (mb *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestam
 }
 
 func (mb *masterBeacon) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
-    if err := mb.IsTransitionPossible(timestamp); err != nil {
+    if err := mb.isTransitionPossible(timestamp); err != nil {
         return MasterTransitionFail, err
     }
     if len(meta.EncryptedStatus) == 0 {
@@ -381,7 +396,7 @@ func (mb *masterBeacon) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestam
 }
 
 func (mb *masterBeacon) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
-    if err := mb.IsTransitionPossible(timestamp); err != nil {
+    if err := mb.isTransitionPossible(timestamp); err != nil {
         return MasterTransitionFail, err
     }
     if len(meta.EncryptedStatus) == 0 {
@@ -436,7 +451,7 @@ func (mb *masterBeacon) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp ti
 }
 
 func (mb *masterBeacon) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
-    if err := mb.IsTransitionPossible(timestamp); err != nil {
+    if err := mb.isTransitionPossible(timestamp); err != nil {
         return MasterTransitionFail, err
     }
     if meta.DiscoveryAgent == nil || meta.DiscoveryAgent.Version != slagent.SLAVE_DISCOVER_VERSION {
@@ -495,6 +510,9 @@ func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTran
             case MasterBindBroken:
                 nextState = MasterBounded
                 break
+
+            case MasterDiscarded:
+                nextState = currState
         }
         // failed to transit
     } else if nextCondition == MasterTransitionFail {
@@ -517,6 +535,9 @@ func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTran
             case MasterBindBroken:
                 nextState = MasterBindBroken
                 break
+
+            case MasterDiscarded:
+                nextState = currState
         }
         // idle
     } else  {
