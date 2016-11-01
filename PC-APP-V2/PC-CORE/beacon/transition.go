@@ -10,7 +10,7 @@ import (
     "github.com/stkim1/pc-core/context"
 )
 
-const allowedTimesOfFailure int = 4
+const allowedTimesOfFailure int = 5
 const timeOutWindow time.Duration = time.Second * 10
 
 func NewBeaconForSlaveNode() MasterBeacon {
@@ -64,18 +64,26 @@ func (mb *masterBeacon) SlaveNode() (*model.SlaveNode) {
     return mb.slaveNode
 }
 
-
 func (mb *masterBeacon) TransitionWithTimestamp(timestamp time.Time) error {
-    if err := mb.isTransitionPossible(timestamp); err != nil {
-        // transition is not possible anymore, and will fail no matter what
-        mb.beaconState = stateTransition(mb.beaconState, MasterTransitionFail)
-        return err
+    var err error = nil
+    var nextConfirmedState MasterBeaconTransition
+    if mb.trialFailCount < allowedTimesOfFailure && timestamp.Sub(mb.lastSuccess) < timeOutWindow {
+        nextConfirmedState = MasterTransitionIdle
+    } else {
+        if allowedTimesOfFailure <= mb.trialFailCount {
+            err = fmt.Errorf("[ERR] Transition has failed too many times already")
+        } else if timeOutWindow <= timestamp.Sub(mb.lastSuccess) {
+            err = fmt.Errorf("[ERR] Slave did not make transition in the given time window " + timeOutWindow.String())
+        }
+        nextConfirmedState = MasterTransitionFail
     }
-    return nil
+
+    mb.beaconState = stateTransition(mb.beaconState, nextConfirmedState)
+    return err
 }
 
 func (mb *masterBeacon) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
-    var transition MasterBeaconTranstion
+    var transition MasterBeaconTransition
     var err error = nil
 
     if meta == nil || meta.MetaVersion != slagent.SLAVE_META_VERSION {
@@ -114,47 +122,49 @@ func (mb *masterBeacon) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMe
         transition, err = mb.bindBroken(meta, timestamp)
         break
     }
+
     case MasterDiscarded:
         fallthrough
     default:
         transition, err = MasterTransitionFail, fmt.Errorf("[ERR] managmentState should never reach default")
     }
 
-    // make transition regardless of the presence of error
-    mb.beaconState = stateTransition(mb.beaconState, transition)
+    // this is to apply failed time count and timeout window
+    finalStateCandiate := mb.translateStateWithTimeout(transition, timestamp)
 
-    // check the outcome and make changes
-    switch transition {
-        case MasterTransitionOk: {
-            mb.lastSuccess = time.Now()
-            mb.trialFailCount = 0
-            break
-        }
-        default: {
-            if mb.trialFailCount <= allowedTimesOfFailure {
-                mb.trialFailCount++
-            }
-            break
-        }
-    }
+    // make transition regardless of the presence of error
+    mb.beaconState = stateTransition(mb.beaconState, finalStateCandiate)
 
     return err
 }
 
-func (mb *masterBeacon) isTransitionPossible(timestamp time.Time) error {
-    if allowedTimesOfFailure < mb.trialFailCount {
-        return fmt.Errorf("[ERR] Transition failed too many times")
+func (mb *masterBeacon) translateStateWithTimeout(nextStateCandiate MasterBeaconTransition, timestamp time.Time) MasterBeaconTransition {
+    var nextConfirmedState MasterBeaconTransition
+
+    switch nextStateCandiate {
+        case MasterTransitionOk: {
+            mb.lastSuccess = time.Now()
+            mb.trialFailCount = 0
+            nextConfirmedState = MasterTransitionOk
+            break
+        }
+        default:{
+            if mb.trialFailCount < allowedTimesOfFailure {
+                mb.trialFailCount++
+            }
+
+            if mb.trialFailCount < allowedTimesOfFailure && timestamp.Sub(mb.lastSuccess) < timeOutWindow {
+                nextConfirmedState = MasterTransitionIdle
+            } else {
+                nextConfirmedState = MasterTransitionFail
+            }
+        }
     }
-    if timeOutWindow < timestamp.Sub(mb.lastSuccess) {
-        return fmt.Errorf("[ERR] Slave did not make transition into given time window")
-    }
-    return nil
+
+    return nextConfirmedState
 }
 
-func (mb *masterBeacon) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
-    if err := mb.isTransitionPossible(timestamp); err != nil {
-        return MasterTransitionFail, err
-    }
+func (mb *masterBeacon) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
     if meta.DiscoveryAgent == nil || meta.DiscoveryAgent.Version != slagent.SLAVE_DISCOVER_VERSION {
         return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave discovery")
     }
@@ -192,10 +202,7 @@ func (mb *masterBeacon) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp
     return MasterTransitionOk, nil
 }
 
-func (mb *masterBeacon) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
-    if err := mb.isTransitionPossible(timestamp); err != nil {
-        return MasterTransitionFail, err
-    }
+func (mb *masterBeacon) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
     if meta.StatusAgent == nil || meta.StatusAgent.Version != slagent.SLAVE_STATUS_VERSION {
         return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave status")
     }
@@ -222,10 +229,7 @@ func (mb *masterBeacon) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp 
     return MasterTransitionOk, nil
 }
 
-func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
-    if err := mb.isTransitionPossible(timestamp); err != nil {
-        return MasterTransitionFail, err
-    }
+func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
     if meta.StatusAgent == nil || meta.StatusAgent.Version != slagent.SLAVE_STATUS_VERSION {
         return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave status")
     }
@@ -285,10 +289,7 @@ func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp t
     return MasterTransitionOk, nil
 }
 
-func (mb *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
-    if err := mb.isTransitionPossible(timestamp); err != nil {
-        return MasterTransitionFail, err
-    }
+func (mb *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
     if len(meta.EncryptedStatus) == 0 {
         return MasterTransitionFail, fmt.Errorf("[ERR] Null encrypted slave status")
     }
@@ -340,10 +341,7 @@ func (mb *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestam
     return MasterTransitionOk, nil
 }
 
-func (mb *masterBeacon) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
-    if err := mb.isTransitionPossible(timestamp); err != nil {
-        return MasterTransitionFail, err
-    }
+func (mb *masterBeacon) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
     if len(meta.EncryptedStatus) == 0 {
         return MasterTransitionFail, fmt.Errorf("[ERR] Null encrypted slave status")
     }
@@ -395,10 +393,7 @@ func (mb *masterBeacon) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestam
     return MasterTransitionOk, nil
 }
 
-func (mb *masterBeacon) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
-    if err := mb.isTransitionPossible(timestamp); err != nil {
-        return MasterTransitionFail, err
-    }
+func (mb *masterBeacon) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
     if len(meta.EncryptedStatus) == 0 {
         return MasterTransitionFail, fmt.Errorf("[ERR] Null encrypted slave status")
     }
@@ -450,10 +445,7 @@ func (mb *masterBeacon) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp ti
     return MasterTransitionOk, nil
 }
 
-func (mb *masterBeacon) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
-    if err := mb.isTransitionPossible(timestamp); err != nil {
-        return MasterTransitionFail, err
-    }
+func (mb *masterBeacon) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
     if meta.DiscoveryAgent == nil || meta.DiscoveryAgent.Version != slagent.SLAVE_DISCOVER_VERSION {
         return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave status")
     }
@@ -489,7 +481,7 @@ func (mb *masterBeacon) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp
     return MasterTransitionOk, nil
 }
 
-func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTranstion) MasterBeaconState {
+func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTransition) MasterBeaconState {
     var nextState MasterBeaconState
     // successfully transition to the next
     if nextCondition == MasterTransitionOk {

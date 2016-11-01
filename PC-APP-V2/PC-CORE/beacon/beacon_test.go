@@ -166,13 +166,7 @@ func Test_Init_Unbounded_Transition_Fail(t *testing.T) {
         t.Error("[ERR] Master fail count should have increased")
         return
     }
-    // 2nd trial with TS +1 sec
-    masterTS = masterTS.Add(time.Second)
-    if err := mb.TransitionWithTimestamp(masterTS); err != nil {
-        t.Error(err.Error())
-        return
-    }
-    // 3th trial with TS +10 sec. This will fail
+    // 2nd trial with TS +10 sec
     masterTS = masterTS.Add(time.Second * 10)
     if err := mb.TransitionWithTimestamp(masterTS); err != nil {
         t.Log(err.Error())
@@ -185,7 +179,7 @@ func Test_Init_Unbounded_Transition_Fail(t *testing.T) {
         t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
         return
     }
-
+    
     // --- TOO MANY TIMES FAILURE ---
     mb = NewBeaconForSlaveNode()
     if mb.CurrentState() != MasterInit {
@@ -205,35 +199,13 @@ func Test_Init_Unbounded_Transition_Fail(t *testing.T) {
         t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
         return
     }
-    // 2nd trial with incorrect slave meta
-    masterTS = masterTS.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
-        t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
-        return
-    }
-    // 3rd trial with incorrect slave meta
-    masterTS = masterTS.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
-        t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
-        return
-    }
-    // 4th trial with incorrect slave meta
-    masterTS = masterTS.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
-        t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
-        return
-    }
-    // 5th trial with incorrect slave meta
-    masterTS = masterTS.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
-        t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
-        return
-    }
-    // 6th trial with incorrect slave meta
-    masterTS = masterTS.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
-        t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
-        return
+    // four more times of failure with incorrect slave meta
+    for i := 0; i < 4; i++ {
+        masterTS = masterTS.Add(time.Second)
+        if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+            t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
+            return
+        }
     }
     if mb.CurrentState() != MasterDiscarded {
         t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())

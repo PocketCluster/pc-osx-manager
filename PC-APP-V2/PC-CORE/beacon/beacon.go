@@ -20,9 +20,9 @@ const (
     MasterDiscarded
 )
 
-type MasterBeaconTranstion int
+type MasterBeaconTransition int
 const (
-    MasterTransitionFail    MasterBeaconTranstion = iota
+    MasterTransitionFail    MasterBeaconTransition = iota
     MasterTransitionOk
     MasterTransitionIdle
 )
