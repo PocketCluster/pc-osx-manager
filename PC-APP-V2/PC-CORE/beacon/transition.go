@@ -10,15 +10,24 @@ import (
     "github.com/stkim1/pc-core/context"
 )
 
+const allowedTimesOfFailure int = 5
+const timeOutWindow time.Duration = time.Second * 10
+
 func NewBeaconForSlaveNode() MasterBeacon {
     return &masterBeacon{
+        // the chances where created beacon is tried to transion in later than 10 secs are low. So we'll just initiate the state here.
+        lastSuccess    : time.Now(),
+        trialFailCount : 0,
         beaconState    : MasterInit,
         slaveNode      : model.NewSlaveNode(),
     }
 }
 
 type masterBeacon struct {
+    // last time successfully transitioned state
     lastSuccess         time.Time
+    // each time we try to make transtion and fail, count goes up.
+    trialFailCount      int
     beaconState         MasterBeaconState
     slaveNode           *model.SlaveNode
     aesKey              []byte
@@ -56,433 +65,462 @@ func (mb *masterBeacon) SlaveNode() (*model.SlaveNode) {
 }
 
 func (mb *masterBeacon) TranstionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+    var transition MasterBeaconTranstion
+    var err error = nil
+
     if meta == nil || meta.MetaVersion != slagent.SLAVE_META_VERSION {
         return fmt.Errorf("[ERR] Null or incorrect version of slave meta")
     }
     if len(meta.SlaveID) == 0 {
         return fmt.Errorf("[ERR] Null or incorrect slave ID")
     }
+
     switch mb.beaconState {
-    case MasterInit:
-        return mb.beaconInit(meta, timestamp)
-
-    case MasterUnbounded:
-        return mb.unbounded(meta, timestamp)
-
-    case MasterInquired:
-        return mb.inquired(meta, timestamp)
-
-    case MasterKeyExchange:
-        return mb.keyExchange(meta, timestamp)
-
-    case MasterCryptoCheck:
-        return mb.cryptoCheck(meta, timestamp)
-
-    case MasterBounded:
-        return mb.bounded(meta, timestamp)
-
-    case MasterBindBroken:
-        return mb.bindBroken(meta, timestamp)
-
-    default:
-        return fmt.Errorf("[ERR] managmentState cannot reach default")
+    case MasterInit: {
+        transition, err = mb.beaconInit(meta, timestamp)
+        break
     }
+    case MasterUnbounded: {
+        transition, err = mb.unbounded(meta, timestamp)
+        break
+    }
+    case MasterInquired: {
+        transition, err = mb.inquired(meta, timestamp)
+        break
+    }
+    case MasterKeyExchange: {
+        transition, err = mb.keyExchange(meta, timestamp)
+        break
+    }
+    case MasterCryptoCheck: {
+        transition, err = mb.cryptoCheck(meta, timestamp)
+        break
+    }
+    case MasterBounded: {
+        transition, err = mb.bounded(meta, timestamp)
+        break
+    }
+    case MasterBindBroken: {
+        transition, err = mb.bindBroken(meta, timestamp)
+        break
+    }
+    default:
+        transition, err = MasterTransitionFail, fmt.Errorf("[ERR] managmentState should never reach default")
+    }
+
+    // make transition regardless of the presence of error
+    mb.beaconState = stateTransition(mb.beaconState, transition)
+
+    // check the outcome and make changes
+    switch transition {
+        case MasterTransitionOk: {
+            mb.lastSuccess = time.Now()
+            mb.trialFailCount = 0
+            break
+        }
+        default: {
+            if mb.trialFailCount <= allowedTimesOfFailure {
+                mb.trialFailCount++
+            }
+            break
+        }
+    }
+
+    return err
 }
 
-func (mb *masterBeacon) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+func (mb *masterBeacon) IsTransitionPossible(timestamp time.Time) error {
+    if allowedTimesOfFailure < mb.trialFailCount {
+        return fmt.Errorf("[ERR] Transition failed too many times")
+    }
+    if timeOutWindow < timestamp.Sub(mb.lastSuccess) {
+        return fmt.Errorf("[ERR] Slave did not make transition into given time window")
+    }
+    return nil
+}
+
+func (mb *masterBeacon) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
+    if err := mb.IsTransitionPossible(timestamp); err != nil {
+        return MasterTransitionFail, err
+    }
     if meta.DiscoveryAgent == nil || meta.DiscoveryAgent.Version != slagent.SLAVE_DISCOVER_VERSION {
-        return fmt.Errorf("[ERR] Null or incorrect version of slave discovery")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave discovery")
     }
     // if slave isn't looking for agent, then just return. this is not for this state.
     if meta.DiscoveryAgent.SlaveResponse != slagent.SLAVE_LOOKUP_AGENT {
-        return nil
+        return MasterTransitionIdle, nil
     }
     if len(meta.DiscoveryAgent.SlaveAddress) != 0 {
         mb.slaveNode.IP4Address = meta.DiscoveryAgent.SlaveAddress
     } else {
-        return fmt.Errorf("[ERR] Inappropriate slave node address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave node address")
     }
     if len(meta.DiscoveryAgent.SlaveGateway) != 0 {
         mb.slaveNode.IP4Gateway = meta.DiscoveryAgent.SlaveGateway
     } else {
-        return fmt.Errorf("[ERR] Inappropriate slave node gateway")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave node gateway")
     }
     if len(meta.DiscoveryAgent.SlaveNetmask) != 0 {
         mb.slaveNode.IP4Netmask = meta.DiscoveryAgent.SlaveNetmask
     } else {
-        return fmt.Errorf("[ERR] Inappropriate slave node netmask")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave node netmask")
     }
     if meta.SlaveID != meta.DiscoveryAgent.SlaveNodeMacAddr {
-        return fmt.Errorf("[ERR] Inappropriate slave ID")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave ID")
     }
     if len(meta.DiscoveryAgent.SlaveNodeMacAddr) != 0 {
         mb.slaveNode.MacAddress = meta.DiscoveryAgent.SlaveNodeMacAddr
     } else {
-        return fmt.Errorf("[ERR] Inappropriate slave MAC address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave MAC address")
     }
 
-
-    state, err := stateTransition(mb.beaconState, MasterTransitionOk)
-    if err != nil {
-        return err
-    }
-    mb.beaconState = state
-    return nil
+    return MasterTransitionOk, nil
 }
 
-func (mb *masterBeacon) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+func (mb *masterBeacon) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
+    if err := mb.IsTransitionPossible(timestamp); err != nil {
+        return MasterTransitionFail, err
+    }
     if meta.StatusAgent == nil || meta.StatusAgent.Version != slagent.SLAVE_STATUS_VERSION {
-        return fmt.Errorf("[ERR] Null or incorrect version of slave status")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave status")
     }
     // check if slave response is what we look for
     if meta.StatusAgent.SlaveResponse != slagent.SLAVE_WHO_I_AM {
-        return nil
+        return MasterTransitionIdle, nil
     }
     if meta.SlaveID != meta.StatusAgent.SlaveNodeMacAddr {
-        return fmt.Errorf("[ERR] Inappropriate slave ID")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave ID")
     }
     if mb.slaveNode.IP4Address != meta.StatusAgent.SlaveAddress {
-        return fmt.Errorf("[ERR] Incorrect slave ip address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave ip address")
     }
     if mb.slaveNode.MacAddress != meta.StatusAgent.SlaveNodeMacAddr {
-        return fmt.Errorf("[ERR] Incorrect slave MAC address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave MAC address")
     }
     if len(meta.StatusAgent.SlaveHardware) != 0 {
         mb.slaveNode.Arch = meta.StatusAgent.SlaveHardware
     } else {
-        return fmt.Errorf("[ERR] Inappropriate slave architecture")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave architecture")
     }
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
-    state, err := stateTransition(mb.beaconState, MasterTransitionOk)
-    if err != nil {
-        return err
-    }
-    mb.beaconState = state
-    return nil
+    return MasterTransitionOk, nil
 }
 
-func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
+    if err := mb.IsTransitionPossible(timestamp); err != nil {
+        return MasterTransitionFail, err
+    }
     if meta.StatusAgent == nil || meta.StatusAgent.Version != slagent.SLAVE_STATUS_VERSION {
-        return fmt.Errorf("[ERR] Null or incorrect version of slave status")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave status")
     }
     // check if slave response is what we look for
     if meta.StatusAgent.SlaveResponse != slagent.SLAVE_SEND_PUBKEY {
-        return nil
+        return MasterTransitionIdle, nil
     }
     masterAgentName, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
-        return err
+        return MasterTransitionFail, err
     }
     if masterAgentName != meta.StatusAgent.MasterBoundAgent {
-        return fmt.Errorf("[ERR] Slave reports to incorrect master agent")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Slave reports to incorrect master agent")
     }
     if mb.slaveNode.IP4Address != meta.StatusAgent.SlaveAddress {
-        return fmt.Errorf("[ERR] Incorrect slave ip address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave ip address")
     }
     if meta.SlaveID != meta.StatusAgent.SlaveNodeMacAddr {
-        return fmt.Errorf("[ERR] Inappropriate slave ID")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave ID")
     }
     if mb.slaveNode.MacAddress != meta.StatusAgent.SlaveNodeMacAddr {
-        return fmt.Errorf("[ERR] Incorrect slave MAC address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave MAC address")
     }
     if mb.slaveNode.Arch != meta.StatusAgent.SlaveHardware {
-        return fmt.Errorf("[ERR] Incorrect slave architecture")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave architecture")
     }
     if len(meta.SlavePubKey) != 0 {
         masterPrvKey, err := context.SharedHostContext().MasterPrivateKey()
         if err != nil {
-            return err
+            return MasterTransitionFail, err
         }
         encryptor, err := crypt.NewEncryptorFromKeyData(meta.SlavePubKey, masterPrvKey)
         if err != nil {
-            return err
+            return MasterTransitionFail, err
         }
         mb.slaveNode.PublicKey = meta.SlavePubKey
         mb.rsaEncryptor = encryptor
     } else {
-        return fmt.Errorf("[ERR] Inappropriate slave public key")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave public key")
     }
 
     aesKey := crypt.NewAESKey32Byte()
     aesCryptor, err := crypt.NewAESCrypto(aesKey)
     if err != nil {
-        return err
+        return MasterTransitionFail, err
     }
     mb.aesKey = aesKey
     mb.aesCryptor = aesCryptor
 
     nodeName, err := model.FindSlaveNameCandiate()
     if err != nil {
-        return err
+        return MasterTransitionFail, err
     }
     mb.slaveNode.NodeName = nodeName
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
-    state, err := stateTransition(mb.beaconState, MasterTransitionOk)
-    if err != nil {
-        return err
-    }
-    mb.beaconState = state
-    return nil
+    return MasterTransitionOk, nil
 }
 
-func (mb *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+func (mb *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
+    if err := mb.IsTransitionPossible(timestamp); err != nil {
+        return MasterTransitionFail, err
+    }
     if len(meta.EncryptedStatus) == 0 {
-        return fmt.Errorf("[ERR] Null encrypted slave status")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Null encrypted slave status")
     }
     if mb.aesCryptor == nil {
-        return fmt.Errorf("[ERR] AES Cryptor is null. This should not happen")
+        return MasterTransitionFail, fmt.Errorf("[ERR] AES Cryptor is null. This should not happen")
     }
     if mb.aesKey == nil {
-        return fmt.Errorf("[ERR] AES Key is null. This should not happen")
+        return MasterTransitionFail, fmt.Errorf("[ERR] AES Key is null. This should not happen")
     }
     plain, err := mb.aesCryptor.Decrypt(meta.EncryptedStatus)
     if err != nil {
-        return err
+        return MasterTransitionFail, err
     }
     usm, err := slagent.UnpackedSlaveStatus(plain)
     if err != nil {
-        return err
+        return MasterTransitionFail, err
     }
     if usm == nil || usm.Version != slagent.SLAVE_STATUS_VERSION {
-        return fmt.Errorf("[ERR] Null or incorrect version of slave status")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave status")
     }
     // check if slave response is what we look for
     if usm.SlaveResponse != slagent.SLAVE_CHECK_CRYPTO {
-        return nil
+        return MasterTransitionIdle, nil
     }
     masterAgentName, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
-        return err
+        return MasterTransitionFail, err
     }
     if masterAgentName != usm.MasterBoundAgent {
-        return fmt.Errorf("[ERR] Incorrect master agent name from slave")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect master agent name from slave")
     }
     if mb.slaveNode.NodeName != usm.SlaveNodeName {
-        return fmt.Errorf("[ERR] Incorrect slave node name beacon [%s] / slave master [%s] ", mb.slaveNode.NodeName, usm.SlaveNodeName)
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave node name beacon [%s] / slave master [%s] ", mb.slaveNode.NodeName, usm.SlaveNodeName)
     }
     if mb.slaveNode.IP4Address != usm.SlaveAddress {
-        return fmt.Errorf("[ERR] Incorrect slave ip address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave ip address")
     }
     if meta.SlaveID != usm.SlaveNodeMacAddr {
-        return fmt.Errorf("[ERR] Inappropriate slave ID")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave ID")
     }
     if mb.slaveNode.MacAddress != usm.SlaveNodeMacAddr {
-        return fmt.Errorf("[ERR] Incorrect slave MAC address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave MAC address")
     }
     if mb.slaveNode.Arch != usm.SlaveHardware {
-        return fmt.Errorf("[ERR] Incorrect slave architecture")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave architecture")
     }
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
-    state, err := stateTransition(mb.beaconState, MasterTransitionOk)
-    if err != nil {
-        return err
-    }
-    mb.beaconState = state
-    return nil
+    return MasterTransitionOk, nil
 }
 
-func (mb *masterBeacon) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+func (mb *masterBeacon) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
+    if err := mb.IsTransitionPossible(timestamp); err != nil {
+        return MasterTransitionFail, err
+    }
     if len(meta.EncryptedStatus) == 0 {
-        return fmt.Errorf("[ERR] Null encrypted slave status")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Null encrypted slave status")
     }
     if mb.aesCryptor == nil {
-        return fmt.Errorf("[ERR] AES Cryptor is null. This should not happen")
+        return MasterTransitionFail, fmt.Errorf("[ERR] AES Cryptor is null. This should not happen")
     }
     if mb.aesKey == nil {
-        return fmt.Errorf("[ERR] AES Key is null. This should not happen")
+        return MasterTransitionFail, fmt.Errorf("[ERR] AES Key is null. This should not happen")
     }
     plain, err := mb.aesCryptor.Decrypt(meta.EncryptedStatus)
     if err != nil {
-        return err
+        return MasterTransitionFail, err
     }
     usm, err := slagent.UnpackedSlaveStatus(plain)
     if err != nil {
-        return err
+        return MasterTransitionFail, err
     }
     if usm == nil || usm.Version != slagent.SLAVE_STATUS_VERSION {
-        return fmt.Errorf("[ERR] Null or incorrect version of slave status")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave status")
     }
     // check if slave response is what we look for
     if usm.SlaveResponse != slagent.SLAVE_REPORT_STATUS {
-        return nil
+        return MasterTransitionIdle, nil
     }
     masterAgentName, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
-        return err
+        return MasterTransitionFail, err
     }
     if masterAgentName != usm.MasterBoundAgent {
-        return fmt.Errorf("[ERR] Incorrect master agent name from slave")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect master agent name from slave")
     }
     if mb.slaveNode.NodeName != usm.SlaveNodeName {
-        return fmt.Errorf("[ERR] Incorrect slave master agent")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave master agent")
     }
     if mb.slaveNode.IP4Address != usm.SlaveAddress {
-        return fmt.Errorf("[ERR] Incorrect slave ip address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave ip address")
     }
     if meta.SlaveID != usm.SlaveNodeMacAddr {
-        return fmt.Errorf("[ERR] Inappropriate slave ID")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave ID")
     }
     if mb.slaveNode.MacAddress != usm.SlaveNodeMacAddr {
-        return fmt.Errorf("[ERR] Incorrect slave MAC address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave MAC address")
     }
     if mb.slaveNode.Arch != usm.SlaveHardware {
-        return fmt.Errorf("[ERR] Incorrect slave architecture")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave architecture")
     }
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
-    state, err := stateTransition(mb.beaconState, MasterTransitionOk)
-    if err != nil {
-        return err
-    }
-    mb.beaconState = state
-    return nil
+    return MasterTransitionOk, nil
 }
 
-func (mb *masterBeacon) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+func (mb *masterBeacon) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
+    if err := mb.IsTransitionPossible(timestamp); err != nil {
+        return MasterTransitionFail, err
+    }
     if len(meta.EncryptedStatus) == 0 {
-        return fmt.Errorf("[ERR] Null encrypted slave status")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Null encrypted slave status")
     }
     if mb.aesCryptor == nil {
-        return fmt.Errorf("[ERR] AES Cryptor is null. This should not happen")
+        return MasterTransitionFail, fmt.Errorf("[ERR] AES Cryptor is null. This should not happen")
     }
     if mb.aesKey == nil {
-        return fmt.Errorf("[ERR] AES Key is null. This should not happen")
+        return MasterTransitionFail, fmt.Errorf("[ERR] AES Key is null. This should not happen")
     }
     plain, err := mb.aesCryptor.Decrypt(meta.EncryptedStatus)
     if err != nil {
-        return err
+        return MasterTransitionFail, err
     }
     usm, err := slagent.UnpackedSlaveStatus(plain)
     if err != nil {
-        return err
+        return MasterTransitionFail, err
     }
     if usm == nil || usm.Version != slagent.SLAVE_STATUS_VERSION {
-        return fmt.Errorf("[ERR] Null or incorrect version of slave status")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave status")
     }
     // check if slave response is what we look for
     if usm.SlaveResponse != slagent.SLAVE_REPORT_STATUS {
-        return nil
+        return MasterTransitionIdle, nil
     }
     masterAgentName, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
-        return err
+        return MasterTransitionFail, err
     }
     if masterAgentName != usm.MasterBoundAgent {
-        return fmt.Errorf("[ERR] Incorrect master agent name from slave")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect master agent name from slave")
     }
     if mb.slaveNode.NodeName != usm.SlaveNodeName {
-        return fmt.Errorf("[ERR] Incorrect slave master agent")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave master agent")
     }
     if mb.slaveNode.IP4Address != usm.SlaveAddress {
-        return fmt.Errorf("[ERR] Incorrect slave ip address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave ip address")
     }
     if meta.SlaveID != usm.SlaveNodeMacAddr {
-        return fmt.Errorf("[ERR] Inappropriate slave ID")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave ID")
     }
     if mb.slaveNode.MacAddress != usm.SlaveNodeMacAddr {
-        return fmt.Errorf("[ERR] Incorrect slave MAC address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave MAC address")
     }
     if mb.slaveNode.Arch != usm.SlaveHardware {
-        return fmt.Errorf("[ERR] Incorrect slave architecture")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave architecture")
     }
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
-    state, err := stateTransition(mb.beaconState, MasterTransitionOk)
-    if err != nil {
-        return err
-    }
-    mb.beaconState = state
-    return nil
+    return MasterTransitionOk, nil
 }
 
-func (mb *masterBeacon) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+func (mb *masterBeacon) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTranstion, error) {
+    if err := mb.IsTransitionPossible(timestamp); err != nil {
+        return MasterTransitionFail, err
+    }
     if meta.DiscoveryAgent == nil || meta.DiscoveryAgent.Version != slagent.SLAVE_DISCOVER_VERSION {
-        return fmt.Errorf("[ERR] Null or incorrect version of slave status")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave status")
     }
     // if slave isn't looking for agent, then just return. this is not for this state.
     if meta.DiscoveryAgent.SlaveResponse != slagent.SLAVE_LOOKUP_AGENT {
-        return nil
+        return MasterTransitionIdle, nil
     }
     masterAgentName, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
-        return err
+        return MasterTransitionFail, err
     }
     // since this node isn't looking for us, sliently ignore this request
     if masterAgentName != meta.DiscoveryAgent.MasterBoundAgent {
-        return nil
+        return MasterTransitionIdle, nil
     }
     if mb.slaveNode.IP4Address != meta.DiscoveryAgent.SlaveAddress {
-        return fmt.Errorf("[ERR] Incorrect slave ip address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave ip address")
     }
     if mb.slaveNode.IP4Gateway != meta.DiscoveryAgent.SlaveGateway {
-        return fmt.Errorf("[ERR] Incorrect slave gateway address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave gateway address")
     }
     if mb.slaveNode.IP4Netmask != meta.DiscoveryAgent.SlaveNetmask {
-        return fmt.Errorf("[ERR] Incorrect slave netmask address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave netmask address")
     }
     if meta.SlaveID != meta.DiscoveryAgent.SlaveNodeMacAddr {
-        return fmt.Errorf("[ERR] Inappropriate slave ID")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave ID")
     }
     if mb.slaveNode.MacAddress != meta.DiscoveryAgent.SlaveNodeMacAddr {
-        return fmt.Errorf("[ERR] Incorrect slave MAC address")
+        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave MAC address")
     }
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
-    state, err := stateTransition(mb.beaconState, MasterTransitionOk)
-    if err != nil {
-        return err
-    }
-    mb.beaconState = state
-    return nil
+    return MasterTransitionOk, nil
 }
 
-func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTranstion) (nextState MasterBeaconState, err error) {
+func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTranstion) MasterBeaconState {
+    var nextState MasterBeaconState
     // successfully transition to the next
     if nextCondition == MasterTransitionOk {
         switch currState {
-        case MasterInit:
-            nextState = MasterUnbounded
-        case MasterUnbounded:
-            nextState = MasterInquired
-        case MasterInquired:
-            nextState = MasterKeyExchange
-        case MasterKeyExchange:
-            nextState = MasterCryptoCheck
-        case MasterCryptoCheck:
-            nextState = MasterBounded
-        case MasterBounded:
-            nextState = MasterBounded
-        case MasterBindBroken:
-            nextState = MasterBounded
-        default:
-            err = fmt.Errorf("[ERR] 'nextCondition is true and hit default' cannot happen")
+            case MasterInit:
+                nextState = MasterUnbounded
+            case MasterUnbounded:
+                nextState = MasterInquired
+            case MasterInquired:
+                nextState = MasterKeyExchange
+            case MasterKeyExchange:
+                nextState = MasterCryptoCheck
+
+            case MasterCryptoCheck:
+                fallthrough
+            case MasterBounded:
+                fallthrough
+            case MasterBindBroken:
+                nextState = MasterBounded
+                break
         }
         // failed to transit
     } else if nextCondition == MasterTransitionFail {
         switch currState {
-        case MasterInit:
-            nextState = MasterDiscarded
-        case MasterUnbounded:
-            nextState = MasterDiscarded
-        case MasterInquired:
-            nextState = MasterDiscarded
-        case MasterKeyExchange:
-            nextState = MasterDiscarded
-        case MasterCryptoCheck:
-            nextState = MasterDiscarded
-        case MasterBounded:
-            nextState = MasterBindBroken
-        case MasterBindBroken:
-            nextState = MasterBindBroken
-        default:
-            err = fmt.Errorf("[ERR] 'nextCondition is true and hit default' cannot happen")
+
+            case MasterInit:
+                fallthrough
+            case MasterUnbounded:
+                fallthrough
+            case MasterInquired:
+                fallthrough
+            case MasterKeyExchange:
+                fallthrough
+            case MasterCryptoCheck:
+                nextState = MasterDiscarded
+                break
+
+            case MasterBounded:
+                fallthrough
+            case MasterBindBroken:
+                nextState = MasterBindBroken
+                break
         }
         // idle
     } else  {
         nextState = currState
     }
-    return
+    return nextState
 }
