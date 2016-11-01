@@ -179,7 +179,7 @@ func Test_Init_Unbounded_Transition_Fail(t *testing.T) {
         t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
         return
     }
-    
+
     // --- TOO MANY TIMES FAILURE ---
     mb = NewBeaconForSlaveNode()
     if mb.CurrentState() != MasterInit {
@@ -220,6 +220,86 @@ func Test_Init_Unbounded_Transition_Fail(t *testing.T) {
 func Test_Unbounded_Inquired_Transition_Fail(t *testing.T) {
     setUp()
     defer tearDown()
+
+    // test var preperations
+    masterTS := time.Now()
+    mb := NewBeaconForSlaveNode()
+    if mb.CurrentState() != MasterInit {
+        t.Error("[ERR] Master state is expected to be " + MasterInit.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    mb.(*masterBeacon).beaconState = MasterUnbounded
+    // --- TIMEOUT FAILURE ---
+    slaveTS := masterTS.Add(time.Second)
+    sa, _, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    // this is an error injection
+    sa.StatusAgent.MasterBoundAgent = "MASTER-YODA"
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+        t.Errorf("[ERR] incorrect slave state. Should generate error with wrong master name")
+        return
+    } else {
+        t.Logf(err.Error())
+    }
+    if mb.CurrentState() != MasterUnbounded {
+        t.Error("[ERR] Master state is expected to be " + MasterInit.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    if mb.(*masterBeacon).trialFailCount != 1 {
+        t.Error("[ERR] Master fail count should have increased")
+        return
+    }
+    // update with timestamp
+    slaveTS = masterTS.Add(time.Second * 11)
+    if err := mb.TransitionWithTimestamp(slaveTS); err != nil {
+        t.Log(err.Error())
+    }
+    if mb.(*masterBeacon).trialFailCount != 1 {
+        t.Errorf("[ERR] Master fail count should have increased. Current count %d", mb.(*masterBeacon).trialFailCount)
+        return
+    }
+    if mb.CurrentState() != MasterDiscarded {
+        t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+
+
+    // test var preperations
+    masterTS = time.Now()
+    mb = NewBeaconForSlaveNode()
+    if mb.CurrentState() != MasterInit {
+        t.Error("[ERR] Master state is expected to be " + MasterInit.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    mb.(*masterBeacon).beaconState = MasterUnbounded
+    // --- TOO MANY TIMES FAILURE ---
+    for i := 0; i < 5; i ++ {
+        slaveTS := masterTS.Add(time.Second * time.Duration(i + 1))
+        sa, _, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
+        if err != nil {
+            t.Error(err.Error())
+            return
+        }
+        // this is an error injection
+        sa.StatusAgent.MasterBoundAgent = "MASTER-YODA"
+        if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+            t.Errorf("[ERR] incorrect slave state. Should generate error with wrong master name")
+            return
+        } else {
+            t.Logf(err.Error())
+        }
+    }
+    if mb.CurrentState() != MasterDiscarded {
+        t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    if mb.(*masterBeacon).trialFailCount != 5 {
+        t.Error("[ERR] Master fail count should have increased")
+        return
+    }
 }
 
 func Test_Inquired_KeyExchange_Fail(t *testing.T) {

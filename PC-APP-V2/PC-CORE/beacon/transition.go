@@ -142,6 +142,9 @@ func (mb *masterBeacon) translateStateWithTimeout(nextStateCandiate MasterBeacon
     var nextConfirmedState MasterBeaconTransition
 
     switch nextStateCandiate {
+        // As MasterTransitionOk does not check timewindow, it could grant an infinite timewindow to make transition.
+        // This is indeed intented as it will give us a chance to handle racing situations. Plus, TransitionWithTimestamp()
+        // should have squashed suspected beacons and that's the role of TransitionWithTimestamp()
         case MasterTransitionOk: {
             mb.lastSuccess = time.Now()
             mb.trialFailCount = 0
