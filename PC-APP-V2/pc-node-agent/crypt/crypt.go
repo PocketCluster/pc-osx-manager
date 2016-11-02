@@ -201,6 +201,8 @@ func GenerateKeyPair(pubKeyPath, prvkeyPath, sshPubkeyPath string) error {
 
     // generate and write private key as PEM
     prvkeyFile, err := os.Create(prvkeyPath)
+    // as go defer works in LIFO, we'll chage permissions first
+    defer os.Chmod(prvkeyPath, 0600)
     defer prvkeyFile.Close()
     if err != nil {
         return err
@@ -215,6 +217,7 @@ func GenerateKeyPair(pubKeyPath, prvkeyPath, sshPubkeyPath string) error {
 
     // generate and write public key as PEM
     pubkeyFile, err := os.Create(pubKeyPath)
+    defer os.Chmod(pubKeyPath, 0600)
     defer pubkeyFile.Close()
     if err != nil {
         return err
@@ -234,5 +237,5 @@ func GenerateKeyPair(pubKeyPath, prvkeyPath, sshPubkeyPath string) error {
     pub, err := ssh.NewPublicKey(&privateKey.PublicKey); if err != nil {
         return err
     }
-    return ioutil.WriteFile(sshPubkeyPath, ssh.MarshalAuthorizedKey(pub), 0655)
+    return ioutil.WriteFile(sshPubkeyPath, ssh.MarshalAuthorizedKey(pub), 0600)
 }
