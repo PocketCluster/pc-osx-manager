@@ -162,7 +162,7 @@ func onIdle(state locator.SlaveLocatingState, lastIdleAction time.Time, slaveTim
             }
         }
         case locator.SlaveBindBroken: {
-            if (time.Second * 10) < slaveTimestamp.Sub(lastIdleAction) {
+            if (time.Second * 3) < slaveTimestamp.Sub(lastIdleAction) {
                 slctx := slcontext.SharedSlaveContext()
 
                 masterAgentName, err := slctx.GetMasterAgent()

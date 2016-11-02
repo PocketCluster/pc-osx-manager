@@ -13,6 +13,10 @@ func tearDown() {
 func TestGetDefaultIP4Gateway(t *testing.T) {
     setUp()
     defer tearDown()
+}
+
+
+func TestGenerateSlaveContext(t *testing.T) {
 
 
 
