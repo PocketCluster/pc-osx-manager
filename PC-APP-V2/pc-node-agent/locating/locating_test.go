@@ -62,7 +62,7 @@ func TestInquired_KeyExchangeTransition(t *testing.T) {
 
     // set to slave discovery state to "Inquired"
     sd := NewSlaveDiscovery()
-    sd.(*slaveDiscovery).discoveryState = SlaveInquired
+    sd.(*slaveDiscovery).locatingState = SlaveInquired
 
     // execute state transition
     if err = sd.TranstionWithMasterMeta(meta, endTime.Add(time.Second)); err != nil {
@@ -88,7 +88,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
     // set to slave discovery state to "Inquired"
     context := slcontext.SharedSlaveContext()
     sd := NewSlaveDiscovery()
-    sd.(*slaveDiscovery).discoveryState = SlaveInquired
+    sd.(*slaveDiscovery).locatingState = SlaveInquired
 
     // execute state transition
     slaveTS := masterTS.Add(time.Second)
@@ -136,7 +136,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
     }
 }
 
-func TestCryptoCheck_BoundedTransition(t *testing.T) {
+func Test_Unbounded_Bounded_Onepass(t *testing.T) {
     setUp()
     defer tearDown()
 
@@ -149,7 +149,7 @@ func TestCryptoCheck_BoundedTransition(t *testing.T) {
     // set to slave discovery state to "Inquired"
     context := slcontext.SharedSlaveContext()
     sd := NewSlaveDiscovery()
-    sd.(*slaveDiscovery).discoveryState = SlaveInquired
+    sd.(*slaveDiscovery).locatingState = SlaveInquired
 
     // execute state transition
     slaveTS := masterTS.Add(time.Second)

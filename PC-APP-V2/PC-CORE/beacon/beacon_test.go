@@ -31,7 +31,6 @@ func tearDown() {
     context.DebugContextDestroy()
 }
 
-
 func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
     setUp()
     defer tearDown()

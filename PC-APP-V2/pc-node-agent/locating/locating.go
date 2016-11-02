@@ -5,25 +5,24 @@ import (
     "github.com/stkim1/pc-core/msagent"
 )
 
-type SDState int
+type SlaveLocatingState int
 const (
-    SlaveUnbounded         SDState = iota
+    SlaveUnbounded          SlaveLocatingState = iota
     SlaveInquired
     SlaveKeyExchange
     SlaveCryptoCheck
     SlaveBounded
     SlaveBindBroken
-    SlaveDiscarded
 )
 
-type SDTranstion int
+type SlaveLocatingTransition int
 const (
-    SlaveTransitionFail    SDTranstion = iota
+    SlaveTransitionFail     SlaveLocatingTransition = iota
     SlaveTransitionOk
     SlaveTransitionIdle
 )
 
-func (st SDState) String() string {
+func (st SlaveLocatingState) String() string {
     var state string
     switch st {
     case SlaveUnbounded:
@@ -38,14 +37,12 @@ func (st SDState) String() string {
         state = "SlaveKeyExchange"
     case SlaveCryptoCheck:
         state = "SlaveCryptoCheck"
-    case SlaveDiscarded:
-        state = "SlaveDiscarded"
     }
     return state
 }
 
 type SlaveDiscovery interface {
-    CurrentState() SDState
+    CurrentState() SlaveLocatingState
     TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (err error)
 }
 
