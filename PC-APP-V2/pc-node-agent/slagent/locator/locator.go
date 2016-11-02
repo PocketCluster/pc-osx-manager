@@ -1,4 +1,4 @@
-package locating
+package locator
 
 import (
     "time"
@@ -41,8 +41,9 @@ func (st SlaveLocatingState) String() string {
     return state
 }
 
-type SlaveDiscovery interface {
+type SlaveLocator interface {
     CurrentState() SlaveLocatingState
     TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (err error)
+    Close() error
 }
 

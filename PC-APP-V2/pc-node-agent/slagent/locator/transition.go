@@ -1,4 +1,4 @@
-package locating
+package locator
 
 import (
     "time"
@@ -10,7 +10,7 @@ import (
 const allowedTimesOfFailure int = 5
 const timeOutWindow time.Duration = time.Second * 5
 
-type slaveDiscovery struct {
+type slaveLocator struct {
     // last time successfully transitioned state
     lastSuccess      time.Time
     // each time we try to make transtion and fail, count goes up.
@@ -18,24 +18,24 @@ type slaveDiscovery struct {
     locatingState    SlaveLocatingState
 }
 
-func NewSlaveDiscovery() (sd SlaveDiscovery) {
-    sd = &slaveDiscovery{
+func NewSlaveDiscovery() (sd SlaveLocator) {
+    sd = &slaveLocator{
         locatingState   : SlaveUnbounded,
         trialFailCount  : 0,
     }
     return
 }
 
-func (sd *slaveDiscovery) CurrentState() SlaveLocatingState {
+func (sd *slaveLocator) CurrentState() SlaveLocatingState {
     return sd.locatingState
 }
 
-func (sd *slaveDiscovery) TranstionWithTimestamp(timestamp time.Time) error {
+func (sd *slaveLocator) TranstionWithTimestamp(timestamp time.Time) error {
 
     return nil
 }
 
-func (sd *slaveDiscovery) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) error {
+func (sd *slaveLocator) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) error {
     if meta == nil || meta.MetaVersion != msagent.MASTER_META_VERSION {
         return fmt.Errorf("[ERR] Null or incorrect version of master meta")
     }
@@ -74,12 +74,17 @@ func (sd *slaveDiscovery) TranstionWithMasterMeta(meta *msagent.PocketMasterAgen
     return err
 }
 
-func (sd *slaveDiscovery) translateStateWithTimeout(nextStateCandiate SlaveLocatingTransition, slaveTimestamp time.Time) SlaveLocatingTransition {
+func (sd *slaveLocator) Close() error {
+    return nil
+}
+
+func (sd *slaveLocator) translateStateWithTimeout(nextStateCandiate SlaveLocatingTransition, slaveTimestamp time.Time) SlaveLocatingTransition {
 
     var nextConfirmedState SlaveLocatingTransition
     switch nextStateCandiate {
     case SlaveTransitionOk: {
         sd.lastSuccess = slaveTimestamp
+        sd.trialFailCount = 0
         nextConfirmedState = SlaveTransitionOk
     }
     default: {
@@ -99,7 +104,7 @@ func (sd *slaveDiscovery) translateStateWithTimeout(nextStateCandiate SlaveLocat
 
 // -- state evaluation
 
-func (sd *slaveDiscovery) unbounded(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (SlaveLocatingTransition, error) {
+func (sd *slaveLocator) unbounded(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (SlaveLocatingTransition, error) {
     if meta.DiscoveryRespond == nil || meta.DiscoveryRespond.Version != msagent.MASTER_RESPOND_VERSION {
         return SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of master response")
     }
@@ -111,7 +116,7 @@ func (sd *slaveDiscovery) unbounded(meta *msagent.PocketMasterAgentMeta, timesta
     return SlaveTransitionOk, nil
 }
 
-func (sd *slaveDiscovery) inquired(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (SlaveLocatingTransition, error) {
+func (sd *slaveLocator) inquired(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (SlaveLocatingTransition, error) {
     // TODO : 1) check if meta is rightful to be bound
 
     if meta.StatusCommand == nil || meta.StatusCommand.Version != msagent.MASTER_COMMAND_VERSION {
@@ -133,7 +138,7 @@ func (sd *slaveDiscovery) inquired(meta *msagent.PocketMasterAgentMeta, timestam
     return SlaveTransitionOk, nil
 }
 
-func (sd *slaveDiscovery) keyExchange(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (SlaveLocatingTransition, error) {
+func (sd *slaveLocator) keyExchange(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (SlaveLocatingTransition, error) {
 
     if len(meta.RsaCryptoSignature) == 0 {
         return SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect RSA signature from Master command")
@@ -186,7 +191,7 @@ func (sd *slaveDiscovery) keyExchange(meta *msagent.PocketMasterAgentMeta, times
     return SlaveTransitionOk, nil
 }
 
-func (sd *slaveDiscovery) cryptoCheck(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (SlaveLocatingTransition, error) {
+func (sd *slaveLocator) cryptoCheck(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (SlaveLocatingTransition, error) {
     if len(meta.EncryptedMasterCommand) == 0 {
         return SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect encrypted master command")
     }
@@ -217,12 +222,12 @@ func (sd *slaveDiscovery) cryptoCheck(meta *msagent.PocketMasterAgentMeta, times
     return SlaveTransitionOk, nil
 }
 
-func (sd *slaveDiscovery) bounded(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (SlaveLocatingTransition, error) {
+func (sd *slaveLocator) bounded(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (SlaveLocatingTransition, error) {
 
     return SlaveTransitionOk, nil
 }
 
-func (sd *slaveDiscovery) bindBroken(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (SlaveLocatingTransition, error) {
+func (sd *slaveLocator) bindBroken(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (SlaveLocatingTransition, error) {
     if len(meta.EncryptedMasterRespond) == 0 {
         return SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect encrypted master respond")
     }
