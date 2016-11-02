@@ -27,6 +27,7 @@ type PocketSlaveContext interface {
     SetAESKey(aesKey []byte) (err error)
     GetAESKey() (aeskey []byte)
     DiscardAESKey()
+    AESCryptor() (crypt.AESCryptor, error)
     crypt.AESCryptor
 
     SetMasterAgent(agentName string) (err error)

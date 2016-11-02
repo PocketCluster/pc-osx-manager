@@ -4,7 +4,6 @@ import (
     "testing"
     "time"
 
-    "github.com/stkim1/pc-node-agent/locator"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-core/context"
 )
@@ -29,12 +28,5 @@ func TestLocatorSetup(t *testing.T) {
     setUp()
     defer tearDown()
 
-    funcList := make(map[locator.SlaveLocatingState]locator.SlaveLocatorFunction)
-    service := NewSlaveLocatingService()
-    funcList[locator.SlaveUnbounded] = service.MonitorLocatingService
-
-    if funcList[locator.SlaveUnbounded] == nil {
-        t.Error("[ERR] cannot find a responding function")
-    }
-
+    NewSlaveLocatingService().MonitorLocatingService()
 }

@@ -12,27 +12,73 @@ const timeOutWindow time.Duration = time.Second * 5
 
 type slaveLocator struct {
     // last time successfully transitioned state
-    lastSuccess      time.Time
+    lastTransition     time.Time
     // each time we try to make transtion and fail, count goes up.
-    trialFailCount   int
-    locatingState    SlaveLocatingState
+    transitionFailed   int
+
+    // last time idle action takes place
+    lastIdleAction     time.Time
+    // each time we try to act on idle, count goes up
+    idleActionCount    int
+
+    locatingState      SlaveLocatingState
+
+    onSuccess          SlaveLocatorOnStateTransitionSuccess
+    onIdle             SlaveLocatorOnStateTransitionIdle
+    onFail             SlaveLocatorOnStateTransitionFailure
 }
 
 func NewSlaveDiscovery() (sd SlaveLocator) {
     sd = &slaveLocator{
-        locatingState   : SlaveUnbounded,
-        trialFailCount  : 0,
+        lastTransition   : time.Now(),
+        transitionFailed : 0,
+        lastIdleAction   : time.Now(),
+        idleActionCount  : 0,
+        locatingState    : SlaveUnbounded,
     }
     return
+}
+
+func NewSlaveLocator(onSuccess SlaveLocatorOnStateTransitionSuccess, onIdle SlaveLocatorOnStateTransitionIdle, onFail SlaveLocatorOnStateTransitionFailure) SlaveLocator {
+    return &slaveLocator{
+        lastTransition   : time.Now(),
+        transitionFailed : 0,
+        lastIdleAction   : time.Now(),
+        idleActionCount  : 0,
+        locatingState    : SlaveUnbounded,
+        onSuccess        : onSuccess,
+        onIdle           : onIdle,
+        onFail           : onFail,
+    }
 }
 
 func (sd *slaveLocator) CurrentState() SlaveLocatingState {
     return sd.locatingState
 }
 
-func (sd *slaveLocator) TranstionWithTimestamp(timestamp time.Time) error {
+func (sd *slaveLocator) TranstionWithTimestamp(slaveTimestamp time.Time) error {
+    var err error = nil
+    var nextConfirmedState SlaveLocatingTransition
+    if sd.transitionFailed < allowedTimesOfFailure && slaveTimestamp.Sub(sd.lastTransition) < timeOutWindow {
+        nextConfirmedState = SlaveTransitionIdle
+    } else {
+        if allowedTimesOfFailure <= sd.transitionFailed {
+            err = fmt.Errorf("[ERR] Transition has failed too many times already")
+        } else if timeOutWindow <= slaveTimestamp.Sub(sd.lastTransition) {
+            err = fmt.Errorf("[ERR] Slave did not make transition in the given time window " + timeOutWindow.String())
+        }
+        nextConfirmedState = SlaveTransitionFail
+    }
 
-    return nil
+    oldState := sd.locatingState
+    // finalize locating master beacon state
+    newState := stateTransition(sd.locatingState, nextConfirmedState)
+    // fianalize state change
+    sd.locatingState = newState
+
+    // execute event lisenter
+    sd.executeEventListners(newState, oldState, nextConfirmedState, slaveTimestamp)
+    return err
 }
 
 func (sd *slaveLocator) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) error {
@@ -68,9 +114,14 @@ func (sd *slaveLocator) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentM
     // filter out the intermediate transition value with failed count + timestamp
     finalTransitionCandidate := sd.translateStateWithTimeout(transition, slaveTimestamp)
 
+    oldState := sd.locatingState
     // finalize locating master beacon state
-    sd.locatingState = stateTransition(sd.locatingState, finalTransitionCandidate)
+    newState := stateTransition(sd.locatingState, finalTransitionCandidate)
+    // fianalize state change
+    sd.locatingState = newState
 
+    // execute event lisenter
+    sd.executeEventListners(newState, oldState, finalTransitionCandidate, slaveTimestamp)
     return err
 }
 
@@ -78,21 +129,45 @@ func (sd *slaveLocator) Close() error {
     return nil
 }
 
+func (sd *slaveLocator) executeEventListners(newState, oldState SlaveLocatingState, transition SlaveLocatingTransition, slaveTimestamp time.Time) {
+    switch transition {
+    case SlaveTransitionOk:
+        if newState != oldState && sd.onSuccess != nil {
+            sd.onSuccess(newState)
+        }
+    case SlaveTransitionIdle:
+        if newState == oldState && sd.onIdle != nil {
+            if sd.onIdle(newState, sd.lastIdleAction, slaveTimestamp, sd.idleActionCount) {
+                sd.lastIdleAction = slaveTimestamp
+                sd.idleActionCount++
+            }
+        }
+    case SlaveTransitionFail:
+        if newState != oldState && sd.onFail != nil{
+            sd.onFail(newState)
+        }
+    }
+}
+
 func (sd *slaveLocator) translateStateWithTimeout(nextStateCandiate SlaveLocatingTransition, slaveTimestamp time.Time) SlaveLocatingTransition {
 
     var nextConfirmedState SlaveLocatingTransition
     switch nextStateCandiate {
     case SlaveTransitionOk: {
-        sd.lastSuccess = slaveTimestamp
-        sd.trialFailCount = 0
+        sd.lastIdleAction = slaveTimestamp
+        sd.transitionFailed = 0
+
+        // since
+        sd.lastTransition = slaveTimestamp
+        sd.idleActionCount = 0
         nextConfirmedState = SlaveTransitionOk
     }
     default: {
-        if sd.trialFailCount < allowedTimesOfFailure {
-            sd.trialFailCount++
+        if sd.transitionFailed < allowedTimesOfFailure {
+            sd.transitionFailed++
         }
 
-        if sd.trialFailCount < allowedTimesOfFailure && slaveTimestamp.Sub(sd.lastSuccess) < timeOutWindow {
+        if sd.transitionFailed < allowedTimesOfFailure && slaveTimestamp.Sub(sd.lastTransition) < timeOutWindow {
             nextConfirmedState = SlaveTransitionIdle
         } else {
             nextConfirmedState = SlaveTransitionFail

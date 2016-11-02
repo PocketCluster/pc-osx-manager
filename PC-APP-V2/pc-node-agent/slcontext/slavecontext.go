@@ -124,6 +124,13 @@ func (sc *slaveContext) DiscardAESKey() {
     return
 }
 
+func (sc *slaveContext) AESCryptor() (crypt.AESCryptor, error) {
+    if sc.aesCryptor != nil {
+        return nil, fmt.Errorf("[ERR] AESKey or AESCryptor is not setup")
+    }
+    return sc.aesCryptor, nil
+}
+
 func (sc *slaveContext) Encrypt(data []byte) ([]byte, error) {
     if sc.aesCryptor == nil {
         return nil, fmt.Errorf("[ERR] Cannot AES encrypt with null cryptor")

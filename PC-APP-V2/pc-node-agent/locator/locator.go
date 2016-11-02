@@ -43,9 +43,16 @@ func (st SlaveLocatingState) String() string {
 
 type SlaveLocator interface {
     CurrentState() SlaveLocatingState
-    TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (err error)
+    TranstionWithTimestamp(timestamp time.Time) error
+    TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) error
     Close() error
 }
 
-type SlaveLocatorFunction func () error
+// On sucess happens at the moment successful state transition takes place
+type SlaveLocatorOnStateTransitionSuccess      func (SlaveLocatingState)
 
+// OnIdle happens as locator awaits
+type SlaveLocatorOnStateTransitionIdle         func (SlaveLocatingState, time.Time, time.Time, int) bool
+
+// OnFail happens at the moment state transition fails to happen
+type SlaveLocatorOnStateTransitionFailure      func (SlaveLocatingState)
