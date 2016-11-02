@@ -70,8 +70,3 @@ const (
     //TODO check if this is really necessary. If we're to manage SSH sessions with a centralized server, this is not needed
     //SLAVE_CLUSTER_MEMBERS = "pc_sl_cl"
 )
-
-type SlaveAgent interface {
-    // this is main loop of locating service to master
-    MonitorLocatingService() error
-}

@@ -15,8 +15,8 @@ var slaveNodeName string
 var initSendTimestmap time.Time
 
 func setUp() {
-    slcontext.DebugSlcontextPrepare()
     masterAgentName, _ = context.DebugContextPrepare().MasterAgentName()
+    slcontext.DebugSlcontextPrepare()
     slaveNodeName = "pc-node1"
     initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 }

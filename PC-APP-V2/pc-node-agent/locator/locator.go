@@ -47,3 +47,5 @@ type SlaveLocator interface {
     Close() error
 }
 
+type SlaveLocatorFunction func () error
+
