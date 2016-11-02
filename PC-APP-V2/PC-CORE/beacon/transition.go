@@ -64,15 +64,15 @@ func (mb *masterBeacon) SlaveNode() (*model.SlaveNode) {
     return mb.slaveNode
 }
 
-func (mb *masterBeacon) TransitionWithTimestamp(timestamp time.Time) error {
+func (mb *masterBeacon) TransitionWithTimestamp(masterTimestamp time.Time) error {
     var err error = nil
     var nextConfirmedState MasterBeaconTransition
-    if mb.trialFailCount < allowedTimesOfFailure && timestamp.Sub(mb.lastSuccess) < timeOutWindow {
+    if mb.trialFailCount < allowedTimesOfFailure && masterTimestamp.Sub(mb.lastSuccess) < timeOutWindow {
         nextConfirmedState = MasterTransitionIdle
     } else {
         if allowedTimesOfFailure <= mb.trialFailCount {
             err = fmt.Errorf("[ERR] Transition has failed too many times already")
-        } else if timeOutWindow <= timestamp.Sub(mb.lastSuccess) {
+        } else if timeOutWindow <= masterTimestamp.Sub(mb.lastSuccess) {
             err = fmt.Errorf("[ERR] Slave did not make transition in the given time window " + timeOutWindow.String())
         }
         nextConfirmedState = MasterTransitionFail
@@ -82,7 +82,7 @@ func (mb *masterBeacon) TransitionWithTimestamp(timestamp time.Time) error {
     return err
 }
 
-func (mb *masterBeacon) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+func (mb *masterBeacon) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) error {
     var transition MasterBeaconTransition
     var err error = nil
 
@@ -95,42 +95,44 @@ func (mb *masterBeacon) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMe
 
     switch mb.beaconState {
     case MasterInit: {
-        transition, err = mb.beaconInit(meta, timestamp)
+        transition, err = mb.beaconInit(meta, masterTimestamp)
         break
     }
     case MasterUnbounded: {
-        transition, err = mb.unbounded(meta, timestamp)
+        transition, err = mb.unbounded(meta, masterTimestamp)
         break
     }
     case MasterInquired: {
-        transition, err = mb.inquired(meta, timestamp)
+        transition, err = mb.inquired(meta, masterTimestamp)
         break
     }
     case MasterKeyExchange: {
-        transition, err = mb.keyExchange(meta, timestamp)
+        transition, err = mb.keyExchange(meta, masterTimestamp)
         break
     }
     case MasterCryptoCheck: {
-        transition, err = mb.cryptoCheck(meta, timestamp)
+        transition, err = mb.cryptoCheck(meta, masterTimestamp)
         break
     }
     case MasterBounded: {
-        transition, err = mb.bounded(meta, timestamp)
+        transition, err = mb.bounded(meta, masterTimestamp)
         break
     }
     case MasterBindBroken: {
-        transition, err = mb.bindBroken(meta, timestamp)
+        transition, err = mb.bindBroken(meta, masterTimestamp)
         break
     }
 
-    case MasterDiscarded:
-        fallthrough
+    case MasterDiscarded: {
+        transition, err = MasterTransitionFail, fmt.Errorf("[INFO] discarded beacon should be collected ASAP")
+        break
+    }
     default:
         transition, err = MasterTransitionFail, fmt.Errorf("[ERR] managmentState should never reach default")
     }
 
     // this is to apply failed time count and timeout window
-    finalStateCandiate := mb.translateStateWithTimeout(transition, timestamp)
+    finalStateCandiate := mb.translateStateWithTimeout(transition, masterTimestamp)
 
     // make transition regardless of the presence of error
     mb.beaconState = stateTransition(mb.beaconState, finalStateCandiate)
@@ -138,7 +140,7 @@ func (mb *masterBeacon) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMe
     return err
 }
 
-func (mb *masterBeacon) translateStateWithTimeout(nextStateCandiate MasterBeaconTransition, timestamp time.Time) MasterBeaconTransition {
+func (mb *masterBeacon) translateStateWithTimeout(nextStateCandiate MasterBeaconTransition, masterTimestamp time.Time) MasterBeaconTransition {
     var nextConfirmedState MasterBeaconTransition
 
     switch nextStateCandiate {
@@ -146,7 +148,7 @@ func (mb *masterBeacon) translateStateWithTimeout(nextStateCandiate MasterBeacon
         // This is indeed intented as it will give us a chance to handle racing situations. Plus, TransitionWithTimestamp()
         // should have squashed suspected beacons and that's the role of TransitionWithTimestamp()
         case MasterTransitionOk: {
-            mb.lastSuccess = time.Now()
+            mb.lastSuccess = masterTimestamp
             mb.trialFailCount = 0
             nextConfirmedState = MasterTransitionOk
             break
@@ -156,7 +158,7 @@ func (mb *masterBeacon) translateStateWithTimeout(nextStateCandiate MasterBeacon
                 mb.trialFailCount++
             }
 
-            if mb.trialFailCount < allowedTimesOfFailure && timestamp.Sub(mb.lastSuccess) < timeOutWindow {
+            if mb.trialFailCount < allowedTimesOfFailure && masterTimestamp.Sub(mb.lastSuccess) < timeOutWindow {
                 nextConfirmedState = MasterTransitionIdle
             } else {
                 nextConfirmedState = MasterTransitionFail

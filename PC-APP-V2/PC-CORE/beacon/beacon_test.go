@@ -50,7 +50,10 @@ func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
         return
     }
     masterTS := initTime
-    mb.TransitionWithSlaveMeta(sa, masterTS)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
     if mb.CurrentState() != MasterUnbounded {
         t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
         return
@@ -221,7 +224,7 @@ func Test_Unbounded_Inquired_Transition_Fail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    // test var preperations
+    // --- TIMEOUT FAILURE ---
     masterTS := time.Now()
     mb := NewBeaconForSlaveNode()
     if mb.CurrentState() != MasterInit {
@@ -229,7 +232,7 @@ func Test_Unbounded_Inquired_Transition_Fail(t *testing.T) {
         return
     }
     mb.(*masterBeacon).beaconState = MasterUnbounded
-    // --- TIMEOUT FAILURE ---
+    // --- test
     slaveTS := masterTS.Add(time.Second)
     sa, _, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
     if err != nil {
@@ -254,6 +257,7 @@ func Test_Unbounded_Inquired_Transition_Fail(t *testing.T) {
     }
     // update with timestamp
     slaveTS = masterTS.Add(time.Second * 11)
+    t.Logf("[INFO] slaveTS - MasterBeacon.lastSuccessTimestmap : " + slaveTS.Sub(mb.(*masterBeacon).lastSuccess).String())
     if err := mb.TransitionWithTimestamp(slaveTS); err != nil {
         t.Log(err.Error())
     }
@@ -267,7 +271,7 @@ func Test_Unbounded_Inquired_Transition_Fail(t *testing.T) {
     }
 
 
-    // test var preperations
+    // --- TOO MANY TIMES FAILURE ---
     masterTS = time.Now()
     mb = NewBeaconForSlaveNode()
     if mb.CurrentState() != MasterInit {
@@ -275,16 +279,17 @@ func Test_Unbounded_Inquired_Transition_Fail(t *testing.T) {
         return
     }
     mb.(*masterBeacon).beaconState = MasterUnbounded
-    // --- TOO MANY TIMES FAILURE ---
-    for i := 0; i < 5; i ++ {
-        slaveTS := masterTS.Add(time.Second * time.Duration(i + 1))
-        sa, _, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
+    // --- test
+    for i := 0; i < allowedTimesOfFailure; i ++ {
+        slaveTS = masterTS.Add(time.Second)
+        sa, end, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
         if err != nil {
             t.Error(err.Error())
             return
         }
         // this is an error injection
         sa.StatusAgent.MasterBoundAgent = "MASTER-YODA"
+        masterTS = end.Add(time.Second)
         if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
             t.Errorf("[ERR] incorrect slave state. Should generate error with wrong master name")
             return
@@ -305,16 +310,434 @@ func Test_Unbounded_Inquired_Transition_Fail(t *testing.T) {
 func Test_Inquired_KeyExchange_Fail(t *testing.T) {
     setUp()
     defer tearDown()
+
+    // --- TIMEOUT FAILURE ---
+    mb := NewBeaconForSlaveNode()
+    sa, err := slagent.TestSlaveUnboundedMasterSearchDiscovery()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS := time.Now()
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS := masterTS.Add(time.Second)
+    sa, end, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    // --- TEST
+    slaveTS = masterTS.Add(time.Second)
+    sa, end, err = slagent.TestSlaveKeyExchangeStatus("MASTER-YODA", crypt.TestSlavePublicKey(), slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+        t.Error("[ERR] Master beacon should have failed if wrong master name is fed!")
+        return
+    } else {
+        t.Log(err.Error())
+    }
+    if mb.CurrentState() != MasterInquired {
+        t.Error("[ERR] Master state is expected to be " + MasterInquired.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    if mb.(*masterBeacon).trialFailCount != 1 {
+        t.Error("[ERR] Master fail count should have increased")
+        return
+    }
+    // fail with timestamp
+    masterTS = masterTS.Add(time.Second * 11)
+    t.Logf("[INFO] slaveTS - MasterBeacon.lastSuccessTimestmap : " + slaveTS.Sub(mb.(*masterBeacon).lastSuccess).String())
+    if err := mb.TransitionWithTimestamp(masterTS); err != nil {
+        t.Log(err.Error())
+    }
+    if mb.(*masterBeacon).trialFailCount != 1 {
+        t.Errorf("[ERR] Master fail count should have increased. Current count %d", mb.(*masterBeacon).trialFailCount)
+        return
+    }
+    if mb.CurrentState() != MasterDiscarded {
+        t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+
+
+    // --- TOO MANY TIMES FAILURE ---
+    mb = NewBeaconForSlaveNode()
+    sa, err = slagent.TestSlaveUnboundedMasterSearchDiscovery()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = time.Now()
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS = masterTS.Add(time.Second)
+    sa, end, err = slagent.TestSlaveAnswerMasterInquiry(slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    // --- test
+    for i := 0; i < allowedTimesOfFailure; i++ {
+        t.Logf("[INFO] Master state : %s. Trial count %d", mb.CurrentState().String(), mb.(*masterBeacon).trialFailCount)
+
+        if mb.(*masterBeacon).trialFailCount != i {
+            t.Error("[ERR] Master fail count [%d] should match with trial count [%d]", mb.(*masterBeacon).trialFailCount, i)
+            return
+        }
+        if mb.CurrentState() != MasterInquired {
+            t.Errorf("[ERR] Master state is expected to be %s. Current : %s. Trial count %d", MasterInquired.String(), mb.CurrentState().String(), mb.(*masterBeacon).trialFailCount)
+            //return
+        }
+        slaveTS = masterTS.Add(time.Second)
+        t.Logf("[INFO] slaveTS - MasterBeacon.lastSuccessTimestmap : " + slaveTS.Sub(mb.(*masterBeacon).lastSuccess).String())
+        sa, end, err = slagent.TestSlaveKeyExchangeStatus("MASTER-YODA", crypt.TestSlavePublicKey(), slaveTS)
+        if err != nil {
+            t.Error(err.Error())
+            return
+        }
+        masterTS = end.Add(time.Second)
+        if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+            t.Error("[ERR] Master beacon should have failed if wrong master name is fed!")
+            return
+        } else {
+            t.Log(err.Error())
+        }
+    }
+    if mb.CurrentState() != MasterDiscarded {
+        t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    if mb.(*masterBeacon).trialFailCount != 5 {
+        t.Error("[ERR] Master fail count should have increased")
+        return
+    }
 }
 
 func Test_KeyExchange_CryptoCheck_Fail(t *testing.T) {
     setUp()
     defer tearDown()
+
+    // --- TIMEOUT FAILURE ---
+    mb := NewBeaconForSlaveNode()
+    sa, err := slagent.TestSlaveUnboundedMasterSearchDiscovery()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS := time.Now()
+    mb.TransitionWithSlaveMeta(sa, masterTS)
+    if mb.CurrentState() != MasterUnbounded {
+        t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    slaveTS := masterTS.Add(time.Second)
+    sa, end, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS = masterTS.Add(time.Second)
+    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, crypt.TestSlavePublicKey(), slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    // --- test
+    slaveTS = masterTS.Add(time.Second)
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.(*masterBeacon).aesCryptor, slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+        t.Errorf("[ERR] Incorrect slave name should fail master beacon to transition")
+        return
+    } else {
+        t.Log(err.Error())
+    }
+    if mb.CurrentState() != MasterKeyExchange {
+        t.Error("[ERR] Master state is expected to be " + MasterKeyExchange.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    if mb.(*masterBeacon).trialFailCount != 1 {
+        t.Error("[ERR] Master fail count should have increased")
+        return
+    }
+    // fail with timestamp
+    masterTS = masterTS.Add(time.Second * 11)
+    t.Logf("[INFO] masterTS - MasterBeacon.lastSuccessTimestmap : " + masterTS.Sub(mb.(*masterBeacon).lastSuccess).String())
+    if err := mb.TransitionWithTimestamp(masterTS); err != nil {
+        t.Log(err.Error())
+    }
+    if mb.(*masterBeacon).trialFailCount != 1 {
+        t.Errorf("[ERR] Master fail count should have increased. Current count %d", mb.(*masterBeacon).trialFailCount)
+        return
+    }
+    if mb.CurrentState() != MasterDiscarded {
+        t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+
+
+    // --- TOO MANY TIMES FAILURE ---
+    mb = NewBeaconForSlaveNode()
+    sa, err = slagent.TestSlaveUnboundedMasterSearchDiscovery()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = time.Now()
+    mb.TransitionWithSlaveMeta(sa, masterTS)
+    if mb.CurrentState() != MasterUnbounded {
+        t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    slaveTS = masterTS.Add(time.Second)
+    sa, end, err = slagent.TestSlaveAnswerMasterInquiry(slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS = masterTS.Add(time.Second)
+    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, crypt.TestSlavePublicKey(), slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    // --- test
+    for i := 0; i < allowedTimesOfFailure; i++ {
+        t.Logf("[INFO] Master state : %s. Trial count %d", mb.CurrentState().String(), mb.(*masterBeacon).trialFailCount)
+
+        if mb.CurrentState() != MasterKeyExchange {
+            t.Error("[ERR] Master state is expected to be " + MasterKeyExchange.String() + ". Current : " + mb.CurrentState().String())
+            return
+        }
+        slaveTS = masterTS.Add(time.Second)
+        t.Logf("[INFO] slaveTS - MasterBeacon.lastSuccessTimestmap : " + slaveTS.Sub(mb.(*masterBeacon).lastSuccess).String())
+        sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.(*masterBeacon).aesCryptor, slaveTS)
+        if err != nil {
+            t.Error(err.Error())
+            return
+        }
+        masterTS = end.Add(time.Second)
+        if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+            t.Errorf("[ERR] Incorrect slave name should fail master beacon to transition")
+            return
+        } else {
+            t.Log(err.Error())
+        }
+    }
+    if mb.CurrentState() != MasterDiscarded {
+        t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    if mb.(*masterBeacon).trialFailCount != 5 {
+        t.Error("[ERR] Master fail count should have increased")
+        return
+    }
 }
 
 func Test_KeyExchange_Bounded_Fail(t *testing.T) {
     setUp()
     defer tearDown()
+
+    // --- TIMEOUT FAILURE ---
+    mb := NewBeaconForSlaveNode()
+    sa, err := slagent.TestSlaveUnboundedMasterSearchDiscovery()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS := time.Now()
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS := masterTS.Add(time.Second)
+    sa, end, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS = masterTS.Add(time.Second)
+    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, crypt.TestSlavePublicKey(), slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS = masterTS.Add(time.Second)
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, mb.(*masterBeacon).aesCryptor, slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    // --- test
+    slaveTS = masterTS.Add(time.Second)
+    sa, end, err = slagent.TestSlaveBoundedStatus("INCORRECT-SLAVE-NAME", mb.(*masterBeacon).aesCryptor, slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+        t.Errorf("[ERR] Incorrect slave name should fail master beacon to transition")
+        return
+    } else {
+        t.Log(err.Error())
+    }
+    if mb.CurrentState() != MasterCryptoCheck {
+        t.Error("[ERR] Master state is expected to be " + MasterCryptoCheck.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    if mb.(*masterBeacon).trialFailCount != 1 {
+        t.Error("[ERR] Master fail count should have increased")
+        return
+    }
+    // fail with timestamp
+    masterTS = masterTS.Add(time.Second * 11)
+    t.Logf("[INFO] masterTS - MasterBeacon.lastSuccessTimestmap : " + masterTS.Sub(mb.(*masterBeacon).lastSuccess).String())
+    if err := mb.TransitionWithTimestamp(masterTS); err != nil {
+        t.Log(err.Error())
+    }
+    if mb.(*masterBeacon).trialFailCount != 1 {
+        t.Errorf("[ERR] Master fail count should have increased. Current count %d", mb.(*masterBeacon).trialFailCount)
+        return
+    }
+    if mb.CurrentState() != MasterDiscarded {
+        t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+
+
+    // --- TOO MANY TIMES FAILURE ---
+    mb = NewBeaconForSlaveNode()
+    sa, err = slagent.TestSlaveUnboundedMasterSearchDiscovery()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = time.Now()
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS = masterTS.Add(time.Second)
+    sa, end, err = slagent.TestSlaveAnswerMasterInquiry(slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS = masterTS.Add(time.Second)
+    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, crypt.TestSlavePublicKey(), slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS = masterTS.Add(time.Second)
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, mb.(*masterBeacon).aesCryptor, slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    // --- test
+    for i := 0; i < allowedTimesOfFailure ; i++ {
+        if mb.CurrentState() != MasterCryptoCheck {
+            t.Error("[ERR] Master state is expected to be " + MasterCryptoCheck.String() + ". Current : " + mb.CurrentState().String())
+            return
+        }
+        slaveTS = masterTS.Add(time.Second)
+        sa, end, err = slagent.TestSlaveBoundedStatus("INCORRECT-SLAVE-NAME", mb.(*masterBeacon).aesCryptor, slaveTS)
+        if err != nil {
+            t.Error(err.Error())
+            return
+        }
+        masterTS = end.Add(time.Second)
+        if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+            t.Errorf("[ERR] Incorrect slave name should fail master beacon to transition")
+            return
+        } else {
+            t.Log(err.Error())
+        }
+    }
+    if mb.(*masterBeacon).trialFailCount != 5 {
+        t.Errorf("[ERR] Master fail count should have increased. Current count %d", mb.(*masterBeacon).trialFailCount)
+        return
+    }
+    if mb.CurrentState() != MasterDiscarded {
+        t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
 }
 
 func Test_Bounded_BindBroken_Transition(t *testing.T) {
