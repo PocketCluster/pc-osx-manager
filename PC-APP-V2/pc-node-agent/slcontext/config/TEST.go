@@ -5,7 +5,7 @@ import (
     "os/user"
 )
 
-func DebugConfigPrepare() (PocketSlaveConfig, error) {
+func DebugConfigPrepare() (*PocketSlaveConfig, error) {
     usr, err := user.Current()
     if err != nil {
         return nil, err
@@ -16,15 +16,13 @@ func DebugConfigPrepare() (PocketSlaveConfig, error) {
         os.MkdirAll(root, 0700);
     }
 
-    return loadSlaveConfig(root), nil
+    return _loadSlaveConfig(root), nil
 }
 
-func DebugConfigDestory(config PocketSlaveConfig) {
-    cfg := config.(*pocketSlaveConfig)
+func DebugConfigDestory(cfg *PocketSlaveConfig) {
     os.Remove(cfg.rootPath + slave_config_file)
     os.Remove(cfg.rootPath + slave_public_Key_file)
     os.Remove(cfg.rootPath + slave_prvate_Key_file)
     os.Remove(cfg.rootPath + slave_ssh_Key_file)
-
-    config = nil
+    cfg = nil
 }

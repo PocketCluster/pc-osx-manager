@@ -3,9 +3,11 @@ package slcontext
 import (
     "sync"
     "fmt"
+    "net"
+
     "github.com/stkim1/pc-node-agent/crypt"
     "github.com/stkim1/netifaces"
-    "net"
+    "github.com/stkim1/pc-node-agent/slcontext/config"
 )
 
 // this method should never have an error
@@ -14,10 +16,10 @@ func SharedSlaveContext() PocketSlaveContext {
 }
 
 type slaveContext struct {
+    config              *config.PocketSlaveConfig
     publicKey           []byte
     privateKey          []byte
     decryptor           crypt.RsaDecryptor
-    encryptor           crypt.RsaEncryptor
 
     masterAgent         string
     masterIP4Address    string
@@ -42,7 +44,87 @@ func getSingletonSlaveContext() *slaveContext {
 
 // this one should never have an error
 func initializeSlaveContext(sc *slaveContext) {
-    // TODO : generate and set pub/prv key pair
+    // load config and generate
+    sc.loadFromConfig()
+}
+
+// --- Sync All ---
+func (sc *slaveContext) loadFromConfig() error {
+    cfg := config.LoadPocketSlaveConfig()
+
+    // public key
+    pubkey, err := cfg.SlavePublicKey()
+    if err != nil {
+        return err
+    }
+    sc.publicKey = pubkey
+
+    // private key
+    prvkey, err := cfg.SlavePrivateKey()
+    if err != nil {
+        return err
+    }
+    sc.privateKey = prvkey
+
+    // if master public key exists
+    if mspubkey, err := cfg.MasterPublicKey(); len(mspubkey) != 0 && err == nil {
+        sc.masterPubkey = mspubkey
+
+        if decryptor, err := crypt.NewDecryptorFromKeyData(mspubkey, prvkey); decryptor != nil && err == nil {
+            sc.decryptor = decryptor
+        }
+    }
+
+    // master agent name
+    if len(cfg.MasterSection.MasterBoundAgent) != 0 {
+        sc.masterAgent = cfg.MasterSection.MasterBoundAgent
+    }
+
+    // master ip4 address
+    if len(cfg.MasterSection.MasterIP4Address) != 0 {
+        sc.masterIP4Address = cfg.MasterSection.MasterIP4Address
+    }
+
+    // slave node name
+    if len(cfg.SlaveSection.SlaveNodeName) != 0 {
+        sc.slaveNodeName = cfg.SlaveSection.SlaveNodeName
+    }
+
+    sc.config = cfg
+    return nil
+}
+
+func (sc *slaveContext) SyncAll() error {
+    // master agent name
+    if man, err := sc.GetMasterAgent(); err != nil {
+        sc.config.MasterSection.MasterBoundAgent = man
+    }
+    // master ip4 address
+    if maddr, err := sc.GetMasterIP4Address(); err != nil {
+        sc.config.MasterSection.MasterIP4Address = maddr
+    }
+
+    // master pubkey
+    if maddr, err := sc.GetMasterPublicKey(); err != nil {
+        sc.config.SaveMasterPublicKey(maddr)
+    }
+
+    // slaveNodeName
+    if name, err := sc.GetSlaveNodeName(); err != nil {
+        sc.config.SlaveSection.SlaveNodeName = name
+    }
+    return sc.config.Save()
+}
+
+func (sc *slaveContext) DiscardAll() error {
+    sc.decryptor = nil
+    sc.masterAgent = ""
+    sc.masterIP4Address = ""
+    sc.masterPubkey = nil
+    sc.aeskey = nil
+    sc.aesCryptor = nil
+    sc.slaveNodeName = ""
+    return nil
 }
 
 // decryptor/encryptor interface
@@ -61,29 +143,17 @@ func (sc *slaveContext) DecryptMessage(crypted []byte, sendSig crypt.Signature) 
     return sc.decryptor.DecryptMessage(crypted, sendSig)
 }
 
-func (sc *slaveContext) EncryptMessage(plain []byte) ([]byte, crypt.Signature, error) {
-    if sc.encryptor == nil {
-        return nil, nil, fmt.Errorf("[ERR] cannot encrypt with null encryptor")
-    }
-    return sc.encryptor.EncryptMessage(plain)
-}
-
 // --- Master Public key ---
-func (sc *slaveContext) SetMasterPublicKey(masterPubkey []byte) (error) {
-    if masterPubkey == nil {
+func (sc *slaveContext) SetMasterPublicKey(masterPubkey []byte) error {
+    if len(masterPubkey) == 0 {
         return fmt.Errorf("[ERR] Master public key is nil")
     }
     sc.masterPubkey = masterPubkey
 
-    encryptor, err := crypt.NewEncryptorFromKeyData(masterPubkey, sc.privateKey)
-    if err != nil {
-        return err
-    }
     decryptor, err := crypt.NewDecryptorFromKeyData(masterPubkey, sc.privateKey)
     if err != nil {
         return err
     }
-    sc.encryptor = encryptor
     sc.decryptor = decryptor
     return nil
 }
@@ -92,19 +162,8 @@ func (sc *slaveContext) GetMasterPublicKey() ([]byte, error) {
     return sc.masterPubkey, nil
 }
 
-func (sc *slaveContext) DiscardMasterPublicKey() (error) {
-    sc.masterPubkey = nil
-    sc.encryptor = nil
-    sc.decryptor = nil
-    return nil
-}
-
-func (sc *slaveContext) SyncMasterPublicKey() (error) {
-    return nil
-}
-
 // --- AES key ---
-func (sc *slaveContext) SetAESKey(aesKey []byte) (error) {
+func (sc *slaveContext) SetAESKey(aesKey []byte) error {
     cryptor, err := crypt.NewAESCrypto(aesKey)
     if err != nil {
         return nil
@@ -146,63 +205,52 @@ func (sc *slaveContext) Decrypt(data []byte) ([]byte, error) {
 }
 
 // --- Master Agent Name ---
-func (sc *slaveContext) SetMasterAgent(agentName string) (error) {
+func (sc *slaveContext) SetMasterAgent(agentName string) error {
+    if len(agentName) == 0 {
+        return fmt.Errorf("[ERR] Cannot set empty master agent name")
+    }
     sc.masterAgent = agentName
     return nil
 }
 
 func (sc *slaveContext) GetMasterAgent() (string, error) {
-    agentName := sc.masterAgent
-    return agentName, nil
-}
-
-func (sc *slaveContext) SyncMasterAgent() (error) {
-    return nil
-}
-
-func (sc *slaveContext) DiscardMasterAgent() (error) {
-    sc.masterAgent = ""
-    return nil
+    if len(sc.masterAgent) == 0 {
+        return "", fmt.Errorf("[ERR] Empty master agent name")
+    }
+    return sc.masterAgent, nil
 }
 
 // --- Master IP4 Address ---
-func (sc *slaveContext) SetMasterIP4Address(ip4Address string) (error) {
+func (sc *slaveContext) SetMasterIP4Address(ip4Address string) error {
+    if len(ip4Address) == 0 {
+        return fmt.Errorf("[ERR] Cannot set empty master ip4 address")
+    }
     sc.masterIP4Address = ip4Address
     return nil
 }
 
 func (sc *slaveContext) GetMasterIP4Address() (string, error) {
+    if len(sc.masterIP4Address) == 0 {
+        return "", fmt.Errorf("[ERR] Empty master ip4 address")
+    }
     return sc.masterIP4Address, nil
 }
 
-func (sc *slaveContext) SyncMasterIP4Address() (error) {
-    return nil
-}
-
-func (sc *slaveContext) DiscardMasterIP4Address() (error) {
-    sc.masterIP4Address = ""
-    return nil
-}
-
 // --- Slave Node Name ---
-func (sc *slaveContext) SetSlaveNodeName(nodeName string) (error) {
+func (sc *slaveContext) SetSlaveNodeName(nodeName string) error {
+    if len(nodeName) == 0 {
+        return fmt.Errorf("[ERR] Cannot set empty slave nodename")
+    }
     sc.slaveNodeName = nodeName
     return nil
 }
 
-func (sc *slaveContext) GetSlaveNodeName() ( string, error) {
+func (sc *slaveContext) GetSlaveNodeName() (string, error) {
+    if len(sc.slaveNodeName) == 0 {
+        return "", fmt.Errorf("[ERR] empty slave node name")
+    }
     return sc.slaveNodeName, nil
 }
-
-func (sc *slaveContext) SyncSlaveNodeName() (err error) {
-    return
-}
-
-func (sc *slaveContext) DiscardSlaveNodeName() (err error) {
-    sc.slaveNodeName = ""
-    return
-}
-
 
 // --- Network ---
 type ip4addr struct {
@@ -274,22 +322,4 @@ func (sc *slaveContext) PrimaryNetworkInterface() (*NetworkInterface, error) {
         HardwareAddr    : &(iface.HardwareAddr),
         GatewayAddr     : gwaddr,
     }, nil
-}
-
-// --- Sync All ---
-func (sc *slaveContext) SyncAll() (error) {
-    return nil
-}
-func (sc *slaveContext) DiscardAll() (error) {
-    err := sc.DiscardMasterPublicKey()
-    if err != nil {
-        return err
-    }
-    sc.DiscardAESKey()
-    err = sc.DiscardMasterAgent()
-    if err != nil {
-        return err
-    }
-    err = sc.DiscardMasterIP4Address()
-    return err
 }

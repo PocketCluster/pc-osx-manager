@@ -8,13 +8,12 @@ import (
 )
 
 func TestConfigLoadAndSave(t *testing.T) {
-    config, err := DebugConfigPrepare()
+    cfg, err := DebugConfigPrepare()
     if err != nil {
         t.Errorf(err.Error())
         return
     }
-    defer DebugConfigDestory(config)
-    cfg := config.(*pocketSlaveConfig)
+    defer DebugConfigDestory(cfg)
     t.Log(spew.Sdump(cfg))
 
     // check if config dir exists, and creat if DNE
@@ -29,12 +28,12 @@ func TestConfigLoadAndSave(t *testing.T) {
         t.Error("[ERR] slave keys dir should have existed")
         return
     }
-    if err := saveSlaveConfig(cfg); err != nil {
+    if err := cfg.Save(); err != nil {
         t.Error(err.Error())
         return
     }
 
-    loadedCfg := loadSlaveConfig(cfg.rootPath)
+    loadedCfg := _loadSlaveConfig(cfg.rootPath)
     if !reflect.DeepEqual(cfg, loadedCfg) {
         t.Error("[ERR] incorect loaded config should be the same.")
         t.Log(spew.Sdump(loadedCfg))

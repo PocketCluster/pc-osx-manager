@@ -2,12 +2,11 @@ package config
 
 import (
     "os"
+    "fmt"
     "io/ioutil"
 
     "gopkg.in/yaml.v2"
-    "github.com/stkim1/pc-node-agent/locator"
-    "github.com/stkim1/pc-node-agent/slcontext"
-    "fmt"
+    //"github.com/stkim1/pc-node-agent/locator"
     "github.com/stkim1/pc-node-agent/crypt"
 )
 
@@ -70,26 +69,8 @@ const (
     POCKET_END          = "// ---------------  POCKETCLUSTER END  ---------------"
 )
 
-type PocketSlaveConfig interface {
-    // load context with config values
-    LoadupContext(ctx *slcontext.PocketSlaveContext) error
-
-    // save context values to config
-    SaveContext(ctx *slcontext.PocketSlaveContext) error
-
-    SlavePublicKey() ([]byte, error)
-    SlavePrivateKey() ([]byte, error)
-    SlaveSSHKey() ([]byte, error)
-    MasterPublicKey() ([]byte, error)
-}
-
-// This is default public constructor as it does not accept root file path
-func NewPocketSlaveConfig() (PocketSlaveConfig) {
-    return loadSlaveConfig("")
-}
-
 // --- struct
-type configMasterSection struct {
+type ConfigMasterSection struct {
     // Master Agent Specific String
     MasterBoundAgent    string                   `yaml:"master-binder-agent"`
     // Last Known IP4
@@ -99,7 +80,7 @@ type configMasterSection struct {
     MasterTimeZone      string                   `yaml:"master-timezone"`
 }
 
-type configSlaveSection struct {
+type ConfigSlaveSection struct {
     SlaveMacAddr        string                   `yaml:"slave-mac-addr"`
     SlaveNodeName       string                   `yaml:"slave-node-name"`
     SlaveIP4Addr        string                   `yaml:"slave-ip4-addr"`
@@ -110,28 +91,32 @@ type configSlaveSection struct {
     //SlaveNameServ       string
 }
 
-type pocketSlaveConfig struct {
+type PocketSlaveConfig struct {
     // this field exists to create files at a specific location for testing so ignore
     rootPath            string                   `yaml:"-"`
     ConfigVersion       string                   `yaml:"config-version"`
     BindingStatus       string                   `yaml:"binding-status"`
-    MasterSection       *configMasterSection     `yaml:"master-section",inline,flow`
-    SlaveSection        *configSlaveSection      `yaml:"slave-section",inline,flow`
+    MasterSection       *ConfigMasterSection     `yaml:"master-section",inline,flow`
+    SlaveSection        *ConfigSlaveSection      `yaml:"slave-section",inline,flow`
 }
 
+// This is default public constructor as it does not accept root file path
+func LoadPocketSlaveConfig() *PocketSlaveConfig {
+    return _loadSlaveConfig("")
+}
 
 // --- func
-func _brandNewSlaveConfig(rootPath string) (*pocketSlaveConfig) {
-    return &pocketSlaveConfig{
+func _brandNewSlaveConfig(rootPath string) (*PocketSlaveConfig) {
+    return &PocketSlaveConfig{
         rootPath        :rootPath,
         ConfigVersion   :SLAVE_CONFIG_VAL,
-        BindingStatus   :locator.SlaveUnbounded.String(),
-        MasterSection   :&configMasterSection{},
-        SlaveSection    :&configSlaveSection{},
+        BindingStatus   : "SlaveUnbounded", //locator.SlaveUnbounded.String(),
+        MasterSection   :&ConfigMasterSection{},
+        SlaveSection    :&ConfigSlaveSection{},
     }
 }
 
-func loadSlaveConfig(rootPath string) (*pocketSlaveConfig) {
+func _loadSlaveConfig(rootPath string) (*PocketSlaveConfig) {
 
     // check if config dir exists, and creat if DNE
     configDirPath := rootPath + slave_config_dir
@@ -171,7 +156,7 @@ func loadSlaveConfig(rootPath string) (*pocketSlaveConfig) {
     if configData, err := ioutil.ReadFile(configFilePath); err != nil {
         return _brandNewSlaveConfig(rootPath)
     } else {
-        var config pocketSlaveConfig
+        var config PocketSlaveConfig
         if err = yaml.Unmarshal(configData, &config); err != nil {
             return _brandNewSlaveConfig(rootPath)
         } else {
@@ -182,7 +167,7 @@ func loadSlaveConfig(rootPath string) (*pocketSlaveConfig) {
     }
 }
 
-func saveSlaveConfig(cfg *pocketSlaveConfig) error {
+func (cfg *PocketSlaveConfig) Save() error {
     // check if config dir exists, and creat if DNE
     configDirPath := cfg.rootPath + slave_config_dir
     if _, err := os.Stat(configDirPath); os.IsNotExist(err) {
@@ -197,16 +182,7 @@ func saveSlaveConfig(cfg *pocketSlaveConfig) error {
     return ioutil.WriteFile(configFilePath, configData, 0600)
 }
 
-func (pc *pocketSlaveConfig) LoadupContext(ctx *slcontext.PocketSlaveContext) error {
-
-    return nil
-}
-
-func (pc *pocketSlaveConfig) SaveContext(ctx *slcontext.PocketSlaveContext) error {
-    return nil
-}
-
-func (pc *pocketSlaveConfig) SlavePublicKey() ([]byte, error) {
+func (pc *PocketSlaveConfig) SlavePublicKey() ([]byte, error) {
     pubKeyPath := pc.rootPath + slave_public_Key_file
     if _, err := os.Stat(pubKeyPath); os.IsNotExist(err) {
         return nil, fmt.Errorf("[ERR] keys have not been generated properly. This is a critical error")
@@ -214,7 +190,7 @@ func (pc *pocketSlaveConfig) SlavePublicKey() ([]byte, error) {
     return ioutil.ReadFile(pubKeyPath)
 }
 
-func (pc *pocketSlaveConfig) SlavePrivateKey() ([]byte, error) {
+func (pc *PocketSlaveConfig) SlavePrivateKey() ([]byte, error) {
     prvKeyPath := pc.rootPath + slave_prvate_Key_file
     if _, err := os.Stat(prvKeyPath); os.IsNotExist(err) {
         return nil, fmt.Errorf("[ERR] keys have not been generated properly. This is a critical error")
@@ -222,7 +198,7 @@ func (pc *pocketSlaveConfig) SlavePrivateKey() ([]byte, error) {
     return ioutil.ReadFile(prvKeyPath)
 }
 
-func (pc *pocketSlaveConfig) SlaveSSHKey() ([]byte, error) {
+func (pc *PocketSlaveConfig) SlaveSSHKey() ([]byte, error) {
     sshKeyPath := pc.rootPath + slave_ssh_Key_file
     if _, err := os.Stat(sshKeyPath); os.IsNotExist(err) {
         return nil, fmt.Errorf("[ERR] keys have not been generated properly. This is a critical error")
@@ -230,10 +206,18 @@ func (pc *pocketSlaveConfig) SlaveSSHKey() ([]byte, error) {
     return ioutil.ReadFile(sshKeyPath)
 }
 
-func (pc *pocketSlaveConfig) MasterPublicKey() ([]byte, error) {
+func (pc *PocketSlaveConfig) MasterPublicKey() ([]byte, error) {
     masterPubKey := pc.rootPath + master_public_Key_file
     if _, err := os.Stat(masterPubKey); os.IsNotExist(err) {
         return nil, fmt.Errorf("[ERR] Master Publickey might have not been synced yet.")
     }
     return ioutil.ReadFile(masterPubKey)
+}
+
+func (pc *PocketSlaveConfig) SaveMasterPublicKey(masterPubKey []byte) error {
+    if len(masterPubKey) == 0 {
+        return fmt.Errorf("[ERR] Cannot save empty master key")
+    }
+    keyPath := pc.rootPath + master_public_Key_file
+    return ioutil.WriteFile(keyPath, masterPubKey, 0600)
 }

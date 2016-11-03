@@ -14,39 +14,33 @@ type NetworkInterface struct {
 }
 
 type PocketSlaveContext interface {
+    // Once sync, all the configuration is saved, and slave node is bounded
+    // This must be executed on success from CheckCrypto -> Bound
+    SyncAll() error
+    // Discard all data communicated
+    DiscardAll() error
+
     GetPublicKey() (pubkey []byte)
     GetPrivateKey() (prvkey []byte)
     crypt.RsaDecryptor
-    crypt.RsaEncryptor
 
-    SetMasterPublicKey(masterPubkey []byte) (err error)
-    GetMasterPublicKey() (pubkey []byte, err error)
-    DiscardMasterPublicKey() (err error)
-    SyncMasterPublicKey() (err error)
+    SetMasterPublicKey(masterPubkey []byte) error
+    GetMasterPublicKey() ([]byte, error)
 
-    SetAESKey(aesKey []byte) (err error)
+    SetAESKey(aesKey []byte) error
     GetAESKey() (aeskey []byte)
     DiscardAESKey()
     AESCryptor() (crypt.AESCryptor, error)
     crypt.AESCryptor
 
-    SetMasterAgent(agentName string) (err error)
-    GetMasterAgent() (agentName string, err error)
-    SyncMasterAgent() (err error)
-    DiscardMasterAgent() (err error)
+    SetMasterAgent(agentName string) error
+    GetMasterAgent() (string, error)
 
-    SetMasterIP4Address(ip4Address string) (err error)
-    GetMasterIP4Address() (ip4Address string, err error)
-    SyncMasterIP4Address() (err error)
-    DiscardMasterIP4Address() (err error)
+    SetMasterIP4Address(ip4Address string) error
+    GetMasterIP4Address() (string, error)
 
-    SetSlaveNodeName(nodeName string) (err error)
-    GetSlaveNodeName() (nodeName string, err error)
-    SyncSlaveNodeName() (err error)
-    DiscardSlaveNodeName() (err error)
+    SetSlaveNodeName(nodeName string) error
+    GetSlaveNodeName() (string, error)
 
-    PrimaryNetworkInterface() (status *NetworkInterface, err error)
-
-    SyncAll() (err error)
-    DiscardAll() (err error)
+    PrimaryNetworkInterface() (*NetworkInterface, error)
 }
