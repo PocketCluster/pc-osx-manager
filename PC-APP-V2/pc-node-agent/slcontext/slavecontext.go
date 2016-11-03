@@ -90,7 +90,28 @@ func (sc *slaveContext) loadFromConfig() error {
         sc.slaveNodeName = cfg.SlaveSection.SlaveNodeName
     }
 
+    paddr, err := sc.PrimaryNetworkInterface()
+    if err != nil {
+        return err
+    }
+
+    if paddr.HardwareAddr.String() != cfg.SlaveSection.SlaveMacAddr {
+        cfg.SlaveSection.SlaveMacAddr  = paddr.HardwareAddr.String()
+    }
+    if paddr.IP.String() != cfg.SlaveSection.SlaveIP4Addr {
+        cfg.SlaveSection.SlaveIP4Addr  = paddr.IP.String()
+    }
+    if paddr.GatewayAddr != cfg.SlaveSection.SlaveGateway {
+        cfg.SlaveSection.SlaveGateway  = paddr.GatewayAddr
+    }
+    if paddr.IPMask.String() != cfg.SlaveSection.SlaveNetMask {
+        cfg.SlaveSection.SlaveNetMask  = paddr.IPMask.String()
+    }
+    if config.SLAVE_NAMESRV_VALUE != cfg.SlaveSection.SlaveNameServ {
+        cfg.SlaveSection.SlaveNameServ = config.SLAVE_NAMESRV_VALUE
+    }
     sc.config = cfg
+
     return nil
 }
 
@@ -103,17 +124,20 @@ func (sc *slaveContext) SyncAll() error {
     if maddr, err := sc.GetMasterIP4Address(); err != nil {
         sc.config.MasterSection.MasterIP4Address = maddr
     }
-
     // master pubkey
     if maddr, err := sc.GetMasterPublicKey(); err != nil {
         sc.config.SaveMasterPublicKey(maddr)
     }
-
     // slaveNodeName
     if name, err := sc.GetSlaveNodeName(); err != nil {
         sc.config.SlaveSection.SlaveNodeName = name
     }
-    return sc.config.Save()
+    // slave network interface
+    if err := sc.config.SaveFixedNetworkInterface(); err != nil {
+        // TODO : pass error for now v0.1.4
+    }
+    // whole slave config
+    return sc.config.SaveSlaveConfig()
 }
 
 func (sc *slaveContext) DiscardAll() error {

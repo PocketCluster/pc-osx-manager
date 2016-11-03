@@ -4,9 +4,9 @@ import (
     "os"
     "fmt"
     "io/ioutil"
+    "strings"
 
     "gopkg.in/yaml.v2"
-    //"github.com/stkim1/pc-node-agent/locator"
     "github.com/stkim1/pc-node-agent/crypt"
 )
 
@@ -22,21 +22,22 @@ const (
 
 // ------ NETWORK INTERFACES ------
 const (
-    SLAVE_ADDRESS_KEY   = "address"
-    SLAVE_NETMASK_KEY   = "netmask"
-    SLAVE_BROADCS_KEY   = "broadcast"
-    SLAVE_GATEWAY_KEY   = "gateway"
-
-    // TODO we might not need this
-    //NAMESRV             = "dns-nameservers"
+    SLAVE_ADDRESS_KEY = "address"
+    SLAVE_GATEWAY_KEY = "gateway"
+    SLAVE_NETMASK_KEY = "netmask"
+    SLAVE_NAMESRV_KEY = "dns-nameserver"
+    SLAVE_BROADCS_KEY = "broadcast"
 )
-// TODO : we might not need this
-//var IFACE_KEYS []string = []string{ADDRESS, NETMASK, BROADCS, GATEWAY}
+
+var SLAVE_NETIFACE_KEYS []string = []string{SLAVE_ADDRESS_KEY, SLAVE_GATEWAY_KEY, SLAVE_NETMASK_KEY, SLAVE_NAMESRV_KEY, SLAVE_BROADCS_KEY}
 
 const (
     PAGENT_SEND_PORT    = 10060
     PAGENT_RECV_PORT    = 10061
 )
+
+// Master name server is fixed for now (v.0.1.4)
+const SLAVE_NAMESRV_VALUE = "pc-master:53535"
 
 // ------ CONFIGURATION FILES ------
 const (
@@ -53,9 +54,9 @@ const (
     // HOST GENERAL CONFIG
     network_iface_file      = "/etc/network/interfaces"
     hostname_file           = "/etc/hostname"
-    hostaddr_file           = "/etc/hosts"
+    //hostaddr_file           = "/etc/hosts"
     host_timezone_file      = "/etc/timezone"
-    resolve_conf_file       = "/etc/resolv.conf"
+    //resolve_conf_file       = "/etc/resolv.conf"
 )
 
 // ------ SALT DEFAULT ------
@@ -65,8 +66,8 @@ const (
 
 // ------- POCKET EDITOR MARKER ------
 const (
-    POCKET_START        = "// --------------- POCKETCLUSTER START ---------------"
-    POCKET_END          = "// ---------------  POCKETCLUSTER END  ---------------"
+    POCKET_START        = "# --------------- POCKETCLUSTER START ---------------"
+    POCKET_END          = "# ---------------  POCKETCLUSTER END  ---------------"
 )
 
 // --- struct
@@ -81,14 +82,14 @@ type ConfigMasterSection struct {
 }
 
 type ConfigSlaveSection struct {
-    SlaveMacAddr        string                   `yaml:"slave-mac-addr"`
     SlaveNodeName       string                   `yaml:"slave-node-name"`
-    SlaveIP4Addr        string                   `yaml:"slave-ip4-addr"`
+    SlaveMacAddr        string                   `yaml:"slave-mac-addr"`
     //SlaveIP6Addr        string
+    SlaveIP4Addr        string                   `yaml:"slave-net-ip4"`
+    SlaveGateway        string                   `yaml:"slave-net-gateway"`
     SlaveNetMask        string                   `yaml:"slave-net-mask"`
-    //SlaveBroadcast      string
-    SlaveGateway        string                   `yaml:"slave-gateway"`
-    //SlaveNameServ       string
+    SlaveNameServ       string                   `yaml:"slave-net-nameserv"`
+    //SlaveBroadcast      string                   `yaml:"slave-net-broadc"`
 }
 
 type PocketSlaveConfig struct {
@@ -110,6 +111,7 @@ func _brandNewSlaveConfig(rootPath string) (*PocketSlaveConfig) {
     return &PocketSlaveConfig{
         rootPath        :rootPath,
         ConfigVersion   :SLAVE_CONFIG_VAL,
+        // TODO : we need to avoid cyclic import but need to fix this
         BindingStatus   : "SlaveUnbounded", //locator.SlaveUnbounded.String(),
         MasterSection   :&ConfigMasterSection{},
         SlaveSection    :&ConfigSlaveSection{},
@@ -167,7 +169,7 @@ func _loadSlaveConfig(rootPath string) (*PocketSlaveConfig) {
     }
 }
 
-func (cfg *PocketSlaveConfig) Save() error {
+func (cfg *PocketSlaveConfig) SaveSlaveConfig() error {
     // check if config dir exists, and creat if DNE
     configDirPath := cfg.rootPath + slave_config_dir
     if _, err := os.Stat(configDirPath); os.IsNotExist(err) {
@@ -179,7 +181,19 @@ func (cfg *PocketSlaveConfig) Save() error {
     if err != nil {
         return err
     }
-    return ioutil.WriteFile(configFilePath, configData, 0600)
+    if err = ioutil.WriteFile(configFilePath, configData, 0600); err != nil {
+        return err
+    }
+
+    // save host file
+    hostnamePath := cfg.rootPath + hostname_file
+    if len(cfg.SlaveSection.SlaveNodeName) != 0 {
+        err = ioutil.WriteFile(hostnamePath, []byte(cfg.SlaveSection.SlaveNodeName), 0644);
+        if err != nil {
+            return err
+        }
+    }
+    return nil
 }
 
 func (pc *PocketSlaveConfig) SlavePublicKey() ([]byte, error) {
@@ -220,4 +234,80 @@ func (pc *PocketSlaveConfig) SaveMasterPublicKey(masterPubKey []byte) error {
     }
     keyPath := pc.rootPath + master_public_Key_file
     return ioutil.WriteFile(keyPath, masterPubKey, 0600)
+}
+
+
+// --- network interface redefinition
+func _network_iface_redefined(slaveConfig *ConfigSlaveSection) []string {
+    return []string {
+        POCKET_START,
+        "iface eth0 inet static",
+        fmt.Sprintf("%s %s", SLAVE_ADDRESS_KEY, slaveConfig.SlaveIP4Addr),
+        fmt.Sprintf("%s %s", SLAVE_GATEWAY_KEY, slaveConfig.SlaveGateway),
+        fmt.Sprintf("%s %s", SLAVE_NETMASK_KEY, slaveConfig.SlaveNetMask),
+        fmt.Sprintf("%s %s", SLAVE_NAMESRV_KEY, slaveConfig.SlaveNameServ),
+        //fmt.Sprintf("%s %s", SLAVE_BROADCS_KEY, slaveConfig.SlaveBroadcast),
+        POCKET_END,
+    }
+}
+
+func _network_keyword_prefixed(line string) bool {
+    for _, exl := range SLAVE_NETIFACE_KEYS {
+        if strings.HasPrefix(line, exl) {
+            return true
+        }
+    }
+    return false
+}
+
+func _fixateNetworkInterfaces(slaveConfig *ConfigSlaveSection, ifaceData []string) []string {
+    var ifacelines []string
+    is_pocket_defiend := false
+    is_pocket_editing := false
+    // first scan
+    for _, l := range ifaceData {
+        line := strings.TrimSpace(l)
+        if strings.HasPrefix(l, POCKET_START) {
+            is_pocket_defiend = true
+            is_pocket_editing = true
+            ifacelines = append(ifacelines, _network_iface_redefined(slaveConfig)...)
+            continue
+        }
+        if strings.HasPrefix(l, POCKET_END) {
+            is_pocket_editing = false
+            continue
+        }
+        if !is_pocket_editing {
+            ifacelines = append(ifacelines, line)
+        }
+    }
+    // second scan in case there is no pocket section
+    if !is_pocket_defiend {
+        ifacelines = nil
+        for _, l := range ifaceData {
+            line := strings.TrimSpace(l)
+            if strings.HasPrefix(line, "iface eth0 inet") {
+                ifacelines = append(ifacelines, _network_iface_redefined(slaveConfig)...)
+                continue
+            }
+            if _network_keyword_prefixed(line) {
+                continue
+            }
+            ifacelines = append(ifacelines, line)
+        }
+    }
+    return ifacelines
+}
+
+func (pc *PocketSlaveConfig) SaveFixedNetworkInterface() error {
+    var ifaceFilePath string = pc.rootPath + network_iface_file
+    ifaceFileContent, err := ioutil.ReadFile(ifaceFilePath)
+    var ifaceData []string = strings.Split(string(ifaceFileContent),"\n")
+    if err != nil {
+        return err
+    }
+
+    var fixedIfaceData []string = _fixateNetworkInterfaces(pc.SlaveSection, ifaceData)
+    var fixedIfaceContent []byte = []byte(strings.Join(fixedIfaceData, "\n"))
+    return ioutil.WriteFile(ifaceFilePath, fixedIfaceContent, 0644)
 }

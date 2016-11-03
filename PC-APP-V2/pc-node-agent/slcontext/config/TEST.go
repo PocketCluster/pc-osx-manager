@@ -21,8 +21,12 @@ func DebugConfigPrepare() (*PocketSlaveConfig, error) {
 
 func DebugConfigDestory(cfg *PocketSlaveConfig) {
     os.Remove(cfg.rootPath + slave_config_file)
+    os.Remove(cfg.rootPath + hostname_file)
+
     os.Remove(cfg.rootPath + slave_public_Key_file)
     os.Remove(cfg.rootPath + slave_prvate_Key_file)
     os.Remove(cfg.rootPath + slave_ssh_Key_file)
+
+    os.Remove(cfg.rootPath + network_iface_file)
     cfg = nil
 }
