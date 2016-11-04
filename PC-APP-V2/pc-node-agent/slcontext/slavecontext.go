@@ -115,7 +115,8 @@ func (sc *slaveContext) initWithConfig(cfg *config.PocketSlaveConfig) error {
 }
 
 // Once sync, all the configuration is saved, and slave node is bounded
-// This must be executed on success from CheckCrypto -> Bound
+// This must be executed on success from CheckCrypto -> Bound, or BindBroken -> Bind
+// No other place can execute this
 func (sc *slaveContext) SyncAll() error {
     // master agent name
     man, err := sc.GetMasterAgent()
@@ -137,10 +138,32 @@ func (sc *slaveContext) SyncAll() error {
         return err
     }
     sc.config.SlaveSection.SlaveNodeName = name
+
+    // slave network section
+    paddr, err := sc.PrimaryNetworkInterface()
+    if err != nil {
+        return err
+    }
+    cfg := sc.config
+    if paddr.HardwareAddr.String() != cfg.SlaveSection.SlaveMacAddr {
+        cfg.SlaveSection.SlaveMacAddr  = paddr.HardwareAddr.String()
+    }
+    if paddr.IP.String() != cfg.SlaveSection.SlaveIP4Addr {
+        cfg.SlaveSection.SlaveIP4Addr  = paddr.IP.String()
+    }
+    if paddr.GatewayAddr != cfg.SlaveSection.SlaveGateway {
+        cfg.SlaveSection.SlaveGateway  = paddr.GatewayAddr
+    }
+    if paddr.IPMask.String() != cfg.SlaveSection.SlaveNetMask {
+        cfg.SlaveSection.SlaveNetMask  = paddr.IPMask.String()
+    }
+    if config.SLAVE_NAMESRV_VALUE != cfg.SlaveSection.SlaveNameServ {
+        cfg.SlaveSection.SlaveNameServ = config.SLAVE_NAMESRV_VALUE
+    }
     return nil
 }
 
-// Discard all data communicated.
+// Discard all data communicated with master (not the one from slave itself such as network info)
 // This should executed on failure from joining states (unbounded, inquired, keyexchange, checkcrypto)
 func (sc *slaveContext) DiscardAll() error {
     // discard aeskey
@@ -156,25 +179,19 @@ func (sc *slaveContext) DiscardAll() error {
 
     // remove master node
     sc.masterAgent = ""
+    // master ip4 address
     sc.masterIP4Address = ""
-
     // remove slave node
     sc.slaveNodeName = ""
 
     if sc.config != nil {
         cfg := sc.config
         // master agent name
-        if cfg.MasterSection.MasterBoundAgent != sc.masterAgent {
-            cfg.MasterSection.MasterBoundAgent = sc.masterAgent
-        }
+        cfg.MasterSection.MasterBoundAgent = ""
         // master ip4 address
-        if cfg.MasterSection.MasterIP4Address != sc.masterIP4Address {
-            cfg.MasterSection.MasterIP4Address = sc.masterIP4Address
-        }
+        cfg.MasterSection.MasterIP4Address = ""
         // slave node name
-        if cfg.SlaveSection.SlaveNodeName != sc.slaveNodeName {
-            cfg.SlaveSection.SlaveNodeName = sc.slaveNodeName
-        }
+        cfg.SlaveSection.SlaveNodeName = ""
     }
     return nil
 }
@@ -184,7 +201,8 @@ func (sc *slaveContext) ReloadConfiguration() error {
     return sc.initWithConfig(config.LoadPocketSlaveConfig())
 }
 
-// Save all configuration
+// This must be executed on success from CheckCrypto -> Bound, or BindBroken -> Bind
+// No other place can execute this
 func (sc *slaveContext) SaveConfiguration() error {
     // master pubkey
     mpubkey, err := sc.GetMasterPublicKey()
@@ -192,9 +210,13 @@ func (sc *slaveContext) SaveConfiguration() error {
         return err
     }
     sc.config.SaveMasterPublicKey(mpubkey)
-
     // slave network interface
     err = sc.config.SaveFixedNetworkInterface()
+    if err != nil {
+        return err
+    }
+    // save slave node name to hostname
+    err = sc.config.SaveHostname()
     if err != nil {
         return err
     }

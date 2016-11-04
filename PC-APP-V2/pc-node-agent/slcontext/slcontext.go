@@ -15,14 +15,19 @@ type NetworkInterface struct {
 
 type PocketSlaveContext interface {
     // Once sync, all the configuration is saved, and slave node is bounded
-    // This must be executed on success from CheckCrypto -> Bound
+    // This must be executed on success from CheckCrypto -> Bound, or BindBroken -> Bind
+    // No other place can execute this
     SyncAll() error
-    // Discard all data communicated.
+    // Discard all data communicated with master (not the one from slave itself such as network info)
     // This should executed on failure from joining states (unbounded, inquired, keyexchange, checkcrypto)
     DiscardAll() error
     // reload all configuration
-    ReloadConfiguration() error
-    // Save all configuration
+
+    // TODO : how to test this?
+    // ReloadConfiguration() error
+
+    // This must be executed on success from CheckCrypto -> Bound, or BindBroken -> Bound.
+    // No other place can execute this
     SaveConfiguration() error
 
     GetPublicKey() (pubkey []byte)

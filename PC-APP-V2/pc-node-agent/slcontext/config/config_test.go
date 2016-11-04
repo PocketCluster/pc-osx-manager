@@ -7,9 +7,10 @@ import (
     "os"
     "strings"
     "io/ioutil"
+    "github.com/stkim1/pc-node-agent/crypt"
 )
 
-func TestConfigLoadAndSave(t *testing.T) {
+func TestConfigSaveReload(t *testing.T) {
     cfg, err := DebugConfigPrepare()
     if err != nil {
         t.Errorf(err.Error())
@@ -269,4 +270,58 @@ func TestFixedNetworkInterfaceFile(t *testing.T) {
             t.Log(string(testFixedNetworkInterface(i)))
         }
     }
+}
+
+func TestConfigSaveReloadPublicMasterKey(t *testing.T) {
+    cfg, err := DebugConfigPrepare()
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+    defer DebugConfigDestory(cfg)
+
+    err = cfg.SaveMasterPublicKey(crypt.TestMasterPublicKey())
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    master, err := cfg.MasterPublicKey()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    if !reflect.DeepEqual(master, crypt.TestMasterPublicKey()) {
+        t.Error("[ERR] Master Publickey is different!")
+        return
+    }
+}
+
+
+func TestSaveLoadHostName(t *testing.T) {
+    cfg, err := DebugConfigPrepare()
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+    defer DebugConfigDestory(cfg)
+
+    var hostnamePath string = cfg.rootPath + hostname_file
+    const slaveNodeName string = "jedi-skywalker"
+
+    cfg.SlaveSection.SlaveNodeName = slaveNodeName
+    err = cfg.SaveHostname()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    hname, err := ioutil.ReadFile(hostnamePath)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if string(hname) != slaveNodeName {
+        t.Error("[ERR] incorrect hostname")
+   }
 }

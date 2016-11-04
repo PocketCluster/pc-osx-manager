@@ -46,8 +46,8 @@ const (
     slave_config_file       = "/etc/pocket/slave-conf.yaml"
 
     slave_keys_dir          = "/etc/pocket/pki"
-    slave_prvate_Key_file   = "/etc/pocket/pki/slave.pem"
     slave_public_Key_file   = "/etc/pocket/pki/slave.pub"
+    slave_prvate_Key_file   = "/etc/pocket/pki/slave.pem"
     slave_ssh_Key_file      = "/etc/pocket/pki/slave.ssh"
     master_public_Key_file  = "/etc/pocket/pki/master.pub"
 
@@ -184,14 +184,14 @@ func (cfg *PocketSlaveConfig) SaveSlaveConfig() error {
     if err = ioutil.WriteFile(configFilePath, configData, 0600); err != nil {
         return err
     }
+    return nil
+}
 
+func (cfg *PocketSlaveConfig) SaveHostname() error {
     // save host file
     hostnamePath := cfg.rootPath + hostname_file
     if len(cfg.SlaveSection.SlaveNodeName) != 0 {
-        err = ioutil.WriteFile(hostnamePath, []byte(cfg.SlaveSection.SlaveNodeName), 0644);
-        if err != nil {
-            return err
-        }
+        return ioutil.WriteFile(hostnamePath, []byte(cfg.SlaveSection.SlaveNodeName), 0644);
     }
     return nil
 }

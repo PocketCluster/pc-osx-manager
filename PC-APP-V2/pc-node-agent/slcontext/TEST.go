@@ -23,5 +23,6 @@ func DebugSlcontextPrepare() PocketSlaveContext {
 
 func DebugSlcontextDestroy() {
     singletonContext.DiscardAll()
+    config.DebugConfigDestory(singletonContext.config)
     singletonContext = nil
 }
