@@ -236,6 +236,10 @@ func (pc *PocketSlaveConfig) SaveMasterPublicKey(masterPubKey []byte) error {
     return ioutil.WriteFile(keyPath, masterPubKey, 0600)
 }
 
+func (pc *PocketSlaveConfig) ClearMasterPublicKey() error {
+    keyPath := pc.rootPath + master_public_Key_file
+    return os.Remove(keyPath)
+}
 
 // --- network interface redefinition
 func _network_iface_redefined(slaveConfig *ConfigSlaveSection) []string {

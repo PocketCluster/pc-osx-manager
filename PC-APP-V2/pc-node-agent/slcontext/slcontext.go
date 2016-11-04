@@ -17,8 +17,13 @@ type PocketSlaveContext interface {
     // Once sync, all the configuration is saved, and slave node is bounded
     // This must be executed on success from CheckCrypto -> Bound
     SyncAll() error
-    // Discard all data communicated
+    // Discard all data communicated.
+    // This should executed on failure from joining states (unbounded, inquired, keyexchange, checkcrypto)
     DiscardAll() error
+    // reload all configuration
+    ReloadConfiguration() error
+    // Save all configuration
+    SaveConfiguration() error
 
     GetPublicKey() (pubkey []byte)
     GetPrivateKey() (prvkey []byte)

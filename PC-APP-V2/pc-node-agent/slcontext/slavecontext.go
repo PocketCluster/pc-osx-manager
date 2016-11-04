@@ -37,21 +37,20 @@ var once sync.Once
 func getSingletonSlaveContext() *slaveContext {
     once.Do(func() {
         singletonContext = &slaveContext{}
-        initializeSlaveContext(singletonContext)
+        cfg := config.LoadPocketSlaveConfig()
+        initializeSlaveContext(singletonContext, cfg)
     })
     return singletonContext
 }
 
 // this one should never have an error
-func initializeSlaveContext(sc *slaveContext) {
+func initializeSlaveContext(sc *slaveContext, cfg *config.PocketSlaveConfig) {
     // load config and generate
-    sc.loadFromConfig()
+    sc.initWithConfig(cfg)
 }
 
 // --- Sync All ---
-func (sc *slaveContext) loadFromConfig() error {
-    cfg := config.LoadPocketSlaveConfig()
-
+func (sc *slaveContext) initWithConfig(cfg *config.PocketSlaveConfig) error {
     // public key
     pubkey, err := cfg.SlavePublicKey()
     if err != nil {
@@ -115,40 +114,92 @@ func (sc *slaveContext) loadFromConfig() error {
     return nil
 }
 
+// Once sync, all the configuration is saved, and slave node is bounded
+// This must be executed on success from CheckCrypto -> Bound
 func (sc *slaveContext) SyncAll() error {
     // master agent name
-    if man, err := sc.GetMasterAgent(); err != nil {
-        sc.config.MasterSection.MasterBoundAgent = man
+    man, err := sc.GetMasterAgent()
+    if err != nil {
+        return err
     }
+    sc.config.MasterSection.MasterBoundAgent = man
+
     // master ip4 address
-    if maddr, err := sc.GetMasterIP4Address(); err != nil {
-        sc.config.MasterSection.MasterIP4Address = maddr
+    maddr, err := sc.GetMasterIP4Address()
+    if err != nil {
+        return err
     }
-    // master pubkey
-    if maddr, err := sc.GetMasterPublicKey(); err != nil {
-        sc.config.SaveMasterPublicKey(maddr)
-    }
+    sc.config.MasterSection.MasterIP4Address = maddr
+
     // slaveNodeName
-    if name, err := sc.GetSlaveNodeName(); err != nil {
-        sc.config.SlaveSection.SlaveNodeName = name
+    name, err := sc.GetSlaveNodeName()
+    if err != nil {
+        return err
     }
+    sc.config.SlaveSection.SlaveNodeName = name
+    return nil
+}
+
+// Discard all data communicated.
+// This should executed on failure from joining states (unbounded, inquired, keyexchange, checkcrypto)
+func (sc *slaveContext) DiscardAll() error {
+    // discard aeskey
+    sc.DiscardAESKey()
+
+    // remove decryptor
+    sc.masterPubkey = nil
+    sc.decryptor = nil
+    // this is to remove master pub key if it exists
+    if sc.config != nil {
+        sc.config.ClearMasterPublicKey()
+    }
+
+    // remove master node
+    sc.masterAgent = ""
+    sc.masterIP4Address = ""
+
+    // remove slave node
+    sc.slaveNodeName = ""
+
+    if sc.config != nil {
+        cfg := sc.config
+        // master agent name
+        if cfg.MasterSection.MasterBoundAgent != sc.masterAgent {
+            cfg.MasterSection.MasterBoundAgent = sc.masterAgent
+        }
+        // master ip4 address
+        if cfg.MasterSection.MasterIP4Address != sc.masterIP4Address {
+            cfg.MasterSection.MasterIP4Address = sc.masterIP4Address
+        }
+        // slave node name
+        if cfg.SlaveSection.SlaveNodeName != sc.slaveNodeName {
+            cfg.SlaveSection.SlaveNodeName = sc.slaveNodeName
+        }
+    }
+    return nil
+}
+
+// reload all configuration
+func (sc *slaveContext) ReloadConfiguration() error {
+    return sc.initWithConfig(config.LoadPocketSlaveConfig())
+}
+
+// Save all configuration
+func (sc *slaveContext) SaveConfiguration() error {
+    // master pubkey
+    mpubkey, err := sc.GetMasterPublicKey()
+    if err != nil {
+        return err
+    }
+    sc.config.SaveMasterPublicKey(mpubkey)
+
     // slave network interface
-    if err := sc.config.SaveFixedNetworkInterface(); err != nil {
-        // TODO : pass error for now v0.1.4
+    err = sc.config.SaveFixedNetworkInterface()
+    if err != nil {
+        return err
     }
     // whole slave config
     return sc.config.SaveSlaveConfig()
-}
-
-func (sc *slaveContext) DiscardAll() error {
-    sc.decryptor = nil
-    sc.masterAgent = ""
-    sc.masterIP4Address = ""
-    sc.masterPubkey = nil
-    sc.aeskey = nil
-    sc.aesCryptor = nil
-    sc.slaveNodeName = ""
-    return nil
 }
 
 // decryptor/encryptor interface
@@ -183,6 +234,9 @@ func (sc *slaveContext) SetMasterPublicKey(masterPubkey []byte) error {
 }
 
 func (sc *slaveContext) GetMasterPublicKey() ([]byte, error) {
+    if sc.masterPubkey == nil {
+        return nil, fmt.Errorf("[ERR] Empty master public key")
+    }
     return sc.masterPubkey, nil
 }
 
