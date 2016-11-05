@@ -31,11 +31,6 @@ const (
 
 var SLAVE_NETIFACE_KEYS []string = []string{SLAVE_ADDRESS_KEY, SLAVE_GATEWAY_KEY, SLAVE_NETMASK_KEY, SLAVE_NAMESRV_KEY, SLAVE_BROADCS_KEY}
 
-const (
-    PAGENT_SEND_PORT    = 10060
-    PAGENT_RECV_PORT    = 10061
-)
-
 // Master name server is fixed for now (v.0.1.4)
 const SLAVE_NAMESRV_VALUE = "pc-master:53535"
 
