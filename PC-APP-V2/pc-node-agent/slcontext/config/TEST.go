@@ -4,6 +4,7 @@ import (
     "os"
     "os/user"
     "io/ioutil"
+    "fmt"
 )
 
 func DebugConfigPrepare() (*PocketSlaveConfig, error) {
@@ -36,9 +37,11 @@ iface eth0 inet dhcp`)
 
     netiface := root + "/etc/network/interfaces"
     if _, err := os.Stat(netiface); os.IsNotExist(err) {
+        fmt.Println("/etc/network/interfaces DNE. Let's make one")
         if err = ioutil.WriteFile(netiface, ifaces, 0644); err != nil {
             return nil, err
         }
+        fmt.Println("/etc/network/interfaces creation success.")
     }
     return _loadSlaveConfig(root), nil
 }
