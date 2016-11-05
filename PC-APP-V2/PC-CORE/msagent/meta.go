@@ -31,7 +31,7 @@ func UnpackedMasterMeta(message []byte) (meta *PocketMasterAgentMeta, err error)
 // --- per-state meta function
 
 func SlaveIdentityInquiryMeta(respond *PocketMasterRespond) (meta *PocketMasterAgentMeta) {
-    meta = &PocketMasterAgentMeta{
+    meta = &PocketMasterAgentMeta {
         MetaVersion         :MASTER_META_VERSION,
         DiscoveryRespond    :respond,
     }
@@ -39,7 +39,7 @@ func SlaveIdentityInquiryMeta(respond *PocketMasterRespond) (meta *PocketMasterA
 }
 
 func MasterDeclarationMeta(command *PocketMasterCommand, pubkey []byte) (meta *PocketMasterAgentMeta) {
-    meta = &PocketMasterAgentMeta{
+    meta = &PocketMasterAgentMeta {
         MetaVersion         :MASTER_META_VERSION,
         StatusCommand       :command,
         MasterPubkey        :pubkey,
@@ -84,7 +84,7 @@ func ExchangeCryptoKeyAndNameMeta(command *PocketMasterCommand, status *slagent.
     if err != nil {
         return
     }
-    meta = &PocketMasterAgentMeta{
+    meta = &PocketMasterAgentMeta {
         MetaVersion             :MASTER_META_VERSION,
         EncryptedMasterCommand  :encryptedCommand,
         EncryptedSlaveStatus    :encryptedSlaveName, //encryptedStatus,
@@ -105,7 +105,7 @@ func MasterBindReadyMeta(command *PocketMasterCommand, aescrypto crypt.AESCrypto
     if err != nil {
         return
     }
-    meta = &PocketMasterAgentMeta{
+    meta = &PocketMasterAgentMeta {
         MetaVersion             :MASTER_META_VERSION,
         EncryptedMasterCommand  :encryptedCommand,
     }
@@ -123,7 +123,7 @@ func BoundedSlaveAckMeta(command *PocketMasterCommand, aescrypto crypt.AESCrypto
     if err != nil {
         return
     }
-    meta = &PocketMasterAgentMeta{
+    meta = &PocketMasterAgentMeta {
         MetaVersion             :MASTER_META_VERSION,
         EncryptedMasterCommand  :encryptedCommand,
     }
@@ -146,7 +146,7 @@ func BrokenBindRecoverMeta(respond *PocketMasterRespond, aeskey []byte, aescrypt
     if err != nil {
         return
     }
-    meta = &PocketMasterAgentMeta{
+    meta = &PocketMasterAgentMeta {
         MetaVersion             :MASTER_META_VERSION,
         EncryptedMasterRespond  :er,
         EncryptedAESKey         :ea,

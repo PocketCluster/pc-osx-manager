@@ -1,38 +1,56 @@
 package slcontext
 
-import "github.com/stkim1/pc-node-agent/crypt"
+import (
+    "github.com/stkim1/pc-node-agent/crypt"
+    "net"
+)
+
+type NetworkInterface struct {
+    *net.Interface
+    *net.IP
+    *net.IPMask
+    *net.HardwareAddr
+    GatewayAddr             string
+}
 
 type PocketSlaveContext interface {
+    // Once sync, all the configuration is saved, and slave node is bounded
+    // This must be executed on success from CheckCrypto -> Bound, or BindBroken -> Bind
+    // No other place can execute this
+    SyncAll() error
+    // Discard all data communicated with master (not the one from slave itself such as network info)
+    // This should executed on failure from joining states (unbounded, inquired, keyexchange, checkcrypto)
+    DiscardAll() error
+    // reload all configuration
+
+    // TODO : how to test this?
+    // ReloadConfiguration() error
+
+    // This must be executed on success from CheckCrypto -> Bound, or BindBroken -> Bound.
+    // No other place can execute this
+    SaveConfiguration() error
+
     GetPublicKey() (pubkey []byte)
     GetPrivateKey() (prvkey []byte)
     crypt.RsaDecryptor
-    crypt.RsaEncryptor
 
-    SetMasterPublicKey(masterPubkey []byte) (err error)
-    GetMasterPublicKey() (pubkey []byte, err error)
-    DiscardMasterPublicKey() (err error)
-    SyncMasterPublicKey() (err error)
+    SetMasterPublicKey(masterPubkey []byte) error
+    GetMasterPublicKey() ([]byte, error)
 
-    SetAESKey(aesKey []byte) (err error)
+    SetAESKey(aesKey []byte) error
     GetAESKey() (aeskey []byte)
     DiscardAESKey()
+    AESCryptor() (crypt.AESCryptor, error)
     crypt.AESCryptor
 
-    SetMasterAgent(agentName string) (err error)
-    GetMasterAgent() (agentName string, err error)
-    SyncMasterAgent() (err error)
-    DiscardMasterAgent() (err error)
+    SetMasterAgent(agentName string) error
+    GetMasterAgent() (string, error)
 
-    SetMasterIP4Address(ip4Address string) (err error)
-    GetMasterIP4Address() (ip4Address string, err error)
-    SyncMasterIP4Address() (err error)
-    DiscardMasterIP4Address() (err error)
+    SetMasterIP4Address(ip4Address string) error
+    GetMasterIP4Address() (string, error)
 
-    SetSlaveNodeName(nodeName string) (err error)
-    GetSlaveNodeName() (nodeName string, err error)
-    SyncSlaveNodeName() (err error)
-    DiscardSlaveNodeName() (err error)
+    SetSlaveNodeName(nodeName string) error
+    GetSlaveNodeName() (string, error)
 
-    SyncAll() (err error)
-    DiscardAll() (err error)
+    PrimaryNetworkInterface() (*NetworkInterface, error)
 }

@@ -5,7 +5,7 @@ import (
     "fmt"
     "time"
 
-    "github.com/stkim1/pc-node-agent/mcast"
+    "github.com/stkim1/pc-node-agent/net/mcast"
 )
 
 func mcastTest() {

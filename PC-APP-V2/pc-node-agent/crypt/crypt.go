@@ -11,9 +11,6 @@ import (
     "io/ioutil"
     "os"
     "golang.org/x/crypto/ssh"
-    "crypto/cipher"
-    "crypto/aes"
-    "io"
 )
 
 type Signature []byte
@@ -204,6 +201,8 @@ func GenerateKeyPair(pubKeyPath, prvkeyPath, sshPubkeyPath string) error {
 
     // generate and write private key as PEM
     prvkeyFile, err := os.Create(prvkeyPath)
+    // as go defer works in LIFO, we'll chage permissions first
+    defer os.Chmod(prvkeyPath, 0600)
     defer prvkeyFile.Close()
     if err != nil {
         return err
@@ -218,6 +217,7 @@ func GenerateKeyPair(pubKeyPath, prvkeyPath, sshPubkeyPath string) error {
 
     // generate and write public key as PEM
     pubkeyFile, err := os.Create(pubKeyPath)
+    defer os.Chmod(pubKeyPath, 0600)
     defer pubkeyFile.Close()
     if err != nil {
         return err
@@ -237,43 +237,5 @@ func GenerateKeyPair(pubKeyPath, prvkeyPath, sshPubkeyPath string) error {
     pub, err := ssh.NewPublicKey(&privateKey.PublicKey); if err != nil {
         return err
     }
-    return ioutil.WriteFile(sshPubkeyPath, ssh.MarshalAuthorizedKey(pub), 0655)
-}
-
-
-//------------------------------------------------ AES CRYPTOR ---------------------------------------------------------
-
-type aesCrpytor struct {
-    cipher.Block
-}
-
-func (ac *aesCrpytor) Encrypt(plain []byte) (crypted []byte, err error) {
-    crypted = make([]byte, aes.BlockSize + len(string(plain)))
-
-    // iv : initialization vector
-    iv := crypted[:aes.BlockSize]
-    if _, err = io.ReadFull(rand.Reader, iv); err != nil {
-        return nil, err
-    }
-
-    cfb := cipher.NewCFBEncrypter(ac.Block, iv)
-    cfb.XORKeyStream(crypted[aes.BlockSize:], plain)
-    return crypted, nil
-}
-
-func (ac *aesCrpytor) Decrypt(crypted []byte) (plain []byte, err error) {
-
-    if len(crypted) < aes.BlockSize {
-        err = errors.New("[ERR] ciphertext too short")
-        return nil, err
-    }
-
-    iv := crypted[:aes.BlockSize]
-    plain = make([]byte, len(crypted[aes.BlockSize:]))
-    copy(plain, crypted[aes.BlockSize:])
-
-    cfb := cipher.NewCFBDecrypter(ac.Block, iv)
-    cfb.XORKeyStream(plain, plain)
-
-    return plain, err
+    return ioutil.WriteFile(sshPubkeyPath, ssh.MarshalAuthorizedKey(pub), 0600)
 }

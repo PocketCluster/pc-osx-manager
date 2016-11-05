@@ -2,9 +2,10 @@ package msagent
 
 import (
     "time"
-    "github.com/stkim1/pc-node-agent/slagent"
     "fmt"
-    "github.com/stkim1/pc-core/config"
+
+    "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/pc-core/context"
     "gopkg.in/vmihailenco/msgpack.v2"
 )
 
@@ -79,12 +80,12 @@ func MasterDeclarationCommand(uss *slagent.PocketSlaveStatus, timestamp time.Tim
     if !uss.IsAppropriateSlaveInfo() {
         return nil, fmt.Errorf("[ERR] Inappropriate Slave information")
     }
-    sn, err := config.MasterHostSerial()
+    sn, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
-        return nil, fmt.Errorf("[ERR] Cannot find out Master serial")
+        return nil, fmt.Errorf(err.Error())
     }
-    ia, err := config.MasterIPAddress()
-    if err != nil {
+    ia, err := context.SharedHostContext().HostPrimaryAddress()
+    if err != nil || len(ia) == 0 {
         return nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
     }
 
@@ -114,11 +115,11 @@ func ExchangeCryptoKeyAndNameCommand(uss *slagent.PocketSlaveStatus, slavename s
     if !uss.IsAppropriateSlaveInfo() {
         return nil, nil, fmt.Errorf("[ERR] Inappropriate Slave information")
     }
-    sn, err := config.MasterHostSerial()
+    sn, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
-        return nil, nil, fmt.Errorf("[ERR] Cannot find out Master serial")
+        return nil, nil, fmt.Errorf(err.Error())
     }
-    ia, err := config.MasterIPAddress()
+    ia, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil {
         return nil, nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
     }
@@ -150,17 +151,17 @@ func MasterBindReadyCommand(uss *slagent.PocketSlaveStatus, timestamp time.Time)
     if len(uss.MasterBoundAgent) == 0 {
         return nil, fmt.Errorf("[ERR] Slave doesn't know its master")
     }
-    if uss.SlaveResponse != slagent.SLAVE_BIND_READY {
+    if uss.SlaveResponse != slagent.SLAVE_CHECK_CRYPTO {
         return nil, fmt.Errorf("[ERR] Slave is not ready for binding")
     }
     if !uss.IsAppropriateSlaveInfo() {
         return nil, fmt.Errorf("[ERR] Inappropriate Slave information")
     }
-    sn, err := config.MasterHostSerial()
+    sn, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
-        return nil, fmt.Errorf("[ERR] Cannot find out Master serial")
+        return nil, fmt.Errorf(err.Error())
     }
-    ia, err := config.MasterIPAddress()
+    ia, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil {
         return nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
     }
@@ -187,11 +188,11 @@ func BoundedSlaveAckCommand(uss *slagent.PocketSlaveStatus, timestamp time.Time)
     if !uss.IsAppropriateSlaveInfo() {
         return nil, fmt.Errorf("[ERR] Inappropriate Slave information")
     }
-    sn, err := config.MasterHostSerial()
+    sn, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
-        return nil, fmt.Errorf("[ERR] Cannot find out Master serial")
+        return nil, fmt.Errorf(err.Error())
     }
-    ia, err := config.MasterIPAddress()
+    ia, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil {
         return nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
     }
