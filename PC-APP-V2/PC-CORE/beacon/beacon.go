@@ -4,7 +4,7 @@ import (
     "time"
 
     "github.com/stkim1/pc-node-agent/slagent"
-    "github.com/stkim1/pc-node-agent/crypt"
+    "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/model"
 )
 
@@ -57,8 +57,8 @@ type MasterBeacon interface {
     TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error
 
     AESKey() ([]byte, error)
-    AESCryptor() (crypt.AESCryptor, error)
-    RSAEncryptor() (crypt.RsaEncryptor, error)
+    AESCryptor() (pcrypto.AESCryptor, error)
+    RSAEncryptor() (pcrypto.RsaEncryptor, error)
 
     SlaveNode() *model.SlaveNode
 }

@@ -1,4 +1,4 @@
-package crypt
+package pcrypto
 
 const TestKeySignature string = "K9crXmaFVpvoXAEB/QUguOENDIJ2AhWTgbj8JAPAHbatQqaes19ycSaZgGCrg5NhGvgP13Wf/zR0ny6PR0V8FTUjzxaK2fGDElythqwW7QISyRPKFayRSNjGOC9/d74d31JB2/05Tuk4hksb5u90bc1y+t5RYMArDn8aJjx2GA8="
 

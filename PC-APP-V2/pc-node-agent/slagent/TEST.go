@@ -3,7 +3,7 @@ package slagent
 import (
     "time"
 
-    "github.com/stkim1/pc-node-agent/crypt"
+    "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/context"
 )
 
@@ -44,7 +44,7 @@ func TestSlaveKeyExchangeStatus(masterAgentName string, pubKey []byte, begin tim
     return ma, begin, err
 }
 
-func TestSlaveCheckCryptoStatus(masterAgentName, slaveAgentName string, aesCryptor crypt.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
+func TestSlaveCheckCryptoStatus(masterAgentName, slaveAgentName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
     sa, err := CheckSlaveCryptoStatus(masterAgentName, slaveAgentName, begin)
     if err != nil {
         return nil, begin, err
@@ -56,7 +56,7 @@ func TestSlaveCheckCryptoStatus(masterAgentName, slaveAgentName string, aesCrypt
     return ma, begin, nil
 }
 
-func TestSlaveBoundedStatus(slaveNodeName string, aesCryptor crypt.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
+func TestSlaveBoundedStatus(slaveNodeName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
     masterAgentName, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
         return nil, begin, err

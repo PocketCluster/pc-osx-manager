@@ -2,9 +2,10 @@ package slcontext
 
 import (
     "testing"
-    "github.com/davecgh/go-spew/spew"
-    "github.com/stkim1/pc-node-agent/crypt"
     "reflect"
+
+    "github.com/stkim1/pcrypto"
+    "github.com/davecgh/go-spew/spew"
     "github.com/stkim1/pc-node-agent/slcontext/config"
 )
 
@@ -38,7 +39,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
     const MASTER_IP4_ADDR = "192.168.1.4"
     const SLAVE_NODE_NAME = "pc-node1"
 
-    err := SharedSlaveContext().SetMasterPublicKey(crypt.TestMasterPublicKey());
+    err := SharedSlaveContext().SetMasterPublicKey(pcrypto.TestMasterPublicKey());
     if err != nil {
         t.Error(err.Error())
         return
@@ -81,7 +82,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if !reflect.DeepEqual(mpk, crypt.TestMasterPublicKey()) {
+    if !reflect.DeepEqual(mpk, pcrypto.TestMasterPublicKey()) {
         t.Error("[ERR] Master Public key is not properly loaded")
         return
     }
@@ -152,7 +153,7 @@ func TestDiscardSaveLoadSlaveContext(t *testing.T) {
     const MASTER_IP4_ADDR = "192.168.1.4"
     const SLAVE_NODE_NAME = "pc-node1"
 
-    err := SharedSlaveContext().SetMasterPublicKey(crypt.TestMasterPublicKey());
+    err := SharedSlaveContext().SetMasterPublicKey(pcrypto.TestMasterPublicKey());
     if err != nil {
         t.Error(err.Error())
         return

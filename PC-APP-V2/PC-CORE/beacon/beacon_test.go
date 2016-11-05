@@ -8,7 +8,7 @@ import (
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-core/model"
-    "github.com/stkim1/pc-node-agent/crypt"
+    "github.com/stkim1/pcrypto"
 )
 
 var masterAgentName string
@@ -77,7 +77,7 @@ func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
 
     // --- slave tries to key exchange
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, crypt.TestSlavePublicKey(), slaveTS)
+    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, pcrypto.TestSlavePublicKey(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -336,7 +336,7 @@ func Test_Inquired_KeyExchange_Fail(t *testing.T) {
 
     // --- TEST
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveKeyExchangeStatus("MASTER-YODA", crypt.TestSlavePublicKey(), slaveTS)
+    sa, end, err = slagent.TestSlaveKeyExchangeStatus("MASTER-YODA", pcrypto.TestSlavePublicKey(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -409,7 +409,7 @@ func Test_Inquired_KeyExchange_Fail(t *testing.T) {
         }
         slaveTS = masterTS.Add(time.Second)
         t.Logf("[INFO] slaveTS - MasterBeacon.lastSuccessTimestmap : " + slaveTS.Sub(mb.(*masterBeacon).lastSuccess).String())
-        sa, end, err = slagent.TestSlaveKeyExchangeStatus("MASTER-YODA", crypt.TestSlavePublicKey(), slaveTS)
+        sa, end, err = slagent.TestSlaveKeyExchangeStatus("MASTER-YODA", pcrypto.TestSlavePublicKey(), slaveTS)
         if err != nil {
             t.Error(err.Error())
             return
@@ -461,7 +461,7 @@ func Test_KeyExchange_CryptoCheck_Fail(t *testing.T) {
         return
     }
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, crypt.TestSlavePublicKey(), slaveTS)
+    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, pcrypto.TestSlavePublicKey(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -534,7 +534,7 @@ func Test_KeyExchange_CryptoCheck_Fail(t *testing.T) {
         return
     }
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, crypt.TestSlavePublicKey(), slaveTS)
+    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, pcrypto.TestSlavePublicKey(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -605,7 +605,7 @@ func Test_KeyExchange_Bounded_Fail(t *testing.T) {
         return
     }
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, crypt.TestSlavePublicKey(), slaveTS)
+    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, pcrypto.TestSlavePublicKey(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -688,7 +688,7 @@ func Test_KeyExchange_Bounded_Fail(t *testing.T) {
         return
     }
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, crypt.TestSlavePublicKey(), slaveTS)
+    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, pcrypto.TestSlavePublicKey(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return

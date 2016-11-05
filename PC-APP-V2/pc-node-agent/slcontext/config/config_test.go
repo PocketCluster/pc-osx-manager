@@ -1,13 +1,14 @@
 package config
 
 import (
-    "testing"
-    "github.com/davecgh/go-spew/spew"
-    "reflect"
     "os"
     "strings"
+    "testing"
+    "reflect"
     "io/ioutil"
-    "github.com/stkim1/pc-node-agent/crypt"
+
+    "github.com/davecgh/go-spew/spew"
+    "github.com/stkim1/pcrypto"
 )
 
 func TestConfigSaveReload(t *testing.T) {
@@ -280,7 +281,7 @@ func TestConfigSaveReloadPublicMasterKey(t *testing.T) {
     }
     defer DebugConfigDestory(cfg)
 
-    err = cfg.SaveMasterPublicKey(crypt.TestMasterPublicKey())
+    err = cfg.SaveMasterPublicKey(pcrypto.TestMasterPublicKey())
     if err != nil {
         t.Error(err.Error())
         return
@@ -292,7 +293,7 @@ func TestConfigSaveReloadPublicMasterKey(t *testing.T) {
         return
     }
 
-    if !reflect.DeepEqual(master, crypt.TestMasterPublicKey()) {
+    if !reflect.DeepEqual(master, pcrypto.TestMasterPublicKey()) {
         t.Error("[ERR] Master Publickey is different!")
         return
     }

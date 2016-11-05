@@ -4,7 +4,7 @@ import (
     "time"
 
     "github.com/stkim1/pc-node-agent/slagent"
-    "github.com/stkim1/pc-node-agent/crypt"
+    "github.com/stkim1/pcrypto"
 )
 
 // Let's Suppose you've received an unbounded inquery from a node over multicast net.
@@ -54,7 +54,7 @@ func TestMasterAgentDeclarationCommand(masterPubKey []byte, begin time.Time) (*P
     return MasterDeclarationMeta(cmd, masterPubKey), end, nil
 }
 
-func TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName string, slavePubKey []byte, aesKey []byte, aesCryptor crypt.AESCryptor, rsaEncryptor crypt.RsaEncryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+func TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName string, slavePubKey []byte, aesKey []byte, aesCryptor pcrypto.AESCryptor, rsaEncryptor pcrypto.RsaEncryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
     msa, end, err := slagent.TestSlaveKeyExchangeStatus(masterAgentName, slavePubKey, begin)
     if err != nil {
         return nil, begin, err
@@ -82,7 +82,7 @@ func TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName string, slavePu
     return meta, begin, nil
 }
 
-func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, aesCryptor crypt.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
     msa, end, err := slagent.TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, aesCryptor, begin)
     if err != nil {
         return nil, begin, err
@@ -121,7 +121,7 @@ func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, aesCryp
     return meta, end, nil
 }
 
-func TestMasterBoundedStatusCommand(slaveNodeName string, aesCryptor crypt.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+func TestMasterBoundedStatusCommand(slaveNodeName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
     msa, end, err := slagent.TestSlaveBoundedStatus(slaveNodeName, aesCryptor, begin)
     if err != nil {
         return nil, begin, err
@@ -159,7 +159,7 @@ func TestMasterBoundedStatusCommand(slaveNodeName string, aesCryptor crypt.AESCr
     return meta, end, nil
 }
 
-func TestMasterBrokenBindRecoveryCommand(masterBoundAgentName string, aesKey []byte, aesCryptor crypt.AESCryptor, rsaEncryptor crypt.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
+func TestMasterBrokenBindRecoveryCommand(masterBoundAgentName string, aesKey []byte, aesCryptor pcrypto.AESCryptor, rsaEncryptor pcrypto.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
     sam, err := slagent.TestSlaveBindBroken(masterBoundAgentName)
     if err != nil {
         return

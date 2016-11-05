@@ -1,9 +1,10 @@
 package slagent
 
 import (
-    "github.com/stkim1/pc-node-agent/crypt"
-    "gopkg.in/vmihailenco/msgpack.v2"
     "fmt"
+
+    "gopkg.in/vmihailenco/msgpack.v2"
+    "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-node-agent/slcontext"
 )
 
@@ -68,7 +69,7 @@ func KeyExchangeMeta(agent *PocketSlaveStatus, pubkey []byte) (*PocketSlaveAgent
 }
 
 
-func CheckSlaveCryptoMeta(agent *PocketSlaveStatus, aescrypto crypt.AESCryptor) (*PocketSlaveAgentMeta, error) {
+func CheckSlaveCryptoMeta(agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor) (*PocketSlaveAgentMeta, error) {
     mp, err := PackedSlaveStatus(agent)
     if err != nil {
         return nil, err
@@ -88,7 +89,7 @@ func CheckSlaveCryptoMeta(agent *PocketSlaveStatus, aescrypto crypt.AESCryptor) 
     }, nil
 }
 
-func SlaveBoundedMeta(agent *PocketSlaveStatus, aescrypto crypt.AESCryptor) (*PocketSlaveAgentMeta, error) {
+func SlaveBoundedMeta(agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor) (*PocketSlaveAgentMeta, error) {
     mp, err := PackedSlaveStatus(agent)
     if err != nil {
         return nil, err

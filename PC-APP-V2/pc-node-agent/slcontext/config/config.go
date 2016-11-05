@@ -7,7 +7,7 @@ import (
     "strings"
 
     "gopkg.in/yaml.v2"
-    "github.com/stkim1/pc-node-agent/crypt"
+    "github.com/stkim1/pcrypto"
 )
 
 // ------ CONFIG VERSION -------
@@ -140,7 +140,7 @@ func _loadSlaveConfig(rootPath string) (*PocketSlaveConfig) {
         shouldGenerateKeys = true
     }
     if shouldGenerateKeys {
-        crypt.GenerateKeyPair(pubKeyPath, prvKeyPath, sshKeyPath)
+        pcrypto.GenerateKeyPair(pubKeyPath, prvKeyPath, sshKeyPath)
     }
 
     // check if config file exists in path.

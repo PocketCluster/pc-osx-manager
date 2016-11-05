@@ -5,7 +5,7 @@ import (
     "testing"
     "runtime"
 
-    "github.com/stkim1/pc-node-agent/crypt"
+    "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-node-agent/slcontext"
 )
@@ -204,7 +204,7 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
 
     // test comparison
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
-    ma, _, err := TestSlaveKeyExchangeStatus(masterAgentName, crypt.TestSlavePublicKey(), initSendTimestmap)
+    ma, _, err := TestSlaveKeyExchangeStatus(masterAgentName, pcrypto.TestSlavePublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -289,7 +289,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
     defer tearDown()
 
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
-    ma, _, err := TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, crypt.TestAESCryptor, initSendTimestmap)
+    ma, _, err := TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -303,7 +303,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave status data %s\n", len(ma.EncryptedStatus))
         return
     }
-    esd, err := crypt.TestAESCryptor.Decrypt(ma.EncryptedStatus)
+    esd, err := pcrypto.TestAESCryptor.Decrypt(ma.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return
@@ -372,7 +372,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         return
     }
 
-    esd, err = crypt.TestAESCryptor.Decrypt(up.EncryptedStatus)
+    esd, err = pcrypto.TestAESCryptor.Decrypt(up.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return
@@ -424,7 +424,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
     defer tearDown()
 
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
-    ma, _, err := TestSlaveBoundedStatus(slaveNodeName, crypt.TestAESCryptor, initSendTimestmap)
+    ma, _, err := TestSlaveBoundedStatus(slaveNodeName, pcrypto.TestAESCryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -437,7 +437,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave status data %s\n", len(ma.EncryptedStatus))
         return
     }
-    esd, err := crypt.TestAESCryptor.Decrypt(ma.EncryptedStatus)
+    esd, err := pcrypto.TestAESCryptor.Decrypt(ma.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return
@@ -506,7 +506,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         return
     }
 
-    esd, err = crypt.TestAESCryptor.Decrypt(up.EncryptedStatus)
+    esd, err = pcrypto.TestAESCryptor.Decrypt(up.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return

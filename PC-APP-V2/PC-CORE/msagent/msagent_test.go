@@ -8,7 +8,7 @@ import (
 
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-node-agent/slcontext"
-    "github.com/stkim1/pc-node-agent/crypt"
+    "github.com/stkim1/pcrypto"
 )
 
 var masterAgentName string
@@ -116,7 +116,7 @@ func TestMasterDeclarationMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    meta, end, err := TestMasterAgentDeclarationCommand(crypt.TestMasterPublicKey(), initTime)
+    meta, end, err := TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -194,7 +194,7 @@ func TestExecKeyExchangeMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, crypt.TestSlavePublicKey(), crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor, initTime)
+    meta, _, err := TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -245,7 +245,7 @@ func TestSendCryptoCheckMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, crypt.TestAESCryptor, initTime)
+    meta, _, err := TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -278,7 +278,7 @@ func TestBoundedStatusMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterBoundedStatusCommand(slaveNodeName, crypt.TestAESCryptor, initTime)
+    meta, _, err := TestMasterBoundedStatusCommand(slaveNodeName, pcrypto.TestAESCryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return
