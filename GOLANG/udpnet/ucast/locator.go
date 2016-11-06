@@ -8,17 +8,9 @@ import (
     "time"
 )
 
-const (
-    PAGENT_SEND_PORT    = 10060
-    PAGENT_RECV_PORT    = 10061
-)
+const LOCATOR_RECVD_BUFFER_SIZE int = 16384
 
-type ConnParam struct {
-    RecvMessage         chan <- []byte       // Message to recv
-    Timeout             time.Duration        // Lookup timeout, default 1 second
-}
-
-type channel struct {
+type locatorChannel struct {
     ipv4Conn     *net.UDPConn
 
     closed       bool
@@ -26,13 +18,13 @@ type channel struct {
     closeLock    sync.Mutex
 }
 
-func NewPocketLocatorChannel() (*channel, error) {
+func NewPocketLocatorChannel() (*locatorChannel, error) {
     // Create a IPv4 listener
     urecv4, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: PAGENT_RECV_PORT})
     if err != nil {
         return nil, fmt.Errorf("[ERR] failed to bind to any unicast udp port : " + err.Error())
     }
-    c := &channel{
+    c := &locatorChannel{
         ipv4Conn    : urecv4,
         closedCh    : make(chan struct{}),
     }
@@ -40,18 +32,15 @@ func NewPocketLocatorChannel() (*channel, error) {
 }
 
 // query is used to perform a lookup and stream results
-func (c *channel) Connect(params *ConnParam) error {
+func (c *locatorChannel) Connect(param *ConnParam) error {
 
     // Start listening for response packets
-    msgCh := make(chan []byte, 32)
-    go c.recv(c.ipv4Conn, params.RecvMessage)
+    go c.recv(c.ipv4Conn, param.RecvMessage)
 
     // Listen until we reach the timeout
-    finish := time.After(params.Timeout)
+    finish := time.After(param.Timeout)
     for {
         select {
-        case resp := <-msgCh:
-            params.RecvMessage <- resp
         case <-finish:
             return nil
         }
@@ -59,7 +48,7 @@ func (c *channel) Connect(params *ConnParam) error {
 }
 
 // Close is used to cleanup the client
-func (c *channel) Close() error {
+func (c *locatorChannel) Close() error {
     c.closeLock.Lock()
     defer c.closeLock.Unlock()
 
@@ -77,7 +66,7 @@ func (c *channel) Close() error {
     return nil
 }
 
-func (c *channel) Send(targetHost string, q []byte) error {
+func (c *locatorChannel) Send(targetHost string, q []byte) error {
     targetAddr := &net.UDPAddr{
         IP:   net.ParseIP(targetHost),
         Port: PAGENT_SEND_PORT,
@@ -90,11 +79,11 @@ func (c *channel) Send(targetHost string, q []byte) error {
 }
 
 // recv is used to receive until we get a shutdown
-func (c *channel) recv(l *net.UDPConn, msgCh chan <- []byte) {
+func (c *locatorChannel) recv(l *net.UDPConn, msgChan chan <- []byte) {
     if l == nil {
         return
     }
-    buf := make([]byte, 65536)
+    buf := make([]byte, LOCATOR_RECVD_BUFFER_SIZE)
     for !c.closed {
         n, err := l.Read(buf)
         if err != nil {
@@ -105,7 +94,7 @@ func (c *channel) recv(l *net.UDPConn, msgCh chan <- []byte) {
         log.Printf("%d bytes have been received %v", n, buf[:n])
         msg := buf[:n]
         select {
-        case msgCh <- msg:
+        case msgChan <- msg:
         case <-c.closedCh:
             return
         }
