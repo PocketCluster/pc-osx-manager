@@ -14,7 +14,7 @@ func ucastBeaonTest() {
         return
     }
     for entry := range channel.ChRead {
-        fmt.Printf("Got new entry: %s\n", string(entry.Pack))
+        fmt.Printf("Got new entry: %s\n", string(entry.Message))
     }
 }
 

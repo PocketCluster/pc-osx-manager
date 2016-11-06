@@ -69,8 +69,8 @@ func (bc *BeaconChannel) reader() {
 
     for !bc.closed {
         pack := &ChanPkg{}
-        pack.Pack = make([]byte, PC_MAX_UDP_BUF_SIZE)
-        count, pack.Addr, err = bc.conn.ReadFromUDP(pack.Pack)
+        pack.Message = make([]byte, PC_MAX_UDP_BUF_SIZE)
+        count, pack.Address, err = bc.conn.ReadFromUDP(pack.Message)
         if err != nil {
             if bc.log != nil {
                 bc.log.Printf("[ERR] beacon channel : Failed to read packet: %v", err)
@@ -81,7 +81,7 @@ func (bc *BeaconChannel) reader() {
         if bc.log != nil {
             bc.log.Printf("[INFO] %d bytes have been received", count)
         }
-        pack.Pack = pack.Pack[:count]
+        pack.Message = pack.Message[:count]
         select {
             case bc.ChRead <- pack:
             case <-bc.closedCh:
@@ -92,7 +92,7 @@ func (bc *BeaconChannel) reader() {
 
 func (bc *BeaconChannel) writer() {
     for v := range bc.chWrite {
-        _, e := bc.conn.WriteToUDP(v.Pack, v.Addr)
+        _, e := bc.conn.WriteToUDP(v.Message, v.Address)
         if e != nil && bc.log != nil {
             bc.log.Println(e)
         }
@@ -108,8 +108,8 @@ func (bc *BeaconChannel) Send(targetHost string, buf []byte) error {
         Port    : PAGENT_RECV_PORT,
     }
     bc.chWrite <- &ChanPkg{
-        Pack    : buf,
-        Addr    : targetAddr,
+        Message    : buf,
+        Address    : targetAddr,
     }
 
     // TODO : find ways to remove this. We'll wait artificially for now (v0.1.4)

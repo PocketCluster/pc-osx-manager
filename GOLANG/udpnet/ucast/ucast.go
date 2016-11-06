@@ -1,7 +1,6 @@
 package ucast
 
 import (
-    "time"
     "net"
 )
 
@@ -23,14 +22,7 @@ const PC_BEACON_CHAN_CAP = 254
 // locator channel capacitor doesn't need to be big. just big enough to hold communication with beacon
 const PC_LOCATOR_CHAN_CAP = 4
 
-type ConnParam struct {
-    RecvMessage         chan <- []byte       // Message to recv
-    Timeout             time.Duration        // Lookup timeout, default 1 second
+type ChanPkg struct {
+    Message     []byte
+    Address     *net.UDPAddr
 }
-
-type (
-    ChanPkg struct {
-        Pack    []byte
-        Addr    *net.UDPAddr
-    }
-)
