@@ -3,12 +3,11 @@ package main
 import (
     "log"
     "fmt"
-    "time"
-
     "github.com/stkim1/udpnet/ucast"
 )
 
-func ucastBeaconTest() {
+/*
+func ucastOldBeaconTest() {
     channel, err := ucast.NewPocketBeaconChannel()
     if err != nil {
         log.Fatal(err.Error())
@@ -33,7 +32,31 @@ func ucastBeaconTest() {
         //time.Sleep(time.Second)
     }
 }
+*/
+
+func ucastNewBeaonTest() {
+    channel, err := ucast.NewPocketBeaconChannel(nil)
+    if err != nil {
+        log.Fatal(err.Error())
+        return
+    }
+
+    for entry := range channel.ChRead {
+        fmt.Printf("Got new entry: %s\n", string(entry.Pack))
+    }
+
+/*
+    for {
+        select {
+        case <- channel.ChRead:
+            for entry := range channel.ChRead {
+                fmt.Printf("Got new entry: %s\n", string(entry.Pack))
+            }
+        }
+    }
+*/
+}
 
 func main() {
-    ucastBeaconTest()
+    ucastNewBeaonTest()
 }

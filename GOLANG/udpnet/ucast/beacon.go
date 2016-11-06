@@ -2,98 +2,115 @@ package ucast
 
 import (
     "net"
+    "log"
     "sync"
     "fmt"
-    "log"
-    "time"
 )
 
-type beaconChannel struct {
-    ipv4Conn     *net.UDPConn
+type (
+    BeaconChannel struct {
+        closed       bool
+        closedCh     chan struct{}
+        closeLock    sync.Mutex
+        log          *log.Logger
 
-    closed       bool
-    closedCh     chan struct{}
-    closeLock    sync.Mutex
-}
+        conn         *net.UDPConn
+        ChRead       chan *ChanPkg
+        ChWrite      chan *ChanPkg
+    }
+)
 
-func NewPocketBeaconChannel() (*beaconChannel, error) {
-    // Create a IPv4 listener
-    urecv4, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: PAGENT_SEND_PORT})
+// New constructor of a new server
+func NewPocketBeaconChannel(log *log.Logger) (*BeaconChannel, error) {
+    conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: PAGENT_SEND_PORT})
     if err != nil {
-        return nil, fmt.Errorf("[ERR] failed to bind to any unicast udp port : " + err.Error())
+        return nil, err
     }
-    c := &beaconChannel{
-        ipv4Conn    : urecv4,
-        closedCh    : make(chan struct{}),
+    beacon := &BeaconChannel {
+        conn       : conn,
+        ChRead     : make(chan *ChanPkg, PC_MAX_COMM_CHAN_CAP),
+        ChWrite    : make(chan *ChanPkg, PC_MAX_COMM_CHAN_CAP),
+        log        : log,
     }
-    return c, nil
+    go beacon.reader()
+    go beacon.writer()
+    return beacon, nil
 }
 
-// query is used to perform a lookup and stream results
-func (c *beaconChannel) Connect(param *ConnParam) error {
-
-    // Start listening for response packets
-    go c.recv(c.ipv4Conn, param.RecvMessage)
-
-    // Listen until we reach the timeout
-    finish := time.After(param.Timeout)
-    for {
-        select {
-        case <-finish:
-            return nil
-        }
-    }
-}
 
 // Close is used to cleanup the client
-func (c *beaconChannel) Close() error {
+func (c *BeaconChannel) Close() error {
     c.closeLock.Lock()
     defer c.closeLock.Unlock()
+
+    if c.log != nil {
+        log.Printf("[INFO] beacon channel closing : %v", *c)
+    }
 
     if c.closed {
         return nil
     }
     c.closed = true
 
-    log.Printf("[INFO] beacon channel closing : %v", *c)
     close(c.closedCh)
+    close(c.ChRead)
+    close(c.ChWrite)
 
-    if c.ipv4Conn != nil {
-        c.ipv4Conn.Close()
+    if c.conn != nil {
+        c.conn.Close()
     }
     return nil
 }
 
-func (c *beaconChannel) Send(targetHost string, buf []byte) error {
+func (c *BeaconChannel) reader() {
+    var (
+        err error
+        count int
+    )
+
+    for !c.closed {
+        pack := &ChanPkg{}
+        pack.Pack = make([]byte, PC_MAX_UDP_BUF_SIZE)
+        count, pack.Addr, err = c.conn.ReadFromUDP(pack.Pack)
+        if err != nil {
+            if c.log != nil {
+                c.log.Printf("[ERR] beacon channel : Failed to read packet: %v", err)
+            }
+            continue
+        }
+
+        if c.log != nil {
+            c.log.Printf("[INFO] %d bytes have been received", count)
+        }
+        pack.Pack = pack.Pack[:count]
+        select {
+            case c.ChRead <- pack:
+            case <-c.closedCh:
+                return
+        }
+    }
+}
+
+func (t *BeaconChannel) writer() {
+    for v := range t.ChWrite {
+        _, e := t.conn.WriteToUDP(v.Pack, v.Addr)
+        if e != nil && t.log != nil {
+            t.log.Println(e)
+        }
+    }
+}
+
+func (c *BeaconChannel) Send(targetHost string, buf []byte) error {
+    if len(targetHost) == 0 || len(buf) == 0 {
+        return fmt.Errorf("[ERR] Cannot send null data to null host")
+    }
     targetAddr := &net.UDPAddr{
         IP      : net.ParseIP(targetHost),
         Port    : PAGENT_RECV_PORT,
     }
-    if c.ipv4Conn != nil {
-        c.ipv4Conn.WriteToUDP(buf, targetAddr)
+    c.ChWrite <- &ChanPkg{
+        Pack    : buf,
+        Addr    : targetAddr,
     }
     return nil
-}
-
-// recv is used to receive until we get a shutdown
-func (c *beaconChannel) recv(l *net.UDPConn, msgCh chan <- []byte) {
-    if l == nil {
-        return
-    }
-    buf := make([]byte, PC_MAX_UDP_BUF_SIZE)
-    for !c.closed {
-        n, err := l.Read(buf)
-        if err != nil {
-            log.Printf("[ERR] beacon channel : Failed to read packet: %v", err)
-            continue
-        }
-
-        log.Printf("[INFO] %d bytes have been received %v", n, buf[:n])
-        msg := buf[:n]
-        select {
-        case msgCh <- msg:
-        case <-c.closedCh:
-            return
-        }
-    }
 }
