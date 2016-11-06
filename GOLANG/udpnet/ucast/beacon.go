@@ -5,20 +5,19 @@ import (
     "log"
     "sync"
     "fmt"
+    "time"
 )
 
-type (
-    BeaconChannel struct {
-        closed       bool
-        closedCh     chan struct{}
-        closeLock    sync.Mutex
-        log          *log.Logger
+type BeaconChannel struct {
+    closed       bool
+    closedCh     chan struct{}
+    closeLock    sync.Mutex
+    log          *log.Logger
 
-        conn         *net.UDPConn
-        ChRead       chan *ChanPkg
-        ChWrite      chan *ChanPkg
-    }
-)
+    conn         *net.UDPConn
+    ChRead       chan *ChanPkg
+    chWrite      chan *ChanPkg
+}
 
 // New constructor of a new server
 func NewPocketBeaconChannel(log *log.Logger) (*BeaconChannel, error) {
@@ -28,8 +27,9 @@ func NewPocketBeaconChannel(log *log.Logger) (*BeaconChannel, error) {
     }
     beacon := &BeaconChannel {
         conn       : conn,
-        ChRead     : make(chan *ChanPkg, PC_MAX_COMM_CHAN_CAP),
-        ChWrite    : make(chan *ChanPkg, PC_MAX_COMM_CHAN_CAP),
+        ChRead     : make(chan *ChanPkg, PC_BEACON_CHAN_CAP),
+        chWrite    : make(chan *ChanPkg, PC_BEACON_CHAN_CAP),
+        closedCh   : make(chan struct{}),
         log        : log,
     }
     go beacon.reader()
@@ -37,70 +37,69 @@ func NewPocketBeaconChannel(log *log.Logger) (*BeaconChannel, error) {
     return beacon, nil
 }
 
-
 // Close is used to cleanup the client
-func (c *BeaconChannel) Close() error {
-    c.closeLock.Lock()
-    defer c.closeLock.Unlock()
+func (bc *BeaconChannel) Close() error {
+    bc.closeLock.Lock()
+    defer bc.closeLock.Unlock()
 
-    if c.log != nil {
-        log.Printf("[INFO] beacon channel closing : %v", *c)
+    if bc.log != nil {
+        log.Printf("[INFO] beacon channel closing : %v", *bc)
     }
 
-    if c.closed {
+    if bc.closed {
         return nil
     }
-    c.closed = true
+    bc.closed = true
 
-    close(c.closedCh)
-    close(c.ChRead)
-    close(c.ChWrite)
+    close(bc.closedCh)
+    close(bc.ChRead)
+    close(bc.chWrite)
 
-    if c.conn != nil {
-        c.conn.Close()
+    if bc.conn != nil {
+        bc.conn.Close()
     }
     return nil
 }
 
-func (c *BeaconChannel) reader() {
+func (bc *BeaconChannel) reader() {
     var (
         err error
         count int
     )
 
-    for !c.closed {
+    for !bc.closed {
         pack := &ChanPkg{}
         pack.Pack = make([]byte, PC_MAX_UDP_BUF_SIZE)
-        count, pack.Addr, err = c.conn.ReadFromUDP(pack.Pack)
+        count, pack.Addr, err = bc.conn.ReadFromUDP(pack.Pack)
         if err != nil {
-            if c.log != nil {
-                c.log.Printf("[ERR] beacon channel : Failed to read packet: %v", err)
+            if bc.log != nil {
+                bc.log.Printf("[ERR] beacon channel : Failed to read packet: %v", err)
             }
             continue
         }
 
-        if c.log != nil {
-            c.log.Printf("[INFO] %d bytes have been received", count)
+        if bc.log != nil {
+            bc.log.Printf("[INFO] %d bytes have been received", count)
         }
         pack.Pack = pack.Pack[:count]
         select {
-            case c.ChRead <- pack:
-            case <-c.closedCh:
+            case bc.ChRead <- pack:
+            case <-bc.closedCh:
                 return
         }
     }
 }
 
-func (t *BeaconChannel) writer() {
-    for v := range t.ChWrite {
-        _, e := t.conn.WriteToUDP(v.Pack, v.Addr)
-        if e != nil && t.log != nil {
-            t.log.Println(e)
+func (bc *BeaconChannel) writer() {
+    for v := range bc.chWrite {
+        _, e := bc.conn.WriteToUDP(v.Pack, v.Addr)
+        if e != nil && bc.log != nil {
+            bc.log.Println(e)
         }
     }
 }
 
-func (c *BeaconChannel) Send(targetHost string, buf []byte) error {
+func (bc *BeaconChannel) Send(targetHost string, buf []byte) error {
     if len(targetHost) == 0 || len(buf) == 0 {
         return fmt.Errorf("[ERR] Cannot send null data to null host")
     }
@@ -108,9 +107,12 @@ func (c *BeaconChannel) Send(targetHost string, buf []byte) error {
         IP      : net.ParseIP(targetHost),
         Port    : PAGENT_RECV_PORT,
     }
-    c.ChWrite <- &ChanPkg{
+    bc.chWrite <- &ChanPkg{
         Pack    : buf,
         Addr    : targetAddr,
     }
+
+    // TODO : find ways to remove this. We'll wait artificially for now (v0.1.4)
+    time.Sleep(time.Microsecond * 100)
     return nil
 }

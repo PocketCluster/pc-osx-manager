@@ -18,7 +18,10 @@ const PC_SAFE_UDP_PKT_SIZE = 508
 const PC_MAX_UDP_BUF_SIZE = 65507
 
 // total 256 IP class C client can exists. Since we're to remove router, broadcast, and beacon itself, 253 is the number
-const PC_MAX_COMM_CHAN_CAP = 254
+const PC_BEACON_CHAN_CAP = 254
+
+// locator channel capacitor doesn't need to be big. just big enough to hold communication with beacon
+const PC_LOCATOR_CHAN_CAP = 4
 
 type ConnParam struct {
     RecvMessage         chan <- []byte       // Message to recv
