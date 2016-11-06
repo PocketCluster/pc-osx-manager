@@ -64,8 +64,8 @@ func NewClient() (*client, error) {
         return nil, fmt.Errorf("failed to bind to any multicast udp port : " + err.Error())
     }
     c := &client{
-        ipv4MulticastConn: mconn4,
         ipv4UnicastConn:   uconn4,
+        ipv4MulticastConn: mconn4,
         closedCh:          make(chan struct{}),
     }
     return c, nil
