@@ -16,7 +16,7 @@ func ucastLocatorTest() {
     }
 
     log.Print("[INFO] let's try to listen")
-    recvMsg := make(chan []byte, ucast.BEACON_RECVD_BUFFER_SIZE)
+    recvMsg := make(chan []byte, ucast.PC_MAX_UDP_BUF_SIZE)
     err = channel.Connect(&ucast.ConnParam{
         RecvMessage : recvMsg,
         Timeout     : time.Second,
@@ -27,7 +27,7 @@ func ucastLocatorTest() {
 
     for i := 0; i < 3; i++ {
         log.Print("[INFO] send HELLO! to 192.168.1.152")
-        channel.Send("192.168.1.152", []byte("HELLO!"))
+        channel.Send("192.168.1.220", []byte("HELLO!"))
     }
     for {
         for entry := range recvMsg {

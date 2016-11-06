@@ -8,8 +8,6 @@ import (
     "time"
 )
 
-const LOCATOR_RECVD_BUFFER_SIZE int = 16384
-
 type locatorChannel struct {
     ipv4Conn     *net.UDPConn
 
@@ -83,7 +81,7 @@ func (c *locatorChannel) recv(l *net.UDPConn, msgChan chan <- []byte) {
     if l == nil {
         return
     }
-    buf := make([]byte, LOCATOR_RECVD_BUFFER_SIZE)
+    buf := make([]byte, PC_MAX_UDP_BUF_SIZE)
     for !c.closed {
         n, err := l.Read(buf)
         if err != nil {

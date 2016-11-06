@@ -72,7 +72,7 @@ func TestUnboundedBroadcastMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if 512 <= len(mp) {
+    if 508 <= len(mp) {
         t.Errorf("[ERR] Package message length does not match an expectation [%d]", len(mp))
         return
     }
@@ -156,7 +156,7 @@ func TestInquiredMetaAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if 512 <= len(mp) {
+    if 508 <= len(mp) {
         t.Errorf("[ERR] Package message length [%d] exceeds an expectation", len(mp))
         return
     }
@@ -351,7 +351,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if 512 <= len(mp) {
+    if 508 <= len(mp) {
         t.Errorf("[ERR] Package message length [%d] exceeds an expectation", len(mp))
         return
     }
@@ -485,7 +485,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if 512 <= len(mp) {
+    if 508 <= len(mp) {
         t.Errorf("[ERR] Package message length [%d] exceeds an expectation", len(mp))
         return
     }
@@ -592,7 +592,7 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
     if err != nil {
         t.Error(err.Error())
     }
-    if 512 <= len(mp) {
+    if 508 <= len(mp) {
         t.Errorf("[ERR] Incorrect MsgPack Length %d", len(mp))
     }
 

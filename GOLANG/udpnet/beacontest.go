@@ -15,7 +15,7 @@ func ucastBeaconTest() {
         return
     }
 
-    recvMsg := make(chan []byte, ucast.BEACON_RECVD_BUFFER_SIZE)
+    recvMsg := make(chan []byte, ucast.PC_MAX_UDP_BUF_SIZE)
     go func() {
         err = channel.Connect(&ucast.ConnParam{
             RecvMessage : recvMsg,

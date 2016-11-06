@@ -74,7 +74,8 @@ func TestUnboundedInqueryMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if 512 <= len(mp) {
+    // http://stackoverflow.com/questions/1098897/what-is-the-largest-safe-udp-packet-size-on-the-internet
+    if 508 <= len(mp) {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
         return
     }
@@ -152,7 +153,7 @@ func TestMasterDeclarationMeta(t *testing.T) {
         fmt.Printf(err.Error())
         return
     }
-    if 512 <= len(mp) {
+    if 508 <= len(mp) {
         t.Errorf("[ERR] Package message length does not match an expectation [%d]", len(mp))
         return
     }
@@ -204,7 +205,7 @@ func TestExecKeyExchangeMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if 512 <= len(mp) {
+    if 508 <= len(mp) {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
     }
     // verification step
@@ -255,7 +256,7 @@ func TestSendCryptoCheckMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if 512 <= len(mp) {
+    if 508 <= len(mp) {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
     }
     // verification step
@@ -288,7 +289,7 @@ func TestBoundedStatusMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if 512 <= len(mp) {
+    if 508 <= len(mp) {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
         return
     }
