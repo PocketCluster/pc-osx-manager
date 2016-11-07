@@ -18,8 +18,8 @@ type multiListener struct {
     log          *log.Logger
 }
 
-func NewMultiListener(log *log.Logger) (*multiListener, error) {
-    mconn4, err := net.ListenMulticastUDP("udp4", nil, ipv4McastAddr)
+func NewMultiListener(iface *net.Interface, log *log.Logger) (*multiListener, error) {
+    mconn4, err := net.ListenMulticastUDP("udp4", iface, ipv4McastAddr)
     if err != nil {
         return nil, fmt.Errorf("failed to bind to any multicast udp port : " + err.Error())
     }
