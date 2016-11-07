@@ -5,7 +5,7 @@ import (
     "time"
     "bytes"
 
-    "github.com/stkim1/pc-node-agent/crypt"
+    "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/msagent"
@@ -54,7 +54,7 @@ func TestInquired_KeyExchangeTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, endTime, err := msagent.TestMasterAgentDeclarationCommand(crypt.TestMasterPublicKey(), initSendTimestmap)
+    meta, endTime, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -79,7 +79,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(crypt.TestMasterPublicKey(), initSendTimestmap)
+    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -103,7 +103,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
 
     // get master meta with aeskey
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, crypt.TestSlavePublicKey(), crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -130,7 +130,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
         t.Errorf("[ERR] slave node name is setup inappropriately | Current : %s\n", snName)
         return
     }
-    if bytes.Compare(context.GetAESKey(), crypt.TestAESKey) != 0 {
+    if bytes.Compare(context.GetAESKey(), pcrypto.TestAESKey) != 0 {
         t.Errorf("[ERR] slave aes key is setup inappropriately")
         return
     }
@@ -140,7 +140,7 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(crypt.TestMasterPublicKey(), initSendTimestmap)
+    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -160,7 +160,7 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
 
     // get master meta with aeskey
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, crypt.TestSlavePublicKey(), crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
 
     if err != nil {
         t.Error(err.Error())
@@ -180,7 +180,7 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
 
     // get master bind ready
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, crypt.TestAESCryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -197,7 +197,7 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
         return
     }
 
-    meta, err = msagent.TestMasterBrokenBindRecoveryCommand(masterAgentName, crypt.TestAESKey, crypt.TestAESCryptor, crypt.TestMasterRSAEncryptor)
+    meta, err = msagent.TestMasterBrokenBindRecoveryCommand(masterAgentName, pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor)
     if err != nil {
         t.Error(err.Error())
         return
@@ -223,7 +223,7 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
         t.Errorf("[ERR] slave node name is setup inappropriately | Current : %s\n", snName)
         return
     }
-    if bytes.Compare(context.GetAESKey(), crypt.TestAESKey) != 0 {
+    if bytes.Compare(context.GetAESKey(), pcrypto.TestAESKey) != 0 {
         t.Errorf("[ERR] slave aes key is setup inappropriately")
         return
     }

@@ -1,7 +1,7 @@
 //+build !build
 package context
 
-import "github.com/stkim1/pc-node-agent/crypt"
+import "github.com/stkim1/pcrypto"
 
 var test_intefaces = []*HostNetworkInterface{
     {
@@ -104,8 +104,8 @@ func DebugContextPrepare() (HostContext) {
     hostContext.monitorNetworkGateways(test_gateways)
     hostContext.monitorNetworkInterfaces(test_intefaces)
 
-    hostContext.publicKeyData               = crypt.TestMasterPublicKey()
-    hostContext.privateKeyData              = crypt.TestMasterPrivateKey()
+    hostContext.publicKeyData               = pcrypto.TestMasterPublicKey()
+    hostContext.privateKeyData              = pcrypto.TestMasterPrivateKey()
 
     return hostContext
 }

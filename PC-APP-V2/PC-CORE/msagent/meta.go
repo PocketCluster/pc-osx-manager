@@ -2,7 +2,7 @@ package msagent
 
 import (
     "gopkg.in/vmihailenco/msgpack.v2"
-    "github.com/stkim1/pc-node-agent/crypt"
+    "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
@@ -49,7 +49,7 @@ func MasterDeclarationMeta(command *PocketMasterCommand, pubkey []byte) (meta *P
 
 // AES key is encrypted with RSA for async encryption scheme, and rest of data, EncryptedMasterCommand &
 // EncryptedSlaveStatus, are encrypted with AES
-func ExchangeCryptoKeyAndNameMeta(command *PocketMasterCommand, status *slagent.PocketSlaveStatus, aeskey []byte, aescrypto crypt.AESCryptor, rsacrypto crypt.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
+func ExchangeCryptoKeyAndNameMeta(command *PocketMasterCommand, status *slagent.PocketSlaveStatus, aeskey []byte, aescrypto pcrypto.AESCryptor, rsacrypto pcrypto.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
     // marshal command
     mc, err := PackedMasterCommand(command)
     if err != nil {
@@ -94,7 +94,7 @@ func ExchangeCryptoKeyAndNameMeta(command *PocketMasterCommand, status *slagent.
     return
 }
 
-func MasterBindReadyMeta(command *PocketMasterCommand, aescrypto crypt.AESCryptor) (meta *PocketMasterAgentMeta, err error) {
+func MasterBindReadyMeta(command *PocketMasterCommand, aescrypto pcrypto.AESCryptor) (meta *PocketMasterAgentMeta, err error) {
     // marshal command
     mc, err := PackedMasterCommand(command)
     if err != nil {
@@ -112,7 +112,7 @@ func MasterBindReadyMeta(command *PocketMasterCommand, aescrypto crypt.AESCrypto
     return
 }
 
-func BoundedSlaveAckMeta(command *PocketMasterCommand, aescrypto crypt.AESCryptor) (meta *PocketMasterAgentMeta, err error) {
+func BoundedSlaveAckMeta(command *PocketMasterCommand, aescrypto pcrypto.AESCryptor) (meta *PocketMasterAgentMeta, err error) {
     // marshal command
     mc, err := PackedMasterCommand(command)
     if err != nil {
@@ -130,7 +130,7 @@ func BoundedSlaveAckMeta(command *PocketMasterCommand, aescrypto crypt.AESCrypto
     return
 }
 
-func BrokenBindRecoverMeta(respond *PocketMasterRespond, aeskey []byte, aescrypto crypt.AESCryptor, rsacrypto crypt.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
+func BrokenBindRecoverMeta(respond *PocketMasterRespond, aeskey []byte, aescrypto pcrypto.AESCryptor, rsacrypto pcrypto.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
     // marshal command
     mr, err := PackedMasterRespond(respond)
     if err != nil {

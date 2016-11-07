@@ -1,9 +1,10 @@
 package slcontext
 
 import (
-    "github.com/stkim1/pc-node-agent/crypt"
-    "github.com/stkim1/pc-node-agent/slcontext/config"
     "fmt"
+
+    "github.com/stkim1/pcrypto"
+    "github.com/stkim1/pc-node-agent/slcontext/config"
 )
 
 func DebugSlcontextPrepare() PocketSlaveContext {
@@ -15,8 +16,8 @@ func DebugSlcontextPrepare() PocketSlaveContext {
     }
     initializeSlaveContext(singletonContext, cfg)
     // pub/priv keys are generated
-    singletonContext.publicKey = crypt.TestSlavePrivateKey()
-    singletonContext.privateKey = crypt.TestSlavePrivateKey()
+    singletonContext.publicKey = pcrypto.TestSlavePrivateKey()
+    singletonContext.privateKey = pcrypto.TestSlavePrivateKey()
 
     return singletonContext
 }

@@ -5,7 +5,7 @@ import (
     "fmt"
     "net"
 
-    "github.com/stkim1/pc-node-agent/crypt"
+    "github.com/stkim1/pcrypto"
     "github.com/stkim1/netifaces"
     "github.com/stkim1/pc-node-agent/slcontext/config"
 )
@@ -19,13 +19,13 @@ type slaveContext struct {
     config              *config.PocketSlaveConfig
     publicKey           []byte
     privateKey          []byte
-    decryptor           crypt.RsaDecryptor
+    decryptor           pcrypto.RsaDecryptor
 
     masterAgent         string
     masterIP4Address    string
     masterPubkey        []byte
     aeskey              []byte
-    aesCryptor          crypt.AESCryptor
+    aesCryptor          pcrypto.AESCryptor
 
     slaveNodeName       string
 }
@@ -69,7 +69,7 @@ func (sc *slaveContext) initWithConfig(cfg *config.PocketSlaveConfig) error {
     if mspubkey, err := cfg.MasterPublicKey(); len(mspubkey) != 0 && err == nil {
         sc.masterPubkey = mspubkey
 
-        if decryptor, err := crypt.NewDecryptorFromKeyData(mspubkey, prvkey); decryptor != nil && err == nil {
+        if decryptor, err := pcrypto.NewDecryptorFromKeyData(mspubkey, prvkey); decryptor != nil && err == nil {
             sc.decryptor = decryptor
         }
     }
@@ -233,7 +233,7 @@ func (sc *slaveContext) GetPrivateKey() ([]byte) {
     return sc.privateKey
 }
 
-func (sc *slaveContext) DecryptMessage(crypted []byte, sendSig crypt.Signature) ([]byte, error) {
+func (sc *slaveContext) DecryptMessage(crypted []byte, sendSig pcrypto.Signature) ([]byte, error) {
     if sc.decryptor == nil {
         return nil, fmt.Errorf("[ERR] cannot decrypt with null decryptor")
     }
@@ -247,7 +247,7 @@ func (sc *slaveContext) SetMasterPublicKey(masterPubkey []byte) error {
     }
     sc.masterPubkey = masterPubkey
 
-    decryptor, err := crypt.NewDecryptorFromKeyData(masterPubkey, sc.privateKey)
+    decryptor, err := pcrypto.NewDecryptorFromKeyData(masterPubkey, sc.privateKey)
     if err != nil {
         return err
     }
@@ -264,7 +264,7 @@ func (sc *slaveContext) GetMasterPublicKey() ([]byte, error) {
 
 // --- AES key ---
 func (sc *slaveContext) SetAESKey(aesKey []byte) error {
-    cryptor, err := crypt.NewAESCrypto(aesKey)
+    cryptor, err := pcrypto.NewAESCrypto(aesKey)
     if err != nil {
         return nil
     }
@@ -283,7 +283,7 @@ func (sc *slaveContext) DiscardAESKey() {
     return
 }
 
-func (sc *slaveContext) AESCryptor() (crypt.AESCryptor, error) {
+func (sc *slaveContext) AESCryptor() (pcrypto.AESCryptor, error) {
     if sc.aesCryptor != nil {
         return nil, fmt.Errorf("[ERR] AESKey or AESCryptor is not setup")
     }

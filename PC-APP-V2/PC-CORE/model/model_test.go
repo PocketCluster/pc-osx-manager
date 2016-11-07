@@ -3,8 +3,9 @@ package model
 import (
     "testing"
     "time"
-    "github.com/stkim1/pc-node-agent/crypt"
     "reflect"
+
+    "github.com/stkim1/pcrypto"
 )
 
 func setup() (ModelRepo) {
@@ -35,8 +36,8 @@ func TestSlaveNodeCRUD(t *testing.T) {
         LastAlive   :timestmap,
         NodeName    :"pc-node2",
         State       :SNMStateJoined,
-        PublicKey   :crypt.TestMasterPublicKey(),
-        PrivateKey  :crypt.TestMasterPrivateKey(),
+        PublicKey   :pcrypto.TestMasterPublicKey(),
+        PrivateKey  :pcrypto.TestMasterPrivateKey(),
     }
     err = InsertSlaveNode(testSlave)
     if err != nil {
@@ -61,8 +62,8 @@ func TestSlaveNodeCRUD(t *testing.T) {
     testSlave2.LastAlive    = timestmap2
     testSlave2.NodeName     = "pc-node3"
     testSlave2.State        = SNMStateJoined
-    testSlave2.PublicKey    = crypt.TestSlavePublicKey()
-    testSlave2.PrivateKey   = crypt.TestSlavePrivateKey()
+    testSlave2.PublicKey    = pcrypto.TestSlavePublicKey()
+    testSlave2.PrivateKey   = pcrypto.TestSlavePrivateKey()
 
     err = InsertSlaveNode(testSlave2)
     if err != nil {
@@ -85,19 +86,19 @@ func TestSlaveNodeCRUD(t *testing.T) {
 
     for _, node := range nodes {
         if node.NodeName == "pc-node2" {
-            if !reflect.DeepEqual(node.PublicKey, crypt.TestMasterPublicKey()) {
+            if !reflect.DeepEqual(node.PublicKey, pcrypto.TestMasterPublicKey()) {
                 t.Error("[ERR] saved public key is different from loaded public key")
             }
-            if !reflect.DeepEqual(node.PrivateKey, crypt.TestMasterPrivateKey()) {
+            if !reflect.DeepEqual(node.PrivateKey, pcrypto.TestMasterPrivateKey()) {
                 t.Error("[ERR] saved public key is different from loaded public key")
             }
         }
 
         if node.NodeName == "pc-node3" {
-            if !reflect.DeepEqual(node.PublicKey, crypt.TestSlavePublicKey()) {
+            if !reflect.DeepEqual(node.PublicKey, pcrypto.TestSlavePublicKey()) {
                 t.Error("[ERR] saved public key is different from loaded public key")
             }
-            if !reflect.DeepEqual(node.PrivateKey, crypt.TestSlavePrivateKey()) {
+            if !reflect.DeepEqual(node.PrivateKey, pcrypto.TestSlavePrivateKey()) {
                 t.Error("[ERR] saved public key is different from loaded public key")
             }
         }

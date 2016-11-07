@@ -6,7 +6,7 @@ import (
 
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-node-agent/slagent"
-    "github.com/stkim1/pc-node-agent/crypt"
+    "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/context"
 )
 
@@ -31,8 +31,8 @@ type masterBeacon struct {
     beaconState         MasterBeaconState
     slaveNode           *model.SlaveNode
     aesKey              []byte
-    aesCryptor          crypt.AESCryptor
-    rsaEncryptor        crypt.RsaEncryptor
+    aesCryptor          pcrypto.AESCryptor
+    rsaEncryptor        pcrypto.RsaEncryptor
 }
 
 func (mb *masterBeacon) CurrentState() MasterBeaconState {
@@ -45,14 +45,14 @@ func (mb *masterBeacon) AESKey() ([]byte, error) {
     }
     return mb.aesKey, nil
 }
-func (mb *masterBeacon) AESCryptor() (crypt.AESCryptor, error) {
+func (mb *masterBeacon) AESCryptor() (pcrypto.AESCryptor, error) {
     if mb.aesCryptor == nil {
         return nil, fmt.Errorf("[ERR] Null AES cryptor")
     }
     return mb.aesCryptor, nil
 }
 
-func (mb *masterBeacon) RSAEncryptor() (crypt.RsaEncryptor, error) {
+func (mb *masterBeacon) RSAEncryptor() (pcrypto.RsaEncryptor, error) {
     if mb.rsaEncryptor == nil {
         return nil, fmt.Errorf("[ERR] Null RSA encryptor")
     }
@@ -266,7 +266,7 @@ func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp t
         if err != nil {
             return MasterTransitionFail, err
         }
-        encryptor, err := crypt.NewEncryptorFromKeyData(meta.SlavePubKey, masterPrvKey)
+        encryptor, err := pcrypto.NewEncryptorFromKeyData(meta.SlavePubKey, masterPrvKey)
         if err != nil {
             return MasterTransitionFail, err
         }
@@ -276,8 +276,8 @@ func (mb *masterBeacon) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp t
         return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave public key")
     }
 
-    aesKey := crypt.NewAESKey32Byte()
-    aesCryptor, err := crypt.NewAESCrypto(aesKey)
+    aesKey := pcrypto.NewAESKey32Byte()
+    aesCryptor, err := pcrypto.NewAESCrypto(aesKey)
     if err != nil {
         return MasterTransitionFail, err
     }

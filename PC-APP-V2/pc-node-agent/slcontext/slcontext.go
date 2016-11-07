@@ -1,8 +1,9 @@
 package slcontext
 
 import (
-    "github.com/stkim1/pc-node-agent/crypt"
     "net"
+
+    "github.com/stkim1/pcrypto"
 )
 
 type NetworkInterface struct {
@@ -32,7 +33,7 @@ type PocketSlaveContext interface {
 
     GetPublicKey() (pubkey []byte)
     GetPrivateKey() (prvkey []byte)
-    crypt.RsaDecryptor
+    pcrypto.RsaDecryptor
 
     SetMasterPublicKey(masterPubkey []byte) error
     GetMasterPublicKey() ([]byte, error)
@@ -40,8 +41,8 @@ type PocketSlaveContext interface {
     SetAESKey(aesKey []byte) error
     GetAESKey() (aeskey []byte)
     DiscardAESKey()
-    AESCryptor() (crypt.AESCryptor, error)
-    crypt.AESCryptor
+    AESCryptor() (pcrypto.AESCryptor, error)
+    pcrypto.AESCryptor
 
     SetMasterAgent(agentName string) error
     GetMasterAgent() (string, error)
