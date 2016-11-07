@@ -27,8 +27,8 @@ func NewPocketLocatorChannel(log *log.Logger) (*locatorChannel, error) {
     }
     locator := &locatorChannel {
         conn       : conn,
-        ChRead     : make(chan *ChanPkg, PC_LOCATOR_CHAN_CAP),
-        chWrite    : make(chan *ChanPkg, PC_LOCATOR_CHAN_CAP),
+        ChRead     : make(chan *ChanPkg, PC_UCAST_LOCATOR_CHAN_CAP),
+        chWrite    : make(chan *ChanPkg, PC_UCAST_LOCATOR_CHAN_CAP),
         closedCh   : make(chan struct{}),
         log        : log,
     }
@@ -69,7 +69,7 @@ func (lc *locatorChannel) reader() {
 
     for !lc.closed {
         pack := &ChanPkg{}
-        pack.Message = make([]byte, PC_MAX_UDP_BUF_SIZE)
+        pack.Message = make([]byte, PC_MAX_UCAST_UDP_BUF_SIZE)
         count, pack.Address, err = lc.conn.ReadFromUDP(pack.Message)
         if err != nil {
             if lc.log != nil {
@@ -113,6 +113,6 @@ func (lc *locatorChannel) Send(targetHost string, buf []byte) error {
     }
 
     // TODO : find ways to remove this. We'll wait artificially for now (v0.1.4)
-    time.Sleep(time.Microsecond * 100)
+    time.After(time.Millisecond)
     return nil
 }

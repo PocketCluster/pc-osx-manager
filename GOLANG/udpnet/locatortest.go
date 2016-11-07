@@ -20,9 +20,8 @@ func ucastLocatorTest() {
         if err != nil {
             log.Fatal(err.Error())
         }
-        time.Sleep(time.Microsecond * 100)
     }
-    time.Sleep(time.Microsecond * 100)
+    time.After(time.Millisecond)
     channel.Close()
 }
 

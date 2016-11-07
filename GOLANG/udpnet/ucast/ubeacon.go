@@ -27,8 +27,8 @@ func NewPocketBeaconChannel(log *log.Logger) (*BeaconChannel, error) {
     }
     beacon := &BeaconChannel {
         conn       : conn,
-        ChRead     : make(chan *ChanPkg, PC_BEACON_CHAN_CAP),
-        chWrite    : make(chan *ChanPkg, PC_BEACON_CHAN_CAP),
+        ChRead     : make(chan *ChanPkg, PC_UCAST_BEACON_CHAN_CAP),
+        chWrite    : make(chan *ChanPkg, PC_UCAST_BEACON_CHAN_CAP),
         closedCh   : make(chan struct{}),
         log        : log,
     }
@@ -69,7 +69,7 @@ func (bc *BeaconChannel) reader() {
 
     for !bc.closed {
         pack := &ChanPkg{}
-        pack.Message = make([]byte, PC_MAX_UDP_BUF_SIZE)
+        pack.Message = make([]byte, PC_MAX_UCAST_UDP_BUF_SIZE)
         count, pack.Address, err = bc.conn.ReadFromUDP(pack.Message)
         if err != nil {
             if bc.log != nil {
@@ -78,9 +78,6 @@ func (bc *BeaconChannel) reader() {
             continue
         }
 
-        if bc.log != nil {
-            bc.log.Printf("[INFO] %d bytes have been received", count)
-        }
         pack.Message = pack.Message[:count]
         select {
             case bc.ChRead <- pack:
@@ -113,6 +110,6 @@ func (bc *BeaconChannel) Send(targetHost string, buf []byte) error {
     }
 
     // TODO : find ways to remove this. We'll wait artificially for now (v0.1.4)
-    time.Sleep(time.Microsecond * 100)
+    time.After(time.Millisecond)
     return nil
 }
