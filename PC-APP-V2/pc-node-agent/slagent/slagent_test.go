@@ -411,7 +411,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Error("[ERR] Unidentical StatusAgent.SlaveHardware")
         return
     }
-    // TODO : need to fix slave timeout
+    // TODO : need to fix slave timezone
     if sd.SlaveTimestamp.Equal(usd.SlaveTimestamp) {
         t.Skip("[ERR] Unidentical StatusAgent.SlaveTimestamp")
         return
@@ -545,7 +545,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Error("[ERR] Unidentical StatusAgent.SlaveHardware")
         return
     }
-    // TODO : need to fix slave timeout
+    // TODO : need to fix slave timezone
     if sd.SlaveTimestamp.Equal(usd.SlaveTimestamp) {
         t.Skip("[ERR] Unidentical StatusAgent.SlaveTimestamp")
         return
