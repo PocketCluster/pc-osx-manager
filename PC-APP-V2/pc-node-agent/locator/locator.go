@@ -57,8 +57,6 @@ type SlaveLocatorOnStateTransitionIdle         func (SlaveLocatingState, time.Ti
 // OnFail happens at the moment state transition fails to happen
 type SlaveLocatorOnStateTransitionFailure      func (SlaveLocatingState)
 
-// ------ DEFAULT TIMEOUTS ------
-const (
-    UNBOUNDED_TIMEOUT   = 3 * time.Second
-    BOUNDED_TIMEOUT     = 10 * time.Second
-)
+
+
+
