@@ -2,7 +2,6 @@ package state
 
 import (
     "time"
-    "fmt"
 
     "github.com/stkim1/pc-node-agent/locator"
     "github.com/stkim1/pc-core/msagent"
@@ -90,46 +89,45 @@ func stateTransition(currState locator.SlaveLocatingState, nextCondition locator
     // Succeed to transition to the next
     if  nextCondition == locator.SlaveTransitionOk {
         switch currState {
-        case locator.SlaveUnbounded:
-            nextState = locator.SlaveInquired
-        case locator.SlaveInquired:
-            nextState = locator.SlaveKeyExchange
-        case locator.SlaveKeyExchange:
-            nextState = locator.SlaveCryptoCheck
+            case locator.SlaveUnbounded:
+                nextState = locator.SlaveInquired
+            case locator.SlaveInquired:
+                nextState = locator.SlaveKeyExchange
+            case locator.SlaveKeyExchange:
+                nextState = locator.SlaveCryptoCheck
 
-        case locator.SlaveCryptoCheck:
-            fallthrough
-        case locator.SlaveBindBroken:
-            fallthrough
-        case locator.SlaveBounded:
-            nextState = locator.SlaveBounded
-            break
+            case locator.SlaveCryptoCheck:
+                fallthrough
+            case locator.SlaveBindBroken:
+                fallthrough
+            case locator.SlaveBounded:
+                nextState = locator.SlaveBounded
+                break
 
-        default:
-            nextState = locator.SlaveUnbounded
+            default:
+                nextState = locator.SlaveUnbounded
         }
         // Fail to transition to the next
     } else if nextCondition == locator.SlaveTransitionFail {
         switch currState {
+            case locator.SlaveUnbounded:
+                fallthrough
+            case locator.SlaveInquired:
+                fallthrough
+            case locator.SlaveKeyExchange:
+                fallthrough
+            case locator.SlaveCryptoCheck:
+                nextState = locator.SlaveUnbounded
+                break
 
-        case locator.SlaveUnbounded:
-            fallthrough
-        case locator.SlaveInquired:
-            fallthrough
-        case locator.SlaveKeyExchange:
-            fallthrough
-        case locator.SlaveCryptoCheck:
-            nextState = locator.SlaveUnbounded
-            break
+            case locator.SlaveBindBroken:
+                fallthrough
+            case locator.SlaveBounded:
+                nextState = locator.SlaveBindBroken
+                break
 
-        case locator.SlaveBindBroken:
-            fallthrough
-        case locator.SlaveBounded:
-            nextState = locator.SlaveBindBroken
-            break
-
-        default:
-            nextState = locator.SlaveUnbounded
+            default:
+                nextState = locator.SlaveUnbounded
         }
         // Idle
     } else {
@@ -139,7 +137,7 @@ func stateTransition(currState locator.SlaveLocatingState, nextCondition locator
 }
 
 // --- STATE TRANSITION ---
-func (ls *LocatorState) executeTranslateMasterMetaWithTimestamp(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
+func (ls *LocatorState) executeMasterMetaTranslateForNextState(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
     return locator.SlaveTransitionIdle, nil
 }
 
@@ -199,12 +197,7 @@ func (ls *LocatorState) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentM
         eventErr error = nil
     )
 
-    if meta == nil || meta.MetaVersion != msagent.MASTER_META_VERSION {
-        // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
-        return ls.locatingState, locator.SlaveTransitionIdle, fmt.Errorf("[ERR] Null or incorrect version of master meta")
-    }
-
-    transition, transErr = ls.executeTranslateMasterMetaWithTimestamp(meta, slaveTimestamp)
+    transition, transErr = ls.executeMasterMetaTranslateForNextState(meta, slaveTimestamp)
 
     // filter out the intermediate transition value with failed count + timestamp
     finalTransitionCandidate := finalizeTransitionWithTimeout(ls, transition, slaveTimestamp)
@@ -222,7 +215,7 @@ func (ls *LocatorState) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentM
 }
 
 // --- TRANSMISSION CONTROL
-func (ls *LocatorState) executeStateTxWithTimestamp(slaveTimestamp time.Time) error {
+func (ls *LocatorState) executeStateTxActionWithTimestamp(slaveTimestamp time.Time) error {
     return nil
 }
 
@@ -248,7 +241,7 @@ func (ls *LocatorState) TranstionWithTimestamp(slaveTimestamp time.Time) (locato
     transition = checkTxStateWithTime(ls, slaveTimestamp)
 
     if transition == locator.SlaveTransitionIdle {
-        transErr = ls.executeStateTxWithTimestamp(slaveTimestamp)
+        transErr = ls.executeStateTxActionWithTimestamp(slaveTimestamp)
 
         // since an action is taken, the action counter goes up regardless of error
         ls.txActionCount++

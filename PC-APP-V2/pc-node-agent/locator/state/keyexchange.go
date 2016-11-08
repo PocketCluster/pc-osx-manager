@@ -14,7 +14,36 @@ type keyexchange struct{
     LocatorState
 }
 
-func (ls *keyexchange) executeTranslateMasterMetaWithTimestamp(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
+func (ls *keyexchange) executeStateTxActionWithTimestamp(slaveTimestamp time.Time) error {
+    slctx := slcontext.SharedSlaveContext()
+
+    masterAgentName, err := slctx.GetMasterAgent()
+    if err != nil {
+        return err
+    }
+    agent, err := slagent.KeyExchangeStatus(masterAgentName, slaveTimestamp)
+    if err != nil {
+        return err
+    }
+    _, err = slagent.KeyExchangeMeta(agent, slctx.GetPublicKey())
+    if err != nil {
+        return err
+    }
+    _, err = slcontext.SharedSlaveContext().GetMasterIP4Address()
+    if err != nil {
+        return err
+    }
+
+    // TODO : send answer to master
+
+    return nil
+}
+
+func (ls *keyexchange) executeMasterMetaTranslateForNextState(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
+    if meta == nil || meta.MetaVersion != msagent.MASTER_META_VERSION {
+        // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
+        return locator.SlaveTransitionIdle, fmt.Errorf("[ERR] Null or incorrect version of master meta")
+    }
     if len(meta.RsaCryptoSignature) == 0 {
         return locator.SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect RSA signature from Master command")
     }
@@ -43,6 +72,7 @@ func (ls *keyexchange) executeTranslateMasterMetaWithTimestamp(meta *msagent.Poc
     if err != nil {
         return locator.SlaveTransitionFail, err
     }
+
     msAgent, err := slcontext.SharedSlaveContext().GetMasterAgent()
     if err != nil {
         return locator.SlaveTransitionFail, err
@@ -57,6 +87,7 @@ func (ls *keyexchange) executeTranslateMasterMetaWithTimestamp(meta *msagent.Poc
     if msCmd.MasterCommandType != msagent.COMMAND_EXCHANGE_CRPTKEY {
         return locator.SlaveTransitionIdle, nil
     }
+    // set slave node name
     nodeName, err := slcontext.SharedSlaveContext().Decrypt(meta.EncryptedSlaveStatus)
     if err != nil {
         return locator.SlaveTransitionFail, err
@@ -66,23 +97,10 @@ func (ls *keyexchange) executeTranslateMasterMetaWithTimestamp(meta *msagent.Poc
     return locator.SlaveTransitionOk, nil
 }
 
-func (ls *keyexchange) executeStateTxWithTimestamp(slaveTimestamp time.Time) error {
-    slctx := slcontext.SharedSlaveContext()
-
-    masterAgentName, err := slctx.GetMasterAgent()
-    if err != nil {
-        return err
-    }
-    agent, err := slagent.KeyExchangeStatus(masterAgentName, slaveTimestamp)
-    if err != nil {
-        return err
-    }
-    _, err = slagent.KeyExchangeMeta(agent, slctx.GetPublicKey())
-    if err != nil {
-        return err
-    }
-
-    // TODO : send answer to master
-
+func (ls *keyexchange) onStateTranstionSuccess(slaveTimestamp time.Time) error {
     return nil
+}
+
+func (ls *keyexchange) onStateTranstionFailure(slaveTimestamp time.Time) error {
+    return slcontext.SharedSlaveContext().DiscardAll()
 }

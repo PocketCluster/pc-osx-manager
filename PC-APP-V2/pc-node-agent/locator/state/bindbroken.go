@@ -14,7 +14,32 @@ type bindbroken struct{
     LocatorState
 }
 
-func (ls *bindbroken) executeTranslateMasterMetaWithTimestamp(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
+func (ls *bindbroken) executeStateTxActionWithTimestamp(slaveTimestamp time.Time) error {
+    slctx := slcontext.SharedSlaveContext()
+
+    masterAgentName, err := slctx.GetMasterAgent()
+    if err != nil {
+        return nil
+    }
+    ba, err := slagent.BrokenBindDiscovery(masterAgentName)
+    if err != nil {
+        return nil
+    }
+    _, err = slagent.BrokenBindMeta(ba)
+    if err != nil {
+        return nil
+    }
+
+    // TODO : broadcast slave meta
+
+    return nil
+}
+
+func (ls *bindbroken) executeMasterMetaTranslateForNextState(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
+    if meta == nil || meta.MetaVersion != msagent.MASTER_META_VERSION {
+        // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
+        return locator.SlaveTransitionIdle, fmt.Errorf("[ERR] Null or incorrect version of master meta")
+    }
     if len(meta.EncryptedMasterRespond) == 0 {
         return locator.SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect encrypted master respond")
     }
@@ -32,7 +57,7 @@ func (ls *bindbroken) executeTranslateMasterMetaWithTimestamp(meta *msagent.Pock
     slcontext.SharedSlaveContext().SetAESKey(aeskey)
 
     // aes decryption of command
-    pckedRsp, err := slcontext.SharedSlaveContext().Decrypt(meta.EncryptedMasterCommand)
+    pckedRsp, err := slcontext.SharedSlaveContext().Decrypt(meta.EncryptedMasterRespond)
     if err != nil {
         return locator.SlaveTransitionFail, err
     }
@@ -56,26 +81,20 @@ func (ls *bindbroken) executeTranslateMasterMetaWithTimestamp(meta *msagent.Pock
         return locator.SlaveTransitionIdle, nil
     }
 
+    // set the master ip address
+    if len(msRsp.MasterAddress) == 0 {
+        return locator.SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect master address")
+    }
+    slcontext.SharedSlaveContext().SetMasterIP4Address(msRsp.MasterAddress)
+
     return locator.SlaveTransitionOk, nil
 }
 
-func (ls *bindbroken) executeStateTxWithTimestamp(slaveTimestamp time.Time) error {
-    slctx := slcontext.SharedSlaveContext()
+func (ls *bindbroken) onStateTranstionSuccess(slaveTimestamp time.Time) error {
+    return slcontext.SharedSlaveContext().SyncAll()
+}
 
-    masterAgentName, err := slctx.GetMasterAgent()
-    if err != nil {
-        return nil
-    }
-    ba, err := slagent.BrokenBindDiscovery(masterAgentName)
-    if err != nil {
-        return nil
-    }
-    _, err = slagent.BrokenBindMeta(ba)
-    if err != nil {
-        return nil
-    }
-
-    // TODO : send answer to master
-
+func (ls *bindbroken) onStateTranstionFailure(slaveTimestamp time.Time) error {
+    slcontext.SharedSlaveContext().DiscardAESKey()
     return nil
 }

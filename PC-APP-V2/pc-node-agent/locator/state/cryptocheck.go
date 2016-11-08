@@ -14,7 +14,44 @@ type cryptocheck struct{
     LocatorState
 }
 
-func (ls *cryptocheck) executeTranslateMasterMetaWithTimestamp(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
+func (ls *cryptocheck) executeStateTxActionWithTimestamp(slaveTimestamp time.Time) error {
+    slctx := slcontext.SharedSlaveContext()
+
+    masterAgentName, err := slctx.GetMasterAgent()
+    if err != nil {
+        return err
+    }
+    slaveAgentName, err := slctx.GetSlaveNodeName()
+    if err != nil {
+        return err
+    }
+    aesCryptor, err := slctx.AESCryptor()
+    if err != nil {
+        return err
+    }
+    sa, err := slagent.CheckSlaveCryptoStatus(masterAgentName, slaveAgentName, slaveTimestamp)
+    if err != nil {
+        return err
+    }
+    _, err = slagent.CheckSlaveCryptoMeta(sa, aesCryptor)
+    if err != nil {
+        return err
+    }
+    _, err = slcontext.SharedSlaveContext().GetMasterIP4Address()
+    if err != nil {
+        return err
+    }
+
+    // TODO : send answer to master
+
+    return nil
+}
+
+func (ls *cryptocheck) executeMasterMetaTranslateForNextState(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
+    if meta == nil || meta.MetaVersion != msagent.MASTER_META_VERSION {
+        // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
+        return locator.SlaveTransitionIdle, fmt.Errorf("[ERR] Null or incorrect version of master meta")
+    }
     if len(meta.EncryptedMasterCommand) == 0 {
         return locator.SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect encrypted master command")
     }
@@ -45,30 +82,10 @@ func (ls *cryptocheck) executeTranslateMasterMetaWithTimestamp(meta *msagent.Poc
     return locator.SlaveTransitionOk, nil
 }
 
-func (ls *cryptocheck) executeStateTxWithTimestamp(slaveTimestamp time.Time) error {
-    slctx := slcontext.SharedSlaveContext()
+func (ls *cryptocheck) onStateTranstionSuccess(slaveTimestamp time.Time) error {
+    return slcontext.SharedSlaveContext().SyncAll()
+}
 
-    masterAgentName, err := slctx.GetMasterAgent()
-    if err != nil {
-        return err
-    }
-    slaveAgentName, err := slctx.GetMasterAgent()
-    if err != nil {
-        return err
-    }
-    aesCryptor, err := slctx.AESCryptor()
-    if err != nil {
-        return err
-    }
-    sa, err := slagent.CheckSlaveCryptoStatus(masterAgentName, slaveAgentName, slaveTimestamp)
-    if err != nil {
-        return err
-    }
-    _, err = slagent.CheckSlaveCryptoMeta(sa, aesCryptor)
-    if err != nil {
-        return err
-    }
-
-    // TODO : send answer to master
-    return nil
+func (ls *cryptocheck) onStateTranstionFailure(slaveTimestamp time.Time) error {
+    return slcontext.SharedSlaveContext().DiscardAll()
 }
