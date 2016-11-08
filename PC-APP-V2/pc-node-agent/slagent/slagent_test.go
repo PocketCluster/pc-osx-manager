@@ -303,7 +303,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave status data %s\n", len(ma.EncryptedStatus))
         return
     }
-    esd, err := pcrypto.TestAESCryptor.Decrypt(ma.EncryptedStatus)
+    esd, err := pcrypto.TestAESCryptor.DecryptByAES(ma.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return
@@ -372,7 +372,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         return
     }
 
-    esd, err = pcrypto.TestAESCryptor.Decrypt(up.EncryptedStatus)
+    esd, err = pcrypto.TestAESCryptor.DecryptByAES(up.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return
@@ -437,7 +437,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave status data %s\n", len(ma.EncryptedStatus))
         return
     }
-    esd, err := pcrypto.TestAESCryptor.Decrypt(ma.EncryptedStatus)
+    esd, err := pcrypto.TestAESCryptor.DecryptByAES(ma.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return
@@ -506,7 +506,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         return
     }
 
-    esd, err = pcrypto.TestAESCryptor.Decrypt(up.EncryptedStatus)
+    esd, err = pcrypto.TestAESCryptor.DecryptByAES(up.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
         return

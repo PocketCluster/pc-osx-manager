@@ -50,14 +50,14 @@ func (ls *bindbroken) executeMasterMetaTranslateForNextState(meta *msagent.Pocke
         return locator.SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect RSA signature from Master command")
     }
 
-    aeskey, err := slcontext.SharedSlaveContext().DecryptMessage(meta.EncryptedAESKey, meta.RsaCryptoSignature)
+    aeskey, err := slcontext.SharedSlaveContext().DecryptByRSA(meta.EncryptedAESKey, meta.RsaCryptoSignature)
     if err != nil {
         return locator.SlaveTransitionFail, err
     }
     slcontext.SharedSlaveContext().SetAESKey(aeskey)
 
     // aes decryption of command
-    pckedRsp, err := slcontext.SharedSlaveContext().Decrypt(meta.EncryptedMasterRespond)
+    pckedRsp, err := slcontext.SharedSlaveContext().DecryptByAES(meta.EncryptedMasterRespond)
     if err != nil {
         return locator.SlaveTransitionFail, err
     }

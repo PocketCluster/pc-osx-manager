@@ -57,14 +57,14 @@ func (ls *keyexchange) executeMasterMetaTranslateForNextState(meta *msagent.Pock
         return locator.SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect slave status from master command")
     }
 
-    aeskey, err := slcontext.SharedSlaveContext().DecryptMessage(meta.EncryptedAESKey, meta.RsaCryptoSignature)
+    aeskey, err := slcontext.SharedSlaveContext().DecryptByRSA(meta.EncryptedAESKey, meta.RsaCryptoSignature)
     if err != nil {
         return locator.SlaveTransitionFail, err
     }
     slcontext.SharedSlaveContext().SetAESKey(aeskey)
 
     // aes decryption of command
-    pckedCmd, err := slcontext.SharedSlaveContext().Decrypt(meta.EncryptedMasterCommand)
+    pckedCmd, err := slcontext.SharedSlaveContext().DecryptByAES(meta.EncryptedMasterCommand)
     if err != nil {
         return locator.SlaveTransitionFail, err
     }
@@ -88,7 +88,7 @@ func (ls *keyexchange) executeMasterMetaTranslateForNextState(meta *msagent.Pock
         return locator.SlaveTransitionIdle, nil
     }
     // set slave node name
-    nodeName, err := slcontext.SharedSlaveContext().Decrypt(meta.EncryptedSlaveStatus)
+    nodeName, err := slcontext.SharedSlaveContext().DecryptByAES(meta.EncryptedSlaveStatus)
     if err != nil {
         return locator.SlaveTransitionFail, err
     }

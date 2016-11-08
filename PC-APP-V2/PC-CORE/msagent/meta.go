@@ -56,7 +56,7 @@ func ExchangeCryptoKeyAndNameMeta(command *PocketMasterCommand, status *slagent.
         return
     }
     // encrypt the marshaled command with AES
-    encryptedCommand, err := aescrypto.Encrypt(mc)
+    encryptedCommand, err := aescrypto.EncryptByAES(mc)
     if err != nil {
         return
     }
@@ -75,12 +75,12 @@ func ExchangeCryptoKeyAndNameMeta(command *PocketMasterCommand, status *slagent.
     }
 */
     // encrypted slave name with AES
-    encryptedSlaveName, err := aescrypto.Encrypt([]byte(status.SlaveNodeName))
+    encryptedSlaveName, err := aescrypto.EncryptByAES([]byte(status.SlaveNodeName))
     if err != nil {
         return
     }
     // encrypt the AES key with RSA
-    encryptedAES, AESsignature, err := rsacrypto.EncryptMessage(aeskey)
+    encryptedAES, AESsignature, err := rsacrypto.EncryptByRSA(aeskey)
     if err != nil {
         return
     }
@@ -101,7 +101,7 @@ func MasterBindReadyMeta(command *PocketMasterCommand, aescrypto pcrypto.AESCryp
         return
     }
     // encrypt the marshaled command with AES
-    encryptedCommand, err := aescrypto.Encrypt(mc)
+    encryptedCommand, err := aescrypto.EncryptByAES(mc)
     if err != nil {
         return
     }
@@ -119,7 +119,7 @@ func BoundedSlaveAckMeta(command *PocketMasterCommand, aescrypto pcrypto.AESCryp
         return
     }
     // encrypt the marshaled command with AES
-    encryptedCommand, err := aescrypto.Encrypt(mc)
+    encryptedCommand, err := aescrypto.EncryptByAES(mc)
     if err != nil {
         return
     }
@@ -137,12 +137,12 @@ func BrokenBindRecoverMeta(respond *PocketMasterRespond, aeskey []byte, aescrypt
         return
     }
     // encrypt the marshaled command with AES
-    er, err := aescrypto.Encrypt(mr)
+    er, err := aescrypto.EncryptByAES(mr)
     if err != nil {
         return
     }
     // encrypt the AES key with RSA
-    ea, as, err := rsacrypto.EncryptMessage(aeskey)
+    ea, as, err := rsacrypto.EncryptByRSA(aeskey)
     if err != nil {
         return
     }

@@ -233,11 +233,11 @@ func (sc *slaveContext) GetPrivateKey() ([]byte) {
     return sc.privateKey
 }
 
-func (sc *slaveContext) DecryptMessage(crypted []byte, sendSig pcrypto.Signature) ([]byte, error) {
+func (sc *slaveContext) DecryptByRSA(crypted []byte, sendSig pcrypto.Signature) ([]byte, error) {
     if sc.decryptor == nil {
         return nil, fmt.Errorf("[ERR] cannot decrypt with null decryptor")
     }
-    return sc.decryptor.DecryptMessage(crypted, sendSig)
+    return sc.decryptor.DecryptByRSA(crypted, sendSig)
 }
 
 // --- Master Public key ---
@@ -290,18 +290,18 @@ func (sc *slaveContext) AESCryptor() (pcrypto.AESCryptor, error) {
     return sc.aesCryptor, nil
 }
 
-func (sc *slaveContext) Encrypt(data []byte) ([]byte, error) {
+func (sc *slaveContext) EncryptByAES(data []byte) ([]byte, error) {
     if sc.aesCryptor == nil {
         return nil, fmt.Errorf("[ERR] Cannot AES encrypt with null cryptor")
     }
-    return sc.aesCryptor.Encrypt(data)
+    return sc.aesCryptor.EncryptByAES(data)
 }
 
-func (sc *slaveContext) Decrypt(data []byte) ([]byte, error) {
+func (sc *slaveContext) DecryptByAES(data []byte) ([]byte, error) {
     if sc.aesCryptor == nil {
         return nil, fmt.Errorf("[ERR] Cannot AES decrypt with null cryptor")
     }
-    return sc.aesCryptor.Decrypt(data)
+    return sc.aesCryptor.DecryptByAES(data)
 }
 
 // --- Master Agent Name ---

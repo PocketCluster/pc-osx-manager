@@ -27,11 +27,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="bindbroken.go" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/locator/state/bindbroken.go">
+      <file leaf-file-name="slavecontext.go" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/slcontext/slavecontext.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="56">
-              <caret line="48" column="34" selection-start-line="48" selection-start-column="16" selection-end-line="48" selection-end-column="34" />
+            <state relative-caret-position="321">
+              <caret line="239" column="36" selection-start-line="239" selection-start-column="31" selection-end-line="239" selection-end-column="36" />
               <folding />
             </state>
           </provider>
@@ -99,17 +99,17 @@
         <option value="$PROJECT_DIR$/locator/locating_test.go" />
         <option value="$PROJECT_DIR$/slcontext/TEST.go" />
         <option value="$PROJECT_DIR$/slagent/meta.go" />
-        <option value="$PROJECT_DIR$/slcontext/slavecontext.go" />
         <option value="$PROJECT_DIR$/slagent/slagent_test.go" />
         <option value="$PROJECT_DIR$/locator/state.go" />
         <option value="$PROJECT_DIR$/locator/locator.go" />
         <option value="$PROJECT_DIR$/locator/state/state.go" />
         <option value="$PROJECT_DIR$/locator/state/inquired.go" />
-        <option value="$PROJECT_DIR$/locator/state/cryptocheck.go" />
         <option value="$PROJECT_DIR$/locator/state/bounded.go" />
-        <option value="$PROJECT_DIR$/locator/state/keyexchange.go" />
         <option value="$PROJECT_DIR$/locator/state/unbounded.go" />
+        <option value="$PROJECT_DIR$/slcontext/slavecontext.go" />
         <option value="$PROJECT_DIR$/locator/state/bindbroken.go" />
+        <option value="$PROJECT_DIR$/locator/state/cryptocheck.go" />
+        <option value="$PROJECT_DIR$/locator/state/keyexchange.go" />
       </list>
     </option>
   </component>
@@ -785,24 +785,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/locator/transition.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3456">
-          <caret line="92" column="16" selection-start-line="92" selection-start-column="16" selection-end-line="92" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/service/service.go" />
     <entry file="file://$PROJECT_DIR$/service/service_test.go" />
-    <entry file="file://$PROJECT_DIR$/locator/locator.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="296">
-          <caret line="27" column="23" selection-start-line="27" selection-start-column="9" selection-end-line="27" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../pc-core/msagent/respond.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="303">
@@ -815,14 +799,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="6570">
           <caret line="547" column="40" selection-start-line="547" selection-start-column="40" selection-end-line="547" selection-end-column="40" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/slcontext/slcontext.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="23" column="4" selection-start-line="23" selection-start-column="4" selection-end-line="23" selection-end-column="4" />
           <folding />
         </state>
       </provider>
@@ -847,30 +823,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="165">
           <caret line="19" column="23" selection-start-line="19" selection-start-column="23" selection-end-line="19" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/slcontext/slavecontext.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3">
-          <caret line="259" column="36" selection-start-line="259" selection-start-column="36" selection-end-line="259" selection-end-column="36" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/locator/state/cryptocheck.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="731">
-          <caret line="85" column="51" selection-start-line="85" selection-start-column="0" selection-end-line="85" selection-end-column="51" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/locator/state/keyexchange.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="446">
-          <caret line="74" column="0" selection-start-line="74" selection-start-column="0" selection-end-line="74" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -909,10 +861,58 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/locator/locator.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="416">
+          <caret line="35" column="26" selection-start-line="35" selection-start-column="26" selection-end-line="35" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/locator/transition.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3814">
+          <caret line="92" column="16" selection-start-line="92" selection-start-column="16" selection-end-line="92" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slcontext/slcontext.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="23" column="4" selection-start-line="23" selection-start-column="4" selection-end-line="23" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/locator/state/bindbroken.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="56">
-          <caret line="48" column="34" selection-start-line="48" selection-start-column="16" selection-end-line="48" selection-end-column="34" />
+        <state relative-caret-position="401">
+          <caret line="59" column="64" selection-start-line="59" selection-start-column="64" selection-end-line="59" selection-end-column="64" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/locator/state/keyexchange.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="581">
+          <caret line="90" column="65" selection-start-line="90" selection-start-column="65" selection-end-line="90" selection-end-column="65" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/locator/state/cryptocheck.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="326">
+          <caret line="58" column="52" selection-start-line="58" selection-start-column="52" selection-end-line="58" selection-end-column="64" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slcontext/slavecontext.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="321">
+          <caret line="239" column="36" selection-start-line="239" selection-start-column="31" selection-end-line="239" selection-end-column="36" />
           <folding />
         </state>
       </provider>

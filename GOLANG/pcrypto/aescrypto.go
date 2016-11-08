@@ -11,8 +11,8 @@ import (
 )
 
 type AESCryptor interface {
-    Encrypt(data []byte) (crypted []byte, err error)
-    Decrypt(data []byte) (plain []byte, err error)
+    EncryptByAES(data []byte) (crypted []byte, err error)
+    DecryptByAES(data []byte) (plain []byte, err error)
 }
 
 func NewAESCrypto(key []byte) (crypto AESCryptor, err error) {
@@ -36,7 +36,7 @@ type aesCrpytor struct {
     cipher.Block
 }
 
-func (ac *aesCrpytor) Encrypt(plain []byte) ([]byte, error) {
+func (ac *aesCrpytor) EncryptByAES(plain []byte) ([]byte, error) {
     var crypted []byte = make([]byte, aes.BlockSize + len(string(plain)))
 
     // iv : initialization vector
@@ -50,7 +50,7 @@ func (ac *aesCrpytor) Encrypt(plain []byte) ([]byte, error) {
     return crypted, nil
 }
 
-func (ac *aesCrpytor) Decrypt(crypted []byte) ([]byte,error) {
+func (ac *aesCrpytor) DecryptByAES(crypted []byte) ([]byte,error) {
 
     var plain []byte
     if len(crypted) < aes.BlockSize {

@@ -228,14 +228,14 @@ func (sd *slaveLocator) keyExchange(meta *msagent.PocketMasterAgentMeta, timesta
         return SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect slave status from master command")
     }
 
-    aeskey, err := slcontext.SharedSlaveContext().DecryptMessage(meta.EncryptedAESKey, meta.RsaCryptoSignature)
+    aeskey, err := slcontext.SharedSlaveContext().DecryptByRSA(meta.EncryptedAESKey, meta.RsaCryptoSignature)
     if err != nil {
         return SlaveTransitionFail, err
     }
     slcontext.SharedSlaveContext().SetAESKey(aeskey)
 
     // aes decryption of command
-    pckedCmd, err := slcontext.SharedSlaveContext().Decrypt(meta.EncryptedMasterCommand)
+    pckedCmd, err := slcontext.SharedSlaveContext().DecryptByAES(meta.EncryptedMasterCommand)
     if err != nil {
         return SlaveTransitionFail, err
     }
@@ -257,7 +257,7 @@ func (sd *slaveLocator) keyExchange(meta *msagent.PocketMasterAgentMeta, timesta
     if msCmd.MasterCommandType != msagent.COMMAND_EXCHANGE_CRPTKEY {
         return SlaveTransitionIdle, nil
     }
-    nodeName, err := slcontext.SharedSlaveContext().Decrypt(meta.EncryptedSlaveStatus)
+    nodeName, err := slcontext.SharedSlaveContext().DecryptByAES(meta.EncryptedSlaveStatus)
     if err != nil {
         return SlaveTransitionFail, err
     }
@@ -271,7 +271,7 @@ func (sd *slaveLocator) cryptoCheck(meta *msagent.PocketMasterAgentMeta, timesta
         return SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect encrypted master command")
     }
     // aes decryption of command
-    pckedCmd, err := slcontext.SharedSlaveContext().Decrypt(meta.EncryptedMasterCommand)
+    pckedCmd, err := slcontext.SharedSlaveContext().DecryptByAES(meta.EncryptedMasterCommand)
     if err != nil {
         return SlaveTransitionFail, err
     }
@@ -313,14 +313,14 @@ func (sd *slaveLocator) bindBroken(meta *msagent.PocketMasterAgentMeta, timestam
         return SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect RSA signature from Master command")
     }
 
-    aeskey, err := slcontext.SharedSlaveContext().DecryptMessage(meta.EncryptedAESKey, meta.RsaCryptoSignature)
+    aeskey, err := slcontext.SharedSlaveContext().DecryptByRSA(meta.EncryptedAESKey, meta.RsaCryptoSignature)
     if err != nil {
         return SlaveTransitionFail, err
     }
     slcontext.SharedSlaveContext().SetAESKey(aeskey)
 
     // aes decryption of command
-    pckedRsp, err := slcontext.SharedSlaveContext().Decrypt(meta.EncryptedMasterCommand)
+    pckedRsp, err := slcontext.SharedSlaveContext().DecryptByAES(meta.EncryptedMasterCommand)
     if err != nil {
         return SlaveTransitionFail, err
     }

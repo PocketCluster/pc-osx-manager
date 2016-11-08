@@ -56,7 +56,7 @@ func (ls *cryptocheck) executeMasterMetaTranslateForNextState(meta *msagent.Pock
         return locator.SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect encrypted master command")
     }
     // aes decryption of command
-    pckedCmd, err := slcontext.SharedSlaveContext().Decrypt(meta.EncryptedMasterCommand)
+    pckedCmd, err := slcontext.SharedSlaveContext().DecryptByAES(meta.EncryptedMasterCommand)
     if err != nil {
         return locator.SlaveTransitionFail, err
     }
