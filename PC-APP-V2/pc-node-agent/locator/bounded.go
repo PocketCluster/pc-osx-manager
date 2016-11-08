@@ -1,4 +1,4 @@
-package state
+package locator
 
 import (
     "time"
@@ -11,6 +11,10 @@ import (
 
 type bounded struct{
     locatorState
+}
+
+func (ls *bounded) CurrentState() SlaveLocatingState {
+    return SlaveBounded
 }
 
 func (ls *bounded) txTimeout() time.Duration {

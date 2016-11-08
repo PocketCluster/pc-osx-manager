@@ -1,4 +1,4 @@
-package state
+package locator
 
 import (
     "time"
@@ -11,6 +11,10 @@ import (
 
 type keyexchange struct{
     locatorState
+}
+
+func (ls *keyexchange) CurrentState() SlaveLocatingState {
+    return SlaveKeyExchange
 }
 
 func (ls *keyexchange) transitionActionWithTimestamp(slaveTimestamp time.Time) error {

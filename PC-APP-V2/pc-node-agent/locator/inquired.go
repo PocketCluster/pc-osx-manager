@@ -1,4 +1,4 @@
-package state
+package locator
 
 import (
     "time"
@@ -11,6 +11,10 @@ import (
 
 type inquired struct {
     locatorState
+}
+
+func (ls *inquired) CurrentState() SlaveLocatingState {
+    return SlaveInquired
 }
 
 func (ls *inquired) transitionActionWithTimestamp(slaveTimestamp time.Time) error {

@@ -1,4 +1,4 @@
-package state
+package locator
 
 import (
     "time"
@@ -11,6 +11,10 @@ import (
 
 type cryptocheck struct{
     locatorState
+}
+
+func (ls *cryptocheck) CurrentState() SlaveLocatingState {
+    return SlaveCryptoCheck
 }
 
 func (ls *cryptocheck) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
