@@ -137,7 +137,7 @@ func stateTransition(currState locator.SlaveLocatingState, nextCondition locator
 }
 
 // --- STATE TRANSITION ---
-func (ls *LocatorState) executeMasterMetaTranslateForNextState(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
+func (ls *LocatorState) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
     return locator.SlaveTransitionIdle, nil
 }
 
@@ -190,14 +190,14 @@ func executeOnTransitionEvents(ls *LocatorState, newState, oldState locator.Slav
     return nil
 }
 
-func (ls *LocatorState) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingState, locator.SlaveLocatingTransition, error) {
+func (ls *LocatorState) MasterMetaTranstion(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingState, locator.SlaveLocatingTransition, error) {
     var (
         transition locator.SlaveLocatingTransition
         transErr error = nil
         eventErr error = nil
     )
 
-    transition, transErr = ls.executeMasterMetaTranslateForNextState(meta, slaveTimestamp)
+    transition, transErr = ls.transitionWithMasterMeta(meta, slaveTimestamp)
 
     // filter out the intermediate transition value with failed count + timestamp
     finalTransitionCandidate := finalizeTransitionWithTimeout(ls, transition, slaveTimestamp)
@@ -215,7 +215,7 @@ func (ls *LocatorState) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentM
 }
 
 // --- TRANSMISSION CONTROL
-func (ls *LocatorState) executeStateTxActionWithTimestamp(slaveTimestamp time.Time) error {
+func (ls *LocatorState) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
     return nil
 }
 
@@ -231,7 +231,7 @@ func checkTxStateWithTime(ls *LocatorState, slaveTimestamp time.Time) locator.Sl
     return locator.SlaveTransitionFail
 }
 
-func (ls *LocatorState) TranstionWithTimestamp(slaveTimestamp time.Time) (locator.SlaveLocatingState, locator.SlaveLocatingTransition, error) {
+func (ls *LocatorState) TimestampTranstion(slaveTimestamp time.Time) (locator.SlaveLocatingState, locator.SlaveLocatingTransition, error) {
     var (
         transition locator.SlaveLocatingTransition
         transErr error = nil
@@ -241,7 +241,7 @@ func (ls *LocatorState) TranstionWithTimestamp(slaveTimestamp time.Time) (locato
     transition = checkTxStateWithTime(ls, slaveTimestamp)
 
     if transition == locator.SlaveTransitionIdle {
-        transErr = ls.executeStateTxActionWithTimestamp(slaveTimestamp)
+        transErr = ls.transitionActionWithTimestamp(slaveTimestamp)
 
         // since an action is taken, the action counter goes up regardless of error
         ls.txActionCount++

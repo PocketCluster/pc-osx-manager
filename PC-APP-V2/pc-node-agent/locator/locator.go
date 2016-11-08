@@ -56,7 +56,3 @@ type SlaveLocatorOnStateTransitionIdle         func (SlaveLocatingState, time.Ti
 
 // OnFail happens at the moment state transition fails to happen
 type SlaveLocatorOnStateTransitionFailure      func (SlaveLocatingState)
-
-
-
-

@@ -14,7 +14,7 @@ type bindbroken struct{
     LocatorState
 }
 
-func (ls *bindbroken) executeStateTxActionWithTimestamp(slaveTimestamp time.Time) error {
+func (ls *bindbroken) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
     slctx := slcontext.SharedSlaveContext()
 
     masterAgentName, err := slctx.GetMasterAgent()
@@ -35,7 +35,7 @@ func (ls *bindbroken) executeStateTxActionWithTimestamp(slaveTimestamp time.Time
     return nil
 }
 
-func (ls *bindbroken) executeMasterMetaTranslateForNextState(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
+func (ls *bindbroken) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
     if meta == nil || meta.MetaVersion != msagent.MASTER_META_VERSION {
         // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
         return locator.SlaveTransitionIdle, fmt.Errorf("[ERR] Null or incorrect version of master meta")

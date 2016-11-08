@@ -14,7 +14,7 @@ type unbounded struct{
     LocatorState
 }
 
-func (ls *unbounded) executeStateTxActionWithTimestamp(slaveTimestamp time.Time) error {
+func (ls *unbounded) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
     ua, err := slagent.UnboundedMasterDiscovery()
     if err != nil {
         return err
@@ -29,7 +29,7 @@ func (ls *unbounded) executeStateTxActionWithTimestamp(slaveTimestamp time.Time)
     return nil
 }
 
-func (ls *unbounded) executeMasterMetaTranslateForNextState(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
+func (ls *unbounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
     if meta == nil || meta.MetaVersion != msagent.MASTER_META_VERSION {
         // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
         return locator.SlaveTransitionIdle, fmt.Errorf("[ERR] Null or incorrect version of master meta")

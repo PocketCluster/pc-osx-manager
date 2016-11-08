@@ -14,7 +14,7 @@ type inquired struct {
     LocatorState
 }
 
-func (ls *inquired) executeStateTxActionWithTimestamp(slaveTimestamp time.Time) error {
+func (ls *inquired) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
     agent, err := slagent.AnswerMasterInquiryStatus(slaveTimestamp)
     if err != nil {
         return err
@@ -32,7 +32,7 @@ func (ls *inquired) executeStateTxActionWithTimestamp(slaveTimestamp time.Time) 
     return nil
 }
 
-func (ls *inquired) executeMasterMetaTranslateForNextState(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
+func (ls *inquired) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
     // TODO : 1) check if meta is rightful to be bound
     if meta == nil || meta.MetaVersion != msagent.MASTER_META_VERSION {
         // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time

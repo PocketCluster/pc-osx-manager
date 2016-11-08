@@ -14,7 +14,7 @@ type cryptocheck struct{
     LocatorState
 }
 
-func (ls *cryptocheck) executeStateTxActionWithTimestamp(slaveTimestamp time.Time) error {
+func (ls *cryptocheck) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
     slctx := slcontext.SharedSlaveContext()
 
     masterAgentName, err := slctx.GetMasterAgent()
@@ -47,7 +47,7 @@ func (ls *cryptocheck) executeStateTxActionWithTimestamp(slaveTimestamp time.Tim
     return nil
 }
 
-func (ls *cryptocheck) executeMasterMetaTranslateForNextState(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
+func (ls *cryptocheck) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
     if meta == nil || meta.MetaVersion != msagent.MASTER_META_VERSION {
         // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
         return locator.SlaveTransitionIdle, fmt.Errorf("[ERR] Null or incorrect version of master meta")

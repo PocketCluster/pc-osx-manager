@@ -18,7 +18,7 @@ func (ls *bounded) txTimeout() time.Duration {
     return BoundedTimeout
 }
 
-func (ls *bounded) executeStateTxActionWithTimestamp(slaveTimestamp time.Time) error {
+func (ls *bounded) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
     slctx := slcontext.SharedSlaveContext()
 
     masterAgentName, err := slctx.GetMasterAgent()
@@ -50,7 +50,7 @@ func (ls *bounded) executeStateTxActionWithTimestamp(slaveTimestamp time.Time) e
     return nil
 }
 
-func (ls *bounded) executeMasterMetaTranslateForNextState(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
+func (ls *bounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
     if meta == nil || meta.MetaVersion != msagent.MASTER_META_VERSION {
         // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
         return locator.SlaveTransitionIdle, fmt.Errorf("[ERR] Null or incorrect version of master meta")
