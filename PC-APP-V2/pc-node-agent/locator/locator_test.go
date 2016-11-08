@@ -1,5 +1,5 @@
 package locator
-/*
+
 import (
     "testing"
     "time"
@@ -27,6 +27,7 @@ func tearDown() {
     context.DebugContextDestroy()
 }
 
+
 func TestUnboundedState_InquiredTransition(t *testing.T) {
     setUp()
     defer tearDown()
@@ -37,15 +38,24 @@ func TestUnboundedState_InquiredTransition(t *testing.T) {
         return
     }
 
-    ssd := NewSlaveDiscovery()
+    ssd, err := NewSlaveLocator(SlaveUnbounded)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
     err = ssd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 2))
     if err != nil {
         t.Error(err.Error())
         return
     }
 
-    if ssd.CurrentState() != SlaveInquired {
-        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", ssd.CurrentState().String())
+    state, err := ssd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveInquired {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
         return
     }
 }
@@ -61,16 +71,25 @@ func TestInquired_KeyExchangeTransition(t *testing.T) {
     }
 
     // set to slave discovery state to "Inquired"
-    sd := NewSlaveDiscovery()
-    sd.(*slaveLocator).locatingState = SlaveInquired
+    sd, err := NewSlaveLocator(SlaveUnbounded)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    sd.(*slaveLocator).state = &inquired{}
 
     // execute state transition
     if err = sd.TranstionWithMasterMeta(meta, endTime.Add(time.Second)); err != nil {
         t.Errorf(err.Error())
         return
     }
-    if sd.CurrentState() != SlaveKeyExchange {
-        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", sd.CurrentState().String())
+    state, err := sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveKeyExchange {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
         return
     }
 }
@@ -79,6 +98,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
+    context := slcontext.SharedSlaveContext()
     meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
@@ -86,9 +106,12 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
     }
 
     // set to slave discovery state to "Inquired"
-    context := slcontext.SharedSlaveContext()
-    sd := NewSlaveDiscovery()
-    sd.(*slaveLocator).locatingState = SlaveInquired
+    sd, err := NewSlaveLocator(SlaveUnbounded)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    sd.(*slaveLocator).state = &inquired{}
 
     // execute state transition
     slaveTS := masterTS.Add(time.Second)
@@ -96,8 +119,13 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
         t.Errorf(err.Error())
         return
     }
-    if sd.CurrentState() != SlaveKeyExchange {
-        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", sd.CurrentState().String())
+    state, err := sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveKeyExchange {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
         return
     }
 
@@ -115,8 +143,13 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if sd.CurrentState() != SlaveCryptoCheck {
-        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", sd.CurrentState().String())
+    state, err = sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveCryptoCheck {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
         return
     }
 
@@ -140,6 +173,7 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
     setUp()
     defer tearDown()
 
+    context := slcontext.SharedSlaveContext()
     meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
@@ -147,9 +181,13 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
     }
 
     // set to slave discovery state to "Inquired"
-    context := slcontext.SharedSlaveContext()
-    sd := NewSlaveDiscovery()
-    sd.(*slaveLocator).locatingState = SlaveInquired
+
+    sd, err := NewSlaveLocator(SlaveUnbounded)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    sd.(*slaveLocator).state = &inquired{}
 
     // execute state transition
     slaveTS := masterTS.Add(time.Second)
@@ -161,7 +199,6 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
     // get master meta with aeskey
     masterTS = slaveTS.Add(time.Second)
     meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
-
     if err != nil {
         t.Error(err.Error())
         return
@@ -173,8 +210,13 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if sd.CurrentState() != SlaveCryptoCheck {
-        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", sd.CurrentState().String())
+    state, err := sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveCryptoCheck {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
         return
     }
 
@@ -191,9 +233,13 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
         t.Error(err.Error())
         return
     }
-
-    if sd.CurrentState() != SlaveBounded {
-        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", sd.CurrentState().String())
+    state, err = sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveBounded {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
         return
     }
 
@@ -208,9 +254,14 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    state, err = sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
     // now broken bind is recovered
-    if sd.CurrentState() != SlaveBounded {
-        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", sd.CurrentState().String())
+    if state != SlaveBounded {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
         return
     }
 
@@ -228,4 +279,3 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
         return
     }
 }
-*/
