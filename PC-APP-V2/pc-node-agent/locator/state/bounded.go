@@ -2,16 +2,15 @@ package state
 
 import (
     "time"
+    "fmt"
 
     "github.com/stkim1/pc-core/msagent"
-    "github.com/stkim1/pc-node-agent/locator"
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-node-agent/slcontext"
-    "fmt"
 )
 
 type bounded struct{
-    LocatorState
+    locatorState
 }
 
 func (ls *bounded) txTimeout() time.Duration {
@@ -50,12 +49,12 @@ func (ls *bounded) transitionActionWithTimestamp(slaveTimestamp time.Time) error
     return nil
 }
 
-func (ls *bounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
+func (ls *bounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {
     if meta == nil || meta.MetaVersion != msagent.MASTER_META_VERSION {
         // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
-        return locator.SlaveTransitionIdle, fmt.Errorf("[ERR] Null or incorrect version of master meta")
+        return SlaveTransitionIdle, fmt.Errorf("[ERR] Null or incorrect version of master meta")
     }
-    return locator.SlaveTransitionOk, nil
+    return SlaveTransitionOk, nil
 }
 
 func (ls *bounded) onStateTranstionSuccess(slaveTimestamp time.Time) error {

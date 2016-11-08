@@ -3,49 +3,61 @@ package state
 import (
     "time"
 
-    "github.com/stkim1/pc-node-agent/locator"
     "github.com/stkim1/pc-core/msagent"
 )
 
 const (
     TranstionFailureLimit uint          = 5
-
     TransitionTimeout     time.Duration = time.Second * 10
 
-
     TxActionLimit         uint          = 5
-
     UnboundedTimeout      time.Duration = time.Second * 3
-
     BoundedTimeout        time.Duration = time.Second * 10
 )
 
-type opError struct {
-    TransitionError         error
-    EventError              error
+type SlaveLocatingState int
+const (
+    SlaveUnbounded          SlaveLocatingState = iota
+    SlaveInquired
+    SlaveKeyExchange
+    SlaveCryptoCheck
+    SlaveBounded
+    SlaveBindBroken
+)
+
+type SlaveLocatingTransition int
+const (
+    SlaveTransitionFail     SlaveLocatingTransition = iota
+    SlaveTransitionOk
+    SlaveTransitionIdle
+)
+
+func (st SlaveLocatingState) String() string {
+    var state string
+    switch st {
+    case SlaveUnbounded:
+        state = "SlaveUnbounded"
+    case SlaveBounded:
+        state = "SlaveBounded"
+    case SlaveBindBroken:
+        state = "SlaveBindBroken"
+    case SlaveInquired:
+        state = "SlaveInquired"
+    case SlaveKeyExchange:
+        state = "SlaveKeyExchange"
+    case SlaveCryptoCheck:
+        state = "SlaveCryptoCheck"
+    }
+    return state
 }
 
-func (oe *opError) Error() string {
-    var errStr string = ""
-
-    if oe.TransitionError != nil {
-        errStr += oe.TransitionError.Error()
-    }
-
-    if oe.EventError != nil {
-        errStr += oe.EventError.Error()
-    }
-    return errStr
+type LocatorState interface {
+    CurrentState() SlaveLocatingState
+    MasterMetaTranstion(timestamp time.Time) (SlaveLocatingTransition, error)
+    TimestampTranstion(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) (SlaveLocatingTransition, error)
 }
 
-func summarizeErrors(transErr error, eventErr error) *opError {
-    if transErr == nil && eventErr == nil {
-        return nil
-    }
-    return &opError{TransitionError: transErr, EventError: eventErr}
-}
-
-type LocatorState struct {
+type locatorState struct {
     // each time we try to make transtion and fail, count goes up.
     transitionActionCount uint
 
@@ -58,76 +70,75 @@ type LocatorState struct {
     // last time transmission takes place. This is to control the frequnecy of transmission
     lastTxTS              time.Time
 
-    locatingState         locator.SlaveLocatingState
+    locatingState         SlaveLocatingState
 }
 
 // property functions
-func (ls *LocatorState) LocatingState() locator.SlaveLocatingState {
+func (ls *locatorState) CurrentState() SlaveLocatingState {
     return ls.locatingState
 }
 
-func (ls *LocatorState) transtionFailureLimit() uint {
+func (ls *locatorState) transtionFailureLimit() uint {
     return TranstionFailureLimit
 }
 
-func (ls *LocatorState) transitionTimeout() time.Duration {
+func (ls *locatorState) transitionTimeout() time.Duration {
     return TransitionTimeout
 }
 
-func (ls *LocatorState) txActionLimit() uint {
+func (ls *locatorState) txActionLimit() uint {
     return TxActionLimit
 }
 
-func (ls *LocatorState) txTimeout() time.Duration {
+func (ls *locatorState) txTimeout() time.Duration {
     return UnboundedTimeout
 }
 
-
 // -- STATE TRANSITION
-func stateTransition(currState locator.SlaveLocatingState, nextCondition locator.SlaveLocatingTransition) locator.SlaveLocatingState {
-    var nextState locator.SlaveLocatingState
+func stateTransition(currState SlaveLocatingState, nextCondition SlaveLocatingTransition) SlaveLocatingState {
+    var nextState SlaveLocatingState
     // Succeed to transition to the next
-    if  nextCondition == locator.SlaveTransitionOk {
+    if  nextCondition == SlaveTransitionOk {
         switch currState {
-            case locator.SlaveUnbounded:
-                nextState = locator.SlaveInquired
-            case locator.SlaveInquired:
-                nextState = locator.SlaveKeyExchange
-            case locator.SlaveKeyExchange:
-                nextState = locator.SlaveCryptoCheck
+            case SlaveUnbounded:
+                nextState = SlaveInquired
+            case SlaveInquired:
+                nextState = SlaveKeyExchange
+            case SlaveKeyExchange:
+                nextState = SlaveCryptoCheck
 
-            case locator.SlaveCryptoCheck:
+            case SlaveCryptoCheck:
                 fallthrough
-            case locator.SlaveBindBroken:
+            case SlaveBindBroken:
                 fallthrough
-            case locator.SlaveBounded:
-                nextState = locator.SlaveBounded
+            case SlaveBounded:
+                nextState = SlaveBounded
                 break
 
             default:
-                nextState = locator.SlaveUnbounded
+                nextState = SlaveUnbounded
         }
         // Fail to transition to the next
-    } else if nextCondition == locator.SlaveTransitionFail {
+    } else if nextCondition == SlaveTransitionFail {
         switch currState {
-            case locator.SlaveUnbounded:
+            case SlaveUnbounded:
                 fallthrough
-            case locator.SlaveInquired:
+            case SlaveInquired:
                 fallthrough
-            case locator.SlaveKeyExchange:
+            case SlaveKeyExchange:
                 fallthrough
-            case locator.SlaveCryptoCheck:
-                nextState = locator.SlaveUnbounded
+            case SlaveCryptoCheck:
+                nextState = SlaveUnbounded
                 break
 
-            case locator.SlaveBindBroken:
+            case SlaveBindBroken:
                 fallthrough
-            case locator.SlaveBounded:
-                nextState = locator.SlaveBindBroken
+            case SlaveBounded:
+                nextState = SlaveBindBroken
                 break
 
             default:
-                nextState = locator.SlaveUnbounded
+                nextState = SlaveUnbounded
         }
         // Idle
     } else {
@@ -137,14 +148,14 @@ func stateTransition(currState locator.SlaveLocatingState, nextCondition locator
 }
 
 // --- STATE TRANSITION ---
-func (ls *LocatorState) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingTransition, error) {
-    return locator.SlaveTransitionIdle, nil
+func (ls *locatorState) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {
+    return SlaveTransitionIdle, nil
 }
 
-func finalizeTransitionWithTimeout(ls *LocatorState, nextStateCandiate locator.SlaveLocatingTransition, slaveTimestamp time.Time) locator.SlaveLocatingTransition {
-    var nextConfirmedState locator.SlaveLocatingTransition
+func finalizeTransitionWithTimeout(ls *locatorState, nextStateCandiate SlaveLocatingTransition, slaveTimestamp time.Time) SlaveLocatingTransition {
+    var nextConfirmedState SlaveLocatingTransition
     switch nextStateCandiate {
-        case locator.SlaveTransitionOk: {
+        case SlaveTransitionOk: {
             // reset transition action count / timestamp to 0
             ls.lastTransitionTS = slaveTimestamp
             ls.transitionActionCount = 0
@@ -152,7 +163,7 @@ func finalizeTransitionWithTimeout(ls *LocatorState, nextStateCandiate locator.S
             // since
             ls.lastTxTS = slaveTimestamp
             ls.txActionCount = 0
-            nextConfirmedState = locator.SlaveTransitionOk
+            nextConfirmedState = SlaveTransitionOk
         }
         default: {
             if ls.transitionActionCount < ls.transtionFailureLimit() {
@@ -160,29 +171,29 @@ func finalizeTransitionWithTimeout(ls *LocatorState, nextStateCandiate locator.S
             }
 
             if ls.transitionActionCount < ls.transtionFailureLimit() && slaveTimestamp.Sub(ls.lastTransitionTS) < ls.transitionTimeout() {
-                nextConfirmedState = locator.SlaveTransitionIdle
+                nextConfirmedState = SlaveTransitionIdle
             } else {
-                nextConfirmedState = locator.SlaveTransitionFail
+                nextConfirmedState = SlaveTransitionFail
             }
         }
     }
     return nextConfirmedState
 }
 
-func (ls *LocatorState) onStateTranstionSuccess(slaveTimestamp time.Time) error {
+func (ls *locatorState) onStateTranstionSuccess(slaveTimestamp time.Time) error {
     return nil
 }
 
-func (ls *LocatorState) onStateTranstionFailure(slaveTimestamp time.Time) error {
+func (ls *locatorState) onStateTranstionFailure(slaveTimestamp time.Time) error {
     return nil
 }
 
-func executeOnTransitionEvents(ls *LocatorState, newState, oldState locator.SlaveLocatingState, transition locator.SlaveLocatingTransition, slaveTimestamp time.Time) error {
+func executeOnTransitionEvents(ls *locatorState, newState, oldState SlaveLocatingState, transition SlaveLocatingTransition, slaveTimestamp time.Time) error {
     if newState != oldState {
         switch transition {
-            case locator.SlaveTransitionOk:
+            case SlaveTransitionOk:
                 return ls.onStateTranstionSuccess(slaveTimestamp)
-            case locator.SlaveTransitionFail: {
+            case SlaveTransitionFail: {
                 return ls.onStateTranstionFailure(slaveTimestamp)
             }
         }
@@ -190,9 +201,9 @@ func executeOnTransitionEvents(ls *LocatorState, newState, oldState locator.Slav
     return nil
 }
 
-func (ls *LocatorState) MasterMetaTranstion(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (locator.SlaveLocatingState, locator.SlaveLocatingTransition, error) {
+func (ls *locatorState) MasterMetaTranstion(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {
     var (
-        transition locator.SlaveLocatingTransition
+        transition SlaveLocatingTransition
         transErr error = nil
         eventErr error = nil
     )
@@ -211,36 +222,36 @@ func (ls *LocatorState) MasterMetaTranstion(meta *msagent.PocketMasterAgentMeta,
     // execute event lisenter
     eventErr = executeOnTransitionEvents(ls, newState, oldState, finalTransitionCandidate, slaveTimestamp)
 
-    return ls.locatingState, finalTransitionCandidate, summarizeErrors(transErr, eventErr)
+    return finalTransitionCandidate, summarizeErrors(transErr, eventErr)
 }
 
 // --- TRANSMISSION CONTROL
-func (ls *LocatorState) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
+func (ls *locatorState) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
     return nil
 }
 
-func checkTxStateWithTime(ls *LocatorState, slaveTimestamp time.Time) locator.SlaveLocatingTransition {
+func checkTxStateWithTime(ls *locatorState, slaveTimestamp time.Time) SlaveLocatingTransition {
     if ls.txActionCount < ls.txActionLimit() {
         // if tx timeout window is smaller than time delta (T_1 - T_0), don't do anything!!! just skip!
         if ls.txTimeout() < slaveTimestamp.Sub(ls.lastTransitionTS) {
             ls.txActionCount++
         }
-        return locator.SlaveTransitionIdle
+        return SlaveTransitionIdle
     }
     // this is failure. the fact that this is called indicate that we're ready to move to failure state
-    return locator.SlaveTransitionFail
+    return SlaveTransitionFail
 }
 
-func (ls *LocatorState) TimestampTranstion(slaveTimestamp time.Time) (locator.SlaveLocatingState, locator.SlaveLocatingTransition, error) {
+func (ls *locatorState) TimestampTranstion(slaveTimestamp time.Time) (SlaveLocatingTransition, error) {
     var (
-        transition locator.SlaveLocatingTransition
+        transition SlaveLocatingTransition
         transErr error = nil
         eventErr error = nil
     )
 
     transition = checkTxStateWithTime(ls, slaveTimestamp)
 
-    if transition == locator.SlaveTransitionIdle {
+    if transition == SlaveTransitionIdle {
         transErr = ls.transitionActionWithTimestamp(slaveTimestamp)
 
         // since an action is taken, the action counter goes up regardless of error
@@ -258,5 +269,5 @@ func (ls *LocatorState) TimestampTranstion(slaveTimestamp time.Time) (locator.Sl
         eventErr = executeOnTransitionEvents(ls, newState, oldState, transition, slaveTimestamp)
     }
 
-    return ls.locatingState, transition, summarizeErrors(transErr, eventErr)
+    return transition, summarizeErrors(transErr, eventErr)
 }
