@@ -76,7 +76,7 @@ func TestInquired_KeyExchangeTransition(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    sd.(*slaveLocator).state = &inquired{}
+    sd.(*slaveLocator).state = newInquiredState()
 
     // execute state transition
     if err = sd.TranstionWithMasterMeta(meta, endTime.Add(time.Second)); err != nil {
@@ -111,7 +111,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    sd.(*slaveLocator).state = &inquired{}
+    sd.(*slaveLocator).state = newInquiredState()
 
     // execute state transition
     slaveTS := masterTS.Add(time.Second)
@@ -181,13 +181,12 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
     }
 
     // set to slave discovery state to "Inquired"
-
     sd, err := NewSlaveLocator(SlaveUnbounded)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    sd.(*slaveLocator).state = &inquired{}
+    sd.(*slaveLocator).state = newInquiredState()
 
     // execute state transition
     slaveTS := masterTS.Add(time.Second)

@@ -9,6 +9,15 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
+func newBindbrokenState() LocatorState {
+    bs := &bindbroken{}
+    bs.timestampTransition     = bs.transitionActionWithTimestamp
+    bs.masterMetaTransition    = bs.transitionWithMasterMeta
+    bs.onTransitionSuccess     = bs.onStateTranstionSuccess
+    bs.onTransitionFailure     = bs.onStateTranstionFailure
+    return bs
+}
+
 type bindbroken struct{
     locatorState
 }

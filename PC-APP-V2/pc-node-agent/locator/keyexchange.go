@@ -9,6 +9,15 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
+func newKeyexchangeState() LocatorState {
+    ks := &keyexchange{}
+    ks.timestampTransition    = ks.transitionActionWithTimestamp
+    ks.masterMetaTransition   = ks.transitionWithMasterMeta
+    ks.onTransitionSuccess    = ks.onStateTranstionSuccess
+    ks.onTransitionFailure    = ks.onStateTranstionFailure
+    return ks
+}
+
 type keyexchange struct{
     locatorState
 }

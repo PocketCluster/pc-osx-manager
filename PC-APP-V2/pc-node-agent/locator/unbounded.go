@@ -9,6 +9,15 @@ import (
     "github.com/stkim1/pc-node-agent/slcontext"
 )
 
+func newUnboundedState() LocatorState {
+    us := &unbounded{}
+    us.timestampTransition     = us.transitionActionWithTimestamp
+    us.masterMetaTransition    = us.transitionWithMasterMeta
+    us.onTransitionSuccess     = us.onStateTranstionSuccess
+    us.onTransitionFailure     = us.onStateTranstionFailure
+    return us
+}
+
 type unbounded struct{
     locatorState
 }

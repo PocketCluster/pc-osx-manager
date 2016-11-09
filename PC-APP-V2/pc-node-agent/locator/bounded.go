@@ -9,6 +9,15 @@ import (
     "github.com/stkim1/pc-node-agent/slcontext"
 )
 
+func newBoundedState() LocatorState {
+    bs := &bounded{}
+    bs.timestampTransition     = bs.transitionActionWithTimestamp
+    bs.masterMetaTransition    = bs.transitionWithMasterMeta
+    bs.onTransitionSuccess     = bs.onStateTranstionSuccess
+    bs.onTransitionFailure     = bs.onStateTranstionFailure
+    return bs
+}
+
 type bounded struct{
     locatorState
 }

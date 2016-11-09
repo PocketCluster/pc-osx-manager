@@ -60,9 +60,9 @@ func NewSlaveLocator(state SlaveLocatingState) (SlaveLocator, error) {
     switch state {
 
     case SlaveUnbounded:
-        return &slaveLocator{state: &unbounded{}}, nil
+        return &slaveLocator{state: newUnboundedState()}, nil
     case SlaveBindBroken:
-        return &slaveLocator{state: &bindbroken{}}, nil
+        return &slaveLocator{state: newBindbrokenState()}, nil
 
     default:
         return nil, fmt.Errorf("[ERR] SlaveLocator can initiated from SlaveUnbounded or SlaveBindBroken only")

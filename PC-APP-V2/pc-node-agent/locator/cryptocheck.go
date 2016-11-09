@@ -9,6 +9,15 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
+func newCryptocheckState() LocatorState {
+    cc := &cryptocheck{}
+    cc.timestampTransition     = cc.transitionActionWithTimestamp
+    cc.masterMetaTransition    = cc.transitionWithMasterMeta
+    cc.onTransitionSuccess     = cc.onStateTranstionSuccess
+    cc.onTransitionFailure     = cc.onStateTranstionFailure
+    return cc
+}
+
 type cryptocheck struct{
     locatorState
 }

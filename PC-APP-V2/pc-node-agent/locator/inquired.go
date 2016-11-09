@@ -9,6 +9,15 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
+func newInquiredState() LocatorState {
+    is := &inquired{}
+    is.timestampTransition    = is.transitionActionWithTimestamp
+    is.masterMetaTransition   = is.transitionWithMasterMeta
+    is.onTransitionSuccess    = is.onStateTranstionSuccess
+    is.onTransitionFailure    = is.onStateTranstionFailure
+    return is
+}
+
 type inquired struct {
     locatorState
 }

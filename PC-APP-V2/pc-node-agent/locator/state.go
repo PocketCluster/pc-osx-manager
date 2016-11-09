@@ -4,6 +4,7 @@ import (
     "time"
 
     "github.com/stkim1/pc-core/msagent"
+    "log"
 )
 
 const (
@@ -21,6 +22,15 @@ type LocatorState interface {
     TimestampTranstion(slaveTimestamp time.Time) (LocatorState, error)
 }
 
+type transitionWithMasterMeta       func (meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error)
+
+type transitionActionWithTimestamp  func (slaveTimestamp time.Time) error
+
+type onStateTranstionSuccess        func (slaveTimestamp time.Time) error
+
+type onStateTranstionFailure        func (slaveTimestamp time.Time) error
+
+
 type locatorState struct {
     // each time we try to make transtion and fail, count goes up.
     transitionActionCount uint
@@ -29,10 +39,21 @@ type locatorState struct {
     lastTransitionTS      time.Time
 
     // each time we try to send something, count goes up. This include success/fail altogether.
-    txActionCount         uint
+    txActionCount        uint
 
     // last time transmission takes place. This is to control the frequnecy of transmission
-    lastTxTS              time.Time
+    lastTxTS             time.Time
+
+    // --- transition functions ---
+    // master transition func
+    masterMetaTransition transitionWithMasterMeta
+
+    // timestamp transition func
+    timestampTransition  transitionActionWithTimestamp
+
+    onTransitionSuccess  onStateTranstionSuccess
+
+    onTransitionFailure  onStateTranstionFailure
 }
 
 // property functions
@@ -64,25 +85,25 @@ func newLocatorStateForState(ls LocatorState, newState, oldState SlaveLocatingSt
 
     switch newState {
         case SlaveUnbounded:
-            return &unbounded{}
+            return newUnboundedState()
 
         case SlaveInquired:
-            return &inquired{}
+            return newInquiredState()
 
         case SlaveKeyExchange:
-            return &keyexchange{}
+            return newKeyexchangeState()
 
         case SlaveCryptoCheck:
-            return &cryptocheck{}
+            return newCryptocheckState()
 
         case SlaveBounded:
-            return &bounded{}
+            return newBoundedState()
 
         case SlaveBindBroken:
-            return &bindbroken{}
+            return newBindbrokenState()
 
         default:
-            return &unbounded{}
+            return newUnboundedState()
     }
 }
 
@@ -139,9 +160,6 @@ func stateTransition(currState SlaveLocatingState, nextCondition SlaveLocatingTr
 }
 
 // --- STATE TRANSITION ---
-func (ls *locatorState) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {
-    return SlaveTransitionIdle, nil
-}
 
 func finalizeTransitionWithTimeout(ls *locatorState, nextStateCandiate SlaveLocatingTransition, slaveTimestamp time.Time) SlaveLocatingTransition {
     var nextConfirmedState SlaveLocatingTransition
@@ -171,21 +189,17 @@ func finalizeTransitionWithTimeout(ls *locatorState, nextStateCandiate SlaveLoca
     return nextConfirmedState
 }
 
-func (ls *locatorState) onStateTranstionSuccess(slaveTimestamp time.Time) error {
-    return nil
-}
-
-func (ls *locatorState) onStateTranstionFailure(slaveTimestamp time.Time) error {
-    return nil
-}
-
 func executeOnTransitionEvents(ls *locatorState, newState, oldState SlaveLocatingState, transition SlaveLocatingTransition, slaveTimestamp time.Time) error {
     if newState != oldState {
         switch transition {
             case SlaveTransitionOk:
-                return ls.onStateTranstionSuccess(slaveTimestamp)
+                if ls.onTransitionSuccess != nil {
+                    return ls.onTransitionSuccess(slaveTimestamp)
+                }
             case SlaveTransitionFail: {
-                return ls.onStateTranstionFailure(slaveTimestamp)
+                if ls.onTransitionFailure != nil {
+                    return ls.onTransitionFailure(slaveTimestamp)
+                }
             }
         }
     }
@@ -198,8 +212,11 @@ func (ls *locatorState) MasterMetaTranstion(meta *msagent.PocketMasterAgentMeta,
         transErr, eventErr error = nil, nil
         newState, oldState SlaveLocatingState = ls.CurrentState(), ls.CurrentState()
     )
+    if ls.masterMetaTransition == nil {
+        log.Panic("[PANIC] MASTER META TRANSTION SHOULD HAVE BEEN SETUP PROPERLY")
+    }
 
-    transition, transErr = ls.transitionWithMasterMeta(meta, slaveTimestamp)
+    transition, transErr = ls.masterMetaTransition(meta, slaveTimestamp)
 
     // filter out the intermediate transition value with failed count + timestamp
     finalTransitionCandidate := finalizeTransitionWithTimeout(ls, transition, slaveTimestamp)
@@ -214,10 +231,6 @@ func (ls *locatorState) MasterMetaTranstion(meta *msagent.PocketMasterAgentMeta,
 }
 
 // --- TRANSMISSION CONTROL
-func (ls *locatorState) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
-    return nil
-}
-
 func checkTxStateWithTime(ls *locatorState, slaveTimestamp time.Time) SlaveLocatingTransition {
     if ls.txActionCount < ls.txActionLimit() {
         // if tx timeout window is smaller than time delta (T_1 - T_0), don't do anything!!! just skip!
@@ -236,11 +249,14 @@ func (ls *locatorState) TimestampTranstion(slaveTimestamp time.Time) (LocatorSta
         transition SlaveLocatingTransition
         transErr, eventErr error = nil, nil
     )
+    if ls.timestampTransition == nil {
+        log.Panic("[PANIC] TIMESTAMP TRANSITION SHOULD HAVE BEEN SETUP PROPERLY")
+    }
 
     transition = checkTxStateWithTime(ls, slaveTimestamp)
 
     if transition == SlaveTransitionIdle {
-        transErr = ls.transitionActionWithTimestamp(slaveTimestamp)
+        transErr = ls.timestampTransition(slaveTimestamp)
 
         // since an action is taken, the action counter goes up regardless of error
         ls.txActionCount++
