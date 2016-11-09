@@ -11,23 +11,23 @@ import (
 
 func newBoundedState() LocatorState {
     bs := &bounded{}
-    bs.timestampTransition     = bs.transitionActionWithTimestamp
-    bs.masterMetaTransition    = bs.transitionWithMasterMeta
-    bs.onTransitionSuccess     = bs.onStateTranstionSuccess
-    bs.onTransitionFailure     = bs.onStateTranstionFailure
+
+    bs.constState                   = SlaveBounded
+
+    bs.constTransitionFailureLimit  = TransitionFailureLimit
+    bs.constTransitionTimout        = TransitionTimeout
+    bs.constTxActionLimit           = TxActionLimit
+    bs.constTxTimeout               = BoundedTimeout
+
+    bs.timestampTransition          = bs.transitionActionWithTimestamp
+    bs.masterMetaTransition         = bs.transitionWithMasterMeta
+    bs.onTransitionSuccess          = bs.onStateTranstionSuccess
+    bs.onTransitionFailure          = bs.onStateTranstionFailure
     return bs
 }
 
 type bounded struct{
     locatorState
-}
-
-func (ls *bounded) CurrentState() SlaveLocatingState {
-    return SlaveBounded
-}
-
-func (ls *bounded) txTimeout() time.Duration {
-    return BoundedTimeout
 }
 
 func (ls *bounded) transitionActionWithTimestamp(slaveTimestamp time.Time) error {

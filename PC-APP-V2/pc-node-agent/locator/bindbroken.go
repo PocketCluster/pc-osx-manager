@@ -11,19 +11,23 @@ import (
 
 func newBindbrokenState() LocatorState {
     bs := &bindbroken{}
-    bs.timestampTransition     = bs.transitionActionWithTimestamp
-    bs.masterMetaTransition    = bs.transitionWithMasterMeta
-    bs.onTransitionSuccess     = bs.onStateTranstionSuccess
-    bs.onTransitionFailure     = bs.onStateTranstionFailure
+
+    bs.constState                   = SlaveBindBroken
+
+    bs.constTransitionFailureLimit  = TransitionFailureLimit
+    bs.constTransitionTimout        = TransitionTimeout
+    bs.constTxActionLimit           = TxActionLimit
+    bs.constTxTimeout               = UnboundedTimeout
+
+    bs.timestampTransition          = bs.transitionActionWithTimestamp
+    bs.masterMetaTransition         = bs.transitionWithMasterMeta
+    bs.onTransitionSuccess          = bs.onStateTranstionSuccess
+    bs.onTransitionFailure          = bs.onStateTranstionFailure
     return bs
 }
 
 type bindbroken struct{
     locatorState
-}
-
-func (ls *bindbroken) CurrentState() SlaveLocatingState {
-    return SlaveBindBroken
 }
 
 func (ls *bindbroken) transitionActionWithTimestamp(slaveTimestamp time.Time) error {

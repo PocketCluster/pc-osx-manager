@@ -11,19 +11,23 @@ import (
 
 func newUnboundedState() LocatorState {
     us := &unbounded{}
-    us.timestampTransition     = us.transitionActionWithTimestamp
-    us.masterMetaTransition    = us.transitionWithMasterMeta
-    us.onTransitionSuccess     = us.onStateTranstionSuccess
-    us.onTransitionFailure     = us.onStateTranstionFailure
+
+    us.constState                   = SlaveUnbounded
+
+    us.constTransitionFailureLimit  = TransitionFailureLimit
+    us.constTransitionTimout        = TransitionTimeout
+    us.constTxActionLimit           = TxActionLimit
+    us.constTxTimeout               = UnboundedTimeout
+
+    us.timestampTransition          = us.transitionActionWithTimestamp
+    us.masterMetaTransition         = us.transitionWithMasterMeta
+    us.onTransitionSuccess          = us.onStateTranstionSuccess
+    us.onTransitionFailure          = us.onStateTranstionFailure
     return us
 }
 
 type unbounded struct{
     locatorState
-}
-
-func (ls *unbounded) CurrentState() SlaveLocatingState {
-    return SlaveUnbounded
 }
 
 func (ls *unbounded) transitionActionWithTimestamp(slaveTimestamp time.Time) error {

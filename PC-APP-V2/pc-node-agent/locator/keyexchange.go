@@ -11,19 +11,23 @@ import (
 
 func newKeyexchangeState() LocatorState {
     ks := &keyexchange{}
-    ks.timestampTransition    = ks.transitionActionWithTimestamp
-    ks.masterMetaTransition   = ks.transitionWithMasterMeta
-    ks.onTransitionSuccess    = ks.onStateTranstionSuccess
-    ks.onTransitionFailure    = ks.onStateTranstionFailure
+
+    ks.constState                   = SlaveKeyExchange
+
+    ks.constTransitionFailureLimit  = TransitionFailureLimit
+    ks.constTransitionTimout        = TransitionTimeout
+    ks.constTxActionLimit           = TxActionLimit
+    ks.constTxTimeout               = UnboundedTimeout
+
+    ks.timestampTransition          = ks.transitionActionWithTimestamp
+    ks.masterMetaTransition         = ks.transitionWithMasterMeta
+    ks.onTransitionSuccess          = ks.onStateTranstionSuccess
+    ks.onTransitionFailure          = ks.onStateTranstionFailure
     return ks
 }
 
 type keyexchange struct{
     locatorState
-}
-
-func (ls *keyexchange) CurrentState() SlaveLocatingState {
-    return SlaveKeyExchange
 }
 
 func (ls *keyexchange) transitionActionWithTimestamp(slaveTimestamp time.Time) error {

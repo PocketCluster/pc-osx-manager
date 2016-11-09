@@ -8,12 +8,12 @@ import (
 )
 
 const (
-    TranstionFailureLimit uint          = 5
-    TransitionTimeout     time.Duration = time.Second * 10
+    TransitionFailureLimit uint          = 5
+    TransitionTimeout      time.Duration = time.Second * 10
 
-    TxActionLimit         uint          = 5
-    UnboundedTimeout      time.Duration = time.Second * 3
-    BoundedTimeout        time.Duration = time.Second * 10
+    TxActionLimit          uint          = 5
+    UnboundedTimeout       time.Duration = time.Second * 3
+    BoundedTimeout         time.Duration = time.Second * 10
 )
 
 type LocatorState interface {
@@ -32,6 +32,23 @@ type onStateTranstionFailure        func (slaveTimestamp time.Time) error
 
 
 type locatorState struct {
+    /* --- given, constant state --- */
+    // this is given state that will not change
+    constState            SlaveLocatingState
+
+    // transition failure
+    constTransitionFailureLimit uint
+
+    // transition timeout
+    constTransitionTimout time.Duration
+
+    // transmission limit
+    constTxActionLimit    uint
+
+    // unbounded timeout
+    constTxTimeout        time.Duration
+
+    /* --- changing properties to record transaction --- */
     // each time we try to make transtion and fail, count goes up.
     transitionActionCount uint
 
@@ -39,42 +56,44 @@ type locatorState struct {
     lastTransitionTS      time.Time
 
     // each time we try to send something, count goes up. This include success/fail altogether.
-    txActionCount        uint
+    txActionCount         uint
 
     // last time transmission takes place. This is to control the frequnecy of transmission
-    lastTxTS             time.Time
+    lastTxTS              time.Time
 
-    // --- transition functions ---
+    /* --- transition functions --- */
     // master transition func
-    masterMetaTransition transitionWithMasterMeta
+    masterMetaTransition  transitionWithMasterMeta
 
     // timestamp transition func
-    timestampTransition  transitionActionWithTimestamp
+    timestampTransition   transitionActionWithTimestamp
 
-    onTransitionSuccess  onStateTranstionSuccess
+    // onSuccess
+    onTransitionSuccess   onStateTranstionSuccess
 
-    onTransitionFailure  onStateTranstionFailure
+    // onFailure
+    onTransitionFailure   onStateTranstionFailure
 }
 
 // property functions
 func (ls *locatorState) CurrentState() SlaveLocatingState {
-    return SlaveUnbounded
+    return ls.constState
 }
 
 func (ls *locatorState) transtionFailureLimit() uint {
-    return TranstionFailureLimit
+    return ls.constTransitionFailureLimit
 }
 
 func (ls *locatorState) transitionTimeout() time.Duration {
-    return TransitionTimeout
+    return ls.constTransitionTimout
 }
 
 func (ls *locatorState) txActionLimit() uint {
-    return TxActionLimit
+    return ls.constTxActionLimit
 }
 
 func (ls *locatorState) txTimeout() time.Duration {
-    return UnboundedTimeout
+    return ls.constTxTimeout
 }
 
 // -- STATE TRANSITION

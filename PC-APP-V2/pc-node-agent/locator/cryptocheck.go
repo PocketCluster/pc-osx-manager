@@ -11,19 +11,23 @@ import (
 
 func newCryptocheckState() LocatorState {
     cc := &cryptocheck{}
-    cc.timestampTransition     = cc.transitionActionWithTimestamp
-    cc.masterMetaTransition    = cc.transitionWithMasterMeta
-    cc.onTransitionSuccess     = cc.onStateTranstionSuccess
-    cc.onTransitionFailure     = cc.onStateTranstionFailure
+
+    cc.constState                   = SlaveCryptoCheck
+
+    cc.constTransitionFailureLimit  = TransitionFailureLimit
+    cc.constTransitionTimout        = TransitionTimeout
+    cc.constTxActionLimit           = TxActionLimit
+    cc.constTxTimeout               = UnboundedTimeout
+
+    cc.timestampTransition          = cc.transitionActionWithTimestamp
+    cc.masterMetaTransition         = cc.transitionWithMasterMeta
+    cc.onTransitionSuccess          = cc.onStateTranstionSuccess
+    cc.onTransitionFailure          = cc.onStateTranstionFailure
     return cc
 }
 
 type cryptocheck struct{
     locatorState
-}
-
-func (ls *cryptocheck) CurrentState() SlaveLocatingState {
-    return SlaveCryptoCheck
 }
 
 func (ls *cryptocheck) transitionActionWithTimestamp(slaveTimestamp time.Time) error {

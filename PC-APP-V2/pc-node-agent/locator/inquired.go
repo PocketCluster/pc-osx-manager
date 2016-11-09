@@ -11,19 +11,23 @@ import (
 
 func newInquiredState() LocatorState {
     is := &inquired{}
-    is.timestampTransition    = is.transitionActionWithTimestamp
-    is.masterMetaTransition   = is.transitionWithMasterMeta
-    is.onTransitionSuccess    = is.onStateTranstionSuccess
-    is.onTransitionFailure    = is.onStateTranstionFailure
+
+    is.constState                   = SlaveInquired
+
+    is.constTransitionFailureLimit  = TransitionFailureLimit
+    is.constTransitionTimout        = TransitionTimeout
+    is.constTxActionLimit           = TxActionLimit
+    is.constTxTimeout               = UnboundedTimeout
+
+    is.timestampTransition          = is.transitionActionWithTimestamp
+    is.masterMetaTransition         = is.transitionWithMasterMeta
+    is.onTransitionSuccess          = is.onStateTranstionSuccess
+    is.onTransitionFailure          = is.onStateTranstionFailure
     return is
 }
 
 type inquired struct {
     locatorState
-}
-
-func (ls *inquired) CurrentState() SlaveLocatingState {
-    return SlaveInquired
 }
 
 func (ls *inquired) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
