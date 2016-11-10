@@ -284,7 +284,7 @@ func (sc *slaveContext) DiscardAESKey() {
 }
 
 func (sc *slaveContext) AESCryptor() (pcrypto.AESCryptor, error) {
-    if sc.aesCryptor != nil {
+    if sc.aesCryptor == nil {
         return nil, fmt.Errorf("[ERR] AESKey or AESCryptor is not setup")
     }
     return sc.aesCryptor, nil

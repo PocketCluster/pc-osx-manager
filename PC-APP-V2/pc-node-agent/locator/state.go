@@ -287,7 +287,7 @@ func (ls *locatorState) TimestampTransition(slaveTimestamp time.Time) (LocatorSt
     if transition == SlaveTransitionFail {
 
         // finalize locating master beacon state
-        newState := stateTransition(oldState, transition)
+        newState = stateTransition(oldState, transition)
 
         // execute event lisenter
         eventErr = executeOnTransitionEvents(ls, newState, oldState, transition, slaveTimestamp)

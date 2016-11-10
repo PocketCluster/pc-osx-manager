@@ -31,10 +31,6 @@ type bounded struct{
 }
 
 func (ls *bounded) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
-    // we'll reset TX action count to 0 and now so successful tx action can happen infinitely
-    // we need to reset the counter here than receiver
-    ls.txActionCount = 0
-
     slctx := slcontext.SharedSlaveContext()
 
     masterAgentName, err := slctx.GetMasterAgent()
@@ -71,6 +67,11 @@ func (ls *bounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta,
         // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
         return SlaveTransitionIdle, fmt.Errorf("[ERR] Null or incorrect version of master meta")
     }
+
+    // We'll reset TX action count to 0 and now so successful tx action can happen infinitely
+    // We need to reset the counter here when correct master meta comes in
+    // It is b/c when succeeded in confirming with master, we should be able to keep receiving master meta
+    ls.txActionCount = 0
 
     // TODO : send answer to master
 

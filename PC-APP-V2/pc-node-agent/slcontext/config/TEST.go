@@ -47,14 +47,26 @@ iface eth0 inet dhcp`)
 }
 
 func DebugConfigDestory(cfg *PocketSlaveConfig) {
-
-    os.Remove(cfg.rootPath + slave_config_file)
-    os.Remove(cfg.rootPath + slave_public_Key_file)
-    os.Remove(cfg.rootPath + slave_prvate_Key_file)
-    os.Remove(cfg.rootPath + slave_ssh_Key_file)
-    os.Remove(cfg.rootPath + master_public_Key_file)
-
-    os.Remove(cfg.rootPath + hostname_file)
-    os.Remove(cfg.rootPath + network_iface_file)
+    if _, err := os.Stat(cfg.rootPath + slave_config_file); os.IsExist(err) {
+        os.Remove(cfg.rootPath + slave_config_file)
+    }
+    if _, err := os.Stat(cfg.rootPath + slave_public_Key_file); os.IsExist(err) {
+        os.Remove(cfg.rootPath + slave_public_Key_file)
+    }
+    if _, err := os.Stat(cfg.rootPath + slave_prvate_Key_file); os.IsExist(err) {
+        os.Remove(cfg.rootPath + slave_prvate_Key_file)
+    }
+    if _, err := os.Stat(cfg.rootPath + slave_ssh_Key_file); os.IsExist(err) {
+        os.Remove(cfg.rootPath + slave_ssh_Key_file)
+    }
+    if _, err := os.Stat(cfg.rootPath + master_public_Key_file); os.IsExist(err) {
+        os.Remove(cfg.rootPath + master_public_Key_file)
+    }
+    if _, err := os.Stat(cfg.rootPath + hostname_file); os.IsExist(err) {
+        os.Remove(cfg.rootPath + hostname_file)
+    }
+    if _, err := os.Stat(cfg.rootPath + network_iface_file); os.IsExist(err) {
+        os.Remove(cfg.rootPath + network_iface_file)
+    }
     cfg = nil
 }

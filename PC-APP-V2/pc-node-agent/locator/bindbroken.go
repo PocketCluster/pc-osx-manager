@@ -31,7 +31,7 @@ type bindbroken struct{
 }
 
 func (ls *bindbroken) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
-    // we'll reset TX action count to 0 and now so successful tx action can happen infinitely
+    // we'll reset TX action count to 0 and now so successful tx action can happen infinitely until we confirm with master
     // we need to reset the counter here than receiver
     ls.txActionCount = 0
 
