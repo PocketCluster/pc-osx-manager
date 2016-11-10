@@ -17,7 +17,7 @@ func newInquiredState() LocatorState {
     is.constTransitionFailureLimit  = TransitionFailureLimit
     is.constTransitionTimout        = TransitionTimeout
     is.constTxActionLimit           = TxActionLimit
-    is.constTxTimeout               = UnboundedTimeout
+    is.constTxTimeWindow = UnboundedTimeout
 
     is.timestampTransition          = is.transitionActionWithTimestamp
     is.masterMetaTransition         = is.transitionWithMasterMeta

@@ -80,7 +80,7 @@ func (sl *slaveLocator) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentM
         return fmt.Errorf("[ERR] LocatorState is nil. Cannot make transition with master meta")
     }
     var err error
-    sl.state, err = sl.state.MasterMetaTranstion(meta, slaveTimestamp)
+    sl.state, err = sl.state.MasterMetaTransition(meta, slaveTimestamp)
     return err
 }
 
@@ -89,7 +89,7 @@ func (sl *slaveLocator) TranstionWithTimestamp(slaveTimestamp time.Time) error {
         return fmt.Errorf("[ERR] LocatorState is nil. Cannot make transition with master meta")
     }
     var err error
-    sl.state, err = sl.state.TimestampTranstion(slaveTimestamp)
+    sl.state, err = sl.state.TimestampTransition(slaveTimestamp)
     return err
 }
 

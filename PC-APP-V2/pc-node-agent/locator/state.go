@@ -5,6 +5,7 @@ import (
 
     "github.com/stkim1/pc-core/msagent"
     "log"
+    "fmt"
 )
 
 const (
@@ -18,8 +19,8 @@ const (
 
 type LocatorState interface {
     CurrentState() SlaveLocatingState
-    MasterMetaTranstion(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (LocatorState, error)
-    TimestampTranstion(slaveTimestamp time.Time) (LocatorState, error)
+    MasterMetaTransition(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (LocatorState, error)
+    TimestampTransition(slaveTimestamp time.Time) (LocatorState, error)
 }
 
 type transitionWithMasterMeta       func (meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error)
@@ -32,47 +33,47 @@ type onStateTranstionFailure        func (slaveTimestamp time.Time) error
 
 
 type locatorState struct {
-    /* --- given, constant state --- */
+    /* -------------------------------------- given, constant state ------------------------------------------------- */
     // this is given state that will not change
-    constState            SlaveLocatingState
+    constState                  SlaveLocatingState
 
     // transition failure
     constTransitionFailureLimit uint
 
     // transition timeout
-    constTransitionTimout time.Duration
+    constTransitionTimout       time.Duration
 
     // transmission limit
-    constTxActionLimit    uint
+    constTxActionLimit          uint
 
     // unbounded timeout
-    constTxTimeout        time.Duration
+    constTxTimeWindow           time.Duration
 
-    /* --- changing properties to record transaction --- */
+    /* ---------------------------------- changing properties to record transaction --------------------------------- */
     // each time we try to make transtion and fail, count goes up.
-    transitionActionCount uint
+    transitionActionCount       uint
 
     // last time successfully transitioned state.
-    lastTransitionTS      time.Time
+    lastTransitionTS            time.Time
 
     // each time we try to send something, count goes up. This include success/fail altogether.
-    txActionCount         uint
+    txActionCount               uint
 
     // last time transmission takes place. This is to control the frequnecy of transmission
-    lastTxTS              time.Time
+    lastTxTS                    time.Time
 
-    /* --- transition functions --- */
+    /* ----------------------------------------- transition functions ----------------------------------------------- */
     // master transition func
-    masterMetaTransition  transitionWithMasterMeta
+    masterMetaTransition        transitionWithMasterMeta
 
     // timestamp transition func
-    timestampTransition   transitionActionWithTimestamp
+    timestampTransition         transitionActionWithTimestamp
 
     // onSuccess
-    onTransitionSuccess   onStateTranstionSuccess
+    onTransitionSuccess         onStateTranstionSuccess
 
     // onFailure
-    onTransitionFailure   onStateTranstionFailure
+    onTransitionFailure         onStateTranstionFailure
 }
 
 // property functions
@@ -92,8 +93,8 @@ func (ls *locatorState) txActionLimit() uint {
     return ls.constTxActionLimit
 }
 
-func (ls *locatorState) txTimeout() time.Duration {
-    return ls.constTxTimeout
+func (ls *locatorState) txTimeWindow() time.Duration {
+    return ls.constTxTimeWindow
 }
 
 // -- STATE TRANSITION
@@ -225,7 +226,7 @@ func executeOnTransitionEvents(ls *locatorState, newState, oldState SlaveLocatin
     return nil
 }
 
-func (ls *locatorState) MasterMetaTranstion(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (LocatorState, error) {
+func (ls *locatorState) MasterMetaTransition(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (LocatorState, error) {
     var (
         transition SlaveLocatingTransition
         transErr, eventErr error = nil, nil
@@ -250,19 +251,28 @@ func (ls *locatorState) MasterMetaTranstion(meta *msagent.PocketMasterAgentMeta,
 }
 
 // --- TRANSMISSION CONTROL
-func checkTxStateWithTime(ls *locatorState, slaveTimestamp time.Time) SlaveLocatingTransition {
+func runTxStateActionWithTimestamp(ls *locatorState, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {
+    var transErr error = nil
+
     if ls.txActionCount < ls.txActionLimit() {
+
         // if tx timeout window is smaller than time delta (T_1 - T_0), don't do anything!!! just skip!
-        if ls.txTimeout() < slaveTimestamp.Sub(ls.lastTransitionTS) {
+        if ls.txTimeWindow() < slaveTimestamp.Sub(ls.lastTxTS) {
+
+            transErr = ls.timestampTransition(slaveTimestamp)
+            // since an action is taken, the action counter goes up regardless of error
             ls.txActionCount++
+            // we'll reset slave action timestamp
+            ls.lastTxTS = slaveTimestamp
         }
-        return SlaveTransitionIdle
+
+        return SlaveTransitionIdle, transErr
     }
     // this is failure. the fact that this is called indicate that we're ready to move to failure state
-    return SlaveTransitionFail
+    return SlaveTransitionFail, fmt.Errorf("[ERR] Transmission count has exceeded a given limit")
 }
 
-func (ls *locatorState) TimestampTranstion(slaveTimestamp time.Time) (LocatorState, error) {
+func (ls *locatorState) TimestampTransition(slaveTimestamp time.Time) (LocatorState, error) {
     var (
         newState, oldState SlaveLocatingState = ls.CurrentState(), ls.CurrentState()
         transition SlaveLocatingTransition
@@ -272,15 +282,9 @@ func (ls *locatorState) TimestampTranstion(slaveTimestamp time.Time) (LocatorSta
         log.Panic("[PANIC] TIMESTAMP TRANSITION SHOULD HAVE BEEN SETUP PROPERLY")
     }
 
-    transition = checkTxStateWithTime(ls, slaveTimestamp)
-
-    if transition == SlaveTransitionIdle {
-        transErr = ls.timestampTransition(slaveTimestamp)
-
-        // since an action is taken, the action counter goes up regardless of error
-        ls.txActionCount++
-    } else {
-        // now idle action condition has failed, and we need to make transition to FAILTURE state
+    transition, transErr = runTxStateActionWithTimestamp(ls, slaveTimestamp)
+    // now idle action condition has failed, and we need to make transition to FAILTURE state
+    if transition == SlaveTransitionFail {
 
         // finalize locating master beacon state
         newState := stateTransition(oldState, transition)

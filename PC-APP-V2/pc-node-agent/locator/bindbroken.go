@@ -17,7 +17,7 @@ func newBindbrokenState() LocatorState {
     bs.constTransitionFailureLimit  = TransitionFailureLimit
     bs.constTransitionTimout        = TransitionTimeout
     bs.constTxActionLimit           = TxActionLimit
-    bs.constTxTimeout               = UnboundedTimeout
+    bs.constTxTimeWindow = UnboundedTimeout
 
     bs.timestampTransition          = bs.transitionActionWithTimestamp
     bs.masterMetaTransition         = bs.transitionWithMasterMeta
@@ -31,6 +31,10 @@ type bindbroken struct{
 }
 
 func (ls *bindbroken) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
+    // we'll reset TX action count to 0 and now so successful tx action can happen infinitely
+    // we need to reset the counter here than receiver
+    ls.txActionCount = 0
+
     slctx := slcontext.SharedSlaveContext()
 
     masterAgentName, err := slctx.GetMasterAgent()

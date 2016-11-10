@@ -17,7 +17,7 @@ func newBoundedState() LocatorState {
     bs.constTransitionFailureLimit  = TransitionFailureLimit
     bs.constTransitionTimout        = TransitionTimeout
     bs.constTxActionLimit           = TxActionLimit
-    bs.constTxTimeout               = BoundedTimeout
+    bs.constTxTimeWindow = BoundedTimeout
 
     bs.timestampTransition          = bs.transitionActionWithTimestamp
     bs.masterMetaTransition         = bs.transitionWithMasterMeta
@@ -31,6 +31,10 @@ type bounded struct{
 }
 
 func (ls *bounded) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
+    // we'll reset TX action count to 0 and now so successful tx action can happen infinitely
+    // we need to reset the counter here than receiver
+    ls.txActionCount = 0
+
     slctx := slcontext.SharedSlaveContext()
 
     masterAgentName, err := slctx.GetMasterAgent()
@@ -67,6 +71,9 @@ func (ls *bounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta,
         // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
         return SlaveTransitionIdle, fmt.Errorf("[ERR] Null or incorrect version of master meta")
     }
+
+    // TODO : send answer to master
+
     return SlaveTransitionOk, nil
 }
 
