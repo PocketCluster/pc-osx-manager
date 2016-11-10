@@ -76,6 +76,9 @@ type locatorState struct {
 
     // onFailure
     onTransitionFailure         onStateTranstionFailure
+
+    /* ---------------------------------------- Communication Channel ----------------------------------------------- */
+    commChannel                 CommChannel
 }
 
 // property functions
@@ -100,33 +103,38 @@ func (ls *locatorState) txTimeWindow() time.Duration {
 }
 
 // -- STATE TRANSITION
-func newLocatorStateForState(ls LocatorState, newState, oldState SlaveLocatingState) LocatorState {
+func newLocatorStateForState(ls *locatorState, newState, oldState SlaveLocatingState) LocatorState {
     if newState == oldState {
         return ls
     }
 
+    var comm CommChannel = ls.commChannel
+    var newLocatorState LocatorState = nil
     switch newState {
         case SlaveUnbounded:
-            return newUnboundedState()
+            newLocatorState = newUnboundedState(comm)
 
         case SlaveInquired:
-            return newInquiredState()
+            newLocatorState = newInquiredState(comm)
 
         case SlaveKeyExchange:
-            return newKeyexchangeState()
+            newLocatorState = newKeyexchangeState(comm)
 
         case SlaveCryptoCheck:
-            return newCryptocheckState()
+            newLocatorState = newCryptocheckState(comm)
 
         case SlaveBounded:
-            return newBoundedState()
+            newLocatorState = newBoundedState(comm)
 
         case SlaveBindBroken:
-            return newBindbrokenState()
+            newLocatorState = newBindbrokenState(comm)
 
         default:
-            return newUnboundedState()
+            newLocatorState = newUnboundedState(comm)
     }
+    // invalidate old LocatorState CommChannel for GC
+    ls.commChannel = nil
+    return newLocatorState
 }
 
 func stateTransition(currState SlaveLocatingState, nextCondition SlaveLocatingTransition) SlaveLocatingState {

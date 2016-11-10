@@ -44,6 +44,11 @@ func (st SlaveLocatingState) String() string {
     return state
 }
 
+type CommChannel interface {
+    McastSend(data []byte) error
+    UcastSend(data []byte, target string) error
+}
+
 type SlaveLocator interface {
     CurrentState() (SlaveLocatingState, error)
     TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) error
@@ -56,13 +61,16 @@ type slaveLocator struct {
 }
 
 // New slaveLocator starts only from unbounded or bindbroken
-func NewSlaveLocator(state SlaveLocatingState) (SlaveLocator, error) {
+func NewSlaveLocator(state SlaveLocatingState, comm CommChannel) (SlaveLocator, error) {
+    if comm == nil {
+        return nil, fmt.Errorf("[ERR] communication channel cannot be void")
+    }
 
     switch state {
     case SlaveUnbounded:
-        return &slaveLocator{state: newUnboundedState()}, nil
+        return &slaveLocator{state: newUnboundedState(comm)}, nil
     case SlaveBindBroken:
-        return &slaveLocator{state: newBindbrokenState()}, nil
+        return &slaveLocator{state: newBindbrokenState(comm)}, nil
     default:
         return nil, fmt.Errorf("[ERR] SlaveLocator can initiated from SlaveUnbounded or SlaveBindBroken only")
     }

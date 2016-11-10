@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
-func newCryptocheckState() LocatorState {
+func newCryptocheckState(comm CommChannel) LocatorState {
     cc := &cryptocheck{}
 
     cc.constState                   = SlaveCryptoCheck
@@ -23,6 +23,8 @@ func newCryptocheckState() LocatorState {
     cc.masterMetaTransition         = cc.transitionWithMasterMeta
     cc.onTransitionSuccess          = cc.onStateTranstionSuccess
     cc.onTransitionFailure          = cc.onStateTranstionFailure
+
+    cc.commChannel                  = comm
     return cc
 }
 
@@ -49,18 +51,22 @@ func (ls *cryptocheck) transitionActionWithTimestamp(slaveTimestamp time.Time) e
     if err != nil {
         return err
     }
-    _, err = slagent.CheckSlaveCryptoMeta(sa, aesCryptor)
+    sm, err := slagent.CheckSlaveCryptoMeta(sa, aesCryptor)
     if err != nil {
         return err
     }
-    _, err = slcontext.SharedSlaveContext().GetMasterIP4Address()
+    pm, err := slagent.PackedSlaveMeta(sm)
     if err != nil {
         return err
     }
-
-    // TODO : send answer to master
-
-    return nil
+    ma, err := slcontext.SharedSlaveContext().GetMasterIP4Address()
+    if err != nil {
+        return err
+    }
+    if ls.commChannel == nil {
+        return fmt.Errorf("[ERR] Comm Channel is nil")
+    }
+    return ls.commChannel.UcastSend(pm, ma)
 }
 
 func (ls *cryptocheck) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {

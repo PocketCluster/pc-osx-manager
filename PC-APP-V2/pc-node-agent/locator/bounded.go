@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slcontext"
 )
 
-func newBoundedState() LocatorState {
+func newBoundedState(comm CommChannel) LocatorState {
     bs := &bounded{}
 
     bs.constState                   = SlaveBounded
@@ -23,6 +23,8 @@ func newBoundedState() LocatorState {
     bs.masterMetaTransition         = bs.transitionWithMasterMeta
     bs.onTransitionSuccess          = bs.onStateTranstionSuccess
     bs.onTransitionFailure          = bs.onStateTranstionFailure
+
+    bs.commChannel                  = comm
     return bs
 }
 
@@ -49,17 +51,22 @@ func (ls *bounded) transitionActionWithTimestamp(slaveTimestamp time.Time) error
     if err != nil {
         return err
     }
-    _, err = slagent.SlaveBoundedMeta(sa, aesCryptor)
+    sm, err := slagent.SlaveBoundedMeta(sa, aesCryptor)
     if err != nil {
         return err
     }
-    _, err = slcontext.SharedSlaveContext().GetMasterIP4Address()
+    pm, err := slagent.PackedSlaveMeta(sm)
     if err != nil {
         return err
     }
-
-    // TODO : send answer to master
-    return nil
+    ma, err := slcontext.SharedSlaveContext().GetMasterIP4Address()
+    if err != nil {
+        return err
+    }
+    if ls.commChannel == nil {
+        return fmt.Errorf("[ERR] Comm Channel is nil")
+    }
+    return ls.commChannel.UcastSend(pm, ma)
 }
 
 func (ls *bounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {

@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
-func newBindbrokenState() LocatorState {
+func newBindbrokenState(comm CommChannel) LocatorState {
     bs := &bindbroken{}
 
     bs.constState                   = SlaveBindBroken
@@ -23,6 +23,8 @@ func newBindbrokenState() LocatorState {
     bs.masterMetaTransition         = bs.transitionWithMasterMeta
     bs.onTransitionSuccess          = bs.onStateTranstionSuccess
     bs.onTransitionFailure          = bs.onStateTranstionFailure
+
+    bs.commChannel                  = comm
     return bs
 }
 
@@ -36,7 +38,6 @@ func (ls *bindbroken) transitionActionWithTimestamp(slaveTimestamp time.Time) er
     ls.txActionCount = 0
 
     slctx := slcontext.SharedSlaveContext()
-
     masterAgentName, err := slctx.GetMasterAgent()
     if err != nil {
         return nil
@@ -45,14 +46,18 @@ func (ls *bindbroken) transitionActionWithTimestamp(slaveTimestamp time.Time) er
     if err != nil {
         return nil
     }
-    _, err = slagent.BrokenBindMeta(ba)
+    sm, err := slagent.BrokenBindMeta(ba)
     if err != nil {
         return nil
     }
-
-    // TODO : broadcast slave meta
-
-    return nil
+    pm, err := slagent.PackedSlaveMeta(sm)
+    if err != nil {
+        return err
+    }
+    if ls.commChannel == nil {
+        return fmt.Errorf("[ERR] Comm Channel is nil")
+    }
+    return ls.commChannel.McastSend(pm)
 }
 
 func (ls *bindbroken) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {

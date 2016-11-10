@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
-func newInquiredState() LocatorState {
+func newInquiredState(comm CommChannel) LocatorState {
     is := &inquired{}
 
     is.constState                   = SlaveInquired
@@ -23,6 +23,8 @@ func newInquiredState() LocatorState {
     is.masterMetaTransition         = is.transitionWithMasterMeta
     is.onTransitionSuccess          = is.onStateTranstionSuccess
     is.onTransitionFailure          = is.onStateTranstionFailure
+
+    is.commChannel                  = comm
     return is
 }
 
@@ -35,17 +37,22 @@ func (ls *inquired) transitionActionWithTimestamp(slaveTimestamp time.Time) erro
     if err != nil {
         return err
     }
-    _, err = slagent.AnswerMasterInquiryMeta(agent)
+    sm, err := slagent.AnswerMasterInquiryMeta(agent)
     if err != nil {
         return err
     }
-    _, err = slcontext.SharedSlaveContext().GetMasterIP4Address()
+    pm, err := slagent.PackedSlaveMeta(sm)
     if err != nil {
         return err
     }
-    // TODO : send answer to master
-
-    return nil
+    ma, err := slcontext.SharedSlaveContext().GetMasterIP4Address()
+    if err != nil {
+        return err
+    }
+    if ls.commChannel == nil {
+        return fmt.Errorf("[ERR] Comm Channel is nil")
+    }
+    return ls.commChannel.UcastSend(pm, ma)
 }
 
 func (ls *inquired) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {

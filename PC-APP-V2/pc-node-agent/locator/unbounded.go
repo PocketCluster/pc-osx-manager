@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slcontext"
 )
 
-func newUnboundedState() LocatorState {
+func newUnboundedState(comm CommChannel) LocatorState {
     us := &unbounded{}
 
     us.constState                   = SlaveUnbounded
@@ -23,6 +23,8 @@ func newUnboundedState() LocatorState {
     us.masterMetaTransition         = us.transitionWithMasterMeta
     us.onTransitionSuccess          = us.onStateTranstionSuccess
     us.onTransitionFailure          = us.onStateTranstionFailure
+
+    us.commChannel                  = comm
     return us
 }
 
@@ -39,14 +41,18 @@ func (ls *unbounded) transitionActionWithTimestamp(slaveTimestamp time.Time) err
     if err != nil {
         return err
     }
-    _, err = slagent.UnboundedMasterDiscoveryMeta(ua)
+    sm, err := slagent.UnboundedMasterDiscoveryMeta(ua)
     if err != nil {
         return err
     }
-
-    // TODO : broadcast slave meta
-
-    return nil
+    pm, err := slagent.PackedSlaveMeta(sm)
+    if err != nil {
+        return err
+    }
+    if ls.commChannel == nil {
+        return fmt.Errorf("[ERR] Comm Channel is nil")
+    }
+    return ls.commChannel.McastSend(pm)
 }
 
 func (ls *unbounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {

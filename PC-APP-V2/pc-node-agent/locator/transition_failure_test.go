@@ -72,6 +72,7 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
+    debugComm := &DebugCommChannel{}
     // Let's have a bounded state
     context := slcontext.SharedSlaveContext()
     context.SetMasterPublicKey(pcrypto.TestMasterPublicKey())
@@ -79,7 +80,7 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
     context.SetSlaveNodeName(slaveNodeName)
 
     // have a slave locator
-    sd, err := NewSlaveLocator(SlaveBindBroken)
+    sd, err := NewSlaveLocator(SlaveBindBroken, debugComm)
     if err != nil {
         t.Error(err.Error())
         return
@@ -132,6 +133,12 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
             }
         }
     }
+    if debugComm.UCommCount != (TxActionLimit - 1) {
+        t.Errorf("[ERR] comm count does not match %d | expected %d", debugComm.MCommCount, (TxActionLimit - 1))
+    }
+    if debugComm.MCommCount != 1 {
+        t.Errorf("[ERR] MultiComm count does not match %d / expected %d ", debugComm.MCommCount, 1)
+    }
 }
 
 // bindbroken -> bindbroken
@@ -139,13 +146,14 @@ func Test_BindBroken_BindBroken_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
+    debugComm := &DebugCommChannel{}
     // by the time bind broken state is revived, previous master public key should have been available.
     context := slcontext.SharedSlaveContext()
     context.SetMasterPublicKey(pcrypto.TestMasterPublicKey())
     context.SetMasterAgent(masterAgentName)
     context.SetSlaveNodeName(slaveNodeName)
 
-    sd, err := NewSlaveLocator(SlaveBindBroken)
+    sd, err := NewSlaveLocator(SlaveBindBroken, debugComm)
     if err != nil {
         t.Error(err.Error())
         return
@@ -172,6 +180,9 @@ func Test_BindBroken_BindBroken_TxActionFail(t *testing.T) {
             return
         }
     }
+    if debugComm.MCommCount != TxCountTarget {
+        t.Errorf("[ERR] MultiComm count does not match %d / expected %d ", debugComm.MCommCount, TxCountTarget)
+    }
 }
 
 // unbounded -> unbounded
@@ -179,7 +190,8 @@ func Test_Unbounded_Unbounded_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    sd, err := NewSlaveLocator(SlaveUnbounded)
+    debugComm := &DebugCommChannel{}
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
     if err != nil {
         t.Error(err.Error())
         return
@@ -205,5 +217,8 @@ func Test_Unbounded_Unbounded_TxActionFail(t *testing.T) {
             t.Errorf("[ERR] Slave state should not change properly | Current : %s\n", state.String())
             return
         }
+    }
+    if debugComm.MCommCount != TxCountTarget {
+        t.Errorf("[ERR] MultiComm count does not match %d | expected %d", debugComm.MCommCount, TxCountTarget)
     }
 }

@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
-func newKeyexchangeState() LocatorState {
+func newKeyexchangeState(comm CommChannel) LocatorState {
     ks := &keyexchange{}
 
     ks.constState                   = SlaveKeyExchange
@@ -23,6 +23,8 @@ func newKeyexchangeState() LocatorState {
     ks.masterMetaTransition         = ks.transitionWithMasterMeta
     ks.onTransitionSuccess          = ks.onStateTranstionSuccess
     ks.onTransitionFailure          = ks.onStateTranstionFailure
+
+    ks.commChannel                  = comm
     return ks
 }
 
@@ -41,18 +43,22 @@ func (ls *keyexchange) transitionActionWithTimestamp(slaveTimestamp time.Time) e
     if err != nil {
         return err
     }
-    _, err = slagent.KeyExchangeMeta(agent, slctx.GetPublicKey())
+    sm, err := slagent.KeyExchangeMeta(agent, slctx.GetPublicKey())
     if err != nil {
         return err
     }
-    _, err = slcontext.SharedSlaveContext().GetMasterIP4Address()
+    pm, err := slagent.PackedSlaveMeta(sm)
     if err != nil {
         return err
     }
-
-    // TODO : send answer to master
-
-    return nil
+    ma, err := slcontext.SharedSlaveContext().GetMasterIP4Address()
+    if err != nil {
+        return err
+    }
+    if ls.commChannel == nil {
+        return fmt.Errorf("[ERR] Comm Channel is nil")
+    }
+    return ls.commChannel.UcastSend(pm, ma)
 }
 
 func (ls *keyexchange) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {

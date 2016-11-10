@@ -37,7 +37,7 @@ func TestUnboundedState_InquiredTransition(t *testing.T) {
         return
     }
 
-    ssd, err := NewSlaveLocator(SlaveUnbounded)
+    ssd, err := NewSlaveLocator(SlaveUnbounded, &DebugCommChannel{})
     if err != nil {
         t.Error(err.Error())
         return
@@ -70,12 +70,12 @@ func TestInquired_KeyExchangeTransition(t *testing.T) {
     }
 
     // set to slave discovery state to "Inquired"
-    sd, err := NewSlaveLocator(SlaveUnbounded)
+    sd, err := NewSlaveLocator(SlaveUnbounded, &DebugCommChannel{})
     if err != nil {
         t.Error(err.Error())
         return
     }
-    sd.(*slaveLocator).state = newInquiredState()
+    sd.(*slaveLocator).state = newInquiredState(&DebugCommChannel{})
 
     // execute state transition
     if err = sd.TranstionWithMasterMeta(meta, endTime.Add(time.Second)); err != nil {
@@ -105,12 +105,12 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
     }
 
     // set to slave discovery state to "Inquired"
-    sd, err := NewSlaveLocator(SlaveUnbounded)
+    sd, err := NewSlaveLocator(SlaveUnbounded, &DebugCommChannel{})
     if err != nil {
         t.Error(err.Error())
         return
     }
-    sd.(*slaveLocator).state = newInquiredState()
+    sd.(*slaveLocator).state = newInquiredState(&DebugCommChannel{})
 
     // execute state transition
     slaveTS := masterTS.Add(time.Second)
@@ -174,7 +174,7 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
 
     context := slcontext.SharedSlaveContext()
 
-    sd, err := NewSlaveLocator(SlaveUnbounded)
+    sd, err := NewSlaveLocator(SlaveUnbounded, &DebugCommChannel{})
     if err != nil {
         t.Error(err.Error())
         return
@@ -290,7 +290,7 @@ func Test_BindBroken_Bounded_Transition(t *testing.T) {
     context.SetMasterAgent(masterAgentName)
     context.SetSlaveNodeName(slaveNodeName)
 
-    sd, err := NewSlaveLocator(SlaveBindBroken)
+    sd, err := NewSlaveLocator(SlaveBindBroken, &DebugCommChannel{})
     if err != nil {
         t.Error(err.Error())
         return
