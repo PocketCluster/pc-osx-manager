@@ -281,19 +281,34 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
 }
 
 func Test_BindBroken_Bounded_Transition(t *testing.T) {
-/*
-    meta, err = msagent.TestMasterBrokenBindRecoveryCommand(masterAgentName, pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor)
+    setUp()
+    defer tearDown()
+
+    // by the time bind broken state is revived, previous master public key should have been available.
+    context := slcontext.SharedSlaveContext()
+    context.SetMasterPublicKey(pcrypto.TestMasterPublicKey())
+    context.SetMasterAgent(masterAgentName)
+    context.SetSlaveNodeName(slaveNodeName)
+
+    sd, err := NewSlaveLocator(SlaveBindBroken)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    masterTS := time.Now()
+    meta, err := msagent.TestMasterBrokenBindRecoveryCommand(masterAgentName, pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor)
     if err != nil {
         t.Error(err.Error())
         return
     }
     // execute state transition
-    slaveTS = slaveTS.Add(time.Second)
+    slaveTS := masterTS.Add(time.Second)
     if err = sd.TranstionWithMasterMeta(meta, slaveTS); err != nil {
         t.Error(err.Error())
         return
     }
-    state, err = sd.CurrentState()
+    state, err := sd.CurrentState()
     if err != nil {
         t.Error(err.Error())
         return
@@ -303,5 +318,17 @@ func Test_BindBroken_Bounded_Transition(t *testing.T) {
         t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
         return
     }
-*/
+    // Verification
+    if msName, _ := context.GetMasterAgent(); msName != masterAgentName {
+        t.Errorf("[ERR] master node name is setup inappropriately | Current : %s\n", msName)
+        return
+    }
+    if snName, _ := context.GetSlaveNodeName(); snName != slaveNodeName {
+        t.Errorf("[ERR] slave node name is setup inappropriately | Current : %s\n", snName)
+        return
+    }
+    if bytes.Compare(context.GetAESKey(), pcrypto.TestAESKey) != 0 {
+        t.Errorf("[ERR] slave aes key is setup inappropriately")
+        return
+    }
 }
