@@ -126,10 +126,16 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
                 t.Errorf("[ERR] Slave state should not change properly | Current : %s\n", state.String())
                 return
             }
+            if len(debugComm.LastUcastMessage) == 0 || 508 < len(debugComm.LastUcastMessage) {
+                t.Errorf("[ERR] Unicast message cannot exceed 508 bytes. Current %d", len(debugComm.LastUcastMessage))
+            }
         } else {
             if state != SlaveBindBroken {
                 t.Errorf("[ERR] Slave state should not change properly | Current : %s\n", state.String())
                 return
+            }
+            if len(debugComm.LastMcastMessage) == 0 || 508 < len(debugComm.LastMcastMessage) {
+                t.Errorf("[ERR] Multicast message cannot exceed 508 bytes. Current %d", len(debugComm.LastMcastMessage))
             }
         }
     }
@@ -179,6 +185,9 @@ func Test_BindBroken_BindBroken_TxActionFail(t *testing.T) {
             t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
             return
         }
+        if len(debugComm.LastMcastMessage) == 0 || 508 < len(debugComm.LastMcastMessage) {
+            t.Errorf("[ERR] Multicast message cannot exceed 508 bytes. Current %d", len(debugComm.LastMcastMessage))
+        }
     }
     if debugComm.MCommCount != TxCountTarget {
         t.Errorf("[ERR] MultiComm count does not match %d / expected %d ", debugComm.MCommCount, TxCountTarget)
@@ -216,6 +225,9 @@ func Test_Unbounded_Unbounded_TxActionFail(t *testing.T) {
         if state != SlaveUnbounded {
             t.Errorf("[ERR] Slave state should not change properly | Current : %s\n", state.String())
             return
+        }
+        if len(debugComm.LastMcastMessage) == 0 || 508 < len(debugComm.LastMcastMessage) {
+            t.Errorf("[ERR] Multicast message cannot exceed 508 bytes. Current %d", len(debugComm.LastMcastMessage))
         }
     }
     if debugComm.MCommCount != TxCountTarget {

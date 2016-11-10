@@ -2,8 +2,8 @@ package locator
 
 type DebugCommChannel struct {
     LastMcastMessage []byte
-    LastUcaseMessage []byte
-    LastUcaseHost    string
+    LastUcastMessage []byte
+    LastUcastHost    string
     MCommCount       uint
     UCommCount       uint
 }
@@ -15,8 +15,8 @@ func (dc *DebugCommChannel) McastSend(data []byte) error {
 }
 
 func (dc *DebugCommChannel) UcastSend(data []byte, target string) error {
-    dc.LastUcaseMessage = data
-    dc.LastUcaseHost = target
+    dc.LastUcastMessage = data
+    dc.LastUcastHost = target
     dc.UCommCount++
     return nil
 }
