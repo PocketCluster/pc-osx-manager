@@ -17,7 +17,7 @@ func newKeyexchangeState() LocatorState {
     ks.constTransitionFailureLimit  = TransitionFailureLimit
     ks.constTransitionTimout        = TransitionTimeout
     ks.constTxActionLimit           = TxActionLimit
-    ks.constTxTimeWindow = UnboundedTimeout
+    ks.constTxTimeWindow            = UnboundedTimeout
 
     ks.timestampTransition          = ks.transitionActionWithTimestamp
     ks.masterMetaTransition         = ks.transitionWithMasterMeta

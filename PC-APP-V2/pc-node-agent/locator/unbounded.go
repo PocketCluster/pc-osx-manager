@@ -17,7 +17,7 @@ func newUnboundedState() LocatorState {
     us.constTransitionFailureLimit  = TransitionFailureLimit
     us.constTransitionTimout        = TransitionTimeout
     us.constTxActionLimit           = TxActionLimit
-    us.constTxTimeWindow = UnboundedTimeout
+    us.constTxTimeWindow            = UnboundedTimeout
 
     us.timestampTransition          = us.transitionActionWithTimestamp
     us.masterMetaTransition         = us.transitionWithMasterMeta

@@ -17,7 +17,7 @@ func newCryptocheckState() LocatorState {
     cc.constTransitionFailureLimit  = TransitionFailureLimit
     cc.constTransitionTimout        = TransitionTimeout
     cc.constTxActionLimit           = TxActionLimit
-    cc.constTxTimeWindow = UnboundedTimeout
+    cc.constTxTimeWindow            = UnboundedTimeout
 
     cc.timestampTransition          = cc.transitionActionWithTimestamp
     cc.masterMetaTransition         = cc.transitionWithMasterMeta

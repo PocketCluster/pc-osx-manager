@@ -17,7 +17,7 @@ func newBoundedState() LocatorState {
     bs.constTransitionFailureLimit  = TransitionFailureLimit
     bs.constTransitionTimout        = TransitionTimeout
     bs.constTxActionLimit           = TxActionLimit
-    bs.constTxTimeWindow = BoundedTimeout
+    bs.constTxTimeWindow            = BoundedTimeout
 
     bs.timestampTransition          = bs.transitionActionWithTimestamp
     bs.masterMetaTransition         = bs.transitionWithMasterMeta

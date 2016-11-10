@@ -17,7 +17,7 @@ func newBindbrokenState() LocatorState {
     bs.constTransitionFailureLimit  = TransitionFailureLimit
     bs.constTransitionTimout        = TransitionTimeout
     bs.constTxActionLimit           = TxActionLimit
-    bs.constTxTimeWindow = UnboundedTimeout
+    bs.constTxTimeWindow            = UnboundedTimeout
 
     bs.timestampTransition          = bs.transitionActionWithTimestamp
     bs.masterMetaTransition         = bs.transitionWithMasterMeta
