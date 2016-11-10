@@ -60,6 +60,8 @@ type locatorState struct {
     txActionCount               uint
 
     // last time transmission takes place. This is to control the frequnecy of transmission
+    // !!!IMPORTANT!!! BY NOT SETTING A PARTICULAR VALUE, BY NOT SETTING ANYTHING, WE WILL AUTOMATICALLY EXECUTE
+    // TX ACTION ON THE IDLE CYCLE RIGHT AFTER A SUCCESSFUL TRANSITION. SO DO NOT SET ANTYHING IN CONSTRUCTION
     lastTxTS                    time.Time
 
     /* ----------------------------------------- transition functions ----------------------------------------------- */
