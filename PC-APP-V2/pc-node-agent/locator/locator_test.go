@@ -18,7 +18,8 @@ var initSendTimestmap time.Time
 func setUp() {
     masterAgentName, _ = context.DebugContextPrepare().MasterAgentName()
     slaveNodeName = "pc-node1"
-    initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
+    //initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
+    initSendTimestmap = time.Now()
     slcontext.DebugSlcontextPrepare()
 }
 
@@ -37,18 +38,18 @@ func TestUnboundedState_InquiredTransition(t *testing.T) {
         return
     }
 
-    ssd, err := NewSlaveLocator(SlaveUnbounded, &DebugCommChannel{})
+    sd, err := NewSlaveLocator(SlaveUnbounded, &DebugCommChannel{})
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = ssd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 2))
+    err = sd.TranstionWithMasterMeta(meta, initSendTimestmap.Add(time.Second * 2))
     if err != nil {
         t.Error(err.Error())
         return
     }
 
-    state, err := ssd.CurrentState()
+    state, err := sd.CurrentState()
     if err != nil {
         t.Error(err.Error())
         return

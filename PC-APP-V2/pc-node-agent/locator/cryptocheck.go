@@ -19,6 +19,8 @@ func newCryptocheckState(comm CommChannel) LocatorState {
     cc.constTxActionLimit           = TxActionLimit
     cc.constTxTimeWindow            = UnboundedTimeout
 
+    cc.lastTransitionTS             = time.Now()
+
     cc.timestampTransition          = cc.transitionActionWithTimestamp
     cc.masterMetaTransition         = cc.transitionWithMasterMeta
     cc.onTransitionSuccess          = cc.onStateTranstionSuccess

@@ -3,10 +3,12 @@ package locator
 import (
     "testing"
     "time"
+    "log"
 
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-core/msagent"
+    "github.com/davecgh/go-spew/spew"
 )
 
 // unbounded -> inquired
@@ -14,12 +16,97 @@ func Test_Unbounded_Inquired_MasterMetaFail(t *testing.T) {
     setUp()
     defer tearDown()
 
+    // unbounded state
+    debugComm := &DebugCommChannel{}
+    slaveTS := time.Now().Add(time.Second)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    state, err := sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveUnbounded {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+        return
+    }
+
+    // master meta failture test
+    TransitionLimit := int(TransitionFailureLimit * TransitionFailureLimit)
+    for i := 0 ; i < TransitionLimit; i++ {
+        slaveTS = slaveTS.Add(time.Second)
+        meta, err := msagent.TestMasterInquireSlaveRespond()
+        if err != nil {
+            t.Error(err.Error())
+            return
+        }
+        meta.DiscoveryRespond.MasterAddress = ""
+        err = sd.TranstionWithMasterMeta(meta, slaveTS)
+        if err != nil {
+            t.Skip(err.Error())
+        }
+        state, err := sd.CurrentState()
+        if err != nil {
+            t.Error(err.Error())
+            return
+        }
+        if state != SlaveUnbounded {
+            t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+            return
+        }
+    }
 }
 
 func Test_Unbounded_Inquired_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
+    // inquired transition
+    debugComm := &DebugCommChannel{}
+    slaveTS := time.Now()
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    state, err := sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveUnbounded {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+        return
+    }
+
+    // transmission failture test
+    TransitionLimit := int(TransitionFailureLimit * TransitionFailureLimit)
+    for i := 0 ; i < TransitionLimit; i++ {
+        slaveTS = slaveTS.Add(time.Millisecond + UnboundedTimeout)
+        err = sd.TranstionWithTimestamp(slaveTS)
+        if err != nil {
+            t.Error(err.Error())
+            return
+        }
+        state, err := sd.CurrentState()
+        if err != nil {
+            t.Error(err.Error())
+            return
+        }
+        if state != SlaveUnbounded {
+            t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+            return
+        }
+        if len(debugComm.LastMcastMessage) == 0 || 508 < len(debugComm.LastMcastMessage) {
+            t.Errorf("[ERR] Multicast message cannot exceed 508 bytes. Current %d", len(debugComm.LastMcastMessage))
+        }
+    }
+    if debugComm.MCommCount != uint(TransitionLimit) {
+        t.Errorf("[ERR] MultiComm count does not match %d | expected %d", debugComm.MCommCount, TransitionLimit)
+    }
 }
 
 // inquired -> keyexchange
@@ -27,12 +114,211 @@ func Test_Inquired_Keyexchange_MasterMetaFail(t *testing.T) {
     setUp()
     defer tearDown()
 
+    // unbounded -> inquired
+    context := slcontext.SharedSlaveContext()
+    debugComm := &DebugCommChannel{}
+    slaveTS := time.Now()
+    masterTS := time.Now()
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    meta, err := msagent.TestMasterInquireSlaveRespond()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS = slaveTS.Add(time.Second)
+    err = sd.TranstionWithMasterMeta(meta, slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    state, err := sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveInquired {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+        return
+    }
+
+    for i := 0; i <= int(TransitionFailureLimit); i++ {
+        // inquired -> keyexchange
+        masterTS = slaveTS.Add(time.Second)
+        meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), masterTS)
+        if err != nil {
+            t.Error(err.Error())
+            return
+        }
+        // void master pubkey to fail transition
+        meta.MasterPubkey = nil
+
+        slaveTS = masterTS.Add(time.Second)
+        err = sd.TranstionWithMasterMeta(meta, slaveTS)
+        if i < int(TransitionFailureLimit) {
+            if err != nil {
+                t.Skip(err.Error())
+            }
+            state, err = sd.CurrentState()
+            if err != nil {
+                t.Error(err.Error())
+                return
+            }
+            if state != SlaveInquired {
+                t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+                return
+            }
+        } else {
+            if err == nil {
+                t.Errorf("[ERR] ")
+            } else {
+                t.Skip(err.Error())
+            }
+            state, err = sd.CurrentState()
+            if err != nil {
+                t.Error(err.Error())
+                return
+            }
+            if state != SlaveUnbounded {
+                t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+                return
+            }
+            _, err = context.GetMasterAgent()
+            if err == nil {
+                t.Errorf("[ERR] Master Agent Name should be nil")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+            _, err = context.GetMasterPublicKey()
+            if err == nil {
+                t.Errorf("[ERR] Master public key should be nil")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+            _, err = context.GetMasterIP4Address()
+            if err == nil {
+                t.Errorf("[ERR] Master address should be empty")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+            _, err = context.AESCryptor()
+            if err == nil {
+                t.Errorf("[ERR] AESCryptor should be nil")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+        }
+    }
 }
 
 func Test_Inquired_Keyexchange_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
+    // unbounded -> inquired
+    context := slcontext.SharedSlaveContext()
+    debugComm := &DebugCommChannel{}
+    slaveTS := time.Now()
+    //masterTS := time.Now()
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    meta, err := msagent.TestMasterInquireSlaveRespond()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS = slaveTS.Add(time.Second)
+    err = sd.TranstionWithMasterMeta(meta, slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    state, err := sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveInquired {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+        return
+    }
+
+    // make transition failed
+    for i := 0; i <= int(TxActionLimit); i++ {
+        slaveTS = slaveTS.Add(time.Millisecond + UnboundedTimeout)
+        err = sd.TranstionWithTimestamp(slaveTS)
+        if i < int(TxActionLimit) {
+            if err != nil {
+                t.Error(err.Error())
+                return
+            }
+            state, err = sd.CurrentState()
+            if err != nil {
+                t.Error(err.Error())
+                return
+            }
+            if state != SlaveInquired {
+                t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+                return
+            }
+        } else {
+            if err == nil {
+                t.Error("[ERR] Tx after TxActionLimit should generate error")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+            if state != SlaveUnbounded {
+                t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+                return
+            }
+
+            _, err = context.GetMasterAgent()
+            if err == nil {
+                t.Errorf("[ERR] Master Agent Name should be nil")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+            _, err = context.GetMasterPublicKey()
+            if err == nil {
+                t.Errorf("[ERR] Master public key should be nil")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+            _, err = context.GetMasterIP4Address()
+            if err == nil {
+                t.Errorf("[ERR] Master address should be empty")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+            _, err = context.AESCryptor()
+            if err == nil {
+                t.Errorf("[ERR] AESCryptor should be nil")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+        }
+        if len(debugComm.LastUcastMessage) == 0 || 508 < len(debugComm.LastUcastMessage) {
+            t.Errorf("[ERR] Multicast message cannot exceed 508 bytes. Current %d", len(debugComm.LastUcastMessage))
+        }
+    }
+    if debugComm.UCommCount != uint(TxActionLimit) + 1 {
+        t.Errorf("[ERR] MultiComm count does not match %d | expected %d", debugComm.MCommCount, TxActionLimit + 1)
+    }
 }
 
 // keyexchange -> cryptocheck
@@ -40,12 +326,255 @@ func Test_Keyexchange_Cryptocheck_MasterMetaFail(t *testing.T) {
     setUp()
     defer tearDown()
 
+    context := slcontext.SharedSlaveContext()
+    debugComm := &DebugCommChannel{}
+    slaveTS := time.Now()
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    // unbounded -> inquired
+    meta, err := msagent.TestMasterInquireSlaveRespond()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS = slaveTS.Add(time.Second)
+    err = sd.TranstionWithMasterMeta(meta, slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    state, err := sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveInquired {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+        return
+    }
+    // inquired -> keyexchange
+    masterTS := slaveTS.Add(time.Second)
+    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), masterTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    // execute state transition
+    slaveTS = masterTS.Add(time.Second)
+    err = sd.TranstionWithMasterMeta(meta, slaveTS)
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+    state, err = sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveKeyExchange {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+        return
+    }
+
+    for i := 0; i <= int(TransitionFailureLimit); i++ {
+        // keyexchange -> cryptocheck
+        masterTS = slaveTS.Add(time.Second)
+        meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
+        if err != nil {
+            t.Error(err.Error())
+            return
+        }
+        // make transition fail
+        meta.RsaCryptoSignature = nil
+
+        slaveTS = masterTS.Add(time.Second)
+        err = sd.TranstionWithMasterMeta(meta, slaveTS)
+        if i < int(TransitionFailureLimit) {
+            if err != nil {
+                t.Skip(err.Error())
+            }
+            state, err = sd.CurrentState()
+            if err != nil {
+                t.Error(err.Error())
+                return
+            }
+            if state != SlaveInquired {
+                t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+                return
+            }
+        } else {
+            if err == nil {
+                t.Errorf("[ERR] ")
+            } else {
+                t.Skip(err.Error())
+            }
+            state, err = sd.CurrentState()
+            if err != nil {
+                t.Error(err.Error())
+                return
+            }
+            if state != SlaveUnbounded {
+                t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+                return
+            }
+            _, err = context.GetMasterAgent()
+            if err == nil {
+                t.Errorf("[ERR] Master Agent Name should be nil")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+            _, err = context.GetMasterPublicKey()
+            if err == nil {
+                t.Errorf("[ERR] Master public key should be nil")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+            _, err = context.GetMasterIP4Address()
+            if err == nil {
+                t.Errorf("[ERR] Master address should be empty")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+            _, err = context.AESCryptor()
+            if err == nil {
+                t.Errorf("[ERR] AESCryptor should be nil")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+        }
+    }
 }
 
 func Test_keyexchange_Cryptocheck_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
+    context := slcontext.SharedSlaveContext()
+    debugComm := &DebugCommChannel{}
+    slaveTS := time.Now()
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    // unbounded -> inquired
+    meta, err := msagent.TestMasterInquireSlaveRespond()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS = slaveTS.Add(time.Second)
+    err = sd.TranstionWithMasterMeta(meta, slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    state, err := sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveInquired {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+        return
+    }
+    // inquired -> keyexchange
+    masterTS := slaveTS.Add(time.Second)
+    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), masterTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    // execute state transition
+    slaveTS = masterTS.Add(time.Second)
+    err = sd.TranstionWithMasterMeta(meta, slaveTS)
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+    state, err = sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveKeyExchange {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+        return
+    }
+
+    // make transition failed
+    for i := 0; i <= int(TxActionLimit); i++ {
+        slaveTS = slaveTS.Add(time.Millisecond + UnboundedTimeout)
+        err = sd.TranstionWithTimestamp(slaveTS)
+        if i < int(TxActionLimit) {
+            if err != nil {
+                t.Error(err.Error())
+                return
+            }
+            state, err = sd.CurrentState()
+            if err != nil {
+                t.Error(err.Error())
+                return
+            }
+            if state != SlaveKeyExchange {
+                t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+                return
+            }
+            if len(debugComm.LastUcastMessage) == 0 || 508 < len(debugComm.LastUcastMessage) {
+                t.Errorf("[ERR] Multicast message cannot exceed 508 bytes. Current %d", len(debugComm.LastUcastMessage))
+                log.Println(spew.Sdump(debugComm.LastUcastMessage))
+            }
+        } else {
+            if err == nil {
+                t.Error("[ERR] Tx after TxActionLimit should generate error")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+            if state != SlaveUnbounded {
+                t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+                return
+            }
+            _, err = context.GetMasterAgent()
+            if err == nil {
+                t.Errorf("[ERR] Master Agent Name should be nil")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+            _, err = context.GetMasterPublicKey()
+            if err == nil {
+                t.Errorf("[ERR] Master public key should be nil")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+            _, err = context.GetMasterIP4Address()
+            if err == nil {
+                t.Errorf("[ERR] Master address should be empty")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+            _, err = context.AESCryptor()
+            if err == nil {
+                t.Errorf("[ERR] AESCryptor should be nil")
+                return
+            } else {
+                t.Skip(err.Error())
+            }
+        }
+    }
+    if debugComm.UCommCount != uint(TxActionLimit) + 1 {
+        t.Errorf("[ERR] MultiComm count does not match %d | expected %d", debugComm.MCommCount, TxActionLimit + 1)
+    }
 }
 
 // cryptocheck -> bounded
@@ -78,8 +607,8 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    debugComm := &DebugCommChannel{}
     // Let's have a bounded state
+    debugComm := &DebugCommChannel{}
     context := slcontext.SharedSlaveContext()
     context.SetMasterPublicKey(pcrypto.TestMasterPublicKey())
     context.SetMasterAgent(masterAgentName)
@@ -143,6 +672,11 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
             if len(debugComm.LastMcastMessage) == 0 || 508 < len(debugComm.LastMcastMessage) {
                 t.Errorf("[ERR] Multicast message cannot exceed 508 bytes. Current %d", len(debugComm.LastMcastMessage))
             }
+            aesKey := context.GetAESKey()
+            if len(aesKey) != 0 {
+                t.Error("[ERR] AES key should be nil")
+                return
+            }
         }
     }
     if debugComm.UCommCount != (TxActionLimit - 1) {
@@ -158,8 +692,8 @@ func Test_BindBroken_BindBroken_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    debugComm := &DebugCommChannel{}
     // by the time bind broken state is revived, previous master public key should have been available.
+    debugComm := &DebugCommChannel{}
     context := slcontext.SharedSlaveContext()
     context.SetMasterPublicKey(pcrypto.TestMasterPublicKey())
     context.SetMasterAgent(masterAgentName)

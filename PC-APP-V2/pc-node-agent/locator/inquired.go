@@ -19,6 +19,8 @@ func newInquiredState(comm CommChannel) LocatorState {
     is.constTxActionLimit           = TxActionLimit
     is.constTxTimeWindow            = UnboundedTimeout
 
+    is.lastTransitionTS             = time.Now()
+
     is.timestampTransition          = is.transitionActionWithTimestamp
     is.masterMetaTransition         = is.transitionWithMasterMeta
     is.onTransitionSuccess          = is.onStateTranstionSuccess

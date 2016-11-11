@@ -19,6 +19,8 @@ func newKeyexchangeState(comm CommChannel) LocatorState {
     ks.constTxActionLimit           = TxActionLimit
     ks.constTxTimeWindow            = UnboundedTimeout
 
+    ks.lastTransitionTS             = time.Now()
+
     ks.timestampTransition          = ks.transitionActionWithTimestamp
     ks.masterMetaTransition         = ks.transitionWithMasterMeta
     ks.onTransitionSuccess          = ks.onStateTranstionSuccess

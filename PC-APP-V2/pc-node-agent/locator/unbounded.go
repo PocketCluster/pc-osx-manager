@@ -19,6 +19,8 @@ func newUnboundedState(comm CommChannel) LocatorState {
     us.constTxActionLimit           = TxActionLimit
     us.constTxTimeWindow            = UnboundedTimeout
 
+    us.lastTransitionTS             = time.Now()
+
     us.timestampTransition          = us.transitionActionWithTimestamp
     us.masterMetaTransition         = us.transitionWithMasterMeta
     us.onTransitionSuccess          = us.onStateTranstionSuccess

@@ -16,7 +16,7 @@ func DebugSlcontextPrepare() PocketSlaveContext {
     }
     initializeSlaveContext(singletonContext, cfg)
     // pub/priv keys are generated
-    singletonContext.publicKey = pcrypto.TestSlavePrivateKey()
+    singletonContext.publicKey = pcrypto.TestSlavePublicKey()
     singletonContext.privateKey = pcrypto.TestSlavePrivateKey()
 
     return singletonContext

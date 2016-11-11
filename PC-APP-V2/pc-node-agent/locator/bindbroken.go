@@ -19,6 +19,8 @@ func newBindbrokenState(comm CommChannel) LocatorState {
     bs.constTxActionLimit           = TxActionLimit
     bs.constTxTimeWindow            = UnboundedTimeout
 
+    bs.lastTransitionTS             = time.Now()
+
     bs.timestampTransition          = bs.transitionActionWithTimestamp
     bs.masterMetaTransition         = bs.transitionWithMasterMeta
     bs.onTransitionSuccess          = bs.onStateTranstionSuccess
