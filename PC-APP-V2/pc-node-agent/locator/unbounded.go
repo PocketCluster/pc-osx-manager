@@ -15,7 +15,7 @@ func newUnboundedState(comm CommChannel) LocatorState {
     us.constState                   = SlaveUnbounded
 
     us.constTransitionFailureLimit  = TransitionFailureLimit
-    us.constTransitionTimout        = TransitionTimeout
+    us.constTransitionTimout        = UnboundedTimeout * time.Duration(TxActionLimit)
     us.constTxActionLimit           = TxActionLimit
     us.constTxTimeWindow            = UnboundedTimeout
 

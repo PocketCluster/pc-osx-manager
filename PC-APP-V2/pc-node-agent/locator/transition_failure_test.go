@@ -62,7 +62,13 @@ func Test_Cryptocheck_Bounded_TxActionFail(t *testing.T) {
 }
 
 // bounded -> bindbroken
-func Test_Bounded_BindBroken_MasterMeta_fail(t *testing.T) {
+func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
+    setUp()
+    defer tearDown()
+
+}
+
+func Test_Bounded_BindBroken_MasterMeta_TimeoutFail(t *testing.T) {
     setUp()
     defer tearDown()
 

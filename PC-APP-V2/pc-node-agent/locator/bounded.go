@@ -15,7 +15,7 @@ func newBoundedState(comm CommChannel) LocatorState {
     bs.constState                   = SlaveBounded
 
     bs.constTransitionFailureLimit  = TransitionFailureLimit
-    bs.constTransitionTimout        = TransitionTimeout
+    bs.constTransitionTimout        = BoundedTimeout * time.Duration(TxActionLimit)
     bs.constTxActionLimit           = TxActionLimit
     bs.constTxTimeWindow            = BoundedTimeout
 

@@ -15,7 +15,7 @@ func newInquiredState(comm CommChannel) LocatorState {
     is.constState                   = SlaveInquired
 
     is.constTransitionFailureLimit  = TransitionFailureLimit
-    is.constTransitionTimout        = TransitionTimeout
+    is.constTransitionTimout        = UnboundedTimeout * time.Duration(TxActionLimit)
     is.constTxActionLimit           = TxActionLimit
     is.constTxTimeWindow            = UnboundedTimeout
 

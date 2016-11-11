@@ -15,7 +15,7 @@ func newCryptocheckState(comm CommChannel) LocatorState {
     cc.constState                   = SlaveCryptoCheck
 
     cc.constTransitionFailureLimit  = TransitionFailureLimit
-    cc.constTransitionTimout        = TransitionTimeout
+    cc.constTransitionTimout        = UnboundedTimeout * time.Duration(TxActionLimit)
     cc.constTxActionLimit           = TxActionLimit
     cc.constTxTimeWindow            = UnboundedTimeout
 

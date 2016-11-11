@@ -15,7 +15,7 @@ func newKeyexchangeState(comm CommChannel) LocatorState {
     ks.constState                   = SlaveKeyExchange
 
     ks.constTransitionFailureLimit  = TransitionFailureLimit
-    ks.constTransitionTimout        = TransitionTimeout
+    ks.constTransitionTimout        = UnboundedTimeout * time.Duration(TxActionLimit)
     ks.constTxActionLimit           = TxActionLimit
     ks.constTxTimeWindow            = UnboundedTimeout
 

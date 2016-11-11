@@ -15,7 +15,7 @@ func newBindbrokenState(comm CommChannel) LocatorState {
     bs.constState                   = SlaveBindBroken
 
     bs.constTransitionFailureLimit  = TransitionFailureLimit
-    bs.constTransitionTimout        = TransitionTimeout
+    bs.constTransitionTimout        = UnboundedTimeout * time.Duration(TxActionLimit)
     bs.constTxActionLimit           = TxActionLimit
     bs.constTxTimeWindow            = UnboundedTimeout
 
