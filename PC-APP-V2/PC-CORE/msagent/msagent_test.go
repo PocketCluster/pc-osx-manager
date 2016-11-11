@@ -279,7 +279,7 @@ func TestBoundedStatusMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterBoundedStatusCommand(slaveNodeName, pcrypto.TestAESCryptor, initTime)
+    meta, _, err := TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return

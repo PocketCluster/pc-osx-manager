@@ -4,7 +4,6 @@ import (
     "time"
 
     "github.com/stkim1/pcrypto"
-    "github.com/stkim1/pc-core/context"
 )
 
 func TestSlaveUnboundedMasterSearchDiscovery() (*PocketSlaveAgentMeta, error) {
@@ -56,11 +55,7 @@ func TestSlaveCheckCryptoStatus(masterAgentName, slaveAgentName string, aesCrypt
     return ma, begin, nil
 }
 
-func TestSlaveBoundedStatus(slaveNodeName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
-    masterAgentName, err := context.SharedHostContext().MasterAgentName()
-    if err != nil {
-        return nil, begin, err
-    }
+func TestSlaveBoundedStatus(masterAgentName, slaveNodeName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
     sa, err := SlaveBoundedStatus(masterAgentName, slaveNodeName, begin)
     if err != nil {
         return nil, begin, err

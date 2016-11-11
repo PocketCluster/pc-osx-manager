@@ -424,7 +424,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
     defer tearDown()
 
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
-    ma, _, err := TestSlaveBoundedStatus(slaveNodeName, pcrypto.TestAESCryptor, initSendTimestmap)
+    ma, _, err := TestSlaveBoundedStatus(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return

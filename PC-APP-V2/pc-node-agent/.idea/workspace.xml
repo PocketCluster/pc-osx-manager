@@ -49,7 +49,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/slagent/locator/locating_test.go" />
         <option value="$PROJECT_DIR$/slagent/locator/TEST.go" />
         <option value="$PROJECT_DIR$/slagent/locator/transition.go" />
         <option value="$PROJECT_DIR$/slagent/locator/locator.go" />
@@ -68,9 +67,7 @@
         <option value="$PROJECT_DIR$/slcontext/config/config_test.go" />
         <option value="$PROJECT_DIR$/slcontext/config/config.go" />
         <option value="$PROJECT_DIR$/slcontext/slcontext_test.go" />
-        <option value="$PROJECT_DIR$/slagent/TEST.go" />
         <option value="$PROJECT_DIR$/slagent/meta.go" />
-        <option value="$PROJECT_DIR$/slagent/slagent_test.go" />
         <option value="$PROJECT_DIR$/locator/state/operror.go" />
         <option value="$PROJECT_DIR$/locator/state/bindbroken.go" />
         <option value="$PROJECT_DIR$/locator/state/bounded.go" />
@@ -88,7 +85,6 @@
         <option value="$PROJECT_DIR$/slcontext/config/TEST.go" />
         <option value="$PROJECT_DIR$/main.go" />
         <option value="$PROJECT_DIR$/locator/locator.go" />
-        <option value="$PROJECT_DIR$/locator/TEST.go" />
         <option value="$PROJECT_DIR$/locator/state.go" />
         <option value="$PROJECT_DIR$/locator/unbounded.go" />
         <option value="$PROJECT_DIR$/locator/inquired.go" />
@@ -99,6 +95,10 @@
         <option value="$PROJECT_DIR$/locator/locator_test.go" />
         <option value="$PROJECT_DIR$/slcontext/slcontext.go" />
         <option value="$PROJECT_DIR$/slcontext/TEST.go" />
+        <option value="$PROJECT_DIR$/slagent/slagent_test.go" />
+        <option value="$PROJECT_DIR$/../pc-core/msagent/TEST.go" />
+        <option value="$PROJECT_DIR$/slagent/TEST.go" />
+        <option value="$PROJECT_DIR$/locator/TEST.go" />
         <option value="$PROJECT_DIR$/locator/transition_failure_test.go" />
       </list>
     </option>
@@ -198,12 +198,30 @@
     <property name="configurable.Module.libraries.is.expanded" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
-  <component name="RunManager" selected="Go Application.Build main.go and run">
+  <component name="RunManager" selected="Go Test.Test_Bounded_BindBroken_TxActionFail in transition_failure_test.go">
     <configuration default="false" name="Build main.go and run" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
       <module name="pc-node-agent" />
       <working_directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$/main.go" />
       <kind value="FILE" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Test_Bounded_BindBroken_MasterMeta_Fail in transition_failure_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
+      <module name="pc-node-agent" />
+      <working_directory value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="github.com/stkim1/pc-node-agent/locator" />
+      <pattern value="^Test_Bounded_BindBroken_MasterMeta_Fail$" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Test_Bounded_BindBroken_TxActionFail in transition_failure_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
+      <module name="pc-node-agent" />
+      <working_directory value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="github.com/stkim1/pc-node-agent/locator" />
+      <pattern value="^Test_Bounded_BindBroken_TxActionFail$" />
       <method />
     </configuration>
     <configuration default="true" type="AndroidRunConfigurationType" factoryName="Android Application">
@@ -464,12 +482,16 @@
       <listeners />
       <method />
     </configuration>
-    <list size="1">
+    <list size="3">
       <item index="0" class="java.lang.String" itemvalue="Go Application.Build main.go and run" />
+      <item index="1" class="java.lang.String" itemvalue="Go Test.Test_Bounded_BindBroken_MasterMeta_Fail in transition_failure_test.go" />
+      <item index="2" class="java.lang.String" itemvalue="Go Test.Test_Bounded_BindBroken_TxActionFail in transition_failure_test.go" />
     </list>
     <recent_temporary>
-      <list size="1">
-        <item index="0" class="java.lang.String" itemvalue="Go Application.Build main.go and run" />
+      <list size="3">
+        <item index="0" class="java.lang.String" itemvalue="Go Test.Test_Bounded_BindBroken_TxActionFail in transition_failure_test.go" />
+        <item index="1" class="java.lang.String" itemvalue="Go Test.Test_Bounded_BindBroken_MasterMeta_Fail in transition_failure_test.go" />
+        <item index="2" class="java.lang.String" itemvalue="Go Application.Build main.go and run" />
       </list>
     </recent_temporary>
   </component>
@@ -505,29 +527,29 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="TestSaveLoadSlaveContext_in_slcontext_test_go - 2016.11.04 at 23h 56m 10s.xml">
-      <configuration name="TestSaveLoadSlaveContext in slcontext_test.go" configurationId="GoTestRunConfiguration" />
+    <history-entry file="Test_Bounded_BindBroken_MasterMeta_Fail_in_transition_failure_test_go - 2016.11.11 at 12h 40m 10s.xml">
+      <configuration name="Test_Bounded_BindBroken_MasterMeta_Fail in transition_failure_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="Test_Bounded_BindBroken_TxActionFail_in_transition_failure_test_go - 2016.11.10 at 14h 27m 51s.xml">
+    <history-entry file="Test_Bounded_BindBroken_MasterMeta_Fail_in_transition_failure_test_go - 2016.11.11 at 12h 40m 52s.xml">
+      <configuration name="Test_Bounded_BindBroken_MasterMeta_Fail in transition_failure_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="Test_Bounded_BindBroken_MasterMeta_Fail_in_transition_failure_test_go - 2016.11.11 at 12h 41m 17s.xml">
+      <configuration name="Test_Bounded_BindBroken_MasterMeta_Fail in transition_failure_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="Test_Bounded_BindBroken_MasterMeta_Fail_in_transition_failure_test_go - 2016.11.11 at 12h 41m 41s.xml">
+      <configuration name="Test_Bounded_BindBroken_MasterMeta_Fail in transition_failure_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="Test_Bounded_BindBroken_MasterMeta_Fail_in_transition_failure_test_go - 2016.11.11 at 12h 42m 12s.xml">
+      <configuration name="Test_Bounded_BindBroken_MasterMeta_Fail in transition_failure_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="Test_Bounded_BindBroken_TxActionFail_in_transition_failure_test_go - 2016.11.11 at 12h 42m 53s.xml">
       <configuration name="Test_Bounded_BindBroken_TxActionFail in transition_failure_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="Test_Unbounded_Bounded_Onepass_in_locator_test_go - 2016.11.09 at 09h 57m 10s.xml">
-      <configuration name="Test_Unbounded_Bounded_Onepass in locator_test.go" configurationId="GoTestRunConfiguration" />
+    <history-entry file="Test_Bounded_BindBroken_TxActionFail_in_transition_failure_test_go - 2016.11.11 at 12h 43m 13s.xml">
+      <configuration name="Test_Bounded_BindBroken_TxActionFail in transition_failure_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="Test_Unbounded_Bounded_Onepass_in_locator_test_go - 2016.11.09 at 10h 22m 37s.xml">
-      <configuration name="Test_Unbounded_Bounded_Onepass in locator_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="Test_Unbounded_Bounded_Onepass_in_locator_test_go - 2016.11.09 at 10h 23m 52s.xml">
-      <configuration name="Test_Unbounded_Bounded_Onepass in locator_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="Test_Unbounded_Bounded_Onepass_in_locator_test_go - 2016.11.09 at 10h 25m 13s.xml">
-      <configuration name="Test_Unbounded_Bounded_Onepass in locator_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="Test_Unbounded_Bounded_Onepass_in_locator_test_go - 2016.11.09 at 10h 32m 44s.xml">
-      <configuration name="Test_Unbounded_Bounded_Onepass in locator_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="Test_Unbounded_Bounded_Onepass_in_locator_test_go - 2016.11.09 at 10h 33m 05s.xml">
-      <configuration name="Test_Unbounded_Bounded_Onepass in locator_test.go" configurationId="GoTestRunConfiguration" />
+    <history-entry file="Test_Bounded_BindBroken_TxActionFail_in_transition_failure_test_go - 2016.11.11 at 12h 43m 36s.xml">
+      <configuration name="Test_Bounded_BindBroken_TxActionFail in transition_failure_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
     <history-entry file="Test_Unbounded_Unbounded_TxActionFail_in_transition_failure_test_go - 2016.11.10 at 14h 25m 19s.xml">
       <configuration name="Test_Unbounded_Unbounded_TxActionFail in transition_failure_test.go" configurationId="GoTestRunConfiguration" />
@@ -546,7 +568,7 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4600639" sideWeight="0.5022247" order="10" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.6336528" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2342918" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -663,13 +685,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slagent/slagent_test.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6570">
-          <caret line="547" column="40" selection-start-line="547" selection-start-column="40" selection-end-line="547" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/slagent/status.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="341">
@@ -741,30 +756,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slagent/TEST.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="795">
-          <caret line="58" column="69" selection-start-line="58" selection-start-column="69" selection-end-line="58" selection-end-column="69" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/locator/TEST.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="22" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/locator/bounded.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="21" column="6" selection-start-line="21" selection-start-column="6" selection-end-line="21" selection-end-column="6" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/locator/cryptocheck.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="210">
@@ -789,44 +780,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/locator/locator.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="495">
-          <caret line="39" column="32" selection-start-line="39" selection-start-column="32" selection-end-line="39" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/locator/bindbroken.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="21" column="23" selection-start-line="21" selection-start-column="7" selection-end-line="21" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/locator/locator_test.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="356">
-          <caret line="232" column="0" selection-start-line="225" selection-start-column="0" selection-end-line="232" selection-end-column="0" />
-          <folding>
-            <element signature="e#17#225#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/locator/state.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="746">
           <caret line="271" column="23" selection-start-line="271" selection-start-column="10" selection-end-line="271" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../pc-core/msagent/meta.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="663">
-          <caret line="91" column="26" selection-start-line="91" selection-start-column="8" selection-end-line="91" selection-end-column="26" />
           <folding />
         </state>
       </provider>
@@ -873,21 +830,85 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../pc-core/msagent/TEST.go">
+    <entry file="file://$PROJECT_DIR$/../pc-core/msagent/meta.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="618">
-          <caret line="77" column="45" selection-start-line="77" selection-start-column="17" selection-end-line="77" selection-end-column="45" />
+        <state relative-caret-position="483">
+          <caret line="108" column="19" selection-start-line="108" selection-start-column="8" selection-end-line="108" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slagent/slagent_test.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="426" column="58" selection-start-line="426" selection-start-column="58" selection-end-line="426" selection-end-column="58" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slagent/TEST.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="31" selection-start-line="5" selection-start-column="31" selection-end-line="5" selection-end-column="31" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/locator/transition_failure_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-855">
-          <caret line="18" column="22" selection-start-line="18" selection-start-column="22" selection-end-line="18" selection-end-column="22" />
+        <state relative-caret-position="110">
+          <caret line="1095" column="31" selection-start-line="1095" selection-start-column="31" selection-end-line="1095" selection-end-column="31" />
           <folding>
             <element signature="e#17#221#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/locator/bindbroken.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="61" column="35" selection-start-line="61" selection-start-column="26" selection-end-line="61" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/locator/locator.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="230">
+          <caret line="47" column="4" selection-start-line="47" selection-start-column="4" selection-end-line="47" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/locator/TEST.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="11" column="23" selection-start-line="11" selection-start-column="23" selection-end-line="11" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/locator/bounded.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-315">
+          <caret line="21" column="6" selection-start-line="21" selection-start-column="6" selection-end-line="21" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../pc-core/msagent/TEST.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="821">
+          <caret line="123" column="36" selection-start-line="123" selection-start-column="36" selection-end-line="123" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/locator/locator_test.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="11" selection-start-line="5" selection-start-column="11" selection-end-line="5" selection-end-column="11" />
+          <folding />
         </state>
       </provider>
     </entry>

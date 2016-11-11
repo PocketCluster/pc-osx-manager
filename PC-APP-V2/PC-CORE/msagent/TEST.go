@@ -121,8 +121,8 @@ func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, aesCryp
     return meta, end, nil
 }
 
-func TestMasterBoundedStatusCommand(slaveNodeName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
-    msa, end, err := slagent.TestSlaveBoundedStatus(slaveNodeName, aesCryptor, begin)
+func TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+    msa, end, err := slagent.TestSlaveBoundedStatus(masterAgentName, slaveNodeName, aesCryptor, begin)
     if err != nil {
         return nil, begin, err
     }
