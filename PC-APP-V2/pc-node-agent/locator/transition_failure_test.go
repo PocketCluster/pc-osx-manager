@@ -46,7 +46,7 @@ func Test_Unbounded_Inquired_MasterMetaFail(t *testing.T) {
         meta.DiscoveryRespond.MasterAddress = ""
         err = sd.TranstionWithMasterMeta(meta, slaveTS)
         if err != nil {
-            t.Skip(err.Error())
+            t.Log(err.Error())
         }
         state, err := sd.CurrentState()
         if err != nil {
@@ -161,7 +161,7 @@ func Test_Inquired_Keyexchange_MasterMetaFail(t *testing.T) {
         err = sd.TranstionWithMasterMeta(meta, slaveTS)
         if i < int(TransitionFailureLimit) - 1 {
             if err != nil {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             state, err = sd.CurrentState()
             if err != nil {
@@ -176,7 +176,7 @@ func Test_Inquired_Keyexchange_MasterMetaFail(t *testing.T) {
             if err == nil {
                 t.Errorf("[ERR] Master meta transition count more than TransitionFailureLimit should generate error")
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             state, err = sd.CurrentState()
             if err != nil {
@@ -192,28 +192,28 @@ func Test_Inquired_Keyexchange_MasterMetaFail(t *testing.T) {
                 t.Errorf("[ERR] Master Agent Name should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.GetMasterPublicKey()
             if err == nil {
                 t.Errorf("[ERR] Master public key should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.GetMasterIP4Address()
             if err == nil {
                 t.Errorf("[ERR] Master address should be empty")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.AESCryptor()
             if err == nil {
                 t.Errorf("[ERR] AESCryptor should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
         }
     }
@@ -277,48 +277,52 @@ func Test_Inquired_Keyexchange_TxActionFail(t *testing.T) {
                 t.Error("[ERR] Tx after TxActionLimit should generate error")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
+            }
+            state, err = sd.CurrentState()
+            if err != nil {
+                t.Error(err.Error())
+                return
             }
             if state != SlaveUnbounded {
                 t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
                 return
             }
-
             _, err = context.GetMasterAgent()
             if err == nil {
                 t.Errorf("[ERR] Master Agent Name should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.GetMasterPublicKey()
             if err == nil {
                 t.Errorf("[ERR] Master public key should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.GetMasterIP4Address()
             if err == nil {
                 t.Errorf("[ERR] Master address should be empty")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.AESCryptor()
             if err == nil {
                 t.Errorf("[ERR] AESCryptor should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
         }
         if len(debugComm.LastUcastMessage) == 0 || 508 < len(debugComm.LastUcastMessage) {
             t.Errorf("[ERR] Multicast message cannot exceed 508 bytes. Current %d", len(debugComm.LastUcastMessage))
         }
     }
-    if debugComm.UCommCount != uint(TxActionLimit) + 1 {
-        t.Errorf("[ERR] MultiComm count does not match %d | expected %d", debugComm.MCommCount, TxActionLimit + 1)
+    if debugComm.UCommCount != TxActionLimit {
+        t.Errorf("[ERR] MultiComm count does not match %d | expected %d", debugComm.UCommCount, TxActionLimit)
     }
 }
 
@@ -383,7 +387,7 @@ func Test_Keyexchange_Cryptocheck_MasterMetaFail(t *testing.T) {
     /* ---------------------------------------------- make transition failed ---------------------------------------- */
     for i := 0; i <= int(TransitionFailureLimit); i++ {
         // keyexchange -> cryptocheck
-        masterTS = slaveTS.Add(time.Second)
+        masterTS = slaveTS.Add(time.Millisecond * 100)
         meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
         if err != nil {
             t.Error(err.Error())
@@ -392,26 +396,27 @@ func Test_Keyexchange_Cryptocheck_MasterMetaFail(t *testing.T) {
         // make transition fail
         meta.RsaCryptoSignature = nil
 
-        slaveTS = masterTS.Add(time.Second)
+        slaveTS = masterTS.Add(time.Millisecond * 100)
         err = sd.TranstionWithMasterMeta(meta, slaveTS)
-        if i < int(TransitionFailureLimit) {
+        if i < int(TransitionFailureLimit - 1) {
             if err != nil {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             state, err = sd.CurrentState()
             if err != nil {
                 t.Error(err.Error())
                 return
             }
-            if state != SlaveInquired {
+            if state != SlaveKeyExchange {
                 t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
                 return
             }
         } else {
             if err == nil {
-                t.Errorf("[ERR] ")
+                t.Errorf("[ERR] Should not generate error after failure transition")
+                return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             state, err = sd.CurrentState()
             if err != nil {
@@ -427,28 +432,28 @@ func Test_Keyexchange_Cryptocheck_MasterMetaFail(t *testing.T) {
                 t.Errorf("[ERR] Master Agent Name should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.GetMasterPublicKey()
             if err == nil {
                 t.Errorf("[ERR] Master public key should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.GetMasterIP4Address()
             if err == nil {
                 t.Errorf("[ERR] Master address should be empty")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.AESCryptor()
             if err == nil {
                 t.Errorf("[ERR] AESCryptor should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
         }
     }
@@ -538,7 +543,12 @@ func Test_keyexchange_Cryptocheck_TxActionFail(t *testing.T) {
                 t.Error("[ERR] Tx after TxActionLimit should generate error")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
+            }
+            state, err = sd.CurrentState()
+            if err != nil {
+                t.Error(err.Error())
+                return
             }
             if state != SlaveUnbounded {
                 t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
@@ -549,33 +559,36 @@ func Test_keyexchange_Cryptocheck_TxActionFail(t *testing.T) {
                 t.Errorf("[ERR] Master Agent Name should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.GetMasterPublicKey()
             if err == nil {
                 t.Errorf("[ERR] Master public key should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.GetMasterIP4Address()
             if err == nil {
                 t.Errorf("[ERR] Master address should be empty")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.AESCryptor()
             if err == nil {
                 t.Errorf("[ERR] AESCryptor should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
         }
+        if len(debugComm.LastUcastMessage) == 0 || 508 < len(debugComm.LastUcastMessage) {
+            t.Errorf("[ERR] Multicast message cannot exceed 508 bytes. Current %d", len(debugComm.LastUcastMessage))
+        }
     }
-    if debugComm.UCommCount != uint(TxActionLimit) + 1 {
-        t.Errorf("[ERR] MultiComm count does not match %d | expected %d", debugComm.MCommCount, TxActionLimit + 1)
+    if debugComm.UCommCount != TxActionLimit {
+        t.Errorf("[ERR] MultiComm count does not match %d | expected %d", debugComm.UCommCount, TxActionLimit)
     }
 }
 
@@ -661,7 +674,7 @@ func Test_Cryptocheck_Bounded_MasterMetaFail(t *testing.T) {
     /* ---------------------------------------------- make transition failed ---------------------------------------- */
     for i := 0; i <= int(TransitionFailureLimit); i++ {
         // cryptocheck -> bounded
-        masterTS = slaveTS.Add(time.Second)
+        masterTS = slaveTS.Add(time.Millisecond * 100)
         meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, masterTS)
         if err != nil {
             t.Error(err.Error())
@@ -670,26 +683,30 @@ func Test_Cryptocheck_Bounded_MasterMetaFail(t *testing.T) {
         // make transition fail
         meta.MetaVersion = ""
 
-        slaveTS = masterTS.Add(time.Second)
+        // FIXME : fix transition timeout window
+        slaveTS = masterTS.Add(time.Millisecond * 100)
         err = sd.TranstionWithMasterMeta(meta, slaveTS)
-        if i < int(TransitionFailureLimit) {
+        if i < int(TransitionFailureLimit  - 1) {
             if err != nil {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             state, err = sd.CurrentState()
+
             if err != nil {
                 t.Error(err.Error())
                 return
             }
+
             if state != SlaveCryptoCheck {
                 t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
                 return
             }
         } else {
             if err == nil {
-                t.Errorf("[ERR] ")
+                t.Errorf("[ERR] Should not generate error after failure transition")
+                return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             state, err = sd.CurrentState()
             if err != nil {
@@ -705,28 +722,28 @@ func Test_Cryptocheck_Bounded_MasterMetaFail(t *testing.T) {
                 t.Errorf("[ERR] Master Agent Name should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.GetMasterPublicKey()
             if err == nil {
                 t.Errorf("[ERR] Master public key should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.GetMasterIP4Address()
             if err == nil {
                 t.Errorf("[ERR] Master address should be empty")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.AESCryptor()
             if err == nil {
                 t.Errorf("[ERR] AESCryptor should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
         }
     }
@@ -837,7 +854,12 @@ func Test_Cryptocheck_Bounded_TxActionFail(t *testing.T) {
                 t.Error("[ERR] Tx after TxActionLimit should generate error")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
+            }
+            state, err = sd.CurrentState()
+            if err != nil {
+                t.Error(err.Error())
+                return
             }
             if state != SlaveUnbounded {
                 t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
@@ -848,33 +870,33 @@ func Test_Cryptocheck_Bounded_TxActionFail(t *testing.T) {
                 t.Errorf("[ERR] Master Agent Name should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.GetMasterPublicKey()
             if err == nil {
                 t.Errorf("[ERR] Master public key should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.GetMasterIP4Address()
             if err == nil {
                 t.Errorf("[ERR] Master address should be empty")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             _, err = context.AESCryptor()
             if err == nil {
                 t.Errorf("[ERR] AESCryptor should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
         }
     }
-    if debugComm.UCommCount != uint(TxActionLimit) + 1 {
-        t.Errorf("[ERR] MultiComm count does not match %d | expected %d", debugComm.MCommCount, TxActionLimit + 1)
+    if debugComm.UCommCount != TxActionLimit {
+        t.Errorf("[ERR] MultiComm count does not match %d | expected %d", debugComm.UCommCount, TxActionLimit)
     }
 }
 
@@ -1009,7 +1031,7 @@ func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
             if err == nil {
                 t.Errorf("[ERR] Exceeding # transition trial should cause an error")
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
             state, err = sd.CurrentState()
             if err != nil {
@@ -1020,33 +1042,17 @@ func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
                 t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
                 return
             }
-            _, err = context.GetMasterAgent()
-            if err == nil {
-                t.Errorf("[ERR] Master Agent Name should be nil")
+            aeskey := context.GetAESKey()
+            if len(aeskey) != 0 {
+                t.Errorf("[ERR] AES KEY should be nil")
                 return
-            } else {
-                t.Skip(err.Error())
-            }
-            _, err = context.GetMasterPublicKey()
-            if err == nil {
-                t.Errorf("[ERR] Master public key should be nil")
-                return
-            } else {
-                t.Skip(err.Error())
-            }
-            _, err = context.GetMasterIP4Address()
-            if err == nil {
-                t.Errorf("[ERR] Master address should be empty")
-                return
-            } else {
-                t.Skip(err.Error())
             }
             _, err = context.AESCryptor()
             if err == nil {
                 t.Errorf("[ERR] AESCryptor should be nil")
                 return
             } else {
-                t.Skip(err.Error())
+                t.Log(err.Error())
             }
         }
     }
@@ -1092,9 +1098,11 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
     }
 
     /* ---------------------------------------------- make transition failed ---------------------------------------- */
+    //FIXME : get the exact count. We are now running 7
+    slaveTS = time.Now()
     var i uint = 0
-    for ;i <= TxActionLimit + 1; i++ {
-        slaveTS = slaveTS.Add(time.Millisecond + BoundedTimeout)
+    for ; i <= TxActionLimit + 1; i++ {
+        slaveTS = slaveTS.Add(time.Second + BoundedTimeout)
         err = sd.TranstionWithTimestamp(slaveTS)
         if i < TxActionLimit {
             if err != nil {
@@ -1114,6 +1122,9 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
                 t.Errorf("[ERR] Unicast message cannot exceed 508 bytes. Current %d", len(debugComm.LastUcastMessage))
             }
         } else {
+            if err != nil {
+                t.Log(err.Error())
+            }
             state, err = sd.CurrentState()
             if err != nil {
                 t.Error(err.Error())
@@ -1123,6 +1134,7 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
                 t.Errorf("[ERR] Slave state should not change properly | Current : %s\n", state.String())
                 return
             }
+            // FIXME : HOW?
             if len(debugComm.LastMcastMessage) == 0 || 508 < len(debugComm.LastMcastMessage) {
                 //t.Errorf("[ERR] Multicast message cannot exceed 508 bytes. Current %d", len(debugComm.LastMcastMessage))
             }
@@ -1136,8 +1148,15 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
     if debugComm.UCommCount != TxActionLimit {
         t.Errorf("[ERR] comm count does not match %d | expected %d", debugComm.UCommCount, TxActionLimit)
     }
+    if len(debugComm.LastUcastMessage) == 0 || 508 < len(debugComm.LastUcastMessage) {
+        t.Errorf("[ERR] Unicast message cannot exceed 508 bytes. Current %d", len(debugComm.LastUcastMessage))
+    }
     if debugComm.MCommCount != 1 {
         t.Errorf("[ERR] MultiComm count does not match %d / expected %d ", debugComm.MCommCount, 1)
+    }
+    // FIXME : WHY?
+    if len(debugComm.LastMcastMessage) == 0 || 508 < len(debugComm.LastMcastMessage) {
+        t.Errorf("[ERR] Multicast message cannot exceed 508 bytes. Current %d", len(debugComm.LastMcastMessage))
     }
 }
 
