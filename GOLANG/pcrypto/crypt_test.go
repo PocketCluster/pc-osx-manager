@@ -113,14 +113,14 @@ func TestEncDecMessageWithFile(t *testing.T) {
     encr ,err := NewEncryptorFromKeyFiles("recvtest.pub", "sendtest.pem"); if  err != nil {
         t.Errorf(err.Error())
     }
-    crypted, sig, err := encr.EncryptMessage(orgMsg); if err != nil {
+    crypted, sig, err := encr.EncryptByRSA(orgMsg); if err != nil {
         t.Errorf(err.Error())
     }
     // decryptor
     decr, err := NewDecryptorFromKeyFiles("sendtest.pub", "recvtest.pem"); if err != nil {
         t.Errorf(err.Error())
     }
-    plain, err := decr.DecryptMessage(crypted, sig); if err != nil {
+    plain, err := decr.DecryptByRSA(crypted, sig); if err != nil {
         t.Errorf(err.Error())
     }
     // comp
@@ -152,14 +152,14 @@ func TestEncDecMessageWithData(t *testing.T) {
     encr ,err := NewEncryptorFromKeyData(recvTestPubKey, sendTestPrvKey); if  err != nil {
         t.Errorf(err.Error())
     }
-    crypted, sig, err := encr.EncryptMessage(orgMsg); if err != nil {
+    crypted, sig, err := encr.EncryptByRSA(orgMsg); if err != nil {
         t.Errorf(err.Error())
     }
     // decryptor
     decr, err := NewDecryptorFromKeyData(sendTestPubKey, recvTestPrvKey); if err != nil {
         t.Errorf(err.Error())
     }
-    plain, err := decr.DecryptMessage(crypted, sig); if err != nil {
+    plain, err := decr.DecryptByRSA(crypted, sig); if err != nil {
         t.Errorf(err.Error())
     }
     // comp
@@ -176,10 +176,10 @@ func TestAESEncyptionDecryption(t *testing.T) {
     ac, err := NewAESCrypto(key); if err != nil {
         t.Errorf("Cannot create AES cryptor %v", err)
     }
-    crypted, err := ac.Encrypt(text); if err != nil {
+    crypted, err := ac.EncryptByAES(text); if err != nil {
         t.Errorf("Cannot encrypt message with AES %v", err)
     }
-    plain, err := ac.Decrypt(crypted); if err != nil {
+    plain, err := ac.DecryptByAES(crypted); if err != nil {
         t.Errorf("Cannot decrypt message with AES %v", err)
     }
     if string(plain) != string(text) {

@@ -31,7 +31,10 @@ type PocketSlaveContext interface {
     // No other place can execute this
     SaveConfiguration() error
 
+    // TODO handle error
     GetPublicKey() (pubkey []byte)
+
+    // TODO handle error
     GetPrivateKey() (prvkey []byte)
     pcrypto.RsaDecryptor
 
@@ -39,6 +42,7 @@ type PocketSlaveContext interface {
     GetMasterPublicKey() ([]byte, error)
 
     SetAESKey(aesKey []byte) error
+    // TODO : should this be removed? this is only used in testing. Plus, it does not handle error properlty
     GetAESKey() (aeskey []byte)
     DiscardAESKey()
     AESCryptor() (pcrypto.AESCryptor, error)

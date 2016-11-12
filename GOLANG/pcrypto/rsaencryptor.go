@@ -7,7 +7,7 @@ import (
 )
 
 type RsaEncryptor interface {
-    EncryptMessage(plain []byte) (crypted []byte, sig Signature, err error)
+    EncryptByRSA(plain []byte) (crypted []byte, sig Signature, err error)
 }
 
 func NewEncryptorFromKeyFiles(recvPubkeyPath, sendPrvkeyPath string) (RsaEncryptor, error) {
@@ -50,7 +50,7 @@ func (e *encryptor) generateSignature(plain []byte) (Signature, error) {
     return rsa.SignPSS(rand.Reader, e.sendPrvkey.PrivateKey, hType, hash.Sum(nil), opts)
 }
 
-func (e *encryptor) EncryptMessage(plain []byte) (crypted []byte, sig Signature, err error) {
+func (e *encryptor) EncryptByRSA(plain []byte) (crypted []byte, sig Signature, err error) {
     crypted, err = e.recvPubkey.encrypt(plain); if err != nil {
         return nil, nil, err
     }

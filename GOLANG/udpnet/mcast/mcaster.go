@@ -54,9 +54,6 @@ func (mc *multiCaster) Close() error {
 
 func (mc *multiCaster) write() {
     for cp := range mc.chWrite {
-
-        log.Print("[INFO] LET's MULTICAST! " + string(cp.Message))
-
         // TODO : we can timeout if necessary
         _, e := mc.ipv4UnicastConn.WriteToUDP(cp.Message, ipv4McastAddr)
         if e != nil && mc.log != nil {
@@ -66,7 +63,10 @@ func (mc *multiCaster) write() {
 }
 
 // sendQuery is used to multicast a query out
-func (mc *multiCaster) Send(message []byte)  {
+func (mc *multiCaster) Send(message []byte) error {
+    if len(message) == 0 {
+        return fmt.Errorf("[ERR] Multicast message is empty")
+    }
     cp := &CastPkg{
         Message     : message,
     }

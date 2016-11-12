@@ -98,7 +98,7 @@ func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, aesCryp
         return nil, begin, err
     }
     // marshaled, descrypted, slave-status
-    mdsa, err := aesCryptor.Decrypt(usm.EncryptedStatus)
+    mdsa, err := aesCryptor.DecryptByAES(usm.EncryptedStatus)
     if err != nil {
         return nil, begin, err
     }
@@ -121,8 +121,8 @@ func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, aesCryp
     return meta, end, nil
 }
 
-func TestMasterBoundedStatusCommand(slaveNodeName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
-    msa, end, err := slagent.TestSlaveBoundedStatus(slaveNodeName, aesCryptor, begin)
+func TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+    msa, end, err := slagent.TestSlaveBoundedStatus(masterAgentName, slaveNodeName, aesCryptor, begin)
     if err != nil {
         return nil, begin, err
     }
@@ -137,7 +137,7 @@ func TestMasterBoundedStatusCommand(slaveNodeName string, aesCryptor pcrypto.AES
         return nil, begin, err
     }
     // marshaled, descrypted, slave-status
-    mdsa, err := aesCryptor.Decrypt(usm.EncryptedStatus)
+    mdsa, err := aesCryptor.DecryptByAES(usm.EncryptedStatus)
     if err != nil {
         return nil, begin, err
     }

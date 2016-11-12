@@ -304,7 +304,7 @@ func (mb *masterBeacon) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestam
     if mb.aesKey == nil {
         return MasterTransitionFail, fmt.Errorf("[ERR] AES Key is null. This should not happen")
     }
-    plain, err := mb.aesCryptor.Decrypt(meta.EncryptedStatus)
+    plain, err := mb.aesCryptor.DecryptByAES(meta.EncryptedStatus)
     if err != nil {
         return MasterTransitionFail, err
     }
@@ -356,7 +356,7 @@ func (mb *masterBeacon) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestam
     if mb.aesKey == nil {
         return MasterTransitionFail, fmt.Errorf("[ERR] AES Key is null. This should not happen")
     }
-    plain, err := mb.aesCryptor.Decrypt(meta.EncryptedStatus)
+    plain, err := mb.aesCryptor.DecryptByAES(meta.EncryptedStatus)
     if err != nil {
         return MasterTransitionFail, err
     }
@@ -408,7 +408,7 @@ func (mb *masterBeacon) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp ti
     if mb.aesKey == nil {
         return MasterTransitionFail, fmt.Errorf("[ERR] AES Key is null. This should not happen")
     }
-    plain, err := mb.aesCryptor.Decrypt(meta.EncryptedStatus)
+    plain, err := mb.aesCryptor.DecryptByAES(meta.EncryptedStatus)
     if err != nil {
         return MasterTransitionFail, err
     }

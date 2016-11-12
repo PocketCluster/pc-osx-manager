@@ -2,7 +2,10 @@ package locator
 
 import (
     "time"
+    "fmt"
+
     "github.com/stkim1/pc-core/msagent"
+    "bytes"
 )
 
 type SlaveLocatingState int
@@ -41,24 +44,89 @@ func (st SlaveLocatingState) String() string {
     return state
 }
 
+type CommChannel interface {
+    McastSend(data []byte) error
+    UcastSend(data []byte, target string) error
+}
+
 type SlaveLocator interface {
-    CurrentState() SlaveLocatingState
-    TranstionWithTimestamp(timestamp time.Time) error
+    CurrentState() (SlaveLocatingState, error)
     TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) error
+    TranstionWithTimestamp(timestamp time.Time) error
     Close() error
 }
 
-// On sucess happens at the moment successful state transition takes place
-type SlaveLocatorOnStateTransitionSuccess      func (SlaveLocatingState)
+type slaveLocator struct {
+    state       LocatorState
+}
 
-// OnIdle happens as locator awaits
-type SlaveLocatorOnStateTransitionIdle         func (SlaveLocatingState, time.Time, time.Time, int) bool
+// New slaveLocator starts only from unbounded or bindbroken
+func NewSlaveLocator(state SlaveLocatingState, comm CommChannel) (SlaveLocator, error) {
+    if comm == nil {
+        return nil, fmt.Errorf("[ERR] communication channel cannot be void")
+    }
 
-// OnFail happens at the moment state transition fails to happen
-type SlaveLocatorOnStateTransitionFailure      func (SlaveLocatingState)
+    switch state {
+    case SlaveUnbounded:
+        return &slaveLocator{state: newUnboundedState(comm)}, nil
+    case SlaveBindBroken:
+        return &slaveLocator{state: newBindbrokenState(comm)}, nil
+    default:
+        return nil, fmt.Errorf("[ERR] SlaveLocator can initiated from SlaveUnbounded or SlaveBindBroken only")
+    }
+}
 
-// ------ DEFAULT TIMEOUTS ------
-const (
-    UNBOUNDED_TIMEOUT   = 3 * time.Second
-    BOUNDED_TIMEOUT     = 10 * time.Second
-)
+func (sl *slaveLocator) CurrentState() (SlaveLocatingState, error) {
+    if sl.state == nil {
+        return SlaveUnbounded, nil
+    }
+    return sl.state.CurrentState(), nil
+}
+
+func (sl *slaveLocator) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) error {
+    if sl.state == nil {
+        return fmt.Errorf("[ERR] LocatorState is nil. Cannot make transition with master meta")
+    }
+    var err error
+    sl.state, err = sl.state.MasterMetaTransition(meta, slaveTimestamp)
+    return err
+}
+
+func (sl *slaveLocator) TranstionWithTimestamp(slaveTimestamp time.Time) error {
+    if sl.state == nil {
+        return fmt.Errorf("[ERR] LocatorState is nil. Cannot make transition with master meta")
+    }
+    var err error
+    sl.state, err = sl.state.TimestampTransition(slaveTimestamp)
+    return err
+}
+
+func (sl *slaveLocator) Close() error {
+    // TODO : TO BE CONTINUED
+    return nil
+}
+
+type opError struct {
+    TransitionError         error
+    EventError              error
+}
+
+func (oe *opError) Error() string {
+    var errStr bytes.Buffer
+
+    if oe.TransitionError != nil {
+        errStr.WriteString(oe.TransitionError.Error())
+    }
+
+    if oe.EventError != nil {
+        errStr.WriteString(oe.EventError.Error())
+    }
+    return errStr.String()
+}
+
+func summarizeErrors(transErr error, eventErr error) error {
+    if transErr == nil && eventErr == nil {
+        return nil
+    }
+    return &opError{TransitionError: transErr, EventError: eventErr}
+}

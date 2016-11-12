@@ -74,7 +74,7 @@ func CheckSlaveCryptoMeta(agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor
     if err != nil {
         return nil, err
     }
-    crypted, err := aescrypto.Encrypt(mp)
+    crypted, err := aescrypto.EncryptByAES(mp)
     if err != nil {
         return nil, err
     }
@@ -94,7 +94,7 @@ func SlaveBoundedMeta(agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor) (*
     if err != nil {
         return nil, err
     }
-    crypted, err := aescrypto.Encrypt(mp)
+    crypted, err := aescrypto.EncryptByAES(mp)
     if err != nil {
         return nil, err
     }

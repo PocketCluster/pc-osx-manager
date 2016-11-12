@@ -119,7 +119,7 @@ func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
 
     // --- slave is now bounded
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveBoundedStatus(slaveNodeName, mb.(*masterBeacon).aesCryptor, slaveTS)
+    sa, end, err = slagent.TestSlaveBoundedStatus(masterAgentName, slaveNodeName, mb.(*masterBeacon).aesCryptor, slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -628,7 +628,7 @@ func Test_KeyExchange_Bounded_Fail(t *testing.T) {
     }
     // --- test
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveBoundedStatus("INCORRECT-SLAVE-NAME", mb.(*masterBeacon).aesCryptor, slaveTS)
+    sa, end, err = slagent.TestSlaveBoundedStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.(*masterBeacon).aesCryptor, slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -716,7 +716,7 @@ func Test_KeyExchange_Bounded_Fail(t *testing.T) {
             return
         }
         slaveTS = masterTS.Add(time.Second)
-        sa, end, err = slagent.TestSlaveBoundedStatus("INCORRECT-SLAVE-NAME", mb.(*masterBeacon).aesCryptor, slaveTS)
+        sa, end, err = slagent.TestSlaveBoundedStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.(*masterBeacon).aesCryptor, slaveTS)
         if err != nil {
             t.Error(err.Error())
             return
