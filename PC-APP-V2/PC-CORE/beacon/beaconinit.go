@@ -8,7 +8,7 @@ import (
     "github.com/stkim1/pc-core/model"
 )
 
-func beaconInitState(comm CommChannel) BeaconState {
+func beaconinitState(comm CommChannel) BeaconState {
     b := &beaconinit{}
 
     b.constState                    = MasterInit
@@ -35,7 +35,7 @@ type beaconinit struct {
     beaconState
 }
 
-func (b *beaconinit) transitionActionWithTimestamp() error {
+func (b *beaconinit) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     return nil
 }
 
@@ -80,10 +80,10 @@ func (b *beaconinit) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp ti
     return MasterTransitionOk, nil
 }
 
-func (b *beaconinit) onStateTranstionSuccess(slaveTimestamp time.Time) error {
+func (b *beaconinit) onStateTranstionSuccess(masterTimestamp time.Time) error {
     return nil
 }
 
-func (b *beaconinit) onStateTranstionFailure(slaveTimestamp time.Time) error {
+func (b *beaconinit) onStateTranstionFailure(masterTimestamp time.Time) error {
     return nil
 }

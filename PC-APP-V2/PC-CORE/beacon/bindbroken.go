@@ -10,7 +10,7 @@ import (
     "github.com/stkim1/pcrypto"
 )
 
-func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (MasterBeacon, error) {
+func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (BeaconState, error) {
     b := &bindbroken{}
 
     b.constState                    = MasterInit
@@ -34,6 +34,7 @@ func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (MasterBeacon
     aesKey := pcrypto.NewAESKey32Byte()
     aesCryptor, err := pcrypto.NewAESCrypto(aesKey)
     if err != nil {
+        b.Close()
         return nil, fmt.Errorf("[ERR] cannot create AES cyprtor " + err.Error())
     }
     b.aesKey = aesKey
@@ -42,25 +43,28 @@ func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (MasterBeacon
     // set RSA encryptor
     masterPrvKey, err := context.SharedHostContext().MasterPrivateKey()
     if err != nil {
+        b.Close()
         return nil, err
     }
     if len(slaveNode.PublicKey) == 0 {
+        b.Close()
         return nil, fmt.Errorf("[ERR] Cannot bind a slave without its public key. This only happens when user has deleted master database")
     }
     encryptor, err := pcrypto.NewEncryptorFromKeyData(slaveNode.PublicKey, masterPrvKey)
     if err != nil {
+        b.Close()
         return nil, err
     }
     b.rsaEncryptor = encryptor
 
-    return b
+    return b, nil
 }
 
 type bindbroken struct {
     beaconState
 }
 
-func (b *bindbroken) transitionActionWithTimestamp() error {
+func (b *bindbroken) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     return nil
 }
 
@@ -100,10 +104,10 @@ func (b *bindbroken) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp ti
     return MasterTransitionOk, nil
 }
 
-func (b *bindbroken) onStateTranstionSuccess(slaveTimestamp time.Time) error {
+func (b *bindbroken) onStateTranstionSuccess(masterTimestamp time.Time) error {
     return nil
 }
 
-func (b *bindbroken) onStateTranstionFailure(slaveTimestamp time.Time) error {
+func (b *bindbroken) onStateTranstionFailure(masterTimestamp time.Time) error {
     return nil
 }

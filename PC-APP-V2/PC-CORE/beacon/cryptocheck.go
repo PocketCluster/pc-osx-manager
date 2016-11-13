@@ -8,7 +8,7 @@ import (
     "github.com/stkim1/pc-core/context"
 )
 
-func cryptocheckState(oldState *beaconState) MasterBeacon {
+func cryptocheckState(oldState *beaconState) BeaconState {
     b := &cryptocheck{}
 
     b.constState                    = MasterInit
@@ -38,7 +38,7 @@ type cryptocheck struct {
     beaconState
 }
 
-func (b *cryptocheck) transitionActionWithTimestamp() error {
+func (b *cryptocheck) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     return nil
 }
 
@@ -94,10 +94,10 @@ func (b *cryptocheck) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestamp 
     return MasterTransitionOk, nil
 }
 
-func (b *cryptocheck) onStateTranstionSuccess(slaveTimestamp time.Time) error {
+func (b *cryptocheck) onStateTranstionSuccess(masterTimestamp time.Time) error {
     return nil
 }
 
-func (b *cryptocheck) onStateTranstionFailure(slaveTimestamp time.Time) error {
+func (b *cryptocheck) onStateTranstionFailure(masterTimestamp time.Time) error {
     return nil
 }

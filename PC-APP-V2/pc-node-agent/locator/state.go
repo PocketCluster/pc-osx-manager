@@ -2,10 +2,11 @@ package locator
 
 import (
     "time"
-
-    "github.com/stkim1/pc-core/msagent"
     "log"
     "fmt"
+    "bytes"
+
+    "github.com/stkim1/pc-core/msagent"
 )
 
 const (
@@ -253,7 +254,7 @@ func executeOnTransitionEvents(ls *locatorState, newState, oldState SlaveLocatin
 
 func (ls *locatorState) MasterMetaTransition(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (LocatorState, error) {
     var (
-        transition SlaveLocatingTransition
+        transitionCandidate, finalTransition SlaveLocatingTransition
         transErr, eventErr error = nil, nil
         newState, oldState SlaveLocatingState = ls.CurrentState(), ls.CurrentState()
     )
@@ -261,16 +262,16 @@ func (ls *locatorState) MasterMetaTransition(meta *msagent.PocketMasterAgentMeta
         log.Panic("[PANIC] MASTER META TRANSTION SHOULD HAVE BEEN SETUP PROPERLY")
     }
 
-    transition, transErr = ls.masterMetaTransition(meta, slaveTimestamp)
+    transitionCandidate, transErr = ls.masterMetaTransition(meta, slaveTimestamp)
 
     // filter out the intermediate transition value with failed count + timestamp
-    finalTransitionCandidate := finalizeTransitionWithTimeout(ls, transition, slaveTimestamp)
+    finalTransition = finalizeTransitionWithTimeout(ls, transitionCandidate, slaveTimestamp)
 
-    // finalize locating master beacon state
-    newState = stateTransition(oldState, finalTransitionCandidate)
+    // finalize slave locator state
+    newState = stateTransition(oldState, finalTransition)
 
     // execute event lisenter
-    eventErr = executeOnTransitionEvents(ls, newState, oldState, finalTransitionCandidate, slaveTimestamp)
+    eventErr = executeOnTransitionEvents(ls, newState, oldState, finalTransition, slaveTimestamp)
 
     return newLocatorStateForState(ls, newState, oldState), summarizeErrors(transErr, eventErr)
 }
@@ -319,4 +320,30 @@ func (ls *locatorState) TimestampTransition(slaveTimestamp time.Time) (LocatorSt
     }
 
     return newLocatorStateForState(ls, newState, oldState), summarizeErrors(transErr, eventErr)
+}
+
+/* ================================================= Operation Error ================================================ */
+type opError struct {
+    TransitionError         error
+    EventError              error
+}
+
+func (oe *opError) Error() string {
+    var errStr bytes.Buffer
+
+    if oe.TransitionError != nil {
+        errStr.WriteString(oe.TransitionError.Error())
+    }
+
+    if oe.EventError != nil {
+        errStr.WriteString(oe.EventError.Error())
+    }
+    return errStr.String()
+}
+
+func summarizeErrors(transErr error, eventErr error) error {
+    if transErr == nil && eventErr == nil {
+        return nil
+    }
+    return &opError{TransitionError: transErr, EventError: eventErr}
 }

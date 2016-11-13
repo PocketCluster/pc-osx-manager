@@ -10,7 +10,7 @@ import (
     "github.com/stkim1/pc-core/context"
 )
 
-func inquiredState(oldState *beaconState) MasterBeacon {
+func inquiredState(oldState *beaconState) BeaconState {
     b := &inquired{}
 
     b.constState                    = MasterInit
@@ -37,7 +37,7 @@ type inquired struct {
     beaconState
 }
 
-func (b *inquired) transitionActionWithTimestamp() error {
+func (b *inquired) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     return nil
 }
 
@@ -103,10 +103,10 @@ func (b *inquired) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.T
     return MasterTransitionOk, nil
 }
 
-func (b *inquired) onStateTranstionSuccess(slaveTimestamp time.Time) error {
+func (b *inquired) onStateTranstionSuccess(masterTimestamp time.Time) error {
     return nil
 }
 
-func (b *inquired) onStateTranstionFailure(slaveTimestamp time.Time) error {
+func (b *inquired) onStateTranstionFailure(masterTimestamp time.Time) error {
     return nil
 }

@@ -8,7 +8,7 @@ import (
     "github.com/stkim1/pc-core/context"
 )
 
-func keyexchangeState(oldState *beaconState) MasterBeacon {
+func keyexchangeState(oldState *beaconState) BeaconState {
     b := &keyexchange{}
 
     b.constState                    = MasterInit
@@ -38,7 +38,7 @@ type keyexchange struct {
     beaconState
 }
 
-func (b *keyexchange) transitionActionWithTimestamp() error {
+func (b *keyexchange) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     return nil
 }
 
@@ -94,10 +94,10 @@ func (b *keyexchange) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestamp 
     return MasterTransitionOk, nil
 }
 
-func (b *keyexchange) onStateTranstionSuccess(slaveTimestamp time.Time) error {
+func (b *keyexchange) onStateTranstionSuccess(masterTimestamp time.Time) error {
     return nil
 }
 
-func (b *keyexchange) onStateTranstionFailure(slaveTimestamp time.Time) error {
+func (b *keyexchange) onStateTranstionFailure(masterTimestamp time.Time) error {
     return nil
 }

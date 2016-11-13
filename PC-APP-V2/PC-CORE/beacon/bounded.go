@@ -8,15 +8,15 @@ import (
     "github.com/stkim1/pc-core/context"
 )
 
-func boundedState(oldState *beaconState) MasterBeacon {
+func boundedState(oldState *beaconState) BeaconState {
     b := &bounded{}
 
     b.constState                    = MasterInit
 
     b.constTransitionFailureLimit   = TransitionFailureLimit
-    b.constTransitionTimeout        = UnboundedTimeout * time.Duration(TxActionLimit)
+    b.constTransitionTimeout        = BoundedTimeout * time.Duration(TxActionLimit)
     b.constTxActionLimit            = TxActionLimit
-    b.constTxTimeWindow             = UnboundedTimeout
+    b.constTxTimeWindow             = BoundedTimeout
 
     b.lastTransitionTS              = time.Now()
 
@@ -38,7 +38,7 @@ type bounded struct {
     beaconState
 }
 
-func (b *bounded) transitionActionWithTimestamp() error {
+func (b *bounded) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     return nil
 }
 
@@ -94,10 +94,10 @@ func (b *bounded) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Tim
     return MasterTransitionOk, nil
 }
 
-func (b *bounded) onStateTranstionSuccess(slaveTimestamp time.Time) error {
+func (b *bounded) onStateTranstionSuccess(masterTimestamp time.Time) error {
     return nil
 }
 
-func (b *bounded) onStateTranstionFailure(slaveTimestamp time.Time) error {
+func (b *bounded) onStateTranstionFailure(masterTimestamp time.Time) error {
     return nil
 }

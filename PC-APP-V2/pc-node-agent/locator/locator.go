@@ -5,7 +5,6 @@ import (
     "fmt"
 
     "github.com/stkim1/pc-core/msagent"
-    "bytes"
 )
 
 type SlaveLocatingState int
@@ -106,27 +105,3 @@ func (sl *slaveLocator) Close() error {
     return nil
 }
 
-type opError struct {
-    TransitionError         error
-    EventError              error
-}
-
-func (oe *opError) Error() string {
-    var errStr bytes.Buffer
-
-    if oe.TransitionError != nil {
-        errStr.WriteString(oe.TransitionError.Error())
-    }
-
-    if oe.EventError != nil {
-        errStr.WriteString(oe.EventError.Error())
-    }
-    return errStr.String()
-}
-
-func summarizeErrors(transErr error, eventErr error) error {
-    if transErr == nil && eventErr == nil {
-        return nil
-    }
-    return &opError{TransitionError: transErr, EventError: eventErr}
-}

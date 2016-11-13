@@ -1,5 +1,5 @@
 package beacon
-
+/*
 import (
     "testing"
     "time"
@@ -30,6 +30,7 @@ func tearDown() {
     slcontext.DebugSlcontextDestroy()
     context.DebugContextDestroy()
 }
+
 
 func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
     setUp()
@@ -744,4 +745,4 @@ func Test_Bounded_BindBroken_Transition(t *testing.T) {
     defer tearDown()
 }
 
-
+*/

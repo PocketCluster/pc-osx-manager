@@ -7,8 +7,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
-
-func unboundedState(oldState *beaconState) MasterBeacon {
+func unboundedState(oldState *beaconState) BeaconState {
     b := &unbounded{}
 
     b.constState                    = MasterInit
@@ -35,10 +34,9 @@ type unbounded struct {
     beaconState
 }
 
-func (b *unbounded) transitionActionWithTimestamp() error {
+func (b *unbounded) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     return nil
 }
-
 
 func (b *unbounded) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
     if meta.StatusAgent == nil || meta.StatusAgent.Version != slagent.SLAVE_STATUS_VERSION {
@@ -57,7 +55,6 @@ func (b *unbounded) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time
     if b.slaveNode.MacAddress != meta.StatusAgent.SlaveNodeMacAddr {
         return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave MAC address")
     }
-
     // slave hardware architecture
     if len(meta.StatusAgent.SlaveHardware) == 0 {
         return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave architecture")
@@ -68,10 +65,10 @@ func (b *unbounded) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time
     return MasterTransitionOk, nil
 }
 
-func (b *unbounded) onStateTranstionSuccess(slaveTimestamp time.Time) error {
+func (b *unbounded) onStateTranstionSuccess(masterTimestamp time.Time) error {
     return nil
 }
 
-func (b *unbounded) onStateTranstionFailure(slaveTimestamp time.Time) error {
+func (b *unbounded) onStateTranstionFailure(masterTimestamp time.Time) error {
     return nil
 }
