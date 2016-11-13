@@ -70,9 +70,8 @@ func NewSlaveLocator(state SlaveLocatingState, comm CommChannel) (SlaveLocator, 
         return &slaveLocator{state: newUnboundedState(comm)}, nil
     case SlaveBindBroken:
         return &slaveLocator{state: newBindbrokenState(comm)}, nil
-    default:
-        return nil, fmt.Errorf("[ERR] SlaveLocator can initiated from SlaveUnbounded or SlaveBindBroken only")
     }
+    return nil, fmt.Errorf("[ERR] SlaveLocator can initiated from SlaveUnbounded or SlaveBindBroken only")
 }
 
 func (sl *slaveLocator) CurrentState() (SlaveLocatingState, error) {

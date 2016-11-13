@@ -14,7 +14,7 @@ import (
 const (
     TransitionFailureLimit      uint          = 5
     // TODO : timeout mechanism for receiving slave meta
-    TransitionTimeout           time.Duration = time.Second * 10
+    // TransitionTimeout           time.Duration = time.Second * 10
 
     TxActionLimit               uint          = 5
     UnboundedTimeout            time.Duration = time.Second * 3
@@ -33,6 +33,7 @@ type BeaconState interface {
     CurrentState() MasterBeaconState
     TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (BeaconState, error)
     TransitionWithTimestamp(masterTimestamp time.Time) (BeaconState, error)
+    SlaveNode() *model.SlaveNode
     Close() error
 }
 
@@ -57,6 +58,7 @@ type beaconState struct {
 
     txActionCount               uint
 
+    // DO NOT SET ANY TIME ON THIS FIELD SO THE FIRST TX ACTION CAN BE DONE WITHIN THE CYCLE
     lastTransmissionTS          time.Time
 
     /* ----------------------------------------- transition functions ----------------------------------------------- */
@@ -213,7 +215,7 @@ func (b *beaconState) translateStateWithTimeout(nextStateCandiate MasterBeaconTr
             nextConfirmedState = MasterTransitionOk
             break
         }
-        default:{
+        default: {
             if b.transitionFailureCount < b.transitionFailureLimit() {
                 b.transitionFailureCount++
             }
@@ -229,16 +231,16 @@ func (b *beaconState) translateStateWithTimeout(nextStateCandiate MasterBeaconTr
     return nextConfirmedState
 }
 
-func runOnTransitionEvents(ls *beaconState, newState, oldState MasterBeaconState, transition MasterBeaconTransition, masterTimestamp time.Time) error {
+func runOnTransitionEvents(b *beaconState, newState, oldState MasterBeaconState, transition MasterBeaconTransition, masterTimestamp time.Time) error {
     if newState != oldState {
         switch transition {
             case MasterTransitionOk:
-                if ls.onTransitionSuccess != nil {
-                    return ls.onTransitionSuccess(masterTimestamp)
+                if b.onTransitionSuccess != nil {
+                    return b.onTransitionSuccess(masterTimestamp)
                 }
             case MasterTransitionFail: {
-                if ls.onTransitionFailure != nil {
-                    return ls.onTransitionFailure(masterTimestamp)
+                if b.onTransitionFailure != nil {
+                    return b.onTransitionFailure(masterTimestamp)
                 }
             }
         }
@@ -318,21 +320,44 @@ func (b *beaconState) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta
 
 /* ----------------------------------------- Timestamp Transition Functions ----------------------------------------- */
 func (b *beaconState) TransitionWithTimestamp(masterTimestamp time.Time) (BeaconState, error) {
-    var err error = nil
-    var nextConfirmedState MasterBeaconTransition
-    if b.transitionFailureCount < TransitionFailureLimit && masterTimestamp.Sub(b.lastTransitionTS) < TransitionTimeout {
-        nextConfirmedState = MasterTransitionIdle
-    } else {
-        if TransitionFailureLimit <= b.transitionFailureCount {
-            err = fmt.Errorf("[ERR] Transition has failed too many times already")
-        } else if TransitionTimeout <= masterTimestamp.Sub(b.lastTransitionTS) {
-            err = fmt.Errorf("[ERR] Slave did not make transition in the given time window " + TransitionTimeout.String())
-        }
-        nextConfirmedState = MasterTransitionFail
+    var (
+        newState, oldState MasterBeaconState = b.CurrentState(), b.CurrentState()
+        transition MasterBeaconTransition
+        transErr, eventErr error = nil, nil
+    )
+    if b.TransitionWithTimestamp == nil {
+        log.Panic("[CRITICAL] timestamp")
     }
 
-    b.constState = stateTransition(b.constState, nextConfirmedState)
-    return nil, err
+    transition, transErr = func(b *beaconState, masterTimestamp time.Time) (MasterBeaconTransition, error) {
+        var transErr error = nil
+
+        if b.txActionCount < b.txActionLimit() {
+
+            // if tx timeout window is smaller than time delta (T_1 - T_0), don't do anything!!! just skip!
+            if b.txTimeWindow() < masterTimestamp.Sub(b.lastTransmissionTS) {
+
+                transErr = b.timestampTransition(masterTimestamp)
+                // since an action is taken, the action counter goes up regardless of error
+                b.txActionCount++
+                // we'll reset slave action timestamp
+                b.lastTransmissionTS = masterTimestamp
+            }
+
+            return MasterTransitionIdle, transErr
+        }
+        // this is failure. the fact that this is called indicate that we're ready to move to failure state
+        return MasterTransitionFail, fmt.Errorf("[ERR] Transmission count has exceeded a given limit")
+    }(b, masterTimestamp)
+
+    if transition == MasterTransitionFail {
+        // finalize state
+        newState = stateTransition(oldState, transition)
+        // event
+        eventErr = runOnTransitionEvents(b, newState, oldState, transition, masterTimestamp)
+    }
+
+    return newBeaconForState(b, newState, oldState), summarizeErrors(transErr, eventErr)
 }
 
 /* ================================================= Operation Error ================================================ */

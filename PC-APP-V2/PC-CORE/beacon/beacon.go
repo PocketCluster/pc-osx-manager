@@ -4,8 +4,8 @@ import (
     "time"
 
     "github.com/stkim1/pc-node-agent/slagent"
-    "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/model"
+    "fmt"
 )
 
 type MasterBeaconState int
@@ -50,20 +50,69 @@ func (st MasterBeaconState) String() string {
     return state
 }
 
+type CommChannel interface {
+    //McastSend(data []byte) error
+    UcastSend(data []byte, target string) error
+}
+
 // MasterBeacon is assigned individually for each slave node.
 type MasterBeacon interface {
     CurrentState() MasterBeaconState
     TransitionWithTimestamp(timestamp time.Time) error
     TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error
 
-    AESKey() ([]byte, error)
-    AESCryptor() (pcrypto.AESCryptor, error)
-    RSAEncryptor() (pcrypto.RsaEncryptor, error)
-
     SlaveNode() *model.SlaveNode
 }
 
-type CommChannel interface {
-    //McastSend(data []byte) error
-    UcastSend(data []byte, target string) error
+func NewMasterBeacon(state MasterBeaconState, slaveNode *model.SlaveNode, comm CommChannel) (MasterBeacon, error) {
+    if comm == nil {
+        return nil, fmt.Errorf("[ERR] communication channel cannot be void")
+    }
+
+    switch state {
+    case MasterInit:
+        return &masterBeacon{state:beaconinitState(comm)}, nil
+
+    case MasterBindBroken:
+        if slaveNode == nil {
+            return nil, fmt.Errorf("[ERR] Slavenode cannot be nil")
+        }
+        bstate, err := bindbrokenState(slaveNode, comm)
+        if err != nil {
+            return nil, err
+        }
+        return &masterBeacon{state:bstate}, nil
+    }
+    return nil, fmt.Errorf("[ERR] MasterBeacon can initiated from MasterInit or MasterBindBroken only")
 }
+
+type masterBeacon struct {
+    state       BeaconState
+}
+
+func (mb *masterBeacon) CurrentState() MasterBeaconState {
+    return mb.state.CurrentState()
+}
+
+func (mb *masterBeacon) TransitionWithTimestamp(timestamp time.Time) error {
+    if mb.state == nil {
+        return fmt.Errorf("[ERR] BeaconState is nil. Cannot make transition with master timestamp")
+    }
+    var err error = nil
+    mb.state, err = mb.state.TransitionWithTimestamp(timestamp)
+    return err
+}
+
+func (mb *masterBeacon) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+    if mb.state == nil {
+        return fmt.Errorf("[ERR] BeaconState is nil. Cannot make transition with master meta")
+    }
+    var err error = nil
+    mb.state, err = mb.state.TransitionWithSlaveMeta(meta, timestamp)
+    return err
+}
+
+func (mb *masterBeacon) SlaveNode() *model.SlaveNode {
+    return mb.state.SlaveNode()
+}
+

@@ -37,7 +37,7 @@ func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
     defer tearDown()
 
     // test var preperations
-    mb := NewBeaconForSlaveNode()
+    mb := NewMasterBeacon(MasterInit, nil, nil)
     if mb.CurrentState() != MasterInit {
         t.Error("[ERR] Master state is expected to be " + MasterInit.String() + ". Current : " + mb.CurrentState().String())
         return
