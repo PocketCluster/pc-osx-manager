@@ -11,7 +11,7 @@ import (
 func cryptocheckState(oldState *beaconState) BeaconState {
     b := &cryptocheck{}
 
-    b.constState                    = MasterInit
+    b.constState                    = MasterCryptoCheck
 
     b.constTransitionFailureLimit   = TransitionFailureLimit
     b.constTransitionTimeout        = UnboundedTimeout * time.Duration(TxActionLimit)

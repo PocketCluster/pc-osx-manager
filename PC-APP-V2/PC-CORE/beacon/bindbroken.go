@@ -13,7 +13,7 @@ import (
 func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (BeaconState, error) {
     b := &bindbroken{}
 
-    b.constState                    = MasterInit
+    b.constState                    = MasterBindBroken
 
     b.constTransitionFailureLimit   = TransitionFailureLimit
     b.constTransitionTimeout        = UnboundedTimeout * time.Duration(TxActionLimit)

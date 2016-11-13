@@ -2,10 +2,10 @@ package beacon
 
 import (
     "time"
+    "fmt"
 
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-core/model"
-    "fmt"
 )
 
 type MasterBeaconState int

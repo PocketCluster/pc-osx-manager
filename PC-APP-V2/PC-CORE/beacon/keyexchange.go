@@ -11,7 +11,7 @@ import (
 func keyexchangeState(oldState *beaconState) BeaconState {
     b := &keyexchange{}
 
-    b.constState                    = MasterInit
+    b.constState                    = MasterKeyExchange
 
     b.constTransitionFailureLimit   = TransitionFailureLimit
     b.constTransitionTimeout        = UnboundedTimeout * time.Duration(TxActionLimit)

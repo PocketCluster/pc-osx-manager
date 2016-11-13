@@ -13,7 +13,7 @@ import (
 func inquiredState(oldState *beaconState) BeaconState {
     b := &inquired{}
 
-    b.constState                    = MasterInit
+    b.constState                    = MasterInquired
 
     b.constTransitionFailureLimit   = TransitionFailureLimit
     b.constTransitionTimeout        = UnboundedTimeout * time.Duration(TxActionLimit)

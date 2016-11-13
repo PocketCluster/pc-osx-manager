@@ -10,7 +10,7 @@ import (
 func unboundedState(oldState *beaconState) BeaconState {
     b := &unbounded{}
 
-    b.constState                    = MasterInit
+    b.constState                    = MasterUnbounded
 
     b.constTransitionFailureLimit   = TransitionFailureLimit
     b.constTransitionTimeout        = UnboundedTimeout * time.Duration(TxActionLimit)

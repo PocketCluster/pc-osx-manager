@@ -11,7 +11,7 @@ import (
 func boundedState(oldState *beaconState) BeaconState {
     b := &bounded{}
 
-    b.constState                    = MasterInit
+    b.constState                    = MasterBounded
 
     b.constTransitionFailureLimit   = TransitionFailureLimit
     b.constTransitionTimeout        = BoundedTimeout * time.Duration(TxActionLimit)

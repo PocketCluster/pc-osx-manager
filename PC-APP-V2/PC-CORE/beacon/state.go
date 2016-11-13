@@ -102,26 +102,6 @@ func (b *beaconState) txTimeWindow() time.Duration {
     return b.constTxTimeWindow
 }
 
-func (b *beaconState) AESKey() ([]byte, error) {
-    if len(b.aesKey) == 0 {
-        return nil, fmt.Errorf("[ERR] Empty AES Key")
-    }
-    return b.aesKey, nil
-}
-func (b *beaconState) AESCryptor() (pcrypto.AESCryptor, error) {
-    if b.aesCryptor == nil {
-        return nil, fmt.Errorf("[ERR] Null AES cryptor")
-    }
-    return b.aesCryptor, nil
-}
-
-func (b *beaconState) RSAEncryptor() (pcrypto.RsaEncryptor, error) {
-    if b.rsaEncryptor == nil {
-        return nil, fmt.Errorf("[ERR] Null RSA encryptor")
-    }
-    return b.rsaEncryptor, nil
-}
-
 func (b *beaconState) SlaveNode() (*model.SlaveNode) {
     // TODO : copy struct that the return value is read-only
     return b.slaveNode
@@ -168,6 +148,8 @@ func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTran
             break
 
         case MasterDiscarded:
+            fallthrough
+        default:
             nextState = currState
         }
         // failed to transit
@@ -193,6 +175,8 @@ func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTran
             break
 
         case MasterDiscarded:
+            fallthrough
+        default:
             nextState = currState
         }
         // idle
@@ -282,7 +266,7 @@ func newBeaconForState(b* beaconState, newState, oldState MasterBeaconState) Bea
             }
 
         case MasterDiscarded:
-            // TODO : implement master discarded
+            newBeaconState = discardedState(b)
     }
     return newBeaconState
 }
