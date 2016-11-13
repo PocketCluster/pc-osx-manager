@@ -279,7 +279,7 @@ func Test_Unbounded_Inquired_Transition_Fail(t *testing.T) {
     }
     mb.(*masterBeacon).beaconState = MasterUnbounded
     // --- test
-    for i := 0; i < allowedTimesOfFailure; i ++ {
+    for i := 0; i < TransitionFailureLimit; i ++ {
         slaveTS = masterTS.Add(time.Second)
         sa, end, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
         if err != nil {
@@ -396,7 +396,7 @@ func Test_Inquired_KeyExchange_Fail(t *testing.T) {
         return
     }
     // --- test
-    for i := 0; i < allowedTimesOfFailure; i++ {
+    for i := 0; i < TransitionFailureLimit; i++ {
         t.Logf("[INFO] Master state : %s. Trial count %d", mb.CurrentState().String(), mb.(*masterBeacon).trialFailCount)
 
         if mb.(*masterBeacon).trialFailCount != i {
@@ -545,7 +545,7 @@ func Test_KeyExchange_CryptoCheck_Fail(t *testing.T) {
         return
     }
     // --- test
-    for i := 0; i < allowedTimesOfFailure; i++ {
+    for i := 0; i < TransitionFailureLimit; i++ {
         t.Logf("[INFO] Master state : %s. Trial count %d", mb.CurrentState().String(), mb.(*masterBeacon).trialFailCount)
 
         if mb.CurrentState() != MasterKeyExchange {
@@ -710,7 +710,7 @@ func Test_KeyExchange_Bounded_Fail(t *testing.T) {
         return
     }
     // --- test
-    for i := 0; i < allowedTimesOfFailure ; i++ {
+    for i := 0; i < TransitionFailureLimit; i++ {
         if mb.CurrentState() != MasterCryptoCheck {
             t.Error("[ERR] Master state is expected to be " + MasterCryptoCheck.String() + ". Current : " + mb.CurrentState().String())
             return

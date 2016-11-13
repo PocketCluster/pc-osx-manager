@@ -63,3 +63,7 @@ type MasterBeacon interface {
     SlaveNode() *model.SlaveNode
 }
 
+type CommChannel interface {
+    //McastSend(data []byte) error
+    UcastSend(data []byte, target string) error
+}

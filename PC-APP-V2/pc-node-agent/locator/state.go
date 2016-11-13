@@ -22,12 +22,6 @@ const (
     BoundedTimeout         time.Duration = time.Second * 10
 )
 
-type LocatorState interface {
-    CurrentState() SlaveLocatingState
-    MasterMetaTransition(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (LocatorState, error)
-    TimestampTransition(slaveTimestamp time.Time) (LocatorState, error)
-}
-
 type transitionWithMasterMeta       func (meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error)
 
 type transitionActionWithTimestamp  func (slaveTimestamp time.Time) error
@@ -36,9 +30,14 @@ type onStateTranstionSuccess        func (slaveTimestamp time.Time) error
 
 type onStateTranstionFailure        func (slaveTimestamp time.Time) error
 
+type LocatorState interface {
+    CurrentState() SlaveLocatingState
+    MasterMetaTransition(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (LocatorState, error)
+    TimestampTransition(slaveTimestamp time.Time) (LocatorState, error)
+}
 
 type locatorState struct {
-    /* -------------------------------------- given, constant state ------------------------------------------------- */
+    /* -------------------------------------- given, constant field ------------------------------------------------- */
     // this is given state that will not change
     constState                  SlaveLocatingState
 
@@ -91,7 +90,7 @@ func (ls *locatorState) CurrentState() SlaveLocatingState {
     return ls.constState
 }
 
-func (ls *locatorState) transtionFailureLimit() uint {
+func (ls *locatorState) transitionFailureLimit() uint {
     return ls.constTransitionFailureLimit
 }
 
@@ -105,6 +104,17 @@ func (ls *locatorState) txActionLimit() uint {
 
 func (ls *locatorState) txTimeWindow() time.Duration {
     return ls.constTxTimeWindow
+}
+
+/* ------------------------------------------------ Helper Functions ------------------------------------------------ */
+// close func pointers and delegates to help GC
+func (ls *locatorState) Close() error {
+    ls.masterMetaTransition  = nil
+    ls.timestampTransition   = nil
+    ls.onTransitionSuccess   = nil
+    ls.onTransitionFailure   = nil
+    ls.commChannel           = nil
+    return nil
 }
 
 // -- STATE TRANSITION
@@ -138,7 +148,7 @@ func newLocatorStateForState(ls *locatorState, newState, oldState SlaveLocatingS
             newLocatorState = newUnboundedState(comm)
     }
     // invalidate old LocatorState CommChannel for GC
-    ls.commChannel = nil
+    ls.Close()
     return newLocatorState
 }
 
@@ -210,11 +220,11 @@ func finalizeTransitionWithTimeout(ls *locatorState, nextStateCandiate SlaveLoca
             nextConfirmedState = SlaveTransitionOk
         }
         default: {
-            if ls.transitionActionCount < ls.transtionFailureLimit() {
+            if ls.transitionActionCount < ls.transitionFailureLimit() {
                 ls.transitionActionCount++
             }
 
-            if ls.transitionActionCount < ls.transtionFailureLimit() && slaveTimestamp.Sub(ls.lastTransitionTS) < ls.transitionTimeout() {
+            if ls.transitionActionCount < ls.transitionFailureLimit() && slaveTimestamp.Sub(ls.lastTransitionTS) < ls.transitionTimeout() {
                 nextConfirmedState = SlaveTransitionIdle
             } else {
                 nextConfirmedState = SlaveTransitionFail
