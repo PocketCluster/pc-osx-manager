@@ -30,9 +30,10 @@ func Test_Init_Unbounded_Transition_TimeoutFail(t *testing.T) {
         t.Skip(err.Error())
     }
 
-    // 1st trial with incorrect slave meta
+    // 1st fail
     masterTS := time.Now()
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    if err == nil {
         t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
         return
     } else {
@@ -42,21 +43,23 @@ func Test_Init_Unbounded_Transition_TimeoutFail(t *testing.T) {
         t.Error("[ERR] Master state is expected to be " + MasterInit.String() + ". Current : " + mb.CurrentState().String())
         return
     }
-    if mb.(*masterBeacon).state.(*beaconState).transitionFailureCount != 1 {
+    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 1 {
         t.Error("[ERR] Master fail count should have increased")
         return
     }
-    // 2nd trial with TS +10 sec
-    masterTS = masterTS.Add(time.Second * 10)
-    if err := mb.TransitionWithTimestamp(masterTS); err != nil {
+
+    // 2nd fail
+    masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout * time.Duration(TxActionLimit))
+    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    if err != nil {
         t.Log(err.Error())
-    }
-    if mb.(*masterBeacon).state.(*beaconState).transitionFailureCount != 1 {
-        t.Errorf("[ERR] Master fail count should have increased. Current count %d", mb.(*masterBeacon).state.(*beaconState).transitionFailureCount)
-        return
     }
     if mb.CurrentState() != MasterDiscarded {
         t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 0 {
+        t.Errorf("[ERR] Master fail count should have increased. Current count %d", mb.(*masterBeacon).state.(DebugState).TransitionFailed())
         return
     }
 }
@@ -83,27 +86,23 @@ func Test_Init_Unbounded_Transition_TooManyMetaFail(t *testing.T) {
     if err != nil {
         t.Skip(err.Error())
     }
-
-    // 1st trial with incorrect slave meta
     masterTS := time.Now()
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
-        t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
-        return
-    }
     // four more times of failure with incorrect slave meta
     for i := 0; i < int(TransitionFailureLimit); i++ {
         masterTS = masterTS.Add(time.Second)
-        err := mb.TransitionWithSlaveMeta(sa, masterTS)
+        err = mb.TransitionWithSlaveMeta(sa, masterTS)
         if err == nil {
             t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
             return
+        } else {
+            t.Log(err.Error())
         }
     }
     if mb.CurrentState() != MasterDiscarded {
         t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
         return
     }
-    if mb.(*masterBeacon).state.(*beaconState).transitionFailureCount != TransitionFailureLimit {
+    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 0 {
         t.Error("[ERR] Master fail count should have increased")
         return
     }

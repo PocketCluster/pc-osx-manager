@@ -34,7 +34,6 @@ type BeaconState interface {
     TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (BeaconState, error)
     TransitionWithTimestamp(masterTimestamp time.Time) (BeaconState, error)
     SlaveNode() *model.SlaveNode
-    Close() error
 }
 
 type beaconState struct {
@@ -109,7 +108,7 @@ func (b *beaconState) SlaveNode() (*model.SlaveNode) {
 
 /* ------------------------------------------------ Helper Functions ------------------------------------------------ */
 // close func pointers and delegates to help GC
-func (b *beaconState) Close() error {
+func (b *beaconState) Close() {
     b.slaveMetaTransition    = nil
     b.timestampTransition    = nil
     b.onTransitionSuccess    = nil
@@ -120,8 +119,6 @@ func (b *beaconState) Close() error {
     b.rsaEncryptor           = nil
     b.slaveNode              = nil
     b.commChan               = nil
-
-    return nil
 }
 
 /* ------------------------------------------ Meta Transition Functions --------------------------------------------- */

@@ -60,7 +60,7 @@ func Test_KeyExchange_CryptoCheck_TimeoutFail(t *testing.T) {
     }
     // --- test
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.(*masterBeacon).state.(*beaconState).aesCryptor, slaveTS)
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -76,18 +76,18 @@ func Test_KeyExchange_CryptoCheck_TimeoutFail(t *testing.T) {
         t.Error("[ERR] Master state is expected to be " + MasterKeyExchange.String() + ". Current : " + mb.CurrentState().String())
         return
     }
-    if mb.(*masterBeacon).state.(*beaconState).transitionFailureCount != 1 {
+    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 1 {
         t.Error("[ERR] Master fail count should have increased")
         return
     }
     // fail with timestamp
     masterTS = masterTS.Add(time.Second * 11)
-    t.Logf("[INFO] masterTS - MasterBeacon.lastSuccessTimestmap : " + masterTS.Sub(mb.(*masterBeacon).state.(*beaconState).lastTransitionTS).String())
+    t.Logf("[INFO] masterTS - MasterBeacon.lastSuccessTimestmap : " + masterTS.Sub(mb.(*masterBeacon).state.(DebugState).TransitionSuccessTS()).String())
     if err := mb.TransitionWithTimestamp(masterTS); err != nil {
         t.Log(err.Error())
     }
-    if mb.(*masterBeacon).state.(*beaconState).transitionFailureCount != 1 {
-        t.Errorf("[ERR] Master fail count should have increased. Current count %d", mb.(*masterBeacon).state.(*beaconState).transitionFailureCount)
+    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 1 {
+        t.Errorf("[ERR] Master fail count should have increased. Current count %d", mb.(*masterBeacon).state.(DebugState).TransitionFailed())
         return
     }
     if mb.CurrentState() != MasterDiscarded {
@@ -150,15 +150,15 @@ func Test_KeyExchange_CryptoCheck_TooManyMetaFail(t *testing.T) {
 
     // --- test
     for i := 0; i < int(TransitionFailureLimit); i++ {
-        t.Logf("[INFO] Master state : %s. Trial count %d", mb.CurrentState().String(), mb.(*masterBeacon).state.(*beaconState).transitionFailureCount)
+        t.Logf("[INFO] Master state : %s. Trial count %d", mb.CurrentState().String(), mb.(*masterBeacon).state.(DebugState).TransitionFailed())
 
         if mb.CurrentState() != MasterKeyExchange {
             t.Error("[ERR] Master state is expected to be " + MasterKeyExchange.String() + ". Current : " + mb.CurrentState().String())
             return
         }
         slaveTS = masterTS.Add(time.Second)
-        t.Logf("[INFO] slaveTS - MasterBeacon.lastSuccessTimestmap : " + slaveTS.Sub(mb.(*masterBeacon).state.(*beaconState).lastTransitionTS).String())
-        sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.(*masterBeacon).state.(*beaconState).aesCryptor, slaveTS)
+        t.Logf("[INFO] slaveTS - MasterBeacon.lastSuccessTimestmap : " + slaveTS.Sub(mb.(*masterBeacon).state.(DebugState).TransitionSuccessTS()).String())
+        sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
         if err != nil {
             t.Error(err.Error())
             return
@@ -175,7 +175,7 @@ func Test_KeyExchange_CryptoCheck_TooManyMetaFail(t *testing.T) {
         t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
         return
     }
-    if mb.(*masterBeacon).state.(*beaconState).transitionFailureCount != TransitionFailureLimit {
+    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != TransitionFailureLimit {
         t.Error("[ERR] Master fail count should have increased")
         return
     }

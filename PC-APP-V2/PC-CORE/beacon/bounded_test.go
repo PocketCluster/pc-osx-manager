@@ -76,7 +76,7 @@ func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
     }
 
     // --- slave checks crypto
-    if mb.(*masterBeacon).state.(*beaconState).aesCryptor == nil {
+    if mb.(*masterBeacon).state.(DebugState).AESCryptor() == nil {
         t.Error("[ERR] AES Cryptor is nil. Should not happen.")
         return
     }
@@ -84,8 +84,9 @@ func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
         t.Errorf("[ERR] Slave node name should not be empty")
         return
     }
+    aescryptor := mb.(*masterBeacon).state.(DebugState).AESCryptor()
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, mb.(*masterBeacon).state.(*beaconState).aesCryptor, slaveTS)
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, aescryptor, slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -102,7 +103,8 @@ func Test_Init_Bounded_OnePass_Transition(t *testing.T) {
 
     // --- slave is now bounded
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveBoundedStatus(masterAgentName, slaveNodeName, mb.(*masterBeacon).state.(*beaconState).aesCryptor, slaveTS)
+    aescryptor = mb.(*masterBeacon).state.(DebugState).AESCryptor()
+    sa, end, err = slagent.TestSlaveBoundedStatus(masterAgentName, slaveNodeName, aescryptor, slaveTS)
     if err != nil {
         t.Error(err.Error())
         return

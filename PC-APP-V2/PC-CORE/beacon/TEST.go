@@ -1,5 +1,10 @@
 package beacon
 
+import (
+    "github.com/stkim1/pcrypto"
+    "time"
+)
+
 type DebugCommChannel struct {
     LastUcastMessage []byte
     LastUcastHost    string
@@ -11,4 +16,37 @@ func (dc *DebugCommChannel) UcastSend(data []byte, target string) error {
     dc.LastUcastHost = target
     dc.UCommCount++
     return nil
+}
+
+type DebugState interface {
+    AESKey() []byte
+    AESCryptor() pcrypto.AESCryptor
+    TransitionSuccessTS() time.Time
+    TransitionFailed() uint
+    TxActionTS() time.Time
+    TxActionFailed() uint
+}
+
+func (b *beaconState) AESKey() []byte {
+    return b.aesKey
+}
+
+func (b *beaconState) AESCryptor() pcrypto.AESCryptor {
+    return b.aesCryptor
+}
+
+func (b *beaconState) TransitionSuccessTS() time.Time {
+    return b.lastTransitionTS
+}
+
+func (b *beaconState) TransitionFailed() uint {
+    return b.transitionFailureCount
+}
+
+func (b *beaconState) TxActionTS() time.Time {
+    return b.lastTransmissionTS
+}
+
+func (b *beaconState) TxActionFailed() uint {
+    return b.txActionCount
 }

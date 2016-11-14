@@ -57,18 +57,18 @@ func Test_Unbounded_Inquired_Transition_TimeoutFail(t *testing.T) {
         t.Error("[ERR] Master state is expected to be " + MasterInit.String() + ". Current : " + mb.CurrentState().String())
         return
     }
-    if mb.(*masterBeacon).state.(*beaconState).transitionFailureCount != 1 {
+    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 1 {
         t.Error("[ERR] Master fail count should have increased")
         return
     }
     // update with timestamp
     slaveTS = masterTS.Add(time.Second * 11)
-    t.Logf("[INFO] slaveTS - MasterBeacon.lastSuccessTimestmap : " + slaveTS.Sub(mb.(*masterBeacon).state.(*beaconState).lastTransitionTS).String())
+    t.Logf("[INFO] slaveTS - MasterBeacon.lastSuccessTimestmap : " + slaveTS.Sub(mb.(*masterBeacon).state.(DebugState).TransitionSuccessTS()).String())
     if err := mb.TransitionWithTimestamp(slaveTS); err != nil {
         t.Log(err.Error())
     }
-    if mb.(*masterBeacon).state.(*beaconState).transitionFailureCount != 1 {
-        t.Errorf("[ERR] Master fail count should have increased. Current count %d", mb.(*masterBeacon).state.(*beaconState).transitionFailureCount)
+    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 1 {
+        t.Errorf("[ERR] Master fail count should have increased. Current count %d", mb.(*masterBeacon).state.(DebugState).TransitionFailed())
         return
     }
     if mb.CurrentState() != MasterDiscarded {
@@ -131,7 +131,7 @@ func Test_Unbounded_Inquired_Transition_TooManyMetaFail(t *testing.T) {
         t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
         return
     }
-    if mb.(*masterBeacon).state.(*beaconState).transitionFailureCount != 5 {
+    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 5 {
         t.Error("[ERR] Master fail count should have increased")
         return
     }
