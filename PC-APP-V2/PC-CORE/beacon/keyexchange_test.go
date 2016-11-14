@@ -66,7 +66,8 @@ func Test_KeyExchange_CryptoCheck_TimeoutFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    if err == nil {
         t.Errorf("[ERR] Incorrect slave name should fail master beacon to transition")
         return
     } else {
@@ -80,13 +81,14 @@ func Test_KeyExchange_CryptoCheck_TimeoutFail(t *testing.T) {
         t.Error("[ERR] Master fail count should have increased")
         return
     }
-    // fail with timestamp
-    masterTS = masterTS.Add(time.Second * 11)
+    // 2nd trial
+    masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout * time.Duration(TxActionLimit))
     t.Logf("[INFO] masterTS - MasterBeacon.lastSuccessTimestmap : " + masterTS.Sub(mb.(*masterBeacon).state.(DebugState).TransitionSuccessTS()).String())
-    if err := mb.TransitionWithTimestamp(masterTS); err != nil {
+    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    if err != nil {
         t.Log(err.Error())
     }
-    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 1 {
+    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 0 {
         t.Errorf("[ERR] Master fail count should have increased. Current count %d", mb.(*masterBeacon).state.(DebugState).TransitionFailed())
         return
     }
@@ -101,7 +103,6 @@ func Test_KeyExchange_CryptoCheck_TooManyMetaFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    // --- TIMEOUT FAILURE ---
     debugComm := &DebugCommChannel{}
 
     // test var preperations
@@ -150,8 +151,6 @@ func Test_KeyExchange_CryptoCheck_TooManyMetaFail(t *testing.T) {
 
     // --- test
     for i := 0; i < int(TransitionFailureLimit); i++ {
-        t.Logf("[INFO] Master state : %s. Trial count %d", mb.CurrentState().String(), mb.(*masterBeacon).state.(DebugState).TransitionFailed())
-
         if mb.CurrentState() != MasterKeyExchange {
             t.Error("[ERR] Master state is expected to be " + MasterKeyExchange.String() + ". Current : " + mb.CurrentState().String())
             return
@@ -175,7 +174,7 @@ func Test_KeyExchange_CryptoCheck_TooManyMetaFail(t *testing.T) {
         t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
         return
     }
-    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != TransitionFailureLimit {
+    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 0 {
         t.Error("[ERR] Master fail count should have increased")
         return
     }

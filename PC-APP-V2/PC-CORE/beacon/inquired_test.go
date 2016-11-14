@@ -53,6 +53,7 @@ func Test_Inquired_KeyExchange_TimeoutFail(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    // first trial
     masterTS = end.Add(time.Second)
     if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
         t.Error("[ERR] Master beacon should have failed if wrong master name is fed!")
@@ -68,13 +69,14 @@ func Test_Inquired_KeyExchange_TimeoutFail(t *testing.T) {
         t.Error("[ERR] Master fail count should have increased")
         return
     }
-    // fail with timestamp
-    masterTS = masterTS.Add(time.Second * 11)
-    t.Logf("[INFO] slaveTS - MasterBeacon.lastSuccessTimestmap : " + slaveTS.Sub(mb.(*masterBeacon).state.(DebugState).TransitionSuccessTS()).String())
-    if err := mb.TransitionWithTimestamp(masterTS); err != nil {
+
+    // 2nd try
+    masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout * time.Duration(TxActionLimit))
+    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    if err != nil {
         t.Log(err.Error())
     }
-    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 1 {
+    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 0 {
         t.Errorf("[ERR] Master fail count should have increased. Current count %d", mb.(*masterBeacon).state.(DebugState).TransitionFailed())
         return
     }
@@ -124,13 +126,7 @@ func Test_Inquired_KeyExchange_TooManyMetaFail(t *testing.T) {
     }
 
     // --- test ---
-    for i := 0; i < int(TransitionFailureLimit); i++ {
-        t.Logf("[INFO] Master state : %s. Trial count %d", mb.CurrentState().String(), mb.(*masterBeacon).state.(DebugState).TransitionFailed())
-
-        if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != uint(i) {
-            t.Error("[ERR] Master fail count [%d] should match with trial count [%d]", mb.(*masterBeacon).state.(DebugState).TransitionFailed(), i)
-            return
-        }
+    for i := 1; i <= int(TransitionFailureLimit); i++ {
         if mb.CurrentState() != MasterInquired {
             t.Errorf("[ERR] Master state is expected to be %s. Current : %s. Trial count %d", MasterInquired.String(), mb.CurrentState().String(), mb.(*masterBeacon).state.(DebugState).TransitionFailed())
             return
@@ -149,13 +145,19 @@ func Test_Inquired_KeyExchange_TooManyMetaFail(t *testing.T) {
         } else {
             t.Log(err.Error())
         }
+        if i < int(TransitionFailureLimit) {
+            if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != uint(i) {
+                t.Errorf("[ERR] Master fail count [%d] should have increased appropriatetly : iteration %d", mb.(*masterBeacon).state.(DebugState).TransitionFailed(), i)
+                return
+            }
+        }
     }
     if mb.CurrentState() != MasterDiscarded {
         t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
         return
     }
-    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 5 {
-        t.Error("[ERR] Master fail count should have increased")
+    if mb.(*masterBeacon).state.(DebugState).TransitionFailed() != 0 {
+        t.Errorf("[ERR] Wrong master discarded count %d", mb.(*masterBeacon).state.(DebugState).TransitionFailed())
         return
     }
 }
