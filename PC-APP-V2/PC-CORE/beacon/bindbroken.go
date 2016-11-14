@@ -8,6 +8,7 @@ import (
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pcrypto"
+    "github.com/stkim1/pc-core/msagent"
 )
 
 func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (BeaconState, error) {
@@ -65,7 +66,25 @@ type bindbroken struct {
 }
 
 func (b *bindbroken) transitionActionWithTimestamp(masterTimestamp time.Time) error {
-    return nil
+    // master preperation
+    // FIXME : get slave discovery agent here. usm.DiscoveryAgent
+    cmd, err := msagent.BrokenBindRecoverRespond(nil)
+    if err != nil {
+        return err
+    }
+    // meta
+    meta, err := msagent.BrokenBindRecoverMeta(cmd, b.aesKey, b.aesCryptor, b.rsaEncryptor)
+    if err != nil {
+        return err
+    }
+    pm, err := msagent.PackedMasterMeta(meta)
+    if err != nil {
+        return err
+    }
+    if b.commChan == nil {
+        fmt.Errorf("[ERR] Communication channel is null. This should never happen")
+    }
+    return b.commChan.UcastSend(pm, b.slaveNode.IP4Address)
 }
 
 func (b *bindbroken) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {

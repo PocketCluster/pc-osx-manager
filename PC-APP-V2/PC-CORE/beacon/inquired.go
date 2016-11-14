@@ -8,6 +8,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/msagent"
 )
 
 func inquiredState(oldState *beaconState) BeaconState {
@@ -38,7 +39,24 @@ type inquired struct {
 }
 
 func (b *inquired) transitionActionWithTimestamp(masterTimestamp time.Time) error {
-    return nil
+    masterPubKey, err := context.SharedHostContext().MasterPublicKey()
+    if err != nil {
+        return err
+    }
+    // FIXME : get slave status agent here. slagent.PocketSlaveStatus
+    cmd, err := msagent.MasterDeclarationCommand(nil, masterTimestamp)
+    if err != nil {
+        return err
+    }
+    meta := msagent.MasterDeclarationMeta(cmd, masterPubKey)
+    pm, err := msagent.PackedMasterMeta(meta)
+    if err != nil {
+        return err
+    }
+    if b.commChan == nil {
+        fmt.Errorf("[ERR] Communication channel is null. This should never happen")
+    }
+    return b.commChan.UcastSend(pm, b.slaveNode.IP4Address)
 }
 
 func (b *inquired) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {

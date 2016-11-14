@@ -5,6 +5,7 @@ import (
     "time"
 
     "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/pc-core/msagent"
 )
 
 func unboundedState(oldState *beaconState) BeaconState {
@@ -35,7 +36,20 @@ type unbounded struct {
 }
 
 func (b *unbounded) transitionActionWithTimestamp(masterTimestamp time.Time) error {
-    return nil
+    // FIXME : get slave discovery agent here. usm.DiscoveryAgent
+    cmd, err := msagent.SlaveIdentityInqueryRespond(nil)
+    if err != nil {
+        return err
+    }
+    meta := msagent.SlaveIdentityInquiryMeta(cmd)
+    pm, err := msagent.PackedMasterMeta(meta)
+    if err != nil {
+        return err
+    }
+    if b.commChan == nil {
+        fmt.Errorf("[ERR] Communication channel is null. This should never happen")
+    }
+    return b.commChan.UcastSend(pm, b.slaveNode.IP4Address)
 }
 
 func (b *unbounded) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {

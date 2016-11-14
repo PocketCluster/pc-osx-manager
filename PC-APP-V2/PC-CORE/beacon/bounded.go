@@ -6,6 +6,7 @@ import (
 
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/msagent"
 )
 
 func boundedState(oldState *beaconState) BeaconState {
@@ -39,7 +40,23 @@ type bounded struct {
 }
 
 func (b *bounded) transitionActionWithTimestamp(masterTimestamp time.Time) error {
-    return nil
+    // FIXME : get slave status agent here. slagent.PocketSlaveStatus
+    cmd, err := msagent.BoundedSlaveAckCommand(nil, masterTimestamp)
+    if err != nil {
+        return err
+    }
+    meta, err := msagent.BoundedSlaveAckMeta(cmd, b.aesCryptor)
+    if err != nil {
+        return err
+    }
+    pm, err := msagent.PackedMasterMeta(meta)
+    if err != nil {
+        return err
+    }
+    if b.commChan == nil {
+        fmt.Errorf("[ERR] Communication channel is null. This should never happen")
+    }
+    return b.commChan.UcastSend(pm, b.slaveNode.IP4Address)
 }
 
 func (b *bounded) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
