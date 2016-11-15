@@ -180,3 +180,77 @@ func Test_KeyExchange_CryptoCheck_TooManyMetaFail(t *testing.T) {
     }
 }
 
+func Test_KeyExchange_CryptoCheck_TxActionFail(t *testing.T) {
+    setUp()
+    defer tearDown()
+
+    var (
+        debugComm CommChannel = &DebugCommChannel{}
+        masterTS, slaveTS time.Time = time.Now(), time.Now()
+    )
+
+    // test var preperations
+    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+    if mb.CurrentState() != MasterInit {
+        t.Error("[ERR] Master state is expected to be " + MasterInit.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    sa, err := slagent.TestSlaveUnboundedMasterSearchDiscovery()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = time.Now()
+    mb.TransitionWithSlaveMeta(sa, masterTS)
+    if mb.CurrentState() != MasterUnbounded {
+        t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    slaveTS = masterTS.Add(time.Second)
+    sa, end, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if mb.CurrentState() != MasterInquired {
+        t.Errorf("[ERR] Master state is expected to be %s. Current : %s. Trial count %d", MasterInquired.String(), mb.CurrentState().String(), mb.(*masterBeacon).state.(DebugState).TransitionFailed())
+        return
+    }
+    slaveTS = masterTS.Add(time.Second)
+    sa, end, err = slagent.TestSlaveKeyExchangeStatus(masterAgentName, pcrypto.TestSlavePublicKey(), slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    masterTS = end.Add(time.Second)
+    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if mb.CurrentState() != MasterKeyExchange {
+        t.Error("[ERR] Master state is expected to be " + MasterKeyExchange.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+
+    // --- TX ACTION FAIL ---
+    for i := 0; i <= int(TxActionLimit); i++ {
+        masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout)
+        err = mb.TransitionWithTimestamp(masterTS)
+        if err != nil {
+            t.Log(err.Error())
+        }
+    }
+    if mb.CurrentState() != MasterDiscarded {
+        t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+}
