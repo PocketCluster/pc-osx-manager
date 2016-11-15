@@ -5,7 +5,6 @@ import (
     "fmt"
 
     "github.com/stkim1/pc-core/msagent"
-    "bytes"
 )
 
 type SlaveLocatingState int
@@ -71,9 +70,8 @@ func NewSlaveLocator(state SlaveLocatingState, comm CommChannel) (SlaveLocator, 
         return &slaveLocator{state: newUnboundedState(comm)}, nil
     case SlaveBindBroken:
         return &slaveLocator{state: newBindbrokenState(comm)}, nil
-    default:
-        return nil, fmt.Errorf("[ERR] SlaveLocator can initiated from SlaveUnbounded or SlaveBindBroken only")
     }
+    return nil, fmt.Errorf("[ERR] SlaveLocator can initiated from SlaveUnbounded or SlaveBindBroken only")
 }
 
 func (sl *slaveLocator) CurrentState() (SlaveLocatingState, error) {
@@ -106,27 +104,3 @@ func (sl *slaveLocator) Close() error {
     return nil
 }
 
-type opError struct {
-    TransitionError         error
-    EventError              error
-}
-
-func (oe *opError) Error() string {
-    var errStr bytes.Buffer
-
-    if oe.TransitionError != nil {
-        errStr.WriteString(oe.TransitionError.Error())
-    }
-
-    if oe.EventError != nil {
-        errStr.WriteString(oe.EventError.Error())
-    }
-    return errStr.String()
-}
-
-func summarizeErrors(transErr error, eventErr error) error {
-    if transErr == nil && eventErr == nil {
-        return nil
-    }
-    return &opError{TransitionError: transErr, EventError: eventErr}
-}
