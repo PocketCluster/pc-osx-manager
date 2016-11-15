@@ -188,4 +188,12 @@ func Test_Unbounded_Inquired_TxActionFail(t *testing.T) {
         t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
         return
     }
+    if len(debugComm.(*DebugCommChannel).LastUcastMessage) == 0 {
+        t.Error("[ERR] CommChannel Ucast Message should contain proper messages")
+        return
+    }
+    if mb.SlaveNode().IP4Address != debugComm.(*DebugCommChannel).LastUcastHost {
+        t.Error("[ERR] CommChannel Ucast Message should match slave node address")
+        return
+    }
 }
