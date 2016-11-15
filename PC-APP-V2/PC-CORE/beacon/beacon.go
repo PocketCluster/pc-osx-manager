@@ -16,6 +16,7 @@ const (
     MasterKeyExchange
     MasterCryptoCheck
     MasterBounded
+    MasterBindRecovery
     MasterBindBroken
     MasterDiscarded
 )
@@ -42,6 +43,8 @@ func (st MasterBeaconState) String() string {
             state = "MasterCryptoCheck"
         case MasterBounded:
             state = "MasterBounded"
+        case MasterBindRecovery:
+            state = "MasterRecovery"
         case MasterBindBroken:
             state = "MasterBindBroken"
         case MasterDiscarded:

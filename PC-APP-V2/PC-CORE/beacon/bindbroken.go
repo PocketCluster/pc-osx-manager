@@ -8,7 +8,6 @@ import (
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pcrypto"
-    "github.com/stkim1/pc-core/msagent"
 )
 
 func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (BeaconState, error) {
@@ -69,27 +68,10 @@ type bindbroken struct {
 }
 
 func (b *bindbroken) transitionActionWithTimestamp(masterTimestamp time.Time) error {
-    // master preperation
-    if b.slaveLocation == nil {
-        return fmt.Errorf("[ERR] SlaveDiscoveryAgent is nil. We cannot form a proper response")
-    }
-    cmd, err := msagent.BrokenBindRecoverRespond(b.slaveLocation)
-    if err != nil {
-        return err
-    }
-    // meta
-    meta, err := msagent.BrokenBindRecoverMeta(cmd, b.aesKey, b.aesCryptor, b.rsaEncryptor)
-    if err != nil {
-        return err
-    }
-    pm, err := msagent.PackedMasterMeta(meta)
-    if err != nil {
-        return err
-    }
-    if b.commChan == nil {
-        fmt.Errorf("[ERR] Communication channel is null. This should never happen")
-    }
-    return b.commChan.UcastSend(pm, b.slaveNode.IP4Address)
+    // bindbroken state waits indifinitely for the rite slave meta comes in so that it can move on.
+    // Here, we'll reset action count all the time.
+    b.txActionCount = 0
+    return nil
 }
 
 func (b *bindbroken) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
@@ -125,11 +107,11 @@ func (b *bindbroken) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp ti
     }
 
     // save discovery agent for respond generation
-    discovery, err := slagent.ConvertBindAttemptDiscoveryAgent(meta.DiscoveryAgent, b.slaveNode, b.slaveNode.Arch)
+    discovery, err := slagent.ConvertBindAttemptDiscoveryAgent(meta.DiscoveryAgent, b.slaveNode.NodeName, b.slaveNode.Arch)
     if err != nil {
         return MasterTransitionFail, err
     }
-    b.slaveLocation = discovery
+    b.slaveStatus = discovery
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil

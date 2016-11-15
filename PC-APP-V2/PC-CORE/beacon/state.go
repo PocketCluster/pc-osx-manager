@@ -146,8 +146,12 @@ func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTran
             fallthrough
         case MasterBounded:
             fallthrough
-        case MasterBindBroken:
+        case MasterBindRecovery:
             nextState = MasterBounded
+            break
+
+        case MasterBindBroken:
+            nextState = MasterBindRecovery
             break
 
         case MasterDiscarded:
@@ -172,6 +176,8 @@ func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTran
             break
 
         case MasterBounded:
+            fallthrough
+        case MasterBindRecovery:
             fallthrough
         case MasterBindBroken:
             nextState = MasterBindBroken
@@ -260,6 +266,9 @@ func newBeaconForState(b* beaconState, newState, oldState MasterBeaconState) Bea
 
         case MasterBounded:
             newBeaconState = boundedState(b)
+
+        case MasterBindRecovery:
+            newBeaconState = bindrecoveryState(b)
 
         case MasterBindBroken:
             newBeaconState, err = bindbrokenState(b.slaveNode, b.commChan)

@@ -1,28 +1,28 @@
 package beacon
 
 import (
-    "fmt"
     "time"
+    "fmt"
 
     "github.com/stkim1/pc-node-agent/slagent"
-    "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/msagent"
+    "github.com/stkim1/pc-core/context"
 )
 
-func boundedState(oldState *beaconState) BeaconState {
-    b := &bounded{}
+func bindrecoveryState(oldState *beaconState) BeaconState {
+    b := &bindrecovery{}
 
-    b.constState                    = MasterBounded
+    b.constState                    = MasterBindRecovery
 
     b.constTransitionFailureLimit   = TransitionFailureLimit
-    b.constTransitionTimeout        = BoundedTimeout * time.Duration(TxActionLimit)
+    b.constTransitionTimeout        = UnboundedTimeout * time.Duration(TxActionLimit)
     b.constTxActionLimit            = TxActionLimit
-    b.constTxTimeWindow             = BoundedTimeout
+    b.constTxTimeWindow             = UnboundedTimeout
 
     b.lastTransitionTS              = time.Now()
 
     b.timestampTransition           = b.transitionActionWithTimestamp
-    b.slaveMetaTransition           = b.bounded
+    b.slaveMetaTransition           = b.transitionWithSlaveMeta
     b.onTransitionSuccess           = b.onStateTranstionSuccess
     b.onTransitionFailure           = b.onStateTranstionFailure
 
@@ -33,24 +33,27 @@ func boundedState(oldState *beaconState) BeaconState {
     b.commChan                      = oldState.commChan
 
     b.slaveLocation                 = nil
+    // this status is generated from bindbroken
     b.slaveStatus                   = oldState.slaveStatus
 
     return b
 }
 
-type bounded struct {
+type bindrecovery struct {
     beaconState
 }
 
-func (b *bounded) transitionActionWithTimestamp(masterTimestamp time.Time) error {
-    if b.slaveStatus == nil {
-        return fmt.Errorf("[ERR] SlaveStatusAgent is nil. We cannot form a proper response")
+func (b *bindrecovery) transitionActionWithTimestamp(masterTimestamp time.Time) error {
+    // master preperation
+    if b.slaveLocation == nil {
+        return fmt.Errorf("[ERR] SlaveDiscoveryAgent is nil. We cannot form a proper response")
     }
-    cmd, err := msagent.BoundedSlaveAckCommand(b.slaveStatus, masterTimestamp)
+    cmd, err := msagent.BrokenBindRecoverRespond(b.slaveLocation)
     if err != nil {
         return err
     }
-    meta, err := msagent.BoundedSlaveAckMeta(cmd, b.aesCryptor)
+    // meta
+    meta, err := msagent.BrokenBindRecoverMeta(cmd, b.aesKey, b.aesCryptor, b.rsaEncryptor)
     if err != nil {
         return err
     }
@@ -64,7 +67,7 @@ func (b *bounded) transitionActionWithTimestamp(masterTimestamp time.Time) error
     return b.commChan.UcastSend(pm, b.slaveNode.IP4Address)
 }
 
-func (b *bounded) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+func (b *bindrecovery) transitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (MasterBeaconTransition, error) {
     if len(meta.EncryptedStatus) == 0 {
         return MasterTransitionFail, fmt.Errorf("[ERR] Null encrypted slave status")
     }
@@ -112,22 +115,18 @@ func (b *bounded) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Tim
         return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave architecture")
     }
 
-    // save status for response generation
+    // this status comes from slavenode. Save status for response generation
     b.slaveStatus = usm
-
-    // We'll reset TX action count to 0 and now so successful tx action can happen infinitely
-    // We need to reset the counter here when correct slave meta comes in
-    // It is b/c when succeeded in confirming with slave, we should be able to keep receiving slave meta
-    b.txActionCount = 0
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil
 }
 
-func (b *bounded) onStateTranstionSuccess(masterTimestamp time.Time) error {
+func (b *bindrecovery) onStateTranstionSuccess(masterTimestamp time.Time) error {
     return nil
 }
 
-func (b *bounded) onStateTranstionFailure(masterTimestamp time.Time) error {
+func (b *bindrecovery) onStateTranstionFailure(masterTimestamp time.Time) error {
     return nil
 }
+
