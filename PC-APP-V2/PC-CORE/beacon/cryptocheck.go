@@ -32,6 +32,9 @@ func cryptocheckState(oldState *beaconState) BeaconState {
     b.slaveNode                     = oldState.slaveNode
     b.commChan                      = oldState.commChan
 
+    b.slaveLocation                 = nil
+    b.slaveStatus                   = oldState.slaveStatus
+
     return b
 }
 
@@ -40,8 +43,10 @@ type cryptocheck struct {
 }
 
 func (b *cryptocheck) transitionActionWithTimestamp(masterTimestamp time.Time) error {
-    // FIXME : get slave status agent here. slagent.PocketSlaveStatus
-    cmd, err := msagent.MasterBindReadyCommand(nil, masterTimestamp)
+    if b.slaveStatus == nil {
+        return fmt.Errorf("[ERR] SlaveStatusAgent is nil. We cannot form a proper response")
+    }
+    cmd, err := msagent.MasterBindReadyCommand(b.slaveStatus, masterTimestamp)
     if err != nil {
         return err
     }
@@ -106,6 +111,9 @@ func (b *cryptocheck) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestamp 
     if b.slaveNode.Arch != usm.SlaveHardware {
         return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave architecture")
     }
+
+    // save status for response generation
+    b.slaveStatus = usm
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil

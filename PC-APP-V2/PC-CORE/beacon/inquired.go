@@ -31,6 +31,9 @@ func inquiredState(oldState *beaconState) BeaconState {
     b.slaveNode                     = oldState.slaveNode
     b.commChan                      = oldState.commChan
 
+    b.slaveLocation                 = nil
+    b.slaveStatus                   = oldState.slaveStatus
+
     return b
 }
 
@@ -43,8 +46,10 @@ func (b *inquired) transitionActionWithTimestamp(masterTimestamp time.Time) erro
     if err != nil {
         return err
     }
-    // FIXME : get slave status agent here. slagent.PocketSlaveStatus
-    cmd, err := msagent.MasterDeclarationCommand(nil, masterTimestamp)
+    if b.slaveStatus == nil {
+        return fmt.Errorf("[ERR] SlaveStatusAgent is nil. We cannot form a proper response")
+    }
+    cmd, err := msagent.MasterDeclarationCommand(b.slaveStatus, masterTimestamp)
     if err != nil {
         return err
     }
@@ -116,6 +121,9 @@ func (b *inquired) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.T
         return MasterTransitionFail, err
     }
     b.slaveNode.NodeName = nodeName
+
+    // save status for response generation
+    b.slaveStatus = meta.StatusAgent
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil

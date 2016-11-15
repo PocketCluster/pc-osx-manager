@@ -32,6 +32,9 @@ func boundedState(oldState *beaconState) BeaconState {
     b.slaveNode                     = oldState.slaveNode
     b.commChan                      = oldState.commChan
 
+    b.slaveLocation                 = nil
+    b.slaveStatus                   = oldState.slaveStatus
+
     return b
 }
 
@@ -40,8 +43,10 @@ type bounded struct {
 }
 
 func (b *bounded) transitionActionWithTimestamp(masterTimestamp time.Time) error {
-    // FIXME : get slave status agent here. slagent.PocketSlaveStatus
-    cmd, err := msagent.BoundedSlaveAckCommand(nil, masterTimestamp)
+    if b.slaveStatus == nil {
+        return fmt.Errorf("[ERR] SlaveStatusAgent is nil. We cannot form a proper response")
+    }
+    cmd, err := msagent.BoundedSlaveAckCommand(b.slaveStatus, masterTimestamp)
     if err != nil {
         return err
     }
@@ -106,6 +111,9 @@ func (b *bounded) bounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Tim
     if b.slaveNode.Arch != usm.SlaveHardware {
         return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave architecture")
     }
+
+    // save status for response generation
+    b.slaveStatus = usm
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil

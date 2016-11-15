@@ -78,6 +78,9 @@ type beaconState struct {
     aesCryptor                  pcrypto.AESCryptor
     rsaEncryptor                pcrypto.RsaEncryptor
     commChan                    CommChannel
+
+    slaveLocation               *slagent.PocketSlaveDiscovery
+    slaveStatus                 *slagent.PocketSlaveStatus
 }
 
 // properties
@@ -119,6 +122,9 @@ func (b *beaconState) Close() {
     b.rsaEncryptor           = nil
     b.slaveNode              = nil
     b.commChan               = nil
+
+    b.slaveLocation          = nil
+    b.slaveStatus            = nil
 }
 
 /* ------------------------------------------ Meta Transition Functions --------------------------------------------- */

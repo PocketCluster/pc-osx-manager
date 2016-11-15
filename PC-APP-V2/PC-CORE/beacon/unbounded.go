@@ -28,6 +28,9 @@ func unboundedState(oldState *beaconState) BeaconState {
     b.slaveNode                     = oldState.slaveNode
     b.commChan                      = oldState.commChan
 
+    b.slaveLocation                 = oldState.slaveLocation
+    b.slaveStatus                   = nil
+
     return b
 }
 
@@ -36,8 +39,10 @@ type unbounded struct {
 }
 
 func (b *unbounded) transitionActionWithTimestamp(masterTimestamp time.Time) error {
-    // FIXME : get slave discovery agent here. usm.DiscoveryAgent
-    cmd, err := msagent.SlaveIdentityInqueryRespond(nil)
+    if b.slaveLocation == nil {
+        return fmt.Errorf("[ERR] SlaveDiscoveryAgent is nil. We cannot form a proper response")
+    }
+    cmd, err := msagent.SlaveIdentityInqueryRespond(b.slaveLocation)
     if err != nil {
         return err
     }
@@ -74,6 +79,9 @@ func (b *unbounded) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time
         return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave architecture")
     }
     b.slaveNode.Arch = meta.StatusAgent.SlaveHardware
+
+    // save status for response generation
+    b.slaveStatus = meta.StatusAgent
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil

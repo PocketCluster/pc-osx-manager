@@ -31,6 +31,9 @@ func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (BeaconState,
     b.slaveNode                     = slaveNode
     b.commChan                      = comm
 
+    b.slaveLocation                 = nil
+    b.slaveStatus                   = nil
+
     // aeskey & aes encryptor/decryptor
     aesKey := pcrypto.NewAESKey32Byte()
     aesCryptor, err := pcrypto.NewAESCrypto(aesKey)
@@ -67,8 +70,10 @@ type bindbroken struct {
 
 func (b *bindbroken) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     // master preperation
-    // FIXME : get slave discovery agent here. usm.DiscoveryAgent
-    cmd, err := msagent.BrokenBindRecoverRespond(nil)
+    if b.slaveLocation == nil {
+        return fmt.Errorf("[ERR] SlaveDiscoveryAgent is nil. We cannot form a proper response")
+    }
+    cmd, err := msagent.BrokenBindRecoverRespond(b.slaveLocation)
     if err != nil {
         return err
     }
@@ -118,6 +123,13 @@ func (b *bindbroken) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp ti
     if b.slaveNode.MacAddress != meta.DiscoveryAgent.SlaveNodeMacAddr {
         return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave MAC address")
     }
+
+    // save discovery agent for respond generation
+    discovery, err := slagent.ConvertBindAttemptDiscoveryAgent(meta.DiscoveryAgent, b.slaveNode, b.slaveNode.Arch)
+    if err != nil {
+        return MasterTransitionFail, err
+    }
+    b.slaveLocation = discovery
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil

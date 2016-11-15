@@ -28,6 +28,9 @@ func beaconinitState(comm CommChannel) BeaconState {
     b.slaveNode                     = &model.SlaveNode{}
     b.commChan                      = comm
 
+    b.slaveLocation                 = nil
+    b.slaveStatus                   = nil
+
     return b
 }
 
@@ -76,6 +79,9 @@ func (b *beaconinit) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp ti
         return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave MAC address")
     }
     b.slaveNode.MacAddress = meta.DiscoveryAgent.SlaveNodeMacAddr
+
+    // save slave discovery to send responsed
+    b.slaveLocation  = meta.DiscoveryAgent
 
     return MasterTransitionOk, nil
 }
