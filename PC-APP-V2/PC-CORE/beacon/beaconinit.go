@@ -25,7 +25,7 @@ func beaconinitState(comm CommChannel) BeaconState {
     b.onTransitionSuccess           = b.onStateTranstionSuccess
     b.onTransitionFailure           = b.onStateTranstionFailure
 
-    b.slaveNode                     = &model.SlaveNode{}
+    b.slaveNode                     = model.NewSlaveNode()
     b.commChan                      = comm
 
     b.slaveLocation                 = nil

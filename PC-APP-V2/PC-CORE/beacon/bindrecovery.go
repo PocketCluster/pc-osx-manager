@@ -15,7 +15,9 @@ func bindrecoveryState(oldState *beaconState) BeaconState {
     b.constState                    = MasterBindRecovery
 
     b.constTransitionFailureLimit   = TransitionFailureLimit
-    b.constTransitionTimeout        = UnboundedTimeout * time.Duration(TxActionLimit)
+    // since slave is expected in bounded state, we are to wait that longer
+    // nonetheless, constTxTimeWindow is still unbounded mode to send frequently
+    b.constTransitionTimeout        = BoundedTimeout * time.Duration(TxActionLimit)
     b.constTxActionLimit            = TxActionLimit
     b.constTxTimeWindow             = UnboundedTimeout
 

@@ -18,7 +18,7 @@ func setUp() {
     model.DebugModelRepoPrepare()
 
     masterAgentName, _ = mctx.MasterAgentName()
-    slaveNodeName = "pc-node1"
+    slaveNodeName = model.DEBUG_SLAVE_NODE_NAME
     initTime, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 }
 
