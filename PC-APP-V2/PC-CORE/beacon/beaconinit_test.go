@@ -148,5 +148,7 @@ func Test_BeaconInit_Unbounded_TxActionFail(t *testing.T) {
         t.Error("[ERR] CommChannel Ucast Message should match slave node address")
         return
     }
-
+    if debugComm.(*DebugCommChannel).UCommCount != 0 {
+        t.Errorf("[ERR] MultiComm count does not match %d | expected %d", debugComm.(*DebugCommChannel).UCommCount, 0)
+    }
 }

@@ -223,4 +223,7 @@ func Test_Inquired_KeyExchange_TxActionFail(t *testing.T) {
         t.Error("[ERR] Master state is expected to be " + MasterDiscarded.String() + ". Current : " + mb.CurrentState().String())
         return
     }
+    if debugComm.(*DebugCommChannel).UCommCount != TxActionLimit {
+        t.Errorf("[ERR] MultiComm count does not match %d | expected %d", debugComm.(*DebugCommChannel).UCommCount, TxActionLimit)
+    }
 }
