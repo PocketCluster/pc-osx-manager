@@ -25,17 +25,22 @@ func dbParams(storagePath, dbFile string) string {
 
 // applyDefaults applies default values to the existing config structure
 func applyDefaults(cfg *service.Config, context context.HostContext) {
-    hostname, err := os.Hostname()
+    var (
+        hostname, appDataDir, dataDir string = "", "", ""
+        err error = nil
+    )
+
+    hostname, err = os.Hostname()
     if err != nil {
         hostname = "localhost"
         log.Errorf("Failed to determine hostname: %v", err)
     }
 
-    appDataDir, err := context.ApplicationUserDataDirectory()
+    appDataDir, err = context.ApplicationUserDataDirectory()
     if err != nil {
         log.Errorf("Failed to determine hostname: %v", err)
     }
-    dataDir := appDataDir + "/teleport"
+    dataDir = appDataDir + "/teleport"
     // check if the path exists and make it if absent
     if _, err := os.Stat(dataDir); err != nil {
         if os.IsNotExist(err) {

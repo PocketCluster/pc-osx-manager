@@ -212,12 +212,12 @@ func (ctx *hostContext) ApplicationExecutableDirectory() (string, error) {
     return ctx.applicationExecutablePath, nil
 }
 
-func (ctx *hostContext) ApplicationUserDataDirectory() (dataPath string, err error) {
+func (ctx *hostContext) ApplicationUserDataDirectory() (string, error) {
     pHome, err := ctx.PosixHomeDirectory()
     if err != nil {
-        return
+        return "", err
     }
-    dataPath = pHome + "/.pocket"
+    dataPath := pHome + "/.pocket"
 
     // create the data directory if it's missing
     _, err = os.Stat(dataPath)

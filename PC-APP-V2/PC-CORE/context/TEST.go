@@ -78,8 +78,8 @@ func debugContextTeardown() {
 func DebugContextPrepare() (HostContext) {
     // once singleton is assigned, it will not assign again. This is how we invalidate singleton ops
     singletonContextInstance()
-    hostContext := &hostContext{
-        cocoaHomePath:              "/Users/almightykim",
+    context = &hostContext{
+        cocoaHomePath:               "/Users/almightykim",
         posixHomePath:               "/Users/almightykim",
         fullUserName:                "Almighty Kim",
         loginUserName:               "almightykim",
@@ -105,10 +105,10 @@ func DebugContextPrepare() (HostContext) {
         currentCountryCode:          "KR",
     }
 
-    hostContext.monitorNetworkGateways(test_gateways)
-    hostContext.monitorNetworkInterfaces(test_intefaces)
+    context.monitorNetworkGateways(test_gateways)
+    context.monitorNetworkInterfaces(test_intefaces)
 
-    return hostContext
+    return context
 }
 
 func DebugContextDestroy() {

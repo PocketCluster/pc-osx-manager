@@ -50,7 +50,7 @@ const (
 	AuthListenPort = 3025
 
 	// Default DB to use for persisting state. Another options is "etcd"
-	BackendType = "bolt"
+	BackendType = "SQLite"
 
 	// Name of events bolt database file stored in DataDir
     EventsSqliteFile = "events.db"
