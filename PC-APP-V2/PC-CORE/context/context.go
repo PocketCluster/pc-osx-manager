@@ -6,6 +6,7 @@ import (
     "fmt"
 
     "github.com/ricochet2200/go-disk-usage/du"
+    "os"
 )
 
 type HostContext interface {
@@ -217,7 +218,17 @@ func (ctx *hostContext) ApplicationUserDataDirectory() (dataPath string, err err
         return
     }
     dataPath = pHome + "/.pocket"
-    return
+
+    // create the data directory if it's missing
+    _, err = os.Stat(dataPath)
+    if os.IsNotExist(err) {
+        err := os.MkdirAll(dataPath, os.ModeDir|0700)
+        if err != nil {
+            return "", err
+        }
+    }
+
+    return dataPath, nil
 }
 
 func (ctx *hostContext) HostDeviceSerial() (string, error) {
