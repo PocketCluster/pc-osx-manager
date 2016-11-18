@@ -34,40 +34,45 @@ type HostContext interface {
     HostPhysicalMemorySize() uint64
     HostStorageSpaceStatus() (total uint64, available uint64)
 
+    CurrentCountryCode() (string, error)
+    CurrentLanguageCode() (string, error)
+
     MasterAgentName() (string, error)
     MasterPublicKey() ([]byte, error)
     MasterPrivateKey() ([]byte, error)
 }
 
 type hostContext struct {
-    publicKeyData               []byte
-    privateKeyData              []byte
+    hostInterfaces               *[]*HostNetworkInterface
+    hostGateways                 *[]*HostNetworkGateway
 
-    hostInterfaces              *[]*HostNetworkInterface
-    hostGateways                *[]*HostNetworkGateway
+    primaryInteface              *HostNetworkInterface
+    primaryAddress               *HostIPAddress
+    primaryGateway               *HostNetworkGateway
 
-    primaryInteface             *HostNetworkInterface
-    primaryAddress              *HostIPAddress
-    primaryGateway              *HostNetworkGateway
+    cocoaHomePath                string
+    posixHomePath                string
+    fullUserName                 string
+    loginUserName                string
+    userTempPath                 string
 
-    cocoaHomePath               string
-    posixHomePath               string
-    fullUserName                string
-    loginUserName               string
-    userTempPath                string
+    applicationSupportPath       string
+    applicationDocumentPath      string
+    applicationTempPath          string
+    applicationLibCachePath      string
+    applicationResourcePath      string
+    applicationExecutablePath    string
 
-    applicationSupportPath      string
-    applicationDocumentPath     string
-    applicationTempPath         string
-    applicationLibCachePath     string
-    applicationResourcePath     string
-    applicationExecutablePath   string
+    processorCount               uint
+    activeProcessorCount         uint
+    physicalMemorySize           uint64
 
-    hostDeviceSerial            string
+    hostDeviceSerial             string
+    publicKeyData                []byte
+    privateKeyData               []byte
 
-    processorCount              uint
-    activeProcessorCount        uint
-    physicalMemorySize          uint64
+    currentCountryCode           string
+    currentLanguageCode          string
 }
 
 // singleton initialization
@@ -289,4 +294,18 @@ func (ctx *hostContext) MasterPrivateKey() ([]byte, error) {
         return nil, fmt.Errorf("[ERR] Invalid master private key data")
     }
     return ctx.privateKeyData, nil
+}
+
+func (ctx *hostContext) CurrentCountryCode() (string, error) {
+    if len(ctx.currentCountryCode) == 0 {
+        return "", fmt.Errorf("[ERR] Invalid country code")
+    }
+    return ctx.currentCountryCode, nil
+}
+
+func (ctx *hostContext) CurrentLanguageCode() (string, error) {
+    if len(ctx.currentLanguageCode) == 0 {
+        return "", fmt.Errorf("[ERR] Invalid language code")
+    }
+    return ctx.currentLanguageCode, nil
 }

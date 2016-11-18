@@ -76,35 +76,37 @@ func debugContextTeardown() {
 }
 
 func DebugContextPrepare() (HostContext) {
-
     // once singleton is assigned, it will not assign again. This is how we invalidate singleton ops
     singletonContextInstance()
-    hostContext := debugContextSetup();
+    hostContext := &hostContext{
+        cocoaHomePath:              "/Users/almightykim",
+        posixHomePath:               "/Users/almightykim",
+        fullUserName:                "Almighty Kim",
+        loginUserName:               "almightykim",
+        userTempPath:                "/var/folders/1s/nn_7b2vd75g6lfs5_vxcgt_c0000gn/T/",
 
-    hostContext.cocoaHomePath               = "/Users/almightykim"
-    hostContext.posixHomePath               = "/Users/almightykim"
-    hostContext.fullUserName                = "Almighty Kim"
-    hostContext.loginUserName               = "almightykim"
-    hostContext.userTempPath                = "/var/folders/1s/nn_7b2vd75g6lfs5_vxcgt_c0000gn/T/"
+        applicationSupportPath:      "/Users/almightykim/Library/Application Support/SysUtil",
+        applicationDocumentPath:     "/Users/almightykim/Documents",
+        applicationTempPath:         "/var/folders/1s/nn_7b2vd75g6lfs5_vxcgt_c0000gn/T/",
+        applicationLibCachePath:     "/Users/almightykim/Library/Caches",
+        applicationResourcePath:     "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/Resources",
+        applicationExecutablePath:   "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/MacOS/SysUtil",
 
-    hostContext.applicationSupportPath      = "/Users/almightykim/Library/Application Support/SysUtil"
-    hostContext.applicationDocumentPath     = "/Users/almightykim/Documents"
-    hostContext.applicationTempPath         = "/var/folders/1s/nn_7b2vd75g6lfs5_vxcgt_c0000gn/T/"
-    hostContext.applicationLibCachePath     = "/Users/almightykim/Library/Caches"
-    hostContext.applicationResourcePath     = "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/Resources"
-    hostContext.applicationExecutablePath   = "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/MacOS/SysUtil"
+        hostDeviceSerial:            "G8815052XYL",
 
-    hostContext.hostDeviceSerial            = "G8815052XYL"
+        processorCount:              8,
+        activeProcessorCount:        8,
+        physicalMemorySize:          34359738368,
 
-    hostContext.processorCount              = 8
-    hostContext.activeProcessorCount        = 8
-    hostContext.physicalMemorySize          = 34359738368
+        publicKeyData:               pcrypto.TestMasterPublicKey(),
+        privateKeyData:              pcrypto.TestMasterPrivateKey(),
+
+        currentLanguageCode:         "EN",
+        currentCountryCode:          "KR",
+    }
 
     hostContext.monitorNetworkGateways(test_gateways)
     hostContext.monitorNetworkInterfaces(test_intefaces)
-
-    hostContext.publicKeyData               = pcrypto.TestMasterPublicKey()
-    hostContext.privateKeyData              = pcrypto.TestMasterPrivateKey()
 
     return hostContext
 }

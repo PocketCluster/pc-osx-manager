@@ -16,11 +16,17 @@ func (ctx *hostContext) RefreshStatus() error {
     ctx.applicationResourcePath     = findApplicationResourceDirectory()
     ctx.applicationExecutablePath   = findApplicationExecutableDirectory()
 
-    ctx.hostDeviceSerial            = findSerialNumber()
-
     ctx.processorCount              = findSystemProcessorCount()
     ctx.activeProcessorCount        = findSystemActiveProcessorCount()
     ctx.physicalMemorySize          = findSystemPhysicalMemorySize()
+
+    ctx.hostDeviceSerial            = findSerialNumber()
+    // TODO set pcrypto Public/Private/Cert/CA
+    //ctx.publicKeyData               =
+    //ctx.privateKeyData              =
+
+    ctx.currentLanguageCode         = findCurrentLanguageCode()
+    ctx.currentCountryCode          = findCurrentCountryCode()
 
     return nil
 }

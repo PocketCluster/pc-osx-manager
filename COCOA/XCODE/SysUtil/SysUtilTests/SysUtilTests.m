@@ -92,4 +92,12 @@
     [self tearDown];
 }
 
+-(void)testLocaleInfo {
+    [self setUp];
+    
+    NSLog(@"%s", PCEnvironmentCurrentCountryCode());
+    NSLog(@"%s", PCEnvironmentCurrentLanguageCode());
+
+    [self tearDown];
+}
 @end

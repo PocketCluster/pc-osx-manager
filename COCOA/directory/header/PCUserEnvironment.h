@@ -24,4 +24,9 @@ PCEnvironmentUserTemporaryDirectory(void);
 extern const char*
 PCEnvironmentLoginUserName(void);
 
+const char*
+PCEnvironmentCurrentLanguageCode(void);
+
+const char*
+PCEnvironmentCurrentCountryCode(void);
 #endif /* __PCUSERENVIRONMENT_H__ */

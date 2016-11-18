@@ -41,3 +41,13 @@ PCEnvironmentLoginUserName(void) {
     NSString* user = NSUserName();
     return [user UTF8String];
 }
+
+const char*
+PCEnvironmentCurrentCountryCode(void) {
+    return [[[NSLocale currentLocale] objectForKey:NSLocaleCountryCode] UTF8String];
+}
+
+const char*
+PCEnvironmentCurrentLanguageCode(void) {
+    return [[[[NSLocale currentLocale] objectForKey:NSLocaleLanguageCode] uppercaseString] UTF8String];
+}
