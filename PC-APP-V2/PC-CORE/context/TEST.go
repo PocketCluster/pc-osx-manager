@@ -1,4 +1,3 @@
-//+build !build
 package context
 
 import "github.com/stkim1/pcrypto"
