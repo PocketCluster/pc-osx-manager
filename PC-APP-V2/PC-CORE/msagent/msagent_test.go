@@ -9,6 +9,7 @@ import (
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pcrypto"
+    "github.com/davecgh/go-spew/spew"
 )
 
 var masterAgentName string
@@ -75,6 +76,7 @@ func TestUnboundedInqueryMeta(t *testing.T) {
         return
     }
     // http://stackoverflow.com/questions/1098897/what-is-the-largest-safe-udp-packet-size-on-the-internet
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
         return
@@ -153,6 +155,7 @@ func TestMasterDeclarationMeta(t *testing.T) {
         fmt.Printf(err.Error())
         return
     }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] Package message length does not match an expectation [%d]", len(mp))
         return
@@ -205,6 +208,7 @@ func TestExecKeyExchangeMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
     }
@@ -256,6 +260,7 @@ func TestSendCryptoCheckMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
     }
@@ -289,6 +294,7 @@ func TestBoundedStatusMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
         return
@@ -310,4 +316,29 @@ func TestBoundedStatusMeta(t *testing.T) {
 }
 
 func TestBindBrokenMeta(t *testing.T) {
+    setUp()
+    defer tearDown()
+
+    meta, err := TestMasterBrokenBindRecoveryCommand(masterAgentName, pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor)
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+    mp, err := PackedMasterMeta(meta)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
+    if 508 <= len(mp) {
+        t.Errorf("[ERR] package meta message size [%d] does not match the expected", len(mp))
+        return
+    }
+    // verification step
+    _, err = UnpackedMasterMeta(mp)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+
 }
