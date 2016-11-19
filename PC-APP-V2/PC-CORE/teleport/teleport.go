@@ -3,6 +3,7 @@ package teleport
 import (
     "os"
     "fmt"
+
     "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/trace"
 )

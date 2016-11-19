@@ -5,17 +5,17 @@ import (
 )
 
 type PocketSlaveDiscovery struct {
-    Version             DiscoveryProtocol    `msgpack:"pc_sl_pd"`
+    Version             DiscoveryProtocol    `msgpack:"s_pd"`
     // master
-    MasterBoundAgent    string               `msgpack:"pc_ms_ba,omitempty"`
+    MasterBoundAgent    string               `msgpack:"m_ba,omitempty"`
     // slave response
-    SlaveResponse       ResponseType         `msgpack:"pc_sl_rt,omitempty`
+    SlaveResponse       ResponseType         `msgpack:"s_rt,omitempty`
 
     // slave
-    SlaveAddress        string               `msgpack:"pc_sl_i4,omitempty"`
-    SlaveGateway        string               `msgpack:"pc_sl_g4,omitempty"`
-    SlaveNetmask        string               `msgpack:"pc_sl_n4,omitempty"`
-    SlaveNodeMacAddr    string               `msgpack:"pc_sl_ma"`
+    SlaveAddress        string               `msgpack:"s_i4,omitempty"`
+    SlaveGateway        string               `msgpack:"s_g4,omitempty"`
+    SlaveNetmask        string               `msgpack:"s_n4,omitempty"`
+    SlaveNodeMacAddr    string               `msgpack:"s_ma"`
 
     // TODO : check if nameserver & node name is really necessary for discovery
     //SlaveNameServer     string     `bson:"pc_sl_ns,omitempty"

@@ -4,61 +4,61 @@ package msagent
 // meta protocol scheme & version
 type MetaProtocol string
 const (
-    MASTER_META_PROTO           MetaProtocol = "pc_ms_pm"
+    MASTER_META_PROTO           MetaProtocol = "m_pm"
     MASTER_META_VERSION         MetaProtocol = "1.0.1"
 )
 
 // discovery protocol scheme & version
 type RespondProtocol string
 const (
-    MASTER_RESPOND_PROTO        RespondProtocol = "pc_ms_pr"
+    MASTER_RESPOND_PROTO        RespondProtocol = "m_pr"
     MASTER_RESPOND_VERSION      RespondProtocol = "1.0.1"
 )
 
 // status protocol scheme & version
 type CommandProtocol string
 const (
-    MASTER_COMMAND_PROTO        CommandProtocol = "pc_ms_pc"
+    MASTER_COMMAND_PROTO        CommandProtocol = "m_pc"
     MASTER_COMMAND_VERSION      CommandProtocol = "1.0.1"
 )
 
 // Discovery & Status tag for meta
 const (
-    MASTER_ENCRYPTED_COMMAND    = "pc_ms_ec"
-    MASTER_DISCOVER_RESPOND     = "pc_ms_dr"
-    MASTER_STATUS_COMMANDER     = "pc_ms_sc"
-    MASTER_PUBLIC_KEY           = "pc_ms_pk"
-    MASTER_ENCRYPTED_AESKEY     = "pc_ms_ak"
-    MASTER_RSA_SIGNATURE        = "pc_ms_sg"
-    MASTER_ENCRYPTED_SLAVE      = "pc_ms_es"
-    MASTER_ENCRYPTED_RESPOND    = "pc_ms_er"
+    MASTER_ENCRYPTED_COMMAND    = "m_ec"
+    MASTER_DISCOVER_RESPOND     = "m_dr"
+    MASTER_STATUS_COMMANDER     = "m_sc"
+    MASTER_PUBLIC_KEY           = "m_pk"
+    MASTER_ENCRYPTED_AESKEY     = "m_ak"
+    MASTER_RSA_SIGNATURE        = "m_sg"
+    MASTER_ENCRYPTED_SLAVE      = "m_es"
+    MASTER_ENCRYPTED_RESPOND    = "m_er"
 )
 
 // ------ COMMAND DEFINITIONS ------
 type CommandType string
-const MASTER_COMMAND_TYPE  string = "pc_ms_ct"
+const MASTER_COMMAND_TYPE  string = "m_ct"
 const (
-    COMMAND_SLAVE_IDINQUERY     CommandType = "pc_ms_si"
-    COMMAND_MASTER_DECLARE      CommandType = "pc_ms_md"
-    COMMAND_EXCHANGE_CRPTKEY    CommandType = "pc_ms_ck"
-    COMMAND_MASTER_BIND_READY   CommandType = "pc_ms_mr"
-    COMMAND_SLAVE_ACK           CommandType = "pc_ms_ak"
-    COMMAND_RECOVER_BIND        CommandType = "pc_ms_rb"
-    COMMAND_MASTER_AWAY         CommandType = "pc_ms_ma"
+    COMMAND_SLAVE_IDINQUERY     CommandType = "m_si"
+    COMMAND_MASTER_DECLARE      CommandType = "m_md"
+    COMMAND_EXCHANGE_CRPTKEY    CommandType = "m_ck"
+    COMMAND_MASTER_BIND_READY   CommandType = "m_mr"
+    COMMAND_SLAVE_ACK           CommandType = "m_ak"
+    COMMAND_RECOVER_BIND        CommandType = "m_rb"
+    COMMAND_MASTER_AWAY         CommandType = "m_ma"
 )
 
 // ------ MASTER SECTION ------
 const (
-    MASTER_SECTION              = "master"
+    //MASTER_SECTION              = "master"
 
     // bound-id
-    MASTER_BOUND_AGENT          = "pc_ms_ba"
+    MASTER_BOUND_AGENT          = "m_ba"
     // master ip4 / ip6
-    MASTER_IP4_ADDRESS          = "pc_ms_i4"
-    MASTER_IP6_ADDRESS          = "pc_ms_i6"
+    MASTER_IP4_ADDRESS          = "m_i4"
+    MASTER_IP6_ADDRESS          = "m_i6"
     // master datetime
-    MASTER_TIMESTAMP            = "pc_ms_ts"
+    MASTER_TIMESTAMP            = "m_ts"
 
     // TODO : Do we need this?
-    //MASTER_HOSTNAME        = "pc_ms_hn"
+    //MASTER_HOSTNAME        = "m_hn"
 )

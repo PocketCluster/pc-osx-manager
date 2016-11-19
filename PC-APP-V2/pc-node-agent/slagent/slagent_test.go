@@ -9,6 +9,7 @@ import (
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-node-agent/slcontext"
     "reflect"
+    "github.com/davecgh/go-spew/spew"
 )
 
 var masterAgentName string
@@ -73,6 +74,7 @@ func TestUnboundedBroadcastMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] Package message length does not match an expectation [%d]", len(mp))
         return
@@ -157,6 +159,7 @@ func TestInquiredMetaAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] Package message length [%d] exceeds an expectation", len(mp))
         return
@@ -244,7 +247,8 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if  512 <= len(mp) {
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
+    if  508 <= len(mp) {
         t.Errorf("[ERR] Package message length [%d] exceeds an expectation", len(mp))
         return
     }
@@ -365,6 +369,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] Package message length [%d] exceeds an expectation", len(mp))
         return
@@ -503,6 +508,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] Package message length [%d] exceeds an expectation", len(mp))
         return
@@ -610,6 +616,7 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
     if err != nil {
         t.Error(err.Error())
     }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] Incorrect MsgPack Length %d", len(mp))
     }
