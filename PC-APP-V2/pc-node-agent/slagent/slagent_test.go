@@ -8,6 +8,7 @@ import (
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-node-agent/slcontext"
+    "reflect"
 )
 
 var masterAgentName string
@@ -289,7 +290,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
     defer tearDown()
 
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
-    ma, _, err := TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initSendTimestmap)
+    ma, _, err := TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, slcontext.SharedSlaveContext().GetSSHKey(), pcrypto.TestAESCryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -306,6 +307,19 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
     esd, err := pcrypto.TestAESCryptor.DecryptByAES(ma.EncryptedStatus)
     if err != nil {
         t.Error(err.Error())
+        return
+    }
+    if len(ma.SlavePubKey) == 0 {
+        t.Errorf("ERR] Incorrect slave ssh key field %d\n", len(ma.SlavePubKey))
+        return
+    }
+    ssk, err := pcrypto.TestAESCryptor.DecryptByAES(ma.SlavePubKey)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if !reflect.DeepEqual(ssk, pcrypto.TestSlaveSSHKey()) {
+        t.Errorf("[ERR] Slave ssh key is not the same!")
         return
     }
     sd, err := UnpackedSlaveStatus(esd)
@@ -409,6 +423,10 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
     }
     if sd.SlaveHardware != usd.SlaveHardware {
         t.Error("[ERR] Unidentical StatusAgent.SlaveHardware")
+        return
+    }
+    if !reflect.DeepEqual(ma.SlavePubKey, up.SlavePubKey) {
+        t.Errorf("[ERR] Unidenticla Slave sshkey")
         return
     }
     // TODO : need to fix slave timezone

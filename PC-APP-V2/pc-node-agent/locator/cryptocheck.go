@@ -53,7 +53,7 @@ func (ls *cryptocheck) transitionActionWithTimestamp(slaveTimestamp time.Time) e
     if err != nil {
         return err
     }
-    sm, err := slagent.CheckSlaveCryptoMeta(sa, aesCryptor)
+    sm, err := slagent.CheckSlaveCryptoMeta(sa, slctx.GetSSHKey(), aesCryptor)
     if err != nil {
         return err
     }

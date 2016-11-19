@@ -168,7 +168,7 @@ func (cfg *PocketSlaveConfig) SaveSlaveConfig() error {
     // check if config dir exists, and creat if DNE
     configDirPath := cfg.rootPath + slave_config_dir
     if _, err := os.Stat(configDirPath); os.IsNotExist(err) {
-        os.MkdirAll(configDirPath, 0700);
+        os.MkdirAll(configDirPath, os.ModeDir|0700);
     }
 
     configFilePath := cfg.rootPath + slave_config_file

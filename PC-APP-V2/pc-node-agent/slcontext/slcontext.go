@@ -30,12 +30,9 @@ type PocketSlaveContext interface {
     // This must be executed on success from CheckCrypto -> Bound, or BindBroken -> Bound.
     // No other place can execute this
     SaveConfiguration() error
-
-    // TODO handle error
     GetPublicKey() (pubkey []byte)
-
-    // TODO handle error
     GetPrivateKey() (prvkey []byte)
+    GetSSHKey() ([]byte)
     pcrypto.RsaDecryptor
 
     SetMasterPublicKey(masterPubkey []byte) error

@@ -3,6 +3,7 @@ package beacon
 import (
     "testing"
     "time"
+    "reflect"
 
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pcrypto"
@@ -58,7 +59,7 @@ func Test_CryptoCheck_Bounded_TimeoutFail(t *testing.T) {
         return
     }
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, pcrypto.TestSlaveSSHKey(), mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -70,6 +71,10 @@ func Test_CryptoCheck_Bounded_TimeoutFail(t *testing.T) {
     }
     if mb.CurrentState() != MasterCryptoCheck {
         t.Error("[ERR] Master state is expected to be " + MasterCryptoCheck.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    if !reflect.DeepEqual(mb.SlaveNode().SSHKey, pcrypto.TestSlaveSSHKey()) {
+        t.Error("[ERR] SlaveNode SSHKEY should have been saved propery")
         return
     }
 
@@ -163,7 +168,7 @@ func Test_CryptoCheck_Bounded_TooManyMetaFail(t *testing.T) {
         return
     }
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, pcrypto.TestSlaveSSHKey(), mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -177,6 +182,11 @@ func Test_CryptoCheck_Bounded_TooManyMetaFail(t *testing.T) {
         t.Error("[ERR] Master state is expected to be " + MasterCryptoCheck.String() + ". Current : " + mb.CurrentState().String())
         return
     }
+    if !reflect.DeepEqual(mb.SlaveNode().SSHKey, pcrypto.TestSlaveSSHKey()) {
+        t.Error("[ERR] SlaveNode SSHKEY should have been saved propery")
+        return
+    }
+
 
     // --- test
     aesCrypto := mb.(*masterBeacon).state.(DebugState).AESCryptor()
@@ -259,7 +269,7 @@ func Test_CryptoCheck_Bounded_TxActionFail(t *testing.T) {
         return
     }
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, pcrypto.TestSlaveSSHKey(), mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -271,6 +281,10 @@ func Test_CryptoCheck_Bounded_TxActionFail(t *testing.T) {
     }
     if mb.CurrentState() != MasterCryptoCheck {
         t.Error("[ERR] Master state is expected to be " + MasterCryptoCheck.String() + ". Current : " + mb.CurrentState().String())
+        return
+    }
+    if !reflect.DeepEqual(mb.SlaveNode().SSHKey, pcrypto.TestSlaveSSHKey()) {
+        t.Error("[ERR] SlaveNode SSHKEY should have been saved propery")
         return
     }
 

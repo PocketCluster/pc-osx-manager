@@ -59,6 +59,7 @@ type SlaveNode struct {
     UserMadeName    string       `gorm:"column:user_made_name;type:VARCHAR(256)"`
     PublicKey       []byte       `gorm:"column:public_key;type:BLOB"`
     PrivateKey      []byte       `gorm:"column:private_key;type:BLOB"`
+    SSHKey          []byte       `gorm:"column:ssh_key;type:BLOB"`
 }
 
 func (SlaveNode) TableName() string {

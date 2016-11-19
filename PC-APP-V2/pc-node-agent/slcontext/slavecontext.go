@@ -19,6 +19,7 @@ type slaveContext struct {
     config              *config.PocketSlaveConfig
     publicKey           []byte
     privateKey          []byte
+    sshKey              []byte
     decryptor           pcrypto.RsaDecryptor
 
     masterAgent         string
@@ -64,6 +65,13 @@ func (sc *slaveContext) initWithConfig(cfg *config.PocketSlaveConfig) error {
         return err
     }
     sc.privateKey = prvkey
+
+    //ssh key
+    sshKey, err := cfg.SlaveSSHKey()
+    if err != nil {
+        return err
+    }
+    sc.sshKey = sshKey
 
     // if master public key exists
     if mspubkey, err := cfg.MasterPublicKey(); len(mspubkey) != 0 && err == nil {
@@ -231,6 +239,10 @@ func (sc *slaveContext) GetPublicKey() ([]byte) {
 
 func (sc *slaveContext) GetPrivateKey() ([]byte) {
     return sc.privateKey
+}
+
+func (sc *slaveContext) GetSSHKey() ([]byte) {
+    return sc.sshKey
 }
 
 func (sc *slaveContext) DecryptByRSA(crypted []byte, sendSig pcrypto.Signature) ([]byte, error) {

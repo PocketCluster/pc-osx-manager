@@ -29,6 +29,7 @@ const (
     SLAVE_STATUS_AGENT      = "pc_sl_as"
     SLAVE_ENCRYPTED_STATUS  = "pc_sl_es"
     SLAVE_PUBLIC_KEY        = "pc_sl_pk"
+    SLAVE_SSH_KEY           = "pc_sl_sh"
 )
 
 // Report types (respond to command)
