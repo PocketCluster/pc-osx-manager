@@ -42,7 +42,7 @@ type encryptor struct {
 }
 
 func (e *encryptor) generateSignature(plain []byte) (Signature, error) {
-    hType := crypto.SHA1
+    hType := crypto.SHA256
     hash := hType.New()
     hash.Write(plain)
     opts := &rsa.PSSOptions{SaltLength:rsa.PSSSaltLengthAuto}

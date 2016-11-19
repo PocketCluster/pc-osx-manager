@@ -35,7 +35,7 @@ func newPrivateKeyFromKey(k interface{}) (*rsaPrivateKey, error) {
         case *rsa.PrivateKey:
             return &rsaPrivateKey{
                 PrivateKey:t,
-                Hash:crypto.SHA1,
+                Hash:crypto.SHA256,
             }, nil
         default:
             return nil, fmt.Errorf("ssh: unsupported key type %T", k)
@@ -101,7 +101,7 @@ func (r *rsaPrivateKey) signDataWithHash(data []byte, hashType crypto.Hash) ([]b
 // Sign signs data with rsa-sha hash
 func (r *rsaPrivateKey) Sign(data []byte) ([]byte, error) {
     // TODO : when overal cluster nodes are powerful enough to handle SHA256, please change to that
-    return r.signDataWithHash(data, crypto.SHA1)
+    return r.signDataWithHash(data, crypto.SHA256)
 }
 
 //------------------------------------------------ RSA PUBLIC KEY ------------------------------------------------------
@@ -116,7 +116,7 @@ func newPublicKeyFromKey(k interface{}) (*rsaPublicKey, error) {
         case *rsa.PublicKey:
             return &rsaPublicKey{
                 PublicKey:t,
-                Hash:crypto.SHA1,
+                Hash:crypto.SHA256,
             }, nil
         default:
             return nil, fmt.Errorf("ssh: unsupported key type %T", k)
@@ -185,7 +185,7 @@ func (r *rsaPublicKey) unsignDataWithHash(message []byte, sig []byte, hashType c
 // Unsign verifies the message using a rsa-sha signature
 func (r *rsaPublicKey) Unsign(message []byte, sig []byte) error {
     // TODO : when overal cluster nodes are powerful enough to handle SHA256, please change to that
-    return r.unsignDataWithHash(message, sig, crypto.SHA1)
+    return r.unsignDataWithHash(message, sig, crypto.SHA256)
 }
 
 //------------------------------------------------ RSA KEY GENERATION --------------------------------------------------

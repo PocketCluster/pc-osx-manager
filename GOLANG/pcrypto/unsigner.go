@@ -20,7 +20,7 @@ func newUnsignerFromKey(k interface{}) (Unsigner, error) {
     case *rsa.PublicKey:
         sshKey = &rsaPublicKey{
             PublicKey:t,
-            Hash:crypto.SHA1,
+            Hash:crypto.SHA256,
         }
     default:
         return nil, fmt.Errorf("ssh: unsupported key type %T", k)

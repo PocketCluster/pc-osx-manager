@@ -1,6 +1,6 @@
 package netifaces
 /*
-#include <string.h>
+// #include <string.h>
 #include "netifaces.h"
 */
 import "C"
@@ -8,7 +8,7 @@ import (
     "syscall"
     "fmt"
     "bytes"
-    "unsafe"
+//    "unsafe"
 )
 
 type Gateway struct {
@@ -71,7 +71,11 @@ func (g *Gateway) DefaultIP4Gateway() (string, string, error) {
         return "", "", fmt.Errorf("[ERR] Cannot find default gateway for IP4")
     }
 
-    address = filteredIp4String(C.GoBytes(unsafe.Pointer(gw.addr), C.int(C.strlen(gw.addr))))
-    ifname = filteredInterfaceString(C.GoBytes(unsafe.Pointer(gw.ifname), C.int(C.strlen(gw.ifname))))
+    // FIXME : C-String to Go-String conversion with strlen() has cuased erraneous, extra character addition.
+    //address = filteredIp4String(C.GoBytes(unsafe.Pointer(gw.addr), C.int(C.strlen(gw.addr))))
+    //ifname = filteredInterfaceString(C.GoBytes(unsafe.Pointer(gw.ifname), C.int(C.strlen(gw.ifname))))
+
+    address = filteredIp4String([]byte(C.GoString(gw.addr)))
+    ifname = filteredInterfaceString([]byte(C.GoString(gw.ifname)))
     return address, ifname, nil
 }

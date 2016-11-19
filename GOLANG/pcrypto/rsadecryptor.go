@@ -43,7 +43,7 @@ type decryption struct {
 }
 
 func (d *decryption) verifySignature(plainText []byte, sendSig Signature) error {
-    hType := crypto.SHA1
+    hType := crypto.SHA256
     hash := hType.New()
     hash.Write(plainText)
     opts := &rsa.PSSOptions {SaltLength:rsa.PSSSaltLengthAuto}

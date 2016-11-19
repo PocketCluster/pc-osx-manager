@@ -20,7 +20,7 @@ func newSignerFromKey(k interface{}) (Signer, error) {
     case *rsa.PrivateKey:
         sshKey = &rsaPrivateKey{
             PrivateKey:t,
-            Hash:crypto.SHA1,
+            Hash:crypto.SHA256,
         }
     default:
         return nil, fmt.Errorf("ssh: unsupported key type %T", k)

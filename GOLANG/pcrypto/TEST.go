@@ -1,6 +1,6 @@
 package pcrypto
 
-const TestKeySignature string = "K9crXmaFVpvoXAEB/QUguOENDIJ2AhWTgbj8JAPAHbatQqaes19ycSaZgGCrg5NhGvgP13Wf/zR0ny6PR0V8FTUjzxaK2fGDElythqwW7QISyRPKFayRSNjGOC9/d74d31JB2/05Tuk4hksb5u90bc1y+t5RYMArDn8aJjx2GA8="
+const TestKeySignature string = "natR922oRMExBFdXFAu9wYT6m0mufe15D5hLLT+K3JIjsc8UM4gn3luBSdqzH0UJJ3ysSztea7eiBlkFM6+PV845iKxACl8LlHg5Fhm4GxIljXCcQQOypMZyqnYG9Iyhggc3lYMAqZHFivM0QuVkK1Ti3SN6341HM+FEcWpR37A="
 
 func TestMasterPublicKey() []byte {
     return []byte(`-----BEGIN PUBLIC KEY-----
