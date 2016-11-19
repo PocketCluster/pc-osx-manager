@@ -1,12 +1,11 @@
 package main
 
 import (
-    //"github.com/stkim1/pc-core/swarm"
-    "github.com/stkim1/pc-core/model"
+    "github.com/stkim1/pc-core/teleport"
+    "github.com/stkim1/pc-core/context"
 )
-func main() {
-    //context := swarm.NewContext("localhost:3275", "192.168.1.151:2375,192.168.1.152:2375")
-    //context.Manage()
 
-    model.SharedModelRepoInstance()
+func main() {
+    context.DebugContextPrepare()
+    teleport.StartTeleport()
 }

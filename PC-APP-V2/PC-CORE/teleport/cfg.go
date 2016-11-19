@@ -11,7 +11,7 @@ import (
 )
 
 // MakeDefaultConfig creates a new Config structure and populates it with defaults
-func MakePocketTeleportConfig() (config *service.Config) {
+func makePocketTeleportConfig() (config *service.Config) {
     config = &service.Config{}
     applyDefaults(config, context.SharedHostContext())
     return config
