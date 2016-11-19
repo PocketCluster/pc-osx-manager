@@ -100,7 +100,6 @@ func (r *rsaPrivateKey) signDataWithHash(data []byte, hashType crypto.Hash) ([]b
 
 // Sign signs data with rsa-sha hash
 func (r *rsaPrivateKey) Sign(data []byte) ([]byte, error) {
-    // TODO : when overal cluster nodes are powerful enough to handle SHA256, please change to that
     return r.signDataWithHash(data, crypto.SHA256)
 }
 
@@ -184,7 +183,6 @@ func (r *rsaPublicKey) unsignDataWithHash(message []byte, sig []byte, hashType c
 
 // Unsign verifies the message using a rsa-sha signature
 func (r *rsaPublicKey) Unsign(message []byte, sig []byte) error {
-    // TODO : when overal cluster nodes are powerful enough to handle SHA256, please change to that
     return r.unsignDataWithHash(message, sig, crypto.SHA256)
 }
 
