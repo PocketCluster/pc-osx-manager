@@ -5,16 +5,14 @@
 ```
 
 ###Version 0.1.4
--
-
 - [ ] Network Broadcast Form -> 192.168.2.211/24
-- [ ] [FIXME] RPI cannot acquire proper interface name from netifaces for default gateway
+- [ ] RPI cannot acquire proper interface name from netifaces for default gateway
 - [ ] Slave sends SSH key in cryptocheck to keyexchange of master
-- [ ] Odroid netmask format fix for network/interfaces
-- [*] AESKEY regeneration
+- [ ] Odroid netmask format fix for network/interfaces (`ffffff00` -> `255.255.255.0`)
 - [ ] Singleton lock for it’s property access
 - [ ] UUID for ID (Too long. we will do it when udp packet fragmentation is supported)
-- [*] Shorten `msgpack` name field to reduce message package size
+- [x] AESKEY regeneration when `MasterBeacon` goes to `BindBroken` state
+- [x] Shorten `msgpack` name field to reduce message package size
 
 ###Version 0.1.3
 -

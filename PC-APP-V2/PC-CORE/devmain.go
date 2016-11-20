@@ -1,14 +1,19 @@
 package main
 
 import (
+    "time"
+    "log"
+
     "github.com/stkim1/pc-core/teleport"
     "github.com/stkim1/pc-core/context"
-    "time"
 )
 
 func main() {
     context.DebugContextPrepare()
-    teleport.StartTeleport()
+    err := teleport.StartTeleport(false)
+    if err != nil {
+        log.Printf("[ERR] %s", err.Error())
+    }
 
     for {
         time.Sleep(time.Second)

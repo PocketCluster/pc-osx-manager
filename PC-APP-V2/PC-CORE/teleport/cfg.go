@@ -8,6 +8,7 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/gravitational/teleport/lib/service"
     "github.com/stkim1/pc-core/context"
+    "github.com/gravitational/teleport/lib/utils"
 )
 
 // MakeDefaultConfig creates a new Config structure and populates it with defaults
@@ -51,6 +52,7 @@ func applyDefaults(cfg *service.Config, context context.HostContext) {
     cfg.SeedConfig = false
 
     // defaults for the auth service:
+    cfg.AuthServers = []utils.NetAddr{*AuthConnectAddr()}
     cfg.Auth.Enabled = true
     cfg.Auth.SSHAddr = *AuthListenAddr()
     cfg.Auth.EventsBackend.Type = BackendType
@@ -61,11 +63,15 @@ func applyDefaults(cfg *service.Config, context context.HostContext) {
     cfg.Auth.RecordsBackend.Params = dbParams(dataDir, RecordsSqliteFile)
     ConfigureLimiter(&cfg.Auth.Limiter)
 
+
     // defaults for the SSH proxy service:
     cfg.Proxy.Enabled = true
+    // disable web ui as it's not necessary
+    //cfg.Proxy.DisableWebUI = true
     cfg.Proxy.AssetsDir = dataDir
     cfg.Proxy.SSHAddr = *ProxyListenAddr()
     cfg.Proxy.WebAddr = *ProxyWebListenAddr()
+
     cfg.Proxy.ReverseTunnelListenAddr = *ReverseTunnellListenAddr()
     ConfigureLimiter(&cfg.Proxy.Limiter)
 
