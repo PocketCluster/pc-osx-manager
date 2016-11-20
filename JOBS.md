@@ -11,6 +11,20 @@
 - [ ] Odroid netmask format fix for network/interfaces (`ffffff00` -> `255.255.255.0`)
 - [ ] Singleton lock for it’s property access
 - [ ] UUID for ID (Too long. we will do it when udp packet fragmentation is supported)
+- [ ] Complete Slave node `bounded` state with valid checks
+- [ ] Instant status check on `bounded` (i.e. as soon as master pings slave, master gets response)
+- [ ] `Makefile` to remove all *_test.go and TEST.go
+- [ ] Slave : Remove unnecessary `const` in `slagent` package such as `SLAVE_CLUSTER_MEMBERS`
+- [ ] Slave : Remove unnecessary `field` in `PocketSlaveDiscovery` & `PocketSlaveDiscovery` struct
+- [ ] Slave : search logic in master `Beacon` package
+- [ ] Slave : testing on timeout mechanism for receiving master meta
+- [ ] Slave <-> Master `timezone` incompatibility
+- [ ] Slave : config should be able to tell if Slave node is bounded or not by reading config
+- [ ] Master interface refresh logic
+- [ ] Master Private/Public/CA
+- [ ] Master teleport bolts -> SQLite
+- [ ] Master SQLite encryption
+- [ ] Master Remove unnecessary `const` & `field` in `msagent` package
 - [x] AESKEY regeneration when `MasterBeacon` goes to `BindBroken` state
 - [x] Shorten `msgpack` name field to reduce message package size
 

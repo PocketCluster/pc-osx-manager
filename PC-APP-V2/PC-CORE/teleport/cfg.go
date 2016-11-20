@@ -67,7 +67,7 @@ func applyDefaults(cfg *service.Config, context context.HostContext) {
     // defaults for the SSH proxy service:
     cfg.Proxy.Enabled = true
     // disable web ui as it's not necessary
-    //cfg.Proxy.DisableWebUI = true
+    cfg.Proxy.DisableWebUI = true
     cfg.Proxy.AssetsDir = dataDir
     cfg.Proxy.SSHAddr = *ProxyListenAddr()
     cfg.Proxy.WebAddr = *ProxyWebListenAddr()
@@ -76,7 +76,7 @@ func applyDefaults(cfg *service.Config, context context.HostContext) {
     ConfigureLimiter(&cfg.Proxy.Limiter)
 
     // defaults for the SSH service:
-    cfg.SSH.Enabled = true
+    cfg.SSH.Enabled = false
     cfg.SSH.Addr = *SSHServerListenAddr()
     cfg.SSH.Shell = DefaultShell
     ConfigureLimiter(&cfg.SSH.Limiter)
