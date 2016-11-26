@@ -17,7 +17,7 @@ import (
 )
 
 func StartCoreTeleport(debug bool) error {
-    cfg := coreconfig.MakePocketTeleportConfig()
+    cfg := coreconfig.MakeCoreTeleportConfig()
     if debug {
         cfg.Console = ioutil.Discard
         utils.InitLoggerDebug()

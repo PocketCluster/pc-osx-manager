@@ -42,13 +42,14 @@ func (s *ConfigSuite) TearDownTest(c *C) {
 }
 
 func (s *ConfigSuite) TestDefaultConfig(c *C) {
-    config := MakePocketTeleportConfig()
+    config := MakeCoreTeleportConfig()
     c.Assert(config, NotNil)
 
     // all 3 services should be enabled by default
     c.Assert(config.Auth.Enabled, Equals, true)
-    c.Assert(config.SSH.Enabled, Equals, true)
+    c.Assert(config.SSH.Enabled, Equals, false)
     c.Assert(config.Proxy.Enabled, Equals, true)
+    c.Assert(config.Proxy.DisableWebUI, Equals, true)
 
     localAuthAddr := utils.NetAddr{AddrNetwork: "tcp", Addr: "0.0.0.0:3025"}
     localProxyAddr := utils.NetAddr{AddrNetwork: "tcp", Addr: "0.0.0.0:3023"}

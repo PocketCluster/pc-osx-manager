@@ -4,13 +4,13 @@ import (
     "time"
     "log"
 
-    "github.com/stkim1/pc-core/teleport"
+    "github.com/stkim1/pcteleport"
     "github.com/stkim1/pc-core/context"
 )
 
 func main() {
     context.DebugContextPrepare()
-    err := teleport.StartTeleport(true)
+    err := pcteleport.StartCoreTeleport(true)
     if err != nil {
         log.Printf("[ERR] %s", err.Error())
     }

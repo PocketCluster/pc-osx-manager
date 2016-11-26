@@ -15,7 +15,7 @@ import (
 
 // NewTeleport takes the daemon configuration, instantiates all required services
 // and starts them under a supervisor, returning the supervisor object
-func NewPocketTeleport(cfg *service.Config) (*PocketCoreTeleportProcess, error) {
+func NewCoreTeleport(cfg *service.Config) (*PocketCoreTeleportProcess, error) {
     if err := coreconfig.ValidateConfig(cfg); err != nil {
         return nil, trace.Wrap(err, "Configuration error")
     }

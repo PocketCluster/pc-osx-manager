@@ -16,7 +16,7 @@ import (
 )
 
 // MakeDefaultConfig creates a new Config structure and populates it with defaults
-func MakePocketTeleportConfig() (config *service.Config) {
+func MakeCoreTeleportConfig() (config *service.Config) {
     config = &service.Config{}
     applyDefaults(config, context.SharedHostContext())
     return config
@@ -70,7 +70,7 @@ func applyDefaults(cfg *service.Config, context context.HostContext) {
     // defaults for the SSH proxy service:
     cfg.Proxy.Enabled = true
     // disable web ui as it's not necessary
-    //cfg.Proxy.DisableWebUI = true
+    cfg.Proxy.DisableWebUI = true
     cfg.Proxy.AssetsDir = dataDir
     cfg.Proxy.SSHAddr = *pcdefaults.ProxyListenAddr()
     cfg.Proxy.WebAddr = *pcdefaults.ProxyWebListenAddr()
