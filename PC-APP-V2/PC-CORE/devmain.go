@@ -10,7 +10,7 @@ import (
 
 func main() {
     context.DebugContextPrepare()
-    err := teleport.StartTeleport(false)
+    err := teleport.StartTeleport(true)
     if err != nil {
         log.Printf("[ERR] %s", err.Error())
     }

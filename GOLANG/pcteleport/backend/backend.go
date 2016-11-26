@@ -1,4 +1,4 @@
-package teleport
+package backend
 
 import (
     "sync"

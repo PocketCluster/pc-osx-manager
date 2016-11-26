@@ -1,5 +1,5 @@
 // +build darwin
-package teleport
+package coreconfig
 
 import (
     "testing"
@@ -7,7 +7,9 @@ import (
 
     . "gopkg.in/check.v1"
     "github.com/gravitational/teleport/lib/utils"
+
     "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pcteleport/pcdefaults"
 )
 
 func TestConfig(t *testing.T) { TestingT(t) }
@@ -40,7 +42,7 @@ func (s *ConfigSuite) TearDownTest(c *C) {
 }
 
 func (s *ConfigSuite) TestDefaultConfig(c *C) {
-    config := makePocketTeleportConfig()
+    config := MakePocketTeleportConfig()
     c.Assert(config, NotNil)
 
     // all 3 services should be enabled by default
@@ -61,26 +63,26 @@ func (s *ConfigSuite) TestDefaultConfig(c *C) {
     // auth section
     auth := config.Auth
     c.Assert(auth.SSHAddr, DeepEquals, localAuthAddr)
-    c.Assert(auth.Limiter.MaxConnections, Equals, int64(LimiterMaxConnections))
-    c.Assert(auth.Limiter.MaxNumberOfUsers, Equals, LimiterMaxConcurrentUsers)
+    c.Assert(auth.Limiter.MaxConnections, Equals, int64(pcdefaults.LimiterMaxConnections))
+    c.Assert(auth.Limiter.MaxNumberOfUsers, Equals, pcdefaults.LimiterMaxConcurrentUsers)
 
-    c.Assert(auth.KeysBackend.Type, Equals, BackendType)
+    c.Assert(auth.KeysBackend.Type, Equals, pcdefaults.CoreBackendType)
     c.Assert(auth.KeysBackend.Params, Equals, fmt.Sprintf(`{"path": "%s/keys.db"}`, s.dataDir))
-    c.Assert(auth.EventsBackend.Type, Equals, BackendType)
+    c.Assert(auth.EventsBackend.Type, Equals, pcdefaults.CoreBackendType)
     c.Assert(auth.EventsBackend.Params, Equals, fmt.Sprintf(`{"path": "%s/events.db"}`, s.dataDir))
-    c.Assert(auth.RecordsBackend.Type, Equals, BackendType)
+    c.Assert(auth.RecordsBackend.Type, Equals, pcdefaults.CoreBackendType)
     c.Assert(auth.RecordsBackend.Params, Equals, fmt.Sprintf(`{"path": "%s/records.db"}`, s.dataDir))
 
     // SSH section
     ssh := config.SSH
     c.Assert(ssh.Addr, DeepEquals, localSSHAddr)
-    c.Assert(ssh.Limiter.MaxConnections, Equals, int64(LimiterMaxConnections))
-    c.Assert(ssh.Limiter.MaxNumberOfUsers, Equals, LimiterMaxConcurrentUsers)
+    c.Assert(ssh.Limiter.MaxConnections, Equals, int64(pcdefaults.LimiterMaxConnections))
+    c.Assert(ssh.Limiter.MaxNumberOfUsers, Equals, pcdefaults.LimiterMaxConcurrentUsers)
 
     // proxy section
     proxy := config.Proxy
     c.Assert(proxy.AssetsDir, Equals, s.dataDir)
     c.Assert(proxy.SSHAddr, DeepEquals, localProxyAddr)
-    c.Assert(proxy.Limiter.MaxConnections, Equals, int64(LimiterMaxConnections))
-    c.Assert(proxy.Limiter.MaxNumberOfUsers, Equals, LimiterMaxConcurrentUsers)
+    c.Assert(proxy.Limiter.MaxConnections, Equals, int64(pcdefaults.LimiterMaxConnections))
+    c.Assert(proxy.Limiter.MaxNumberOfUsers, Equals, pcdefaults.LimiterMaxConcurrentUsers)
 }

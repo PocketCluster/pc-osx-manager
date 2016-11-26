@@ -16,7 +16,7 @@ limitations under the License.
 
 // Package defaults contains default constants set in various parts of
 // teleport codebase
-package teleport
+package pcdefaults
 
 import (
 	"fmt"
@@ -24,6 +24,20 @@ import (
 
 	"github.com/gravitational/teleport/lib/limiter"
 	"github.com/gravitational/teleport/lib/utils"
+)
+
+const (
+    // Default DB to use for persisting state. Another options is "etcd"
+    CoreBackendType = "bolt"
+
+    // Name of events bolt database file stored in DataDir
+    CoreEventsSqliteFile = "events.db"
+
+    // Name of keys bolt database file stored in DataDir
+    CoreKeysSqliteFile = "keys.db"
+
+    // Name of records bolt database file stored in DataDir
+    CoreRecordsSqliteFile = "records.db"
 )
 
 // Default port numbers used by all teleport tools
@@ -48,18 +62,6 @@ const (
 	// When running as a "SSH Proxy" this port will be used to
 	// serve auth requests.
 	AuthListenPort = 3025
-
-	// Default DB to use for persisting state. Another options is "etcd"
-	BackendType = "bolt"
-
-	// Name of events bolt database file stored in DataDir
-    EventsSqliteFile = "events.db"
-
-	// Name of keys bolt database file stored in DataDir
-    KeysSqliteFile = "keys.db"
-
-	// Name of records bolt database file stored in DataDir
-    RecordsSqliteFile = "records.db"
 
 // By default SSH server (and SSH proxy) will bind to this IP
 	BindIP = "0.0.0.0"
