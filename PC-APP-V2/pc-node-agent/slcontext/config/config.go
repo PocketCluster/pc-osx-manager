@@ -41,9 +41,15 @@ const (
     slave_config_file       = "/etc/pocket/slave-conf.yaml"
 
     slave_keys_dir          = "/etc/pocket/pki"
+    // these files are 1024 RSA crypto files used to join network
     slave_public_Key_file   = "/etc/pocket/pki/pcslave.pub"
     slave_prvate_Key_file   = "/etc/pocket/pki/pcslave.pem"
     master_public_Key_file  = "/etc/pocket/pki/pcmaster.pub"
+
+    // these files are 2048 RSA crypto files used for SSH, DOCKER
+    node_public_Key_file   = "/etc/pocket/pki/node.pub"
+    node_private_Key_file  = "/etc/pocket/pki/node.pem"
+    node_certificate_file  = "/etc/pocket/pki/node.csr"
 
     // HOST GENERAL CONFIG
     network_iface_file      = "/etc/network/interfaces"
@@ -125,17 +131,32 @@ func _loadSlaveConfig(rootPath string) (*PocketSlaveConfig) {
         os.MkdirAll(keysDirPath, 0700);
     }
 
-    var shouldGenerateKeys bool = false
-    pubKeyPath := rootPath + slave_public_Key_file
-    prvKeyPath := rootPath + slave_prvate_Key_file
-    if _, err := os.Stat(pubKeyPath); os.IsNotExist(err) {
-        shouldGenerateKeys = true
+    // create pocketcluster join key sets
+    var makePcJoinKeys bool = false
+    pcPubKeyPath := rootPath + slave_public_Key_file
+    pcPrvKeyPath := rootPath + slave_prvate_Key_file
+    if _, err := os.Stat(pcPubKeyPath); os.IsNotExist(err) {
+        makePcJoinKeys = true
     }
-    if _, err := os.Stat(prvKeyPath); os.IsNotExist(err) {
-        shouldGenerateKeys = true
+    if _, err := os.Stat(pcPrvKeyPath); os.IsNotExist(err) {
+        makePcJoinKeys = true
     }
-    if shouldGenerateKeys {
-        pcrypto.GenerateWeakKeyPairFiles(pubKeyPath, prvKeyPath, "")
+    if makePcJoinKeys {
+        pcrypto.GenerateWeakKeyPairFiles(pcPubKeyPath, pcPrvKeyPath, "")
+    }
+
+    // create node ssh key sets
+    var makeNodeKeys bool = false
+    nodePubKeyPath := rootPath + node_public_Key_file
+    nodePrvKeyPath := rootPath + node_private_Key_file
+    if _, err := os.Stat(nodePubKeyPath); os.IsNotExist(err) {
+        makeNodeKeys = true
+    }
+    if _, err := os.Stat(nodePrvKeyPath); os.IsNotExist(err) {
+        makeNodeKeys = true
+    }
+    if makeNodeKeys {
+        pcrypto.GenerateStrongKeyPairFiles(nodePubKeyPath, nodePrvKeyPath, "")
     }
 
     // check if config file exists in path.
@@ -221,6 +242,43 @@ func (pc *PocketSlaveConfig) SaveMasterPublicKey(masterPubKey []byte) error {
 func (pc *PocketSlaveConfig) ClearMasterPublicKey() error {
     keyPath := pc.rootPath + master_public_Key_file
     return os.Remove(keyPath)
+}
+
+func (pc *PocketSlaveConfig) NodePublicKey() ([]byte, error) {
+    pubKeyPath := pc.rootPath + node_public_Key_file
+    if _, err := os.Stat(pubKeyPath); os.IsNotExist(err) {
+        return nil, fmt.Errorf("[ERR] keys have not been generated properly. This is a critical error")
+    }
+    return ioutil.ReadFile(pubKeyPath)
+}
+
+func (pc *PocketSlaveConfig) NodePrivateKey() ([]byte, error) {
+    prvKeyPath := pc.rootPath + node_private_Key_file
+    if _, err := os.Stat(prvKeyPath); os.IsNotExist(err) {
+        return nil, fmt.Errorf("[ERR] keys have not been generated properly. This is a critical error")
+    }
+    return ioutil.ReadFile(prvKeyPath)
+}
+
+func (pc *PocketSlaveConfig) NodeCertificate() ([]byte, error) {
+    certPath := pc.rootPath + node_certificate_file
+    if _, err := os.Stat(certPath); os.IsNotExist(err) {
+        return nil, fmt.Errorf("[ERR] keys have not been generated properly. This is a critical error")
+    }
+    return ioutil.ReadFile(certPath)
+}
+
+func (pc *PocketSlaveConfig) SaveNodeCertificate(certificate []byte) error {
+    if len(certificate) == 0 {
+        return fmt.Errorf("[ERR] Cannot save empty node certificate")
+    }
+    filepath := pc.rootPath + node_certificate_file
+    return ioutil.WriteFile(filepath, certificate, 0600)
+}
+
+func (pc *PocketSlaveConfig) ClearNodeCertificate() error {
+    filepath := pc.rootPath + node_certificate_file
+    return os.Remove(filepath)
 }
 
 // --- network interface redefinition

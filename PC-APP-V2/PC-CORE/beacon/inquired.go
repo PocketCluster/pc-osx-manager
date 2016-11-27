@@ -100,7 +100,7 @@ func (b *inquired) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.T
     if err != nil {
         return MasterTransitionFail, err
     }
-    encryptor, err := pcrypto.NewEncryptorFromKeyData(meta.SlavePubKey, masterPrvKey)
+    encryptor, err := pcrypto.NewRsaEncryptorFromKeyData(meta.SlavePubKey, masterPrvKey)
     if err != nil {
         return MasterTransitionFail, err
     }

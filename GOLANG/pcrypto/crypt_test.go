@@ -6,6 +6,7 @@ import (
     "io/ioutil"
     "encoding/base64"
     "reflect"
+    "fmt"
 )
 
 func TestKeyGeneration(t *testing.T) {
@@ -110,14 +111,14 @@ func TestEncDecMessageWithFile(t *testing.T) {
     }
 
     // encryptor
-    encr ,err := NewEncryptorFromKeyFiles("recvtest.pub", "sendtest.pem"); if  err != nil {
+    encr ,err := NewRsaEncryptorFromKeyFiles("recvtest.pub", "sendtest.pem"); if  err != nil {
         t.Errorf(err.Error())
     }
     crypted, sig, err := encr.EncryptByRSA(orgMsg); if err != nil {
         t.Errorf(err.Error())
     }
     // decryptor
-    decr, err := NewDecryptorFromKeyFiles("sendtest.pub", "recvtest.pem"); if err != nil {
+    decr, err := NewRsaDecryptorFromKeyFiles("sendtest.pub", "recvtest.pem"); if err != nil {
         t.Errorf(err.Error())
     }
     plain, err := decr.DecryptByRSA(crypted, sig); if err != nil {
@@ -149,14 +150,14 @@ func TestEncDecMessageWithData(t *testing.T) {
     }
 
     // encryptor
-    encr ,err := NewEncryptorFromKeyData(recvTestPubKey, sendTestPrvKey); if  err != nil {
+    encr ,err := NewRsaEncryptorFromKeyData(recvTestPubKey, sendTestPrvKey); if  err != nil {
         t.Errorf(err.Error())
     }
     crypted, sig, err := encr.EncryptByRSA(orgMsg); if err != nil {
         t.Errorf(err.Error())
     }
     // decryptor
-    decr, err := NewDecryptorFromKeyData(sendTestPubKey, recvTestPrvKey); if err != nil {
+    decr, err := NewRsaDecryptorFromKeyData(sendTestPubKey, recvTestPrvKey); if err != nil {
         t.Errorf(err.Error())
     }
     plain, err := decr.DecryptByRSA(crypted, sig); if err != nil {
@@ -217,4 +218,100 @@ func BenchmarkRandCryptoByte(b *testing.B) {
     for i := 0; i < b.N; i++ {
         randCryptoBytes(32)
     }
+}
+
+func ExampleWeakRsaKeyEncryption() {
+    // master key pair
+    mpub, mprv, _, merr := GenerateWeakKeyPair()
+    if merr != nil {
+        fmt.Printf(merr.Error())
+        return
+    }
+    //slave key pair
+    spub, sprv, _, serr := GenerateWeakKeyPair()
+    if serr != nil {
+        fmt.Printf(serr.Error())
+        return
+    }
+
+    // encryptor
+    encr ,err := NewRsaEncryptorFromKeyData(spub, mprv)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    // decryptor
+    decr, err := NewRsaDecryptorFromKeyData(mpub, sprv)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+
+    // descryption
+    crypted, sig, err := encr.EncryptByRSA(TestAESKey)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    plain, err := decr.DecryptByRSA(crypted, sig);
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    // comp
+    if !reflect.DeepEqual(TestAESKey, plain) {
+        fmt.Printf("[ERR] Unidentical original Message and Decrypted message" + string(plain))
+        return
+    }
+    fmt.Printf("Original Message Size %d | Encrypted Message Size %d | Signature Size %d", len(TestAESKey), len(crypted), len(sig))
+    // Output:
+    // Original Message Size 32 | Encrypted Message Size 128 | Signature Size 128
+}
+
+func ExampleStrongRsaKeyEncryption() {
+    // master key pair
+    mpub, mprv, _, merr := GenerateStrongKeyPair()
+    if merr != nil {
+        fmt.Printf(merr.Error())
+        return
+    }
+    //slave key pair
+    spub, sprv, _, serr := GenerateStrongKeyPair()
+    if serr != nil {
+        fmt.Printf(serr.Error())
+        return
+    }
+
+    // encryptor
+    encr ,err := NewRsaEncryptorFromKeyData(spub, mprv)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    // decryptor
+    decr, err := NewRsaDecryptorFromKeyData(mpub, sprv)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+
+    // descryption
+    crypted, sig, err := encr.EncryptByRSA(TestAESKey)
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    plain, err := decr.DecryptByRSA(crypted, sig);
+    if err != nil {
+        fmt.Printf(err.Error())
+        return
+    }
+    // comp
+    if !reflect.DeepEqual(TestAESKey, plain) {
+        fmt.Printf("[ERR] Unidentical original Message and Decrypted message" + string(plain))
+        return
+    }
+    fmt.Printf("Original Message Size %d | Encrypted Message Size %d | Signature Size %d", len(TestAESKey), len(crypted), len(sig))
+    // Output:
+    // Original Message Size 32 | Encrypted Message Size 256 | Signature Size 256
 }

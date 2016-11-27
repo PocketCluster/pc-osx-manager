@@ -16,18 +16,24 @@ func SharedSlaveContext() PocketSlaveContext {
 }
 
 type slaveContext struct {
-    config              *config.PocketSlaveConfig
-    publicKey           []byte
-    privateKey          []byte
-    decryptor           pcrypto.RsaDecryptor
+    config           *config.PocketSlaveConfig
 
-    masterAgent         string
-    masterIP4Address    string
-    masterPubkey        []byte
-    aeskey              []byte
-    aesCryptor          pcrypto.AESCryptor
+    pocketPublicKey  []byte
+    pocketPrivateKey []byte
+    pocketDecryptor  pcrypto.RsaDecryptor
 
-    slaveNodeName       string
+    nodePublicKey    []byte
+    nodePrivateKey   []byte
+    //nodeCertificate  []byte
+    //nodeDecryptor    pcrypto.RsaDecryptor
+
+    masterAgent      string
+    masterIP4Address string
+    masterPubkey     []byte
+    aeskey           []byte
+    aesCryptor       pcrypto.AESCryptor
+
+    slaveNodeName    string
 }
 
 // Singleton handling
@@ -51,28 +57,42 @@ func initializeSlaveContext(sc *slaveContext, cfg *config.PocketSlaveConfig) {
 
 // --- Sync All ---
 func (sc *slaveContext) initWithConfig(cfg *config.PocketSlaveConfig) error {
-    // public key
-    pubkey, err := cfg.SlavePublicKey()
+    // pocket public key
+    pcpubkey, err := cfg.SlavePublicKey()
     if err != nil {
         return err
     }
-    sc.publicKey = pubkey
+    sc.pocketPublicKey = pcpubkey
 
-    // private key
-    prvkey, err := cfg.SlavePrivateKey()
+    // pocket private key
+    pcprvkey, err := cfg.SlavePrivateKey()
     if err != nil {
         return err
     }
-    sc.privateKey = prvkey
+    sc.pocketPrivateKey = pcprvkey
 
     // if master public key exists
-    if mspubkey, err := cfg.MasterPublicKey(); len(mspubkey) != 0 && err == nil {
-        sc.masterPubkey = mspubkey
+    if pcmspubkey, err := cfg.MasterPublicKey(); len(pcmspubkey) != 0 && err == nil {
+        sc.masterPubkey = pcmspubkey
 
-        if decryptor, err := pcrypto.NewDecryptorFromKeyData(mspubkey, prvkey); decryptor != nil && err == nil {
-            sc.decryptor = decryptor
+        if decryptor, err := pcrypto.NewRsaDecryptorFromKeyData(pcmspubkey, pcprvkey); decryptor != nil && err == nil {
+            sc.pocketDecryptor = decryptor
         }
     }
+
+    // node public key
+    nodepubkey, err := cfg.NodePublicKey()
+    if err != nil {
+        return err
+    }
+    sc.nodePublicKey = nodepubkey
+
+    // node private key
+    nodeprvkey, err := cfg.NodePrivateKey()
+    if err != nil {
+        return err
+    }
+    sc.nodePrivateKey = nodeprvkey
 
     // master agent name
     if len(cfg.MasterSection.MasterBoundAgent) != 0 {
@@ -171,7 +191,7 @@ func (sc *slaveContext) DiscardAll() error {
 
     // remove decryptor
     sc.masterPubkey = nil
-    sc.decryptor = nil
+    sc.pocketDecryptor = nil
     // this is to remove master pub key if it exists
     if sc.config != nil {
         sc.config.ClearMasterPublicKey()
@@ -226,18 +246,18 @@ func (sc *slaveContext) SaveConfiguration() error {
 
 // decryptor/encryptor interface
 func (sc *slaveContext) GetPublicKey() ([]byte) {
-    return sc.publicKey
+    return sc.pocketPublicKey
 }
 
 func (sc *slaveContext) GetPrivateKey() ([]byte) {
-    return sc.privateKey
+    return sc.pocketPrivateKey
 }
 
 func (sc *slaveContext) DecryptByRSA(crypted []byte, sendSig pcrypto.Signature) ([]byte, error) {
-    if sc.decryptor == nil {
+    if sc.pocketDecryptor == nil {
         return nil, fmt.Errorf("[ERR] cannot decrypt with null decryptor")
     }
-    return sc.decryptor.DecryptByRSA(crypted, sendSig)
+    return sc.pocketDecryptor.DecryptByRSA(crypted, sendSig)
 }
 
 // --- Master Public key ---
@@ -247,11 +267,11 @@ func (sc *slaveContext) SetMasterPublicKey(masterPubkey []byte) error {
     }
     sc.masterPubkey = masterPubkey
 
-    decryptor, err := pcrypto.NewDecryptorFromKeyData(masterPubkey, sc.privateKey)
+    decryptor, err := pcrypto.NewRsaDecryptorFromKeyData(masterPubkey, sc.pocketPrivateKey)
     if err != nil {
         return err
     }
-    sc.decryptor = decryptor
+    sc.pocketDecryptor = decryptor
     return nil
 }
 

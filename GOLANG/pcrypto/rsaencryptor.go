@@ -10,7 +10,7 @@ type RsaEncryptor interface {
     EncryptByRSA(plain []byte) (crypted []byte, sig Signature, err error)
 }
 
-func NewEncryptorFromKeyFiles(recvPubkeyPath, sendPrvkeyPath string) (RsaEncryptor, error) {
+func NewRsaEncryptorFromKeyFiles(recvPubkeyPath, sendPrvkeyPath string) (RsaEncryptor, error) {
     pubkey, err := newPublicKeyFromFile(recvPubkeyPath); if err != nil {
         return nil, err
     }
@@ -23,7 +23,7 @@ func NewEncryptorFromKeyFiles(recvPubkeyPath, sendPrvkeyPath string) (RsaEncrypt
     }, nil
 }
 
-func NewEncryptorFromKeyData(recvPubkeyData, sendPrvkeyData []byte) (RsaEncryptor, error) {
+func NewRsaEncryptorFromKeyData(recvPubkeyData, sendPrvkeyData []byte) (RsaEncryptor, error) {
     pubkey, err := newPublicKeyFromData(recvPubkeyData); if err != nil {
         return nil, err
     }
