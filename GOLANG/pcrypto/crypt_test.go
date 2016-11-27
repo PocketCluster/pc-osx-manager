@@ -10,7 +10,7 @@ import (
 
 func TestKeyGeneration(t *testing.T) {
     var toSign []byte = []byte("date: Thu, 05 Jan 2012 21:31:40 GMT")
-    if err := GenerateKeyPair("test.pub", "test.pem", "test.ssh", ); err != nil {
+    if err := GenerateWeakKeyPairFiles("test.pub", "test.pem", "test.ssh"); err != nil {
         t.Errorf("failed to generate a key pair %v", err)
     }
 
@@ -105,7 +105,7 @@ func TestEncDecMessageWithFile(t *testing.T) {
     if err := ioutil.WriteFile("sendtest.pem", TestMasterPrivateKey(), os.ModePerm); err != nil {
         t.Errorf("Fail to write private key %v", err)
     }
-    if err := GenerateKeyPair("recvtest.pub", "recvtest.pem", "recvtest.ssh"); err != nil {
+    if err := GenerateWeakKeyPairFiles("recvtest.pub", "recvtest.pem", "recvtest.ssh"); err != nil {
         t.Errorf("failed to generate a key pair %v", err)
     }
 
@@ -134,7 +134,7 @@ func TestEncDecMessageWithFile(t *testing.T) {
 
 func TestEncDecMessageWithData(t *testing.T) {
     var orgMsg []byte = []byte("date: Thu, 05 Jan 2012 21:31:40 GMT")
-    if err := GenerateKeyPair("recvtest.pub", "recvtest.pem", "recvtest.ssh"); err != nil {
+    if err := GenerateWeakKeyPairFiles("recvtest.pub", "recvtest.pem", "recvtest.ssh"); err != nil {
         t.Errorf("failed to generate a key pair %v", err)
     }
     sendTestPubKey := TestMasterPublicKey()

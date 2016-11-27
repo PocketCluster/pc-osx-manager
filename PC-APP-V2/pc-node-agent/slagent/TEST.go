@@ -43,12 +43,12 @@ func TestSlaveKeyExchangeStatus(masterAgentName string, pubKey []byte, begin tim
     return ma, begin, err
 }
 
-func TestSlaveCheckCryptoStatus(masterAgentName, slaveAgentName string, sshkey []byte, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
+func TestSlaveCheckCryptoStatus(masterAgentName, slaveAgentName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
     sa, err := CheckSlaveCryptoStatus(masterAgentName, slaveAgentName, begin)
     if err != nil {
         return nil, begin, err
     }
-    ma, err := CheckSlaveCryptoMeta(sa, sshkey, aesCryptor)
+    ma, err := CheckSlaveCryptoMeta(sa, aesCryptor)
     if err != nil {
         return nil, begin, err
     }

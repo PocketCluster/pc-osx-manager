@@ -56,10 +56,6 @@ D1aAZ3gE6zFmOmH4cenuHZ1ha82Np4CEVnRaee91YA==
 -----END RSA PRIVATE KEY-----`)
 }
 
-func TestSlaveSSHKey() []byte {
-    return []byte(`ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDG0PyjODHigKj6jKnISMAykXgy2ehOSinHfX5+tRwTAaqe511XnxrPqVB1xygRR3KcjOGNhNa6O7RPJhJ7KA9J7jVVNaZwAArFNA1CuaHnO+ZXToHC2lcGLcBfTrtgVw1JptZBvH8btWujBHpKD4KTjiDuu2YYaCeigvLbyUGx+w==`)
-}
-
 var TestAESKey []byte = []byte("longer means more possible keys ")
 var TestAESCryptor, _ = NewAESCrypto(TestAESKey)
 

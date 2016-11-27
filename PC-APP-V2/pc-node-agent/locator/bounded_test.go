@@ -89,7 +89,7 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
 
     // cryptocheck -> bounded
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, context.GetSSHKey(), pcrypto.TestAESCryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -203,7 +203,7 @@ func Test_Bounded_Unbroken_Loop(t *testing.T) {
     for i := 0 ; i < 100; i++ {
         // MASTER META TRANSITION ACTION
         masterTS = slaveTS.Add(time.Second)
-        meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, context.GetSSHKey(), pcrypto.TestAESCryptor, masterTS)
+        meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, masterTS)
         if err != nil {
             t.Error(err.Error())
             return
@@ -336,7 +336,7 @@ func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
     }
     // cryptocheck -> bounded
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, context.GetAESKey(), pcrypto.TestAESCryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return

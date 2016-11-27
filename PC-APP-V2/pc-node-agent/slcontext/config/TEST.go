@@ -56,9 +56,6 @@ func DebugConfigDestory(cfg *PocketSlaveConfig) {
     if _, err := os.Stat(cfg.rootPath + slave_prvate_Key_file); os.IsExist(err) {
         os.Remove(cfg.rootPath + slave_prvate_Key_file)
     }
-    if _, err := os.Stat(cfg.rootPath + slave_ssh_Key_file); os.IsExist(err) {
-        os.Remove(cfg.rootPath + slave_ssh_Key_file)
-    }
     if _, err := os.Stat(cfg.rootPath + master_public_Key_file); os.IsExist(err) {
         os.Remove(cfg.rootPath + master_public_Key_file)
     }

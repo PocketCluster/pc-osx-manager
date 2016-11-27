@@ -41,10 +41,9 @@ const (
     slave_config_file       = "/etc/pocket/slave-conf.yaml"
 
     slave_keys_dir          = "/etc/pocket/pki"
-    slave_public_Key_file   = "/etc/pocket/pki/slave.pub"
-    slave_prvate_Key_file   = "/etc/pocket/pki/slave.pem"
-    slave_ssh_Key_file      = "/etc/pocket/pki/slave.ssh"
-    master_public_Key_file  = "/etc/pocket/pki/master.pub"
+    slave_public_Key_file   = "/etc/pocket/pki/pcslave.pub"
+    slave_prvate_Key_file   = "/etc/pocket/pki/pcslave.pem"
+    master_public_Key_file  = "/etc/pocket/pki/pcmaster.pub"
 
     // HOST GENERAL CONFIG
     network_iface_file      = "/etc/network/interfaces"
@@ -129,18 +128,14 @@ func _loadSlaveConfig(rootPath string) (*PocketSlaveConfig) {
     var shouldGenerateKeys bool = false
     pubKeyPath := rootPath + slave_public_Key_file
     prvKeyPath := rootPath + slave_prvate_Key_file
-    sshKeyPath := rootPath + slave_ssh_Key_file
     if _, err := os.Stat(pubKeyPath); os.IsNotExist(err) {
         shouldGenerateKeys = true
     }
     if _, err := os.Stat(prvKeyPath); os.IsNotExist(err) {
         shouldGenerateKeys = true
     }
-    if _, err := os.Stat(sshKeyPath); os.IsNotExist(err) {
-        shouldGenerateKeys = true
-    }
     if shouldGenerateKeys {
-        pcrypto.GenerateKeyPair(pubKeyPath, prvKeyPath, sshKeyPath)
+        pcrypto.GenerateWeakKeyPairFiles(pubKeyPath, prvKeyPath, "")
     }
 
     // check if config file exists in path.
@@ -205,14 +200,6 @@ func (pc *PocketSlaveConfig) SlavePrivateKey() ([]byte, error) {
         return nil, fmt.Errorf("[ERR] keys have not been generated properly. This is a critical error")
     }
     return ioutil.ReadFile(prvKeyPath)
-}
-
-func (pc *PocketSlaveConfig) SlaveSSHKey() ([]byte, error) {
-    sshKeyPath := pc.rootPath + slave_ssh_Key_file
-    if _, err := os.Stat(sshKeyPath); os.IsNotExist(err) {
-        return nil, fmt.Errorf("[ERR] keys have not been generated properly. This is a critical error")
-    }
-    return ioutil.ReadFile(sshKeyPath)
 }
 
 func (pc *PocketSlaveConfig) MasterPublicKey() ([]byte, error) {

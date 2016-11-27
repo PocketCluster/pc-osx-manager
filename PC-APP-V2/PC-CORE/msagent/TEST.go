@@ -82,8 +82,8 @@ func TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName string, slavePu
     return meta, begin, nil
 }
 
-func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, slaveSSHKey []byte, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
-    msa, end, err := slagent.TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, slaveSSHKey, aesCryptor, begin)
+func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+    msa, end, err := slagent.TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, aesCryptor, begin)
     if err != nil {
         return nil, begin, err
     }

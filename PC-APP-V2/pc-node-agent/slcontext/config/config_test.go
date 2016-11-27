@@ -63,16 +63,6 @@ func TestConfigSaveReload(t *testing.T) {
         t.Error("[ERR] private key cannot be null")
         return
     }
-
-    sshkey, err := cfg.SlaveSSHKey()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    if len(sshkey) == 0 {
-        t.Error("[ERR] ssh key cannot be null")
-        return
-    }
 }
 
 func testUnfixedNetworkInterface(idx int) []byte {

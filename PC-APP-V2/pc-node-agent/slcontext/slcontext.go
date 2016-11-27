@@ -32,7 +32,6 @@ type PocketSlaveContext interface {
     SaveConfiguration() error
     GetPublicKey() (pubkey []byte)
     GetPrivateKey() (prvkey []byte)
-    GetSSHKey() ([]byte)
     pcrypto.RsaDecryptor
 
     SetMasterPublicKey(masterPubkey []byte) error

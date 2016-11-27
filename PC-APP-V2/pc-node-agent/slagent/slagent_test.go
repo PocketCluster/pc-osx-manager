@@ -294,7 +294,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
     defer tearDown()
 
     piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
-    ma, _, err := TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, slcontext.SharedSlaveContext().GetSSHKey(), pcrypto.TestAESCryptor, initSendTimestmap)
+    ma, _, err := TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -313,17 +313,8 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if len(ma.SlavePubKey) == 0 {
-        t.Errorf("ERR] Incorrect slave ssh key field %d\n", len(ma.SlavePubKey))
-        return
-    }
-    ssk, err := pcrypto.TestAESCryptor.DecryptByAES(ma.SlavePubKey)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    if !reflect.DeepEqual(ssk, pcrypto.TestSlaveSSHKey()) {
-        t.Errorf("[ERR] Slave ssh key is not the same!")
+    if len(ma.SlavePubKey) != 0 {
+        t.Errorf("[ERR] meta.SlavePubKey should be null %d\n", len(ma.SlavePubKey))
         return
     }
     sd, err := UnpackedSlaveStatus(esd)

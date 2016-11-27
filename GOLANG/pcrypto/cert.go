@@ -16,6 +16,54 @@ import (
     "path/filepath"
 )
 
+const (
+    // DefaultLRUCapacity is a capacity for LRU session cache
+    DefaultLRUCapacity = 1024
+    // DefaultCertTTL sets the TTL of the self-signed certificate (1 year)
+    DefaultCertTTL = (24 * time.Hour) * 365
+)
+
+// CreateTLSConfiguration sets up default TLS configuration
+func CreateTLSConfiguration(certFile, keyFile string) (*tls.Config, error) {
+    config := &tls.Config{}
+
+    if _, err := os.Stat(certFile); err != nil {
+        return nil, fmt.Errorf("[ERR] certificate is not accessible by '%v', %s", certFile, err.Error())
+    }
+    if _, err := os.Stat(keyFile); err != nil {
+        return nil, fmt.Errorf("[ERR] certificate is not accessible by '%v', %s", certFile, err.Error())
+    }
+
+    //log.Infof("[PROXY] TLS cert=%v key=%v", certFile, keyFile)
+    cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+    if err != nil {
+        return nil, err
+    }
+
+    config.Certificates = []tls.Certificate{cert}
+
+    config.CipherSuites = []uint16{
+        tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+        tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+
+        tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+        tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+
+        tls.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+        tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+
+        tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+        tls.TLS_RSA_WITH_AES_128_CBC_SHA,
+    }
+
+    config.MinVersion = tls.VersionTLS12
+    config.SessionTicketsDisabled = false
+    config.ClientSessionCache = tls.NewLRUClientSessionCache(
+        DefaultLRUCapacity)
+
+    return config, nil
+}
+
 // TLSCredentials keeps the typical 3 components of a proper HTTPS configuration
 type TLSCredentials struct {
     // PublicKey in PEM format

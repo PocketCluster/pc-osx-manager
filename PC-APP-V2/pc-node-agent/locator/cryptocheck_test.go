@@ -95,7 +95,7 @@ func Test_Cryptocheck_Bounded_MasterMetaFail(t *testing.T) {
     for i := 0; i <= int(TransitionFailureLimit); i++ {
         // cryptocheck -> bounded
         masterTS = slaveTS.Add(time.Millisecond * 100)
-        meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, context.GetSSHKey(), pcrypto.TestAESCryptor, masterTS)
+        meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, masterTS)
         if err != nil {
             t.Error(err.Error())
             return

@@ -68,20 +68,11 @@ func (b *keyexchange) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestamp 
     if len(meta.EncryptedStatus) == 0 {
         return MasterTransitionFail, fmt.Errorf("[ERR] Null encrypted slave status")
     }
-    // SSH KEY is in SlavePubKey field
-    if len(meta.SlavePubKey) == 0 {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Cannot accept meta without SSH KEY")
-    }
     if b.aesCryptor == nil {
         return MasterTransitionFail, fmt.Errorf("[ERR] AES Cryptor is null. This should not happen")
     }
     if b.aesKey == nil {
         return MasterTransitionFail, fmt.Errorf("[ERR] AES Key is null. This should not happen")
-    }
-    // Decrypt Slave SSH KEY
-    slaveSSHkey, err := b.aesCryptor.DecryptByAES(meta.SlavePubKey)
-    if err != nil {
-        return MasterTransitionFail, err
     }
     plain, err := b.aesCryptor.DecryptByAES(meta.EncryptedStatus)
     if err != nil {
@@ -123,9 +114,6 @@ func (b *keyexchange) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestamp 
 
     // save status for response generation
     b.slaveStatus = usm
-
-    // save slave node ssh key
-    b.slaveNode.SSHKey = slaveSSHkey
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil

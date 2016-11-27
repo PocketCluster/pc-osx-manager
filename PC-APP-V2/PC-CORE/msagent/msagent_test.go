@@ -250,7 +250,7 @@ func TestSendCryptoCheckMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, pcrypto.TestSlaveSSHKey(), pcrypto.TestAESCryptor, initTime)
+    meta, _, err := TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return

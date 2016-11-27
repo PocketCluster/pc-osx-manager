@@ -15,7 +15,6 @@ type PocketSlaveAgentMeta struct {
     StatusAgent        *PocketSlaveStatus          `msgpack:"s_as, inline, omitempty"`
     EncryptedStatus    []byte                      `msgpack:"s_es, omitempty"`
     SlavePubKey        []byte                      `msgpack:"s_pk, omitempty"`
-    //EncryptedSlaveSSHKey []byte                    `msgpack:"pc_sl_sh, omitempty"`
 }
 
 func PackedSlaveMeta(meta *PocketSlaveAgentMeta) ([]byte, error) {
@@ -70,19 +69,12 @@ func KeyExchangeMeta(agent *PocketSlaveStatus, pubkey []byte) (*PocketSlaveAgent
 }
 
 
-func CheckSlaveCryptoMeta(agent *PocketSlaveStatus, sshKey []byte, aescrypto pcrypto.AESCryptor) (*PocketSlaveAgentMeta, error) {
+func CheckSlaveCryptoMeta(agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor) (*PocketSlaveAgentMeta, error) {
     mp, err := PackedSlaveStatus(agent)
     if err != nil {
         return nil, err
     }
     crypted, err := aescrypto.EncryptByAES(mp)
-    if err != nil {
-        return nil, err
-    }
-    if len(sshKey) == 0 {
-        return nil, fmt.Errorf("[ERR] Cannot send empty sshkey")
-    }
-    cryptedSshKey, err := aescrypto.EncryptByAES(sshKey)
     if err != nil {
         return nil, err
     }
@@ -94,9 +86,6 @@ func CheckSlaveCryptoMeta(agent *PocketSlaveStatus, sshKey []byte, aescrypto pcr
         MetaVersion     : SLAVE_META_VERSION,
         SlaveID         : piface.HardwareAddr.String(),
         EncryptedStatus : crypted,
-        // FIXME : this is wrong at many levels but if we're to extend one more field, the packet size will exceed 508 @ keyexchange state.
-        SlavePubKey     : cryptedSshKey,
-        //EncryptedSlaveSSHKey : cryptedSshKey,
     }, nil
 }
 
