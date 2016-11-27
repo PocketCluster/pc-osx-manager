@@ -12,20 +12,21 @@ import (
     "github.com/davecgh/go-spew/spew"
 )
 
-var masterAgentName string
-var slaveNodeName string
-var initSendTimestmap time.Time
+var (
+    masterAgentName string
+    slaveNodeName string = "pc-node1"
+    initSendTimestmap time.Time
+)
 
 func setUp() {
+    initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
     masterAgentName, _ = context.DebugContextPrepare().MasterAgentName()
     slcontext.DebugSlcontextPrepare()
-    slaveNodeName = "pc-node1"
-    initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 }
 
 func tearDown() {
-    context.DebugContextDestroy()
     slcontext.DebugSlcontextDestroy()
+    context.DebugContextDestroy()
 }
 
 func TestUnboundedBroadcastMeta(t *testing.T) {

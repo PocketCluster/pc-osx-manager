@@ -12,16 +12,17 @@ import (
     "github.com/davecgh/go-spew/spew"
 )
 
-var masterAgentName string
-var slaveNodeName string
-var initTime time.Time
+var (
+    masterAgentName string
+    slaveNodeName = "pc-node1"
+    initTime time.Time
+)
 
 func setUp() {
     context.DebugContextPrepare()
     slcontext.DebugSlcontextPrepare()
-    sn, _ := context.SharedHostContext().MasterAgentName()
-    masterAgentName = sn
-    slaveNodeName = "pc-node1"
+
+    masterAgentName, _ = context.SharedHostContext().MasterAgentName()
     initTime, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 }
 

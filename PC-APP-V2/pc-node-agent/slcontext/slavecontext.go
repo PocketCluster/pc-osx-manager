@@ -4,16 +4,18 @@ import (
     "sync"
     "fmt"
     "net"
+    "log"
 
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/netifaces"
     "github.com/stkim1/pc-node-agent/slcontext/config"
 )
 
-// this method should never have an error
-func SharedSlaveContext() PocketSlaveContext {
-    return getSingletonSlaveContext()
-}
+// Singleton handling
+var (
+    singletonContext *slaveContext
+    once sync.Once
+)
 
 type slaveContext struct {
     config           *config.PocketSlaveConfig
@@ -36,23 +38,22 @@ type slaveContext struct {
     slaveNodeName    string
 }
 
-// Singleton handling
-var singletonContext *slaveContext
-var once sync.Once
+// this method should never have an error
+func SharedSlaveContext() PocketSlaveContext {
+    return getSingletonSlaveContext()
+}
 
 func getSingletonSlaveContext() *slaveContext {
     once.Do(func() {
         singletonContext = &slaveContext{}
         cfg := config.LoadPocketSlaveConfig()
-        initializeSlaveContext(singletonContext, cfg)
+        err := singletonContext.initWithConfig(cfg)
+        if err != nil {
+            // TODO : Trace this log
+            log.Panicf("[CRITICAL] %s", err.Error())
+        }
     })
     return singletonContext
-}
-
-// this one should never have an error
-func initializeSlaveContext(sc *slaveContext, cfg *config.PocketSlaveConfig) {
-    // load config and generate
-    sc.initWithConfig(cfg)
 }
 
 // --- Sync All ---

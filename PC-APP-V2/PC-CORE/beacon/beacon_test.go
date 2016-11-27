@@ -8,9 +8,11 @@ import (
     "github.com/stkim1/pc-core/model"
 )
 
-var masterAgentName string
-var slaveNodeName string
-var initTime time.Time
+var (
+    masterAgentName string
+    slaveNodeName string
+    initTime time.Time
+)
 
 func setUp() {
     mctx := context.DebugContextPrepare()

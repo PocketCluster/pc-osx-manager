@@ -47,9 +47,9 @@ const (
     master_public_Key_file  = "/etc/pocket/pki/pcmaster.pub"
 
     // these files are 2048 RSA crypto files used for SSH, DOCKER
-    node_public_Key_file   = "/etc/pocket/pki/node.pub"
-    node_private_Key_file  = "/etc/pocket/pki/node.pem"
-    node_certificate_file  = "/etc/pocket/pki/node.csr"
+    node_public_Key_file    = "/etc/pocket/pki/node.pub"
+    node_private_Key_file   = "/etc/pocket/pki/node.pem"
+    node_certificate_file   = "/etc/pocket/pki/node.csr"
 
     // HOST GENERAL CONFIG
     network_iface_file      = "/etc/network/interfaces"
@@ -120,21 +120,35 @@ func _brandNewSlaveConfig(rootPath string) (*PocketSlaveConfig) {
 
 func _loadSlaveConfig(rootPath string) (*PocketSlaveConfig) {
 
+    var (
+        // config and key directories
+        configDirPath string    = rootPath + slave_config_dir
+        keysDirPath string      = rootPath + slave_keys_dir
+
+        // pocket cluster join keys
+        pcPubKeyPath string     = rootPath + slave_public_Key_file
+        pcPrvKeyPath string     = rootPath + slave_prvate_Key_file
+
+        // node SSH/DOCKER keys
+        nodePubKeyPath string   = rootPath + node_public_Key_file
+        nodePrvKeyPath string   = rootPath + node_private_Key_file
+
+        // config file path
+        configFilePath string   = rootPath + slave_config_file
+    )
+
     // check if config dir exists, and creat if DNE
-    configDirPath := rootPath + slave_config_dir
     if _, err := os.Stat(configDirPath); os.IsNotExist(err) {
         os.MkdirAll(configDirPath, 0700);
     }
+
     // check if config secure key dir also exists and creat if DNE
-    keysDirPath := rootPath + slave_keys_dir
     if _, err := os.Stat(keysDirPath); os.IsNotExist(err) {
         os.MkdirAll(keysDirPath, 0700);
     }
 
     // create pocketcluster join key sets
     var makePcJoinKeys bool = false
-    pcPubKeyPath := rootPath + slave_public_Key_file
-    pcPrvKeyPath := rootPath + slave_prvate_Key_file
     if _, err := os.Stat(pcPubKeyPath); os.IsNotExist(err) {
         makePcJoinKeys = true
     }
@@ -147,8 +161,6 @@ func _loadSlaveConfig(rootPath string) (*PocketSlaveConfig) {
 
     // create node ssh key sets
     var makeNodeKeys bool = false
-    nodePubKeyPath := rootPath + node_public_Key_file
-    nodePrvKeyPath := rootPath + node_private_Key_file
     if _, err := os.Stat(nodePubKeyPath); os.IsNotExist(err) {
         makeNodeKeys = true
     }
@@ -160,7 +172,6 @@ func _loadSlaveConfig(rootPath string) (*PocketSlaveConfig) {
     }
 
     // check if config file exists in path.
-    configFilePath := rootPath + slave_config_file
     if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
         return _brandNewSlaveConfig(rootPath)
     }

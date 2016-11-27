@@ -56,6 +56,49 @@ D1aAZ3gE6zFmOmH4cenuHZ1ha82Np4CEVnRaee91YA==
 -----END RSA PRIVATE KEY-----`)
 }
 
+func TestSlaveNodePublicKey() []byte {
+    return []byte(`MacPro:pki almightykim$ cat node.pub
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyO2QqsbF+KYro90d79PB
+54cezOXNMDn5WlVov7X0HIUAI9i74HcU9zWUgx1tWimueYJ568XxzuB2Gr6sFWJy
+0ZDNXjmLmGvx3hCXd7cfJlm/QvBAOAZy6HV22R2ujnqzEdoAjzzrayLcSySDslkY
+00uvDVkky+syL+gxywSXAzYijA2rnQFxFEP9bkdzdNgiPAAbQ7Xi5pM6eQnhbKsU
+i5apRgy3+rRJI0NjIpn86pcw7SIM46vscPV18RB8BakPkmVjUa4vDk/w/+/xrezp
+Fo0n4myExIywcbqaFoVMzWh8j0STm4cQOjspRLxBkSWdvVHkbK+pjeAQQQZtrFo9
+BQIDAQAB
+-----END PUBLIC KEY-----`)
+}
+
+func TestSlaveNodePrivateKey() []byte {
+    return []byte(`-----BEGIN RSA PRIVATE KEY-----
+MIIEpQIBAAKCAQEAyO2QqsbF+KYro90d79PB54cezOXNMDn5WlVov7X0HIUAI9i7
+4HcU9zWUgx1tWimueYJ568XxzuB2Gr6sFWJy0ZDNXjmLmGvx3hCXd7cfJlm/QvBA
+OAZy6HV22R2ujnqzEdoAjzzrayLcSySDslkY00uvDVkky+syL+gxywSXAzYijA2r
+nQFxFEP9bkdzdNgiPAAbQ7Xi5pM6eQnhbKsUi5apRgy3+rRJI0NjIpn86pcw7SIM
+46vscPV18RB8BakPkmVjUa4vDk/w/+/xrezpFo0n4myExIywcbqaFoVMzWh8j0ST
+m4cQOjspRLxBkSWdvVHkbK+pjeAQQQZtrFo9BQIDAQABAoIBAQCmyVS5/fAdu8oj
+5otQJeYii24MxYDy1FzhGF6wLJirB9ga6XDjHdZAcrCJueao3kqfQKh2B0T25ioD
+f10XDzaiMOHYokn3RztpizpAPLjVu8/g/88+8lN2FPOHvHTGfqGgYubt/7KnpzNY
+CMJtTDooQv3XRbUetGhfjg2vKWs1VMSGHGi6Pq3Z8wTlY38NT0lBJNO49JNPsurA
+DLJiC7Rb6SM/YwWh+XEp+Hm0wX52JTXD31S7LUlzOCnBMq9XAM2dC/TNJXEErG8K
+8+F40NUpf8AEYpSqu3aBiyfLTRK+mfdFTtFFkfWBJxJy6nXM08mKNKJvI8V12EPA
+W7/hgebhAoGBAO7bfHFljsFAXrYhWbUfP/tXmkZndfUXYZV+FNAt3OxUc455dJpG
+uOcDrGWY/dnAxklHPoqQWs7g2rHS9uhozGz/64x4QeVO4RDMhkm2FxnuDeqULynb
+xcUdxKxOE4SoPu6IdTlW4xRxdqVDD74KYogU8eQm3iX0eY38M0jyivOJAoGBANdZ
+NFrF3fNF3t/piSVHfU6yTKuT0khbY06r5KMsW7EAJJJ4RkSdhCIQ8AooSwlhyc8X
+v+vHquYsXfXT8aQEw+ExYh44vN1ZZ5VIYdGofnl1mhab9mVrqdYYa3kr1Ny00Ui5
+Gk3FvP/LBhG7Jgc2SRSVtzhQq0RpXqIdX60c2VKdAoGBAKLWgX0xVmRLRQZ3sBe5
+qT3p2CRdTl57xSxMW1YdnjqDzI/6H1M6Gb5sk7Bj39P/B29XobyHc1EMnCuU/n0t
+TQiWZHhMV+hDoU55kKdZ+1/TGiutQIYR7T9X7wfk5ouOw/CMmRYxNPhv7gn2sRnH
+LKtHVC1Nji9j/yacJD58E9y5AoGBAKnQzlhGcB/GmVo47s1W8pl8QLmMd+ZXKph/
+NGz4LdYGJtDZx4+UJv42HRPlckaTtnB4af+kFEAt/Go+F+8fUtfh+V2boFNsjSJL
+Udfi5tkgw8HQexy/Kc6KszV6OwFQFTkjvnpV1BRiJQcWbYaCaF6zMShXdLcd4GI2
+h5wbg8SBAoGAE3vx0D5KqMKyrUzNlvNKORqYLxCl0yACl+hl5GwMXqr774VCQZ2A
+x/6Caylpij1+rFP2SNU4tP++2icJUXUdm7fxV7N3mUrVxcfQnpkZii16yfud+mZN
+BiMNQ1We6oTEqGxIKwSq4VjojwUOqaby5SLRs552a2wBWf2kwAv/3Ec=
+-----END RSA PRIVATE KEY-----`)
+}
+
 var TestAESKey []byte = []byte("longer means more possible keys ")
 var TestAESCryptor, _ = NewAESCrypto(TestAESKey)
 
