@@ -63,73 +63,6 @@ func CreateTLSConfiguration(certFile, keyFile string) (*tls.Config, error) {
     return config, nil
 }
 
-/*
-// TLSCredentials keeps the typical 3 components of a proper HTTPS configuration
-type TLSCredentials struct {
-    // PublicKey in PEM format
-    PublicKey []byte
-    // PrivateKey in PEM format
-    PrivateKey []byte
-    Cert       []byte
-}
-
-// GenerateSelfSignedCert generates a self signed certificate that
-// is valid for given domain names and ips, returns PEM-encoded bytes with key and cert
-func generateSelfSignedCert(country string, hostNames []string) (*TLSCredentials, error) {
-    priv, err := rsa.GenerateKey(rand.Reader, 2048)
-    if err != nil {
-        return nil, err
-    }
-    notBefore := time.Now()
-    notAfter := notBefore.Add(time.Hour * 24 * 365 * 10) // 10 years
-
-    serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
-    serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
-    if err != nil {
-        return nil, err
-    }
-
-    entity := pkix.Name{
-        CommonName:   "localhost",
-        Country:      []string{country},
-        Organization: []string{"localhost"},
-    }
-
-    template := x509.Certificate{
-        SerialNumber:          serialNumber,
-        Issuer:                entity,
-        Subject:               entity,
-        NotBefore:             notBefore,
-        NotAfter:              notAfter,
-        KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
-        BasicConstraintsValid: true,
-        IsCA:                  true,
-    }
-
-    // collect IP addresses localhost resolves to and add them to the cert. template:
-    template.DNSNames = append(hostNames, "localhost.local")
-    ips, _ := net.LookupIP("localhost")
-    if ips != nil {
-        template.IPAddresses = ips
-    }
-    derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
-    if err != nil {
-        return nil, err
-    }
-
-    publicKeyBytes, err := x509.MarshalPKIXPublicKey(priv.Public())
-    if err != nil {
-        return nil, err
-    }
-
-    return &TLSCredentials{
-        PublicKey:  pem.EncodeToMemory(&pem.Block{Type: "RSA PUBLIC KEY", Bytes: publicKeyBytes}),
-        PrivateKey: pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)}),
-        Cert:       pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: derBytes}),
-    }, nil
-}
-*/
-
 // GenerateSelfSignedCert generates a self signed certificate that
 // is valid for given domain names and ips, returns PEM-encoded bytes with key and cert
 func generateSelfSignedCert(country string, hostNames []string) ([]byte, []byte, []byte, error) {
@@ -142,6 +75,11 @@ func generateSelfSignedCert(country string, hostNames []string) ([]byte, []byte,
         serialNumberLimit, serialNumber *big.Int
         err error = nil
     )
+
+    // check country code
+    if len(country) == 0 {
+        return nil, nil, nil, fmt.Errorf("[ERR] Invalid country code : %s", country)
+    }
 
     // generate private key
     privateKey, err = rsa.GenerateKey(rand.Reader, rsaStrongKeySize)
@@ -224,10 +162,6 @@ func generateSelfSignedCert(country string, hostNames []string) ([]byte, []byte,
 
 // CreateSelfSignedHTTPSCert generates and self-signs a TLS key+cert pair for https connection to the proxy server.
 func GenerateSelfSignedCertificateFiles(pubKeyPath, prvKeyPath, certPath, country string) error {
-    if len(country) != 2 {
-        return fmt.Errorf("[ERR] Invalid country code")
-    }
-
     prv, pub, cert, err := generateSelfSignedCert(country, []string{"localhost", "localhost"})
     if err != nil {
         return err
@@ -252,4 +186,9 @@ func GenerateSelfSignedCertificateFiles(pubKeyPath, prvKeyPath, certPath, countr
         }
     }
     return nil
+}
+
+func GenerateSelfSignedCertificateData(country string) ([]byte, []byte, []byte, error) {
+    prv, pub, cert, err := generateSelfSignedCert(country, []string{"localhost", "localhost"})
+    return pub, prv, cert, err
 }

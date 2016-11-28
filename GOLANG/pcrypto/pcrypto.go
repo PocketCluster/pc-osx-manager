@@ -291,13 +291,13 @@ func GenerateStrongKeyPairFiles(pubKeyPath, prvKeyPath, sshKeyPath string) error
 }
 
 // GenerateKeyPair make a pair of public and private keys encoded in PEM format
-func GenerateWeakKeyPair() (pub []byte, prv []byte, ssh []byte, err error) {
-    prv, pub, ssh, err = generateKeyPairs(rsaWeakKeySize)
-    return
+func GenerateWeakKeyPair() ([]byte, []byte, []byte, error) {
+    prv, pub, ssh, err := generateKeyPairs(rsaWeakKeySize)
+    return pub, prv, ssh, err
 }
 
 // GenerateKeyPair make a pair of public and private keys encoded in PEM format
-func GenerateStrongKeyPair() (pub []byte, prv []byte, ssh []byte, err error) {
-    prv, pub, ssh, err = generateKeyPairs(rsaStrongKeySize)
-    return
+func GenerateStrongKeyPair() ([]byte, []byte, []byte, error) {
+    prv, pub, ssh, err := generateKeyPairs(rsaStrongKeySize)
+    return pub, prv, ssh, err
 }
