@@ -31,6 +31,10 @@ iface eth0 inet dhcp`)
     if err != nil {
         return nil, err
     }
+
+    // TODO : ubuntu does not support TMPDIR env. CI host should have it's TMP as memfs in the future
+    //root := os.Getenv("TMPDIR")
+
     var (
         tuid string = uuid.New()
         // check if the path exists and make it if absent

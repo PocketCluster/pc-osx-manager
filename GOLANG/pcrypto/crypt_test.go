@@ -7,6 +7,7 @@ import (
     "encoding/base64"
     "reflect"
     "fmt"
+    "crypto/tls"
 )
 
 func TestKeyGeneration(t *testing.T) {
@@ -314,4 +315,20 @@ func ExampleStrongRsaKeyEncryption() {
     fmt.Printf("Original Message Size %d | Encrypted Message Size %d | Signature Size %d", len(TestAESKey), len(crypted), len(sig))
     // Output:
     // Original Message Size 32 | Encrypted Message Size 256 | Signature Size 256
+}
+
+func TestLoadStrongX509KeyPair(t *testing.T) {
+    if err := GenerateSelfSignedCertificateFiles("recvtest.pub", "recvtest.pem", "recvtest.cert", "KR"); err != nil {
+        t.Errorf("failed to generate a key pair %v", err)
+    }
+
+    _, err := tls.LoadX509KeyPair("recvtest.cert", "recvtest.pem")
+    if !os.IsNotExist(err) {
+        t.Log("[INFO] File does not exists")
+    }
+    if err != nil {
+        t.Error(err.Error())
+    }
+
+    os.Remove("recvtest.pub");os.Remove("recvtest.pem");os.Remove("recvtest.cert");
 }

@@ -449,6 +449,44 @@ func (process *PocketCoreTeleportProcess) initProxyEndpoint(conn *service.Connec
     return nil
 }
 
+// initProxy gets called if teleport runs with 'proxy' role enabled.
+// this means it will do two things:
+//    1. serve a web UI
+//    2. proxy SSH connections to nodes running with 'node' role
+//    3. take care of revse tunnels
+func (process *PocketCoreTeleportProcess) initProxy() error {
+    // *** (11/28/2016) TLS Certificate should be generated in pc-core context initiation ***
+    /*
+    // if no TLS key was provided for the web UI, generate a self signed cert
+    if process.Config.Proxy.TLSKey == "" && !process.Config.Proxy.DisableWebUI {
+        //err := initSelfSignedHTTPSCert(process.Config)
+        var err error = nil
+        if err != nil {
+            return trace.Wrap(err)
+        }
+    }
+    */
+
+    process.RegisterWithAuthServer(
+        process.Config.Token, teleport.RoleProxy,
+        service.ProxyIdentityEvent)
+
+    process.RegisterFunc(func() error {
+        eventsC := make(chan service.Event)
+        process.WaitForEvent(service.ProxyIdentityEvent, eventsC, make(chan struct{}))
+
+        event := <-eventsC
+        log.Infof("[SSH] received %v", &event)
+        conn, ok := (event.Payload).(*service.Connector)
+        if !ok {
+            return trace.BadParameter("unsupported connector type: %T", event.Payload)
+        }
+        return trace.Wrap(process.initProxyEndpoint(conn))
+    })
+    return nil
+}
+
+
 // RegisterWithAuthServer uses one time provisioning token obtained earlier
 // from the server to get a pair of SSH keys signed by Auth server host
 // certificate authority
@@ -508,36 +546,40 @@ func (process *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, r
     })
 }
 
-// initProxy gets called if teleport runs with 'proxy' role enabled.
-// this means it will do two things:
-//    1. serve a web UI
-//    2. proxy SSH connections to nodes running with 'node' role
-//    3. take care of revse tunnels
-func (process *PocketCoreTeleportProcess) initProxy() error {
-    // if no TLS key was provided for the web UI, generate a self signed cert
-    if process.Config.Proxy.TLSKey == "" && !process.Config.Proxy.DisableWebUI {
-        //err := initSelfSignedHTTPSCert(process.Config)
-        var err error = nil
-        if err != nil {
-            return trace.Wrap(err)
-        }
-    }
+/*
 
-    process.RegisterWithAuthServer(
-        process.Config.Token, teleport.RoleProxy,
-        service.ProxyIdentityEvent)
+// initSelfSignedHTTPSCert generates and self-signs a TLS key+cert pair for https connection
+// to the proxy server.
+func initSelfSignedHTTPSCert(cfg *Config) (err error) {
+	log.Warningf("[CONFIG] NO TLS Keys provided, using self signed certificate")
 
-    process.RegisterFunc(func() error {
-        eventsC := make(chan service.Event)
-        process.WaitForEvent(service.ProxyIdentityEvent, eventsC, make(chan struct{}))
+	keyPath := filepath.Join(cfg.DataDir, defaults.SelfSignedKeyPath)
+	certPath := filepath.Join(cfg.DataDir, defaults.SelfSignedCertPath)
 
-        event := <-eventsC
-        log.Infof("[SSH] received %v", &event)
-        conn, ok := (event.Payload).(*service.Connector)
-        if !ok {
-            return trace.BadParameter("unsupported connector type: %T", event.Payload)
-        }
-        return trace.Wrap(process.initProxyEndpoint(conn))
-    })
-    return nil
+	cfg.Proxy.TLSKey = keyPath
+	cfg.Proxy.TLSCert = certPath
+
+	// return the existing pair if they ahve already been generated:
+	_, err = tls.LoadX509KeyPair(certPath, keyPath)
+	if err == nil {
+		return nil
+	}
+	if !os.IsNotExist(err) {
+		return trace.Wrap(err, "unrecognized error reading certs")
+	}
+	log.Warningf("[CONFIG] Generating self signed key and cert to %v %v", keyPath, certPath)
+
+	creds, err := utils.GenerateSelfSignedCert([]string{cfg.Hostname, "localhost"})
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
+	if err := ioutil.WriteFile(keyPath, creds.PrivateKey, 0600); err != nil {
+		return trace.Wrap(err, "error writing key PEM")
+	}
+	if err := ioutil.WriteFile(certPath, creds.Cert, 0600); err != nil {
+		return trace.Wrap(err, "error writing key PEM")
+	}
+	return nil
 }
+ */
