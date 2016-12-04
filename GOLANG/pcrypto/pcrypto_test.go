@@ -318,7 +318,7 @@ func ExampleStrongRsaKeyEncryption() {
 }
 
 func TestLoadStrongX509KeyPair(t *testing.T) {
-    if err := GenerateSelfSignedCertificateFiles("recvtest.pub", "recvtest.pem", "recvtest.cert", "KR"); err != nil {
+    if err := GenerateClusterCertificateAuthorityFiles("recvtest.pub", "recvtest.pem", "recvtest.cert", "cluster-id-here", "KR"); err != nil {
         t.Errorf("failed to generate a key pair %v", err)
     }
 

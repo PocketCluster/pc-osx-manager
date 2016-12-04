@@ -1,39 +1,126 @@
 ## How to sign keys with certificate
 
-### Create CA certificate
+### Create CA Key / public CA Authority
 
-1. Create a private key called `ca-priv-key.pem` for the CA:
+1. Create a private key called `ca-key.pem` for the CA
 	
-  > openssl genrsa -out ca-priv-key.pem 2048
+  > openssl genrsa -out ca-key.pem 2048 -sha256
+  
+2. Inspect the private key
 
-2. Create a public key called `ca.pem` for the CA:
+  > openssl rsa -in ca-key.pem -noout -text
 
-  > openssl req -new -key ca-priv-key.pem -x509 -days 1825 -out ca.pem
+3. Create a public CA Authority called `ca-cert.pub` for the CA
 
-### Create Swarm Private/Certificate
+  > openssl req -x509 -new -nodes -key ca-key.pem -out ca-cert.pub -sha256 -days 365 -subj '/CN=pc-ca'
 
-1. Create a private key `swarm-priv-key.pem` for your Swarm Manager:
+4. Inspect the public authority
+
+  > openssl x509 -in ca-cert.pub -noout -text
+
+### Create Master Key/ Certificate Sign Request/ Signed Certificate
+
+1. Create a private key called `master-key.pem` for the CA
 	
-  > openssl genrsa -out swarm-priv-key.pem 2048
+  > openssl genrsa -out master-key.pem 2048 -sha256
+  
+2. Inspect the private key
 
-2. Generate a **certificate signing request** (CSR) `swarm.csr` using the private key you create in the previous step:
+  > openssl rsa -in master-key.pem -noout -text
 
-  > openssl req -subj "/CN=swarm" -new -key swarm-priv-key.pem -out swarm.csr
+3. Create sign request called `master.csr`
 
-3. Create the certificate `swarm-cert.pem` based on the CSR created in the previous step.
+  > openssl req -new -key master-key.pem -out master.csr -sha256 -subj "/CN=pc-master" -config master.conf
+  
+4. Inspect the Certificate Sign Request
 
-  > openssl x509 -req -days 1825 -in swarm.csr -CA ca.pem -CAkey ca-priv-key.pem -CAcreateserial -out swarm-cert.pem -extensions v3_req 
+  > openssl req -in master.csr -noout -text
 
-### Create Node Private/Certificate
+5. Create signed certificate called `master.cert`
 
-1. Create a private key `node-priv-key.pem` for your Swarm Manager:
+  > openssl x509 -req -in master.csr -CA ca-cert.pub -CAkey ca-key.pem -CAcreateserial -out master.cert -sha256 -days 365 -extensions v3_req -extfile master.conf
 
-  > openssl genrsa -out node-priv-key.pem 2048
+8. Inspect the created self CA certificate
+
+  > openssl x509 -in master.cert -noout -text
+
+- `master.conf` 
+
+  ```sh
+  [req]
+  req_extensions 				= v3_req
+  distinguished_name 			= req_distinguished_name
+  
+  [req_distinguished_name]
+  countryName					= KR
+  commonName					= pc-master
+
+  [ v3_req ]
+  basicConstraints 				= CA:FALSE
+  keyUsage 						= nonRepudiation, digitalSignature, keyEncipherment
+  extendedKeyUsage 				= serverAuth, clientAuth
+  ```
+
+### Create Node Key/ Certificate Sign Request/ Signed Certificate
+
+1. Create a private key `node-key.pem` for your Swarm Manager:
+
+  > openssl genrsa -out node-key.pem 2048 -sha256
 
 2. Generate a **certificate signing request** (CSR) `node.csr` using the private key you create in the previous step:
 
-  > openssl req -subj "/CN=pc-node1" -new -key node-priv-key.pem -out node.csr
+  > openssl req -new -key node-key.pem -out node.csr -sha256 -subj "/CN=pc-node1" -config node.conf
 
 3. Create the certificate `node.cert` based on the CSR created in the previous step.
 
-  > openssl x509 -req -days 1825 -in node.csr -CA ca.pem -CAkey ca-priv-key.pem -CAcreateserial -out node.cert -extensions v3_req 
+  > openssl x509 -req -in node.csr -CA ca-cert.pub -CAkey ca-key.pem -CAcreateserial -out node.cert -sha256 -days 365 -extensions v3_req -extfile node.conf
+
+- `node.conf`
+
+  ```sh
+  [req]
+  req_extensions 				= v3_req
+  distinguished_name 			= req_distinguished_name
+  
+  [req_distinguished_name]
+  countryName					= KR
+  commonName					= pc-node1
+  
+  [ v3_req ]
+  basicConstraints 				= CA:FALSE
+  keyUsage 						= nonRepudiation, digitalSignature, keyEncipherment
+  extendedKeyUsage 				= serverAuth, clientAuth
+  subjectAltName 				= @alt_names
+  
+  [alt_names]
+  DNS.1 						= pocketcluster.local
+  IP.1 							= 192.168.1.152
+  ```
+
+### Swarm Manager Command sequence
+
+```sh
+openssl genrsa -out ca-key.pem 2048 -sha256
+
+openssl req -x509 -new -nodes -key ca-key.pem -out ca-cert.pub -sha256 -days 365 -subj '/CN=pc-ca'
+
+>>>>
+
+openssl genrsa -out master-key.pem 2048 -sha256
+
+openssl req -new -key master-key.pem -out master.csr -sha256 -subj "/CN=pc-master" -config master.conf
+
+openssl x509 -req -in master.csr -CA ca-cert.pub -CAkey ca-key.pem -CAcreateserial -out master.cert -sha256 -days 365 -extensions v3_req -extfile master.conf
+
+>>>>
+
+openssl genrsa -out node-key.pem 2048 -sha256
+
+openssl req -new -key node-key.pem -out node.csr -sha256 -subj "/CN=pc-node1" -config node.conf
+
+openssl x509 -req -in node.csr -CA ca-cert.pub -CAkey ca-key.pem -CAcreateserial -out node.cert -sha256 -days 365 -extensions v3_req -extfile node.conf
+
+>>>>>
+
+swarm --debug manage --tlsverify=true --tlscacert=ca-cert.pub --tlscert=master.cert --tlskey=master-key.pem --host=:3376 --advertise=192.168.1.236:3376 nodes://192.168.1.152:2375
+```
