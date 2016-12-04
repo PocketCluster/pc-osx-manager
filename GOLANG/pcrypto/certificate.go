@@ -123,7 +123,7 @@ func makeSelfCertAuth(commonName, dnsName, country string) ([]byte, []byte, []by
         KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
         BasicConstraintsValid: true,
         IsCA:                  true,
-        DNSNames:              []string{dnsName},
+        DNSNames:              []string{dnsName, "localhost.local"},
     }
 
     // TODO : (11/28/2016) we're to empty the addresses here to see if certificate works fine. Also, check if ip address is really necessary
