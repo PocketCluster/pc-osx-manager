@@ -25,7 +25,7 @@ import (
     "github.com/gravitational/teleport/lib/web"
 
     "github.com/stkim1/pcteleport/pcdefaults"
-    "github.com/stkim1/pcteleport/tun"
+    "github.com/stkim1/pcteleport/pcauth"
     "golang.org/x/crypto/ssh"
 )
 
@@ -212,14 +212,14 @@ func (process *PocketCoreTeleportProcess) initAuthService(authority auth.Authori
 
     // Register an SSH endpoint which is used to create an SSH tunnel to send HTTP
     // requests to the Auth API
-    var authTunnel *tun.AuthTunnel
+    var authTunnel *pcauth.AuthTunnel
     process.RegisterFunc(func() error {
         utils.Consolef(cfg.Console, "[AUTH]  Auth service is starting on %v", cfg.Auth.SSHAddr.Addr)
-        authTunnel, err = tun.NewTunnel(
+        authTunnel, err = pcauth.NewTunnel(
             cfg.Auth.SSHAddr,
             identity.KeySigner,
             apiConf,
-            tun.SetLimiter(limiter),
+            pcauth.SetLimiter(limiter),
         )
         if err != nil {
             utils.Consolef(cfg.Console, "[AUTH] Error: %v", err)

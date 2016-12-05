@@ -25,14 +25,7 @@ type basicConstraints struct {
     MaxPathLen int  `asn1:"optional,default:-1"`
 }
 
-type casigner struct {
-    ca         *x509.Certificate
-    priv       crypto.Signer
-    policy     *config.Signing
-    sigAlgo    x509.SignatureAlgorithm
-}
-
-// A Name contains the SubjectInfo fields.
+// subName subName contains the SubjectInfo fields.
 type subName struct {
     C            string // Country
     ST           string // State
@@ -42,7 +35,7 @@ type subName struct {
     SerialNumber string
 }
 
-// Subject contains the information that should be used to override the
+// requestSubject requestSubject contains the information that should be used to override the
 // subject information when signing a certificate.
 type requestSubject struct {
     CN           string
@@ -72,7 +65,7 @@ func (s *requestSubject) name() pkix.Name {
     return name
 }
 
-// Extension represents a raw extension to be included in the certificate.  The
+// extension represents a raw extension to be included in the certificate.  The
 // "value" field must be hex encoded.
 type extension struct {
     ID       config.OID
@@ -80,7 +73,7 @@ type extension struct {
     Value    string
 }
 
-// SignRequest stores a signature request, which contains the hostname,
+// signRequest stores a signature request, which contains the hostname,
 // the CSR, optional subject information, and the signature profile.
 //
 // Extensions provided in the signRequest are copied into the certificate, as
@@ -277,7 +270,7 @@ func fillTemplate(template *x509.Certificate, defaultProfile, profile *config.Si
     return nil
 }
 
-func signRequestTemplate(s *casigner, template *x509.Certificate, profile *config.SigningProfile) (cert []byte, err error) {
+func signRequestTemplate(s *CaSigner, template *x509.Certificate, profile *config.SigningProfile) (cert []byte, err error) {
     var distPoints = template.CRLDistributionPoints
     err = fillTemplate(template, s.policy.Default, profile)
     if distPoints != nil && len(distPoints) > 0 {
@@ -300,7 +293,7 @@ func signRequestTemplate(s *casigner, template *x509.Certificate, profile *confi
 // Sign signs a new certificate based on the PEM-encoded client
 // certificate or certificate request with the signing profile,
 // specified by profileName.
-func signCertificateRequest(signer *casigner, req signRequest) ([]byte, error) {
+func signCertificateRequest(signer *CaSigner, req signRequest) ([]byte, error) {
     block, _ := pem.Decode([]byte(req.Request))
     if block == nil {
         return nil, fmt.Errorf("[ERR] CSR decoding failed")
@@ -360,18 +353,16 @@ func signCertificateRequest(signer *casigner, req signRequest) ([]byte, error) {
     return signedCert, nil
 }
 
-// TODO : Add Test + Remove cfssl packages + check authority record to Database
-func GenerateSignedCertificate(caKey, caCert, privateKey []byte, hostname, clusterId, ipAddress, country string) ([]byte, error) {
-    if len(hostname) == 0 {
-        return nil, fmt.Errorf("[ERR] Invalid hostname")
-    }
-    // TODO : we need to check if CA's cluster id the same as csr's clusteid
-    if len(clusterId) == 0 {
-        return nil, fmt.Errorf("[ERR] Invalid cluster identification")
-    }
-    if len(country) == 0 {
-        return nil, fmt.Errorf("[ERR] Invalid country code")
-    }
+type CaSigner struct {
+    priv       crypto.Signer
+    ca         *x509.Certificate
+    sigAlgo    x509.SignatureAlgorithm
+    policy     *config.Signing
+    clusterID  string
+    country    string
+}
+
+func NewCertAuthoritySigner(caKey, caCert []byte, clusterID, country string) (*CaSigner, error) {
     caPrvKeyPEM, err := helpers.ParsePrivateKeyPEM(caKey)
     if err != nil {
         return nil, err
@@ -384,11 +375,33 @@ func GenerateSignedCertificate(caKey, caCert, privateKey []byte, hostname, clust
         Profiles: map[string]*config.SigningProfile{},
         Default:  config.DefaultConfig(),
     }
+    if len(clusterID) == 0 {
+        return nil, fmt.Errorf("[ERR] Invalid cluster identification")
+    }
+    if len(country) == 0 {
+        return nil, fmt.Errorf("[ERR] Invalid country code")
+    }
+    return &CaSigner{
+        priv:       caPrvKeyPEM,
+        ca:         caCertPEM,
+        sigAlgo:    helpers.DefaultSigAlgo(caPrvKeyPEM),
+        policy:     policy,
+        clusterID:  strings.ToLower(clusterID),
+        country:    strings.ToUpper(country),
+    }, nil
+}
+
+// TODO : Add Test + Remove cfssl packages + check authority record to Database
+func (s *CaSigner) GenerateSignedCertificate(hostname, ipAddress string, privateKey []byte) ([]byte, error) {
+    if len(hostname) == 0 {
+        return nil, fmt.Errorf("[ERR] Invalid hostname")
+    }
+    // TODO : we need to check if CA's cluster id the same as csr's clusteid
     subject := &requestSubject{
         CN:    hostname,
         Names: []subName{
             {
-                C: strings.ToUpper(country),
+                C: s.country,
             },
         },
     }
@@ -397,21 +410,15 @@ func GenerateSignedCertificate(caKey, caCert, privateKey []byte, hostname, clust
         return nil, err
     }
     creq := signRequest{
-        dnsName:    []string{fmt.Sprintf("%s.%s.cluster.pocketcluster.io", strings.ToLower(hostname), strings.ToLower(clusterId))},
+        dnsName:    []string{fmt.Sprintf("%s.%s.cluster.pocketcluster.io", strings.ToLower(hostname), s.clusterID)},
         Request:    string(nodereq),
         Subject:    subject,
     }
     if len(ipAddress) != 0 {
         creq.ipAddress = []string{ipAddress}
     }
-    if !policy.Valid() {
-        return nil, fmt.Errorf("[ERR] InvalidPolicy")
-    }
-    s := &casigner{
-        ca:      caCertPEM,
-        priv:    caPrvKeyPEM,
-        sigAlgo: helpers.DefaultSigAlgo(caPrvKeyPEM),
-        policy:  policy,
+    if !s.policy.Valid() {
+        return nil, fmt.Errorf("[ERR] Invalid Certificate Authority Policy")
     }
     return signCertificateRequest(s, creq)
 }

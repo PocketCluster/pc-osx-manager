@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tun
+package pcauth
 
 import (
 	"encoding/json"
@@ -44,8 +44,8 @@ import (
 // Use auth.TunClient to connect to AuthTunnel
 type AuthTunnel struct {
 	// authServer implements the "beef" of the Auth service
-	authServer *auth.AuthServer
-	config     *auth.APIConfig
+	authServer 		*auth.AuthServer
+	config     		*auth.APIConfig
 
 	// sshServer implements the nuts & bolts of serving an SSH connection
 	// to create a tunnel
@@ -303,6 +303,12 @@ func (s *AuthTunnel) onAPIConnection(sconn *ssh.ServerConn, sshChan ssh.Channel,
 	}
 
 	api := auth.NewAPIServer(s.config, role)
+    // Since PocketCluster API is an addition to existing api, we'll handle normal request in NotFound functions
+    pcapi := NewPocketAPIServer(s.config, role, func(w http.ResponseWriter, r *http.Request){
+        // TODO : log
+        api.ServeHTTP(w, r)
+    })
+
 	socket := fakeSocket{
 		closed:      make(chan int),
 		connections: make(chan net.Conn),
@@ -327,7 +333,7 @@ func (s *AuthTunnel) onAPIConnection(sconn *ssh.ServerConn, sshChan ssh.Channel,
 	http.Serve(&socket, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// take SSH client name and pass it to HTTP API via HTTP Auth
 		r.SetBasicAuth(sconn.User(), "")
-		api.ServeHTTP(w, r)
+        pcapi.ServeHTTP(w, r)
 	}))
 }
 
