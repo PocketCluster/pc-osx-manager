@@ -154,6 +154,7 @@ func makeSelfCertAuth(commonName, dnsName, country string) ([]byte, []byte, []by
     return pubPem, privPem, certPem, nil
 }
 
+// TODO : Add Test
 // CreateSelfSignedHTTPSCert generates and self-signs a TLS key+cert pair for https connection to the proxy server.
 func GenerateClusterCertificateAuthorityFiles(pubKeyPath, prvKeyPath, certPath, clusterId, country string) error {
     pub, prv, cert, err := makeSelfCertAuth("PC-CA-" + strings.ToUpper(clusterId), strings.ToLower(clusterId) + ".cluster.pocketcluster.io", strings.ToUpper(country))
@@ -182,6 +183,7 @@ func GenerateClusterCertificateAuthorityFiles(pubKeyPath, prvKeyPath, certPath, 
     return nil
 }
 
+// TODO : Add Test
 // return : public, private, certificate, error
 func GenerateClusterCertificateAuthorityData(clusterId, country string) ([]byte, []byte, []byte, error) {
     return makeSelfCertAuth("PC-CA-" + strings.ToUpper(clusterId), strings.ToLower(clusterId) + ".cluster.pocketcluster.io", strings.ToUpper(country))

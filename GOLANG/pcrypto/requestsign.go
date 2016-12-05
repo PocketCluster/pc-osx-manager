@@ -360,6 +360,7 @@ func signCertificateRequest(signer *casigner, req signRequest) ([]byte, error) {
     return signedCert, nil
 }
 
+// TODO : Add Test + Remove cfssl packages + check authority record to Database
 func GenerateSignedCertificate(caKey, caCert, privateKey []byte, hostname, clusterId, ipAddress, country string) ([]byte, error) {
     if len(hostname) == 0 {
         return nil, fmt.Errorf("[ERR] Invalid hostname")

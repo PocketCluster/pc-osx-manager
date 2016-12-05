@@ -9,10 +9,10 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/gravitational/trace"
     "github.com/gravitational/teleport/lib/utils"
-    "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/config"
     "github.com/gravitational/teleport/lib/services"
 
+    "github.com/stkim1/pcteleport/process"
     "github.com/stkim1/pcteleport/coreconfig"
 )
 
@@ -38,7 +38,8 @@ func StartCoreTeleport(debug bool) error {
     }
 
     // add temporary token
-    srv, err := service.NewTeleport(cfg)
+    //srv, err := service.NewTeleport(cfg)
+    srv, err := process.NewCoreTeleport(cfg)
     if err != nil {
         return err
         //return trace.Wrap(err, "initializing teleport")

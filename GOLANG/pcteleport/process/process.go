@@ -25,6 +25,7 @@ import (
     "github.com/gravitational/teleport/lib/web"
 
     "github.com/stkim1/pcteleport/pcdefaults"
+    "github.com/stkim1/pcteleport/tun"
     "golang.org/x/crypto/ssh"
 )
 
@@ -211,14 +212,14 @@ func (process *PocketCoreTeleportProcess) initAuthService(authority auth.Authori
 
     // Register an SSH endpoint which is used to create an SSH tunnel to send HTTP
     // requests to the Auth API
-    var authTunnel *auth.AuthTunnel
+    var authTunnel *tun.AuthTunnel
     process.RegisterFunc(func() error {
         utils.Consolef(cfg.Console, "[AUTH]  Auth service is starting on %v", cfg.Auth.SSHAddr.Addr)
-        authTunnel, err = auth.NewTunnel(
+        authTunnel, err = tun.NewTunnel(
             cfg.Auth.SSHAddr,
             identity.KeySigner,
             apiConf,
-            auth.SetLimiter(limiter),
+            tun.SetLimiter(limiter),
         )
         if err != nil {
             utils.Consolef(cfg.Console, "[AUTH] Error: %v", err)
@@ -455,7 +456,7 @@ func (process *PocketCoreTeleportProcess) initProxyEndpoint(conn *service.Connec
 //    2. proxy SSH connections to nodes running with 'node' role
 //    3. take care of revse tunnels
 func (process *PocketCoreTeleportProcess) initProxy() error {
-    // *** (11/28/2016) TLS Certificate should be generated in pc-core context initiation ***
+    // TODO : (11/28/2016) TLS Certificate should be generated in pc-core context initiation
     /*
     // if no TLS key was provided for the web UI, generate a self signed cert
     if process.Config.Proxy.TLSKey == "" && !process.Config.Proxy.DisableWebUI {
@@ -546,8 +547,8 @@ func (process *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, r
     })
 }
 
-/*
 
+/*
 // initSelfSignedHTTPSCert generates and self-signs a TLS key+cert pair for https connection
 // to the proxy server.
 func initSelfSignedHTTPSCert(cfg *Config) (err error) {
