@@ -35,12 +35,20 @@ func NewPocketAPIServer(config *auth.APIConfig, role teleport.Role, notFound htt
     return srv
 }
 
+const (
+    pcHostToken string      = "token"
+    pcHostID string         = "hostid"
+    pcHostName string       = "hostname"
+    pcHostIp4Addr string    = "ip4addr"
+    pcHostRole string       = "role"
+)
+
 type signedCertificateReq struct {
-    Token       string        `json:"token"`
-    Hostname    string        `json:"hostname"`
-    HostUUID    string        `json:"hostuuid"`
-    IPAddress   string        `json:"ipaddress"`
-    Role        teleport.Role `json:"role"`
+    Token    string        `json:"token"`
+    HostID   string        `json:"hostid"`
+    Hostname string        `json:"hostname"`
+    IP4Addr  string        `json:"ip4addr"`
+    Role     teleport.Role `json:"role"`
 }
 
 func (s *PocketAPIServer) issueSignedCertificatewithToken(w http.ResponseWriter, r *http.Request, _ httprouter.Params) (interface{}, error) {

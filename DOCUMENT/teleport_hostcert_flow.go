@@ -186,6 +186,26 @@ func (process *TeleportProcess) initSSH() error {
 			return writeKeys(dataDir, id, keys.Key, keys.Cert)
 		}
 
+			// RegisterUserToken calls the auth service API to register a new node via registration token
+			// which has been previously issued via GenerateToken
+			func (c *Client) RegisterUsingToken(token, hostID string, role teleport.Role) (*PackedKeys, error) {
+				out, err := c.PostJSON(c.Endpoint("tokens", "register"),
+					registerUsingTokenReq{
+						HostID: hostID,
+						Token:  token,
+						Role:   role,
+					})
+				if err != nil {
+					return nil, trace.Wrap(err)
+				}
+				var keys PackedKeys
+				if err := json.Unmarshal(out.Bytes(), &keys); err != nil {
+					return nil, trace.Wrap(err)
+				}
+				return &keys, nil
+			}
+
+
 		// "/tokens/register"
 		type PackedKeys struct {
 			Key  []byte `json:"key"`

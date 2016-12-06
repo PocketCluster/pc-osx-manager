@@ -547,6 +547,58 @@ func (process *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, r
     })
 }
 
+// RequestSignedCertificateWithAuthServer uses one time provisioning token obtained earlier
+// from the server to get a pair of SSH keys signed by Auth server host
+// certificate authority
+func (process *PocketCoreTeleportProcess) RequestSignedCertificateWithAuthServer(token string, role teleport.Role, eventName string) {
+    cfg := process.Config
+    identityID := auth.IdentityID{Role: role, HostUUID: cfg.HostUUID}
+
+    // this means the server has not been initialized yet, we are starting
+    // the registering client that attempts to connect to the auth server
+    // and provision the keys
+    var authClient *auth.TunClient
+    process.RegisterFunc(func() error {
+        retryTime := pcdefaults.ServerHeartbeatTTL / 3
+        for {
+            connector, err := process.connectToAuthService(role)
+            if err == nil {
+                process.BroadcastEvent(service.Event{Name: eventName, Payload: connector})
+                authClient = connector.Client
+                return nil
+            }
+            if trace.IsConnectionProblem(err) {
+                utils.Consolef(cfg.Console, "[%v] connecting to auth server: %v", role, err)
+                time.Sleep(retryTime)
+                continue
+            }
+            if !trace.IsNotFound(err) {
+                return trace.Wrap(err)
+            }
+
+            // Auth server is remote, so we need a provisioning token
+            if token == "" {
+                return trace.BadParameter("%v must request a signed certificate and needs a provisioning token", role)
+            }
+            log.Infof("[Node] %v requesting a signed certificate with a token %v", role, token)
+            err = pcauth.RequestSignedCertificate(cfg.DataDir, token, "", "", identityID, cfg.AuthServers)
+            if err != nil {
+                utils.Consolef(cfg.Console, "[%v] failed to receive a signed certificate : %v", role, err)
+                time.Sleep(retryTime)
+            } else {
+                utils.Consolef(cfg.Console, "[%v] Successfully received a signed certificate", role)
+                continue
+            }
+        }
+    })
+
+    process.onExit(func(interface{}) {
+        if authClient != nil {
+            authClient.Close()
+        }
+    })
+}
+
 
 /*
 // initSelfSignedHTTPSCert generates and self-signs a TLS key+cert pair for https connection
