@@ -63,3 +63,8 @@ func writeKeys(dataDir string, id auth.IdentityID, key []byte, cert []byte) erro
     }
     return nil
 }
+
+func apiEndpoint(params ...string) string {
+    return fmt.Sprintf("http://stub:0/%s/%s", PocketApiVersion, strings.Join(params, "/"))
+}
+

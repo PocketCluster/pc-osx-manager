@@ -11,6 +11,11 @@ import (
     "github.com/stkim1/pcrypto"
 )
 
+const (
+    PocketCertificate string    = "cert"
+    PocketRequestSigned string  = "reqsigned"
+)
+
 // RequestSignedCertificate is used by auth service clients (other services, like proxy or SSH) when a new node joins
 // the cluster
 func RequestSignedCertificate(dataDir, token, hostname, ip4Addr string, id auth.IdentityID, servers []utils.NetAddr) error {
@@ -24,7 +29,7 @@ func RequestSignedCertificate(dataDir, token, hostname, ip4Addr string, id auth.
     }
 
     client, err := auth.NewTunClient(
-        "auth.client.request",
+        "auth.client.cert.reqsigned",
         servers,
         id.HostUUID,
         method)
@@ -43,7 +48,7 @@ func RequestSignedCertificate(dataDir, token, hostname, ip4Addr string, id auth.
 // requestSignedCertificateWithToken calls the auth service API to register a new node via registration token which has
 // been previously issued via GenerateToken
 func requestSignedCertificateWithToken(c *auth.TunClient, token, hostID, hostname, ip4Addr string, role teleport.Role) (*auth.PackedKeys, error) {
-    out, err := c.PostJSON(c.Endpoint(pcHostToken, pcHostID, pcHostName, pcHostIp4Addr, pcHostRole),
+    out, err := c.PostJSON(apiEndpoint(PocketCertificate, PocketRequestSigned),
         signedCertificateReq{
             Token:      token,
             HostID:     hostID,

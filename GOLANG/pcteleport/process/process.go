@@ -25,8 +25,14 @@ import (
     "github.com/gravitational/teleport/lib/web"
 
     "github.com/stkim1/pcteleport/pcdefaults"
+    "github.com/stkim1/pcteleport/pcconfig"
     "github.com/stkim1/pcteleport/pcauth"
     "golang.org/x/crypto/ssh"
+)
+
+const (
+    // SignedCertificateEvent is generated when a signed certificate is issued from auth server
+    SignedCertificateIssuedEvent = "RequestSignedCertificateIssued"
 )
 
 // TeleportProcess structure holds the state of the Teleport daemon, controlling
@@ -34,29 +40,10 @@ import (
 type PocketCoreTeleportProcess struct {
     sync.Mutex
     service.Supervisor
-    Config *service.Config
+    Config *pcconfig.Config
     // localAuth has local auth server listed in case if this process
     // has started with auth server role enabled
     localAuth *auth.AuthServer
-}
-
-// initAuthStorage initializes the storage backend for the auth. service
-func (process *PocketCoreTeleportProcess) initAuthStorage() (backend.Backend, error) {
-    cfg := &process.Config.Auth
-    var bk backend.Backend
-    var err error
-
-    switch cfg.KeysBackend.Type {
-    case teleport.BoltBackendType:
-        bk, err = boltbk.FromJSON(cfg.KeysBackend.Params)
-    default:
-        return nil, trace.Errorf("unsupported backend type: %v", cfg.KeysBackend.Type)
-    }
-    if err != nil {
-        return nil, trace.Wrap(err)
-    }
-
-    return bk, nil
 }
 
 func (process *PocketCoreTeleportProcess) findStaticIdentity(id auth.IdentityID) (*auth.Identity, error) {
@@ -140,6 +127,26 @@ func (process *PocketCoreTeleportProcess) onExit(callback func(interface{})) {
             callback(event.Payload)
         }
     }()
+}
+
+
+// initAuthStorage initializes the storage backend for the auth. service
+func (process *PocketCoreTeleportProcess) initAuthStorage() (backend.Backend, error) {
+    cfg := &process.Config.Auth
+    var bk backend.Backend
+    var err error
+
+    switch cfg.KeysBackend.Type {
+    case teleport.BoltBackendType:
+        bk, err = boltbk.FromJSON(cfg.KeysBackend.Params)
+    default:
+        return nil, trace.Errorf("unsupported backend type: %v", cfg.KeysBackend.Type)
+    }
+    if err != nil {
+        return nil, trace.Wrap(err)
+    }
+
+    return bk, nil
 }
 
 // initAuthService can be called to initialize auth server service
@@ -487,6 +494,64 @@ func (process *PocketCoreTeleportProcess) initProxy() error {
     return nil
 }
 
+func (process *PocketCoreTeleportProcess) initSSH() error {
+    eventsC := make(chan service.Event)
+
+    // register & generate a signed ssh pub/prv key set
+    process.RegisterWithAuthServer(process.Config.Token, teleport.RoleNode, service.SSHIdentityEvent)
+    process.WaitForEvent(service.SSHIdentityEvent, eventsC, make(chan struct{}))
+
+    // generates a signed certificate & private key for docker/registry
+    process.RequestSignedCertificateWithAuthServer(process.Config.Token, teleport.RoleNode, SignedCertificateIssuedEvent)
+    process.WaitForEvent(SignedCertificateIssuedEvent, eventsC, make(chan struct{}))
+
+    var s *srv.Server
+    process.RegisterFunc(func() error {
+        event := <-eventsC
+        log.Infof("[SSH] received %v", &event)
+        conn, ok := (event.Payload).(*service.Connector)
+        if !ok {
+            return trace.BadParameter("unsupported connector type: %T", event.Payload)
+        }
+
+        cfg := process.Config
+
+        limiter, err := limiter.NewLimiter(cfg.SSH.Limiter)
+        if err != nil {
+            return trace.Wrap(err)
+        }
+
+        s, err = srv.New(cfg.SSH.Addr,
+            cfg.Hostname,
+            []ssh.Signer{conn.Identity.KeySigner},
+            conn.Client,
+            cfg.DataDir,
+            cfg.AdvertiseIP,
+            srv.SetLimiter(limiter),
+            srv.SetShell(cfg.SSH.Shell),
+            srv.SetAuditLog(conn.Client),
+            srv.SetSessionServer(conn.Client),
+            srv.SetLabels(cfg.SSH.Labels, cfg.SSH.CmdLabels),
+        )
+        if err != nil {
+            return trace.Wrap(err)
+        }
+
+        utils.Consolef(cfg.Console, "[SSH]   Service is starting on %v", cfg.SSH.Addr.Addr)
+        if err := s.Start(); err != nil {
+            utils.Consolef(cfg.Console, "[SSH]   Error: %v", err)
+            return trace.Wrap(err)
+        }
+        s.Wait()
+        log.Infof("[SSH] node service exited")
+        return nil
+    })
+    // execute this when process is asked to exit:
+    process.onExit(func(payload interface{}) {
+        s.Close()
+    })
+    return nil
+}
 
 // RegisterWithAuthServer uses one time provisioning token obtained earlier
 // from the server to get a pair of SSH keys signed by Auth server host
@@ -581,6 +646,7 @@ func (process *PocketCoreTeleportProcess) RequestSignedCertificateWithAuthServer
                 return trace.BadParameter("%v must request a signed certificate and needs a provisioning token", role)
             }
             log.Infof("[Node] %v requesting a signed certificate with a token %v", role, token)
+            // TODO DataDir for certificate, hostname, ipaddr
             err = pcauth.RequestSignedCertificate(cfg.DataDir, token, "", "", identityID, cfg.AuthServers)
             if err != nil {
                 utils.Consolef(cfg.Console, "[%v] failed to receive a signed certificate : %v", role, err)

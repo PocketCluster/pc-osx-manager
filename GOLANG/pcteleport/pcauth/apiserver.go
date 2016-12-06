@@ -1,13 +1,19 @@
 package pcauth
 
 import (
+    "fmt"
     "net/http"
+
     "github.com/gravitational/teleport"
     "github.com/gravitational/teleport/lib/httplib"
     "github.com/gravitational/teleport/lib/auth"
 
     "github.com/gravitational/trace"
     "github.com/julienschmidt/httprouter"
+)
+
+const (
+    PocketApiVersion string = "v1"
 )
 
 // APIServer implements http API server for AuthServer interface
@@ -30,18 +36,10 @@ func NewPocketAPIServer(config *auth.APIConfig, role teleport.Role, notFound htt
     srv.Router   = *httprouter.New()
     srv.NotFound = notFound
 
-    srv.POST("/v1/cert/issuesigned", httplib.MakeHandler(srv.issueSignedCertificatewithToken))
+    srv.POST(fmt.Sprintf("/%s/%s/%s", PocketApiVersion, PocketCertificate, PocketRequestSigned), httplib.MakeHandler(srv.issueSignedCertificatewithToken))
 
     return srv
 }
-
-const (
-    pcHostToken string      = "token"
-    pcHostID string         = "hostid"
-    pcHostName string       = "hostname"
-    pcHostIp4Addr string    = "ip4addr"
-    pcHostRole string       = "role"
-)
 
 type signedCertificateReq struct {
     Token    string        `json:"token"`

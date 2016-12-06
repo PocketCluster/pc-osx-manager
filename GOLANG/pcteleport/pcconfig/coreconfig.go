@@ -1,4 +1,4 @@
-package coreconfig
+package pcconfig
 
 import (
     "os"
@@ -7,7 +7,6 @@ import (
     "path/filepath"
 
     log "github.com/Sirupsen/logrus"
-    "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/utils"
     "github.com/gravitational/trace"
 
@@ -16,9 +15,9 @@ import (
 )
 
 // MakeDefaultConfig creates a new Config structure and populates it with defaults
-func MakeCoreTeleportConfig() (config *service.Config) {
-    config = &service.Config{}
-    applyDefaults(config, context.SharedHostContext())
+func MakeCoreTeleportConfig() (config *Config) {
+    config = &Config{}
+    applyCoreDefaults(config, context.SharedHostContext())
     return config
 }
 
@@ -29,7 +28,7 @@ func dbParams(storagePath, dbFile string) string {
 }
 
 // applyDefaults applies default values to the existing config structure
-func applyDefaults(cfg *service.Config, context context.HostContext) {
+func applyCoreDefaults(cfg *Config, context context.HostContext) {
     var (
         hostname, appDataDir, dataDir string = "", "", ""
         err error = nil
@@ -90,7 +89,7 @@ func applyDefaults(cfg *service.Config, context context.HostContext) {
     cfg.Console = os.Stdout
 }
 
-func ValidateConfig(cfg *service.Config) error {
+func ValidateCoreConfig(cfg *Config) error {
     if !cfg.Auth.Enabled && !cfg.SSH.Enabled && !cfg.Proxy.Enabled {
         return trace.BadParameter(
             "config: supply at least one of Auth, SSH or Proxy roles")

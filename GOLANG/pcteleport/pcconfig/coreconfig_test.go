@@ -1,5 +1,5 @@
 // +build darwin
-package coreconfig
+package pcconfig
 
 import (
     "testing"

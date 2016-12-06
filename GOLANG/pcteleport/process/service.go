@@ -9,14 +9,14 @@ import (
     "github.com/gravitational/teleport/lib/utils"
     "github.com/gravitational/teleport/lib/auth/native"
 
-    "github.com/stkim1/pcteleport/coreconfig"
+    "github.com/stkim1/pcteleport/pcconfig"
     "github.com/pborman/uuid"
 )
 
 // NewTeleport takes the daemon configuration, instantiates all required services
 // and starts them under a supervisor, returning the supervisor object
-func NewCoreTeleport(cfg *service.Config) (*PocketCoreTeleportProcess, error) {
-    if err := coreconfig.ValidateConfig(cfg); err != nil {
+func NewCoreTeleport(cfg *pcconfig.Config) (*PocketCoreTeleportProcess, error) {
+    if err := pcconfig.ValidateCoreConfig(cfg); err != nil {
         return nil, trace.Wrap(err, "Configuration error")
     }
 

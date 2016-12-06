@@ -13,11 +13,11 @@ import (
     "github.com/gravitational/teleport/lib/services"
 
     "github.com/stkim1/pcteleport/process"
-    "github.com/stkim1/pcteleport/coreconfig"
+    "github.com/stkim1/pcteleport/pcconfig"
 )
 
 func StartCoreTeleport(debug bool) error {
-    cfg := coreconfig.MakeCoreTeleportConfig()
+    cfg := pcconfig.MakeCoreTeleportConfig()
     if debug {
         cfg.Console = ioutil.Discard
         utils.InitLoggerDebug()
