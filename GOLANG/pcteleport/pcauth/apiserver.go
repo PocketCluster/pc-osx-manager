@@ -39,7 +39,6 @@ func NewPocketAPIServer(config *auth.APIConfig, role teleport.Role, notFound htt
     srv.NotFound = notFound
 
     srv.POST(fmt.Sprintf("/%s/%s/%s", PocketApiVersion, PocketCertificate, PocketRequestSigned), httplib.MakeHandler(srv.issueSignedCertificatewithToken))
-
     return srv
 }
 

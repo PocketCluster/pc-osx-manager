@@ -376,10 +376,10 @@ func (pc *PocketSlaveConfig) SaveFixedNetworkInterface() error {
     return ioutil.WriteFile(ifaceFilePath, fixedIfaceContent, 0644)
 }
 
-func (c *PocketSlaveConfig) ConfigDir() string {
-    return c.rootPath + slave_config_dir
-}
-
 func (c *PocketSlaveConfig) KeyAndCertDir() string {
     return c.rootPath + slave_keys_dir
+}
+
+func (c *PocketSlaveConfig) ConfigDir() string {
+    return c.rootPath + slave_config_dir
 }

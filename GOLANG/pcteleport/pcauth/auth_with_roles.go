@@ -25,6 +25,7 @@ type authWithRoles struct {
 }
 
 func (a *authWithRoles) issueSignedCertificateWithToken(req *signedCertificateReq) (*packedAuthKeyCert, error) {
+    // TODO : add action perm for requesting signed certificate
     if err := a.permChecker.HasPermission(a.role, auth.ActionRegisterUsingToken); err != nil {
         return nil, trace.Wrap(err)
     }
