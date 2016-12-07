@@ -40,7 +40,7 @@ const (
     slave_config_dir        = "/etc/pocket/"
     slave_config_file       = "/etc/pocket/slave-conf.yaml"
 
-    slave_keys_dir          = "/etc/pocket/pki"
+    slave_keys_dir          = "/etc/pocket/pki/"
     // these files are 1024 RSA crypto files used to join network
     slave_public_Key_file   = "/etc/pocket/pki/pcslave.pub"
     slave_prvate_Key_file   = "/etc/pocket/pki/pcslave.pem"
@@ -57,6 +57,15 @@ const (
     //hostaddr_file           = "/etc/hosts"
     host_timezone_file      = "/etc/timezone"
     //resolve_conf_file       = "/etc/resolv.conf"
+
+    SlaveDockerAuthFileName = "docker.auth"
+    SlaveDockerKeyFileName  = "docker.key"
+    SlaveDockerCertFileName = "docker.cert"
+
+    slave_docker_auth_file  = slave_keys_dir + SlaveDockerAuthFileName
+    slave_docker_key_file   = slave_keys_dir + SlaveDockerKeyFileName
+    slave_docker_cert_file  = slave_keys_dir + SlaveDockerCertFileName
+
 )
 
 // ------ SALT DEFAULT ------
@@ -365,4 +374,12 @@ func (pc *PocketSlaveConfig) SaveFixedNetworkInterface() error {
     var fixedIfaceData []string = _fixateNetworkInterfaces(pc.SlaveSection, ifaceData)
     var fixedIfaceContent []byte = []byte(strings.Join(fixedIfaceData, "\n"))
     return ioutil.WriteFile(ifaceFilePath, fixedIfaceContent, 0644)
+}
+
+func (c *PocketSlaveConfig) ConfigDir() string {
+    return c.rootPath + slave_config_dir
+}
+
+func (c *PocketSlaveConfig) KeyAndCertDir() string {
+    return c.rootPath + slave_keys_dir
 }

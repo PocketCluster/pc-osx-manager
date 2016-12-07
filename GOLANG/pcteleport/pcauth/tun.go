@@ -49,11 +49,11 @@ type AuthTunnel struct {
 
     // sshServer implements the nuts & bolts of serving an SSH connection
     // to create a tunnel
-    sshServer       *sshutils.Server
-    hostSigner      ssh.Signer
-    hostCertChecker ssh.CertChecker
-    userCertChecker ssh.CertChecker
-    limiter         *limiter.Limiter
+    sshServer          *sshutils.Server
+    hostSigner         ssh.Signer
+    hostCertChecker    ssh.CertChecker
+    userCertChecker    ssh.CertChecker
+    limiter            *limiter.Limiter
 }
 
 // ServerOption is the functional argument passed to the server
@@ -307,6 +307,7 @@ func (s *AuthTunnel) onAPIConnection(sconn *ssh.ServerConn, sshChan ssh.Channel,
     // Since PocketCluster API is an addition to existing api, we'll handle normal request in NotFound functions
     pcapi := NewPocketAPIServer(s.config, role, func(w http.ResponseWriter, r *http.Request){
         // TODO : log
+        log.Infof("[AUTH] PocketCluster API does not exists %v", r.RequestURI)
         api.ServeHTTP(w, r)
     })
 

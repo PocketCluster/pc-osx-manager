@@ -6,19 +6,13 @@ import (
     "github.com/gravitational/teleport/lib/utils"
     "github.com/gravitational/teleport/lib/auth"
 
-    log "github.com/Sirupsen/logrus"
     "github.com/gravitational/trace"
-    "github.com/stkim1/pcrypto"
-)
-
-const (
-    PocketCertificate string    = "cert"
-    PocketRequestSigned string  = "reqsigned"
+    "github.com/stkim1/pcteleport/pcconfig"
 )
 
 // RequestSignedCertificate is used by auth service clients (other services, like proxy or SSH) when a new node joins
 // the cluster
-func RequestSignedCertificate(dataDir, token, hostname, ip4Addr string, id auth.IdentityID, servers []utils.NetAddr) error {
+func RequestSignedCertificate(cfg *pcconfig.Config, id auth.IdentityID, token string) error {
     tok, err := readToken(token)
     if err != nil {
         return trace.Wrap(err)
@@ -28,6 +22,7 @@ func RequestSignedCertificate(dataDir, token, hostname, ip4Addr string, id auth.
         return trace.Wrap(err)
     }
 
+    var servers []utils.NetAddr = cfg.AuthServers
     client, err := auth.NewTunClient(
         "auth.client.cert.reqsigned",
         servers,
@@ -38,16 +33,16 @@ func RequestSignedCertificate(dataDir, token, hostname, ip4Addr string, id auth.
     }
     defer client.Close()
 
-    keys, err := requestSignedCertificateWithToken(client, tok, id.HostUUID, hostname, ip4Addr, id.Role)
+    keys, err := requestSignedCertificateWithToken(client, tok, id.HostUUID, cfg.Hostname, cfg.IP4Addr, id.Role)
     if err != nil {
         return trace.Wrap(err)
     }
-    return writeKeys(dataDir, id, keys.Key, keys.Cert)
+    return writeDockerKeyAndCert(cfg.KeyCertDir, keys)
 }
 
 // requestSignedCertificateWithToken calls the auth service API to register a new node via registration token which has
 // been previously issued via GenerateToken
-func requestSignedCertificateWithToken(c *auth.TunClient, token, hostID, hostname, ip4Addr string, role teleport.Role) (*auth.PackedKeys, error) {
+func requestSignedCertificateWithToken(c *auth.TunClient, token, hostID, hostname, ip4Addr string, role teleport.Role) (*packedAuthKeyCert, error) {
     out, err := c.PostJSON(apiEndpoint(PocketCertificate, PocketRequestSigned),
         signedCertificateReq{
             Token:      token,
@@ -59,29 +54,9 @@ func requestSignedCertificateWithToken(c *auth.TunClient, token, hostID, hostnam
     if err != nil {
         return nil, trace.Wrap(err)
     }
-    var keys auth.PackedKeys
+    var keys packedAuthKeyCert
     if err := json.Unmarshal(out.Bytes(), &keys); err != nil {
         return nil, trace.Wrap(err)
     }
     return &keys, nil
-}
-
-// createSignedCertificate generates private key and certificate signed
-// by the host certificate authority, listing the role of this server
-func createSignedCertificate(signer pcrypto.CaSigner, hostID, hostname, ipAddress string) (*auth.PackedKeys, error) {
-    // TODO : check if signed cert for this uuid exists. If does, return the value
-
-    _, nodeKey, _, err := pcrypto.GenerateStrongKeyPair()
-    if err != nil {
-        return nil, trace.Wrap(err)
-    }
-    c, err := signer.GenerateSignedCertificate(hostname, ipAddress, nodeKey)
-    if err != nil {
-        log.Warningf("[AUTH] Node `%v` cannot receive a signed certificate : cert generation error. %v", hostname, err)
-        return nil, trace.Wrap(err)
-    }
-    return &auth.PackedKeys{
-        Key:  nodeKey,
-        Cert: c,
-    }, nil
 }

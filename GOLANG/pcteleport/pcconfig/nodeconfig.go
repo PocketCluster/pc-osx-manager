@@ -1,36 +1,29 @@
 package pcconfig
 
+
 import (
     "os"
-    "fmt"
     "io/ioutil"
-    "path/filepath"
 
     log "github.com/Sirupsen/logrus"
     "github.com/gravitational/teleport/lib/utils"
     "github.com/gravitational/trace"
 
-    "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pcteleport/pcdefaults"
+    "github.com/stkim1/pc-node-agent/slcontext"
 )
 
 // MakeDefaultConfig creates a new Config structure and populates it with defaults
-func MakeCoreTeleportConfig() *Config {
-    config := &Config{}
-    applyCoreDefaults(config, context.SharedHostContext())
+func MakeNodeTeleportConfig() (config *Config) {
+    config = &Config{}
+    applyNodeDefaults(config, slcontext.SharedSlaveContext())
     return config
 }
 
-// Generates a string accepted by the BoltDB driver, like this:
-// `{"path": "/var/lib/teleport/records.db"}`
-func dbParams(storagePath, dbFile string) string {
-    return fmt.Sprintf(`{"path": "%s"}`, filepath.Join(storagePath, dbFile))
-}
-
 // applyDefaults applies default values to the existing config structure
-func applyCoreDefaults(cfg *Config, context context.HostContext) {
+func applyNodeDefaults(cfg *Config, context slcontext.PocketSlaveContext) {
     var (
-        hostname, appDataDir, dataDir string = "", "", ""
+        hostname, dataDir string = "", ""
         err error = nil
     )
 
@@ -40,23 +33,13 @@ func applyCoreDefaults(cfg *Config, context context.HostContext) {
         log.Errorf("Failed to determine hostname: %v", err)
     }
 
-    appDataDir, err = context.ApplicationUserDataDirectory()
-    if err != nil {
-        log.Errorf("Failed to determine hostname: %v", err)
-    }
-    dataDir = appDataDir + "/teleport"
-    // check if the path exists and make it if absent
-    if _, err := os.Stat(dataDir); err != nil {
-        if os.IsNotExist(err) {
-            os.MkdirAll(dataDir, os.ModeDir|0700);
-        }
-    }
-
+    // dataDir should have been created before pcteleport is executed
+    dataDir = context.SlaveConfigPath()
     cfg.SeedConfig = false
 
     // defaults for the auth service:
     cfg.AuthServers = []utils.NetAddr{*pcdefaults.AuthConnectAddr()}
-    cfg.Auth.Enabled = true
+    cfg.Auth.Enabled = false
     cfg.Auth.SSHAddr = *pcdefaults.AuthListenAddr()
     cfg.Auth.EventsBackend.Type = pcdefaults.CoreBackendType
     cfg.Auth.EventsBackend.Params = dbParams(dataDir, pcdefaults.CoreEventsSqliteFile)
@@ -67,9 +50,9 @@ func applyCoreDefaults(cfg *Config, context context.HostContext) {
     pcdefaults.ConfigureLimiter(&cfg.Auth.Limiter)
 
     // defaults for the SSH proxy service:
-    cfg.Proxy.Enabled = true
+    cfg.Proxy.Enabled = false
     // disable web ui as it's not necessary
-    cfg.Proxy.DisableWebUI = true
+    cfg.Proxy.DisableWebUI = false
     cfg.Proxy.AssetsDir = dataDir
     cfg.Proxy.SSHAddr = *pcdefaults.ProxyListenAddr()
     cfg.Proxy.WebAddr = *pcdefaults.ProxyWebListenAddr()
@@ -78,7 +61,7 @@ func applyCoreDefaults(cfg *Config, context context.HostContext) {
     pcdefaults.ConfigureLimiter(&cfg.Proxy.Limiter)
 
     // defaults for the SSH service:
-    cfg.SSH.Enabled = false
+    cfg.SSH.Enabled = true
     cfg.SSH.Addr = *pcdefaults.SSHServerListenAddr()
     cfg.SSH.Shell = pcdefaults.DefaultShell
     pcdefaults.ConfigureLimiter(&cfg.SSH.Limiter)
@@ -86,10 +69,20 @@ func applyCoreDefaults(cfg *Config, context context.HostContext) {
     // global defaults
     cfg.Hostname = hostname
     cfg.DataDir = dataDir
+    // TODO remove Stdout
     cfg.Console = os.Stdout
+
+    // get current network interface address
+    iface, err := context.PrimaryNetworkInterface()
+    if err != nil {
+        // TODO if this keeps fail, we'll enforce to get current interface
+        log.Errorf("Failed to determine network interface: %v", err)
+    }
+    cfg.IP4Addr = iface.IP.String()
+    cfg.KeyCertDir = context.SlaveKeyAndCertPath()
 }
 
-func ValidateCoreConfig(cfg *Config) error {
+func ValidateNodeConfig(cfg *Config) error {
     if !cfg.Auth.Enabled && !cfg.SSH.Enabled && !cfg.Proxy.Enabled {
         return trace.BadParameter(
             "config: supply at least one of Auth, SSH or Proxy roles")

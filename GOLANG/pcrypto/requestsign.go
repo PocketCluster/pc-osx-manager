@@ -280,7 +280,7 @@ func signRequestTemplate(s *CaSigner, template *x509.Certificate, profile *confi
         return
     }
 
-    derBytes, err := x509.CreateCertificate(rand.Reader, template, s.ca, template.PublicKey, s.priv)
+    derBytes, err := x509.CreateCertificate(rand.Reader, template, s.caCertPEM, template.PublicKey, s.caPrvKeyPEM)
     if err != nil {
         return nil, err
     }
@@ -354,12 +354,13 @@ func signCertificateRequest(signer *CaSigner, req signRequest) ([]byte, error) {
 }
 
 type CaSigner struct {
-    priv       crypto.Signer
-    ca         *x509.Certificate
-    sigAlgo    x509.SignatureAlgorithm
-    policy     *config.Signing
-    clusterID  string
-    country    string
+    caPrvKeyPEM crypto.Signer
+    caCertPEM   *x509.Certificate
+    caCert      []byte
+    sigAlgo     x509.SignatureAlgorithm
+    policy      *config.Signing
+    clusterID   string
+    country     string
 }
 
 func NewCertAuthoritySigner(caKey, caCert []byte, clusterID, country string) (*CaSigner, error) {
@@ -382,16 +383,18 @@ func NewCertAuthoritySigner(caKey, caCert []byte, clusterID, country string) (*C
         return nil, fmt.Errorf("[ERR] Invalid country code")
     }
     return &CaSigner{
-        priv:       caPrvKeyPEM,
-        ca:         caCertPEM,
-        sigAlgo:    helpers.DefaultSigAlgo(caPrvKeyPEM),
-        policy:     policy,
-        clusterID:  strings.ToLower(clusterID),
-        country:    strings.ToUpper(country),
+        caPrvKeyPEM:   caPrvKeyPEM,
+        caCertPEM:     caCertPEM,
+        caCert:        caCert,
+        sigAlgo:       helpers.DefaultSigAlgo(caPrvKeyPEM),
+        policy:        policy,
+        clusterID:     strings.ToLower(clusterID),
+        country:       strings.ToUpper(country),
     }, nil
 }
 
 // TODO : Add Test + Remove cfssl packages + check authority record to Database
+// GenerateSignedCertificate returned a signed certificate
 func (s *CaSigner) GenerateSignedCertificate(hostname, ipAddress string, privateKey []byte) ([]byte, error) {
     if len(hostname) == 0 {
         return nil, fmt.Errorf("[ERR] Invalid hostname")
@@ -421,4 +424,8 @@ func (s *CaSigner) GenerateSignedCertificate(hostname, ipAddress string, private
         return nil, fmt.Errorf("[ERR] Invalid Certificate Authority Policy")
     }
     return signCertificateRequest(s, creq)
+}
+
+func (s *CaSigner) CertificateAuthority() []byte {
+    return s.caCert
 }

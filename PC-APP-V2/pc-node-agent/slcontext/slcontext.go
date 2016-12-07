@@ -54,4 +54,7 @@ type PocketSlaveContext interface {
     GetSlaveNodeName() (string, error)
 
     PrimaryNetworkInterface() (*NetworkInterface, error)
+
+    SlaveKeyAndCertPath() string
+    SlaveConfigPath() string
 }

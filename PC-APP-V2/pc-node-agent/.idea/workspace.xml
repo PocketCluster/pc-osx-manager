@@ -27,7 +27,18 @@
     <favorites_list name="pc-node-agent" />
   </component>
   <component name="FileEditorManager">
-    <leaf />
+    <leaf>
+      <file leaf-file-name="config.go" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/slcontext/config/config.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="375">
+              <caret line="60" column="38" lean-forward="true" selection-start-line="60" selection-start-column="38" selection-end-line="60" selection-end-column="42" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -113,7 +124,6 @@
         <option value="$PROJECT_DIR$/slagent/discovery.go" />
         <option value="$PROJECT_DIR$/slagent/slagent.go" />
         <option value="$PROJECT_DIR$/locator/keyexchange_test.go" />
-        <option value="$PROJECT_DIR$/slcontext/slcontext.go" />
         <option value="$PROJECT_DIR$/locator/cryptocheck.go" />
         <option value="$PROJECT_DIR$/locator/cryptocheck_test.go" />
         <option value="$PROJECT_DIR$/slagent/TEST.go" />
@@ -121,14 +131,15 @@
         <option value="$PROJECT_DIR$/../pc-core/msagent/TEST.go" />
         <option value="$PROJECT_DIR$/slcontext/config/config_test.go" />
         <option value="$PROJECT_DIR$/locator/locator_test.go" />
-        <option value="$PROJECT_DIR$/slcontext/slavecontext.go" />
-        <option value="$PROJECT_DIR$/slcontext/config/config.go" />
         <option value="$PROJECT_DIR$/slagent/slagent_test.go" />
         <option value="$PROJECT_DIR$/locator/bindbroken_test.go" />
         <option value="$PROJECT_DIR$/locator/bounded_test.go" />
         <option value="$PROJECT_DIR$/slcontext/TEST.go" />
         <option value="$PROJECT_DIR$/slcontext/slcontext_test.go" />
         <option value="$PROJECT_DIR$/slcontext/config/TEST.go" />
+        <option value="$PROJECT_DIR$/slcontext/slcontext.go" />
+        <option value="$PROJECT_DIR$/slcontext/slavecontext.go" />
+        <option value="$PROJECT_DIR$/slcontext/config/config.go" />
       </list>
     </option>
   </component>
@@ -153,6 +164,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -227,8 +240,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
-      <pane id="PackagesPane" />
       <pane id="Scope" />
     </panes>
   </component>
@@ -257,34 +268,7 @@
     <property name="configurable.Module.libraries.is.expanded" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
-  <component name="RunManager" selected="Go Test.TestSaveLoadSlaveContext in slcontext_test.go">
-    <configuration default="false" name="TestGetDefaultConfiguration in slcontext_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
-      <module name="pc-node-agent" />
-      <working_directory value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <kind value="PACKAGE" />
-      <package value="github.com/stkim1/pc-node-agent/slcontext" />
-      <pattern value="^TestGetDefaultConfiguration$" />
-      <method />
-    </configuration>
-    <configuration default="false" name="TestKeyExchangeMetaAgent in slagent_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
-      <module name="pc-node-agent" />
-      <working_directory value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <kind value="PACKAGE" />
-      <package value="github.com/stkim1/pc-node-agent/slagent" />
-      <pattern value="^TestKeyExchangeMetaAgent$" />
-      <method />
-    </configuration>
-    <configuration default="false" name="TestSaveLoadSlaveContext in slcontext_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
-      <module name="pc-node-agent" />
-      <working_directory value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <kind value="PACKAGE" />
-      <package value="github.com/stkim1/pc-node-agent/slcontext" />
-      <pattern value="^TestSaveLoadSlaveContext$" />
-      <method />
-    </configuration>
+  <component name="RunManager">
     <configuration default="true" type="AndroidRunConfigurationType" factoryName="Android App">
       <module name="" />
       <option name="DEPLOY" value="true" />
@@ -502,18 +486,6 @@
       <listeners />
       <method />
     </configuration>
-    <list size="3">
-      <item index="0" class="java.lang.String" itemvalue="Go Test.TestGetDefaultConfiguration in slcontext_test.go" />
-      <item index="1" class="java.lang.String" itemvalue="Go Test.TestKeyExchangeMetaAgent in slagent_test.go" />
-      <item index="2" class="java.lang.String" itemvalue="Go Test.TestSaveLoadSlaveContext in slcontext_test.go" />
-    </list>
-    <recent_temporary>
-      <list size="3">
-        <item index="0" class="java.lang.String" itemvalue="Go Test.TestSaveLoadSlaveContext in slcontext_test.go" />
-        <item index="1" class="java.lang.String" itemvalue="Go Test.TestKeyExchangeMetaAgent in slagent_test.go" />
-        <item index="2" class="java.lang.String" itemvalue="Go Test.TestGetDefaultConfiguration in slcontext_test.go" />
-      </list>
-    </recent_temporary>
     <configuration default="true" type="AndroidRunConfigurationType" factoryName="Android Application">
       <module name="" />
       <option name="DEPLOY" value="true" />
@@ -603,7 +575,7 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="74" y="23" width="1846" height="1057" extended-state="6" />
+    <frame x="74" y="23" width="1846" height="1057" extended-state="0" />
     <editor active="false" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -620,7 +592,7 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2477827" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25886917" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24889135" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -874,13 +846,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slcontext/slcontext.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="34" column="14" lean-forward="false" selection-start-line="34" selection-start-column="14" selection-end-line="34" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/slagent/TEST.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="386">
@@ -944,13 +909,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slcontext/slavecontext.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="121">
-          <caret line="59" column="24" lean-forward="false" selection-start-line="59" selection-start-column="24" selection-end-line="59" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/local/Cellar/go/1.7.3/libexec/src/syscall/zsyscall_darwin_amd64.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="723">
@@ -972,13 +930,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/slcontext/config/config_test.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-335">
-          <caret line="130" column="0" lean-forward="false" selection-start-line="130" selection-start-column="0" selection-end-line="130" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/GOREPO/src/github.com/pborman/uuid/uuid.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="303">
@@ -990,13 +941,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="303">
           <caret line="166" column="5" lean-forward="false" selection-start-line="166" selection-start-column="5" selection-end-line="166" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/slcontext/config/config.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="196" column="4" lean-forward="false" selection-start-line="196" selection-start-column="4" selection-end-line="196" selection-end-column="61" />
         </state>
       </provider>
     </entry>
@@ -1032,6 +976,40 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="311">
           <caret line="40" column="52" lean-forward="false" selection-start-line="40" selection-start-column="52" selection-end-line="40" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slcontext/config/config_test.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="29" column="34" lean-forward="false" selection-start-line="29" selection-start-column="34" selection-end-line="29" selection-end-column="34" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slcontext/slavecontext.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6345">
+          <caret line="423" column="26" lean-forward="true" selection-start-line="423" selection-start-column="26" selection-end-line="423" selection-end-column="26" />
+          <folding>
+            <element signature="e#19#192#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slcontext/slcontext.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="825">
+          <caret line="59" column="0" lean-forward="false" selection-start-line="57" selection-start-column="0" selection-end-line="59" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/slcontext/config/config.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret line="60" column="38" lean-forward="true" selection-start-line="60" selection-start-column="38" selection-end-line="60" selection-end-column="42" />
+          <folding />
         </state>
       </provider>
     </entry>

@@ -13,7 +13,9 @@ import (
 )
 
 const (
-    PocketApiVersion string = "v1"
+    PocketApiVersion string     = "v0"
+    PocketCertificate string    = "cert"
+    PocketRequestSigned string  = "reqsigned"
 )
 
 // APIServer implements http API server for AuthServer interface

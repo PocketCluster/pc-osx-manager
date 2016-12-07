@@ -444,3 +444,13 @@ func (sc *slaveContext) PrimaryNetworkInterface() (*NetworkInterface, error) {
         GatewayAddr     : gwaddr,
     }, nil
 }
+
+// TODO : add tests
+func (s *slaveContext) SlaveKeyAndCertPath() string {
+    return s.config.KeyAndCertDir()
+}
+
+// TODO : add tests
+func (s *slaveContext) SlaveConfigPath() string {
+    return s.config.ConfigDir()
+}

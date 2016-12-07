@@ -21,10 +21,10 @@ type authWithRoles struct {
     sessions    session.Service
     role        teleport.Role
     alog        events.IAuditLog
-    signer      pcrypto.CaSigner
+    signer      *pcrypto.CaSigner
 }
 
-func (a *authWithRoles) issueSignedCertificateWithToken(req *signedCertificateReq) (*auth.PackedKeys, error) {
+func (a *authWithRoles) issueSignedCertificateWithToken(req *signedCertificateReq) (*packedAuthKeyCert, error) {
     if err := a.permChecker.HasPermission(a.role, auth.ActionRegisterUsingToken); err != nil {
         return nil, trace.Wrap(err)
     }
@@ -37,7 +37,7 @@ func (a *authWithRoles) issueSignedCertificateWithToken(req *signedCertificateRe
 // If a token was generated with a TTL, it gets enforced (can't register new nodes after TTL expires)
 // If a token was generated with a TTL=0, it means it's a single-use token and it gets destroyed
 // after a successful registration.
-func issueSignedCertificateWithToken(a *authWithRoles, req *signedCertificateReq) (*auth.PackedKeys, error) {
+func issueSignedCertificateWithToken(a *authWithRoles, req *signedCertificateReq) (*packedAuthKeyCert, error) {
     log.Infof("[AUTH] Node `%v` requests a signed certificate", req.Hostname)
     if len(req.Hostname) == 0 {
         return nil, trace.BadParameter("Hostname cannot be empty")
@@ -65,10 +65,38 @@ func issueSignedCertificateWithToken(a *authWithRoles, req *signedCertificateReq
         return nil, trace.AccessDenied("'%v' cannot cannot receive a signed certificate. The token has expired", req.Hostname)
     }
     // generate & return the node cert:
-    keys, err := createSignedCertificate(a.signer, req.HostID, req.Hostname, req.IP4Addr)
+    keys, err := createSignedCertificate(a.signer, req)
     if err != nil {
         return nil, trace.Wrap(err)
     }
     utils.Consolef(os.Stdout, "[AUTH] A signed Certificate for Node `%v` is issued", req.Hostname)
     return keys, nil
+}
+
+type packedAuthKeyCert struct {
+    Auth []byte `json:"auth"`
+    Key  []byte `json:"key"`
+    Cert []byte `json:"cert"`
+}
+
+// createSignedCertificate generates private key and certificate signed
+// by the host certificate authority, listing the role of this server
+func createSignedCertificate(signer *pcrypto.CaSigner, req *signedCertificateReq) (*packedAuthKeyCert, error) {
+    // TODO : check if signed cert for this uuid exists. If does, return the value
+
+    a := signer.CertificateAuthority()
+    _, k, _, err := pcrypto.GenerateStrongKeyPair()
+    if err != nil {
+        return nil, trace.Wrap(err)
+    }
+    c, err := signer.GenerateSignedCertificate(req.Hostname, req.IP4Addr, k)
+    if err != nil {
+        log.Warningf("[AUTH] Node `%v` cannot receive a signed certificate : cert generation error. %v", req.Hostname, err)
+        return nil, trace.Wrap(err)
+    }
+    return &packedAuthKeyCert{
+        Auth: a,
+        Key:  k,
+        Cert: c,
+    }, nil
 }

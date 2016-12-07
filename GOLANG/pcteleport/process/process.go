@@ -475,9 +475,7 @@ func (process *PocketCoreTeleportProcess) initProxy() error {
     }
     */
 
-    process.RegisterWithAuthServer(
-        process.Config.Token, teleport.RoleProxy,
-        service.ProxyIdentityEvent)
+    process.RegisterWithAuthServer(process.Config.Token, teleport.RoleProxy, service.ProxyIdentityEvent)
 
     process.RegisterFunc(func() error {
         eventsC := make(chan service.Event)
@@ -592,6 +590,7 @@ func (process *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, r
                 if token == "" {
                     return trace.BadParameter("%v must join a cluster and needs a provisioning token", role)
                 }
+                // TODO : move cfg.DataDir -> cfg.KeyCertDir
                 log.Infof("[Node] %v joining the cluster with a token %v", role, token)
                 err = auth.Register(cfg.DataDir, token, identityID, cfg.AuthServers)
             }
@@ -646,8 +645,7 @@ func (process *PocketCoreTeleportProcess) RequestSignedCertificateWithAuthServer
                 return trace.BadParameter("%v must request a signed certificate and needs a provisioning token", role)
             }
             log.Infof("[Node] %v requesting a signed certificate with a token %v", role, token)
-            // TODO DataDir for certificate, hostname, ipaddr
-            err = pcauth.RequestSignedCertificate(cfg.DataDir, token, "", "", identityID, cfg.AuthServers)
+            err = pcauth.RequestSignedCertificate(cfg, identityID, token)
             if err != nil {
                 utils.Consolef(cfg.Console, "[%v] failed to receive a signed certificate : %v", role, err)
                 time.Sleep(retryTime)
