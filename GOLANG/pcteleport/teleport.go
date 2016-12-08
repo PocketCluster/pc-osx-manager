@@ -4,11 +4,7 @@ import (
     "os"
     "fmt"
     "time"
-    "io/ioutil"
-
-    log "github.com/Sirupsen/logrus"
     "github.com/gravitational/trace"
-    "github.com/gravitational/teleport/lib/utils"
     "github.com/gravitational/teleport/lib/config"
     "github.com/gravitational/teleport/lib/services"
 
@@ -17,16 +13,7 @@ import (
 )
 
 func StartCoreTeleport(debug bool) error {
-    cfg := pcconfig.MakeCoreTeleportConfig()
-    if debug {
-        cfg.Console = ioutil.Discard
-        utils.InitLoggerDebug()
-        trace.SetDebug(true)
-        log.Info("Teleport DEBUG output configured")
-    } else {
-        utils.InitLoggerCLI()
-        log.Info("Teleport NORMAL cli output configured")
-    }
+    cfg := pcconfig.MakeCoreTeleportConfig(debug)
 
     // add static tokens
     for _, token := range []config.StaticToken{"node:d52527f9-b260-41d0-bb5a-e23b0cfe0f8f", "node:c9s93fd9-3333-91d3-9999-c9s93fd98f43"} {
@@ -38,16 +25,29 @@ func StartCoreTeleport(debug bool) error {
     }
 
     // add temporary token
-    //srv, err := service.NewTeleport(cfg)
     srv, err := process.NewCoreTeleport(cfg)
     if err != nil {
-        return err
-        //return trace.Wrap(err, "initializing teleport")
+        return trace.Wrap(err, "initializing teleport")
     }
 
     if err := srv.Start(); err != nil {
-        return err
-        //return trace.Wrap(err, "starting teleport")
+        return trace.Wrap(err, "starting teleport")
+    }
+    srv.Wait()
+    return nil
+}
+
+func StartNodeTeleport(authServerAddr, authToken string, debug bool) error {
+    cfg := pcconfig.MakeNodeTeleportConfig(authServerAddr, authToken, debug)
+
+    // add temporary token
+    srv, err := process.NewNodeTeleport(cfg)
+    if err != nil {
+        return trace.Wrap(err, "initializing teleport")
+    }
+
+    if err := srv.Start(); err != nil {
+        return trace.Wrap(err, "starting teleport")
     }
     // create the pid file
     if cfg.PIDFile != "" {
@@ -61,3 +61,4 @@ func StartCoreTeleport(debug bool) error {
     srv.Wait()
     return nil
 }
+

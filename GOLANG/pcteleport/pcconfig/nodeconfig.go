@@ -1,46 +1,69 @@
 package pcconfig
 
-
 import (
+    "errors"
     "os"
     "io/ioutil"
+    "path/filepath"
 
-    log "github.com/Sirupsen/logrus"
     "github.com/gravitational/teleport/lib/utils"
+    log "github.com/Sirupsen/logrus"
     "github.com/gravitational/trace"
 
     "github.com/stkim1/pcteleport/pcdefaults"
     "github.com/stkim1/pc-node-agent/slcontext"
+    "github.com/stkim1/pc-node-agent/slcontext/config"
 )
 
 // MakeDefaultConfig creates a new Config structure and populates it with defaults
-func MakeNodeTeleportConfig() (config *Config) {
+func MakeNodeTeleportConfig(authServerAddr, authToken string, debug bool) (config *Config) {
     config = &Config{}
-    applyNodeDefaults(config, slcontext.SharedSlaveContext())
+    applyNodeDefaults(config, slcontext.SharedSlaveContext(), authServerAddr, authToken, debug)
     return config
 }
 
 // applyDefaults applies default values to the existing config structure
-func applyNodeDefaults(cfg *Config, context slcontext.PocketSlaveContext) {
-    var (
-        hostname, dataDir string = "", ""
-        err error = nil
-    )
-
-    hostname, err = os.Hostname()
+func applyNodeDefaults(cfg *Config, context slcontext.PocketSlaveContext, authServerAddr, authToken string, debug bool) error {
+    addr, err := utils.ParseHostPortAddr(authServerAddr, int(pcdefaults.AuthListenPort))
     if err != nil {
-        hostname = "localhost"
-        log.Errorf("Failed to determine hostname: %v", err)
+        return trace.Wrap(err)
+    }
+    log.Infof("Using auth server: %v", addr.FullAddress())
+    if len(authToken) == 0 {
+        return trace.Wrap(errors.New("[ERR] Invalid AuthToken"))
+    }
+    // dataDir should have been created before pcteleport is executed
+    dataDir := context.SlaveConfigPath()
+    // check if the path exists and report error if absent
+    if _, err := os.Stat(dataDir); err != nil {
+        return trace.Wrap(err)
+    }
+    keyCertDir := context.SlaveKeyAndCertPath()
+    // check if the path exists and report error if absent
+    if _, err := os.Stat(keyCertDir); err != nil {
+        return trace.Wrap(err)
+    }
+    // global defaults
+    nodeName, err := context.GetSlaveNodeName()
+    if err != nil {
+        return trace.Wrap(err)
+    }
+    // get current network interface address
+    iface, err := context.PrimaryNetworkInterface()
+    if err != nil {
+        // TODO if this keeps fail, we'll enforce to get current interface
+        log.Errorf("Failed to determine network interface: %v", err)
+        return trace.Wrap(err)
     }
 
-    // dataDir should have been created before pcteleport is executed
-    dataDir = context.SlaveConfigPath()
-    cfg.SeedConfig = false
-
     // defaults for the auth service:
-    cfg.AuthServers = []utils.NetAddr{*pcdefaults.AuthConnectAddr()}
-    cfg.Auth.Enabled = false
-    cfg.Auth.SSHAddr = *pcdefaults.AuthListenAddr()
+    cfg.SeedConfig      = false
+
+    cfg.Auth.Enabled    = false
+    cfg.AuthServers     = []utils.NetAddr{*addr}
+    cfg.Auth.SSHAddr    = *pcdefaults.AuthListenAddr()
+    cfg.ApplyToken(authToken)
+/*
     cfg.Auth.EventsBackend.Type = pcdefaults.CoreBackendType
     cfg.Auth.EventsBackend.Params = dbParams(dataDir, pcdefaults.CoreEventsSqliteFile)
     cfg.Auth.KeysBackend.Type = pcdefaults.CoreBackendType
@@ -51,35 +74,39 @@ func applyNodeDefaults(cfg *Config, context slcontext.PocketSlaveContext) {
 
     // defaults for the SSH proxy service:
     cfg.Proxy.Enabled = false
-    // disable web ui as it's not necessary
     cfg.Proxy.DisableWebUI = false
     cfg.Proxy.AssetsDir = dataDir
     cfg.Proxy.SSHAddr = *pcdefaults.ProxyListenAddr()
     cfg.Proxy.WebAddr = *pcdefaults.ProxyWebListenAddr()
-
     cfg.Proxy.ReverseTunnelListenAddr = *pcdefaults.ReverseTunnellListenAddr()
     pcdefaults.ConfigureLimiter(&cfg.Proxy.Limiter)
+*/
 
     // defaults for the SSH service:
-    cfg.SSH.Enabled = true
-    cfg.SSH.Addr = *pcdefaults.SSHServerListenAddr()
-    cfg.SSH.Shell = pcdefaults.DefaultShell
+    cfg.SSH.Enabled     = true
+    cfg.SSH.Addr        = *pcdefaults.SSHServerListenAddr()
+    cfg.SSH.Shell       = pcdefaults.DefaultShell
     pcdefaults.ConfigureLimiter(&cfg.SSH.Limiter)
 
-    // global defaults
-    cfg.Hostname = hostname
-    cfg.DataDir = dataDir
-    // TODO remove Stdout
-    cfg.Console = os.Stdout
+    cfg.Hostname        = nodeName
+    cfg.DataDir         = dataDir
+    cfg.Console         = ioutil.Discard
 
-    // get current network interface address
-    iface, err := context.PrimaryNetworkInterface()
-    if err != nil {
-        // TODO if this keeps fail, we'll enforce to get current interface
-        log.Errorf("Failed to determine network interface: %v", err)
+    cfg.IP4Addr         = iface.IP.String()
+    cfg.KeyCertDir      = keyCertDir
+    cfg.DockerAuthFile  = filepath.Join(keyCertDir, config.SlaveDockerAuthFileName)
+    cfg.DockerKeyFile   = filepath.Join(keyCertDir, config.SlaveDockerKeyFileName)
+    cfg.DockerCertFile  = filepath.Join(keyCertDir, config.SlaveDockerCertFileName)
+
+    if debug {
+        utils.InitLoggerDebug()
+        trace.SetDebug(true)
+        log.Info("Teleport DEBUG output configured")
+    } else {
+        utils.InitLoggerCLI()
+        log.Info("Teleport NORMAL output configured")
     }
-    cfg.IP4Addr = iface.IP.String()
-    cfg.KeyCertDir = context.SlaveKeyAndCertPath()
+    return nil
 }
 
 func ValidateNodeConfig(cfg *Config) error {

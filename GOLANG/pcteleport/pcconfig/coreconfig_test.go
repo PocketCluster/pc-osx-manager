@@ -5,7 +5,6 @@ import (
     "testing"
     "fmt"
 
-    . "gopkg.in/check.v1"
     "github.com/gravitational/teleport/lib/utils"
 
     "github.com/stkim1/pc-core/context"

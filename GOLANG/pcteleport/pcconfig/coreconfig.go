@@ -15,9 +15,9 @@ import (
 )
 
 // MakeDefaultConfig creates a new Config structure and populates it with defaults
-func MakeCoreTeleportConfig() *Config {
+func MakeCoreTeleportConfig(debug bool) *Config {
     config := &Config{}
-    applyCoreDefaults(config, context.SharedHostContext())
+    applyCoreDefaults(config, context.SharedHostContext(), debug)
     return config
 }
 
@@ -28,17 +28,11 @@ func dbParams(storagePath, dbFile string) string {
 }
 
 // applyDefaults applies default values to the existing config structure
-func applyCoreDefaults(cfg *Config, context context.HostContext) {
+func applyCoreDefaults(cfg *Config, context context.HostContext, debug bool) {
     var (
-        hostname, appDataDir, dataDir string = "", "", ""
+        hostname, appDataDir, dataDir string = "pc-master", "", ""
         err error = nil
     )
-
-    hostname, err = os.Hostname()
-    if err != nil {
-        hostname = "localhost"
-        log.Errorf("Failed to determine hostname: %v", err)
-    }
 
     appDataDir, err = context.ApplicationUserDataDirectory()
     if err != nil {
@@ -52,41 +46,51 @@ func applyCoreDefaults(cfg *Config, context context.HostContext) {
         }
     }
 
-    cfg.SeedConfig = false
+    cfg.SeedConfig              = false
 
     // defaults for the auth service:
-    cfg.AuthServers = []utils.NetAddr{*pcdefaults.AuthConnectAddr()}
-    cfg.Auth.Enabled = true
-    cfg.Auth.SSHAddr = *pcdefaults.AuthListenAddr()
+    cfg.AuthServers             = []utils.NetAddr{*pcdefaults.AuthConnectAddr()}
+    cfg.Auth.Enabled            = true
+    cfg.Auth.SSHAddr            = *pcdefaults.AuthListenAddr()
     cfg.Auth.EventsBackend.Type = pcdefaults.CoreBackendType
     cfg.Auth.EventsBackend.Params = dbParams(dataDir, pcdefaults.CoreEventsSqliteFile)
-    cfg.Auth.KeysBackend.Type = pcdefaults.CoreBackendType
+    cfg.Auth.KeysBackend.Type   = pcdefaults.CoreBackendType
     cfg.Auth.KeysBackend.Params = dbParams(dataDir, pcdefaults.CoreKeysSqliteFile)
     cfg.Auth.RecordsBackend.Type = pcdefaults.CoreBackendType
     cfg.Auth.RecordsBackend.Params = dbParams(dataDir, pcdefaults.CoreRecordsSqliteFile)
     pcdefaults.ConfigureLimiter(&cfg.Auth.Limiter)
 
     // defaults for the SSH proxy service:
-    cfg.Proxy.Enabled = true
+    cfg.Proxy.Enabled           = true
     // disable web ui as it's not necessary
-    cfg.Proxy.DisableWebUI = true
-    cfg.Proxy.AssetsDir = dataDir
-    cfg.Proxy.SSHAddr = *pcdefaults.ProxyListenAddr()
-    cfg.Proxy.WebAddr = *pcdefaults.ProxyWebListenAddr()
+    cfg.Proxy.DisableWebUI      = true
+    cfg.Proxy.AssetsDir         = dataDir
+    cfg.Proxy.SSHAddr           = *pcdefaults.ProxyListenAddr()
+    cfg.Proxy.WebAddr           = *pcdefaults.ProxyWebListenAddr()
 
     cfg.Proxy.ReverseTunnelListenAddr = *pcdefaults.ReverseTunnellListenAddr()
     pcdefaults.ConfigureLimiter(&cfg.Proxy.Limiter)
 
     // defaults for the SSH service:
-    cfg.SSH.Enabled = false
-    cfg.SSH.Addr = *pcdefaults.SSHServerListenAddr()
-    cfg.SSH.Shell = pcdefaults.DefaultShell
+    cfg.SSH.Enabled             = false
+    cfg.SSH.Addr                = *pcdefaults.SSHServerListenAddr()
+    cfg.SSH.Shell               = pcdefaults.DefaultShell
     pcdefaults.ConfigureLimiter(&cfg.SSH.Limiter)
 
     // global defaults
-    cfg.Hostname = hostname
-    cfg.DataDir = dataDir
-    cfg.Console = os.Stdout
+    cfg.Hostname                = hostname
+    cfg.DataDir                 = dataDir
+    if debug {
+        cfg.Console = ioutil.Discard
+        utils.InitLoggerDebug()
+        trace.SetDebug(true)
+        log.Info("Teleport DEBUG output configured")
+    } else {
+        // TODO : check if we can throw debug info
+        cfg.Console = os.Stdout
+        utils.InitLoggerCLI()
+        log.Info("Teleport NORMAL cli output configured")
+    }
 }
 
 func ValidateCoreConfig(cfg *Config) error {

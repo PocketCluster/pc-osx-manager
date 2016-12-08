@@ -9,7 +9,8 @@ import (
 
     "github.com/gravitational/teleport/lib/auth"
     log "github.com/Sirupsen/logrus"
-    "github.com/stkim1/pc-node-agent/slcontext/config"
+
+    "github.com/stkim1/pcteleport/pcconfig"
 )
 
 // enforceTokenTTL deletes the given token if it's TTL is over. Returns 'false'
@@ -65,19 +66,15 @@ func writeKeys(dataDir string, id auth.IdentityID, key []byte, cert []byte) erro
     return nil
 }
 
-func writeDockerKeyAndCert(keyCertDir string, keys *packedAuthKeyCert) error {
-    ap := filepath.Join(keyCertDir, config.SlaveDockerAuthFileName)
-    kp := filepath.Join(keyCertDir, config.SlaveDockerKeyFileName)
-    cp := filepath.Join(keyCertDir, config.SlaveDockerCertFileName)
-    log.Debugf("write slave docker auth to %v, key to %v, cert from %v", ap, kp, cp)
-
-    if err := ioutil.WriteFile(ap, keys.Auth, 0600); err != nil {
+func writeDockerKeyAndCert(cfg *pcconfig.Config, keys *packedAuthKeyCert) error {
+    log.Debugf("write slave docker auth to %v, key to %v, cert from %v", cfg.DockerAuthFile, cfg.DockerKeyFile, cfg.DockerCertFile)
+    if err := ioutil.WriteFile(cfg.DockerAuthFile, keys.Auth, 0600); err != nil {
         return err
     }
-    if err := ioutil.WriteFile(kp, keys.Key, 0600); err != nil {
+    if err := ioutil.WriteFile(cfg.DockerKeyFile,  keys.Key, 0600); err != nil {
         return err
     }
-    if err := ioutil.WriteFile(cp, keys.Cert, 0600); err != nil {
+    if err := ioutil.WriteFile(cfg.DockerCertFile, keys.Cert, 0600); err != nil {
         return err
     }
     return nil

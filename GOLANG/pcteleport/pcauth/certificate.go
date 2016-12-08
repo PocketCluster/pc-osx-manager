@@ -37,7 +37,7 @@ func RequestSignedCertificate(cfg *pcconfig.Config, id auth.IdentityID, token st
     if err != nil {
         return trace.Wrap(err)
     }
-    return writeDockerKeyAndCert(cfg.KeyCertDir, keys)
+    return writeDockerKeyAndCert(cfg, keys)
 }
 
 // requestSignedCertificateWithToken calls the auth service API to register a new node via registration token which has
