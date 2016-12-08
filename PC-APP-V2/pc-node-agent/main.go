@@ -6,7 +6,6 @@ import (
 
     "github.com/stkim1/netifaces"
     "github.com/stkim1/pc-node-agent/slcontext"
-    "github.com/stkim1/pcteleport/pcconfig"
     "github.com/stkim1/pcteleport"
 )
 
