@@ -3,6 +3,7 @@ package main
 import (
     "log"
     "net"
+    "time"
 
     "github.com/stkim1/netifaces"
     "github.com/stkim1/pc-node-agent/slcontext"
@@ -28,5 +29,8 @@ func main() {
     err = pcteleport.StartNodeTeleport("192.168.1.150", "c9s93fd9-3333-91d3-9999-c9s93fd98f43", true)
     if err != nil {
         log.Print(err.Error())
+    }
+    for {
+        time.Sleep(time.Second)
     }
 }
