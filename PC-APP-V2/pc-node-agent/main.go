@@ -11,21 +11,20 @@ import (
 )
 
 func main() {
-    slcontext.DebugSlcontextPrepare()
-    defer slcontext.DebugSlcontextDestroy()
     gateway, err := netifaces.FindSystemGateways()
     if err != nil {
         log.Print(err.Error())
     }
-    defer gateway.Release()
-
     gwaddr, gwiface, err := gateway.DefaultIP4Gateway()
     log.Printf("GW ADDR %s | GW IFACE %s", gwaddr, gwiface)
     _, err = net.InterfaceByName(gwiface)
     if err != nil {
         log.Print(err.Error())
     }
+    gateway.Release()
 
+    slcontext.DebugSlcontextPrepare()
+    slcontext.SharedSlaveContext().SetSlaveNodeName("pc-node1")
     err = pcteleport.StartNodeTeleport("192.168.1.150", "c9s93fd9-3333-91d3-9999-c9s93fd98f43", true)
     if err != nil {
         log.Print(err.Error())
@@ -33,4 +32,5 @@ func main() {
     for {
         time.Sleep(time.Second)
     }
+    slcontext.DebugSlcontextDestroy()
 }

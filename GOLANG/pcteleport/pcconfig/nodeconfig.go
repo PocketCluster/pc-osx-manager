@@ -13,13 +13,14 @@ import (
     "github.com/stkim1/pcteleport/pcdefaults"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-node-agent/slcontext/config"
+    "github.com/pborman/uuid"
 )
 
 // MakeDefaultConfig creates a new Config structure and populates it with defaults
-func MakeNodeTeleportConfig(authServerAddr, authToken string, debug bool) (config *Config) {
-    config = &Config{}
-    applyNodeDefaults(config, slcontext.SharedSlaveContext(), authServerAddr, authToken, debug)
-    return config
+func MakeNodeTeleportConfig(authServerAddr, authToken string, debug bool) (*Config, error) {
+    config := &Config{}
+    err := applyNodeDefaults(config, slcontext.SharedSlaveContext(), authServerAddr, authToken, debug)
+    return config, err
 }
 
 // applyDefaults applies default values to the existing config structure
@@ -43,6 +44,8 @@ func applyNodeDefaults(cfg *Config, context slcontext.PocketSlaveContext, authSe
     if _, err := os.Stat(keyCertDir); err != nil {
         return trace.Wrap(err)
     }
+    log.Printf("DataDir: %v, KeyCertDir %v", dataDir, keyCertDir)
+
     // global defaults
     nodeName, err := context.GetSlaveNodeName()
     if err != nil {
@@ -55,6 +58,27 @@ func applyNodeDefaults(cfg *Config, context slcontext.PocketSlaveContext, authSe
         log.Errorf("Failed to determine network interface: %v", err)
         return trace.Wrap(err)
     }
+    // TODO : read host UUID from slave context
+    // if there's no host uuid initialized yet, try to read one from the
+    // one of the identities
+    hostUUID, err := utils.ReadHostUUID(cfg.DataDir)
+    if err != nil {
+        if !trace.IsNotFound(err) {
+            //return trace.Wrap(err)
+            log.Printf(err.Error())
+            trace.Wrap(err)
+        }
+        if len(cfg.Identities) != 0 {
+            hostUUID = cfg.Identities[0].ID.HostUUID
+            log.Infof("[INIT] taking host uuid from first identity: %v", cfg.HostUUID)
+        } else {
+            hostUUID = uuid.New()
+            log.Infof("[INIT] generating new host UUID: %v", cfg.HostUUID)
+        }
+        if err := utils.WriteHostUUID(cfg.DataDir, cfg.HostUUID); err != nil {
+            return trace.Wrap(err)
+        }
+    }
 
     // defaults for the auth service:
     cfg.SeedConfig      = false
@@ -63,6 +87,7 @@ func applyNodeDefaults(cfg *Config, context slcontext.PocketSlaveContext, authSe
     cfg.AuthServers     = []utils.NetAddr{*addr}
     cfg.Auth.SSHAddr    = *pcdefaults.AuthListenAddr()
     cfg.ApplyToken(authToken)
+
 /*
     cfg.Auth.EventsBackend.Type = pcdefaults.CoreBackendType
     cfg.Auth.EventsBackend.Params = dbParams(dataDir, pcdefaults.CoreEventsSqliteFile)
@@ -97,6 +122,14 @@ func applyNodeDefaults(cfg *Config, context slcontext.PocketSlaveContext, authSe
     cfg.DockerAuthFile  = filepath.Join(keyCertDir, config.SlaveDockerAuthFileName)
     cfg.DockerKeyFile   = filepath.Join(keyCertDir, config.SlaveDockerKeyFileName)
     cfg.DockerCertFile  = filepath.Join(keyCertDir, config.SlaveDockerCertFileName)
+
+    cfg.HostUUID        = hostUUID
+
+    // if user did not provide auth domain name, use this host UUID
+    if cfg.Auth.Enabled && cfg.Auth.DomainName == "" {
+        log.Info("cfg.Auth.DomainName set to UUID")
+        cfg.Auth.DomainName = cfg.HostUUID
+    }
 
     if debug {
         utils.InitLoggerDebug()

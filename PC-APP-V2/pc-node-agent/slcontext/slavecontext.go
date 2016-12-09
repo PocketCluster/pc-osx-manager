@@ -24,11 +24,6 @@ type slaveContext struct {
     pocketPrivateKey []byte
     pocketDecryptor  pcrypto.RsaDecryptor
 
-    nodePublicKey    []byte
-    nodePrivateKey   []byte
-    //nodeCertificate  []byte
-    //nodeDecryptor    pcrypto.RsaDecryptor
-
     masterAgent      string
     masterIP4Address string
     masterPubkey     []byte
@@ -58,42 +53,28 @@ func getSingletonSlaveContext() *slaveContext {
 
 // --- Sync All ---
 func (sc *slaveContext) initWithConfig(cfg *config.PocketSlaveConfig) error {
+    var err error
+
     // pocket public key
-    pcpubkey, err := cfg.SlavePublicKey()
+    sc.pocketPublicKey , err = cfg.SlavePublicKey()
     if err != nil {
         return err
     }
-    sc.pocketPublicKey = pcpubkey
 
     // pocket private key
-    pcprvkey, err := cfg.SlavePrivateKey()
+    sc.pocketPrivateKey, err = cfg.SlavePrivateKey()
     if err != nil {
         return err
     }
-    sc.pocketPrivateKey = pcprvkey
 
     // if master public key exists
     if pcmspubkey, err := cfg.MasterPublicKey(); len(pcmspubkey) != 0 && err == nil {
         sc.masterPubkey = pcmspubkey
 
-        if decryptor, err := pcrypto.NewRsaDecryptorFromKeyData(pcmspubkey, pcprvkey); decryptor != nil && err == nil {
+        if decryptor, err := pcrypto.NewRsaDecryptorFromKeyData(pcmspubkey, sc.pocketPrivateKey); decryptor != nil && err == nil {
             sc.pocketDecryptor = decryptor
         }
     }
-
-    // node public key
-    nodepubkey, err := cfg.NodePublicKey()
-    if err != nil {
-        return err
-    }
-    sc.nodePublicKey = nodepubkey
-
-    // node private key
-    nodeprvkey, err := cfg.NodePrivateKey()
-    if err != nil {
-        return err
-    }
-    sc.nodePrivateKey = nodeprvkey
 
     // master agent name
     if len(cfg.MasterSection.MasterBoundAgent) != 0 {
@@ -424,7 +405,9 @@ func (sc *slaveContext) PrimaryNetworkInterface() (*NetworkInterface, error) {
     if len(gwiface) == 0 {
         return nil, fmt.Errorf("[ERR] Inappropriate gateway interface")
     }
-    iface, err := net.InterfaceByName(gwiface)
+    // TODO : fix wrong interface name on RPI "eth0v" issue
+    //iface, err := net.InterfaceByName(gwiface)
+    iface, err := net.InterfaceByName("eth0")
     if err != nil {
         return nil, err
     }

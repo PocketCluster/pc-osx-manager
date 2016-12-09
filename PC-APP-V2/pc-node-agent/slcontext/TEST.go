@@ -26,8 +26,6 @@ func DebugSlcontextPrepare() PocketSlaveContext {
     // pub/priv keys are generated
     singletonContext.pocketPublicKey    = pcrypto.TestSlavePublicKey()
     singletonContext.pocketPrivateKey   = pcrypto.TestSlavePrivateKey()
-    singletonContext.nodePublicKey      = pcrypto.TestSlaveNodePublicKey()
-    singletonContext.nodePrivateKey     = pcrypto.TestSlaveNodePrivateKey()
 
     return singletonContext
 }
@@ -51,8 +49,6 @@ func DebugSlcontextPrepareWithRoot(rootPath string) PocketSlaveContext {
     // pub/priv keys are generated
     singletonContext.pocketPublicKey    = pcrypto.TestSlavePublicKey()
     singletonContext.pocketPrivateKey   = pcrypto.TestSlavePrivateKey()
-    singletonContext.nodePublicKey      = pcrypto.TestSlaveNodePublicKey()
-    singletonContext.nodePrivateKey     = pcrypto.TestSlaveNodePrivateKey()
 
     return singletonContext
 }
