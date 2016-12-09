@@ -406,8 +406,8 @@ func (sc *slaveContext) PrimaryNetworkInterface() (*NetworkInterface, error) {
         return nil, fmt.Errorf("[ERR] Inappropriate gateway interface")
     }
     // TODO : fix wrong interface name on RPI "eth0v" issue
-    //iface, err := net.InterfaceByName(gwiface)
-    iface, err := net.InterfaceByName("eth0")
+    iface, err := net.InterfaceByName(gwiface)
+    //iface, err := net.InterfaceByName("eth0")
     if err != nil {
         return nil, err
     }

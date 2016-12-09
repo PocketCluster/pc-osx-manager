@@ -46,9 +46,9 @@ type PocketCoreTeleportProcess struct {
     localAuth *auth.AuthServer
 }
 
-func (process *PocketCoreTeleportProcess) findStaticIdentity(id auth.IdentityID) (*auth.Identity, error) {
-    for i := range process.Config.Identities {
-        identity := process.Config.Identities[i]
+func (p *PocketCoreTeleportProcess) findStaticIdentity(id auth.IdentityID) (*auth.Identity, error) {
+    for i := range p.Config.Identities {
+        identity := p.Config.Identities[i]
         if identity.ID.Equals(id) {
             return identity, nil
         }
@@ -58,18 +58,18 @@ func (process *PocketCoreTeleportProcess) findStaticIdentity(id auth.IdentityID)
 
 // connectToAuthService attempts to login into the auth servers specified in the
 // configuration. Returns 'true' if successful
-func (process *PocketCoreTeleportProcess) connectToAuthService(role teleport.Role) (*service.Connector, error) {
-    id := auth.IdentityID{HostUUID: process.Config.HostUUID, Role: role}
-    identity, err := auth.ReadIdentity(process.Config.DataDir, id)
+func (p *PocketCoreTeleportProcess) connectToAuthService(role teleport.Role) (*service.Connector, error) {
+    id := auth.IdentityID{HostUUID: p.Config.HostUUID, Role: role}
+    identity, err := auth.ReadIdentity(p.Config.DataDir, id)
     if err != nil {
         if trace.IsNotFound(err) {
             // try to locate static identity provide in the file
-            identity, err = process.findStaticIdentity(id)
+            identity, err = p.findStaticIdentity(id)
             if err != nil {
                 return nil, trace.Wrap(err)
             }
             log.Infof("found static identity %v in the config file, writing to disk", &id)
-            if err = auth.WriteIdentity(process.Config.DataDir, identity); err != nil {
+            if err = auth.WriteIdentity(p.Config.DataDir, identity); err != nil {
                 return nil, trace.Wrap(err)
             }
         } else {
@@ -77,12 +77,12 @@ func (process *PocketCoreTeleportProcess) connectToAuthService(role teleport.Rol
         }
     }
     storage := utils.NewFileAddrStorage(
-        filepath.Join(process.Config.DataDir, "authservers.json"))
+        filepath.Join(p.Config.DataDir, "authservers.json"))
 
     authUser := identity.Cert.ValidPrincipals[0]
     authClient, err := auth.NewTunClient(
         string(role),
-        process.Config.AuthServers,
+        p.Config.AuthServers,
         authUser,
         []ssh.AuthMethod{ssh.PublicKeys(identity.KeySigner)},
         auth.TunClientStorage(storage),
@@ -103,25 +103,25 @@ func (process *PocketCoreTeleportProcess) connectToAuthService(role teleport.Rol
     return &service.Connector{Client: authClient, Identity: identity}, nil
 }
 
-func (process *PocketCoreTeleportProcess) setLocalAuth(a *auth.AuthServer) {
-    process.Lock()
-    defer process.Unlock()
-    process.localAuth = a
+func (p *PocketCoreTeleportProcess) setLocalAuth(a *auth.AuthServer) {
+    p.Lock()
+    defer p.Unlock()
+    p.localAuth = a
 }
 
-func (process *PocketCoreTeleportProcess) getLocalAuth() (a *auth.AuthServer) {
-    process.Lock()
-    defer process.Unlock()
-    return process.localAuth
+func (p *PocketCoreTeleportProcess) getLocalAuth() (a *auth.AuthServer) {
+    p.Lock()
+    defer p.Unlock()
+    return p.localAuth
 }
 
 // onExit allows individual services to register a callback function which will be
 // called when Teleport Process is asked to exit. Usually services terminate themselves
 // when the callback is called
-func (process *PocketCoreTeleportProcess) onExit(callback func(interface{})) {
+func (p *PocketCoreTeleportProcess) onExit(callback func(interface{})) {
     go func() {
         eventC := make(chan service.Event)
-        process.WaitForEvent(service.TeleportExitEvent, eventC, make(chan struct{}))
+        p.WaitForEvent(service.TeleportExitEvent, eventC, make(chan struct{}))
         select {
         case event := <-eventC:
             callback(event.Payload)
@@ -150,14 +150,14 @@ func (process *PocketCoreTeleportProcess) initAuthStorage() (backend.Backend, er
 }
 
 // initAuthService can be called to initialize auth server service
-func (process *PocketCoreTeleportProcess) initAuthService(authority auth.Authority) error {
+func (p *PocketCoreTeleportProcess) initAuthService(authority auth.Authority) error {
     var (
         askedToExit = false
         err         error
     )
-    cfg := process.Config
+    cfg := p.Config
     // Initialize the storage back-ends for keys, events and records
-    b, err := process.initAuthStorage()
+    b, err := p.initAuthStorage()
     if err != nil {
         return trace.Wrap(err)
     }
@@ -196,7 +196,7 @@ func (process *PocketCoreTeleportProcess) initAuthService(authority auth.Authori
     if err != nil {
         return trace.Wrap(err)
     }
-    process.setLocalAuth(authServer)
+    p.setLocalAuth(authServer)
 
     // second, create the API Server: it's actually a collection of API servers,
     // each serving requests for a "role" which is assigned to every connected
@@ -220,7 +220,7 @@ func (process *PocketCoreTeleportProcess) initAuthService(authority auth.Authori
     // Register an SSH endpoint which is used to create an SSH tunnel to send HTTP
     // requests to the Auth API
     var authTunnel *pcauth.AuthTunnel
-    process.RegisterFunc(func() error {
+    p.RegisterFunc(func() error {
         utils.Consolef(cfg.Console, "[AUTH]  Auth service is starting on %v", cfg.Auth.SSHAddr.Addr)
         authTunnel, err = pcauth.NewTunnel(
             cfg.Auth.SSHAddr,
@@ -243,34 +243,34 @@ func (process *PocketCoreTeleportProcess) initAuthService(authority auth.Authori
         return nil
     })
 
-    process.RegisterFunc(func() error {
+    p.RegisterFunc(func() error {
         // Heart beat auth server presence, this is not the best place for this
         // logic, consolidate it into auth package later
-        connector, err := process.connectToAuthService(teleport.RoleAdmin)
+        connector, err := p.connectToAuthService(teleport.RoleAdmin)
         if err != nil {
             return trace.Wrap(err)
         }
         // External integrations rely on this event:
-        process.BroadcastEvent(service.Event{Name: service.AuthIdentityEvent, Payload: connector})
-        process.onExit(func(payload interface{}) {
+        p.BroadcastEvent(service.Event{Name: service.AuthIdentityEvent, Payload: connector})
+        p.onExit(func(payload interface{}) {
             connector.Client.Close()
         })
         return nil
     })
 
-    process.RegisterFunc(func() error {
+    p.RegisterFunc(func() error {
         srv := services.Server{
-            ID:       process.Config.HostUUID,
+            ID:       p.Config.HostUUID,
             Addr:     cfg.Auth.SSHAddr.Addr,
-            Hostname: process.Config.Hostname,
+            Hostname: p.Config.Hostname,
         }
         host, port, err := net.SplitHostPort(srv.Addr)
         // advertise-ip is explicitly set:
-        if process.Config.AdvertiseIP != nil {
+        if p.Config.AdvertiseIP != nil {
             if err != nil {
                 return trace.Wrap(err)
             }
-            srv.Addr = fmt.Sprintf("%v:%v", process.Config.AdvertiseIP.String(), port)
+            srv.Addr = fmt.Sprintf("%v:%v", p.Config.AdvertiseIP.String(), port)
         } else {
             // advertise-ip is not set, while the CA is listening on 0.0.0.0? lets try
             // to guess the 'advertise ip' then:
@@ -298,7 +298,7 @@ func (process *PocketCoreTeleportProcess) initAuthService(authority auth.Authori
     })
 
     // execute this when process is asked to exit:
-    process.onExit(func(payload interface{}) {
+    p.onExit(func(payload interface{}) {
         askedToExit = true
         authTunnel.Close()
         log.Infof("[AUTH] auth service exited")
@@ -306,12 +306,12 @@ func (process *PocketCoreTeleportProcess) initAuthService(authority auth.Authori
     return nil
 }
 
-func (process *PocketCoreTeleportProcess) initProxyEndpoint(conn *service.Connector) error {
+func (p *PocketCoreTeleportProcess) initProxyEndpoint(conn *service.Connector) error {
     var (
         askedToExit = true
         err         error
     )
-    cfg := process.Config
+    cfg := p.Config
     proxyLimiter, err := limiter.NewLimiter(cfg.Proxy.Limiter)
     if err != nil {
         return trace.Wrap(err)
@@ -360,14 +360,14 @@ func (process *PocketCoreTeleportProcess) initProxyEndpoint(conn *service.Connec
 
     // register SSH reverse tunnel server that accepts connections
     // from remote teleport nodes
-    process.RegisterFunc(func() error {
+    p.RegisterFunc(func() error {
         utils.Consolef(cfg.Console, "[PROXY] Reverse tunnel service is starting on %v", cfg.Proxy.ReverseTunnelListenAddr.Addr)
         if err := tsrv.Start(); err != nil {
             utils.Consolef(cfg.Console, "[PROXY] Error: %v", err)
             return trace.Wrap(err)
         }
         // notify parties that we've started reverse tunnel server
-        process.BroadcastEvent(service.Event{Name: service.ProxyReverseTunnelServerEvent, Payload: tsrv})
+        p.BroadcastEvent(service.Event{Name: service.ProxyReverseTunnelServerEvent, Payload: tsrv})
         tsrv.Wait()
         if askedToExit {
             log.Infof("[PROXY] Reverse tunnel exited")
@@ -378,8 +378,8 @@ func (process *PocketCoreTeleportProcess) initProxyEndpoint(conn *service.Connec
     // Register web proxy server
     var webListener net.Listener
 
-    if !process.Config.Proxy.DisableWebUI {
-        process.RegisterFunc(func() error {
+    if !p.Config.Proxy.DisableWebUI {
+        p.RegisterFunc(func() error {
             utils.Consolef(cfg.Console, "[PROXY] Web proxy service is starting on %v", cfg.Proxy.WebAddr.Addr)
             webHandler, err := web.NewHandler(
                 web.Config{
@@ -397,7 +397,7 @@ func (process *PocketCoreTeleportProcess) initProxyEndpoint(conn *service.Connec
             defer webHandler.Close()
 
             proxyLimiter.WrapHandle(webHandler)
-            process.BroadcastEvent(service.Event{Name: service.ProxyWebServerEvent, Payload: webHandler})
+            p.BroadcastEvent(service.Event{Name: service.ProxyWebServerEvent, Payload: webHandler})
 
             log.Infof("[PROXY] init TLS listeners")
             webListener, err = utils.ListenTLS(
@@ -421,7 +421,7 @@ func (process *PocketCoreTeleportProcess) initProxyEndpoint(conn *service.Connec
     }
 
     // Register ssh proxy server
-    process.RegisterFunc(func() error {
+    p.RegisterFunc(func() error {
         utils.Consolef(cfg.Console, "[PROXY] SSH proxy service is starting on %v", cfg.Proxy.SSHAddr.Addr)
         if err := SSHProxy.Start(); err != nil {
             if askedToExit {
@@ -434,7 +434,7 @@ func (process *PocketCoreTeleportProcess) initProxyEndpoint(conn *service.Connec
         return nil
     })
 
-    process.RegisterFunc(func() error {
+    p.RegisterFunc(func() error {
         log.Infof("[PROXY] starting reverse tunnel agent pool")
         if err := agentPool.Start(); err != nil {
             log.Fatalf("failed to start: %v", err)
@@ -445,7 +445,7 @@ func (process *PocketCoreTeleportProcess) initProxyEndpoint(conn *service.Connec
     })
 
     // execute this when process is asked to exit:
-    process.onExit(func(payload interface{}) {
+    p.onExit(func(payload interface{}) {
         tsrv.Close()
         SSHProxy.Close()
         agentPool.Stop()
@@ -462,7 +462,7 @@ func (process *PocketCoreTeleportProcess) initProxyEndpoint(conn *service.Connec
 //    1. serve a web UI
 //    2. proxy SSH connections to nodes running with 'node' role
 //    3. take care of revse tunnels
-func (process *PocketCoreTeleportProcess) initProxy() error {
+func (p *PocketCoreTeleportProcess) initProxy() error {
     // TODO : (11/28/2016) TLS Certificate should be generated in pc-core context initiation
     /*
     // if no TLS key was provided for the web UI, generate a self signed cert
@@ -475,11 +475,11 @@ func (process *PocketCoreTeleportProcess) initProxy() error {
     }
     */
 
-    process.RegisterWithAuthServer(process.Config.Token, teleport.RoleProxy, service.ProxyIdentityEvent)
+    p.RegisterWithAuthServer(p.Config.Token, teleport.RoleProxy, service.ProxyIdentityEvent)
 
-    process.RegisterFunc(func() error {
+    p.RegisterFunc(func() error {
         eventsC := make(chan service.Event)
-        process.WaitForEvent(service.ProxyIdentityEvent, eventsC, make(chan struct{}))
+        p.WaitForEvent(service.ProxyIdentityEvent, eventsC, make(chan struct{}))
 
         event := <-eventsC
         log.Infof("[SSH] received %v", &event)
@@ -487,24 +487,24 @@ func (process *PocketCoreTeleportProcess) initProxy() error {
         if !ok {
             return trace.BadParameter("unsupported connector type: %T", event.Payload)
         }
-        return trace.Wrap(process.initProxyEndpoint(conn))
+        return trace.Wrap(p.initProxyEndpoint(conn))
     })
     return nil
 }
 
-func (process *PocketCoreTeleportProcess) initSSH() error {
+func (p *PocketCoreTeleportProcess) initSSH() error {
     eventsC := make(chan service.Event)
 
     // register & generate a signed ssh pub/prv key set
-    process.RegisterWithAuthServer(process.Config.Token, teleport.RoleNode, service.SSHIdentityEvent)
-    process.WaitForEvent(service.SSHIdentityEvent, eventsC, make(chan struct{}))
+    p.RegisterWithAuthServer(p.Config.Token, teleport.RoleNode, service.SSHIdentityEvent)
+    p.WaitForEvent(service.SSHIdentityEvent, eventsC, make(chan struct{}))
 
     // generates a signed certificate & private key for docker/registry
-    process.RequestSignedCertificateWithAuthServer(process.Config.Token, teleport.RoleNode, SignedCertificateIssuedEvent)
-    process.WaitForEvent(SignedCertificateIssuedEvent, eventsC, make(chan struct{}))
+    p.RequestSignedCertificateWithAuthServer(p.Config.Token, teleport.RoleNode, SignedCertificateIssuedEvent)
+    p.WaitForEvent(SignedCertificateIssuedEvent, eventsC, make(chan struct{}))
 
     var s *srv.Server
-    process.RegisterFunc(func() error {
+    p.RegisterFunc(func() error {
         event := <-eventsC
         log.Infof("[SSH] received %v", &event)
         conn, ok := (event.Payload).(*service.Connector)
@@ -512,7 +512,7 @@ func (process *PocketCoreTeleportProcess) initSSH() error {
             return trace.BadParameter("unsupported connector type: %T", event.Payload)
         }
 
-        cfg := process.Config
+        cfg := p.Config
 
         limiter, err := limiter.NewLimiter(cfg.SSH.Limiter)
         if err != nil {
@@ -545,7 +545,7 @@ func (process *PocketCoreTeleportProcess) initSSH() error {
         return nil
     })
     // execute this when process is asked to exit:
-    process.onExit(func(payload interface{}) {
+    p.onExit(func(payload interface{}) {
         s.Close()
     })
     return nil
@@ -554,20 +554,20 @@ func (process *PocketCoreTeleportProcess) initSSH() error {
 // RegisterWithAuthServer uses one time provisioning token obtained earlier
 // from the server to get a pair of SSH keys signed by Auth server host
 // certificate authority
-func (process *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, role teleport.Role, eventName string) {
-    cfg := process.Config
+func (p *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, role teleport.Role, eventName string) {
+    cfg := p.Config
     identityID := auth.IdentityID{Role: role, HostUUID: cfg.HostUUID}
 
     // this means the server has not been initialized yet, we are starting
     // the registering client that attempts to connect to the auth server
     // and provision the keys
     var authClient *auth.TunClient
-    process.RegisterFunc(func() error {
+    p.RegisterFunc(func() error {
         retryTime := pcdefaults.ServerHeartbeatTTL / 3
         for {
-            connector, err := process.connectToAuthService(role)
+            connector, err := p.connectToAuthService(role)
             if err == nil {
-                process.BroadcastEvent(service.Event{Name: eventName, Payload: connector})
+                p.BroadcastEvent(service.Event{Name: eventName, Payload: connector})
                 authClient = connector.Client
                 return nil
             }
@@ -580,11 +580,11 @@ func (process *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, r
                 return trace.Wrap(err)
             }
             //  we haven't connected yet, so we expect the token to exist
-            if process.getLocalAuth() != nil {
+            if p.getLocalAuth() != nil {
                 // Auth service is on the same host, no need to go though the invitation
                 // procedure
                 log.Debugf("[Node] this server has local Auth server started, using it to add role to the cluster")
-                err = auth.LocalRegister(cfg.DataDir, identityID, process.getLocalAuth())
+                err = auth.LocalRegister(cfg.DataDir, identityID, p.getLocalAuth())
             } else {
                 // Auth server is remote, so we need a provisioning token
                 if token == "" {
@@ -604,7 +604,7 @@ func (process *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, r
         }
     })
 
-    process.onExit(func(interface{}) {
+    p.onExit(func(interface{}) {
         if authClient != nil {
             authClient.Close()
         }
@@ -614,20 +614,20 @@ func (process *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, r
 // RequestSignedCertificateWithAuthServer uses one time provisioning token obtained earlier
 // from the server to get a pair of SSH keys signed by Auth server host
 // certificate authority
-func (process *PocketCoreTeleportProcess) RequestSignedCertificateWithAuthServer(token string, role teleport.Role, eventName string) {
-    cfg := process.Config
+func (p *PocketCoreTeleportProcess) RequestSignedCertificateWithAuthServer(token string, role teleport.Role, eventName string) {
+    cfg := p.Config
     identityID := auth.IdentityID{Role: role, HostUUID: cfg.HostUUID}
 
     // this means the server has not been initialized yet, we are starting
     // the registering client that attempts to connect to the auth server
     // and provision the keys
     var authClient *auth.TunClient
-    process.RegisterFunc(func() error {
+    p.RegisterFunc(func() error {
         retryTime := pcdefaults.ServerHeartbeatTTL / 3
         for {
-            connector, err := process.connectToAuthService(role)
+            connector, err := p.connectToAuthService(role)
             if err == nil {
-                process.BroadcastEvent(service.Event{Name: eventName, Payload: connector})
+                p.BroadcastEvent(service.Event{Name: eventName, Payload: connector})
                 authClient = connector.Client
                 return nil
             }
@@ -656,7 +656,7 @@ func (process *PocketCoreTeleportProcess) RequestSignedCertificateWithAuthServer
         }
     })
 
-    process.onExit(func(interface{}) {
+    p.onExit(func(interface{}) {
         if authClient != nil {
             authClient.Close()
         }
