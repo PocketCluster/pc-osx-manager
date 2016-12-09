@@ -2,9 +2,8 @@ package pcteleport
 
 import (
     "os"
-    "fmt"
     "time"
-    "log"
+    log "github.com/Sirupsen/logrus"
 
     "github.com/gravitational/trace"
     "github.com/gravitational/teleport/lib/config"
@@ -42,31 +41,31 @@ func StartCoreTeleport(debug bool) error {
 func StartNodeTeleport(authServerAddr, authToken string, debug bool) error {
     cfg, err := pcconfig.MakeNodeTeleportConfig(authServerAddr, authToken, debug)
     if err != nil {
-        log.Print(err.Error())
+        log.Error(err.Error())
         return trace.Wrap(err, "error in initializing teleport")
     }
 
-    log.Println("Node config created")
+    log.Info("Node config created")
 
     // add temporary token
     srv, err := process.NewNodeTeleport(cfg)
     if err != nil {
-        log.Print(err.Error())
+        log.Error(err.Error())
         return trace.Wrap(err, "error in initializing teleport")
     }
 
     if err := srv.Start(); err != nil {
-        log.Print(err.Error())
+        log.Error(err.Error())
         return trace.Wrap(err, "starting teleport")
     }
     // create the pid file
     if cfg.PIDFile != "" {
         f, err := os.OpenFile(cfg.PIDFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
         if err != nil {
-            log.Print(err.Error())
+            log.Error(err.Error())
             return trace.Wrap(err, "failed to create the PID file")
         }
-        fmt.Fprintf(f, "%v", os.Getpid())
+        log.Info(f, "%v", os.Getpid())
         defer f.Close()
     }
     srv.Wait()

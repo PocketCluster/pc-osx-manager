@@ -115,7 +115,6 @@ func applyNodeDefaults(cfg *Config, context slcontext.PocketSlaveContext, authSe
 
     cfg.Hostname        = nodeName
     cfg.DataDir         = dataDir
-    cfg.Console         = ioutil.Discard
 
     cfg.IP4Addr         = iface.IP.String()
     cfg.KeyCertDir      = keyCertDir
@@ -132,10 +131,12 @@ func applyNodeDefaults(cfg *Config, context slcontext.PocketSlaveContext, authSe
     }
 
     if debug {
+        cfg.Console     = os.Stdout
         utils.InitLoggerDebug()
         trace.SetDebug(true)
         log.Info("Teleport DEBUG output configured")
     } else {
+        cfg.Console     = ioutil.Discard
         utils.InitLoggerCLI()
         log.Info("Teleport NORMAL output configured")
     }
