@@ -1,69 +1,77 @@
 package context
 
-import "github.com/stkim1/pcrypto"
+import (
+    "github.com/stkim1/pcrypto"
+)
 
-var test_intefaces = []*HostNetworkInterface{
-    {
-        WifiPowerOff        : false,
-        IsActive            : true,
-        IsPrimary           : true,
-        AddrCount           : 1,
-        Address             : []*HostIPAddress{
-            {
-                Flags       : 0x8863,
-                Family      : 2,
-                IsPrimary   : true,
-                Address     : "192.168.1.248",
-                Netmask     : "255.255.255.0",
-                Broadcast   : "192.168.1.255",
-            },
-        },
-        BsdName             : "en0",
-        DisplayName         : "Ethernet",
-        MacAddress          : "74:d4:35:f3:b5:20",
-        MediaType           : "Ethernet",
-    },
-    {
-        WifiPowerOff        : false,
-        IsActive            : true,
-        IsPrimary           : false,
-        AddrCount           : 1,
-        Address             : []*HostIPAddress{
-            {
-                Flags       : 0x8863,
-                Family      : 2,
-                IsPrimary   : true,
-                Address     : "192.168.1.247",
-                Netmask     : "255.255.255.0",
-                Broadcast   : "192.168.1.255",
-            },
-        },
-        BsdName             : "en1",
-        DisplayName         : "Wi-Fi",
-        MacAddress          : "74:d4:35:f3:b5:20",
-        MediaType           : "IEEE80211",
-    },
-    {
-        BsdName             : "lo0",
-        Address             : nil,
-    },
-    {
-        BsdName             : "gif0",
-        Address             : nil,
-    },
-    {
-        BsdName             : "stf0",
-    },
-}
+const (
+    DEBUG_CLUSTER_ID string = "89d18964-569f-4f47-99c1-6218d4abd8e3"
+)
 
-var test_gateways = []*HostNetworkGateway{
-    {
-        Family              : 2,
-        IsDefault           : true,
-        IfaceName           : "en0",
-        Address             : "192.168.1.1",
-    },
-}
+var (
+    test_intefaces = []*HostNetworkInterface{
+        {
+            WifiPowerOff        : false,
+            IsActive            : true,
+            IsPrimary           : true,
+            AddrCount           : 1,
+            Address             : []*HostIPAddress{
+                {
+                    Flags       : 0x8863,
+                    Family      : 2,
+                    IsPrimary   : true,
+                    Address     : "192.168.1.248",
+                    Netmask     : "255.255.255.0",
+                    Broadcast   : "192.168.1.255",
+                },
+            },
+            BsdName             : "en0",
+            DisplayName         : "Ethernet",
+            MacAddress          : "74:d4:35:f3:b5:20",
+            MediaType           : "Ethernet",
+        },
+        {
+            WifiPowerOff        : false,
+            IsActive            : true,
+            IsPrimary           : false,
+            AddrCount           : 1,
+            Address             : []*HostIPAddress{
+                {
+                    Flags       : 0x8863,
+                    Family      : 2,
+                    IsPrimary   : true,
+                    Address     : "192.168.1.247",
+                    Netmask     : "255.255.255.0",
+                    Broadcast   : "192.168.1.255",
+                },
+            },
+            BsdName             : "en1",
+            DisplayName         : "Wi-Fi",
+            MacAddress          : "74:d4:35:f3:b5:20",
+            MediaType           : "IEEE80211",
+        },
+        {
+            BsdName             : "lo0",
+            Address             : nil,
+        },
+        {
+            BsdName             : "gif0",
+            Address             : nil,
+        },
+        {
+            BsdName             : "stf0",
+        },
+    }
+
+    test_gateways = []*HostNetworkGateway{
+        {
+            Family              : 2,
+            IsDefault           : true,
+            IfaceName           : "en0",
+            Address             : "192.168.1.1",
+        },
+    }
+)
 
 func debugContextSetup() (*hostContext) {
     context = &hostContext{}
@@ -76,8 +84,14 @@ func debugContextTeardown() {
 }
 
 func DebugContextPrepare() (HostContext) {
+
+
     // once singleton is assigned, it will not assign again. This is how we invalidate singleton ops
-    singletonContextInstance()
+    //singletonContextInstance()
+    once.Do(func(){})
+
+    caSigner, _ := pcrypto.NewCertAuthoritySigner(pcrypto.TestCertPrivateKey(), pcrypto.TestCertPublicAuth(), DEBUG_CLUSTER_ID, "KR")
+
     context = &hostContext{
         cocoaHomePath:               "/Users/almightykim",
         posixHomePath:               "/Users/almightykim",
@@ -103,6 +117,7 @@ func DebugContextPrepare() (HostContext) {
 
         currentLanguageCode:         "EN",
         currentCountryCode:          "KR",
+        CaSigner:                    caSigner,
     }
 
     context.monitorNetworkGateways(test_gateways)

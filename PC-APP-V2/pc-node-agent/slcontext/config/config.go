@@ -94,6 +94,7 @@ type ConfigMasterSection struct {
 
 type ConfigSlaveSection struct {
     SlaveNodeName       string                   `yaml:"slave-node-name"`
+    SlaveNodeUUID       string                   `yaml:"slave-node-uuid"`
     SlaveMacAddr        string                   `yaml:"slave-mac-addr"`
     //SlaveIP6Addr        string
     SlaveIP4Addr        string                   `yaml:"slave-net-ip4"`

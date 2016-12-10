@@ -3,11 +3,11 @@ package main
 import (
     "log"
     "net"
-    "time"
 
     "github.com/stkim1/netifaces"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pcteleport"
+    "github.com/pborman/uuid"
 )
 
 func main() {
@@ -25,12 +25,10 @@ func main() {
 
     slcontext.DebugSlcontextPrepare()
     slcontext.SharedSlaveContext().SetSlaveNodeName("pc-node1")
-    err = pcteleport.StartNodeTeleport("192.168.1.150", "c9s93fd9-3333-91d3-9999-c9s93fd98f43", true)
+    slcontext.SharedSlaveContext().SetSlaveNodeUUID(uuid.New())
+    err = pcteleport.StartNodeTeleport("192.168.1.248", "c9s93fd9-3333-91d3-9999-c9s93fd98f43", true)
     if err != nil {
         log.Print(err.Error())
-    }
-    for {
-        time.Sleep(time.Second)
     }
     slcontext.DebugSlcontextDestroy()
 }

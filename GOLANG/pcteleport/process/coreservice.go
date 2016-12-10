@@ -33,9 +33,12 @@ func NewCoreTeleport(cfg *pcconfig.Config) (*PocketCoreTeleportProcess, error) {
     // one of the identities
     cfg.HostUUID, err = utils.ReadHostUUID(cfg.DataDir)
     if err != nil {
+/*
+        TODO : need to look into IsNotFound Error to see what really happens
         if !trace.IsNotFound(err) {
             return nil, trace.Wrap(err)
         }
+*/
         if len(cfg.Identities) != 0 {
             cfg.HostUUID = cfg.Identities[0].ID.HostUUID
             log.Infof("[INIT] taking host uuid from first identity: %v", cfg.HostUUID)

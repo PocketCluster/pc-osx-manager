@@ -225,6 +225,7 @@ func (p *PocketCoreTeleportProcess) initAuthService(authority auth.Authority) er
         authTunnel, err = pcauth.NewTunnel(
             cfg.Auth.SSHAddr,
             identity.KeySigner,
+            p.Config.CaSigner,
             apiConf,
             pcauth.SetLimiter(limiter),
         )
@@ -558,6 +559,8 @@ func (p *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, role te
     cfg := p.Config
     identityID := auth.IdentityID{Role: role, HostUUID: cfg.HostUUID}
 
+    log.Infof("RegisterWithAuthServer role %s cfg.HostUUID %s", role, cfg.HostUUID)
+
     // this means the server has not been initialized yet, we are starting
     // the registering client that attempts to connect to the auth server
     // and provision the keys
@@ -576,9 +579,13 @@ func (p *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, role te
                 time.Sleep(retryTime)
                 continue
             }
+
+/*
+            TODO : need to look into IsNotFound Error to see what really happens
             if !trace.IsNotFound(err) {
                 return trace.Wrap(err)
             }
+*/
             //  we haven't connected yet, so we expect the token to exist
             if p.getLocalAuth() != nil {
                 // Auth service is on the same host, no need to go though the invitation
@@ -617,6 +624,7 @@ func (p *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, role te
 func (p *PocketCoreTeleportProcess) RequestSignedCertificateWithAuthServer(token string, role teleport.Role, eventName string) {
     cfg := p.Config
     identityID := auth.IdentityID{Role: role, HostUUID: cfg.HostUUID}
+    log.Infof("RequestSignedCertificateWithAuthServer role %s cfg.HostUUID %s", role, cfg.HostUUID)
 
     // this means the server has not been initialized yet, we are starting
     // the registering client that attempts to connect to the auth server
@@ -636,10 +644,12 @@ func (p *PocketCoreTeleportProcess) RequestSignedCertificateWithAuthServer(token
                 time.Sleep(retryTime)
                 continue
             }
+/*
+            TODO : need to look into IsNotFound Error to see what really happens
             if !trace.IsNotFound(err) {
                 return trace.Wrap(err)
             }
-
+*/
             // Auth server is remote, so we need a provisioning token
             if token == "" {
                 return trace.BadParameter("%v must request a signed certificate and needs a provisioning token", role)

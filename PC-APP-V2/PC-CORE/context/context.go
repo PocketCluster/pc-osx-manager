@@ -7,6 +7,7 @@ import (
 
     "github.com/ricochet2200/go-disk-usage/du"
     "os"
+    "github.com/stkim1/pcrypto"
 )
 
 type HostContext interface {
@@ -41,6 +42,8 @@ type HostContext interface {
     MasterAgentName() (string, error)
     MasterPublicKey() ([]byte, error)
     MasterPrivateKey() ([]byte, error)
+
+    MasterCaAuthority() (*pcrypto.CaSigner, error)
 }
 
 type hostContext struct {
@@ -74,6 +77,8 @@ type hostContext struct {
 
     currentCountryCode           string
     currentLanguageCode          string
+
+    *pcrypto.CaSigner
 }
 
 // singleton initialization
@@ -319,4 +324,12 @@ func (ctx *hostContext) CurrentLanguageCode() (string, error) {
         return "", fmt.Errorf("[ERR] Invalid language code")
     }
     return ctx.currentLanguageCode, nil
+}
+
+// TODO : Cert Authority generation
+func (ctx *hostContext) MasterCaAuthority() (*pcrypto.CaSigner, error) {
+    if ctx.CaSigner == nil {
+        return nil, fmt.Errorf("[ERR] Invalid Cert Authority")
+    }
+    return ctx.CaSigner, nil
 }

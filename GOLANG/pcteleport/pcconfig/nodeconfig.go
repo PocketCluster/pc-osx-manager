@@ -13,7 +13,6 @@ import (
     "github.com/stkim1/pcteleport/pcdefaults"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-node-agent/slcontext/config"
-    "github.com/pborman/uuid"
 )
 
 // MakeDefaultConfig creates a new Config structure and populates it with defaults
@@ -61,23 +60,10 @@ func applyNodeDefaults(cfg *Config, context slcontext.PocketSlaveContext, authSe
     // TODO : read host UUID from slave context
     // if there's no host uuid initialized yet, try to read one from the
     // one of the identities
-    hostUUID, err := utils.ReadHostUUID(cfg.DataDir)
+    hostUUID, err := context.GetSlaveNodeUUID()
     if err != nil {
-        if !trace.IsNotFound(err) {
-            //return trace.Wrap(err)
-            log.Printf(err.Error())
-            trace.Wrap(err)
-        }
-        if len(cfg.Identities) != 0 {
-            hostUUID = cfg.Identities[0].ID.HostUUID
-            log.Infof("[INIT] taking host uuid from first identity: %v", cfg.HostUUID)
-        } else {
-            hostUUID = uuid.New()
-            log.Infof("[INIT] generating new host UUID: %v", cfg.HostUUID)
-        }
-        if err := utils.WriteHostUUID(cfg.DataDir, cfg.HostUUID); err != nil {
-            return trace.Wrap(err)
-        }
+        log.Errorf(err.Error())
+        return trace.Wrap(err)
     }
 
     // defaults for the auth service:

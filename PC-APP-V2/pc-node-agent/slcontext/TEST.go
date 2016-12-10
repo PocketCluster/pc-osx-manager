@@ -18,7 +18,7 @@ func DebugSlcontextPrepare() PocketSlaveContext {
     if err != nil {
         log.Panic(err.Error())
     }
-    err = singletonContext.initWithConfig(cfg)
+    err = initWithConfig(singletonContext, cfg)
     if err != nil {
         log.Panic(err.Error())
     }
@@ -41,7 +41,7 @@ func DebugSlcontextPrepareWithRoot(rootPath string) PocketSlaveContext {
     if err != nil {
         log.Panic(err.Error())
     }
-    err = singletonContext.initWithConfig(cfg)
+    err = initWithConfig(singletonContext, cfg)
     if err != nil {
         log.Panic(err.Error())
     }

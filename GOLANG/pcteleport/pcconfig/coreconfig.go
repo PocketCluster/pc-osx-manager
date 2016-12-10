@@ -45,6 +45,10 @@ func applyCoreDefaults(cfg *Config, context context.HostContext, debug bool) {
             os.MkdirAll(dataDir, os.ModeDir|0700);
         }
     }
+    caSigner, err := context.MasterCaAuthority()
+    if err != nil {
+        log.Errorf("Failed to assign cert authority: %v", err)
+    }
 
     cfg.SeedConfig              = false
 
@@ -80,6 +84,11 @@ func applyCoreDefaults(cfg *Config, context context.HostContext, debug bool) {
     // global defaults
     cfg.Hostname                = hostname
     cfg.DataDir                 = dataDir
+
+    // core properties
+    cfg.CaSigner                = caSigner
+
+    // debug setup
     if debug {
         cfg.Console = ioutil.Discard
         utils.InitLoggerDebug()

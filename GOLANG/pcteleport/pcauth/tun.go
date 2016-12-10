@@ -35,6 +35,7 @@ import (
     "github.com/gravitational/trace"
     "golang.org/x/crypto/ssh"
     "golang.org/x/crypto/ssh/agent"
+    "github.com/stkim1/pcrypto"
 )
 
 // AuthTunnel listens on TCP/IP socket and accepts SSH connections. It then establishes
@@ -54,6 +55,9 @@ type AuthTunnel struct {
     hostCertChecker    ssh.CertChecker
     userCertChecker    ssh.CertChecker
     limiter            *limiter.Limiter
+
+    // CaSigner implements the Ca authority signer protocol from Master Context
+    caSigner           *pcrypto.CaSigner
 }
 
 // ServerOption is the functional argument passed to the server
@@ -72,12 +76,14 @@ func SetLimiter(limiter *limiter.Limiter) ServerOption {
 // an "tunnel server" which serves HTTP via SSH.
 func NewTunnel(addr utils.NetAddr,
     hostSigner ssh.Signer,
+    caSigner *pcrypto.CaSigner,
     apiConf *auth.APIConfig,
     opts ...ServerOption) (tunnel *AuthTunnel, err error) {
 
     tunnel = &AuthTunnel{
         authServer: apiConf.AuthServer,
         config:     apiConf,
+        caSigner:   caSigner,
     }
     tunnel.limiter, err = limiter.NewLimiter(limiter.LimiterConfig{})
     if err != nil {
@@ -305,8 +311,8 @@ func (s *AuthTunnel) onAPIConnection(sconn *ssh.ServerConn, sshChan ssh.Channel,
 
     api := auth.NewAPIServer(s.config, role)
     // Since PocketCluster API is an addition to existing api, we'll handle normal request in NotFound functions
-    pcapi := NewPocketAPIServer(s.config, role, func(w http.ResponseWriter, r *http.Request){
-        // TODO : log
+    pcapi := NewPocketAPIServer(s.config, s.caSigner, role, func(w http.ResponseWriter, r *http.Request){
+        // TODO : handle log propery. (Save, collect, whatever necessary)
         log.Infof("[AUTH] PocketCluster API does not exists %v", r.RequestURI)
         api.ServeHTTP(w, r)
     })

@@ -10,6 +10,7 @@ import (
 
     "github.com/gravitational/trace"
     "github.com/julienschmidt/httprouter"
+    "github.com/stkim1/pcrypto"
 )
 
 const (
@@ -25,12 +26,14 @@ type PocketAPIServer struct {
 }
 
 // NewAPIServer returns a new instance of APIServer HTTP handler
-func NewPocketAPIServer(config *auth.APIConfig, role teleport.Role, notFound http.HandlerFunc) PocketAPIServer {
+func NewPocketAPIServer(config *auth.APIConfig, caSigner *pcrypto.CaSigner, role teleport.Role, notFound http.HandlerFunc) PocketAPIServer {
+
     srv := PocketAPIServer{
         ar: authWithRoles{
             authServer:     config.AuthServer,
             permChecker:    config.PermissionChecker,
             sessions:       config.SessionService,
+            caSigner:       caSigner,
             role:           role,
             alog:           config.AuditLog,
         },
