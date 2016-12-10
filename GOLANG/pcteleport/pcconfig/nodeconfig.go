@@ -103,7 +103,6 @@ func applyNodeDefaults(cfg *Config, context slcontext.PocketSlaveContext, authSe
     cfg.DataDir         = dataDir
 
     cfg.IP4Addr         = iface.IP.String()
-    cfg.KeyCertDir      = keyCertDir
     cfg.DockerAuthFile  = filepath.Join(keyCertDir, config.SlaveDockerAuthFileName)
     cfg.DockerKeyFile   = filepath.Join(keyCertDir, config.SlaveDockerKeyFileName)
     cfg.DockerCertFile  = filepath.Join(keyCertDir, config.SlaveDockerCertFileName)

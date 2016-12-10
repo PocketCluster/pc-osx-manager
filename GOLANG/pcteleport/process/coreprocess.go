@@ -1,6 +1,7 @@
 package process
 
 import (
+    "os"
     "net"
     "fmt"
     "time"
@@ -13,6 +14,7 @@ import (
     "github.com/gravitational/teleport"
     "github.com/gravitational/teleport/lib/utils"
     "github.com/gravitational/teleport/lib/auth"
+    "github.com/gravitational/teleport/lib/auth/native"
     "github.com/gravitational/teleport/lib/events"
     "github.com/gravitational/teleport/lib/session"
     "github.com/gravitational/teleport/lib/limiter"
@@ -24,16 +26,95 @@ import (
     "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/web"
 
-    "github.com/stkim1/pcteleport/pcdefaults"
     "github.com/stkim1/pcteleport/pcconfig"
+    "github.com/stkim1/pcteleport/pcdefaults"
     "github.com/stkim1/pcteleport/pcauth"
+    "github.com/pborman/uuid"
     "golang.org/x/crypto/ssh"
 )
 
-const (
-    // SignedCertificateEvent is generated when a signed certificate is issued from auth server
-    SignedCertificateIssuedEvent = "RequestSignedCertificateIssued"
-)
+// NewTeleport takes the daemon configuration, instantiates all required services
+// and starts them under a supervisor, returning the supervisor object
+func NewCoreTeleport(cfg *pcconfig.Config) (*PocketCoreTeleportProcess, error) {
+    if err := pcconfig.ValidateCoreConfig(cfg); err != nil {
+        return nil, trace.Wrap(err, "Configuration error")
+    }
+
+    // create the data directory if it's missing
+    _, err := os.Stat(cfg.DataDir)
+    if os.IsNotExist(err) {
+        err := os.MkdirAll(cfg.DataDir, os.ModeDir|0700)
+        if err != nil {
+            return nil, trace.Wrap(err)
+        }
+    }
+
+    // if there's no host uuid initialized yet, try to read one from the
+    // one of the identities
+    cfg.HostUUID, err = utils.ReadHostUUID(cfg.DataDir)
+    if err != nil {
+        /*
+                TODO : need to look into IsNotFound Error to see what really happens
+                if !trace.IsNotFound(err) {
+                    return nil, trace.Wrap(err)
+                }
+        */
+        if len(cfg.Identities) != 0 {
+            cfg.HostUUID = cfg.Identities[0].ID.HostUUID
+            log.Infof("[INIT] taking host uuid from first identity: %v", cfg.HostUUID)
+        } else {
+            cfg.HostUUID = uuid.New()
+            log.Infof("[INIT] generating new host UUID: %v", cfg.HostUUID)
+        }
+        if err := utils.WriteHostUUID(cfg.DataDir, cfg.HostUUID); err != nil {
+            return nil, trace.Wrap(err)
+        }
+    }
+
+    // if user started auth and another service (without providing the auth address for
+    // that service, the address of the in-process auth will be used
+    if cfg.Auth.Enabled && len(cfg.AuthServers) == 0 {
+        cfg.AuthServers = []utils.NetAddr{cfg.Auth.SSHAddr}
+    }
+
+    // if user did not provide auth domain name, use this host UUID
+    if cfg.Auth.Enabled && cfg.Auth.DomainName == "" {
+        cfg.Auth.DomainName = cfg.HostUUID
+    }
+
+    // try to login into the auth service:
+
+    // if there are no certificates, use self signed
+    process := &PocketCoreTeleportProcess{
+        Supervisor: service.NewSupervisor(),
+        Config:     cfg,
+    }
+
+    serviceStarted := false
+
+    if cfg.Auth.Enabled {
+        if cfg.Keygen == nil {
+            cfg.Keygen = native.New()
+        }
+        if err := process.initAuthService(cfg.Keygen); err != nil {
+            return nil, trace.Wrap(err)
+        }
+        serviceStarted = true
+    }
+
+    if cfg.Proxy.Enabled {
+        if err := process.initProxy(); err != nil {
+            return nil, err
+        }
+        serviceStarted = true
+    }
+
+    if !serviceStarted {
+        return nil, trace.Errorf("all services failed to start")
+    }
+
+    return process, nil
+}
 
 // TeleportProcess structure holds the state of the Teleport daemon, controlling
 // execution and configuration of the teleport services: ssh, auth and proxy.
@@ -493,65 +574,6 @@ func (p *PocketCoreTeleportProcess) initProxy() error {
     return nil
 }
 
-func (p *PocketCoreTeleportProcess) initSSH() error {
-    eventsC := make(chan service.Event)
-
-    // register & generate a signed ssh pub/prv key set
-    p.RegisterWithAuthServer(p.Config.Token, teleport.RoleNode, service.SSHIdentityEvent)
-    p.WaitForEvent(service.SSHIdentityEvent, eventsC, make(chan struct{}))
-
-    // generates a signed certificate & private key for docker/registry
-    p.RequestSignedCertificateWithAuthServer(p.Config.Token, teleport.RoleNode, SignedCertificateIssuedEvent)
-    p.WaitForEvent(SignedCertificateIssuedEvent, eventsC, make(chan struct{}))
-
-    var s *srv.Server
-    p.RegisterFunc(func() error {
-        event := <-eventsC
-        log.Infof("[SSH] received %v", &event)
-        conn, ok := (event.Payload).(*service.Connector)
-        if !ok {
-            return trace.BadParameter("unsupported connector type: %T", event.Payload)
-        }
-
-        cfg := p.Config
-
-        limiter, err := limiter.NewLimiter(cfg.SSH.Limiter)
-        if err != nil {
-            return trace.Wrap(err)
-        }
-
-        s, err = srv.New(cfg.SSH.Addr,
-            cfg.Hostname,
-            []ssh.Signer{conn.Identity.KeySigner},
-            conn.Client,
-            cfg.DataDir,
-            cfg.AdvertiseIP,
-            srv.SetLimiter(limiter),
-            srv.SetShell(cfg.SSH.Shell),
-            srv.SetAuditLog(conn.Client),
-            srv.SetSessionServer(conn.Client),
-            srv.SetLabels(cfg.SSH.Labels, cfg.SSH.CmdLabels),
-        )
-        if err != nil {
-            return trace.Wrap(err)
-        }
-
-        utils.Consolef(cfg.Console, "[SSH]   Service is starting on %v", cfg.SSH.Addr.Addr)
-        if err := s.Start(); err != nil {
-            utils.Consolef(cfg.Console, "[SSH]   Error: %v", err)
-            return trace.Wrap(err)
-        }
-        s.Wait()
-        log.Infof("[SSH] node service exited")
-        return nil
-    })
-    // execute this when process is asked to exit:
-    p.onExit(func(payload interface{}) {
-        s.Close()
-    })
-    return nil
-}
-
 // RegisterWithAuthServer uses one time provisioning token obtained earlier
 // from the server to get a pair of SSH keys signed by Auth server host
 // certificate authority
@@ -597,7 +619,6 @@ func (p *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, role te
                 if token == "" {
                     return trace.BadParameter("%v must join a cluster and needs a provisioning token", role)
                 }
-                // TODO : move cfg.DataDir -> cfg.KeyCertDir
                 log.Infof("[Node] %v joining the cluster with a token %v", role, token)
                 err = auth.Register(cfg.DataDir, token, identityID, cfg.AuthServers)
             }
@@ -606,61 +627,6 @@ func (p *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, role te
                 time.Sleep(retryTime)
             } else {
                 utils.Consolef(cfg.Console, "[%v] Successfully registered with the cluster", role)
-                continue
-            }
-        }
-    })
-
-    p.onExit(func(interface{}) {
-        if authClient != nil {
-            authClient.Close()
-        }
-    })
-}
-
-// RequestSignedCertificateWithAuthServer uses one time provisioning token obtained earlier
-// from the server to get a pair of SSH keys signed by Auth server host
-// certificate authority
-func (p *PocketCoreTeleportProcess) RequestSignedCertificateWithAuthServer(token string, role teleport.Role, eventName string) {
-    cfg := p.Config
-    identityID := auth.IdentityID{Role: role, HostUUID: cfg.HostUUID}
-    log.Infof("RequestSignedCertificateWithAuthServer role %s cfg.HostUUID %s", role, cfg.HostUUID)
-
-    // this means the server has not been initialized yet, we are starting
-    // the registering client that attempts to connect to the auth server
-    // and provision the keys
-    var authClient *auth.TunClient
-    p.RegisterFunc(func() error {
-        retryTime := pcdefaults.ServerHeartbeatTTL / 3
-        for {
-            connector, err := p.connectToAuthService(role)
-            if err == nil {
-                p.BroadcastEvent(service.Event{Name: eventName, Payload: connector})
-                authClient = connector.Client
-                return nil
-            }
-            if trace.IsConnectionProblem(err) {
-                utils.Consolef(cfg.Console, "[%v] connecting to auth server: %v", role, err)
-                time.Sleep(retryTime)
-                continue
-            }
-/*
-            TODO : need to look into IsNotFound Error to see what really happens
-            if !trace.IsNotFound(err) {
-                return trace.Wrap(err)
-            }
-*/
-            // Auth server is remote, so we need a provisioning token
-            if token == "" {
-                return trace.BadParameter("%v must request a signed certificate and needs a provisioning token", role)
-            }
-            log.Infof("[Node] %v requesting a signed certificate with a token %v", role, token)
-            err = pcauth.RequestSignedCertificate(cfg, identityID, token)
-            if err != nil {
-                utils.Consolef(cfg.Console, "[%v] failed to receive a signed certificate : %v", role, err)
-                time.Sleep(retryTime)
-            } else {
-                utils.Consolef(cfg.Console, "[%v] Successfully received a signed certificate", role)
                 continue
             }
         }

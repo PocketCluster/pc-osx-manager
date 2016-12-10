@@ -8,8 +8,6 @@ import (
 type NodeProperty struct {
     // network ip address of current host
     IP4Addr    string
-    // key & cert save directory. This is where privatekey and cert will be saved
-    KeyCertDir string
     // docker ca pub path
     DockerAuthFile string
     // docker Key file path

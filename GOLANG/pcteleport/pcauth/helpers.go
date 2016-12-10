@@ -5,7 +5,6 @@ import (
     "time"
     "io/ioutil"
     "strings"
-    "path/filepath"
 
     "github.com/gravitational/teleport/lib/auth"
     log "github.com/Sirupsen/logrus"
@@ -43,27 +42,6 @@ func readToken(token string) (string, error) {
         return "", nil
     }
     return string(out), nil
-}
-
-// keysPath returns two full file paths: to the host.key and host.cert
-func keysPath(dataDir string, id auth.IdentityID) (key string, cert string) {
-    return filepath.Join(dataDir, fmt.Sprintf("%s.key", strings.ToLower(string(id.Role)))),
-        filepath.Join(dataDir, fmt.Sprintf("%s.cert", strings.ToLower(string(id.Role))))
-}
-
-// writeKeys saves the key/cert pair for a given domain onto disk. This usually means the
-// domain trusts us (signed our public key)
-func writeKeys(dataDir string, id auth.IdentityID, key []byte, cert []byte) error {
-    kp, cp := keysPath(dataDir, id)
-    log.Debugf("write key to %v, cert from %v", kp, cp)
-
-    if err := ioutil.WriteFile(kp, key, 0600); err != nil {
-        return err
-    }
-    if err := ioutil.WriteFile(cp, cert, 0600); err != nil {
-        return err
-    }
-    return nil
 }
 
 func writeDockerKeyAndCert(cfg *pcconfig.Config, keys *packedAuthKeyCert) error {
