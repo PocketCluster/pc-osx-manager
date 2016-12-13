@@ -90,29 +90,15 @@ func NewCoreTeleport(cfg *pcconfig.Config) (*PocketCoreTeleportProcess, error) {
         Config:     cfg,
     }
 
-    serviceStarted := false
-
-    if cfg.Auth.Enabled {
-        if cfg.Keygen == nil {
-            cfg.Keygen = native.New()
-        }
-        if err := process.initAuthService(cfg.Keygen); err != nil {
-            return nil, trace.Wrap(err)
-        }
-        serviceStarted = true
+    if cfg.Keygen == nil {
+        cfg.Keygen = native.New()
     }
-
-    if cfg.Proxy.Enabled {
-        if err := process.initProxy(); err != nil {
-            return nil, err
-        }
-        serviceStarted = true
+    if err := process.initAuthService(cfg.Keygen); err != nil {
+        return nil, trace.Wrap(err)
     }
-
-    if !serviceStarted {
-        return nil, trace.Errorf("all services failed to start")
+    if err := process.initProxy(); err != nil {
+        return nil, err
     }
-
     return process, nil
 }
 
@@ -209,10 +195,9 @@ func (p *PocketCoreTeleportProcess) onExit(callback func(interface{})) {
     }()
 }
 
-
 // initAuthStorage initializes the storage backend for the auth. service
-func (process *PocketCoreTeleportProcess) initAuthStorage() (backend.Backend, error) {
-    cfg := &process.Config.Auth
+func (p *PocketCoreTeleportProcess) initAuthStorage() (backend.Backend, error) {
+    cfg := &p.Config.Auth
     var bk backend.Backend
     var err error
 
@@ -600,7 +585,6 @@ func (p *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, role te
                 time.Sleep(retryTime)
                 continue
             }
-
 /*
             TODO : need to look into IsNotFound Error to see what really happens
             if !trace.IsNotFound(err) {

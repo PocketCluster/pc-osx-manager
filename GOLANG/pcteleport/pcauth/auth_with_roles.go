@@ -13,6 +13,7 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/gravitational/trace"
     "github.com/stkim1/pcrypto"
+    "github.com/gravitational/teleport/lib/services"
 )
 
 type authWithRoles struct {
@@ -99,5 +100,25 @@ func createSignedCertificate(caSigner *pcrypto.CaSigner, req *signedCertificateR
         Auth: a,
         Key:  k,
         Cert: c,
+    }, nil
+}
+
+// signup token data
+// TODO : apply encryption
+type signupTokenPack struct {
+    SignupToken   *services.SignupToken    `json:"signuptokendata"`
+}
+
+func (a *authWithRoles) releaseSignupToken(signupToken string) (*signupTokenPack, error) {
+    // TODO : add action perm for getting signup token data
+    if err := a.permChecker.HasPermission(a.role, auth.ActionCreateUserWithToken); err != nil {
+        return nil, trace.Wrap(err)
+    }
+    tokenData, err := a.authServer.Identity.GetSignupToken(signupToken)
+    if err != nil {
+        return nil, trace.Wrap(err)
+    }
+    return &signupTokenPack{
+        SignupToken:    tokenData,
     }, nil
 }

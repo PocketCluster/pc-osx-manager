@@ -1,7 +1,6 @@
 package main
 
 import (
-    "time"
     "log"
 
     "github.com/stkim1/pcteleport"
@@ -13,9 +12,5 @@ func main() {
     err := pcteleport.StartCoreTeleport(true)
     if err != nil {
         log.Printf("[ERR] %s", err.Error())
-    }
-
-    for {
-        time.Sleep(time.Second)
     }
 }

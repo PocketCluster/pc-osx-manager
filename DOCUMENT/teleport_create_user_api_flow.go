@@ -144,6 +144,10 @@ cmdUsers := UserCommand{config: cfg}
 // -- BEGIN SERVER -- //
 srv.POST("/v1/signuptokens", httplib.MakeHandler(srv.createSignupToken))
 
+type createSignupTokenReqRaw struct {
+	User json.RawMessage `json:"user"`
+}
+
 func (s *APIServer) CreateSignupToken(w http.ResponseWriter, r *http.Request, p httprouter.Params) (interface{}, error) {
 	var req *createSignupTokenReqRaw
 	if err := httplib.ReadJSON(r, &req); err != nil {
@@ -160,28 +164,26 @@ func (s *APIServer) CreateSignupToken(w http.ResponseWriter, r *http.Request, p 
 	return token, nil
 }
 
+	// TeleportUser is an optional user entry in the database
+	type TeleportUser struct {
+		// Name is a user name
+		Name string `json:"name"`
+
+		// AllowedLogins represents a list of OS users this teleport
+		// user is allowed to login as
+		AllowedLogins []string `json:"allowed_logins"`
+
+		// OIDCIdentities lists associated OpenID Connect identities
+		// that let user log in using externally verified identity
+		OIDCIdentities []OIDCIdentity `json:"oidc_identities"`
+	}
+
 	func (a *AuthWithRoles) CreateSignupToken(user services.User) (token string, e error) {
 		if err := a.permChecker.HasPermission(a.role, ActionCreateSignupToken); err != nil {
 			return "", trace.Wrap(err)
 		}
 		return a.authServer.CreateSignupToken(user)
-
 	}
-
-		// TeleportUser is an optional user entry in the database
-		type TeleportUser struct {
-			// Name is a user name
-			Name string `json:"name"`
-
-			// AllowedLogins represents a list of OS users this teleport
-			// user is allowed to login as
-			AllowedLogins []string `json:"allowed_logins"`
-
-			// OIDCIdentities lists associated OpenID Connect identities
-			// that let user log in using externally verified identity
-			OIDCIdentities []OIDCIdentity `json:"oidc_identities"`
-		}
-
 		// CreateSignupToken creates one time token for creating account for the user
 		// For each token it creates username and hotp generator
 		//
@@ -306,9 +308,14 @@ newUser: '/web/newuser/:inviteToken',
 createUserPath: '/v1/webapi/users',
 
 // -- BEGIN WEB API -- // (lib/web/web.go)
-
 h.POST("/webapi/users", httplib.MakeHandler(h.createNewUser))
 
+// createNewUser req is a request to create a new Teleport user
+type createNewUserReq struct {
+	InviteToken       string `json:"invite_token"`
+	Pass              string `json:"pass"`
+	SecondFactorToken string `json:"second_factor_token"`
+}
 // createNewUser creates new user entry based on the invite token
 //
 // POST /v1/webapi/users
@@ -349,6 +356,50 @@ func (m *Handler) createNewUser(w http.ResponseWriter, r *http.Request, p httpro
 		defer clt.Close()
 		sess, err := clt.CreateUserWithToken(token, password, hotpToken)
 		return sess, trace.Wrap(err)
+	}
+
+	func (s *sessionCache) ValidateSession(user, sid string) (*SessionContext, error) {
+		ctx, err := s.getContext(user, sid)
+		if err == nil {
+			return ctx, nil
+		}
+		log.Debugf("ValidateSession(%s, %s)", user, sid)
+		method, err := auth.NewWebSessionAuth(user, []byte(sid))
+		if err != nil {
+			return nil, trace.Wrap(err)
+		}
+		// Note: do not close this auth API client now. It will exist inside of "session context"
+		clt, err := auth.NewTunClient("web.session-user", s.authServers, user, method)
+		if err != nil {
+			return nil, trace.Wrap(err)
+		}
+		sess, err := clt.GetWebSessionInfo(user, sid)
+		if err != nil {
+			return nil, trace.Wrap(err)
+		}
+		c := &SessionContext{
+			clt:    clt,
+			user:   user,
+			sess:   sess,
+			parent: s,
+		}
+		c.Entry = log.WithFields(log.Fields{
+			"user": user,
+			"sess": sess.ID[:4],
+		})
+
+		out, err := s.insertContext(user, sid, c, auth.WebSessionTTL)
+		if err != nil {
+			// this means that someone has just inserted the context, so
+			// close our extra context and return
+			if trace.IsAlreadyExists(err) {
+				log.Infof("just created, returning the existing one")
+				defer c.Close()
+				return out, nil
+			}
+			return nil, trace.Wrap(err)
+		}
+		return out, nil
 	}
 
 		// NewTunClient returns an instance of new HTTP client to Auth server API
@@ -420,6 +471,8 @@ func (m *Handler) createNewUser(w http.ResponseWriter, r *http.Request, p httpro
 				return httplib.ConvertResponse(c.Client.PostJSON(endpoint, val))
 			}
 // -- END WEB API -- // (lib/web/web.go)
+
+
 
 // -- BEGIN SERVER -- // (lib/auth/apiserver.go)
 /*				
@@ -502,17 +555,17 @@ func (s *APIServer) createUserWithToken(w http.ResponseWriter, r *http.Request, 
 				return nil, trace.BadParameter("wrong HOTP token")
 			}
 
-			_, _, err = s.UpsertPassword(tokenData.User.GetName(), []byte(password))
+*			_, _, err = s.UpsertPassword(tokenData.User.GetName(), []byte(password))
 			if err != nil {
 				return nil, trace.Wrap(err)
 			}
 
 			// apply user allowed logins
-			if err = s.UpsertUser(&tokenData.User); err != nil {
+*			if err = s.UpsertUser(&tokenData.User); err != nil {
 				return nil, trace.Wrap(err)
 			}
 
-			err = s.UpsertHOTP(tokenData.User.GetName(), otp)
+-			err = s.UpsertHOTP(tokenData.User.GetName(), otp)
 			if err != nil {
 				return nil, trace.Wrap(err)
 			}
@@ -537,55 +590,97 @@ func (s *APIServer) createUserWithToken(w http.ResponseWriter, r *http.Request, 
 			return sess, nil
 		}
 
-	func (s *sessionCache) ValidateSession(user, sid string) (*SessionContext, error) {
-		ctx, err := s.getContext(user, sid)
-		if err == nil {
-			return ctx, nil
-		}
-		log.Debugf("ValidateSession(%s, %s)", user, sid)
-		method, err := auth.NewWebSessionAuth(user, []byte(sid))
-		if err != nil {
-			return nil, trace.Wrap(err)
-		}
-		// Note: do not close this auth API client now. It will exist inside of "session context"
-		clt, err := auth.NewTunClient("web.session-user", s.authServers, user, method)
-		if err != nil {
-			return nil, trace.Wrap(err)
-		}
-		sess, err := clt.GetWebSessionInfo(user, sid)
-		if err != nil {
-			return nil, trace.Wrap(err)
-		}
-		c := &SessionContext{
-			clt:    clt,
-			user:   user,
-			sess:   sess,
-			parent: s,
-		}
-		c.Entry = log.WithFields(log.Fields{
-			"user": user,
-			"sess": sess.ID[:4],
-		})
+			// UpsertPassword upserts new password and HOTP token
+			func (s *IdentityService) UpsertPassword(user string,
+				password []byte) (hotpURL string, hotpQR []byte, err error) {
 
-		out, err := s.insertContext(user, sid, c, auth.WebSessionTTL)
-		if err != nil {
-			// this means that someone has just inserted the context, so
-			// close our extra context and return
-			if trace.IsAlreadyExists(err) {
-				log.Infof("just created, returning the existing one")
-				defer c.Close()
-				return out, nil
+				if err := services.VerifyPassword(password); err != nil {
+					return "", nil, err
+				}
+				hash, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+				if err != nil {
+					return "", nil, trace.Wrap(err)
+				}
+
+				otp, err := hotp.GenerateHOTP(defaults.HOTPTokenDigits, false)
+				if err != nil {
+					return "", nil, trace.Wrap(err)
+				}
+				hotpQR, err = otp.QR(user)
+				if err != nil {
+					return "", nil, trace.Wrap(err)
+				}
+				hotpURL = otp.URL(user)
+				if err != nil {
+					return "", nil, trace.Wrap(err)
+				}
+
+				err = s.UpsertPasswordHash(user, hash)
+				if err != nil {
+					return "", nil, err
+				}
+				err = s.UpsertHOTP(user, otp)
+				if err != nil {
+					return "", nil, trace.Wrap(err)
+				}
+				return hotpURL, hotpQR, nil
 			}
-			return nil, trace.Wrap(err)
-		}
-		return out, nil
-	}
+
+			// UpsertUser updates parameters about user
+			func (s *IdentityService) UpsertUser(user services.User) error {
+				if !cstrings.IsValidUnixUser(user.GetName()) {
+					return trace.BadParameter("'%v is not a valid unix username'", user.GetName())
+				}
+
+				for _, l := range user.GetAllowedLogins() {
+					if !cstrings.IsValidUnixUser(l) {
+						return trace.BadParameter("'%v is not a valid unix username'", l)
+					}
+				}
+				for _, i := range user.GetIdentities() {
+					if err := i.Check(); err != nil {
+						return trace.Wrap(err)
+					}
+				}
+				data, err := json.Marshal(user)
+				if err != nil {
+					return trace.Wrap(err)
+				}
+
+				err = s.backend.UpsertVal([]string{"web", "users", user.GetName()}, "params", []byte(data), backend.Forever)
+				if err != nil {
+					return trace.Wrap(err)
+				}
+				return nil
+			}
 // -- END SERVER -- //
 
 //// ---- END TELEPORT SERVER USER APPROVAL ---- ////
 
 
+
+
+
+//// ---- BEGIN SERVER UPSERT USER SESSION ---- ////
+// UpsertUser user updates or inserts user entry
+func (c *Client) UpsertUser(user services.User) error {
+	_, err := c.PostJSON(c.Endpoint("users"), upsertUserReq{User: user})
+	return trace.Wrap(err)
+}
+
+// -- BEGIN USER SESSION SERVER --- //
 srv.POST("/v1/users", httplib.MakeHandler(srv.upsertUser))
+//srv.POST("/v1/users/:user/web/password", httplib.MakeHandler(srv.upsertPassword))
+//srv.POST("/v1/users/:user/web/password/check", httplib.MakeHandler(srv.checkPassword))
+
+//** srv.POST("/v1/users/:user/web/signin", httplib.MakeHandler(srv.signIn))
+//srv.POST("/v1/users/:user/web/sessions", httplib.MakeHandler(srv.createWebSession))
+
+/* search for c.Endpoint("users" */
+
+type upsertUserReqRaw struct {
+	User json.RawMessage `json:"user"`
+}
 
 func (s *APIServer) upsertUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) (interface{}, error) {
 	var req *upsertUserReqRaw
@@ -612,6 +707,7 @@ func (s *APIServer) upsertUser(w http.ResponseWriter, r *http.Request, p httprou
 
 		// UpsertUser updates parameters about user
 		func (s *IdentityService) UpsertUser(user services.User) error {
+
 			if !cstrings.IsValidUnixUser(user.GetName()) {
 				return trace.BadParameter("'%v is not a valid unix username'", user.GetName())
 			}
@@ -637,7 +733,218 @@ func (s *APIServer) upsertUser(w http.ResponseWriter, r *http.Request, p httprou
 			}
 			return nil
 		}
+// -- BEGIN USER SESSION SERVER --- //
+
+//// ---- BEGIN SERVER UPSERT USER SESSION ---- ////
 
 
 
 
+////
+/* this is done for testing. It might be removed in the future by gravitation */
+func (s *APISuite) TestGenerateKeysAndCerts(c *C) {
+	priv, pub, err := s.clt.GenerateKeyPair("")
+	c.Assert(err, IsNil)
+
+	// make sure we can parse the private and public key
+	_, err = ssh.ParsePrivateKey(priv)
+	c.Assert(err, IsNil)
+
+	_, _, _, _, err = ssh.ParseAuthorizedKey(pub)
+	c.Assert(err, IsNil)
+
+	c.Assert(s.clt.UpsertCertAuthority(*suite.NewTestCA(services.HostCA, "localhost"), backend.Forever), IsNil)
+
+	_, pub, err = s.clt.GenerateKeyPair("")
+	c.Assert(err, IsNil)
+
+	// make sure we can parse the private and public key
+	cert, err := s.clt.GenerateHostCert(pub, "localhost", "localhost", teleport.Roles{teleport.RoleNode}, time.Hour)
+	c.Assert(err, IsNil)
+
+	_, _, _, _, err = ssh.ParseAuthorizedKey(cert)
+	c.Assert(err, IsNil)
+
+	c.Assert(s.clt.UpsertCertAuthority(*suite.NewTestCA(services.UserCA, "localhost"), backend.Forever), IsNil)
+
+	_, pub, err = s.clt.GenerateKeyPair("")
+	c.Assert(err, IsNil)
+
+	err = s.clt.UpsertUser(&services.TeleportUser{Name: "user1", AllowedLogins: []string{"user1"}})
+	c.Assert(err, IsNil)
+
+	userServer := NewAPIServer(&APIConfig{
+		AuthServer:        s.a,
+		PermissionChecker: NewAllowAllPermissions(),
+		SessionService:    s.sessions,
+		AuditLog:          s.alog,
+	}, teleport.RoleUser)
+
+	authServer := httptest.NewServer(&userServer)
+	defer authServer.Close()
+
+	userClient, err := NewClient(authServer.URL, nil)
+	c.Assert(err, IsNil)
+
+	// should NOT be able to generate a user cert without basic HTTP auth
+	cert, err = userClient.GenerateUserCert(pub, "user1", time.Hour)
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, ".*username or password")
+
+	// Users don't match
+	roundtrip.BasicAuth("user2", "two")(&userClient.Client)
+	cert, err = userClient.GenerateUserCert(pub, "user1", time.Hour)
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, ".*cannot request a certificate for user1")
+
+	// apply HTTP Auth to generate user cert:
+	roundtrip.BasicAuth("user1", "two")(&userClient.Client)
+	cert, err = userClient.GenerateUserCert(pub, "user1", time.Hour)
+	c.Assert(err, IsNil)
+
+	_, _, _, _, err = ssh.ParseAuthorizedKey(cert)
+	c.Assert(err, IsNil)
+}
+
+func (s *TunSuite) TestWebCreatingNewUser(c *C) {
+	c.Assert(s.a.UpsertCertAuthority(*suite.NewTestCA(services.UserCA, "localhost"), backend.Forever), IsNil)
+
+	user := "user456"
+	user2 := "zxzx"
+	user3 := "wrwr"
+
+	mappings := []string{"admin", "db"}
+
+	// Generate token
+	token, err := s.a.CreateSignupToken(&services.TeleportUser{Name: user, AllowedLogins: mappings})
+	c.Assert(err, IsNil)
+	// Generate token2
+	token2, err := s.a.CreateSignupToken(&services.TeleportUser{Name: user2, AllowedLogins: mappings})
+	c.Assert(err, IsNil)
+	// Generate token3
+	token3, err := s.a.CreateSignupToken(&services.TeleportUser{Name: user3, AllowedLogins: mappings})
+	c.Assert(err, IsNil)
+
+	// Connect to auth server using wrong token
+	authMethod0, err := NewSignupTokenAuth("some_wrong_token")
+	c.Assert(err, IsNil)
+
+	clt0, err := NewTunClient("test",[]utils.NetAddr{{AddrNetwork: "tcp", Addr: s.tsrv.Addr()}}, user, authMethod0)
+	c.Assert(err, IsNil)
+	_, _, _, err = clt0.GetSignupTokenData(token2)
+	c.Assert(err, NotNil) // valid token, but invalid client
+
+	// Connect to auth server using valid token
+	authMethod, err := NewSignupTokenAuth(token)
+	c.Assert(err, IsNil)
+
+	clt, err := NewTunClient("test", []utils.NetAddr{{AddrNetwork: "tcp", Addr: s.tsrv.Addr()}}, user, authMethod)
+	c.Assert(err, IsNil)
+	defer clt.Close()
+
+	// User will scan QRcode, here we just loads the OTP generator
+	// right from the backend
+	tokenData, err := s.a.Identity.GetSignupToken(token)
+	c.Assert(err, IsNil)
+	otp, err := hotp.Unmarshal(tokenData.Hotp)
+	c.Assert(err, IsNil)
+
+	hotpTokens := make([]string, defaults.HOTPFirstTokensRange)
+	for i := 0; i < defaults.HOTPFirstTokensRange; i++ {
+		hotpTokens[i] = otp.OTP()
+	}
+
+	tokenData3, err := s.a.Identity.GetSignupToken(token3)
+	c.Assert(err, IsNil)
+	otp3, err := hotp.Unmarshal(tokenData3.Hotp)
+	c.Assert(err, IsNil)
+
+	hotpTokens3 := make([]string, defaults.HOTPFirstTokensRange+1)
+	for i := 0; i < defaults.HOTPFirstTokensRange+1; i++ {
+		hotpTokens3[i] = otp3.OTP()
+	}
+
+	// Loading what the web page loads (username and QR image)
+	_, _, _, err = clt.GetSignupTokenData("wrong_token")
+	c.Assert(err, NotNil)
+
+	_, err = clt.GetUsers() //no permissions
+	c.Assert(err, NotNil)
+
+	user1, _, _, err := clt.GetSignupTokenData(token)
+	c.Assert(err, IsNil)
+	c.Assert(user, Equals, user1)
+
+	// Saving new password
+	clt2, err := NewTunClient("test",[]utils.NetAddr{{AddrNetwork: "tcp", Addr: s.tsrv.Addr()}}, user, authMethod)
+	c.Assert(err, IsNil)
+	defer clt2.Close()
+
+	password := "valid_password"
+
+	_, err = clt2.CreateUserWithToken(token, password, hotpTokens[0])
+	c.Assert(err, IsNil)
+
+	_, err = clt2.CreateUserWithToken(token, "another_user_signup_attempt", hotpTokens[0])
+	c.Assert(err, NotNil)
+
+	_, err = s.a.Identity.GetSignupToken(token)
+	c.Assert(err, NotNil) // token was deleted
+
+	// token out of scan range
+	_, err = clt2.CreateUserWithToken(token3, "newpassword123", hotpTokens3[defaults.HOTPFirstTokensRange])
+	c.Assert(err, NotNil)
+
+	_, err = clt2.CreateUserWithToken(token3, "newpassword45665", hotpTokens3[2])
+	c.Assert(err, IsNil)
+
+	// trying to connect to the auth server using used token
+	clt0, err = NewTunClient("test",[]utils.NetAddr{{AddrNetwork: "tcp", Addr: s.tsrv.Addr()}}, user, authMethod)
+	c.Assert(err, IsNil) // shouldn't accept such connection twice
+	_, _, _, err = clt0.GetSignupTokenData(token2)
+	c.Assert(err, NotNil) // valid token, but invalid client
+
+	// User was created. Now trying to login
+	authMethod3, err := NewWebPasswordAuth(user, []byte(password), hotpTokens[1])
+	c.Assert(err, IsNil)
+
+	clt3, err := NewTunClient("test",[]utils.NetAddr{{AddrNetwork: "tcp", Addr: s.tsrv.Addr()}}, user, authMethod3)
+	c.Assert(err, IsNil)
+	defer clt3.Close()
+
+	ws, err := clt3.SignIn(user, []byte(password))
+	c.Assert(err, IsNil)
+	c.Assert(ws, Not(Equals), "")
+}
+
+func (s *TunSuite) TestSessionsBadPassword(c *C) {
+	c.Assert(s.a.UpsertCertAuthority(
+		*suite.NewTestCA(services.UserCA, "localhost"), backend.Forever), IsNil)
+
+	user := "system-test"
+	pass := []byte("system-abc123")
+
+	hotpURL, _, err := s.a.UpsertPassword(user, pass)
+	c.Assert(err, IsNil)
+
+	otp, label, err := hotp.FromURL(hotpURL)
+	c.Assert(err, IsNil)
+	c.Assert(label, Equals, "system-test")
+	otp.Increment()
+
+	authMethod, err := NewWebPasswordAuth(user, pass, otp.OTP())
+	c.Assert(err, IsNil)
+
+	clt, err := NewTunClient("test",
+		[]utils.NetAddr{{AddrNetwork: "tcp", Addr: s.tsrv.Addr()}}, user, authMethod)
+	c.Assert(err, IsNil)
+	defer clt.Close()
+
+	ws, err := clt.SignIn(user, []byte("different-pass"))
+	c.Assert(err, NotNil)
+	c.Assert(ws, IsNil)
+
+	ws, err = clt.SignIn("not-exists", pass)
+	c.Assert(err, NotNil)
+	c.Assert(ws, IsNil)
+}

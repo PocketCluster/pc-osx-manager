@@ -53,8 +53,8 @@ func applyCoreDefaults(cfg *Config, context context.HostContext, debug bool) {
     cfg.SeedConfig              = false
 
     // defaults for the auth service:
-    cfg.AuthServers             = []utils.NetAddr{*pcdefaults.AuthConnectAddr()}
     cfg.Auth.Enabled            = true
+    cfg.AuthServers             = []utils.NetAddr{*pcdefaults.AuthConnectAddr()}
     cfg.Auth.SSHAddr            = *pcdefaults.AuthListenAddr()
     cfg.Auth.EventsBackend.Type = pcdefaults.CoreBackendType
     cfg.Auth.EventsBackend.Params = dbParams(dataDir, pcdefaults.CoreEventsSqliteFile)
