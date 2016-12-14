@@ -313,7 +313,7 @@ func (s *AuthTunnel) onAPIConnection(sconn *ssh.ServerConn, sshChan ssh.Channel,
     // Since PocketCluster API is an addition to existing api, we'll handle normal request in NotFound functions
     pcapi := NewPocketAPIServer(s.config, s.caSigner, role, func(w http.ResponseWriter, r *http.Request){
         // TODO : handle log propery. (Save, collect, whatever necessary)
-        log.Infof("[AUTH] PocketCluster API does not exists %v", r.RequestURI)
+        // log.Infof("[AUTH] PocketCluster API does not exists %v", r.RequestURI)
         api.ServeHTTP(w, r)
     })
 

@@ -67,7 +67,7 @@ func applyCoreDefaults(cfg *Config, context context.HostContext, debug bool) {
     // defaults for the SSH proxy service:
     cfg.Proxy.Enabled           = true
     // disable web ui as it's not necessary
-    cfg.Proxy.DisableWebUI      = true
+    cfg.Proxy.DisableWebUI      = false
     cfg.Proxy.AssetsDir         = dataDir
     cfg.Proxy.SSHAddr           = *pcdefaults.ProxyListenAddr()
     cfg.Proxy.WebAddr           = *pcdefaults.ProxyWebListenAddr()

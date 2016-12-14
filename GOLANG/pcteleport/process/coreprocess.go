@@ -1,13 +1,15 @@
 package process
 
 import (
-    "os"
-    "net"
+    "crypto/tls"
     "fmt"
-    "time"
-    "sync"
+    "net"
     "net/http"
     "path/filepath"
+    "os"
+    "sync"
+    "time"
+    "io/ioutil"
 
     log "github.com/Sirupsen/logrus"
     "github.com/gravitational/trace"
@@ -530,16 +532,13 @@ func (p *PocketCoreTeleportProcess) initProxyEndpoint(conn *service.Connector) e
 //    3. take care of revse tunnels
 func (p *PocketCoreTeleportProcess) initProxy() error {
     // TODO : (11/28/2016) TLS Certificate should be generated in pc-core context initiation
-    /*
     // if no TLS key was provided for the web UI, generate a self signed cert
-    if process.Config.Proxy.TLSKey == "" && !process.Config.Proxy.DisableWebUI {
-        //err := initSelfSignedHTTPSCert(process.Config)
-        var err error = nil
+    if p.Config.Proxy.TLSKey == "" && !p.Config.Proxy.DisableWebUI {
+        err := initSelfSignedHTTPSCert(p.Config)
         if err != nil {
             return trace.Wrap(err)
         }
     }
-    */
 
     p.RegisterWithAuthServer(p.Config.Token, teleport.RoleProxy, service.ProxyIdentityEvent)
 
@@ -622,15 +621,13 @@ func (p *PocketCoreTeleportProcess) RegisterWithAuthServer(token string, role te
     })
 }
 
-
-/*
 // initSelfSignedHTTPSCert generates and self-signs a TLS key+cert pair for https connection
 // to the proxy server.
-func initSelfSignedHTTPSCert(cfg *Config) (err error) {
+func initSelfSignedHTTPSCert(cfg *pcconfig.Config) (err error) {
 	log.Warningf("[CONFIG] NO TLS Keys provided, using self signed certificate")
 
-	keyPath := filepath.Join(cfg.DataDir, defaults.SelfSignedKeyPath)
-	certPath := filepath.Join(cfg.DataDir, defaults.SelfSignedCertPath)
+	keyPath := filepath.Join(cfg.DataDir, pcdefaults.SelfSignedKeyPath)
+	certPath := filepath.Join(cfg.DataDir, pcdefaults.SelfSignedCertPath)
 
 	cfg.Proxy.TLSKey = keyPath
 	cfg.Proxy.TLSCert = certPath
@@ -658,4 +655,3 @@ func initSelfSignedHTTPSCert(cfg *Config) (err error) {
 	}
 	return nil
 }
- */
