@@ -38,6 +38,11 @@ import (
     "github.com/stkim1/pcrypto"
 )
 
+const (
+    AuthAESEncryption = "aesencrypt"
+)
+
+
 // AuthTunnel listens on TCP/IP socket and accepts SSH connections. It then establishes
 // an SSH tunnell which HTTP requests travel over. In other words, the Auth Service API
 // runs on HTTP-via-SSH-tunnel.
@@ -401,6 +406,20 @@ func (s *AuthTunnel) passwordAuth(
     log.Infof("[AUTH] login attempt: user '%v' type '%v'", conn.User(), ab.Type)
 
     switch ab.Type {
+    case AuthAESEncryption:
+        // TODO : need to check if AES encrypted data is fully decrypted w/o error
+        if err := s.authServer.CheckPasswordWOToken(conn.User(), ab.Pass); err != nil {
+            log.Warningf("password auth error: %#v", err)
+            return nil, trace.Wrap(err)
+        }
+        perms := &ssh.Permissions{
+            Extensions: map[string]string{
+                auth.ExtWebPassword: "<password>",
+                auth.ExtRole:        string(teleport.RoleUser),
+            },
+        }
+        log.Infof("[AUTH] AES Encryption authenticated user: '%v'", conn.User())
+        return perms, nil
     case auth.AuthWebPassword:
         if err := s.authServer.CheckPassword(conn.User(), ab.Pass, ab.HotpToken); err != nil {
             log.Warningf("password auth error: %#v", err)
@@ -467,4 +486,17 @@ type authBucket struct {
     Type      string `json:"type"`
     Pass      []byte `json:"pass"`
     HotpToken string `json:"hotpToken"`
+}
+
+func NewWebAESEncryptionAuth(user string, password []byte, encrypted string) ([]ssh.AuthMethod, error) {
+    data, err := json.Marshal(authBucket{
+        Type:      AuthAESEncryption,
+        User:      user,
+        Pass:      password,
+        HotpToken: encrypted,
+    })
+    if err != nil {
+        return nil, err
+    }
+    return []ssh.AuthMethod{ssh.Password(string(data))}, nil
 }

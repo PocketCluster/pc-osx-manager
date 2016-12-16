@@ -26,11 +26,11 @@ import (
     "github.com/gravitational/teleport/lib/reversetunnel"
     "github.com/gravitational/teleport/lib/srv"
     "github.com/gravitational/teleport/lib/service"
-    "github.com/gravitational/teleport/lib/web"
 
     "github.com/stkim1/pcteleport/pcconfig"
     "github.com/stkim1/pcteleport/pcdefaults"
     "github.com/stkim1/pcteleport/pcauth"
+    "github.com/stkim1/pcteleport/pcweb"
     "github.com/pborman/uuid"
     "golang.org/x/crypto/ssh"
 )
@@ -449,8 +449,8 @@ func (p *PocketCoreTeleportProcess) initProxyEndpoint(conn *service.Connector) e
     if !p.Config.Proxy.DisableWebUI {
         p.RegisterFunc(func() error {
             utils.Consolef(cfg.Console, "[PROXY] Web proxy service is starting on %v", cfg.Proxy.WebAddr.Addr)
-            webHandler, err := web.NewHandler(
-                web.Config{
+            webHandler, err := pcweb.NewHandler(
+                pcweb.Config{
                     Proxy:       tsrv,
                     AssetsDir:   cfg.Proxy.AssetsDir,
                     AuthServers: cfg.AuthServers[0],

@@ -17,7 +17,6 @@ limitations under the License.
 package pcclient
 
 import (
-    "bufio"
     "crypto/x509"
     "encoding/pem"
     "fmt"
@@ -26,26 +25,24 @@ import (
     "net"
     "os"
     "os/exec"
-    "os/signal"
     "os/user"
     "path/filepath"
     "strconv"
     "strings"
-    "syscall"
 
+    log "github.com/Sirupsen/logrus"
+    "github.com/gravitational/trace"
     "github.com/gravitational/teleport/lib/auth/native"
     "github.com/gravitational/teleport/lib/client"
     "github.com/gravitational/teleport/lib/services"
     "github.com/gravitational/teleport/lib/session"
     "github.com/gravitational/teleport/lib/utils"
-    "github.com/gravitational/teleport/lib/web"
 
-    log "github.com/Sirupsen/logrus"
-    "github.com/gravitational/trace"
+    "github.com/stkim1/pcteleport/pcdefaults"
+    "github.com/stkim1/pcteleport/pcweb"
+
     "golang.org/x/crypto/ssh"
     "golang.org/x/crypto/ssh/agent"
-    "golang.org/x/crypto/ssh/terminal"
-    "github.com/stkim1/pcteleport/pcdefaults"
 )
 
 // TeleportClient is a wrapper around SSH client with teleport specific
@@ -110,7 +107,7 @@ func NewPocketClient(c *client.Config) (tc *PocketClient, err error) {
     if tc.HostKeyCallback == nil {
         tc.HostKeyCallback = tc.localAgent.CheckHostSignature
     }
-/*
+
     // sometimes we need to use external auth without using local auth
     // methods, e.g. in automation daemons
     if c.SkipLocalAuth {
@@ -120,7 +117,8 @@ func NewPocketClient(c *client.Config) (tc *PocketClient, err error) {
         return tc, nil
     }
 
-    // we're not going to use ssh agent
+    // TODO add auth method based on pocketcluster auth protocol. we're not going to use ssh agent
+/*
     // first, see if we can authenticate with credentials stored in
     // a local SSH agent:
     if sshAgent := connectToSSHAgent(); sshAgent != nil {
@@ -584,10 +582,19 @@ func (tc *PocketClient) Login() error {
         return trace.Wrap(err)
     }
 
-    var response *web.SSHLoginResponse
-    response, err = tc.directLogin(key.Pub)
-    if err != nil {
-        return trace.Wrap(err)
+    var response *pcweb.SSHLoginResponse
+    if tc.ConnectorID == "" {
+        response, err = tc.directLogin(key.Pub)
+        if err != nil {
+            return trace.Wrap(err)
+        }
+    } else {
+        response, err = tc.oidcLogin(tc.ConnectorID, key.Pub)
+        if err != nil {
+            return trace.Wrap(err)
+        }
+        // in this case identity is returned by the proxy
+        tc.Username = response.Username
     }
     key.Cert = response.Cert
     // save the key:
@@ -636,26 +643,23 @@ func (tc *PocketClient) AddKey(host string, key *Key) error {
 }
 
 // directLogin asks for a password + HOTP token, makes a request to CA via proxy
-func (tc *PocketClient) directLogin(pub []byte) (*web.SSHLoginResponse, error) {
+func (tc *PocketClient) directLogin(pub []byte) (*pcweb.SSHLoginResponse, error) {
     httpsProxyHostPort := tc.Config.ProxyHostPort(true)
     certPool := loopbackPool(httpsProxyHostPort)
 
     // ping the HTTPs endpoint first:
-    if err := web.Ping(httpsProxyHostPort, tc.InsecureSkipVerify, certPool); err != nil {
+    if err := pcweb.Ping(httpsProxyHostPort, tc.InsecureSkipVerify, certPool); err != nil {
         return nil, trace.Wrap(err)
     }
 
-    // TODO we'll get the password and htopToken rightway
-    password, hotpToken, err := tc.AskPasswordAndHOTP()
-    if err != nil {
-        return nil, trace.Wrap(err)
-    }
+    // TODO : what do we do for password section?
+    var password, encrypted string = "1524rmfo", "aes-encrypted-message"
 
     // ask the CA (via proxy) to sign our public key:
-    response, err := web.SSHAgentLogin(httpsProxyHostPort,
+    response, err := pcweb.SSHAgentLoginWithAES(httpsProxyHostPort,
         tc.Config.Username,
         password,
-        hotpToken,
+        encrypted,
         pub,
         tc.KeyTTL,
         tc.InsecureSkipVerify,
@@ -664,12 +668,13 @@ func (tc *PocketClient) directLogin(pub []byte) (*web.SSHLoginResponse, error) {
     return response, trace.Wrap(err)
 }
 
+
 // oidcLogin opens browser window and uses OIDC redirect cycle with browser
-func (tc *PocketClient) oidcLogin(connectorID string, pub []byte) (*web.SSHLoginResponse, error) {
+func (tc *PocketClient) oidcLogin(connectorID string, pub []byte) (*pcweb.SSHLoginResponse, error) {
     log.Infof("oidcLogin start")
     // ask the CA (via proxy) to sign our public key:
     webProxyAddr := tc.Config.ProxyHostPort(true)
-    response, err := web.SSHAgentOIDCLogin(webProxyAddr,
+    response, err := pcweb.SSHAgentOIDCLogin(webProxyAddr,
         connectorID, pub, tc.KeyTTL, tc.InsecureSkipVerify, loopbackPool(webProxyAddr))
     return response, trace.Wrap(err)
 }
@@ -708,6 +713,7 @@ func loopbackPool(proxyAddr string) *x509.CertPool {
     return certPool
 }
 
+/*
 // connects to a local SSH agent
 func connectToSSHAgent() agent.Agent {
     socketPath := os.Getenv("SSH_AUTH_SOCK")
@@ -723,6 +729,7 @@ func connectToSSHAgent() agent.Agent {
     }
     return agent.NewClient(conn)
 }
+*/
 
 // Username returns the current user's username
 func Username() string {
@@ -731,59 +738,6 @@ func Username() string {
         utils.FatalError(err)
     }
     return u.Username
-}
-
-// AskPasswordAndHOTP prompts the user to enter the password + HTOP 2nd factor
-func (tc *PocketClient) AskPasswordAndHOTP() (pwd string, token string, err error) {
-    fmt.Printf("Enter password for Teleport user %v:\n", tc.Config.Username)
-    pwd, err = passwordFromConsole()
-    if err != nil {
-        fmt.Println(err)
-        return "", "", trace.Wrap(err)
-    }
-
-    fmt.Printf("Enter your HOTP token:\n")
-    token, err = lineFromConsole()
-    if err != nil {
-        fmt.Println(err)
-        return "", "", trace.Wrap(err)
-    }
-    return pwd, token, nil
-}
-
-// passwordFromConsole reads from stdin without echoing typed characters to stdout
-func passwordFromConsole() (string, error) {
-    fd := syscall.Stdin
-    state, err := terminal.GetState(fd)
-
-    // intercept Ctr+C and restore terminal
-    sigCh := make(chan os.Signal, 1)
-    closeCh := make(chan int)
-    if err != nil {
-        log.Warnf("failed reading terminal state: %v", err)
-    } else {
-        signal.Notify(sigCh, syscall.SIGINT)
-        go func() {
-            select {
-            case <-sigCh:
-                terminal.Restore(fd, state)
-                os.Exit(1)
-            case <-closeCh:
-            }
-        }()
-    }
-    defer func() {
-        close(closeCh)
-    }()
-
-    bytes, err := terminal.ReadPassword(fd)
-    return string(bytes), err
-}
-
-// lineFromConsole reads a line from stdin
-func lineFromConsole() (string, error) {
-    bytes, _, err := bufio.NewReader(os.Stdin).ReadLine()
-    return string(bytes), err
 }
 
 // ParseLabelSpec parses a string like 'name=value,"long name"="quoted value"` into a map like
