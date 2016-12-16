@@ -53,7 +53,7 @@ func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (BeaconState,
         b.Close()
         return nil, fmt.Errorf("[ERR] Cannot bind a slave without its public key. This only happens when user has deleted master database")
     }
-    encryptor, err := pcrypto.NewEncryptorFromKeyData(slaveNode.PublicKey, masterPrvKey)
+    encryptor, err := pcrypto.NewRsaEncryptorFromKeyData(slaveNode.PublicKey, masterPrvKey)
     if err != nil {
         b.Close()
         return nil, err

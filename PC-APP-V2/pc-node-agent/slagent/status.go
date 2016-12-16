@@ -10,18 +10,18 @@ import (
 )
 
 type PocketSlaveStatus struct {
-    Version             StatusProtocol  `msgpack:"pc_sl_ps"`
+    Version             StatusProtocol  `msgpack:"s_ps"`
     // master
-    MasterBoundAgent    string          `msgpack:"pc_ms_ba,omitempty"`
+    MasterBoundAgent    string          `msgpack:"m_ba,omitempty"`
     // slave response
-    SlaveResponse       ResponseType    `msgpack:"pc_sl_rt,omitempty`
+    SlaveResponse       ResponseType    `msgpack:"s_rt,omitempty`
     // slave
-    SlaveNodeName       string          `msgpack:"pc_sl_nm,omitempty"`
+    SlaveNodeName       string          `msgpack:"s_nm,omitempty"`
     // current interface status
-    SlaveAddress        string          `msgpack:"pc_sl_i4"`
-    SlaveNodeMacAddr    string          `msgpack:"pc_sl_ma"`
-    SlaveHardware       string          `msgpack:"pc_sl_hw"`
-    SlaveTimestamp      time.Time       `msgpack:"pc_sl_ts"`
+    SlaveAddress        string          `msgpack:"s_i4"`
+    SlaveNodeMacAddr    string          `msgpack:"s_ma"`
+    SlaveHardware       string          `msgpack:"s_hw"`
+    SlaveTimestamp      time.Time       `msgpack:"s_ts"`
 }
 
 func (ssa *PocketSlaveStatus) IsAppropriateSlaveInfo() bool {

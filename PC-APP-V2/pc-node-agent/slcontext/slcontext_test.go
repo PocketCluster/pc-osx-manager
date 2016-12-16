@@ -22,22 +22,17 @@ func TestGetDefaultConfiguration(t *testing.T) {
     defer tearDown()
 
     t.Log(spew.Sdump(SharedSlaveContext().(*slaveContext)))
-
-    // TODO : need to test this reliably
-/*
-    if err := SharedSlaveContext().ReloadConfiguration(); err != nil {
-        t.Error(err.Error())
-        return
-    }
-*/
 }
 
 func TestSaveLoadSlaveContext(t *testing.T) {
     setUp()
+    defer tearDown()
 
-    const MASTER_AGENT_NAME = "master-yoda"
-    const MASTER_IP4_ADDR = "192.168.1.4"
-    const SLAVE_NODE_NAME = "pc-node1"
+    const (
+        MASTER_AGENT_NAME = "master-yoda"
+        MASTER_IP4_ADDR = "192.168.1.4"
+        SLAVE_NODE_NAME = "pc-node1"
+    )
 
     err := SharedSlaveContext().SetMasterPublicKey(pcrypto.TestMasterPublicKey());
     if err != nil {
@@ -72,10 +67,11 @@ func TestSaveLoadSlaveContext(t *testing.T) {
     }
 
     // we're to destroy context w/o deleting the config file
+    oldRoot := singletonContext.config.DebugGetRootPath()
     singletonContext.config = nil
     singletonContext = nil
-    setUp()
-    defer tearDown()
+    t.Logf("[INFO] old root %s", oldRoot)
+    DebugSlcontextPrepareWithRoot(oldRoot)
 
     mpk, err := SharedSlaveContext().GetMasterPublicKey()
     if err != nil {
@@ -148,10 +144,13 @@ func TestSaveLoadSlaveContext(t *testing.T) {
 
 func TestDiscardSaveLoadSlaveContext(t *testing.T) {
     setUp()
+    defer tearDown()
 
-    const MASTER_AGENT_NAME = "master-yoda"
-    const MASTER_IP4_ADDR = "192.168.1.4"
-    const SLAVE_NODE_NAME = "pc-node1"
+    const (
+        MASTER_AGENT_NAME = "master-yoda"
+        MASTER_IP4_ADDR = "192.168.1.4"
+        SLAVE_NODE_NAME = "pc-node1"
+    )
 
     err := SharedSlaveContext().SetMasterPublicKey(pcrypto.TestMasterPublicKey());
     if err != nil {
@@ -186,10 +185,10 @@ func TestDiscardSaveLoadSlaveContext(t *testing.T) {
     }
 
     // we're to destroy context w/o deleting the config file
+    oldRoot := singletonContext.config.DebugGetRootPath()
     singletonContext.config = nil
     singletonContext = nil
-    setUp()
-    defer tearDown()
+    DebugSlcontextPrepareWithRoot(oldRoot)
 
     err = SharedSlaveContext().DiscardAll()
     if err != nil {

@@ -11,7 +11,7 @@ type RsaDecryptor interface {
     DecryptByRSA(crypted []byte, sendSig Signature) (plain []byte, err error)
 }
 
-func NewDecryptorFromKeyFiles(sendPubkeyPath, recvPrvkeyPath string) (RsaDecryptor, error) {
+func NewRsaDecryptorFromKeyFiles(sendPubkeyPath, recvPrvkeyPath string) (RsaDecryptor, error) {
     pubkey, err := newPublicKeyFromFile(sendPubkeyPath); if err != nil {
         return nil, err
     }
@@ -24,7 +24,7 @@ func NewDecryptorFromKeyFiles(sendPubkeyPath, recvPrvkeyPath string) (RsaDecrypt
     }, nil
 }
 
-func NewDecryptorFromKeyData(sendPubkeyData, recvPrvkeyData []byte) (RsaDecryptor, error) {
+func NewRsaDecryptorFromKeyData(sendPubkeyData, recvPrvkeyData []byte) (RsaDecryptor, error) {
     pubkey, err := newPublicKeyFromData(sendPubkeyData); if err != nil {
         return nil, err
     }
@@ -43,7 +43,7 @@ type decryption struct {
 }
 
 func (d *decryption) verifySignature(plainText []byte, sendSig Signature) error {
-    hType := crypto.SHA1
+    hType := crypto.SHA256
     hash := hType.New()
     hash.Write(plainText)
     opts := &rsa.PSSOptions {SaltLength:rsa.PSSSaltLengthAuto}

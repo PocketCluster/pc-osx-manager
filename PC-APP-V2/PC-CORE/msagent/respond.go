@@ -57,10 +57,10 @@ import (
 */
 
 type PocketMasterRespond struct {
-    Version           RespondProtocol        `msgpack:"pc_ms_pr"`
-    MasterBoundAgent  string                 `msgpack:"pc_ms_ba"`
-    MasterCommandType CommandType            `msgpack:"pc_ms_ct"`
-    MasterAddress     string                 `msgpack:"pc_ms_i4"`
+    Version           RespondProtocol        `msgpack:"m_pr"`
+    MasterBoundAgent  string                 `msgpack:"m_ba"`
+    MasterCommandType CommandType            `msgpack:"m_ct"`
+    MasterAddress     string                 `msgpack:"m_i4"`
 }
 
 func PackedMasterRespond(meta *PocketMasterRespond) ([]byte, error) {

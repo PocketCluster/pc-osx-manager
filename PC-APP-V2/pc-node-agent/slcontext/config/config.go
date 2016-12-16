@@ -40,11 +40,17 @@ const (
     slave_config_dir        = "/etc/pocket/"
     slave_config_file       = "/etc/pocket/slave-conf.yaml"
 
-    slave_keys_dir          = "/etc/pocket/pki"
-    slave_public_Key_file   = "/etc/pocket/pki/slave.pub"
-    slave_prvate_Key_file   = "/etc/pocket/pki/slave.pem"
-    slave_ssh_Key_file      = "/etc/pocket/pki/slave.ssh"
-    master_public_Key_file  = "/etc/pocket/pki/master.pub"
+    slave_keys_dir          = "/etc/pocket/pki/"
+    // these files are 1024 RSA crypto files used to join network
+    slave_public_Key_file   = "/etc/pocket/pki/pcslave.pub"
+    slave_prvate_Key_file   = "/etc/pocket/pki/pcslave.pem"
+    master_public_Key_file  = "/etc/pocket/pki/pcmaster.pub"
+
+    // these files are 2048 RSA crypto files used for SSH.
+    // 1) This should be acquired from Teleport Auth server
+    // 2) This should be handled by teleport process
+    //node_private_Key_file   = "/etc/pocket/pki/node.key"
+    //node_certificate_file   = "/etc/pocket/pki/node.cert"
 
     // HOST GENERAL CONFIG
     network_iface_file      = "/etc/network/interfaces"
@@ -52,6 +58,16 @@ const (
     //hostaddr_file           = "/etc/hosts"
     host_timezone_file      = "/etc/timezone"
     //resolve_conf_file       = "/etc/resolv.conf"
+
+    // these files are 2048 RSA crypto files used for Docker & Registry. This should be acquired from Teleport Auth server
+    SlaveDockerAuthFileName = "docker.auth"
+    SlaveDockerKeyFileName  = "docker.key"
+    SlaveDockerCertFileName = "docker.cert"
+
+    slave_docker_auth_file  = slave_keys_dir + SlaveDockerAuthFileName
+    slave_docker_key_file   = slave_keys_dir + SlaveDockerKeyFileName
+    slave_docker_cert_file  = slave_keys_dir + SlaveDockerCertFileName
+
 )
 
 // ------ SALT DEFAULT ------
@@ -78,6 +94,7 @@ type ConfigMasterSection struct {
 
 type ConfigSlaveSection struct {
     SlaveNodeName       string                   `yaml:"slave-node-name"`
+    SlaveNodeUUID       string                   `yaml:"slave-node-uuid"`
     SlaveMacAddr        string                   `yaml:"slave-mac-addr"`
     //SlaveIP6Addr        string
     SlaveIP4Addr        string                   `yaml:"slave-net-ip4"`
@@ -115,36 +132,42 @@ func _brandNewSlaveConfig(rootPath string) (*PocketSlaveConfig) {
 
 func _loadSlaveConfig(rootPath string) (*PocketSlaveConfig) {
 
+    var (
+        // config and key directories
+        configDirPath string    = rootPath + slave_config_dir
+        keysDirPath string      = rootPath + slave_keys_dir
+
+        // pocket cluster join keys
+        pcPubKeyPath string     = rootPath + slave_public_Key_file
+        pcPrvKeyPath string     = rootPath + slave_prvate_Key_file
+
+        // config file path
+        configFilePath string   = rootPath + slave_config_file
+    )
+
     // check if config dir exists, and creat if DNE
-    configDirPath := rootPath + slave_config_dir
     if _, err := os.Stat(configDirPath); os.IsNotExist(err) {
         os.MkdirAll(configDirPath, 0700);
     }
+
     // check if config secure key dir also exists and creat if DNE
-    keysDirPath := rootPath + slave_keys_dir
     if _, err := os.Stat(keysDirPath); os.IsNotExist(err) {
         os.MkdirAll(keysDirPath, 0700);
     }
 
-    var shouldGenerateKeys bool = false
-    pubKeyPath := rootPath + slave_public_Key_file
-    prvKeyPath := rootPath + slave_prvate_Key_file
-    sshKeyPath := rootPath + slave_ssh_Key_file
-    if _, err := os.Stat(pubKeyPath); os.IsNotExist(err) {
-        shouldGenerateKeys = true
+    // create pocketcluster join key sets
+    var makePcJoinKeys bool = false
+    if _, err := os.Stat(pcPubKeyPath); os.IsNotExist(err) {
+        makePcJoinKeys = true
     }
-    if _, err := os.Stat(prvKeyPath); os.IsNotExist(err) {
-        shouldGenerateKeys = true
+    if _, err := os.Stat(pcPrvKeyPath); os.IsNotExist(err) {
+        makePcJoinKeys = true
     }
-    if _, err := os.Stat(sshKeyPath); os.IsNotExist(err) {
-        shouldGenerateKeys = true
-    }
-    if shouldGenerateKeys {
-        pcrypto.GenerateKeyPair(pubKeyPath, prvKeyPath, sshKeyPath)
+    if makePcJoinKeys {
+        pcrypto.GenerateWeakKeyPairFiles(pcPubKeyPath, pcPrvKeyPath, "")
     }
 
     // check if config file exists in path.
-    configFilePath := rootPath + slave_config_file
     if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
         return _brandNewSlaveConfig(rootPath)
     }
@@ -168,7 +191,7 @@ func (cfg *PocketSlaveConfig) SaveSlaveConfig() error {
     // check if config dir exists, and creat if DNE
     configDirPath := cfg.rootPath + slave_config_dir
     if _, err := os.Stat(configDirPath); os.IsNotExist(err) {
-        os.MkdirAll(configDirPath, 0700);
+        os.MkdirAll(configDirPath, os.ModeDir|0700);
     }
 
     configFilePath := cfg.rootPath + slave_config_file
@@ -205,14 +228,6 @@ func (pc *PocketSlaveConfig) SlavePrivateKey() ([]byte, error) {
         return nil, fmt.Errorf("[ERR] keys have not been generated properly. This is a critical error")
     }
     return ioutil.ReadFile(prvKeyPath)
-}
-
-func (pc *PocketSlaveConfig) SlaveSSHKey() ([]byte, error) {
-    sshKeyPath := pc.rootPath + slave_ssh_Key_file
-    if _, err := os.Stat(sshKeyPath); os.IsNotExist(err) {
-        return nil, fmt.Errorf("[ERR] keys have not been generated properly. This is a critical error")
-    }
-    return ioutil.ReadFile(sshKeyPath)
 }
 
 func (pc *PocketSlaveConfig) MasterPublicKey() ([]byte, error) {
@@ -309,4 +324,12 @@ func (pc *PocketSlaveConfig) SaveFixedNetworkInterface() error {
     var fixedIfaceData []string = _fixateNetworkInterfaces(pc.SlaveSection, ifaceData)
     var fixedIfaceContent []byte = []byte(strings.Join(fixedIfaceData, "\n"))
     return ioutil.WriteFile(ifaceFilePath, fixedIfaceContent, 0644)
+}
+
+func (c *PocketSlaveConfig) KeyAndCertDir() string {
+    return c.rootPath + slave_keys_dir
+}
+
+func (c *PocketSlaveConfig) ConfigDir() string {
+    return c.rootPath + slave_config_dir
 }

@@ -7,15 +7,15 @@ import (
 )
 
 type PocketMasterAgentMeta struct {
-    MetaVersion               MetaProtocol            `msgpack:"pc_ms_pm"`
-    DiscoveryRespond          *PocketMasterRespond    `msgpack:"pc_ms_dr, inline, omitempty"`
-    StatusCommand             *PocketMasterCommand    `msgpack:"pc_ms_sc, inline, omitempty"`
-    EncryptedMasterCommand    []byte                  `msgpack:"pc_ms_ec, omitempty"`
-    EncryptedSlaveStatus      []byte                  `msgpack:"pc_ms_es, omitempty"`
-    MasterPubkey              []byte                  `msgpack:"pc_ms_pk, omitempty"`
-    EncryptedAESKey           []byte                  `msgpack:"pc_ms_ak, omitempty"`
-    RsaCryptoSignature        []byte                  `msgpack:"pc_ms_sg, omitempty"`
-    EncryptedMasterRespond    []byte                  `msgpack:"pc_ms_er, omitempty"`
+    MetaVersion               MetaProtocol            `msgpack:"m_pm"`
+    DiscoveryRespond          *PocketMasterRespond    `msgpack:"m_dr, inline, omitempty"`
+    StatusCommand             *PocketMasterCommand    `msgpack:"m_sc, inline, omitempty"`
+    EncryptedMasterCommand    []byte                  `msgpack:"m_ec, omitempty"`
+    EncryptedSlaveStatus      []byte                  `msgpack:"m_es, omitempty"`
+    MasterPubkey              []byte                  `msgpack:"m_pk, omitempty"`
+    EncryptedAESKey           []byte                  `msgpack:"m_ak, omitempty"`
+    RsaCryptoSignature        []byte                  `msgpack:"m_sg, omitempty"`
+    EncryptedMasterRespond    []byte                  `msgpack:"m_er, omitempty"`
 }
 
 

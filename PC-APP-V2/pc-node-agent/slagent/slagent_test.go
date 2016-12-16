@@ -8,22 +8,25 @@ import (
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-node-agent/slcontext"
+    "reflect"
+    "github.com/davecgh/go-spew/spew"
 )
 
-var masterAgentName string
-var slaveNodeName string
-var initSendTimestmap time.Time
+var (
+    masterAgentName string
+    slaveNodeName string = "pc-node1"
+    initSendTimestmap time.Time
+)
 
 func setUp() {
+    initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
     masterAgentName, _ = context.DebugContextPrepare().MasterAgentName()
     slcontext.DebugSlcontextPrepare()
-    slaveNodeName = "pc-node1"
-    initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 }
 
 func tearDown() {
-    context.DebugContextDestroy()
     slcontext.DebugSlcontextDestroy()
+    context.DebugContextDestroy()
 }
 
 func TestUnboundedBroadcastMeta(t *testing.T) {
@@ -72,6 +75,7 @@ func TestUnboundedBroadcastMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] Package message length does not match an expectation [%d]", len(mp))
         return
@@ -156,6 +160,7 @@ func TestInquiredMetaAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] Package message length [%d] exceeds an expectation", len(mp))
         return
@@ -243,7 +248,8 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if  512 <= len(mp) {
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
+    if  508 <= len(mp) {
         t.Errorf("[ERR] Package message length [%d] exceeds an expectation", len(mp))
         return
     }
@@ -308,6 +314,10 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    if len(ma.SlavePubKey) != 0 {
+        t.Errorf("[ERR] meta.SlavePubKey should be null %d\n", len(ma.SlavePubKey))
+        return
+    }
     sd, err := UnpackedSlaveStatus(esd)
     if err != nil {
         t.Error(err.Error())
@@ -351,6 +361,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] Package message length [%d] exceeds an expectation", len(mp))
         return
@@ -409,6 +420,10 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
     }
     if sd.SlaveHardware != usd.SlaveHardware {
         t.Error("[ERR] Unidentical StatusAgent.SlaveHardware")
+        return
+    }
+    if !reflect.DeepEqual(ma.SlavePubKey, up.SlavePubKey) {
+        t.Errorf("[ERR] Unidenticla Slave sshkey")
         return
     }
     // TODO : need to fix slave timezone
@@ -485,6 +500,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Error(err.Error())
         return
     }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] Package message length [%d] exceeds an expectation", len(mp))
         return
@@ -592,6 +608,7 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
     if err != nil {
         t.Error(err.Error())
     }
+    t.Logf("[INFO] size of packed meta %d\n package content %s", len(mp), spew.Sdump(mp))
     if 508 <= len(mp) {
         t.Errorf("[ERR] Incorrect MsgPack Length %d", len(mp))
     }

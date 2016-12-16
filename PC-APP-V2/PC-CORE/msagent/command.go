@@ -50,11 +50,11 @@ import (
 }
  */
 type PocketMasterCommand struct {
-    Version           CommandProtocol     `msgpack:"pc_ms_pc"`
-    MasterBoundAgent  string              `msgpack:"pc_ms_ba"`
-    MasterCommandType CommandType         `msgpack:"pc_ms_ct"`
-    MasterAddress     string              `msgpack:"pc_ms_i4"`
-    MasterTimestamp   time.Time           `msgpack:"pc_ms_ts"`
+    Version           CommandProtocol     `msgpack:"m_pc"`
+    MasterBoundAgent  string              `msgpack:"m_ba"`
+    MasterCommandType CommandType         `msgpack:"m_ct"`
+    MasterAddress     string              `msgpack:"m_i4"`
+    MasterTimestamp   time.Time           `msgpack:"m_ts"`
 }
 
 func PackedMasterCommand(meta *PocketMasterCommand) ([]byte, error) {

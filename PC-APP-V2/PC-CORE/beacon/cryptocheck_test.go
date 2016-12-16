@@ -3,7 +3,6 @@ package beacon
 import (
     "testing"
     "time"
-
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pcrypto"
 )

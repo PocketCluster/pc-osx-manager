@@ -6,6 +6,8 @@ import (
     "fmt"
 
     "github.com/ricochet2200/go-disk-usage/du"
+    "os"
+    "github.com/stkim1/pcrypto"
 )
 
 type HostContext interface {
@@ -34,40 +36,49 @@ type HostContext interface {
     HostPhysicalMemorySize() uint64
     HostStorageSpaceStatus() (total uint64, available uint64)
 
+    CurrentCountryCode() (string, error)
+    CurrentLanguageCode() (string, error)
+
     MasterAgentName() (string, error)
     MasterPublicKey() ([]byte, error)
     MasterPrivateKey() ([]byte, error)
+
+    MasterCaAuthority() (*pcrypto.CaSigner, error)
 }
 
 type hostContext struct {
-    publicKeyData               []byte
-    privateKeyData              []byte
+    hostInterfaces               *[]*HostNetworkInterface
+    hostGateways                 *[]*HostNetworkGateway
 
-    hostInterfaces              *[]*HostNetworkInterface
-    hostGateways                *[]*HostNetworkGateway
+    primaryInteface              *HostNetworkInterface
+    primaryAddress               *HostIPAddress
+    primaryGateway               *HostNetworkGateway
 
-    primaryInteface             *HostNetworkInterface
-    primaryAddress              *HostIPAddress
-    primaryGateway              *HostNetworkGateway
+    cocoaHomePath                string
+    posixHomePath                string
+    fullUserName                 string
+    loginUserName                string
+    userTempPath                 string
 
-    cocoaHomePath               string
-    posixHomePath               string
-    fullUserName                string
-    loginUserName               string
-    userTempPath                string
+    applicationSupportPath       string
+    applicationDocumentPath      string
+    applicationTempPath          string
+    applicationLibCachePath      string
+    applicationResourcePath      string
+    applicationExecutablePath    string
 
-    applicationSupportPath      string
-    applicationDocumentPath     string
-    applicationTempPath         string
-    applicationLibCachePath     string
-    applicationResourcePath     string
-    applicationExecutablePath   string
+    processorCount               uint
+    activeProcessorCount         uint
+    physicalMemorySize           uint64
 
-    hostDeviceSerial            string
+    hostDeviceSerial             string
+    publicKeyData                []byte
+    privateKeyData               []byte
 
-    processorCount              uint
-    activeProcessorCount        uint
-    physicalMemorySize          uint64
+    currentCountryCode           string
+    currentLanguageCode          string
+
+    *pcrypto.CaSigner
 }
 
 // singleton initialization
@@ -127,30 +138,6 @@ func (ctx *hostContext) monitorNetworkGateways(gateways []*HostNetworkGateway) {
         }
     }
     return
-}
-
-func (ctx *hostContext) RefreshStatus() error {
-
-    ctx.cocoaHomePath               = findCocoaHomeDirectory()
-    ctx.posixHomePath               = findPosixHomeDirectory()
-    ctx.fullUserName                = findFullUserName()
-    ctx.loginUserName               = findLoginUserName()
-    ctx.userTempPath                = findUserTemporaryDirectory()
-
-    ctx.applicationSupportPath      = findApplicationSupportDirectory()
-    ctx.applicationDocumentPath     = findApplicationDocumentsDirectoru()
-    ctx.applicationTempPath         = findApplicationTemporaryDirectory()
-    ctx.applicationLibCachePath     = findApplicationLibraryCacheDirectory()
-    ctx.applicationResourcePath     = findApplicationResourceDirectory()
-    ctx.applicationExecutablePath   = findApplicationExecutableDirectory()
-
-    ctx.hostDeviceSerial            = findSerialNumber()
-
-    ctx.processorCount              = findSystemProcessorCount()
-    ctx.activeProcessorCount        = findSystemActiveProcessorCount()
-    ctx.physicalMemorySize          = findSystemPhysicalMemorySize()
-
-    return nil
 }
 
 func (ctx *hostContext) CocoaHomeDirectory() (string, error) {
@@ -230,13 +217,23 @@ func (ctx *hostContext) ApplicationExecutableDirectory() (string, error) {
     return ctx.applicationExecutablePath, nil
 }
 
-func (ctx *hostContext) ApplicationUserDataDirectory() (dataPath string, err error) {
+func (ctx *hostContext) ApplicationUserDataDirectory() (string, error) {
     pHome, err := ctx.PosixHomeDirectory()
     if err != nil {
-        return
+        return "", err
     }
-    dataPath = pHome + "/.pocket"
-    return
+    dataPath := pHome + "/.pocket"
+
+    // create the data directory if it's missing
+    _, err = os.Stat(dataPath)
+    if os.IsNotExist(err) {
+        err := os.MkdirAll(dataPath, os.ModeDir|0700)
+        if err != nil {
+            return "", err
+        }
+    }
+
+    return dataPath, nil
 }
 
 func (ctx *hostContext) HostDeviceSerial() (string, error) {
@@ -313,4 +310,26 @@ func (ctx *hostContext) MasterPrivateKey() ([]byte, error) {
         return nil, fmt.Errorf("[ERR] Invalid master private key data")
     }
     return ctx.privateKeyData, nil
+}
+
+func (ctx *hostContext) CurrentCountryCode() (string, error) {
+    if len(ctx.currentCountryCode) == 0 {
+        return "", fmt.Errorf("[ERR] Invalid country code")
+    }
+    return ctx.currentCountryCode, nil
+}
+
+func (ctx *hostContext) CurrentLanguageCode() (string, error) {
+    if len(ctx.currentLanguageCode) == 0 {
+        return "", fmt.Errorf("[ERR] Invalid language code")
+    }
+    return ctx.currentLanguageCode, nil
+}
+
+// TODO : Cert Authority generation
+func (ctx *hostContext) MasterCaAuthority() (*pcrypto.CaSigner, error) {
+    if ctx.CaSigner == nil {
+        return nil, fmt.Errorf("[ERR] Invalid Cert Authority")
+    }
+    return ctx.CaSigner, nil
 }

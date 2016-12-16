@@ -52,7 +52,7 @@ func initializeModelRepo(mr *modelRepo) {
     // check if the path exists and make it if absent
     if _, err := os.Stat(coreDbPath); err != nil {
         if os.IsNotExist(err) {
-            os.MkdirAll(coreDbPath,0700);
+            os.MkdirAll(coreDbPath, os.ModeDir|0700);
         }
     }
 
