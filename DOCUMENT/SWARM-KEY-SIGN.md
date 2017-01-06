@@ -97,6 +97,20 @@
   IP.1 							= 192.168.1.152
   ```
 
+### Docker Daemon Config
+- Copy key/cert/pubkey files to `node` (e.g. with `rsync`, `scp`)
+- Move files to an appropriate path (e.g. `/etc/docker`) and change permission
+
+  ```sh
+  chmod -v 0400 ca-cert.pub node.cert node-key.pem
+  ```
+- Edit `/lib/systemd/system/docker.service` or `/etc/default/docker` and insert following options
+  
+  ```sh
+  DOCKER_OPTS="--dns=172.17.42.1  --tlsverify --tlscacert=/etc/docker/ca-cert.pub" --tlscert=/etc/docker/odroid.cert --tlskey=/etc/docker/odroid-key.pem -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --insecure-registry pc-master:5000"
+  ```
+- If you want docker to listen from a single host change `-H tcp://0.0.0.0:2375` to `-H=<HOST>:2376`
+
 ### Swarm Manager Command sequence
 
 ```sh
@@ -122,5 +136,5 @@ openssl x509 -req -in node.csr -CA ca-cert.pub -CAkey ca-key.pem -CAcreateserial
 
 >>>>>
 
-swarm --debug manage --tlsverify=true --tlscacert=ca-cert.pub --tlscert=master.cert --tlskey=master-key.pem --host=:3376 --advertise=192.168.1.236:3376 nodes://192.168.1.152:2375
+swarm --debug manage --tlsverify=true --tlscacert=ca-cert.pub --tlscert=master.cert --tlskey=master-key.pem --host=:3376 --advertise=192.168.1.236:3376 nodes://192.168.1.151:2375,192.168.1.152:2375
 ```
