@@ -111,30 +111,48 @@
   ```
 - If you want docker to listen from a single host change `-H tcp://0.0.0.0:2375` to `-H=<HOST>:2376`
 
+> References
+
+- [dockerd [OPTIONS]](https://docs.docker.com/engine/reference/commandline/dockerd/)
+- [Protect the Docker daemon socket](https://docs.docker.com/engine/security/https/)
+- [Configure and run Docker on various distributions](https://docs.docker.com/engine/admin/)
+
 ### Swarm Manager Command sequence
 
-```sh
-openssl genrsa -out ca-key.pem 2048 -sha256
+- This is a shortened version of the above sequence
 
-openssl req -x509 -new -nodes -key ca-key.pem -out ca-cert.pub -sha256 -days 365 -subj '/CN=pc-ca'
+  ```sh
+  openssl genrsa -out ca-key.pem 2048 -sha256
+  
+  openssl req -x509 -new -nodes -key ca-key.pem -out ca-cert.pub -sha256 -days 365 -subj '/CN=pc-ca'
+  
+  >>>>
+  
+  openssl genrsa -out master-key.pem 2048 -sha256
+  
+  openssl req -new -key master-key.pem -out master.csr -sha256 -subj "/CN=pc-master" -config master.conf
+  
+  openssl x509 -req -in master.csr -CA ca-cert.pub -CAkey ca-key.pem -CAcreateserial -out master.cert -sha256 -days 365 -extensions v3_req -extfile master.conf
+  
+  >>>>
+  
+  openssl genrsa -out node-key.pem 2048 -sha256
+  
+  openssl req -new -key node-key.pem -out node.csr -sha256 -subj "/CN=pc-node1" -config node.conf
+  
+  openssl x509 -req -in node.csr -CA ca-cert.pub -CAkey ca-key.pem -CAcreateserial -out node.cert -sha256 -days 365 -extensions v3_req -extfile node.conf
+  
+  >>>>>
+  
+  # use nodes:// to connect multiple node
+  swarm --debug manage --tlsverify=true --tlscacert=ca-cert.pub --tlscert=master.cert --tlskey=master-key.pem --host=:3376 --advertise=192.168.1.236:3376 nodes://192.168.1.151:2375,192.168.1.152:2375
+  ```
 
->>>>
+> References
 
-openssl genrsa -out master-key.pem 2048 -sha256
-
-openssl req -new -key master-key.pem -out master.csr -sha256 -subj "/CN=pc-master" -config master.conf
-
-openssl x509 -req -in master.csr -CA ca-cert.pub -CAkey ca-key.pem -CAcreateserial -out master.cert -sha256 -days 365 -extensions v3_req -extfile master.conf
-
->>>>
-
-openssl genrsa -out node-key.pem 2048 -sha256
-
-openssl req -new -key node-key.pem -out node.csr -sha256 -subj "/CN=pc-node1" -config node.conf
-
-openssl x509 -req -in node.csr -CA ca-cert.pub -CAkey ca-key.pem -CAcreateserial -out node.cert -sha256 -days 365 -extensions v3_req -extfile node.conf
-
->>>>>
-
-swarm --debug manage --tlsverify=true --tlscacert=ca-cert.pub --tlscert=master.cert --tlskey=master-key.pem --host=:3376 --advertise=192.168.1.236:3376 nodes://192.168.1.151:2375,192.168.1.152:2375
-```
+- [Use Docker Swarm with TLS
+](https://docs.docker.com/swarm/secure-swarm-tls/)
+- [Configure Docker Swarm for TLS](https://docs.docker.com/swarm/configure-tls/)
+- [Plan for Swarm in production](https://docs.docker.com/swarm/plan-for-production/)
+- [Build a Swarm cluster for production
+](https://docs.docker.com/swarm/install-manual/)
