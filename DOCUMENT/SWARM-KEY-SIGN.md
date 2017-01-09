@@ -107,7 +107,10 @@
 - Edit `/lib/systemd/system/docker.service` or `/etc/default/docker` and insert following options
   
   ```sh
-  DOCKER_OPTS="--dns=172.17.42.1  --tlsverify --tlscacert=/etc/docker/ca-cert.pub" --tlscert=/etc/docker/odroid.cert --tlskey=/etc/docker/odroid-key.pem -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --insecure-registry pc-master:5000"
+  DOCKER_OPTS="--dns=172.17.42.1  --tlsverify --tlscacert=/etc/docker/ca-cert.pub --tlscert=/etc/docker/odroid.cert --tlskey=/etc/docker/odroid-key.pem -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --insecure-registry pc-master:5000"
+
+  # optional
+  DOCKER_OPTS="--dns=172.17.42.1 --insecure-registry pc-master:5000"
   ```
 - If you want docker to listen from a single host change `-H tcp://0.0.0.0:2375` to `-H=<HOST>:2376`
 

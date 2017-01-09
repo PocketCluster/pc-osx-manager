@@ -10,10 +10,26 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/gravitational/trace"
     dkclt "github.com/fsouza/go-dockerclient"
+    "io/ioutil"
 )
 
 func main() {
-    client, err := dkclt.NewVersionedClient("tcp://192.168.1.154:2375", "1.22")
+
+    caPEMCert, err := ioutil.ReadFile("./cert/ca-cert.pub")
+    if err != nil {
+        log.Fatal(trace.Wrap(err))
+    }
+    certPEMBlock, err := ioutil.ReadFile("./cert/master.cert")
+    if err != nil {
+        log.Fatal(trace.Wrap(err))
+    }
+    keyPEMBlock, err := ioutil.ReadFile("./cert/master-key.pem")
+    if err != nil {
+        log.Fatal(trace.Wrap(err))
+    }
+
+    //client, err := dkclt.NewVersionedClient("tcp://192.168.1.154:2375", "1.22")
+    client, err := dkclt.NewTLSClientFromBytes("tcp://192.168.1.154:2375", certPEMBlock, keyPEMBlock, caPEMCert)
     if err != nil {
         log.Fatal(trace.Wrap(err))
     }
