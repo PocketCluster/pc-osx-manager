@@ -97,6 +97,13 @@
   IP.1 							= 192.168.1.152
   ```
 
+### Docker Key/Cert Gen Script
+- run [`docker-keycert`](docker-keycert/dockercertgen.sh) with following options
+  
+  ```sh
+  $ dockercertgen.sh <host_name> <ip_address>
+  ```
+
 ### Docker Daemon Config
 - Copy key/cert/pubkey files to `node` (e.g. with `rsync`, `scp`)
 - Move files to an appropriate path (e.g. `/etc/docker`) and change permission
