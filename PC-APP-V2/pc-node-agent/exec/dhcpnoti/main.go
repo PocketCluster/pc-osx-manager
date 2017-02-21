@@ -13,6 +13,7 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/gravitational/trace"
     "github.com/davecgh/go-spew/spew"
+    process "github.com/mitchellh/go-ps"
 )
 
 const (
@@ -24,13 +25,17 @@ var (
     dev     = flag.String("dev",  "", "Developement")
 )
 
-func readEnviron() {
+func dhcpAgent() {
     if os.Getuid() != 0 {
         log.Fatal(trace.Wrap(errors.New("Insufficient Permission")))
     }
-
-    // we can restrict the execution by chclient only.
-    //ps, err := os.FindProcess(os.Getpid())
+    ps, err := process.FindProcess(os.Getpid())
+    if err != nil {
+        log.Fatal(trace.Wrap(err))
+    }
+    if ps.Executable() != "dhclient" {
+        log.Fatal(trace.Wrap(errors.New("Incorrect Executable")))
+    }
 
     dhcpEvent := &dhcp.DhcpEvent{}
 
@@ -164,7 +169,7 @@ func pocketDaemon() {
 
     // firstly clear off previous socket
     os.Remove(socketPath)
-    listen, err := net.ListenUnix("unix",  &net.UnixAddr{socketPath, "unix"})
+    listen, err := net.ListenUnix("unix", &net.UnixAddr{socketPath, "unix"})
     if err != nil {
         log.Fatal(trace.Wrap(err))
     }
@@ -205,7 +210,7 @@ func main() {
 
     switch *mode {
     case "dhcpevent":
-        readEnviron()
+        dhcpAgent()
         break
     default:
         pocketDaemon()
