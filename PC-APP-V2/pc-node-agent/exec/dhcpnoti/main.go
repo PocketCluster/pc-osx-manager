@@ -2,19 +2,34 @@ package main
 
 import (
     "encoding/json"
-    "log"
+    "errors"
+    "flag"
+    "net"
     "os"
     "time"
 
     dhcp "github.com/stkim1/pc-node-agent/network"
+    "gopkg.in/vmihailenco/msgpack.v2"
+    log "github.com/Sirupsen/logrus"
+    "github.com/gravitational/trace"
+    "github.com/davecgh/go-spew/spew"
 )
 
-func main() {
-    var (
-        writeToFile = false
-    )
+const (
+    socketPath  = "/var/run/pocketd.sock"
+)
 
-    dhcpEvent := new(dhcp.DhcpEvent)
+var (
+    mode    = flag.String("mode", "", "Execution mode")
+    dev     = flag.String("dev",  "", "Developement")
+)
+
+func readEnviron() {
+    if os.Getuid() != 0 {
+        log.Fatal(trace.Wrap(errors.New("Insufficient Permission")))
+    }
+
+    dhcpEvent := &dhcp.DhcpEvent{}
 
     dhcpEvent.Timestamp                               = time.Now().Format(time.RFC3339)
     dhcpEvent.Reason                                  = os.Getenv("reason")
@@ -93,30 +108,79 @@ func main() {
     dhcpEvent.New.Dhcp6DomainSearch                   = os.Getenv("new_dhcp6_domain_search")
     dhcpEvent.New.Dhcp6NameServers                    = os.Getenv("new_dhcp6_name_servers")
 
+    conn, err := net.DialUnix("unix", nil, &net.UnixAddr{socketPath, "unix"})
+    if err != nil {
+        log.Fatal(trace.Wrap(err))
+    }
+    defer conn.Close()
 
-    if writeToFile {
-        jsonOut, err := json.Marshal(dhcpEvent)
-        if err != nil {
-            log.Print(err.Error())
-        }
-        out, err := os.OpenFile("/tmp/dh-client-env.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
-        if err != nil {
-            if !os.IsExist(err) {
-                out, err = os.Create("/tmp/dh-client-env.log")
-                if err != nil {
-                    log.Fatal(err.Error())
-                }
-            } else {
-                log.Fatal(err.Error())
-            }
-        }
-        out.WriteString("\n--------------------- " + time.Now().Format("Mon, 2 Jan 2006 15:04:05 MST") + " ---------------------\n")
-        out.WriteString(string(jsonOut))
-        err = out.Close()
-        if err != nil {
-            log.Fatal(err.Error())
-        }
-    } else {
+    msg, err := msgpack.Marshal(dhcpEvent)
+    if err != nil {
+        log.Fatal(trace.Wrap(err))
+    }
+
+    _, err = conn.Write(msg)
+    if err != nil {
+        log.Error(trace.Wrap(err))
+    }
+
+    if len(*dev) != 0 && *dev == "dhcpevent" {
         json.NewEncoder(os.Stdout).Encode(dhcpEvent)
+    }
+}
+
+func pocketDaemon() {
+    log.Info("Pocket Daemon Started...")
+
+    buf := make([]byte, 20480)
+    dhcpEvent := &dhcp.DhcpEvent{}
+
+    // firstly clear off previous socket
+    os.Remove(socketPath)
+    listen, err := net.ListenUnix("unix",  &net.UnixAddr{socketPath, "unix"})
+    if err != nil {
+        log.Fatal(trace.Wrap(err))
+    }
+    defer os.Remove(socketPath)
+    defer listen.Close()
+
+    for {
+        conn, err := listen.AcceptUnix()
+        if err != nil {
+            log.Error(trace.Wrap(err))
+            continue
+        }
+        count, err := conn.Read(buf)
+        if err != nil {
+            log.Error(trace.Wrap(err))
+            continue
+        }
+        err = msgpack.Unmarshal(buf[0:count], dhcpEvent)
+        if err != nil {
+            log.Error(trace.Wrap(err))
+            continue
+        }
+
+        log.Info(spew.Sdump(dhcpEvent))
+
+        err = conn.Close()
+        if err != nil {
+            log.Error(trace.Wrap(err))
+            continue
+        }
+    }
+
+    log.Info("Pocket Daemon Terminated")
+}
+
+func main() {
+    flag.Parse()
+
+    switch *mode {
+    case "dhcpevent":
+        readEnviron()
+        break
+    default:
+        pocketDaemon()
     }
 }
