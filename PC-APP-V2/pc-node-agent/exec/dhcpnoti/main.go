@@ -29,6 +29,9 @@ func readEnviron() {
         log.Fatal(trace.Wrap(errors.New("Insufficient Permission")))
     }
 
+    // we can restrict the execution by chclient only.
+    //ps, err := os.FindProcess(os.Getpid())
+
     dhcpEvent := &dhcp.DhcpEvent{}
 
     dhcpEvent.Timestamp                               = time.Now().Format(time.RFC3339)
@@ -107,6 +110,30 @@ func readEnviron() {
     dhcpEvent.New.Ip6Prefixlen                        = os.Getenv("new_ip6_prefixlen")
     dhcpEvent.New.Dhcp6DomainSearch                   = os.Getenv("new_dhcp6_domain_search")
     dhcpEvent.New.Dhcp6NameServers                    = os.Getenv("new_dhcp6_name_servers")
+
+    dhcpEvent.Requested.Reason                        = os.Getenv("requested_reason")
+    dhcpEvent.Requested.Interface                     = os.Getenv("requested_interface")
+    dhcpEvent.Requested.Medium                        = os.Getenv("requested_medium")
+    dhcpEvent.Requested.AliasIpAddress                = os.Getenv("requested_alias_ip_address")
+    dhcpEvent.Requested.IpAddress                     = os.Getenv("requested_ip_address")
+    dhcpEvent.Requested.HostName                      = os.Getenv("requested_host_name")
+    dhcpEvent.Requested.NetworkNumber                 = os.Getenv("requested_network_number")
+    dhcpEvent.Requested.SubnetMask                    = os.Getenv("requested_subnet_mask")
+    dhcpEvent.Requested.BroadcastAddress              = os.Getenv("requested_broadcast_address")
+    dhcpEvent.Requested.Routers                       = os.Getenv("requested_routers")
+    dhcpEvent.Requested.StaticRoutes                  = os.Getenv("requested_static_routes")
+    dhcpEvent.Requested.Rfc3442ClasslessStaticRoutes  = os.Getenv("requested_rfc3442_classless_static_routes")
+    dhcpEvent.Requested.DomainName                    = os.Getenv("requested_domain_name")
+    dhcpEvent.Requested.DomainSearch                  = os.Getenv("requested_domain_search")
+    dhcpEvent.Requested.DomainNameServers             = os.Getenv("requested_domain_name_servers")
+    dhcpEvent.Requested.NetbiosNameServers            = os.Getenv("requested_netbios_name_servers")
+    dhcpEvent.Requested.NetbiosScope                  = os.Getenv("requested_netbios_scope")
+    dhcpEvent.Requested.NtpServers                    = os.Getenv("requested_ntp_servers")
+    dhcpEvent.Requested.Ip6Address                    = os.Getenv("requested_ip6_address")
+    dhcpEvent.Requested.Ip6Prefix                     = os.Getenv("requested_ip6_prefix")
+    dhcpEvent.Requested.Ip6Prefixlen                  = os.Getenv("requested_ip6_prefixlen")
+    dhcpEvent.Requested.Dhcp6DomainSearch             = os.Getenv("requested_dhcp6_domain_search")
+    dhcpEvent.Requested.Dhcp6NameServers              = os.Getenv("requested_dhcp6_name_servers")
 
     conn, err := net.DialUnix("unix", nil, &net.UnixAddr{socketPath, "unix"})
     if err != nil {

@@ -37,4 +37,7 @@ type DhcpEvent struct {
     Old          DhcpMeta    `json:"old, omitempty"        msgpack:"old, inline, omitempty"`
     Current      DhcpMeta    `json:"current, omitempty"    msgpack:"current, inline, omitempty"`
     New          DhcpMeta    `json:"new, omitempty"        msgpack:"new, inline, omitempty"`
+
+    // dhcp client requested checker
+    Requested    DhcpMeta    `json:"requested, omitempty"  msgpack:"requested, inline, omitempty"`
 }
