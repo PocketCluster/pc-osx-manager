@@ -17,7 +17,9 @@ import (
 )
 
 const (
-    socketPath  = "/var/run/pocketd.sock"
+    dhcpEventSocketPath = "/var/run/pocketd.sock"
+    modeDhcpAgent       = "dhcpagent"
+    devJsonPrint        = "jsonprint"
 )
 
 var (
@@ -140,7 +142,7 @@ func dhcpAgent() {
     dhcpEvent.Requested.Dhcp6DomainSearch             = os.Getenv("requested_dhcp6_domain_search")
     dhcpEvent.Requested.Dhcp6NameServers              = os.Getenv("requested_dhcp6_name_servers")
 
-    conn, err := net.DialUnix("unix", nil, &net.UnixAddr{socketPath, "unix"})
+    conn, err := net.DialUnix("unix", nil, &net.UnixAddr{dhcpEventSocketPath, "unix"})
     if err != nil {
         log.Fatal(trace.Wrap(err))
     }
@@ -156,7 +158,7 @@ func dhcpAgent() {
         log.Error(trace.Wrap(err))
     }
 
-    if len(*dev) != 0 && *dev == "dhcpevent" {
+    if len(*dev) != 0 && *dev == devJsonPrint {
         json.NewEncoder(os.Stdout).Encode(dhcpEvent)
     }
 }
@@ -168,12 +170,12 @@ func pocketDaemon() {
     dhcpEvent := &dhcp.DhcpEvent{}
 
     // firstly clear off previous socket
-    os.Remove(socketPath)
-    listen, err := net.ListenUnix("unix", &net.UnixAddr{socketPath, "unix"})
+    os.Remove(dhcpEventSocketPath)
+    listen, err := net.ListenUnix("unix", &net.UnixAddr{dhcpEventSocketPath, "unix"})
     if err != nil {
         log.Fatal(trace.Wrap(err))
     }
-    defer os.Remove(socketPath)
+    defer os.Remove(dhcpEventSocketPath)
     defer listen.Close()
 
     for {
@@ -209,7 +211,7 @@ func main() {
     flag.Parse()
 
     switch *mode {
-    case "dhcpevent":
+    case modeDhcpAgent:
         dhcpAgent()
         break
     default:
