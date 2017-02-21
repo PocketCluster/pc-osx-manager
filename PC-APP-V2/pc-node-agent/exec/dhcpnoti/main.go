@@ -29,14 +29,18 @@ var (
 
 func dhcpAgent() {
     if os.Getuid() != 0 {
-        log.Fatal(trace.Wrap(errors.New("Insufficient Permission")))
+        log.Error(trace.Wrap(errors.New("Insufficient Permission")))
+        return
     }
-    ps, err := process.FindProcess(os.Getpid())
+    ps, err := process.FindProcess(os.Getppid())
     if err != nil {
-        log.Fatal(trace.Wrap(err))
+        log.Error(trace.Wrap(err))
+        return
     }
-    if ps.Executable() != "dhclient" {
-        log.Fatal(trace.Wrap(errors.New("Incorrect Executable")))
+    // this should be "dhclient" but we'll leave it for now (2017-02-22)
+    if ps.Executable() != "dhclient-script" {
+        log.Error(trace.Wrap(errors.New("Incorrect Executable")))
+        return
     }
 
     dhcpEvent := &dhcp.DhcpEvent{}
@@ -144,13 +148,15 @@ func dhcpAgent() {
 
     conn, err := net.DialUnix("unix", nil, &net.UnixAddr{dhcpEventSocketPath, "unix"})
     if err != nil {
-        log.Fatal(trace.Wrap(err))
+        log.Error(trace.Wrap(err))
+        return
     }
     defer conn.Close()
 
     msg, err := msgpack.Marshal(dhcpEvent)
     if err != nil {
-        log.Fatal(trace.Wrap(err))
+        log.Error(trace.Wrap(err))
+        return
     }
 
     _, err = conn.Write(msg)
@@ -159,7 +165,15 @@ func dhcpAgent() {
     }
 
     if len(*dev) != 0 && *dev == devJsonPrint {
-        json.NewEncoder(os.Stdout).Encode(dhcpEvent)
+        json.NewEncoder(os.Stdout).Encode(struct {
+            Event         *dhcp.DhcpEvent    `json:"dhcp_event, omitempty"`
+            Pid           int                `json:"dhcp_pid, omitempty"`
+            Executable    string             `json:"dhcp_executable, omitempty"`
+        }{
+            Event:        dhcpEvent,
+            Pid:          os.Getpid(),
+            Executable:   ps.Executable(),
+        })
     }
 }
 
@@ -173,7 +187,8 @@ func pocketDaemon() {
     os.Remove(dhcpEventSocketPath)
     listen, err := net.ListenUnix("unix", &net.UnixAddr{dhcpEventSocketPath, "unix"})
     if err != nil {
-        log.Fatal(trace.Wrap(err))
+        log.Error(trace.Wrap(err))
+        return
     }
     defer os.Remove(dhcpEventSocketPath)
     defer listen.Close()
@@ -203,8 +218,6 @@ func pocketDaemon() {
             continue
         }
     }
-
-    log.Info("Pocket Daemon Terminated")
 }
 
 func main() {
