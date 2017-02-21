@@ -1,5 +1,5 @@
 <component name="libraryTable">
-  <library name="GOPATH &lt;pcteleport&gt;">
+  <library name="GOPATH &lt;moduletest&gt;">
     <CLASSES>
       <root url="file://$USER_HOME$/GOREPO/src/goji.io" />
       <root url="file://$USER_HOME$/GOREPO/src/google.golang.org" />
