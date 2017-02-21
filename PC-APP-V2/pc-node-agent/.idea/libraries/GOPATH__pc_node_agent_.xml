@@ -9,6 +9,7 @@
       <root url="file://$USER_HOME$/GOREPO/src/golang.org" />
       <root url="file://$USER_HOME$/GOREPO/src/gopkg.in" />
       <root url="file://$USER_HOME$/GOREPO/src/github.com" />
+      <root url="file://$USER_HOME$/GOREPO/src/xi2.org" />
       <root url="file://$USER_HOME$/GOREPO/src/honnef.co" />
     </CLASSES>
     <JAVADOC />
@@ -21,6 +22,7 @@
       <root url="file://$USER_HOME$/GOREPO/src/golang.org" />
       <root url="file://$USER_HOME$/GOREPO/src/gopkg.in" />
       <root url="file://$USER_HOME$/GOREPO/src/github.com" />
+      <root url="file://$USER_HOME$/GOREPO/src/xi2.org" />
       <root url="file://$USER_HOME$/GOREPO/src/honnef.co" />
     </SOURCES>
     <excluded>
