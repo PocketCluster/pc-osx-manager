@@ -32,13 +32,19 @@ func dhcpAgent() {
         log.Error(trace.Wrap(errors.New("Insufficient Permission")))
         return
     }
-    ps, err := process.FindProcess(os.Getppid())
+    // dhclient-script pid
+    sps, err := process.FindProcess(os.Getppid())
     if err != nil {
         log.Error(trace.Wrap(err))
         return
     }
-    // this should be "dhclient" but we'll leave it for now (2017-02-22)
-    if ps.Executable() != "dhclient-script" {
+    // real dhclient pid
+    rps, err := process.FindProcess(sps.PPid())
+    if err != nil {
+        log.Error(trace.Wrap(err))
+        return
+    }
+    if rps.Executable() != "dhclient" {
         log.Error(trace.Wrap(errors.New("Incorrect Executable")))
         return
     }
@@ -172,7 +178,7 @@ func dhcpAgent() {
         }{
             Event:        dhcpEvent,
             Pid:          os.Getpid(),
-            Executable:   ps.Executable(),
+            Executable:   rps.Executable(),
         })
     }
 }
