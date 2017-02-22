@@ -38,6 +38,10 @@ func dhcpAgent() {
         log.Error(trace.Wrap(err))
         return
     }
+    if sps.Executable() != "dhclient-script" {
+        log.Error(trace.Wrap(errors.New("Incorrect preliminary executable")))
+        return
+    }
     // real dhclient pid
     rps, err := process.FindProcess(sps.PPid())
     if err != nil {
@@ -45,7 +49,7 @@ func dhcpAgent() {
         return
     }
     if rps.Executable() != "dhclient" {
-        log.Error(trace.Wrap(errors.New("Incorrect Executable")))
+        log.Error(trace.Wrap(errors.New("Incorrect postliminary executable")))
         return
     }
 
