@@ -57,7 +57,7 @@ func NewContext(host string, nodeList string) *SwarmContext {
 // createNodesDiscovery replaces $GOPATH/src/github.com/docker/swarm/cli/manage/createDiscovery
 // Instead of going through dokcker/pkg/discovery interface for the compatiblity with consul,
 // this function creates node based backend directly.
-func (c *SwarmContext) CreateNodeDiscovery() discovery.Backend {
+func (c *SwarmContext) createNodeDiscovery() discovery.Backend {
     hb := c.heartbeat
     if hb < 1*time.Second {
         log.Fatal("--heartbeat should be at least one second")
@@ -70,7 +70,7 @@ func (c *SwarmContext) CreateNodeDiscovery() discovery.Backend {
     return discovery
 }
 
-func (c *SwarmContext) DiscoveryOpt() map[string]string {
+func (c *SwarmContext) getDiscoveryOpt() map[string]string {
     // Process the store options
     options := map[string]string{}
     for key, value := range c.discoveryOpt {

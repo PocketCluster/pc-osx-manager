@@ -163,7 +163,7 @@ func (context *SwarmContext) Manage() {
     if uri == "" {
         log.Fatalf("discovery required to manage a cluster.")
     }
-    discovery := context.CreateNodeDiscovery()
+    discovery := context.createNodeDiscovery()
     s, err := strategy.New(context.strategy)
     if err != nil {
         log.Fatal(err)
