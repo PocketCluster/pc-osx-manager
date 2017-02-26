@@ -4,7 +4,7 @@ import (
     "time"
     "github.com/docker/swarm/cluster"
     "github.com/docker/docker/pkg/discovery"
-    "github.com/docker/docker-pkg/discovery/nodes"
+    "github.com/docker/docker/pkg/discovery/nodes"
     log "github.com/Sirupsen/logrus"
 )
 
