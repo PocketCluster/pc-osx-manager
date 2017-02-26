@@ -2,18 +2,15 @@ package swarm
 
 import (
     "crypto/tls"
-/*
     "crypto/x509"
+    "fmt"
     "io/ioutil"
-*/
-    //"path"
-    //"strings"
     "time"
-    log "github.com/Sirupsen/logrus"
 
+
+    log "github.com/Sirupsen/logrus"
     // implicit loading and initialization
     _ "github.com/docker/docker/pkg/discovery/nodes"
-
     "github.com/docker/leadership"
     "github.com/docker/swarm/api"
     "github.com/docker/swarm/cluster"
@@ -63,38 +60,81 @@ func (h *statusHandler) Status() [][2]string {
     return status
 }
 
+// Load the TLS certificates/keys and, if verify is true, the CA.
+func loadTLSConfig(ca, cert, key string, verify bool) (*tls.Config, error) {
+    c, err := tls.LoadX509KeyPair(cert, key)
+    if err != nil {
+        return nil, fmt.Errorf("Couldn't load X509 key pair (%s, %s): %s. Key encrypted?",
+            cert, key, err)
+    }
+
+    config := &tls.Config{
+        Certificates: []tls.Certificate{c},
+        MinVersion:   tls.VersionTLS10,
+    }
+
+    if verify {
+        certPool := x509.NewCertPool()
+        file, err := ioutil.ReadFile(ca)
+        if err != nil {
+            return nil, fmt.Errorf("Couldn't read CA certificate: %s", err)
+        }
+        certPool.AppendCertsFromPEM(file)
+        config.RootCAs = certPool
+        config.ClientAuth = tls.RequireAndVerifyClientCert
+        config.ClientCAs = certPool
+    } else {
+        // If --tlsverify is not supplied, disable CA validation.
+        config.InsecureSkipVerify = true
+    }
+
+    return config, nil
+}
+
+/*
+swarm manage
+--debug
+--host =            :3376
+--advertise=        pc-master:3376
+
+--tlsverify =       true
+--tlscacert =       /Users/almightykim/Workspace/DKIMG/CERT/ca-cert.pub
+--tlscert =         /Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert
+--tlskey =          /Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key
+
+nodes://192.168.1.150:2375,
+192.168.1.151:2375,
+192.168.1.152:2375,
+192.168.1.153:2375,
+192.168.1.161:2375,
+192.168.1.162:2375,
+192.168.1.163:2375,
+192.168.1.164:2375,
+192.168.1.165:2375,
+192.168.1.166:2375
+*/
+
+const (
+    DefaultTLSCA    = "/Users/almightykim/Workspace/DKIMG/CERT/ca-cert.pub"
+    DefaultTLSCert  = "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert"
+    DefaultTLSKey   = "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key"
+)
+
 func (context *SwarmContext) Manage() {
     var (
         tlsConfig *tls.Config
         err       error
     )
 
-    // we'll look into TLS certificate later
-/*
-    // If either --tls or --tlsverify are specified, load the certificates.
-    if c.Bool("tls") || c.Bool("tlsverify") {
-        if !c.IsSet("tlscert") || !c.IsSet("tlskey") {
-            log.Fatal("--tlscert and --tlskey must be provided when using --tls")
-        }
-        if c.Bool("tlsverify") && !c.IsSet("tlscacert") {
-            log.Fatal("--tlscacert must be provided when using --tlsverify")
-        }
-        tlsConfig, err = loadTLSConfig(
-            c.String("tlscacert"),
-            c.String("tlscert"),
-            c.String("tlskey"),
-            c.Bool("tlsverify"))
-        if err != nil {
-            log.Fatal(err)
-        }
-    } else {
-        // Otherwise, if neither --tls nor --tlsverify are specified, abort if
-        // the other flags are passed as they will be ignored.
-        if c.IsSet("tlscert") || c.IsSet("tlskey") || c.IsSet("tlscacert") {
-            log.Fatal("--tlscert, --tlskey and --tlscacert require the use of either --tls or --tlsverify")
-        }
+    tlsConfig, err = loadTLSConfig(
+        DefaultTLSCA,
+        DefaultTLSCert,
+        DefaultTLSKey,
+        true)
+    if err != nil {
+        log.Fatal(err)
     }
-*/
+
     refreshMinInterval := context.refreshMinInterval
     refreshMaxInterval := context.refreshMaxInterval
     if refreshMinInterval <= time.Duration(0)*time.Second {
@@ -112,7 +152,7 @@ func (context *SwarmContext) Manage() {
     if failureRetry <= 0 {
         log.Fatal("invalid failure retry count")
     }
-    engineOpts := &cluster.EngineOpts{
+    engineOpts := &cluster.EngineOpts {
         RefreshMinInterval: refreshMinInterval,
         RefreshMaxInterval: refreshMaxInterval,
         FailureRetry:       failureRetry,
@@ -123,7 +163,7 @@ func (context *SwarmContext) Manage() {
     if uri == "" {
         log.Fatalf("discovery required to manage a cluster.")
     }
-    discovery := context.createNodeDiscovery()
+    discovery := context.CreateNodeDiscovery()
     s, err := strategy.New(context.strategy)
     if err != nil {
         log.Fatal(err)
