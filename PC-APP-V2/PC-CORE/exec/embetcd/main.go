@@ -18,6 +18,7 @@ const (
     DefaultListenClientURLs         = "https://0.0.0.0:2379"
     DefaultInitialAdvertisePeerURLs = "http://127.0.0.1:2380"
     DefaultListenPeerURLs           = "http://127.0.0.1:2380"
+    DefaultInitialClusterToken      = "pocketcluster-kvstorage"
 )
 
 /*
@@ -70,7 +71,7 @@ func NewEtcdConfig() *embed.Config {
         ACUrls:                 []url.URL{*acurl},                 // --advertise-client-urls
         ClusterState:           embed.ClusterStateFlagNew,
         InitialCluster:         DefaultInitialClusterMember,       // --initial-cluster
-        InitialClusterToken:    "etcd-cluster",
+        InitialClusterToken:    DefaultInitialClusterToken,
         StrictReconfigCheck:    true,
         Metrics:                "basic",
 
