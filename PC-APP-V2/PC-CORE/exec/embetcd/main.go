@@ -11,44 +11,40 @@ import (
     "github.com/coreos/etcd/pkg/transport"
 )
 
-/*
-# leaner config. listen to local only for peer
-bin/etcd \
-
---data-dir="/Users/almightykim/Workspace/DKIMG/ETCD/data" \
---name="pc-master" \
-
---heartbeat-interval=5000 \
---election-timeout=50000 \
-
---listen-peer-urls="http://127.0.0.1:2380" \
---listen-client-urls="https://0.0.0.0:2379" \
---initial-advertise-peer-urls="http://127.0.0.1:2380" \
---advertise-client-urls="https://pc-master:2379" \
-
---initial-cluster="pc-master=http://127.0.0.1:2380" \
-
---cert-file="/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert" \
---key-file="/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key" \
---trusted-ca-file="/Users/almightykim/Workspace/DKIMG/CERT/ca-cert.pub" \
---client-cert-auth=true \
-
---debug
-*/
-
 const (
+    DefaultName                     = "pc-master"
+    DefaultInitialClusterMember     = "pc-master=http://127.0.0.1:2380"
     DefaultAdvertiseClientURLs      = "https://pc-master:2379"
     DefaultListenClientURLs         = "https://0.0.0.0:2379"
     DefaultInitialAdvertisePeerURLs = "http://127.0.0.1:2380"
     DefaultListenPeerURLs           = "http://127.0.0.1:2380"
-    DefaultName                     = "pc-master"
-    DefaultInitialClusterMember     = "pc-master=http://127.0.0.1:2380"
 )
 
 /*
- For full Config options, take a look at "github.com/coreos/etcd/etcdmain/config.go"
- */
-func NewEtcdConfig(dataDir string) *embed.Config {
+# leaner config. listen to local only for peer
+--data-dir =                    "/Users/almightykim/Workspace/DKIMG/ETCD/data"
+--name =                        "pc-master"
+
+--heartbeat-interval =          5000
+--election-timeout =            50000
+
+--listen-peer-urls =            "http://127.0.0.1:2380"
+--listen-client-urls =          "https://0.0.0.0:2379"
+--initial-advertise-peer-urls = "http://127.0.0.1:2380"
+--advertise-client-urls =       "https://pc-master:2379"
+
+--initial-cluster =             "pc-master=http://127.0.0.1:2380"
+
+--cert-file =                   "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert"
+--key-file =                    "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key"
+--trusted-ca-file =             "/Users/almightykim/Workspace/DKIMG/CERT/ca-cert.pub"
+--client-cert-auth =            true
+*/
+
+// For full Config options, take a look at "github.com/coreos/etcd/etcdmain/config.go"
+// Those hard-coded values should be adjusted at later re-iteration
+
+func NewEtcdConfig() *embed.Config {
     // --listen-peer-urls
     lpurl, _ := url.Parse(DefaultListenPeerURLs)
     // --initial-advertise-peer-urls
@@ -63,7 +59,8 @@ func NewEtcdConfig(dataDir string) *embed.Config {
         MaxSnapFiles:           embed.DefaultMaxSnapshots,
         MaxWalFiles:            embed.DefaultMaxWALs,
         SnapCount:              etcdserver.DefaultSnapCount,
-        Dir:                    dataDir,                           // --data-dir
+        // --data-dir
+        Dir:                    "/Users/almightykim/Workspace/DKIMG/ETCD/data",
         Name:                   DefaultName,                       // --name
         TickMs:                 5000,                              // --heartbeat-interval
         ElectionMs:             50000,                             // --election-timeout
@@ -80,7 +77,7 @@ func NewEtcdConfig(dataDir string) *embed.Config {
         // Do not auto generate any certificate
         ClientAutoTLS:          false,
         PeerAutoTLS:            false,
-        Debug:                  true,
+        Debug:                  false,
 
         // client certificate options
         ClientTLSInfo:          transport.TLSInfo {
@@ -98,7 +95,7 @@ func NewEtcdConfig(dataDir string) *embed.Config {
 }
 
 func main() {
-    cfg := NewEtcdConfig("/Users/almightykim/Workspace/DKIMG/ETCD/data")
+    cfg := NewEtcdConfig()
     e, err := embed.StartEtcd(cfg)
     if err != nil {
         log.Fatal(err)
