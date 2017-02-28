@@ -30,9 +30,13 @@ type SwarmContext struct {
     // cluster strategy
     clusterOpt         cluster.DriverOpts
     strategy           string
+
+    tlsCa              string
+    tlsCert            string
+    tlsKey             string
 }
 
-func NewContext(host string, nodeList string) *SwarmContext {
+func NewContext(host, nodeList string, tlsCa, tlsCert, tlsKey string) *SwarmContext {
     discoveryOpt := make(map[string]string)
     clusterOpt := cluster.DriverOpts{}
 
@@ -51,26 +55,30 @@ func NewContext(host string, nodeList string) *SwarmContext {
 
         clusterOpt:         clusterOpt,
         strategy:           "spread",
+
+        tlsCa:              tlsCa,
+        tlsCert:            tlsCert,
+        tlsKey:             tlsKey,
     }
 }
 
 // createNodesDiscovery replaces $GOPATH/src/github.com/docker/swarm/cli/manage/createDiscovery
 // Instead of going through dokcker/pkg/discovery interface for the compatiblity with consul,
 // this function creates node based backend directly.
-func (c *SwarmContext) createNodeDiscovery() discovery.Backend {
+func createNodeDiscovery(c *SwarmContext) discovery.Backend {
     hb := c.heartbeat
     if hb < 1*time.Second {
         log.Fatal("--heartbeat should be at least one second")
     }
     discovery := &nodes.Discovery{}
-    err := discovery.Initialize(c.nodeList, hb, 0, c.DiscoveryOpt())
+    err := discovery.Initialize(c.nodeList, hb, 0, getDiscoveryOpt(c))
     if err != nil {
         log.Fatal(err)
     }
     return discovery
 }
 
-func (c *SwarmContext) getDiscoveryOpt() map[string]string {
+func getDiscoveryOpt(c *SwarmContext) map[string]string {
     // Process the store options
     options := map[string]string{}
     for key, value := range c.discoveryOpt {

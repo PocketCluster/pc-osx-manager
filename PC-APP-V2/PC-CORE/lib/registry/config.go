@@ -6,7 +6,7 @@ import (
     "time"
 
     log "github.com/Sirupsen/logrus"
-    "github.com/Sirupsen/logrus/formatters/logstash"
+    logstash "github.com/bshuster-repo/logrus-logstash-hook"
     "github.com/docker/distribution/configuration"
     "github.com/docker/distribution/context"
 )

@@ -7,7 +7,6 @@ import (
     "io/ioutil"
     "time"
 
-
     log "github.com/Sirupsen/logrus"
     // implicit loading and initialization
     _ "github.com/docker/docker/pkg/discovery/nodes"
@@ -91,35 +90,6 @@ func loadTLSConfig(ca, cert, key string, verify bool) (*tls.Config, error) {
     return config, nil
 }
 
-/*
-swarm manage
---debug
---host =            :3376
---advertise=        pc-master:3376
-
---tlsverify =       true
---tlscacert =       /Users/almightykim/Workspace/DKIMG/CERT/ca-cert.pub
---tlscert =         /Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert
---tlskey =          /Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key
-
-nodes://192.168.1.150:2375,
-192.168.1.151:2375,
-192.168.1.152:2375,
-192.168.1.153:2375,
-192.168.1.161:2375,
-192.168.1.162:2375,
-192.168.1.163:2375,
-192.168.1.164:2375,
-192.168.1.165:2375,
-192.168.1.166:2375
-*/
-
-const (
-    DefaultTLSCA    = "/Users/almightykim/Workspace/DKIMG/CERT/ca-cert.pub"
-    DefaultTLSCert  = "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert"
-    DefaultTLSKey   = "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key"
-)
-
 func (context *SwarmContext) Manage() {
     var (
         tlsConfig *tls.Config
@@ -127,9 +97,9 @@ func (context *SwarmContext) Manage() {
     )
 
     tlsConfig, err = loadTLSConfig(
-        DefaultTLSCA,
-        DefaultTLSCert,
-        DefaultTLSKey,
+        context.tlsCa,
+        context.tlsCert,
+        context.tlsKey,
         true)
     if err != nil {
         log.Fatal(err)
@@ -137,7 +107,7 @@ func (context *SwarmContext) Manage() {
 
     refreshMinInterval := context.refreshMinInterval
     refreshMaxInterval := context.refreshMaxInterval
-    if refreshMinInterval <= time.Duration(0)*time.Second {
+    if refreshMinInterval <= time.Duration(0) * time.Second {
         log.Fatal("min refresh interval should be a positive number")
     }
     if refreshMaxInterval < refreshMinInterval {
@@ -163,7 +133,7 @@ func (context *SwarmContext) Manage() {
     if uri == "" {
         log.Fatalf("discovery required to manage a cluster.")
     }
-    discovery := context.createNodeDiscovery()
+    discovery := createNodeDiscovery(context)
     s, err := strategy.New(context.strategy)
     if err != nil {
         log.Fatal(err)
