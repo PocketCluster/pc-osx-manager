@@ -1,0 +1,219 @@
+MacPro:regmain almightykim$ go run ./main.go
+INFO[0000]
+ --- config.Log ---
+(struct { AccessLog struct { Disabled bool "yaml:\"disabled,omitempty\"" } "yaml:\"accesslog,omitempty\""; Level configuration.Loglevel "yaml:\"level\""; Formatter string "yaml:\"formatter,omitempty\""; Fields map[string]interface {} "yaml:\"fields,omitempty\""; Hooks []configuration.LogHook "yaml:\"hooks,omitempty\"" }) {
+ AccessLog: (struct { Disabled bool "yaml:\"disabled,omitempty\"" }) {
+  Disabled: (bool) false
+ },
+ Level: (configuration.Loglevel) (len=5) "debug",
+ Formatter: (string) (len=4) "text",
+ Fields: (map[string]interface {}) (len=2) {
+  (string) (len=11) "environment": (string) (len=9) "pc-master",
+  (string) (len=7) "service": (string) (len=8) "registry"
+ },
+ Hooks: ([]configuration.LogHook) <nil>
+}
+
+INFO[0000]
+ --- config.HTTP ---
+(struct { Addr string "yaml:\"addr,omitempty\""; Net string "yaml:\"net,omitempty\""; Host string "yaml:\"host,omitempty\""; Prefix string "yaml:\"prefix,omitempty\""; Secret string "yaml:\"secret,omitempty\""; RelativeURLs bool "yaml:\"relativeurls,omitempty\""; TLS struct { Certificate string "yaml:\"certificate,omitempty\""; Key string "yaml:\"key,omitempty\""; ClientCAs []string "yaml:\"clientcas,omitempty\""; LetsEncrypt struct { CacheFile string "yaml:\"cachefile,omitempty\""; Email string "yaml:\"email,omitempty\"" } "yaml:\"letsencrypt,omitempty\"" } "yaml:\"tls,omitempty\""; Headers http.Header "yaml:\"headers,omitempty\""; Debug struct { Addr string "yaml:\"addr,omitempty\"" } "yaml:\"debug,omitempty\""; HTTP2 struct { Disabled bool "yaml:\"disabled,omitempty\"" } "yaml:\"http2,omitempty\"" }) {
+ Addr: (string) (len=12) "0.0.0.0:5000",
+ Net: (string) (len=3) "tcp",
+ Host: (string) "",
+ Prefix: (string) "",
+ Secret: (string) (len=13) "mytokensecret",
+ RelativeURLs: (bool) false,
+ TLS: (struct { Certificate string "yaml:\"certificate,omitempty\""; Key string "yaml:\"key,omitempty\""; ClientCAs []string "yaml:\"clientcas,omitempty\""; LetsEncrypt struct { CacheFile string "yaml:\"cachefile,omitempty\""; Email string "yaml:\"email,omitempty\"" } "yaml:\"letsencrypt,omitempty\"" }) {
+  Certificate: (string) (len=59) "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert",
+  Key: (string) (len=58) "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key",
+  ClientCAs: ([]string) <nil>,
+  LetsEncrypt: (struct { CacheFile string "yaml:\"cachefile,omitempty\""; Email string "yaml:\"email,omitempty\"" }) {
+   CacheFile: (string) "",
+   Email: (string) ""
+  }
+ },
+ Headers: (http.Header) (len=1) {
+  (string) (len=22) "X-Content-Type-Options": ([]string) (len=1 cap=1) {
+   (string) (len=7) "nosniff"
+  }
+ },
+ Debug: (struct { Addr string "yaml:\"addr,omitempty\"" }) {
+  Addr: (string) (len=12) "0.0.0.0:5001"
+ },
+ HTTP2: (struct { Disabled bool "yaml:\"disabled,omitempty\"" }) {
+  Disabled: (bool) false
+ }
+}
+
+INFO[0000]
+ --- config.HTTP.TLS ---
+(struct { Certificate string "yaml:\"certificate,omitempty\""; Key string "yaml:\"key,omitempty\""; ClientCAs []string "yaml:\"clientcas,omitempty\""; LetsEncrypt struct { CacheFile string "yaml:\"cachefile,omitempty\""; Email string "yaml:\"email,omitempty\"" } "yaml:\"letsencrypt,omitempty\"" }) {
+ Certificate: (string) (len=59) "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert",
+ Key: (string) (len=58) "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key",
+ ClientCAs: ([]string) <nil>,
+ LetsEncrypt: (struct { CacheFile string "yaml:\"cachefile,omitempty\""; Email string "yaml:\"email,omitempty\"" }) {
+  CacheFile: (string) "",
+  Email: (string) ""
+ }
+}
+
+INFO[0000]
+ --- config.Compatibility ---
+(struct { Schema1 struct { TrustKey string "yaml:\"signingkeyfile,omitempty\"" } "yaml:\"schema1,omitempty\"" }) {
+ Schema1: (struct { TrustKey string "yaml:\"signingkeyfile,omitempty\"" }) {
+  TrustKey: (string) ""
+ }
+}
+
+INFO[0000]
+ --- config.Validation ---
+(struct { Enabled bool "yaml:\"enabled,omitempty\""; Manifests struct { URLs struct { Allow []string "yaml:\"allow,omitempty\""; Deny []string "yaml:\"deny,omitempty\"" } "yaml:\"urls,omitempty\"" } "yaml:\"manifests,omitempty\"" }) {
+ Enabled: (bool) false,
+ Manifests: (struct { URLs struct { Allow []string "yaml:\"allow,omitempty\""; Deny []string "yaml:\"deny,omitempty\"" } "yaml:\"urls,omitempty\"" }) {
+  URLs: (struct { Allow []string "yaml:\"allow,omitempty\""; Deny []string "yaml:\"deny,omitempty\"" }) {
+   Allow: ([]string) <nil>,
+   Deny: ([]string) <nil>
+  }
+ }
+}
+
+INFO[0000]
+ --- config.Policy ---
+(struct { Repository struct { Classes []string "yaml:\"classes\"" } "yaml:\"repository,omitempty\"" }) {
+ Repository: (struct { Classes []string "yaml:\"classes\"" }) {
+  Classes: ([]string) <nil>
+ }
+}
+
+INFO[0000]
+ --- config ---
+(*configuration.Configuration)(0xc420292e00)({
+ Version: (configuration.Version) (len=3) "0.1",
+ Log: (struct { AccessLog struct { Disabled bool "yaml:\"disabled,omitempty\"" } "yaml:\"accesslog,omitempty\""; Level configuration.Loglevel "yaml:\"level\""; Formatter string "yaml:\"formatter,omitempty\""; Fields map[string]interface {} "yaml:\"fields,omitempty\""; Hooks []configuration.LogHook "yaml:\"hooks,omitempty\"" }) {
+  AccessLog: (struct { Disabled bool "yaml:\"disabled,omitempty\"" }) {
+   Disabled: (bool) false
+  },
+  Level: (configuration.Loglevel) (len=5) "debug",
+  Formatter: (string) (len=4) "text",
+  Fields: (map[string]interface {}) (len=2) {
+   (string) (len=7) "service": (string) (len=8) "registry",
+   (string) (len=11) "environment": (string) (len=9) "pc-master"
+  },
+  Hooks: ([]configuration.LogHook) <nil>
+ },
+ Loglevel: (configuration.Loglevel) (len=4) "info",
+ Storage: (configuration.Storage) (len=3) {
+  (string) (len=5) "cache": (configuration.Parameters) (len=1) {
+   (string) (len=14) "blobdescriptor": (string) (len=8) "inmemory"
+  },
+  (string) (len=10) "filesystem": (configuration.Parameters) (len=2) {
+   (string) (len=13) "rootdirectory": (string) (len=48) "/Users/almightykim/Workspace/DKIMG/REGISTRY/data",
+   (string) (len=10) "maxthreads": (int) 32
+  },
+  (string) (len=11) "maintenance": (configuration.Parameters) (len=2) {
+   (string) (len=8) "readonly": (map[interface {}]interface {}) (len=1) {
+    (string) (len=7) "enabled": (bool) false
+   },
+   (string) (len=13) "uploadpurging": (map[interface {}]interface {}) (len=4) {
+    (string) (len=7) "enabled": (bool) true,
+    (string) (len=3) "age": (string) (len=4) "168h",
+    (string) (len=8) "interval": (string) (len=3) "24h",
+    (string) (len=6) "dryrun": (bool) false
+   }
+  }
+ },
+ Auth: (configuration.Auth) <nil>,
+ Middleware: (map[string][]configuration.Middleware) <nil>,
+ Reporting: (configuration.Reporting) {
+  Bugsnag: (configuration.BugsnagReporting) {
+   APIKey: (string) "",
+   ReleaseStage: (string) "",
+   Endpoint: (string) ""
+  },
+  NewRelic: (configuration.NewRelicReporting) {
+   LicenseKey: (string) "",
+   Name: (string) "",
+   Verbose: (bool) false
+  }
+ },
+ HTTP: (struct { Addr string "yaml:\"addr,omitempty\""; Net string "yaml:\"net,omitempty\""; Host string "yaml:\"host,omitempty\""; Prefix string "yaml:\"prefix,omitempty\""; Secret string "yaml:\"secret,omitempty\""; RelativeURLs bool "yaml:\"relativeurls,omitempty\""; TLS struct { Certificate string "yaml:\"certificate,omitempty\""; Key string "yaml:\"key,omitempty\""; ClientCAs []string "yaml:\"clientcas,omitempty\""; LetsEncrypt struct { CacheFile string "yaml:\"cachefile,omitempty\""; Email string "yaml:\"email,omitempty\"" } "yaml:\"letsencrypt,omitempty\"" } "yaml:\"tls,omitempty\""; Headers http.Header "yaml:\"headers,omitempty\""; Debug struct { Addr string "yaml:\"addr,omitempty\"" } "yaml:\"debug,omitempty\""; HTTP2 struct { Disabled bool "yaml:\"disabled,omitempty\"" } "yaml:\"http2,omitempty\"" }) {
+  Addr: (string) (len=12) "0.0.0.0:5000",
+  Net: (string) (len=3) "tcp",
+  Host: (string) "",
+  Prefix: (string) "",
+  Secret: (string) (len=13) "mytokensecret",
+  RelativeURLs: (bool) false,
+  TLS: (struct { Certificate string "yaml:\"certificate,omitempty\""; Key string "yaml:\"key,omitempty\""; ClientCAs []string "yaml:\"clientcas,omitempty\""; LetsEncrypt struct { CacheFile string "yaml:\"cachefile,omitempty\""; Email string "yaml:\"email,omitempty\"" } "yaml:\"letsencrypt,omitempty\"" }) {
+   Certificate: (string) (len=59) "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert",
+   Key: (string) (len=58) "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key",
+   ClientCAs: ([]string) <nil>,
+   LetsEncrypt: (struct { CacheFile string "yaml:\"cachefile,omitempty\""; Email string "yaml:\"email,omitempty\"" }) {
+    CacheFile: (string) "",
+    Email: (string) ""
+   }
+  },
+  Headers: (http.Header) (len=1) {
+   (string) (len=22) "X-Content-Type-Options": ([]string) (len=1 cap=1) {
+    (string) (len=7) "nosniff"
+   }
+  },
+  Debug: (struct { Addr string "yaml:\"addr,omitempty\"" }) {
+   Addr: (string) (len=12) "0.0.0.0:5001"
+  },
+  HTTP2: (struct { Disabled bool "yaml:\"disabled,omitempty\"" }) {
+   Disabled: (bool) false
+  }
+ },
+ Notifications: (configuration.Notifications) {
+  Endpoints: ([]configuration.Endpoint) <nil>
+ },
+ Redis: (struct { Addr string "yaml:\"addr,omitempty\""; Password string "yaml:\"password,omitempty\""; DB int "yaml:\"db,omitempty\""; DialTimeout time.Duration "yaml:\"dialtimeout,omitempty\""; ReadTimeout time.Duration "yaml:\"readtimeout,omitempty\""; WriteTimeout time.Duration "yaml:\"writetimeout,omitempty\""; Pool struct { MaxIdle int "yaml:\"maxidle,omitempty\""; MaxActive int "yaml:\"maxactive,omitempty\""; IdleTimeout time.Duration "yaml:\"idletimeout,omitempty\"" } "yaml:\"pool,omitempty\"" }) {
+  Addr: (string) "",
+  Password: (string) "",
+  DB: (int) 0,
+  DialTimeout: (time.Duration) 0s,
+  ReadTimeout: (time.Duration) 0s,
+  WriteTimeout: (time.Duration) 0s,
+  Pool: (struct { MaxIdle int "yaml:\"maxidle,omitempty\""; MaxActive int "yaml:\"maxactive,omitempty\""; IdleTimeout time.Duration "yaml:\"idletimeout,omitempty\"" }) {
+   MaxIdle: (int) 0,
+   MaxActive: (int) 0,
+   IdleTimeout: (time.Duration) 0s
+  }
+ },
+ Health: (configuration.Health) {
+  FileCheckers: ([]configuration.FileChecker) <nil>,
+  HTTPCheckers: ([]configuration.HTTPChecker) <nil>,
+  TCPCheckers: ([]configuration.TCPChecker) <nil>,
+  StorageDriver: (struct { Enabled bool "yaml:\"enabled,omitempty\""; Interval time.Duration "yaml:\"interval,omitempty\""; Threshold int "yaml:\"threshold,omitempty\"" }) {
+   Enabled: (bool) false,
+   Interval: (time.Duration) 0s,
+   Threshold: (int) 0
+  }
+ },
+ Proxy: (configuration.Proxy) {
+  RemoteURL: (string) "",
+  Username: (string) "",
+  Password: (string) ""
+ },
+ Compatibility: (struct { Schema1 struct { TrustKey string "yaml:\"signingkeyfile,omitempty\"" } "yaml:\"schema1,omitempty\"" }) {
+  Schema1: (struct { TrustKey string "yaml:\"signingkeyfile,omitempty\"" }) {
+   TrustKey: (string) ""
+  }
+ },
+ Validation: (struct { Enabled bool "yaml:\"enabled,omitempty\""; Manifests struct { URLs struct { Allow []string "yaml:\"allow,omitempty\""; Deny []string "yaml:\"deny,omitempty\"" } "yaml:\"urls,omitempty\"" } "yaml:\"manifests,omitempty\"" }) {
+  Enabled: (bool) false,
+  Manifests: (struct { URLs struct { Allow []string "yaml:\"allow,omitempty\""; Deny []string "yaml:\"deny,omitempty\"" } "yaml:\"urls,omitempty\"" }) {
+   URLs: (struct { Allow []string "yaml:\"allow,omitempty\""; Deny []string "yaml:\"deny,omitempty\"" }) {
+    Allow: ([]string) <nil>,
+    Deny: ([]string) <nil>
+   }
+  }
+ },
+ Policy: (struct { Repository struct { Classes []string "yaml:\"classes\"" } "yaml:\"repository,omitempty\"" }) {
+  Repository: (struct { Classes []string "yaml:\"classes\"" }) {
+   Classes: ([]string) <nil>
+  }
+ }
+})
+
+MacPro:regmain almightykim$
