@@ -1,8 +1,96 @@
 [34mINFO[0m[0000] (*project.Project)(0xc4200a27e0)({
  Name: (string) (len=12) "pockethadoop",
- ServiceConfigs: (*config.ServiceConfigs)(0xc42020de80)({
+ ServiceConfigs: (*config.ServiceConfigs)(0xc42020de20)({
   m: (map[string]*config.ServiceConfig) (len=6) {
-   (string) (len=9) "datanode3": (*config.ServiceConfig)(0xc4202fd800)({
+
+   (string) (len=9) "datanode2": (*config.ServiceConfig)(0xc4202fb400)({
+    Build: (yaml.Build) {
+     Context: (string) "",
+     Dockerfile: (string) "",
+     Args: (map[string]string) <nil>
+    },
+    CapAdd: ([]string) <nil>,
+    CapDrop: ([]string) <nil>,
+    CPUSet: (string) "",
+    CPUShares: (yaml.StringorInt) 0,
+    CPUQuota: (yaml.StringorInt) 0,
+    Command: (yaml.Command) <nil>,
+    CgroupParent: (string) "",
+    ContainerName: (string) (len=8) "pc-node2",
+    Devices: ([]string) <nil>,
+    DependsOn: ([]string) <nil>,
+    DNS: (yaml.Stringorslice) <nil>,
+    DNSOpts: ([]string) <nil>,
+    DNSSearch: (yaml.Stringorslice) <nil>,
+    DomainName: (string) "",
+    Entrypoint: (yaml.Command) <nil>,
+    EnvFile: (yaml.Stringorslice) <nil>,
+    Environment: (yaml.MaporEqualSlice) (len=1 cap=1) {
+     (string) (len=25) "constraint:node==pc-node2"
+    },
+    Expose: ([]string) <nil>,
+    Extends: (yaml.MaporEqualSlice) <nil>,
+    ExternalLinks: ([]string) <nil>,
+    ExtraHosts: ([]string) <nil>,
+    GroupAdd: ([]string) <nil>,
+    Image: (string) (len=46) "pocketcluster/armhf-jupyter-slave-4.2.1:latest",
+    Isolation: (string) "",
+    Hostname: (string) (len=8) "pc-node2",
+    Ipc: (string) "",
+    Labels: (yaml.SliceorMap) <nil>,
+    Links: (yaml.MaporColonSlice) <nil>,
+    Logging: (config.Log) {
+     Driver: (string) "",
+     Options: (map[string]string) <nil>
+    },
+    MacAddress: (string) "",
+    MemLimit: (yaml.MemStringorInt) 0,
+    MemSwapLimit: (yaml.MemStringorInt) 0,
+    MemSwappiness: (yaml.MemStringorInt) 0,
+    NetworkMode: (string) "",
+    Networks: (*yaml.Networks)(0xc420437e80)({
+     Networks: ([]*yaml.Network) (len=1 cap=1) {
+      (*yaml.Network)(0xc420458c60)({
+       Name: (string) (len=6) "hadoop",
+       RealName: (string) (len=19) "pockethadoop_hadoop",
+       Aliases: ([]string) <nil>,
+       IPv4Address: (string) (len=12) "172.16.128.2",
+       IPv6Address: (string) ""
+      })
+     }
+    }),
+    OomKillDisable: (bool) false,
+    OomScoreAdj: (yaml.StringorInt) 0,
+    Pid: (string) "",
+    Ports: ([]string) <nil>,
+    Privileged: (bool) false,
+    SecurityOpt: ([]string) <nil>,
+    ShmSize: (yaml.MemStringorInt) 0,
+    StopSignal: (string) "",
+    Tmpfs: (yaml.Stringorslice) (len=1 cap=1) {
+     (string) (len=4) "/tmp"
+    },
+    VolumeDriver: (string) "",
+    Volumes: (*yaml.Volumes)(0xc420437fa0)({
+     Volumes: ([]*yaml.Volume) (len=2 cap=2) {
+      (*yaml.Volume)(0xc42043ee40)(/pocket/hadoop/2.7.3:/pocket/hadoop),
+      (*yaml.Volume)(0xc42043eea0)(/pocket/spark/2.1.0:/pocket/spark)
+     }
+    }),
+    VolumesFrom: ([]string) <nil>,
+    Uts: (string) "",
+    Restart: (string) "",
+    ReadOnly: (bool) false,
+    StdinOpen: (bool) false,
+    Tty: (bool) false,
+    User: (string) "",
+    WorkingDir: (string) "",
+    Ulimits: (yaml.Ulimits) {
+     Elements: ([]yaml.Ulimit) <nil>
+    }
+   }),
+
+   (string) (len=9) "datanode3": (*config.ServiceConfig)(0xc4202fb800)({
     Build: (yaml.Build) {
      Context: (string) "",
      Dockerfile: (string) "",
@@ -47,9 +135,9 @@
     MemSwapLimit: (yaml.MemStringorInt) 0,
     MemSwappiness: (yaml.MemStringorInt) 0,
     NetworkMode: (string) "",
-    Networks: (*yaml.Networks)(0xc420450ec0)({
+    Networks: (*yaml.Networks)(0xc42046a0e0)({
      Networks: ([]*yaml.Network) (len=1 cap=1) {
-      (*yaml.Network)(0xc4204600c0)({
+      (*yaml.Network)(0xc420458cc0)({
        Name: (string) (len=6) "hadoop",
        RealName: (string) (len=19) "pockethadoop_hadoop",
        Aliases: ([]string) <nil>,
@@ -66,12 +154,14 @@
     SecurityOpt: ([]string) <nil>,
     ShmSize: (yaml.MemStringorInt) 0,
     StopSignal: (string) "",
-    Tmpfs: (yaml.Stringorslice) <nil>,
+    Tmpfs: (yaml.Stringorslice) (len=1 cap=1) {
+     (string) (len=4) "/tmp"
+    },
     VolumeDriver: (string) "",
-    Volumes: (*yaml.Volumes)(0xc420450f40)({
+    Volumes: (*yaml.Volumes)(0xc42046a200)({
      Volumes: ([]*yaml.Volume) (len=2 cap=2) {
-      (*yaml.Volume)(0xc420442b70)(/pocket/hadoop/2.7.3:/pocket/hadoop),
-      (*yaml.Volume)(0xc420442bd0)(/pocket/spark/2.1.0:/pocket/spark)
+      (*yaml.Volume)(0xc42043f020)(/pocket/hadoop/2.7.3:/pocket/hadoop),
+      (*yaml.Volume)(0xc42043f080)(/pocket/spark/2.1.0:/pocket/spark)
      }
     }),
     VolumesFrom: ([]string) <nil>,
@@ -86,7 +176,8 @@
      Elements: ([]yaml.Ulimit) <nil>
     }
    }),
-   (string) (len=9) "datanode4": (*config.ServiceConfig)(0xc4202fdc00)({
+
+   (string) (len=9) "datanode4": (*config.ServiceConfig)(0xc4202fbc00)({
     Build: (yaml.Build) {
      Context: (string) "",
      Dockerfile: (string) "",
@@ -131,9 +222,9 @@
     MemSwapLimit: (yaml.MemStringorInt) 0,
     MemSwappiness: (yaml.MemStringorInt) 0,
     NetworkMode: (string) "",
-    Networks: (*yaml.Networks)(0xc420451080)({
+    Networks: (*yaml.Networks)(0xc42046a340)({
      Networks: ([]*yaml.Network) (len=1 cap=1) {
-      (*yaml.Network)(0xc420460120)({
+      (*yaml.Network)(0xc420458d20)({
        Name: (string) (len=6) "hadoop",
        RealName: (string) (len=19) "pockethadoop_hadoop",
        Aliases: ([]string) <nil>,
@@ -150,12 +241,14 @@
     SecurityOpt: ([]string) <nil>,
     ShmSize: (yaml.MemStringorInt) 0,
     StopSignal: (string) "",
-    Tmpfs: (yaml.Stringorslice) <nil>,
+    Tmpfs: (yaml.Stringorslice) (len=1 cap=1) {
+     (string) (len=4) "/tmp"
+    },
     VolumeDriver: (string) "",
-    Volumes: (*yaml.Volumes)(0xc420451100)({
+    Volumes: (*yaml.Volumes)(0xc42046a460)({
      Volumes: ([]*yaml.Volume) (len=2 cap=2) {
-      (*yaml.Volume)(0xc420442d20)(/pocket/hadoop/2.7.3:/pocket/hadoop),
-      (*yaml.Volume)(0xc420442d80)(/pocket/spark/2.1.0:/pocket/spark)
+      (*yaml.Volume)(0xc42043f200)(/pocket/hadoop/2.7.3:/pocket/hadoop),
+      (*yaml.Volume)(0xc42043f260)(/pocket/spark/2.1.0:/pocket/spark)
      }
     }),
     VolumesFrom: ([]string) <nil>,
@@ -170,7 +263,8 @@
      Elements: ([]yaml.Ulimit) <nil>
     }
    }),
-   (string) (len=9) "datanode5": (*config.ServiceConfig)(0xc420464000)({
+
+   (string) (len=9) "datanode5": (*config.ServiceConfig)(0xc42046c000)({
     Build: (yaml.Build) {
      Context: (string) "",
      Dockerfile: (string) "",
@@ -215,9 +309,9 @@
     MemSwapLimit: (yaml.MemStringorInt) 0,
     MemSwappiness: (yaml.MemStringorInt) 0,
     NetworkMode: (string) "",
-    Networks: (*yaml.Networks)(0xc420451240)({
+    Networks: (*yaml.Networks)(0xc42046a5a0)({
      Networks: ([]*yaml.Network) (len=1 cap=1) {
-      (*yaml.Network)(0xc420460180)({
+      (*yaml.Network)(0xc420458d80)({
        Name: (string) (len=6) "hadoop",
        RealName: (string) (len=19) "pockethadoop_hadoop",
        Aliases: ([]string) <nil>,
@@ -234,12 +328,14 @@
     SecurityOpt: ([]string) <nil>,
     ShmSize: (yaml.MemStringorInt) 0,
     StopSignal: (string) "",
-    Tmpfs: (yaml.Stringorslice) <nil>,
+    Tmpfs: (yaml.Stringorslice) (len=1 cap=1) {
+     (string) (len=4) "/tmp"
+    },
     VolumeDriver: (string) "",
-    Volumes: (*yaml.Volumes)(0xc4204512c0)({
+    Volumes: (*yaml.Volumes)(0xc42046a6c0)({
      Volumes: ([]*yaml.Volume) (len=2 cap=2) {
-      (*yaml.Volume)(0xc420442ed0)(/pocket/hadoop/2.7.3:/pocket/hadoop),
-      (*yaml.Volume)(0xc420442f30)(/pocket/spark/2.1.0:/pocket/spark)
+      (*yaml.Volume)(0xc42043f3e0)(/pocket/hadoop/2.7.3:/pocket/hadoop),
+      (*yaml.Volume)(0xc42043f440)(/pocket/spark/2.1.0:/pocket/spark)
      }
     }),
     VolumesFrom: ([]string) <nil>,
@@ -254,7 +350,8 @@
      Elements: ([]yaml.Ulimit) <nil>
     }
    }),
-   (string) (len=8) "namenode": (*config.ServiceConfig)(0xc420464400)({
+
+   (string) (len=8) "namenode": (*config.ServiceConfig)(0xc42046c400)({
     Build: (yaml.Build) {
      Context: (string) "",
      Dockerfile: (string) "",
@@ -307,9 +404,9 @@
     MemSwapLimit: (yaml.MemStringorInt) 0,
     MemSwappiness: (yaml.MemStringorInt) 0,
     NetworkMode: (string) "",
-    Networks: (*yaml.Networks)(0xc420451460)({
+    Networks: (*yaml.Networks)(0xc42046a860)({
      Networks: ([]*yaml.Network) (len=1 cap=1) {
-      (*yaml.Network)(0xc4204601e0)({
+      (*yaml.Network)(0xc420458de0)({
        Name: (string) (len=6) "hadoop",
        RealName: (string) (len=19) "pockethadoop_hadoop",
        Aliases: ([]string) <nil>,
@@ -329,13 +426,15 @@
     SecurityOpt: ([]string) <nil>,
     ShmSize: (yaml.MemStringorInt) 0,
     StopSignal: (string) "",
-    Tmpfs: (yaml.Stringorslice) <nil>,
+    Tmpfs: (yaml.Stringorslice) (len=1 cap=1) {
+     (string) (len=4) "/tmp"
+    },
     VolumeDriver: (string) "",
-    Volumes: (*yaml.Volumes)(0xc420451540)({
+    Volumes: (*yaml.Volumes)(0xc42046a9e0)({
      Volumes: ([]*yaml.Volume) (len=3 cap=4) {
-      (*yaml.Volume)(0xc420443230)(/pocket/hadoop/2.7.3:/pocket/hadoop),
-      (*yaml.Volume)(0xc420443290)(/pocket/spark/2.1.0:/pocket/spark),
-      (*yaml.Volume)(0xc4204432f0)(/pocket/workspace:/pocket/workspace)
+      (*yaml.Volume)(0xc42043f770)(/pocket/hadoop/2.7.3:/pocket/hadoop),
+      (*yaml.Volume)(0xc42043f7d0)(/pocket/spark/2.1.0:/pocket/spark),
+      (*yaml.Volume)(0xc42043f830)(/pocket/workspace:/pocket/workspace)
      }
     }),
     VolumesFrom: ([]string) <nil>,
@@ -350,7 +449,8 @@
      Elements: ([]yaml.Ulimit) <nil>
     }
    }),
-   (string) (len=9) "datanode1": (*config.ServiceConfig)(0xc4202fd000)({
+
+   (string) (len=9) "datanode1": (*config.ServiceConfig)(0xc4202fb000)({
     Build: (yaml.Build) {
      Context: (string) "",
      Dockerfile: (string) "",
@@ -395,9 +495,9 @@
     MemSwapLimit: (yaml.MemStringorInt) 0,
     MemSwappiness: (yaml.MemStringorInt) 0,
     NetworkMode: (string) "",
-    Networks: (*yaml.Networks)(0xc420450b20)({
+    Networks: (*yaml.Networks)(0xc420437c00)({
      Networks: ([]*yaml.Network) (len=1 cap=1) {
-      (*yaml.Network)(0xc420460000)({
+      (*yaml.Network)(0xc420458c00)({
        Name: (string) (len=6) "hadoop",
        RealName: (string) (len=19) "pockethadoop_hadoop",
        Aliases: ([]string) <nil>,
@@ -414,96 +514,14 @@
     SecurityOpt: ([]string) <nil>,
     ShmSize: (yaml.MemStringorInt) 0,
     StopSignal: (string) "",
-    Tmpfs: (yaml.Stringorslice) <nil>,
+    Tmpfs: (yaml.Stringorslice) (len=1 cap=1) {
+     (string) (len=4) "/tmp"
+    },
     VolumeDriver: (string) "",
-    Volumes: (*yaml.Volumes)(0xc420450bc0)({
+    Volumes: (*yaml.Volumes)(0xc420437d40)({
      Volumes: ([]*yaml.Volume) (len=2 cap=2) {
-      (*yaml.Volume)(0xc420442810)(/pocket/hadoop/2.7.3:/pocket/hadoop),
-      (*yaml.Volume)(0xc420442870)(/pocket/spark/2.1.0:/pocket/spark)
-     }
-    }),
-    VolumesFrom: ([]string) <nil>,
-    Uts: (string) "",
-    Restart: (string) "",
-    ReadOnly: (bool) false,
-    StdinOpen: (bool) false,
-    Tty: (bool) false,
-    User: (string) "",
-    WorkingDir: (string) "",
-    Ulimits: (yaml.Ulimits) {
-     Elements: ([]yaml.Ulimit) <nil>
-    }
-   }),
-   (string) (len=9) "datanode2": (*config.ServiceConfig)(0xc4202fd400)({
-    Build: (yaml.Build) {
-     Context: (string) "",
-     Dockerfile: (string) "",
-     Args: (map[string]string) <nil>
-    },
-    CapAdd: ([]string) <nil>,
-    CapDrop: ([]string) <nil>,
-    CPUSet: (string) "",
-    CPUShares: (yaml.StringorInt) 0,
-    CPUQuota: (yaml.StringorInt) 0,
-    Command: (yaml.Command) <nil>,
-    CgroupParent: (string) "",
-    ContainerName: (string) (len=8) "pc-node2",
-    Devices: ([]string) <nil>,
-    DependsOn: ([]string) <nil>,
-    DNS: (yaml.Stringorslice) <nil>,
-    DNSOpts: ([]string) <nil>,
-    DNSSearch: (yaml.Stringorslice) <nil>,
-    DomainName: (string) "",
-    Entrypoint: (yaml.Command) <nil>,
-    EnvFile: (yaml.Stringorslice) <nil>,
-    Environment: (yaml.MaporEqualSlice) (len=1 cap=1) {
-     (string) (len=25) "constraint:node==pc-node2"
-    },
-    Expose: ([]string) <nil>,
-    Extends: (yaml.MaporEqualSlice) <nil>,
-    ExternalLinks: ([]string) <nil>,
-    ExtraHosts: ([]string) <nil>,
-    GroupAdd: ([]string) <nil>,
-    Image: (string) (len=46) "pocketcluster/armhf-jupyter-slave-4.2.1:latest",
-    Isolation: (string) "",
-    Hostname: (string) (len=8) "pc-node2",
-    Ipc: (string) "",
-    Labels: (yaml.SliceorMap) <nil>,
-    Links: (yaml.MaporColonSlice) <nil>,
-    Logging: (config.Log) {
-     Driver: (string) "",
-     Options: (map[string]string) <nil>
-    },
-    MacAddress: (string) "",
-    MemLimit: (yaml.MemStringorInt) 0,
-    MemSwapLimit: (yaml.MemStringorInt) 0,
-    MemSwappiness: (yaml.MemStringorInt) 0,
-    NetworkMode: (string) "",
-    Networks: (*yaml.Networks)(0xc420450d00)({
-     Networks: ([]*yaml.Network) (len=1 cap=1) {
-      (*yaml.Network)(0xc420460060)({
-       Name: (string) (len=6) "hadoop",
-       RealName: (string) (len=19) "pockethadoop_hadoop",
-       Aliases: ([]string) <nil>,
-       IPv4Address: (string) (len=12) "172.16.128.2",
-       IPv6Address: (string) ""
-      })
-     }
-    }),
-    OomKillDisable: (bool) false,
-    OomScoreAdj: (yaml.StringorInt) 0,
-    Pid: (string) "",
-    Ports: ([]string) <nil>,
-    Privileged: (bool) false,
-    SecurityOpt: ([]string) <nil>,
-    ShmSize: (yaml.MemStringorInt) 0,
-    StopSignal: (string) "",
-    Tmpfs: (yaml.Stringorslice) <nil>,
-    VolumeDriver: (string) "",
-    Volumes: (*yaml.Volumes)(0xc420450d80)({
-     Volumes: ([]*yaml.Volume) (len=2 cap=2) {
-      (*yaml.Volume)(0xc4204429c0)(/pocket/hadoop/2.7.3:/pocket/hadoop),
-      (*yaml.Volume)(0xc420442a20)(/pocket/spark/2.1.0:/pocket/spark)
+      (*yaml.Volume)(0xc42043ec60)(/pocket/hadoop/2.7.3:/pocket/hadoop),
+      (*yaml.Volume)(0xc42043ecc0)(/pocket/spark/2.1.0:/pocket/spark)
      }
     }),
     VolumesFrom: ([]string) <nil>,
@@ -533,7 +551,7 @@
  VolumeConfigs: (map[string]*config.VolumeConfig) {
  },
  NetworkConfigs: (map[string]*config.NetworkConfig) (len=1) {
-  (string) (len=6) "hadoop": (*config.NetworkConfig)(0xc420460d20)({
+  (string) (len=6) "hadoop": (*config.NetworkConfig)(0xc420459920)({
    Driver: (string) (len=7) "overlay",
    DriverOpts: (map[string]string) <nil>,
    External: (yaml.External) {
@@ -554,19 +572,19 @@
   })
  },
  Files: ([]string) (len=1 cap=1) {
-  (string) (len=26) "pocket-deploy-original.yml"
+  (string) (len=17) "pocket-deploy.yml"
  },
  ReloadCallback: (func() error) <nil>,
  ParseOptions: (*config.ParseOptions)(<nil>),
- runtime: (*docker.Project)(0xc4202f2600)({
-  clientFactory: (*client.defaultFactory)(0xc4202f25d0)({
+ runtime: (*docker.Project)(0xc4202f25c0)({
+  clientFactory: (*client.defaultFactory)(0xc4202f2590)({
    client: (*client.Client)(0xc4201ed880)({
     scheme: (string) (len=4) "http",
     host: (string) (len=27) "unix:///var/run/docker.sock",
     proto: (string) (len=4) "unix",
     addr: (string) (len=20) "/var/run/docker.sock",
     basePath: (string) "",
-    client: (*http.Client)(0xc4202f6390)({
+    client: (*http.Client)(0xc4202f4390)({
      Transport: (*http.Transport)(0xc4200dc960)({
       idleMu: (sync.Mutex) {
        state: (int32) 0,
@@ -629,16 +647,16 @@
    })
   })
  }),
- networks: (*network.Networks)(0xc420451dc0)({
+ networks: (*network.Networks)(0xc42046b260)({
   networks: ([]*network.Network) (len=1 cap=1) {
-   (*network.Network)(0xc4203efb80)({
+   (*network.Network)(0xc4203f3b80)({
     client: (*client.Client)(0xc4201ed880)({
      scheme: (string) (len=4) "http",
      host: (string) (len=27) "unix:///var/run/docker.sock",
      proto: (string) (len=4) "unix",
      addr: (string) (len=20) "/var/run/docker.sock",
      basePath: (string) "",
-     client: (*http.Client)(0xc4202f6390)({
+     client: (*http.Client)(0xc4202f4390)({
       Transport: (*http.Transport)(0xc4200dc960)({
        idleMu: (sync.Mutex) {
         state: (int32) 0,
@@ -719,7 +737,7 @@
   },
   networkEnabled: (bool) true
  }),
- volumes: (*volume.Volumes)(0xc420451de0)({
+ volumes: (*volume.Volumes)(0xc42046b280)({
   volumes: ([]*volume.Volume) {
   },
   volumeEnabled: (bool) true
@@ -727,10 +745,10 @@
  configVersion: (string) (len=1) "2",
  context: (*project.Context)(0xc4200dc870)({
   ComposeFiles: ([]string) (len=1 cap=1) {
-   (string) (len=26) "pocket-deploy-original.yml"
+   (string) (len=17) "pocket-deploy.yml"
   },
   ComposeBytes: ([][]uint8) (len=1 cap=1) {
-   ([]uint8) (len=2611 cap=3123) {
+   ([]uint8) (len=2755 cap=3267) {
     00000000  76 65 72 73 69 6f 6e 3a  20 27 32 27 0a 0a 73 65  |version: '2'..se|
     00000010  72 76 69 63 65 73 3a 0a  20 20 6e 61 6d 65 6e 6f  |rvices:.  nameno|
     00000020  64 65 3a 0a 20 20 20 20  69 6d 61 67 65 3a 20 70  |de:.    image: p|
@@ -757,160 +775,169 @@
     00000170  73 70 61 72 6b 0a 20 20  20 20 20 20 2d 20 2f 70  |spark.      - /p|
     00000180  6f 63 6b 65 74 2f 77 6f  72 6b 73 70 61 63 65 3a  |ocket/workspace:|
     00000190  2f 70 6f 63 6b 65 74 2f  77 6f 72 6b 73 70 61 63  |/pocket/workspac|
-    000001a0  65 0a 20 20 20 20 65 6e  76 69 72 6f 6e 6d 65 6e  |e.    environmen|
-    000001b0  74 3a 0a 20 20 20 20 20  20 2d 20 43 4c 55 53 54  |t:.      - CLUST|
-    000001c0  45 52 5f 4e 41 4d 45 3d  70 6f 63 6b 65 74 63 6c  |ER_NAME=pocketcl|
-    000001d0  75 73 74 65 72 2f 68 61  64 6f 6f 70 2d 73 70 61  |uster/hadoop-spa|
-    000001e0  72 6b 2d 6e 6f 74 65 0a  20 20 20 20 20 20 2d 20  |rk-note.      - |
-    000001f0  53 4c 41 56 45 5f 4e 4f  44 45 53 3d 70 63 2d 6e  |SLAVE_NODES=pc-n|
-    00000200  6f 64 65 31 3d 31 37 32  2e 31 36 2e 31 32 38 2e  |ode1=172.16.128.|
-    00000210  31 3b 70 63 2d 6e 6f 64  65 32 3d 31 37 32 2e 31  |1;pc-node2=172.1|
-    00000220  36 2e 31 32 38 2e 32 3b  70 63 2d 6e 6f 64 65 33  |6.128.2;pc-node3|
-    00000230  3d 31 37 32 2e 31 36 2e  31 32 38 2e 33 3b 70 63  |=172.16.128.3;pc|
-    00000240  2d 6e 6f 64 65 34 3d 31  37 32 2e 31 36 2e 31 32  |-node4=172.16.12|
-    00000250  38 2e 34 3b 70 63 2d 6e  6f 64 65 35 3d 31 37 32  |8.4;pc-node5=172|
-    00000260  2e 31 36 2e 31 32 38 2e  35 0a 20 20 20 20 20 20  |.16.128.5.      |
-    00000270  2d 20 63 6f 6e 73 74 72  61 69 6e 74 3a 6e 6f 64  |- constraint:nod|
-    00000280  65 3d 3d 70 63 2d 63 6f  72 65 0a 20 20 20 20 64  |e==pc-core.    d|
-    00000290  65 70 65 6e 64 73 5f 6f  6e 3a 0a 20 20 20 20 20  |epends_on:.     |
-    000002a0  20 2d 20 64 61 74 61 6e  6f 64 65 31 0a 20 20 20  | - datanode1.   |
-    000002b0  20 20 20 2d 20 64 61 74  61 6e 6f 64 65 32 0a 20  |   - datanode2. |
-    000002c0  20 20 20 20 20 2d 20 64  61 74 61 6e 6f 64 65 33  |     - datanode3|
-    000002d0  0a 20 20 20 20 20 20 2d  20 64 61 74 61 6e 6f 64  |.      - datanod|
-    000002e0  65 34 0a 20 20 20 20 20  20 2d 20 64 61 74 61 6e  |e4.      - datan|
-    000002f0  6f 64 65 35 0a 0a 20 20  64 61 74 61 6e 6f 64 65  |ode5..  datanode|
-    00000300  31 3a 0a 20 20 20 20 69  6d 61 67 65 3a 20 70 6f  |1:.    image: po|
-    00000310  63 6b 65 74 63 6c 75 73  74 65 72 2f 61 72 6d 68  |cketcluster/armh|
-    00000320  66 2d 6a 75 70 79 74 65  72 2d 73 6c 61 76 65 2d  |f-jupyter-slave-|
-    00000330  34 2e 32 2e 31 3a 6c 61  74 65 73 74 0a 20 20 20  |4.2.1:latest.   |
-    00000340  20 63 6f 6e 74 61 69 6e  65 72 5f 6e 61 6d 65 3a  | container_name:|
-    00000350  20 70 63 2d 6e 6f 64 65  31 0a 20 20 20 20 68 6f  | pc-node1.    ho|
-    00000360  73 74 6e 61 6d 65 3a 20  70 63 2d 6e 6f 64 65 31  |stname: pc-node1|
-    00000370  0a 20 20 20 20 6e 65 74  77 6f 72 6b 73 3a 0a 20  |.    networks:. |
-    00000380  20 20 20 20 20 68 61 64  6f 6f 70 3a 0a 20 20 20  |     hadoop:.   |
-    00000390  20 20 20 20 20 69 70 76  34 5f 61 64 64 72 65 73  |     ipv4_addres|
-    000003a0  73 3a 20 31 37 32 2e 31  36 2e 31 32 38 2e 31 0a  |s: 172.16.128.1.|
-    000003b0  20 20 20 20 76 6f 6c 75  6d 65 73 3a 0a 20 20 20  |    volumes:.   |
-    000003c0  20 20 20 2d 20 2f 70 6f  63 6b 65 74 2f 68 61 64  |   - /pocket/had|
-    000003d0  6f 6f 70 2f 32 2e 37 2e  33 3a 2f 70 6f 63 6b 65  |oop/2.7.3:/pocke|
-    000003e0  74 2f 68 61 64 6f 6f 70  0a 20 20 20 20 20 20 2d  |t/hadoop.      -|
-    000003f0  20 2f 70 6f 63 6b 65 74  2f 73 70 61 72 6b 2f 32  | /pocket/spark/2|
-    00000400  2e 31 2e 30 3a 2f 70 6f  63 6b 65 74 2f 73 70 61  |.1.0:/pocket/spa|
-    00000410  72 6b 0a 20 20 20 20 65  6e 76 69 72 6f 6e 6d 65  |rk.    environme|
-    00000420  6e 74 3a 0a 20 20 20 20  20 20 2d 20 63 6f 6e 73  |nt:.      - cons|
-    00000430  74 72 61 69 6e 74 3a 6e  6f 64 65 3d 3d 70 63 2d  |traint:node==pc-|
-    00000440  6e 6f 64 65 31 0a 0a 20  20 64 61 74 61 6e 6f 64  |node1..  datanod|
-    00000450  65 32 3a 0a 20 20 20 20  69 6d 61 67 65 3a 20 70  |e2:.    image: p|
-    00000460  6f 63 6b 65 74 63 6c 75  73 74 65 72 2f 61 72 6d  |ocketcluster/arm|
-    00000470  68 66 2d 6a 75 70 79 74  65 72 2d 73 6c 61 76 65  |hf-jupyter-slave|
-    00000480  2d 34 2e 32 2e 31 3a 6c  61 74 65 73 74 0a 20 20  |-4.2.1:latest.  |
-    00000490  20 20 63 6f 6e 74 61 69  6e 65 72 5f 6e 61 6d 65  |  container_name|
-    000004a0  3a 20 70 63 2d 6e 6f 64  65 32 0a 20 20 20 20 68  |: pc-node2.    h|
-    000004b0  6f 73 74 6e 61 6d 65 3a  20 70 63 2d 6e 6f 64 65  |ostname: pc-node|
-    000004c0  32 0a 20 20 20 20 6e 65  74 77 6f 72 6b 73 3a 0a  |2.    networks:.|
-    000004d0  20 20 20 20 20 20 68 61  64 6f 6f 70 3a 0a 20 20  |      hadoop:.  |
-    000004e0  20 20 20 20 20 20 69 70  76 34 5f 61 64 64 72 65  |      ipv4_addre|
-    000004f0  73 73 3a 20 31 37 32 2e  31 36 2e 31 32 38 2e 32  |ss: 172.16.128.2|
-    00000500  0a 20 20 20 20 76 6f 6c  75 6d 65 73 3a 0a 20 20  |.    volumes:.  |
-    00000510  20 20 20 20 2d 20 2f 70  6f 63 6b 65 74 2f 68 61  |    - /pocket/ha|
-    00000520  64 6f 6f 70 2f 32 2e 37  2e 33 3a 2f 70 6f 63 6b  |doop/2.7.3:/pock|
-    00000530  65 74 2f 68 61 64 6f 6f  70 0a 20 20 20 20 20 20  |et/hadoop.      |
-    00000540  2d 20 2f 70 6f 63 6b 65  74 2f 73 70 61 72 6b 2f  |- /pocket/spark/|
-    00000550  32 2e 31 2e 30 3a 2f 70  6f 63 6b 65 74 2f 73 70  |2.1.0:/pocket/sp|
-    00000560  61 72 6b 0a 20 20 20 20  65 6e 76 69 72 6f 6e 6d  |ark.    environm|
-    00000570  65 6e 74 3a 0a 20 20 20  20 20 20 2d 20 63 6f 6e  |ent:.      - con|
-    00000580  73 74 72 61 69 6e 74 3a  6e 6f 64 65 3d 3d 70 63  |straint:node==pc|
-    00000590  2d 6e 6f 64 65 32 0a 0a  20 20 64 61 74 61 6e 6f  |-node2..  datano|
-    000005a0  64 65 33 3a 0a 20 20 20  20 69 6d 61 67 65 3a 20  |de3:.    image: |
-    000005b0  70 6f 63 6b 65 74 63 6c  75 73 74 65 72 2f 61 72  |pocketcluster/ar|
-    000005c0  6d 68 66 2d 6a 75 70 79  74 65 72 2d 73 6c 61 76  |mhf-jupyter-slav|
-    000005d0  65 2d 34 2e 32 2e 31 3a  6c 61 74 65 73 74 0a 20  |e-4.2.1:latest. |
-    000005e0  20 20 20 63 6f 6e 74 61  69 6e 65 72 5f 6e 61 6d  |   container_nam|
-    000005f0  65 3a 20 70 63 2d 6e 6f  64 65 33 0a 20 20 20 20  |e: pc-node3.    |
-    00000600  68 6f 73 74 6e 61 6d 65  3a 20 70 63 2d 6e 6f 64  |hostname: pc-nod|
-    00000610  65 33 0a 20 20 20 20 6e  65 74 77 6f 72 6b 73 3a  |e3.    networks:|
-    00000620  0a 20 20 20 20 20 20 68  61 64 6f 6f 70 3a 0a 20  |.      hadoop:. |
-    00000630  20 20 20 20 20 20 20 69  70 76 34 5f 61 64 64 72  |       ipv4_addr|
-    00000640  65 73 73 3a 20 31 37 32  2e 31 36 2e 31 32 38 2e  |ess: 172.16.128.|
-    00000650  33 0a 20 20 20 20 76 6f  6c 75 6d 65 73 3a 0a 20  |3.    volumes:. |
-    00000660  20 20 20 20 20 2d 20 2f  70 6f 63 6b 65 74 2f 68  |     - /pocket/h|
-    00000670  61 64 6f 6f 70 2f 32 2e  37 2e 33 3a 2f 70 6f 63  |adoop/2.7.3:/poc|
-    00000680  6b 65 74 2f 68 61 64 6f  6f 70 0a 20 20 20 20 20  |ket/hadoop.     |
-    00000690  20 2d 20 2f 70 6f 63 6b  65 74 2f 73 70 61 72 6b  | - /pocket/spark|
-    000006a0  2f 32 2e 31 2e 30 3a 2f  70 6f 63 6b 65 74 2f 73  |/2.1.0:/pocket/s|
-    000006b0  70 61 72 6b 0a 20 20 20  20 65 6e 76 69 72 6f 6e  |park.    environ|
-    000006c0  6d 65 6e 74 3a 0a 20 20  20 20 20 20 2d 20 63 6f  |ment:.      - co|
-    000006d0  6e 73 74 72 61 69 6e 74  3a 6e 6f 64 65 3d 3d 70  |nstraint:node==p|
-    000006e0  63 2d 6e 6f 64 65 33 0a  0a 20 20 64 61 74 61 6e  |c-node3..  datan|
-    000006f0  6f 64 65 34 3a 0a 20 20  20 20 69 6d 61 67 65 3a  |ode4:.    image:|
-    00000700  20 70 6f 63 6b 65 74 63  6c 75 73 74 65 72 2f 61  | pocketcluster/a|
-    00000710  72 6d 68 66 2d 6a 75 70  79 74 65 72 2d 73 6c 61  |rmhf-jupyter-sla|
-    00000720  76 65 2d 34 2e 32 2e 31  3a 6c 61 74 65 73 74 0a  |ve-4.2.1:latest.|
-    00000730  20 20 20 20 63 6f 6e 74  61 69 6e 65 72 5f 6e 61  |    container_na|
-    00000740  6d 65 3a 20 70 63 2d 6e  6f 64 65 34 0a 20 20 20  |me: pc-node4.   |
-    00000750  20 68 6f 73 74 6e 61 6d  65 3a 20 70 63 2d 6e 6f  | hostname: pc-no|
-    00000760  64 65 34 0a 20 20 20 20  6e 65 74 77 6f 72 6b 73  |de4.    networks|
-    00000770  3a 0a 20 20 20 20 20 20  68 61 64 6f 6f 70 3a 0a  |:.      hadoop:.|
-    00000780  20 20 20 20 20 20 20 20  69 70 76 34 5f 61 64 64  |        ipv4_add|
-    00000790  72 65 73 73 3a 20 31 37  32 2e 31 36 2e 31 32 38  |ress: 172.16.128|
-    000007a0  2e 34 0a 20 20 20 20 76  6f 6c 75 6d 65 73 3a 0a  |.4.    volumes:.|
-    000007b0  20 20 20 20 20 20 2d 20  2f 70 6f 63 6b 65 74 2f  |      - /pocket/|
-    000007c0  68 61 64 6f 6f 70 2f 32  2e 37 2e 33 3a 2f 70 6f  |hadoop/2.7.3:/po|
-    000007d0  63 6b 65 74 2f 68 61 64  6f 6f 70 0a 20 20 20 20  |cket/hadoop.    |
-    000007e0  20 20 2d 20 2f 70 6f 63  6b 65 74 2f 73 70 61 72  |  - /pocket/spar|
-    000007f0  6b 2f 32 2e 31 2e 30 3a  2f 70 6f 63 6b 65 74 2f  |k/2.1.0:/pocket/|
-    00000800  73 70 61 72 6b 0a 20 20  20 20 65 6e 76 69 72 6f  |spark.    enviro|
-    00000810  6e 6d 65 6e 74 3a 0a 20  20 20 20 20 20 2d 20 63  |nment:.      - c|
-    00000820  6f 6e 73 74 72 61 69 6e  74 3a 6e 6f 64 65 3d 3d  |onstraint:node==|
-    00000830  70 63 2d 6e 6f 64 65 34  0a 0a 20 20 64 61 74 61  |pc-node4..  data|
-    00000840  6e 6f 64 65 35 3a 0a 20  20 20 20 69 6d 61 67 65  |node5:.    image|
-    00000850  3a 20 70 6f 63 6b 65 74  63 6c 75 73 74 65 72 2f  |: pocketcluster/|
-    00000860  61 72 6d 68 66 2d 6a 75  70 79 74 65 72 2d 73 6c  |armhf-jupyter-sl|
-    00000870  61 76 65 2d 34 2e 32 2e  31 3a 6c 61 74 65 73 74  |ave-4.2.1:latest|
-    00000880  0a 20 20 20 20 63 6f 6e  74 61 69 6e 65 72 5f 6e  |.    container_n|
-    00000890  61 6d 65 3a 20 70 63 2d  6e 6f 64 65 35 0a 20 20  |ame: pc-node5.  |
-    000008a0  20 20 68 6f 73 74 6e 61  6d 65 3a 20 70 63 2d 6e  |  hostname: pc-n|
-    000008b0  6f 64 65 35 0a 20 20 20  20 6e 65 74 77 6f 72 6b  |ode5.    network|
-    000008c0  73 3a 0a 20 20 20 20 20  20 68 61 64 6f 6f 70 3a  |s:.      hadoop:|
-    000008d0  0a 20 20 20 20 20 20 20  20 69 70 76 34 5f 61 64  |.        ipv4_ad|
-    000008e0  64 72 65 73 73 3a 20 31  37 32 2e 31 36 2e 31 32  |dress: 172.16.12|
-    000008f0  38 2e 35 0a 20 20 20 20  76 6f 6c 75 6d 65 73 3a  |8.5.    volumes:|
-    00000900  0a 20 20 20 20 20 20 2d  20 2f 70 6f 63 6b 65 74  |.      - /pocket|
-    00000910  2f 68 61 64 6f 6f 70 2f  32 2e 37 2e 33 3a 2f 70  |/hadoop/2.7.3:/p|
-    00000920  6f 63 6b 65 74 2f 68 61  64 6f 6f 70 0a 20 20 20  |ocket/hadoop.   |
-    00000930  20 20 20 2d 20 2f 70 6f  63 6b 65 74 2f 73 70 61  |   - /pocket/spa|
-    00000940  72 6b 2f 32 2e 31 2e 30  3a 2f 70 6f 63 6b 65 74  |rk/2.1.0:/pocket|
-    00000950  2f 73 70 61 72 6b 0a 20  20 20 20 65 6e 76 69 72  |/spark.    envir|
-    00000960  6f 6e 6d 65 6e 74 3a 0a  20 20 20 20 20 20 2d 20  |onment:.      - |
-    00000970  63 6f 6e 73 74 72 61 69  6e 74 3a 6e 6f 64 65 3d  |constraint:node=|
-    00000980  3d 70 63 2d 6e 6f 64 65  35 0a 0a 6e 65 74 77 6f  |=pc-node5..netwo|
-    00000990  72 6b 73 3a 0a 20 20 68  61 64 6f 6f 70 3a 0a 20  |rks:.  hadoop:. |
-    000009a0  20 20 20 64 72 69 76 65  72 3a 20 6f 76 65 72 6c  |   driver: overl|
-    000009b0  61 79 0a 20 20 20 20 69  70 61 6d 3a 0a 20 20 20  |ay.    ipam:.   |
-    000009c0  20 20 20 63 6f 6e 66 69  67 3a 0a 20 20 20 20 20  |   config:.     |
-    000009d0  20 20 20 2d 20 73 75 62  6e 65 74 3a 20 31 37 32  |   - subnet: 172|
-    000009e0  2e 31 36 2e 31 32 38 2e  30 2f 32 34 0a 20 20 20  |.16.128.0/24.   |
-    000009f0  20 20 20 20 20 20 20 67  61 74 65 77 61 79 3a 20  |       gateway: |
-    00000a00  31 37 32 2e 31 36 2e 31  32 38 2e 32 35 34 0a 20  |172.16.128.254. |
-    00000a10  20 20 20 20 20 20 20 20  20 69 70 5f 72 61 6e 67  |         ip_rang|
-    00000a20  65 3a 20 31 37 32 2e 31  36 2e 31 32 38 2e 30 2f  |e: 172.16.128.0/|
-    00000a30  32 34 0a                                          |24.|
+    000001a0  65 0a 20 20 20 20 74 6d  70 66 73 3a 0a 20 20 20  |e.    tmpfs:.   |
+    000001b0  20 20 20 2d 20 2f 74 6d  70 0a 20 20 20 20 65 6e  |   - /tmp.    en|
+    000001c0  76 69 72 6f 6e 6d 65 6e  74 3a 0a 20 20 20 20 20  |vironment:.     |
+    000001d0  20 2d 20 43 4c 55 53 54  45 52 5f 4e 41 4d 45 3d  | - CLUSTER_NAME=|
+    000001e0  70 6f 63 6b 65 74 63 6c  75 73 74 65 72 2f 68 61  |pocketcluster/ha|
+    000001f0  64 6f 6f 70 2d 73 70 61  72 6b 2d 6e 6f 74 65 0a  |doop-spark-note.|
+    00000200  20 20 20 20 20 20 2d 20  53 4c 41 56 45 5f 4e 4f  |      - SLAVE_NO|
+    00000210  44 45 53 3d 70 63 2d 6e  6f 64 65 31 3d 31 37 32  |DES=pc-node1=172|
+    00000220  2e 31 36 2e 31 32 38 2e  31 3b 70 63 2d 6e 6f 64  |.16.128.1;pc-nod|
+    00000230  65 32 3d 31 37 32 2e 31  36 2e 31 32 38 2e 32 3b  |e2=172.16.128.2;|
+    00000240  70 63 2d 6e 6f 64 65 33  3d 31 37 32 2e 31 36 2e  |pc-node3=172.16.|
+    00000250  31 32 38 2e 33 3b 70 63  2d 6e 6f 64 65 34 3d 31  |128.3;pc-node4=1|
+    00000260  37 32 2e 31 36 2e 31 32  38 2e 34 3b 70 63 2d 6e  |72.16.128.4;pc-n|
+    00000270  6f 64 65 35 3d 31 37 32  2e 31 36 2e 31 32 38 2e  |ode5=172.16.128.|
+    00000280  35 0a 20 20 20 20 20 20  2d 20 63 6f 6e 73 74 72  |5.      - constr|
+    00000290  61 69 6e 74 3a 6e 6f 64  65 3d 3d 70 63 2d 63 6f  |aint:node==pc-co|
+    000002a0  72 65 0a 20 20 20 20 64  65 70 65 6e 64 73 5f 6f  |re.    depends_o|
+    000002b0  6e 3a 0a 20 20 20 20 20  20 2d 20 64 61 74 61 6e  |n:.      - datan|
+    000002c0  6f 64 65 31 0a 20 20 20  20 20 20 2d 20 64 61 74  |ode1.      - dat|
+    000002d0  61 6e 6f 64 65 32 0a 20  20 20 20 20 20 2d 20 64  |anode2.      - d|
+    000002e0  61 74 61 6e 6f 64 65 33  0a 20 20 20 20 20 20 2d  |atanode3.      -|
+    000002f0  20 64 61 74 61 6e 6f 64  65 34 0a 20 20 20 20 20  | datanode4.     |
+    00000300  20 2d 20 64 61 74 61 6e  6f 64 65 35 0a 0a 20 20  | - datanode5..  |
+    00000310  64 61 74 61 6e 6f 64 65  31 3a 0a 20 20 20 20 69  |datanode1:.    i|
+    00000320  6d 61 67 65 3a 20 70 6f  63 6b 65 74 63 6c 75 73  |mage: pocketclus|
+    00000330  74 65 72 2f 61 72 6d 68  66 2d 6a 75 70 79 74 65  |ter/armhf-jupyte|
+    00000340  72 2d 73 6c 61 76 65 2d  34 2e 32 2e 31 3a 6c 61  |r-slave-4.2.1:la|
+    00000350  74 65 73 74 0a 20 20 20  20 63 6f 6e 74 61 69 6e  |test.    contain|
+    00000360  65 72 5f 6e 61 6d 65 3a  20 70 63 2d 6e 6f 64 65  |er_name: pc-node|
+    00000370  31 0a 20 20 20 20 68 6f  73 74 6e 61 6d 65 3a 20  |1.    hostname: |
+    00000380  70 63 2d 6e 6f 64 65 31  0a 20 20 20 20 6e 65 74  |pc-node1.    net|
+    00000390  77 6f 72 6b 73 3a 0a 20  20 20 20 20 20 68 61 64  |works:.      had|
+    000003a0  6f 6f 70 3a 0a 20 20 20  20 20 20 20 20 69 70 76  |oop:.        ipv|
+    000003b0  34 5f 61 64 64 72 65 73  73 3a 20 31 37 32 2e 31  |4_address: 172.1|
+    000003c0  36 2e 31 32 38 2e 31 0a  20 20 20 20 76 6f 6c 75  |6.128.1.    volu|
+    000003d0  6d 65 73 3a 0a 20 20 20  20 20 20 2d 20 2f 70 6f  |mes:.      - /po|
+    000003e0  63 6b 65 74 2f 68 61 64  6f 6f 70 2f 32 2e 37 2e  |cket/hadoop/2.7.|
+    000003f0  33 3a 2f 70 6f 63 6b 65  74 2f 68 61 64 6f 6f 70  |3:/pocket/hadoop|
+    00000400  0a 20 20 20 20 20 20 2d  20 2f 70 6f 63 6b 65 74  |.      - /pocket|
+    00000410  2f 73 70 61 72 6b 2f 32  2e 31 2e 30 3a 2f 70 6f  |/spark/2.1.0:/po|
+    00000420  63 6b 65 74 2f 73 70 61  72 6b 0a 20 20 20 20 74  |cket/spark.    t|
+    00000430  6d 70 66 73 3a 0a 20 20  20 20 20 20 2d 20 2f 74  |mpfs:.      - /t|
+    00000440  6d 70 0a 20 20 20 20 65  6e 76 69 72 6f 6e 6d 65  |mp.    environme|
+    00000450  6e 74 3a 0a 20 20 20 20  20 20 2d 20 63 6f 6e 73  |nt:.      - cons|
+    00000460  74 72 61 69 6e 74 3a 6e  6f 64 65 3d 3d 70 63 2d  |traint:node==pc-|
+    00000470  6e 6f 64 65 31 0a 0a 20  20 64 61 74 61 6e 6f 64  |node1..  datanod|
+    00000480  65 32 3a 0a 20 20 20 20  69 6d 61 67 65 3a 20 70  |e2:.    image: p|
+    00000490  6f 63 6b 65 74 63 6c 75  73 74 65 72 2f 61 72 6d  |ocketcluster/arm|
+    000004a0  68 66 2d 6a 75 70 79 74  65 72 2d 73 6c 61 76 65  |hf-jupyter-slave|
+    000004b0  2d 34 2e 32 2e 31 3a 6c  61 74 65 73 74 0a 20 20  |-4.2.1:latest.  |
+    000004c0  20 20 63 6f 6e 74 61 69  6e 65 72 5f 6e 61 6d 65  |  container_name|
+    000004d0  3a 20 70 63 2d 6e 6f 64  65 32 0a 20 20 20 20 68  |: pc-node2.    h|
+    000004e0  6f 73 74 6e 61 6d 65 3a  20 70 63 2d 6e 6f 64 65  |ostname: pc-node|
+    000004f0  32 0a 20 20 20 20 6e 65  74 77 6f 72 6b 73 3a 0a  |2.    networks:.|
+    00000500  20 20 20 20 20 20 68 61  64 6f 6f 70 3a 0a 20 20  |      hadoop:.  |
+    00000510  20 20 20 20 20 20 69 70  76 34 5f 61 64 64 72 65  |      ipv4_addre|
+    00000520  73 73 3a 20 31 37 32 2e  31 36 2e 31 32 38 2e 32  |ss: 172.16.128.2|
+    00000530  0a 20 20 20 20 76 6f 6c  75 6d 65 73 3a 0a 20 20  |.    volumes:.  |
+    00000540  20 20 20 20 2d 20 2f 70  6f 63 6b 65 74 2f 68 61  |    - /pocket/ha|
+    00000550  64 6f 6f 70 2f 32 2e 37  2e 33 3a 2f 70 6f 63 6b  |doop/2.7.3:/pock|
+    00000560  65 74 2f 68 61 64 6f 6f  70 0a 20 20 20 20 20 20  |et/hadoop.      |
+    00000570  2d 20 2f 70 6f 63 6b 65  74 2f 73 70 61 72 6b 2f  |- /pocket/spark/|
+    00000580  32 2e 31 2e 30 3a 2f 70  6f 63 6b 65 74 2f 73 70  |2.1.0:/pocket/sp|
+    00000590  61 72 6b 0a 20 20 20 20  74 6d 70 66 73 3a 0a 20  |ark.    tmpfs:. |
+    000005a0  20 20 20 20 20 2d 20 2f  74 6d 70 0a 20 20 20 20  |     - /tmp.    |
+    000005b0  65 6e 76 69 72 6f 6e 6d  65 6e 74 3a 0a 20 20 20  |environment:.   |
+    000005c0  20 20 20 2d 20 63 6f 6e  73 74 72 61 69 6e 74 3a  |   - constraint:|
+    000005d0  6e 6f 64 65 3d 3d 70 63  2d 6e 6f 64 65 32 0a 0a  |node==pc-node2..|
+    000005e0  20 20 64 61 74 61 6e 6f  64 65 33 3a 0a 20 20 20  |  datanode3:.   |
+    000005f0  20 69 6d 61 67 65 3a 20  70 6f 63 6b 65 74 63 6c  | image: pocketcl|
+    00000600  75 73 74 65 72 2f 61 72  6d 68 66 2d 6a 75 70 79  |uster/armhf-jupy|
+    00000610  74 65 72 2d 73 6c 61 76  65 2d 34 2e 32 2e 31 3a  |ter-slave-4.2.1:|
+    00000620  6c 61 74 65 73 74 0a 20  20 20 20 63 6f 6e 74 61  |latest.    conta|
+    00000630  69 6e 65 72 5f 6e 61 6d  65 3a 20 70 63 2d 6e 6f  |iner_name: pc-no|
+    00000640  64 65 33 0a 20 20 20 20  68 6f 73 74 6e 61 6d 65  |de3.    hostname|
+    00000650  3a 20 70 63 2d 6e 6f 64  65 33 0a 20 20 20 20 6e  |: pc-node3.    n|
+    00000660  65 74 77 6f 72 6b 73 3a  0a 20 20 20 20 20 20 68  |etworks:.      h|
+    00000670  61 64 6f 6f 70 3a 0a 20  20 20 20 20 20 20 20 69  |adoop:.        i|
+    00000680  70 76 34 5f 61 64 64 72  65 73 73 3a 20 31 37 32  |pv4_address: 172|
+    00000690  2e 31 36 2e 31 32 38 2e  33 0a 20 20 20 20 76 6f  |.16.128.3.    vo|
+    000006a0  6c 75 6d 65 73 3a 0a 20  20 20 20 20 20 2d 20 2f  |lumes:.      - /|
+    000006b0  70 6f 63 6b 65 74 2f 68  61 64 6f 6f 70 2f 32 2e  |pocket/hadoop/2.|
+    000006c0  37 2e 33 3a 2f 70 6f 63  6b 65 74 2f 68 61 64 6f  |7.3:/pocket/hado|
+    000006d0  6f 70 0a 20 20 20 20 20  20 2d 20 2f 70 6f 63 6b  |op.      - /pock|
+    000006e0  65 74 2f 73 70 61 72 6b  2f 32 2e 31 2e 30 3a 2f  |et/spark/2.1.0:/|
+    000006f0  70 6f 63 6b 65 74 2f 73  70 61 72 6b 0a 20 20 20  |pocket/spark.   |
+    00000700  20 74 6d 70 66 73 3a 0a  20 20 20 20 20 20 2d 20  | tmpfs:.      - |
+    00000710  2f 74 6d 70 0a 20 20 20  20 65 6e 76 69 72 6f 6e  |/tmp.    environ|
+    00000720  6d 65 6e 74 3a 0a 20 20  20 20 20 20 2d 20 63 6f  |ment:.      - co|
+    00000730  6e 73 74 72 61 69 6e 74  3a 6e 6f 64 65 3d 3d 70  |nstraint:node==p|
+    00000740  63 2d 6e 6f 64 65 33 0a  0a 20 20 64 61 74 61 6e  |c-node3..  datan|
+    00000750  6f 64 65 34 3a 0a 20 20  20 20 69 6d 61 67 65 3a  |ode4:.    image:|
+    00000760  20 70 6f 63 6b 65 74 63  6c 75 73 74 65 72 2f 61  | pocketcluster/a|
+    00000770  72 6d 68 66 2d 6a 75 70  79 74 65 72 2d 73 6c 61  |rmhf-jupyter-sla|
+    00000780  76 65 2d 34 2e 32 2e 31  3a 6c 61 74 65 73 74 0a  |ve-4.2.1:latest.|
+    00000790  20 20 20 20 63 6f 6e 74  61 69 6e 65 72 5f 6e 61  |    container_na|
+    000007a0  6d 65 3a 20 70 63 2d 6e  6f 64 65 34 0a 20 20 20  |me: pc-node4.   |
+    000007b0  20 68 6f 73 74 6e 61 6d  65 3a 20 70 63 2d 6e 6f  | hostname: pc-no|
+    000007c0  64 65 34 0a 20 20 20 20  6e 65 74 77 6f 72 6b 73  |de4.    networks|
+    000007d0  3a 0a 20 20 20 20 20 20  68 61 64 6f 6f 70 3a 0a  |:.      hadoop:.|
+    000007e0  20 20 20 20 20 20 20 20  69 70 76 34 5f 61 64 64  |        ipv4_add|
+    000007f0  72 65 73 73 3a 20 31 37  32 2e 31 36 2e 31 32 38  |ress: 172.16.128|
+    00000800  2e 34 0a 20 20 20 20 76  6f 6c 75 6d 65 73 3a 0a  |.4.    volumes:.|
+    00000810  20 20 20 20 20 20 2d 20  2f 70 6f 63 6b 65 74 2f  |      - /pocket/|
+    00000820  68 61 64 6f 6f 70 2f 32  2e 37 2e 33 3a 2f 70 6f  |hadoop/2.7.3:/po|
+    00000830  63 6b 65 74 2f 68 61 64  6f 6f 70 0a 20 20 20 20  |cket/hadoop.    |
+    00000840  20 20 2d 20 2f 70 6f 63  6b 65 74 2f 73 70 61 72  |  - /pocket/spar|
+    00000850  6b 2f 32 2e 31 2e 30 3a  2f 70 6f 63 6b 65 74 2f  |k/2.1.0:/pocket/|
+    00000860  73 70 61 72 6b 0a 20 20  20 20 74 6d 70 66 73 3a  |spark.    tmpfs:|
+    00000870  0a 20 20 20 20 20 20 2d  20 2f 74 6d 70 0a 20 20  |.      - /tmp.  |
+    00000880  20 20 65 6e 76 69 72 6f  6e 6d 65 6e 74 3a 0a 20  |  environment:. |
+    00000890  20 20 20 20 20 2d 20 63  6f 6e 73 74 72 61 69 6e  |     - constrain|
+    000008a0  74 3a 6e 6f 64 65 3d 3d  70 63 2d 6e 6f 64 65 34  |t:node==pc-node4|
+    000008b0  0a 0a 20 20 64 61 74 61  6e 6f 64 65 35 3a 0a 20  |..  datanode5:. |
+    000008c0  20 20 20 69 6d 61 67 65  3a 20 70 6f 63 6b 65 74  |   image: pocket|
+    000008d0  63 6c 75 73 74 65 72 2f  61 72 6d 68 66 2d 6a 75  |cluster/armhf-ju|
+    000008e0  70 79 74 65 72 2d 73 6c  61 76 65 2d 34 2e 32 2e  |pyter-slave-4.2.|
+    000008f0  31 3a 6c 61 74 65 73 74  0a 20 20 20 20 63 6f 6e  |1:latest.    con|
+    00000900  74 61 69 6e 65 72 5f 6e  61 6d 65 3a 20 70 63 2d  |tainer_name: pc-|
+    00000910  6e 6f 64 65 35 0a 20 20  20 20 68 6f 73 74 6e 61  |node5.    hostna|
+    00000920  6d 65 3a 20 70 63 2d 6e  6f 64 65 35 0a 20 20 20  |me: pc-node5.   |
+    00000930  20 6e 65 74 77 6f 72 6b  73 3a 0a 20 20 20 20 20  | networks:.     |
+    00000940  20 68 61 64 6f 6f 70 3a  0a 20 20 20 20 20 20 20  | hadoop:.       |
+    00000950  20 69 70 76 34 5f 61 64  64 72 65 73 73 3a 20 31  | ipv4_address: 1|
+    00000960  37 32 2e 31 36 2e 31 32  38 2e 35 0a 20 20 20 20  |72.16.128.5.    |
+    00000970  76 6f 6c 75 6d 65 73 3a  0a 20 20 20 20 20 20 2d  |volumes:.      -|
+    00000980  20 2f 70 6f 63 6b 65 74  2f 68 61 64 6f 6f 70 2f  | /pocket/hadoop/|
+    00000990  32 2e 37 2e 33 3a 2f 70  6f 63 6b 65 74 2f 68 61  |2.7.3:/pocket/ha|
+    000009a0  64 6f 6f 70 0a 20 20 20  20 20 20 2d 20 2f 70 6f  |doop.      - /po|
+    000009b0  63 6b 65 74 2f 73 70 61  72 6b 2f 32 2e 31 2e 30  |cket/spark/2.1.0|
+    000009c0  3a 2f 70 6f 63 6b 65 74  2f 73 70 61 72 6b 0a 20  |:/pocket/spark. |
+    000009d0  20 20 20 74 6d 70 66 73  3a 0a 20 20 20 20 20 20  |   tmpfs:.      |
+    000009e0  2d 20 2f 74 6d 70 0a 20  20 20 20 65 6e 76 69 72  |- /tmp.    envir|
+    000009f0  6f 6e 6d 65 6e 74 3a 0a  20 20 20 20 20 20 2d 20  |onment:.      - |
+    00000a00  63 6f 6e 73 74 72 61 69  6e 74 3a 6e 6f 64 65 3d  |constraint:node=|
+    00000a10  3d 70 63 2d 6e 6f 64 65  35 0a 0a 6e 65 74 77 6f  |=pc-node5..netwo|
+    00000a20  72 6b 73 3a 0a 20 20 68  61 64 6f 6f 70 3a 0a 20  |rks:.  hadoop:. |
+    00000a30  20 20 20 64 72 69 76 65  72 3a 20 6f 76 65 72 6c  |   driver: overl|
+    00000a40  61 79 0a 20 20 20 20 69  70 61 6d 3a 0a 20 20 20  |ay.    ipam:.   |
+    00000a50  20 20 20 63 6f 6e 66 69  67 3a 0a 20 20 20 20 20  |   config:.     |
+    00000a60  20 20 20 2d 20 73 75 62  6e 65 74 3a 20 31 37 32  |   - subnet: 172|
+    00000a70  2e 31 36 2e 31 32 38 2e  30 2f 32 34 0a 20 20 20  |.16.128.0/24.   |
+    00000a80  20 20 20 20 20 20 20 67  61 74 65 77 61 79 3a 20  |       gateway: |
+    00000a90  31 37 32 2e 31 36 2e 31  32 38 2e 32 35 34 0a 20  |172.16.128.254. |
+    00000aa0  20 20 20 20 20 20 20 20  20 69 70 5f 72 61 6e 67  |         ip_rang|
+    00000ab0  65 3a 20 31 37 32 2e 31  36 2e 31 32 38 2e 30 2f  |e: 172.16.128.0/|
+    00000ac0  32 34 0a                                          |24.|
    }
   },
   ProjectName: (string) (len=12) "pockethadoop",
   isOpen: (bool) true,
-  ServiceFactory: (*service.Factory)(0xc420030428)({
+  ServiceFactory: (*service.Factory)(0xc420030410)({
    context: (*ctx.Context)(0xc4200dc870)(<already shown>)
   }),
-  NetworksFactory: (*network.DockerFactory)(0xc4202f25e0)({
-   ClientFactory: (*client.defaultFactory)(0xc4202f25d0)({
+  NetworksFactory: (*network.DockerFactory)(0xc4202f25a0)({
+   ClientFactory: (*client.defaultFactory)(0xc4202f2590)({
     client: (*client.Client)(0xc4201ed880)({
      scheme: (string) (len=4) "http",
      host: (string) (len=27) "unix:///var/run/docker.sock",
      proto: (string) (len=4) "unix",
      addr: (string) (len=20) "/var/run/docker.sock",
      basePath: (string) "",
-     client: (*http.Client)(0xc4202f6390)({
+     client: (*http.Client)(0xc4202f4390)({
       Transport: (*http.Transport)(0xc4200dc960)({
        idleMu: (sync.Mutex) {
         state: (int32) 0,
@@ -973,15 +1000,15 @@
     })
    })
   }),
-  VolumesFactory: (*volume.DockerFactory)(0xc4202f25f0)({
-   ClientFactory: (*client.defaultFactory)(0xc4202f25d0)({
+  VolumesFactory: (*volume.DockerFactory)(0xc4202f25b0)({
+   ClientFactory: (*client.defaultFactory)(0xc4202f2590)({
     client: (*client.Client)(0xc4201ed880)({
      scheme: (string) (len=4) "http",
      host: (string) (len=27) "unix:///var/run/docker.sock",
      proto: (string) (len=4) "unix",
      addr: (string) (len=20) "/var/run/docker.sock",
      basePath: (string) "",
-     client: (*http.Client)(0xc4202f6390)({
+     client: (*http.Client)(0xc4202f4390)({
       Transport: (*http.Transport)(0xc4200dc960)({
        idleMu: (sync.Mutex) {
         state: (int32) 0,
@@ -1044,10 +1071,10 @@
     })
    })
   }),
-  EnvironmentLookup: (*lookup.ComposableEnvLookup)(0xc42020dea0)({
+  EnvironmentLookup: (*lookup.ComposableEnvLookup)(0xc42020de40)({
    Lookups: ([]config.EnvironmentLookup) (len=2 cap=2) {
-    (*lookup.EnvfileLookup)(0xc4202f2610)({
-     Path: (string) (len=85) "/Users/almightykim/Workspace/GOPLACE/src/github.com/stkim1/pc-core/exec/compmain/.env"
+    (*lookup.EnvfileLookup)(0xc4202f25d0)({
+     Path: (string) (len=80) "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/exec/compmain/.env"
     }),
     (*lookup.OsEnvLookup)(0x625948)({
     })
@@ -1070,7 +1097,7 @@
  },
  upCount: (int) 0,
  listeners: ([]chan<- events.Event) (len=1 cap=1) {
-  (chan<- events.Event) 0xc4201f54a0
+  (chan<- events.Event) 0xc4201f7320
  },
  hasListeners: (bool) false
 })

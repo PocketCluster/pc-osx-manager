@@ -27,3 +27,6 @@ Pods/
 .DS_Store
 
 projectFilesBackup/
+
+.idea/
+*.iml

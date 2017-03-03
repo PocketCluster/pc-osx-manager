@@ -15,9 +15,9 @@ import (
 
 func main() {
     log.SetOutput(os.Stdout)
-    project, err := docker.NewProject(&ctx.Context{
+    project, err := docker.NewPocketProject(&ctx.Context{
         Context: project.Context{
-            ComposeFiles: []string{"pocket-deploy-original.yml"},
+            ComposeFiles: []string{"pocket-deploy.yml"},
             ProjectName:  "pocket-hadoop",
         },
     }, nil)
