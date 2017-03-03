@@ -17,12 +17,9 @@ import (
 
 func main() {
     log.SetOutput(os.Stdout)
-
-    composeFile := "pocket-deploy.json"
-
     composeBytes, err := ioutil.ReadFile("pocket-deploy.json")
     if err != nil && !os.IsNotExist(err) {
-        log.Fatal("Failed to open the compose file: %s", composeFile)
+        log.Fatal("Failed to open the compose file: pocket-deploy.json")
     }
     caCert, err  := ioutil.ReadFile("/Users/almightykim/Workspace/DKIMG/CERT/ca-cert.pub")
     if err != nil {
@@ -44,7 +41,6 @@ func main() {
     project, err := docker.NewPocketProject(&docker.PocketContext{
         Context: &ctx.Context{
             Context: project.Context{
-                ComposeFiles: []string{composeFile},
                 ProjectName:  "pocket-hadoop",
             },
         },
