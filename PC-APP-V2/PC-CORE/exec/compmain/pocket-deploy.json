@@ -36,7 +36,7 @@
       ]
     },
     "datanode1": {
-      "image": "pocketcluster/armhf-jupyter-slave-4.2.1:latest",
+      "image": "pc-master:5000/armhf-jupyter-slave-4.2.1:latest",
       "container_name": "pc-node1",
       "hostname": "pc-node1",
       "networks": {
@@ -56,7 +56,7 @@
       ]
     },
     "datanode2": {
-      "image": "pocketcluster/armhf-jupyter-slave-4.2.1:latest",
+      "image": "pc-master:5000/armhf-jupyter-slave-4.2.1:latest",
       "container_name": "pc-node2",
       "hostname": "pc-node2",
       "networks": {
@@ -76,7 +76,7 @@
       ]
     },
     "datanode3": {
-      "image": "pocketcluster/armhf-jupyter-slave-4.2.1:latest",
+      "image": "pc-master:5000/armhf-jupyter-slave-4.2.1:latest",
       "container_name": "pc-node3",
       "hostname": "pc-node3",
       "networks": {
@@ -96,7 +96,7 @@
       ]
     },
     "datanode4": {
-      "image": "pocketcluster/armhf-jupyter-slave-4.2.1:latest",
+      "image": "pc-master:5000/armhf-jupyter-slave-4.2.1:latest",
       "container_name": "pc-node4",
       "hostname": "pc-node4",
       "networks": {
@@ -116,7 +116,7 @@
       ]
     },
     "datanode5": {
-      "image": "pocketcluster/armhf-jupyter-slave-4.2.1:latest",
+      "image": "pc-master:5000/armhf-jupyter-slave-4.2.1:latest",
       "container_name": "pc-node5",
       "hostname": "pc-node5",
       "networks": {

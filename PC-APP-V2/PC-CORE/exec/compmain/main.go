@@ -12,7 +12,7 @@ import (
 
     "golang.org/x/net/context"
     log "github.com/Sirupsen/logrus"
-    "github.com/davecgh/go-spew/spew"
+    //"github.com/davecgh/go-spew/spew"
 )
 
 func main() {
@@ -51,7 +51,13 @@ func main() {
         log.Fatal(err)
     }
 
-    log.Info(spew.Sdump(project))
+    //log.Info(spew.Sdump(project))
+    allInfo, err := project.Ps(context.Background(), []string{}...)
+    if err != nil {
+        log.Fatal(err)
+    }
+    columns := []string{"Id", "Name", "Command", "State", "Ports"}
+    os.Stdout.WriteString(allInfo.String(columns, false))
     return
 
     err = project.Up(context.Background(), options.Up{})
