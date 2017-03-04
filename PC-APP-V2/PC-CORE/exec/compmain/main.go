@@ -34,7 +34,7 @@ func main() {
         log.Fatal(err.Error())
     }
 
-    opts, err := client.NewPocketCientOption(caCert, tlsCert, tlsKey, "tcp://192.168.1.150:3376")
+    opts, err := client.NewPocketCientOption(caCert, tlsCert, tlsKey, "tcp://pc-master:3376")
     if err != nil {
         log.Fatal(err.Error())
     }
@@ -51,17 +51,34 @@ func main() {
         log.Fatal(err)
     }
 
-    //log.Info(spew.Sdump(project))
-    allInfo, err := project.Ps(context.Background(), []string{}...)
-    if err != nil {
-        log.Fatal(err)
+    var action = 3
+    switch action {
+    case 0: {
+        //log.Info(spew.Sdump(project))
+        allInfo, err := project.Ps(context.Background(), []string{}...)
+        if err != nil {
+            log.Fatal(err)
+        }
+        columns := []string{"Id", "Name", "Command", "State", "Ports"}
+        os.Stdout.WriteString(allInfo.String(columns, false))
     }
-    columns := []string{"Id", "Name", "Command", "State", "Ports"}
-    os.Stdout.WriteString(allInfo.String(columns, false))
-    return
-
-    err = project.Up(context.Background(), options.Up{})
-    if err != nil {
-        log.Fatal(err)
+    case 1: {
+        err = project.Up(context.Background(), options.Up{})
+        if err != nil {
+            log.Fatal(err)
+        }
+    }
+    case 2: {
+        err = project.Kill(context.Background(), "SIGINT", []string{}...)
+        if err != nil {
+            log.Fatal(err)
+        }
+    }
+    case 3: {
+        err = project.Delete(context.Background(), options.Delete{}, []string{}...)
+        if err != nil {
+            log.Fatal(err)
+        }
+    }
     }
 }
