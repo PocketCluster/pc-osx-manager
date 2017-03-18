@@ -5,8 +5,6 @@ import (
     "fmt"
 
     "github.com/jmoiron/sqlx"
-    // sqlite is loaded somewhere in cfssl certdb. make sure
-    _ "github.com/mattn/go-sqlite3"
     "github.com/cloudflare/cfssl/certdb"
     certsql "github.com/cloudflare/cfssl/certdb/sql"
 )

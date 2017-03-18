@@ -3,15 +3,16 @@ package pcrypto
 import (
     "database/sql"
     "math"
+    "os"
     "strings"
     "testing"
     "time"
 
+    _ "github.com/mattn/go-sqlite3"
     "github.com/cloudflare/cfssl/certdb"
     certsql "github.com/cloudflare/cfssl/certdb/sql"
     log "github.com/Sirupsen/logrus"
     "github.com/jmoiron/sqlx"
-    "os"
 )
 
 const (
