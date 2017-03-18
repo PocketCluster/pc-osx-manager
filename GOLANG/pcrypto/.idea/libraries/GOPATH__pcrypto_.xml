@@ -1,19 +1,19 @@
 <component name="libraryTable">
   <library name="GOPATH &lt;pcrypto&gt;">
     <CLASSES>
-      <root url="file://$PROJECT_DIR$/../../../../../POCKETPKG/src/github.com" />
-      <root url="file://$PROJECT_DIR$/../../../../../POCKETPKG/src/gopkg.in" />
-      <root url="file://$PROJECT_DIR$/../../../../../POCKETPKG/src/google.golang.org" />
-      <root url="file://$PROJECT_DIR$/../../../../../POCKETPKG/src/golang.org" />
-      <root url="file://$PROJECT_DIR$/../.." />
+      <root url="file://$PROJECT_DIR$/../../../POCKETPKG/src/github.com" />
+      <root url="file://$PROJECT_DIR$/../../../POCKETPKG/src/gopkg.in" />
+      <root url="file://$PROJECT_DIR$/../../../POCKETPKG/src/google.golang.org" />
+      <root url="file://$PROJECT_DIR$/../../../POCKETPKG/src/golang.org" />
+      <root url="file://$PROJECT_DIR$/../../../GOPLACE/src/github.com" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="file://$PROJECT_DIR$/../../../../../POCKETPKG/src/github.com" />
-      <root url="file://$PROJECT_DIR$/../../../../../POCKETPKG/src/gopkg.in" />
-      <root url="file://$PROJECT_DIR$/../../../../../POCKETPKG/src/google.golang.org" />
-      <root url="file://$PROJECT_DIR$/../../../../../POCKETPKG/src/golang.org" />
-      <root url="file://$PROJECT_DIR$/../.." />
+      <root url="file://$PROJECT_DIR$/../../../POCKETPKG/src/github.com" />
+      <root url="file://$PROJECT_DIR$/../../../POCKETPKG/src/gopkg.in" />
+      <root url="file://$PROJECT_DIR$/../../../POCKETPKG/src/google.golang.org" />
+      <root url="file://$PROJECT_DIR$/../../../POCKETPKG/src/golang.org" />
+      <root url="file://$PROJECT_DIR$/../../../GOPLACE/src/github.com" />
     </SOURCES>
     <excluded>
       <root url="file://$PROJECT_DIR$" />

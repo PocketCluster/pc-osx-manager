@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/pcrypto.iml" filepath="$PROJECT_DIR$/pcrypto.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/pcrypto.iml" filepath="$PROJECT_DIR$/.idea/pcrypto.iml" />
     </modules>
   </component>
 </project>
