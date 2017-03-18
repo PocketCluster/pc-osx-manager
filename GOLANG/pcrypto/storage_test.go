@@ -3,18 +3,22 @@ package pcrypto
 import (
     "database/sql"
     "math"
+    "strings"
     "testing"
     "time"
 
     "github.com/cloudflare/cfssl/certdb"
     certsql "github.com/cloudflare/cfssl/certdb/sql"
-    "github.com/cloudflare/cfssl/certdb/testdb"
-
     log "github.com/Sirupsen/logrus"
     "github.com/jmoiron/sqlx"
+    "os"
 )
 
 const (
+    sqliteTruncateTables = `
+DELETE FROM certificates;
+DELETE FROM ocsp_responses;`
+
     sqliteDBFile = "certstore_development.db"
     fakeAKI      = "fake_aki"
 )
@@ -33,7 +37,15 @@ type TestAccessor struct {
 }
 
 func (ta *TestAccessor) Truncate() {
-    testdb.Truncate(ta.DB)
+    var sql = []string{sqliteTruncateTables}
+    for _, expr := range sql {
+        if len(strings.TrimSpace(expr)) == 0 {
+            continue
+        }
+        if _, err := ta.DB.Exec(expr); err != nil {
+            panic(err)
+        }
+    }
 }
 
 func TestSQLite(t *testing.T) {
@@ -48,6 +60,7 @@ func TestSQLite(t *testing.T) {
     }
     testEverything(ta, t)
     db.Close()
+    os.Remove(sqliteDBFile)
 }
 
 // roughlySameTime decides if t1 and t2 are close enough.
