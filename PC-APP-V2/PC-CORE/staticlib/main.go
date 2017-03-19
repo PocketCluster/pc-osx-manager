@@ -13,7 +13,12 @@ import (
     "time"
     "sync"
 
+    log "github.com/Sirupsen/logrus"
     "github.com/tylerb/graceful"
+    "github.com/gravitational/teleport/lib/service"
+    "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/config"
+    "github.com/stkim1/pcrypto"
 )
 
 func RunWebServer(wg *sync.WaitGroup) *graceful.Server {
@@ -46,9 +51,28 @@ func main() {
         wg.Wait()
     }()
 
+    context.DebugContextPrepare()
+    ctx := context.SharedHostContext()
+    config.SetupBaseConfigPath(ctx)
+
+    db, err := config.OpenStorageInstance(ctx)
+    if err != nil {
+        log.Info(err)
+    }
+    // cert engine
+    certStorage, err := pcrypto.NewPocketCertStorage(db)
+    if err != nil {
+        log.Info(err)
+    }
+
+    cfg := service.MakeCoreConfig(ctx, true)
+    cfg.AssignCertStorage(certStorage)
+
+
     // Perhaps the first thing main() function needs to do is initiate OSX main
     C.osxmain(0, nil)
 
     srv.Stop(time.Second)
+    config.CloseStorageInstance(db)
     fmt.Println("pc-core terminated!")
 }

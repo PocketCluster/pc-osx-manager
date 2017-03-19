@@ -2,11 +2,11 @@
 package context
 
 import (
-    "sync"
     "fmt"
-
-//    "github.com/ricochet2200/go-disk-usage/du"
     "os"
+    "sync"
+
+    "github.com/ricochet2200/go-disk-usage/du"
     "github.com/stkim1/pcrypto"
 )
 
@@ -274,10 +274,10 @@ func (ctx *hostContext) HostPhysicalMemorySize() uint64 {
     return uint64(ctx.physicalMemorySize / MB)
 }
 
-// FIXME : Remove "github.com/ricochet2200/go-disk-usage/du"
 func (ctx *hostContext) HostStorageSpaceStatus() (total uint64, available uint64) {
-//    var MB = uint64(1024 * 1024)
-//    usage := du.NewDiskUsage("/")
+    var MB = uint64(1024 * 1024)
+    usage := du.NewDiskUsage("/")
+
 /*
     fmt.Println("Free:", usage.Free()/(MB))
     fmt.Println("Available:", usage.Available()/(MB))
@@ -286,8 +286,8 @@ func (ctx *hostContext) HostStorageSpaceStatus() (total uint64, available uint64
     fmt.Println("Usage:", usage.Usage()*100, "%")
 */
 
-//    total = uint64(usage.Size()/(MB))
-//    available = uint64(usage.Available()/(MB))
+    total = uint64(usage.Size()/(MB))
+    available = uint64(usage.Available()/(MB))
     return
 }
 
