@@ -4,7 +4,7 @@
 set -e
 
 # Environmental variables
-GO_BUILD="${PROJECT_DIR}/../../pc-core/.build"
+GO_BUILD="${PROJECT_DIR}/../../.build"
 
 # Copy header file
 cp "${GO_BUILD}/_cgo_export.h" "${SRCROOT}/manager/Application"
@@ -15,4 +15,4 @@ if [[ -f "${SRCROOT}/manager/pc-core.a" ]]; then
 fi
 cp "${GO_BUILD}/pc-core.a" "${SRCROOT}/manager/"
 
-echo "GO PC-CORE copy done!"
+echo "GO PC-CORE copied!"

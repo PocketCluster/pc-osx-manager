@@ -5,12 +5,12 @@ set -e
 
 # Figure out where things are coming from and going to
 GO=${GOROOT}/bin/go
-GG_BUILD="${PWD}/../.build"
+GG_BUILD="${PWD}/../../.build"
 ARCHIVE="${GG_BUILD}/pc-core.a"
 
 # Clean old directory
 if [ -d ${GG_BUILD} ]; then
-    rm -rf ${GG_BUILD}
+    rm -rf ${GG_BUILD} && mkdir -p ${GG_BUILD}
 fi
 
 echo "Make the temp folders for go objects"

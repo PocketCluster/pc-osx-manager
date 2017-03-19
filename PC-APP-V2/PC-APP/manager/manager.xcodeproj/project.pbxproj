@@ -672,8 +672,8 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0486782C1BCF5FE20071594B /* Build configuration list for PBXNativeTarget "PocketCluster" */;
 			buildPhases = (
-				040D6EE41D8B811E00A94F64 /* PC-CORE BINARY CP */,
 				34B2DA13C3350D6C611A64AA /* [CP] Check Pods Manifest.lock */,
+				040D6EE41D8B811E00A94F64 /* PC-CORE BINARY CP */,
 				048678011BCF5FE20071594B /* Sources */,
 				048678021BCF5FE20071594B /* Frameworks */,
 				048678031BCF5FE20071594B /* Resources */,
@@ -854,7 +854,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		35048D5574D6AB08FDBA3E17 /* [CP] Embed Pods Frameworks */ = {
