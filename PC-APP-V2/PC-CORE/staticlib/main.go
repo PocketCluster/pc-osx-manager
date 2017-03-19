@@ -8,11 +8,12 @@ extern int osxmain(int argc, const char * argv[]);
 */
 import "C"
 import (
-    "github.com/tylerb/graceful"
     "net/http"
     "fmt"
     "time"
     "sync"
+
+    "github.com/tylerb/graceful"
 )
 
 func RunWebServer(wg *sync.WaitGroup) *graceful.Server {

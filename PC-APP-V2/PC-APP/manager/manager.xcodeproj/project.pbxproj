@@ -826,19 +826,19 @@
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = "/bin/bash /Users/almightykim/Workspace/POCKET/CODE/pc-osx-manager/PC-APP-V2/PC-APP/manager/go-setup.sh";
+			shellPath = "/bin/bash ${HOME}/Workspace/pc-osx-manager/PC-APP-V2/PC-APP/manager/go-setup.sh";
 			shellScript = "";
 		};
 		0427673E1BF8CEF8002C1FAE /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 8;
 			files = (
 			);
 			inputPaths = (
 			);
 			outputPaths = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
 			shellScript = "LOCATION=\"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}\"\n\ncodesign --verbose --force --sign \"$CODE_SIGN_IDENTITY\" \"$LOCATION/Sparkle.framework/Versions/A\"";
 		};
@@ -1018,8 +1018,8 @@
 		046A36351BD78F52004E0946 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Developer ID Application: Colorful Glue (NWE35T42PK)";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application: Colorful Glue (NWE35T42PK)";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "";
 				GCC_PREFIX_HEADER = "Askpass/Askpass-Prefix.pch";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1029,8 +1029,8 @@
 		046A36361BD78F52004E0946 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Developer ID Application: Colorful Glue (NWE35T42PK)";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application: Colorful Glue (NWE35T42PK)";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "";
 				GCC_PREFIX_HEADER = "Askpass/Askpass-Prefix.pch";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1126,7 +1126,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
@@ -1140,6 +1139,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/manager",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.manager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
@@ -1153,7 +1153,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
@@ -1167,6 +1166,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/manager",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.manager;
 				PRODUCT_NAME = PocketCluster;
 				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
