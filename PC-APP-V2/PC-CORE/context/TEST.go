@@ -73,26 +73,14 @@ var (
     }
 )
 
-func debugContextSetup() (*hostContext) {
-    context = &hostContext{}
-    initializeHostContext(context)
-    return context
-}
-
-func debugContextTeardown() {
-    context = nil
-}
-
 func DebugContextPrepare() (HostContext) {
 
-
-    // once singleton is assigned, it will not assign again. This is how we invalidate singleton ops
-    //singletonContextInstance()
-    once.Do(func(){})
+    // once singleton is assigned, it will not assign again. This is how we invalidate singleton ops singletonContextInstance()
+    _once.Do(func(){})
 
     caSigner, _ := pcrypto.NewCertAuthoritySigner(pcrypto.TestCertPrivateKey(), pcrypto.TestCertPublicAuth(), DEBUG_CLUSTER_ID, "KR")
 
-    context = &hostContext{
+    _context = &hostContext{
         cocoaHomePath:               "/Users/almightykim",
         posixHomePath:               "/Users/almightykim",
         fullUserName:                "Almighty Kim",
@@ -120,12 +108,12 @@ func DebugContextPrepare() (HostContext) {
         CaSigner:                    caSigner,
     }
 
-    context.monitorNetworkGateways(test_gateways)
-    context.monitorNetworkInterfaces(test_intefaces)
+    _context.monitorNetworkGateways(test_gateways)
+    _context.monitorNetworkInterfaces(test_intefaces)
 
-    return context
+    return _context
 }
 
 func DebugContextDestroy() {
-    debugContextTeardown()
+    _context = nil
 }

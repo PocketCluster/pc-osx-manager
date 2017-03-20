@@ -19,6 +19,7 @@ import (
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/config"
     "github.com/stkim1/pcrypto"
+    "github.com/davecgh/go-spew/spew"
 )
 
 func RunWebServer(wg *sync.WaitGroup) *graceful.Server {
@@ -70,12 +71,12 @@ func main() {
     cfg := service.MakeCoreConfig(ctx, true)
     cfg.AssignCertStorage(certStorage)
 
+    log.Info(spew.Sdump(ctx))
 
     // Perhaps the first thing main() function needs to do is initiate OSX main
     C.osxmain(0, nil)
 
     srv.Stop(time.Second)
     config.CloseStorageInstance(db)
-    context.DebugContextDestroy()
     fmt.Println("pc-core terminated!")
 }

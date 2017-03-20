@@ -6,8 +6,8 @@ import (
 )
 
 func TestSearchPrimaryIPCandidate(t *testing.T) {
-    debugContextSetup()
-    defer debugContextTeardown()
+    DebugContextPrepare()
+    defer DebugContextDestroy()
 
     singletonContextInstance().monitorNetworkInterfaces(test_intefaces)
 
@@ -21,8 +21,8 @@ func TestSearchPrimaryIPCandidate(t *testing.T) {
 }
 
 func TestDefaultGateway(t *testing.T) {
-    debugContextSetup()
-    defer debugContextTeardown()
+    DebugContextPrepare()
+    defer DebugContextDestroy()
 
     singletonContextInstance().monitorNetworkGateways(test_gateways)
 
@@ -36,15 +36,15 @@ func TestDefaultGateway(t *testing.T) {
 }
 
 func ExampleFreeSpace() {
-    debugContextSetup()
-    defer debugContextTeardown()
+    DebugContextPrepare()
+    defer DebugContextDestroy()
 
     SharedHostContext().HostStorageSpaceStatus()
 }
 
 func ExampleSystemInfo() {
-    debugContextSetup()
-    defer debugContextTeardown()
+    DebugContextPrepare()
+    defer DebugContextDestroy()
 
     log.Println(SharedHostContext().HostProcessorCount())
     log.Println(SharedHostContext().HostActiveProcessorCount())

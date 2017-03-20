@@ -24,4 +24,5 @@ CGO_ENABLED=1 CC=clang ${GO} build -ldflags '-tmpdir '${GG_BUILD}' -linkmode ext
 
 echo "Combine the object files into a static library"
 ar rcs ${ARCHIVE} ${GG_BUILD}/*.o
+rm staticlib
 echo "${ARCHIVE} generated!"
