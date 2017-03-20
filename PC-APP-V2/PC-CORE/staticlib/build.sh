@@ -23,5 +23,5 @@ echo "Compile and produce object files"
 CGO_ENABLED=1 CC=clang ${GO} build -ldflags '-tmpdir '${GG_BUILD}' -linkmode external' ./...
 
 echo "Combine the object files into a static library"
-ar rcs ${ARCHIVE} ${GG_BUILD}/*o
+ar rcs ${ARCHIVE} ${GG_BUILD}/*.o
 echo "${ARCHIVE} generated!"
