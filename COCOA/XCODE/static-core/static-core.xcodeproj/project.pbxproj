@@ -40,6 +40,9 @@
 		04259C0A1E7F82240071648E /* PrefixHeader.pch in Headers */ = {isa = PBXBuildFile; fileRef = 04259C091E7F82240071648E /* PrefixHeader.pch */; settings = {ATTRIBUTES = (Private, ); }; };
 		04259C0C1E7F82E10071648E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C0B1E7F82E10071648E /* Foundation.framework */; };
 		04259C0E1E7F82E70071648E /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C0D1E7F82E70071648E /* CoreFoundation.framework */; };
+		04259C141E7F869F0071648E /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C131E7F869F0071648E /* CFNetwork.framework */; };
+		04259C161E7F86B20071648E /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C151E7F86B20071648E /* SystemConfiguration.framework */; };
+		04259C181E7F86BE0071648E /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C171E7F86BE0071648E /* CoreWLAN.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -78,6 +81,9 @@
 		04259C091E7F82240071648E /* PrefixHeader.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
 		04259C0B1E7F82E10071648E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		04259C0D1E7F82E70071648E /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		04259C131E7F869F0071648E /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		04259C151E7F86B20071648E /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		04259C171E7F86BE0071648E /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,8 +91,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04259C141E7F869F0071648E /* CFNetwork.framework in Frameworks */,
 				04259C0E1E7F82E70071648E /* CoreFoundation.framework in Frameworks */,
+				04259C181E7F86BE0071648E /* CoreWLAN.framework in Frameworks */,
 				04259C0C1E7F82E10071648E /* Foundation.framework in Frameworks */,
+				04259C161E7F86B20071648E /* SystemConfiguration.framework in Frameworks */,
 				04259BB81E7F7FFA0071648E /* pc-core.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -97,6 +106,9 @@
 		04259B461E7F7E300071648E = {
 			isa = PBXGroup;
 			children = (
+				04259C171E7F86BE0071648E /* CoreWLAN.framework */,
+				04259C151E7F86B20071648E /* SystemConfiguration.framework */,
+				04259C131E7F869F0071648E /* CFNetwork.framework */,
 				04259C0D1E7F82E70071648E /* CoreFoundation.framework */,
 				04259C0B1E7F82E10071648E /* Foundation.framework */,
 				04259C091E7F82240071648E /* PrefixHeader.pch */,
