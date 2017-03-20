@@ -14,11 +14,15 @@ import (
     "sync"
 
     log "github.com/Sirupsen/logrus"
-    "github.com/tylerb/graceful"
     "github.com/gravitational/teleport/lib/service"
+    "github.com/gravitational/teleport/lib/utils"
+
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/config"
     "github.com/stkim1/pcrypto"
+)
+import (
+    "github.com/tylerb/graceful"
     "github.com/davecgh/go-spew/spew"
 )
 
@@ -43,7 +47,19 @@ func RunWebServer(wg *sync.WaitGroup) *graceful.Server {
     return srv
 }
 
+func setLogger(debug bool) {
+    // debug setup
+    if debug {
+        utils.InitLoggerDebug()
+        log.Info("DEBUG mode logger output configured")
+    } else {
+        utils.InitLoggerCLI()
+        log.Info("NORMAL mode logger configured")
+    }
+}
+
 func main() {
+    setLogger(true)
 
     var wg sync.WaitGroup
     srv := RunWebServer(&wg)
@@ -54,6 +70,8 @@ func main() {
 
     // setup context
     ctx := context.SharedHostContext()
+    context.FindSystemInterfaceStatus()
+    context.FindSystemGatewayStatus()
     config.SetupBaseConfigPath(ctx)
 
     // open database
