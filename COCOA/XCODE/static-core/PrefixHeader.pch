@@ -1,0 +1,16 @@
+//
+//  PrefixHeader.pch
+//  manager
+//
+//  Created by Almighty Kim on 10/21/15.
+//  Copyright © 2015 io.pocketcluster. All rights reserved.
+//
+
+#import <Availability.h>
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+    #import <Cocoa/Cocoa.h>
+    #import "GlobalMacro.h"
+    #import "ARC_HELPER.h"
+#endif

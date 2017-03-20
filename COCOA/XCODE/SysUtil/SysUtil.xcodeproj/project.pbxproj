@@ -16,7 +16,6 @@
 		042F33741DBD7DCA0023DE9E /* NSBundle+DirectoryPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 042F33671DBD7DCA0023DE9E /* NSBundle+DirectoryPath.m */; };
 		042F33751DBD7DCA0023DE9E /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = 042F33691DBD7DCA0023DE9E /* NSFileManager+DirectoryLocations.m */; };
 		042F33761DBD7DCA0023DE9E /* NSResourcePath.m in Sources */ = {isa = PBXBuildFile; fileRef = 042F336B1DBD7DCA0023DE9E /* NSResourcePath.m */; };
-		042F33771DBD7DCA0023DE9E /* util.m in Sources */ = {isa = PBXBuildFile; fileRef = 042F33731DBD7DCA0023DE9E /* util.m */; };
 		042F337F1DBD7E540023DE9E /* SysUtilTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 042F337E1DBD7E540023DE9E /* SysUtilTests.m */; };
 		042F33861DBD7E8F0023DE9E /* NSBundle+DirectoryPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 042F33671DBD7DCA0023DE9E /* NSBundle+DirectoryPath.m */; };
 		042F33871DBD7E8F0023DE9E /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = 042F33691DBD7DCA0023DE9E /* NSFileManager+DirectoryLocations.m */; };
@@ -59,8 +58,6 @@
 		042F336E1DBD7DCA0023DE9E /* GlobalMacro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalMacro.h; sourceTree = "<group>"; };
 		042F336F1DBD7DCA0023DE9E /* OsVersionChecker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OsVersionChecker.h; sourceTree = "<group>"; };
 		042F33701DBD7DCA0023DE9E /* SynthesizeSingleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SynthesizeSingleton.h; sourceTree = "<group>"; };
-		042F33721DBD7DCA0023DE9E /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
-		042F33731DBD7DCA0023DE9E /* util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = util.m; sourceTree = "<group>"; };
 		042F337C1DBD7E540023DE9E /* SysUtilTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SysUtilTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		042F337E1DBD7E540023DE9E /* SysUtilTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SysUtilTests.m; sourceTree = "<group>"; };
 		042F33801DBD7E540023DE9E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -114,7 +111,6 @@
 				04F59C8E1DBDDE5D00BA9707 /* serial */,
 				042F33631DBD7DCA0023DE9E /* directory */,
 				042F336C1DBD7DCA0023DE9E /* macro */,
-				042F33711DBD7DCA0023DE9E /* util */,
 				042F334F1DBD7B3B0023DE9E /* SysUtil */,
 				042F337D1DBD7E540023DE9E /* SysUtilTests */,
 				042F334E1DBD7B3B0023DE9E /* Products */,
@@ -187,16 +183,6 @@
 			);
 			name = macro;
 			path = ../../macro;
-			sourceTree = "<group>";
-		};
-		042F33711DBD7DCA0023DE9E /* util */ = {
-			isa = PBXGroup;
-			children = (
-				042F33721DBD7DCA0023DE9E /* util.h */,
-				042F33731DBD7DCA0023DE9E /* util.m */,
-			);
-			name = util;
-			path = ../../util;
 			sourceTree = "<group>";
 		};
 		042F337D1DBD7E540023DE9E /* SysUtilTests */ = {
@@ -327,7 +313,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				042F33551DBD7B3B0023DE9E /* main.m in Sources */,
-				042F33771DBD7DCA0023DE9E /* util.m in Sources */,
 				042F33761DBD7DCA0023DE9E /* NSResourcePath.m in Sources */,
 				04F59C971DBDE3C800BA9707 /* NSUserEnvironment.m in Sources */,
 				042F33751DBD7DCA0023DE9E /* NSFileManager+DirectoryLocations.m in Sources */,

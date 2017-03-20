@@ -1,0 +1,522 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		04259BB71E7F7FFA0071648E /* _cgo_export.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BB51E7F7FFA0071648E /* _cgo_export.h */; };
+		04259BB81E7F7FFA0071648E /* pc-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259BB61E7F7FFA0071648E /* pc-core.a */; };
+		04259BE71E7F80940071648E /* PCApplicationPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BBB1E7F80940071648E /* PCApplicationPath.h */; };
+		04259BE81E7F80940071648E /* PCUserEnvironment.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BBC1E7F80940071648E /* PCUserEnvironment.h */; };
+		04259BE91E7F80940071648E /* NSBundle+DirectoryPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BBD1E7F80940071648E /* NSBundle+DirectoryPath.h */; };
+		04259BEA1E7F80940071648E /* NSBundle+DirectoryPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BBE1E7F80940071648E /* NSBundle+DirectoryPath.m */; };
+		04259BEB1E7F80940071648E /* NSFileManager+DirectoryLocations.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BBF1E7F80940071648E /* NSFileManager+DirectoryLocations.h */; };
+		04259BEC1E7F80940071648E /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BC01E7F80940071648E /* NSFileManager+DirectoryLocations.m */; };
+		04259BED1E7F80940071648E /* NSResourcePath.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BC11E7F80940071648E /* NSResourcePath.h */; };
+		04259BEE1E7F80940071648E /* NSResourcePath.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BC21E7F80940071648E /* NSResourcePath.m */; };
+		04259BEF1E7F80940071648E /* NSUserEnvironment.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BC31E7F80940071648E /* NSUserEnvironment.m */; };
+		04259BF01E7F80940071648E /* ARC_HELPER.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BC51E7F80940071648E /* ARC_HELPER.h */; };
+		04259BF11E7F80940071648E /* GlobalMacro.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BC61E7F80940071648E /* GlobalMacro.h */; };
+		04259BF41E7F80940071648E /* PCInterfaceStatus.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BCB1E7F80940071648E /* PCInterfaceStatus.h */; };
+		04259BF51E7F80940071648E /* PCInterfaceStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BCC1E7F80940071648E /* PCInterfaceStatus.m */; };
+		04259BF61E7F80940071648E /* PCInterfaceTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BCE1E7F80940071648E /* PCInterfaceTypes.h */; };
+		04259BF71E7F80940071648E /* SCNetworkTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BCF1E7F80940071648E /* SCNetworkTypes.h */; };
+		04259BF81E7F80940071648E /* SCNetworkInterfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = 04259BD11E7F80940071648E /* SCNetworkInterfaces.c */; };
+		04259BF91E7F80940071648E /* SCNetworkInterfaces.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BD21E7F80940071648E /* SCNetworkInterfaces.h */; };
+		04259BFC1E7F80950071648E /* LinkMACVendors.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BD61E7F80940071648E /* LinkMACVendors.h */; };
+		04259BFD1E7F80950071648E /* LinkMACVendors.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BD71E7F80940071648E /* LinkMACVendors.m */; };
+		04259BFE1E7F80950071648E /* LinkObserver.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BD81E7F80940071648E /* LinkObserver.h */; };
+		04259BFF1E7F80950071648E /* LinkObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BD91E7F80940071648E /* LinkObserver.m */; };
+		04259C001E7F80950071648E /* DeviceSerialNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BDB1E7F80940071648E /* DeviceSerialNumber.h */; };
+		04259C011E7F80950071648E /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BDC1E7F80940071648E /* DeviceSerialNumber.m */; };
+		04259C021E7F80950071648E /* PCDeviceSerial.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BDE1E7F80940071648E /* PCDeviceSerial.h */; };
+		04259C031E7F80950071648E /* PCSystemInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BE21E7F80940071648E /* PCSystemInfo.h */; };
+		04259C041E7F80950071648E /* PCSystemInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BE31E7F80940071648E /* PCSystemInfo.m */; };
+		04259C051E7F80950071648E /* PCStaticUtility.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BE51E7F80940071648E /* PCStaticUtility.h */; };
+		04259C061E7F80950071648E /* PCStaticUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BE61E7F80940071648E /* PCStaticUtility.m */; };
+		04259C0A1E7F82240071648E /* PrefixHeader.pch in Headers */ = {isa = PBXBuildFile; fileRef = 04259C091E7F82240071648E /* PrefixHeader.pch */; };
+		04259C0C1E7F82E10071648E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C0B1E7F82E10071648E /* Foundation.framework */; };
+		04259C0E1E7F82E70071648E /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C0D1E7F82E70071648E /* CoreFoundation.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		04259B4F1E7F7E300071648E /* libstatic-core.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libstatic-core.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		04259BB31E7F7F9C0071648E /* go-setup.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "go-setup.sh"; sourceTree = "<group>"; };
+		04259BB51E7F7FFA0071648E /* _cgo_export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _cgo_export.h; sourceTree = "<group>"; };
+		04259BB61E7F7FFA0071648E /* pc-core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "pc-core.a"; sourceTree = "<group>"; };
+		04259BBB1E7F80940071648E /* PCApplicationPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCApplicationPath.h; sourceTree = "<group>"; };
+		04259BBC1E7F80940071648E /* PCUserEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCUserEnvironment.h; sourceTree = "<group>"; };
+		04259BBD1E7F80940071648E /* NSBundle+DirectoryPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSBundle+DirectoryPath.h"; sourceTree = "<group>"; };
+		04259BBE1E7F80940071648E /* NSBundle+DirectoryPath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSBundle+DirectoryPath.m"; sourceTree = "<group>"; };
+		04259BBF1E7F80940071648E /* NSFileManager+DirectoryLocations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+DirectoryLocations.h"; sourceTree = "<group>"; };
+		04259BC01E7F80940071648E /* NSFileManager+DirectoryLocations.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+DirectoryLocations.m"; sourceTree = "<group>"; };
+		04259BC11E7F80940071648E /* NSResourcePath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSResourcePath.h; sourceTree = "<group>"; };
+		04259BC21E7F80940071648E /* NSResourcePath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSResourcePath.m; sourceTree = "<group>"; };
+		04259BC31E7F80940071648E /* NSUserEnvironment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSUserEnvironment.m; sourceTree = "<group>"; };
+		04259BC51E7F80940071648E /* ARC_HELPER.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARC_HELPER.h; sourceTree = "<group>"; };
+		04259BC61E7F80940071648E /* GlobalMacro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalMacro.h; sourceTree = "<group>"; };
+		04259BCB1E7F80940071648E /* PCInterfaceStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCInterfaceStatus.h; sourceTree = "<group>"; };
+		04259BCC1E7F80940071648E /* PCInterfaceStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCInterfaceStatus.m; sourceTree = "<group>"; };
+		04259BCE1E7F80940071648E /* PCInterfaceTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCInterfaceTypes.h; sourceTree = "<group>"; };
+		04259BCF1E7F80940071648E /* SCNetworkTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCNetworkTypes.h; sourceTree = "<group>"; };
+		04259BD11E7F80940071648E /* SCNetworkInterfaces.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SCNetworkInterfaces.c; sourceTree = "<group>"; };
+		04259BD21E7F80940071648E /* SCNetworkInterfaces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCNetworkInterfaces.h; sourceTree = "<group>"; };
+		04259BD61E7F80940071648E /* LinkMACVendors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkMACVendors.h; sourceTree = "<group>"; };
+		04259BD71E7F80940071648E /* LinkMACVendors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkMACVendors.m; sourceTree = "<group>"; };
+		04259BD81E7F80940071648E /* LinkObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkObserver.h; sourceTree = "<group>"; };
+		04259BD91E7F80940071648E /* LinkObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkObserver.m; sourceTree = "<group>"; };
+		04259BDB1E7F80940071648E /* DeviceSerialNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceSerialNumber.h; sourceTree = "<group>"; };
+		04259BDC1E7F80940071648E /* DeviceSerialNumber.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceSerialNumber.m; sourceTree = "<group>"; };
+		04259BDE1E7F80940071648E /* PCDeviceSerial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCDeviceSerial.h; sourceTree = "<group>"; };
+		04259BE21E7F80940071648E /* PCSystemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSystemInfo.h; sourceTree = "<group>"; };
+		04259BE31E7F80940071648E /* PCSystemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSystemInfo.m; sourceTree = "<group>"; };
+		04259BE51E7F80940071648E /* PCStaticUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCStaticUtility.h; sourceTree = "<group>"; };
+		04259BE61E7F80940071648E /* PCStaticUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCStaticUtility.m; sourceTree = "<group>"; };
+		04259C091E7F82240071648E /* PrefixHeader.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
+		04259C0B1E7F82E10071648E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		04259C0D1E7F82E70071648E /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		04259B4C1E7F7E300071648E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04259C0E1E7F82E70071648E /* CoreFoundation.framework in Frameworks */,
+				04259C0C1E7F82E10071648E /* Foundation.framework in Frameworks */,
+				04259BB81E7F7FFA0071648E /* pc-core.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		04259B461E7F7E300071648E = {
+			isa = PBXGroup;
+			children = (
+				04259C0D1E7F82E70071648E /* CoreFoundation.framework */,
+				04259C0B1E7F82E10071648E /* Foundation.framework */,
+				04259C091E7F82240071648E /* PrefixHeader.pch */,
+				04259BB31E7F7F9C0071648E /* go-setup.sh */,
+				04259BB91E7F80940071648E /* directory */,
+				04259BC41E7F80940071648E /* macro */,
+				04259BC91E7F80940071648E /* network */,
+				04259BDA1E7F80940071648E /* serial */,
+				04259BDF1E7F80940071648E /* status */,
+				04259BE01E7F80940071648E /* system */,
+				04259BE41E7F80940071648E /* utility */,
+				04259B511E7F7E300071648E /* static-core */,
+				04259B501E7F7E300071648E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		04259B501E7F7E300071648E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				04259B4F1E7F7E300071648E /* libstatic-core.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		04259B511E7F7E300071648E /* static-core */ = {
+			isa = PBXGroup;
+			children = (
+				04259BB51E7F7FFA0071648E /* _cgo_export.h */,
+				04259BB61E7F7FFA0071648E /* pc-core.a */,
+			);
+			path = "static-core";
+			sourceTree = "<group>";
+		};
+		04259BB91E7F80940071648E /* directory */ = {
+			isa = PBXGroup;
+			children = (
+				04259BBA1E7F80940071648E /* header */,
+				04259BBD1E7F80940071648E /* NSBundle+DirectoryPath.h */,
+				04259BBE1E7F80940071648E /* NSBundle+DirectoryPath.m */,
+				04259BBF1E7F80940071648E /* NSFileManager+DirectoryLocations.h */,
+				04259BC01E7F80940071648E /* NSFileManager+DirectoryLocations.m */,
+				04259BC11E7F80940071648E /* NSResourcePath.h */,
+				04259BC21E7F80940071648E /* NSResourcePath.m */,
+				04259BC31E7F80940071648E /* NSUserEnvironment.m */,
+			);
+			name = directory;
+			path = ../../directory;
+			sourceTree = "<group>";
+		};
+		04259BBA1E7F80940071648E /* header */ = {
+			isa = PBXGroup;
+			children = (
+				04259BBB1E7F80940071648E /* PCApplicationPath.h */,
+				04259BBC1E7F80940071648E /* PCUserEnvironment.h */,
+			);
+			path = header;
+			sourceTree = "<group>";
+		};
+		04259BC41E7F80940071648E /* macro */ = {
+			isa = PBXGroup;
+			children = (
+				04259BC51E7F80940071648E /* ARC_HELPER.h */,
+				04259BC61E7F80940071648E /* GlobalMacro.h */,
+			);
+			name = macro;
+			path = ../../macro;
+			sourceTree = "<group>";
+		};
+		04259BC91E7F80940071648E /* network */ = {
+			isa = PBXGroup;
+			children = (
+				04259BCA1E7F80940071648E /* control */,
+				04259BCD1E7F80940071648E /* header */,
+				04259BD01E7F80940071648E /* library */,
+				04259BD31E7F80940071648E /* model */,
+			);
+			name = network;
+			path = ../../network;
+			sourceTree = "<group>";
+		};
+		04259BCA1E7F80940071648E /* control */ = {
+			isa = PBXGroup;
+			children = (
+				04259BCB1E7F80940071648E /* PCInterfaceStatus.h */,
+				04259BCC1E7F80940071648E /* PCInterfaceStatus.m */,
+			);
+			path = control;
+			sourceTree = "<group>";
+		};
+		04259BCD1E7F80940071648E /* header */ = {
+			isa = PBXGroup;
+			children = (
+				04259BCE1E7F80940071648E /* PCInterfaceTypes.h */,
+				04259BCF1E7F80940071648E /* SCNetworkTypes.h */,
+			);
+			path = header;
+			sourceTree = "<group>";
+		};
+		04259BD01E7F80940071648E /* library */ = {
+			isa = PBXGroup;
+			children = (
+				04259BD11E7F80940071648E /* SCNetworkInterfaces.c */,
+				04259BD21E7F80940071648E /* SCNetworkInterfaces.h */,
+			);
+			path = library;
+			sourceTree = "<group>";
+		};
+		04259BD31E7F80940071648E /* model */ = {
+			isa = PBXGroup;
+			children = (
+				04259BD61E7F80940071648E /* LinkMACVendors.h */,
+				04259BD71E7F80940071648E /* LinkMACVendors.m */,
+				04259BD81E7F80940071648E /* LinkObserver.h */,
+				04259BD91E7F80940071648E /* LinkObserver.m */,
+			);
+			path = model;
+			sourceTree = "<group>";
+		};
+		04259BDA1E7F80940071648E /* serial */ = {
+			isa = PBXGroup;
+			children = (
+				04259BDB1E7F80940071648E /* DeviceSerialNumber.h */,
+				04259BDC1E7F80940071648E /* DeviceSerialNumber.m */,
+				04259BDD1E7F80940071648E /* header */,
+			);
+			name = serial;
+			path = ../../serial;
+			sourceTree = "<group>";
+		};
+		04259BDD1E7F80940071648E /* header */ = {
+			isa = PBXGroup;
+			children = (
+				04259BDE1E7F80940071648E /* PCDeviceSerial.h */,
+			);
+			path = header;
+			sourceTree = "<group>";
+		};
+		04259BDF1E7F80940071648E /* status */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = status;
+			path = ../../status;
+			sourceTree = "<group>";
+		};
+		04259BE01E7F80940071648E /* system */ = {
+			isa = PBXGroup;
+			children = (
+				04259BE11E7F80940071648E /* header */,
+				04259BE31E7F80940071648E /* PCSystemInfo.m */,
+			);
+			name = system;
+			path = ../../system;
+			sourceTree = "<group>";
+		};
+		04259BE11E7F80940071648E /* header */ = {
+			isa = PBXGroup;
+			children = (
+				04259BE21E7F80940071648E /* PCSystemInfo.h */,
+			);
+			path = header;
+			sourceTree = "<group>";
+		};
+		04259BE41E7F80940071648E /* utility */ = {
+			isa = PBXGroup;
+			children = (
+				04259BE51E7F80940071648E /* PCStaticUtility.h */,
+				04259BE61E7F80940071648E /* PCStaticUtility.m */,
+			);
+			name = utility;
+			path = ../../utility;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		04259B4D1E7F7E300071648E /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04259C031E7F80950071648E /* PCSystemInfo.h in Headers */,
+				04259BB71E7F7FFA0071648E /* _cgo_export.h in Headers */,
+				04259BF61E7F80940071648E /* PCInterfaceTypes.h in Headers */,
+				04259BEB1E7F80940071648E /* NSFileManager+DirectoryLocations.h in Headers */,
+				04259C0A1E7F82240071648E /* PrefixHeader.pch in Headers */,
+				04259BE81E7F80940071648E /* PCUserEnvironment.h in Headers */,
+				04259BE91E7F80940071648E /* NSBundle+DirectoryPath.h in Headers */,
+				04259C001E7F80950071648E /* DeviceSerialNumber.h in Headers */,
+				04259C021E7F80950071648E /* PCDeviceSerial.h in Headers */,
+				04259BFC1E7F80950071648E /* LinkMACVendors.h in Headers */,
+				04259BED1E7F80940071648E /* NSResourcePath.h in Headers */,
+				04259C051E7F80950071648E /* PCStaticUtility.h in Headers */,
+				04259BFE1E7F80950071648E /* LinkObserver.h in Headers */,
+				04259BF91E7F80940071648E /* SCNetworkInterfaces.h in Headers */,
+				04259BF01E7F80940071648E /* ARC_HELPER.h in Headers */,
+				04259BF11E7F80940071648E /* GlobalMacro.h in Headers */,
+				04259BE71E7F80940071648E /* PCApplicationPath.h in Headers */,
+				04259BF41E7F80940071648E /* PCInterfaceStatus.h in Headers */,
+				04259BF71E7F80940071648E /* SCNetworkTypes.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		04259B4E1E7F7E300071648E /* static-core */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 04259B581E7F7E300071648E /* Build configuration list for PBXNativeTarget "static-core" */;
+			buildPhases = (
+				04259BB41E7F7FAE0071648E /* PC-CORE BINARY COPY */,
+				04259B4B1E7F7E300071648E /* Sources */,
+				04259B4C1E7F7E300071648E /* Frameworks */,
+				04259B4D1E7F7E300071648E /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "static-core";
+			productName = "static-core";
+			productReference = 04259B4F1E7F7E300071648E /* libstatic-core.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		04259B471E7F7E300071648E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0720;
+				ORGANIZATIONNAME = PocketCluster;
+				TargetAttributes = {
+					04259B4E1E7F7E300071648E = {
+						CreatedOnToolsVersion = 7.2.1;
+					};
+				};
+			};
+			buildConfigurationList = 04259B4A1E7F7E300071648E /* Build configuration list for PBXProject "static-core" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 04259B461E7F7E300071648E;
+			productRefGroup = 04259B501E7F7E300071648E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				04259B4E1E7F7E300071648E /* static-core */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		04259BB41E7F7FAE0071648E /* PC-CORE BINARY COPY */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "PC-CORE BINARY COPY";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = "/bin/bash ${PROJECT_DIR}/go-setup.sh";
+			shellScript = "";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		04259B4B1E7F7E300071648E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04259BEA1E7F80940071648E /* NSBundle+DirectoryPath.m in Sources */,
+				04259BFF1E7F80950071648E /* LinkObserver.m in Sources */,
+				04259BEC1E7F80940071648E /* NSFileManager+DirectoryLocations.m in Sources */,
+				04259C061E7F80950071648E /* PCStaticUtility.m in Sources */,
+				04259BEE1E7F80940071648E /* NSResourcePath.m in Sources */,
+				04259BFD1E7F80950071648E /* LinkMACVendors.m in Sources */,
+				04259BEF1E7F80940071648E /* NSUserEnvironment.m in Sources */,
+				04259C041E7F80950071648E /* PCSystemInfo.m in Sources */,
+				04259BF81E7F80940071648E /* SCNetworkInterfaces.c in Sources */,
+				04259C011E7F80950071648E /* DeviceSerialNumber.m in Sources */,
+				04259BF51E7F80940071648E /* PCInterfaceStatus.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		04259B561E7F7E300071648E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		04259B571E7F7E300071648E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		04259B591E7F7E300071648E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = lib;
+				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/static-core",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		04259B5A1E7F7E300071648E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = lib;
+				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/static-core",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		04259B4A1E7F7E300071648E /* Build configuration list for PBXProject "static-core" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04259B561E7F7E300071648E /* Debug */,
+				04259B571E7F7E300071648E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		04259B581E7F7E300071648E /* Build configuration list for PBXNativeTarget "static-core" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04259B591E7F7E300071648E /* Debug */,
+				04259B5A1E7F7E300071648E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 04259B471E7F7E300071648E /* Project object */;
+}

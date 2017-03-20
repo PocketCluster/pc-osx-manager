@@ -15,7 +15,7 @@
 #import "PCInterfaceStatus.h"
 #import "SCNetworkInterfaces.h"
 #import "LinkObserver.h"
-#import "util.h"
+#import "PCStaticUtility.h"
 
 static const CFStringRef kPocketClusterPrimaryInterface = CFSTR("PocketClusterPrimary");
 

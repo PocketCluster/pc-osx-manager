@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04259C121E7F841C0071648E /* PCStaticUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259C111E7F841C0071648E /* PCStaticUtility.m */; };
 		0497C5551DC00254006FEE0F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5541DC00254006FEE0F /* AppDelegate.m */; };
 		0497C5581DC00254006FEE0F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5571DC00254006FEE0F /* main.m */; };
 		0497C55A1DC00254006FEE0F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0497C5591DC00254006FEE0F /* Assets.xcassets */; };
@@ -30,8 +31,6 @@
 		0497C59D1DC0027F006FEE0F /* LinkMACVendors.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5901DC0027F006FEE0F /* LinkMACVendors.m */; };
 		0497C59E1DC0027F006FEE0F /* LinkObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5921DC0027F006FEE0F /* LinkObserver.m */; };
 		0497C59F1DC0027F006FEE0F /* LinkObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5921DC0027F006FEE0F /* LinkObserver.m */; };
-		0497C5A01DC0027F006FEE0F /* util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5951DC0027F006FEE0F /* util.m */; };
-		0497C5A11DC0027F006FEE0F /* util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5951DC0027F006FEE0F /* util.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +44,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		04259C101E7F841C0071648E /* PCStaticUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCStaticUtility.h; sourceTree = "<group>"; };
+		04259C111E7F841C0071648E /* PCStaticUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCStaticUtility.m; sourceTree = "<group>"; };
 		0497C5501DC00254006FEE0F /* LinkMon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LinkMon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0497C5531DC00254006FEE0F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0497C5541DC00254006FEE0F /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -70,8 +71,6 @@
 		0497C5901DC0027F006FEE0F /* LinkMACVendors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkMACVendors.m; sourceTree = "<group>"; };
 		0497C5911DC0027F006FEE0F /* LinkObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkObserver.h; sourceTree = "<group>"; };
 		0497C5921DC0027F006FEE0F /* LinkObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkObserver.m; sourceTree = "<group>"; };
-		0497C5941DC0027F006FEE0F /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
-		0497C5951DC0027F006FEE0F /* util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = util.m; sourceTree = "<group>"; };
 		0497C5A21DC002A6006FEE0F /* common.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.pch; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -103,12 +102,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		04259C0F1E7F841C0071648E /* utility */ = {
+			isa = PBXGroup;
+			children = (
+				04259C101E7F841C0071648E /* PCStaticUtility.h */,
+				04259C111E7F841C0071648E /* PCStaticUtility.m */,
+			);
+			name = utility;
+			path = ../../utility;
+			sourceTree = "<group>";
+		};
 		0497C5471DC00254006FEE0F = {
 			isa = PBXGroup;
 			children = (
 				0497C5721DC00261006FEE0F /* Framework */,
 				0497C5821DC0027F006FEE0F /* network */,
-				0497C5931DC0027F006FEE0F /* util */,
+				04259C0F1E7F841C0071648E /* utility */,
 				0497C5521DC00254006FEE0F /* LinkMon */,
 				0497C5661DC00255006FEE0F /* LinkMonTests */,
 				0497C5511DC00254006FEE0F /* Products */,
@@ -217,16 +226,6 @@
 			path = model;
 			sourceTree = "<group>";
 		};
-		0497C5931DC0027F006FEE0F /* util */ = {
-			isa = PBXGroup;
-			children = (
-				0497C5941DC0027F006FEE0F /* util.h */,
-				0497C5951DC0027F006FEE0F /* util.m */,
-			);
-			name = util;
-			path = ../../util;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -330,11 +329,11 @@
 			files = (
 				0497C5961DC0027F006FEE0F /* PCInterfaceStatus.m in Sources */,
 				0497C59C1DC0027F006FEE0F /* LinkMACVendors.m in Sources */,
+				04259C121E7F841C0071648E /* PCStaticUtility.m in Sources */,
 				0497C5581DC00254006FEE0F /* main.m in Sources */,
 				0497C5981DC0027F006FEE0F /* SCNetworkInterfaces.c in Sources */,
 				0497C59E1DC0027F006FEE0F /* LinkObserver.m in Sources */,
 				0497C5551DC00254006FEE0F /* AppDelegate.m in Sources */,
-				0497C5A01DC0027F006FEE0F /* util.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -343,7 +342,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				0497C59D1DC0027F006FEE0F /* LinkMACVendors.m in Sources */,
-				0497C5A11DC0027F006FEE0F /* util.m in Sources */,
 				0497C59F1DC0027F006FEE0F /* LinkObserver.m in Sources */,
 				0497C5971DC0027F006FEE0F /* PCInterfaceStatus.m in Sources */,
 				0497C5991DC0027F006FEE0F /* SCNetworkInterfaces.c in Sources */,
