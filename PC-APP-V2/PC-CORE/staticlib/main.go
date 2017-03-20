@@ -53,7 +53,6 @@ func main() {
     }()
 
     // setup context
-    context.DebugContextPrepare()
     ctx := context.SharedHostContext()
     config.SetupBaseConfigPath(ctx)
 
