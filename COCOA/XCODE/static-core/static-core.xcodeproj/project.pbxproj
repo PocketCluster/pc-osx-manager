@@ -7,37 +7,37 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		04259BB71E7F7FFA0071648E /* _cgo_export.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BB51E7F7FFA0071648E /* _cgo_export.h */; };
+		04259BB71E7F7FFA0071648E /* _cgo_export.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BB51E7F7FFA0071648E /* _cgo_export.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04259BB81E7F7FFA0071648E /* pc-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259BB61E7F7FFA0071648E /* pc-core.a */; };
-		04259BE71E7F80940071648E /* PCApplicationPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BBB1E7F80940071648E /* PCApplicationPath.h */; };
-		04259BE81E7F80940071648E /* PCUserEnvironment.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BBC1E7F80940071648E /* PCUserEnvironment.h */; };
-		04259BE91E7F80940071648E /* NSBundle+DirectoryPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BBD1E7F80940071648E /* NSBundle+DirectoryPath.h */; };
+		04259BE71E7F80940071648E /* PCApplicationPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BBB1E7F80940071648E /* PCApplicationPath.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		04259BE81E7F80940071648E /* PCUserEnvironment.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BBC1E7F80940071648E /* PCUserEnvironment.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		04259BE91E7F80940071648E /* NSBundle+DirectoryPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BBD1E7F80940071648E /* NSBundle+DirectoryPath.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04259BEA1E7F80940071648E /* NSBundle+DirectoryPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BBE1E7F80940071648E /* NSBundle+DirectoryPath.m */; };
-		04259BEB1E7F80940071648E /* NSFileManager+DirectoryLocations.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BBF1E7F80940071648E /* NSFileManager+DirectoryLocations.h */; };
+		04259BEB1E7F80940071648E /* NSFileManager+DirectoryLocations.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BBF1E7F80940071648E /* NSFileManager+DirectoryLocations.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04259BEC1E7F80940071648E /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BC01E7F80940071648E /* NSFileManager+DirectoryLocations.m */; };
-		04259BED1E7F80940071648E /* NSResourcePath.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BC11E7F80940071648E /* NSResourcePath.h */; };
+		04259BED1E7F80940071648E /* NSResourcePath.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BC11E7F80940071648E /* NSResourcePath.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04259BEE1E7F80940071648E /* NSResourcePath.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BC21E7F80940071648E /* NSResourcePath.m */; };
 		04259BEF1E7F80940071648E /* NSUserEnvironment.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BC31E7F80940071648E /* NSUserEnvironment.m */; };
-		04259BF01E7F80940071648E /* ARC_HELPER.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BC51E7F80940071648E /* ARC_HELPER.h */; };
-		04259BF11E7F80940071648E /* GlobalMacro.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BC61E7F80940071648E /* GlobalMacro.h */; };
-		04259BF41E7F80940071648E /* PCInterfaceStatus.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BCB1E7F80940071648E /* PCInterfaceStatus.h */; };
+		04259BF01E7F80940071648E /* ARC_HELPER.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BC51E7F80940071648E /* ARC_HELPER.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		04259BF11E7F80940071648E /* GlobalMacro.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BC61E7F80940071648E /* GlobalMacro.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		04259BF41E7F80940071648E /* PCInterfaceStatus.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BCB1E7F80940071648E /* PCInterfaceStatus.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		04259BF51E7F80940071648E /* PCInterfaceStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BCC1E7F80940071648E /* PCInterfaceStatus.m */; };
-		04259BF61E7F80940071648E /* PCInterfaceTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BCE1E7F80940071648E /* PCInterfaceTypes.h */; };
-		04259BF71E7F80940071648E /* SCNetworkTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BCF1E7F80940071648E /* SCNetworkTypes.h */; };
+		04259BF61E7F80940071648E /* PCInterfaceTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BCE1E7F80940071648E /* PCInterfaceTypes.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		04259BF71E7F80940071648E /* SCNetworkTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BCF1E7F80940071648E /* SCNetworkTypes.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		04259BF81E7F80940071648E /* SCNetworkInterfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = 04259BD11E7F80940071648E /* SCNetworkInterfaces.c */; };
-		04259BF91E7F80940071648E /* SCNetworkInterfaces.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BD21E7F80940071648E /* SCNetworkInterfaces.h */; };
-		04259BFC1E7F80950071648E /* LinkMACVendors.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BD61E7F80940071648E /* LinkMACVendors.h */; };
+		04259BF91E7F80940071648E /* SCNetworkInterfaces.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BD21E7F80940071648E /* SCNetworkInterfaces.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		04259BFC1E7F80950071648E /* LinkMACVendors.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BD61E7F80940071648E /* LinkMACVendors.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04259BFD1E7F80950071648E /* LinkMACVendors.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BD71E7F80940071648E /* LinkMACVendors.m */; };
-		04259BFE1E7F80950071648E /* LinkObserver.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BD81E7F80940071648E /* LinkObserver.h */; };
+		04259BFE1E7F80950071648E /* LinkObserver.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BD81E7F80940071648E /* LinkObserver.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04259BFF1E7F80950071648E /* LinkObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BD91E7F80940071648E /* LinkObserver.m */; };
-		04259C001E7F80950071648E /* DeviceSerialNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BDB1E7F80940071648E /* DeviceSerialNumber.h */; };
+		04259C001E7F80950071648E /* DeviceSerialNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BDB1E7F80940071648E /* DeviceSerialNumber.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04259C011E7F80950071648E /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BDC1E7F80940071648E /* DeviceSerialNumber.m */; };
-		04259C021E7F80950071648E /* PCDeviceSerial.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BDE1E7F80940071648E /* PCDeviceSerial.h */; };
-		04259C031E7F80950071648E /* PCSystemInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BE21E7F80940071648E /* PCSystemInfo.h */; };
+		04259C021E7F80950071648E /* PCDeviceSerial.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BDE1E7F80940071648E /* PCDeviceSerial.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		04259C031E7F80950071648E /* PCSystemInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BE21E7F80940071648E /* PCSystemInfo.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		04259C041E7F80950071648E /* PCSystemInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BE31E7F80940071648E /* PCSystemInfo.m */; };
-		04259C051E7F80950071648E /* PCStaticUtility.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BE51E7F80940071648E /* PCStaticUtility.h */; };
+		04259C051E7F80950071648E /* PCStaticUtility.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BE51E7F80940071648E /* PCStaticUtility.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		04259C061E7F80950071648E /* PCStaticUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BE61E7F80940071648E /* PCStaticUtility.m */; };
-		04259C0A1E7F82240071648E /* PrefixHeader.pch in Headers */ = {isa = PBXBuildFile; fileRef = 04259C091E7F82240071648E /* PrefixHeader.pch */; };
+		04259C0A1E7F82240071648E /* PrefixHeader.pch in Headers */ = {isa = PBXBuildFile; fileRef = 04259C091E7F82240071648E /* PrefixHeader.pch */; settings = {ATTRIBUTES = (Private, ); }; };
 		04259C0C1E7F82E10071648E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C0B1E7F82E10071648E /* Foundation.framework */; };
 		04259C0E1E7F82E70071648E /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C0D1E7F82E70071648E /* CoreFoundation.framework */; };
 /* End PBXBuildFile section */
@@ -277,24 +277,24 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				04259C031E7F80950071648E /* PCSystemInfo.h in Headers */,
 				04259BB71E7F7FFA0071648E /* _cgo_export.h in Headers */,
-				04259BF61E7F80940071648E /* PCInterfaceTypes.h in Headers */,
 				04259BEB1E7F80940071648E /* NSFileManager+DirectoryLocations.h in Headers */,
-				04259C0A1E7F82240071648E /* PrefixHeader.pch in Headers */,
-				04259BE81E7F80940071648E /* PCUserEnvironment.h in Headers */,
 				04259BE91E7F80940071648E /* NSBundle+DirectoryPath.h in Headers */,
 				04259C001E7F80950071648E /* DeviceSerialNumber.h in Headers */,
-				04259C021E7F80950071648E /* PCDeviceSerial.h in Headers */,
 				04259BFC1E7F80950071648E /* LinkMACVendors.h in Headers */,
 				04259BED1E7F80940071648E /* NSResourcePath.h in Headers */,
-				04259C051E7F80950071648E /* PCStaticUtility.h in Headers */,
 				04259BFE1E7F80950071648E /* LinkObserver.h in Headers */,
-				04259BF91E7F80940071648E /* SCNetworkInterfaces.h in Headers */,
 				04259BF01E7F80940071648E /* ARC_HELPER.h in Headers */,
 				04259BF11E7F80940071648E /* GlobalMacro.h in Headers */,
+				04259C0A1E7F82240071648E /* PrefixHeader.pch in Headers */,
 				04259BE71E7F80940071648E /* PCApplicationPath.h in Headers */,
+				04259C021E7F80950071648E /* PCDeviceSerial.h in Headers */,
+				04259C031E7F80950071648E /* PCSystemInfo.h in Headers */,
+				04259BF61E7F80940071648E /* PCInterfaceTypes.h in Headers */,
 				04259BF41E7F80940071648E /* PCInterfaceStatus.h in Headers */,
+				04259BE81E7F80940071648E /* PCUserEnvironment.h in Headers */,
+				04259C051E7F80950071648E /* PCStaticUtility.h in Headers */,
+				04259BF91E7F80940071648E /* SCNetworkInterfaces.h in Headers */,
 				04259BF71E7F80940071648E /* SCNetworkTypes.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
