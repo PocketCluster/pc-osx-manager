@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		040D6EE71D8B835E00A94F64 /* pc-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 040D6EE61D8B835E00A94F64 /* pc-core.a */; };
 		040D6EE81D8B835E00A94F64 /* pc-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 040D6EE61D8B835E00A94F64 /* pc-core.a */; };
 		041023ED1BE434290083D62E /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 041023EC1BE434290083D62E /* AppKit.framework */; };
 		041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
@@ -37,15 +36,6 @@
 		046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
 		046A35D71BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
 		046A35D81BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
-		046A36081BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35DF1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m */; };
-		046A36091BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35DF1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m */; };
-		046A360A1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35DF1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m */; };
-		046A360B1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E21BD78AB8004E0946 /* NSBundle+DirectoryPath.m */; };
-		046A360C1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E21BD78AB8004E0946 /* NSBundle+DirectoryPath.m */; };
-		046A360D1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E21BD78AB8004E0946 /* NSBundle+DirectoryPath.m */; };
-		046A360E1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E41BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m */; };
-		046A360F1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E41BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m */; };
-		046A36101BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E41BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m */; };
 		046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E71BD78AB8004E0946 /* DrawingUtils.m */; };
 		046A36121BD78AB8004E0946 /* DrawingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E71BD78AB8004E0946 /* DrawingUtils.m */; };
 		046A36131BD78AB8004E0946 /* DrawingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E71BD78AB8004E0946 /* DrawingUtils.m */; };
@@ -92,15 +82,15 @@
 		04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
 		04C585871BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
 		04C585881BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
+		04C6D6061E7F9CEA0004837A /* libstatic-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04C6D6051E7F9CEA0004837A /* libstatic-core.a */; };
+		04C6D6091E7F9D210004837A /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04C6D6071E7F9CFD0004837A /* CoreWLAN.framework */; };
+		04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6D60C1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m */; };
 		04DCF30D1C11601F007B1DC8 /* AboutWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04DCF30C1C11601F007B1DC8 /* AboutWindow.swift */; };
 		04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
 		04E51DC11BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
 		04E51DC21BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
 		04F705701BD7A9B700829651 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04F7056F1BD7A9B700829651 /* IOKit.framework */; };
 		04F705721BD7A9BD00829651 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04F705711BD7A9BD00829651 /* CoreFoundation.framework */; };
-		04F705761BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */; };
-		04F705771BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */; };
-		04F705781BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */; };
 		89580BEF40BDD88F96DECDEE /* Pods_PocketCluster.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C46CEC44F04E5FF247FB7D68 /* Pods_PocketCluster.framework */; };
 /* End PBXBuildFile section */
 
@@ -151,8 +141,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		040D6EE21D8B7F7100A94F64 /* go-setup.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "go-setup.sh"; sourceTree = "<group>"; };
-		040D6EE51D8B834F00A94F64 /* _cgo_export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _cgo_export.h; sourceTree = "<group>"; };
 		040D6EE61D8B835E00A94F64 /* pc-core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "pc-core.a"; sourceTree = "<group>"; };
 		041023EC1BE434290083D62E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		041FB3B61BD0F3FA0027136F /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
@@ -171,12 +159,6 @@
 		046A35B61BD783CE004E0946 /* BaseWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseWindowController.h; sourceTree = "<group>"; };
 		046A35B71BD783CE004E0946 /* BaseWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseWindowController.m; sourceTree = "<group>"; };
 		046A35C61BD7871B004E0946 /* AboutWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AboutWindow.xib; sourceTree = "<group>"; };
-		046A35DE1BD78AB8004E0946 /* NSDictionary+HTTPAddition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+HTTPAddition.h"; sourceTree = "<group>"; };
-		046A35DF1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+HTTPAddition.m"; sourceTree = "<group>"; };
-		046A35E11BD78AB8004E0946 /* NSBundle+DirectoryPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSBundle+DirectoryPath.h"; sourceTree = "<group>"; };
-		046A35E21BD78AB8004E0946 /* NSBundle+DirectoryPath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSBundle+DirectoryPath.m"; sourceTree = "<group>"; };
-		046A35E31BD78AB8004E0946 /* NSFileManager+DirectoryLocations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+DirectoryLocations.h"; sourceTree = "<group>"; };
-		046A35E41BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+DirectoryLocations.m"; sourceTree = "<group>"; };
 		046A35E61BD78AB8004E0946 /* DrawingUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrawingUtils.h; sourceTree = "<group>"; };
 		046A35E71BD78AB8004E0946 /* DrawingUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrawingUtils.m; sourceTree = "<group>"; };
 		046A35E91BD78AB8004E0946 /* ARC_HELPER.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARC_HELPER.h; sourceTree = "<group>"; };
@@ -234,13 +216,15 @@
 		0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		04C585841BE5BF3B004B2839 /* PCConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCConstants.h; sourceTree = "<group>"; };
 		04C585851BE5BF3B004B2839 /* PCConstants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCConstants.m; sourceTree = "<group>"; };
+		04C6D6051E7F9CEA0004837A /* libstatic-core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libstatic-core.a"; path = "../../../COCOA/XCODE/static-core/build/Debug/libstatic-core.a"; sourceTree = "<group>"; };
+		04C6D6071E7F9CFD0004837A /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
+		04C6D60B1E7F9EDD0004837A /* NSDictionary+HTTPAddition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+HTTPAddition.h"; sourceTree = "<group>"; };
+		04C6D60C1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+HTTPAddition.m"; sourceTree = "<group>"; };
 		04DCF3071C115F0F007B1DC8 /* Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		04DCF30C1C11601F007B1DC8 /* AboutWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutWindow.swift; sourceTree = "<group>"; };
 		04E51DBF1BDC88E3001F1F22 /* Resources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Resources.bundle; sourceTree = "<group>"; };
 		04F7056F1BD7A9B700829651 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		04F705711BD7A9BD00829651 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
-		04F705741BD7AA0D00829651 /* DeviceSerialNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceSerialNumber.h; sourceTree = "<group>"; };
-		04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceSerialNumber.m; sourceTree = "<group>"; };
 		2F1A9A9FFD26979D210B6933 /* Pods-PocketCluster.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PocketCluster.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-PocketCluster/Pods-PocketCluster.debug.xcconfig"; sourceTree = "<group>"; };
 		8528D605609CDB0AD8DA7C48 /* Pods-PocketCluster.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PocketCluster.release.xcconfig"; path = "../Pods/Target Support Files/Pods-PocketCluster/Pods-PocketCluster.release.xcconfig"; sourceTree = "<group>"; };
 		C46CEC44F04E5FF247FB7D68 /* Pods_PocketCluster.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PocketCluster.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -260,6 +244,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04C6D6061E7F9CEA0004837A /* libstatic-core.a in Frameworks */,
+				04C6D6091E7F9D210004837A /* CoreWLAN.framework in Frameworks */,
 				041023ED1BE434290083D62E /* AppKit.framework in Frameworks */,
 				0441A4171BD8BF3E00AABD7A /* CoreServices.framework in Frameworks */,
 				0441A4151BD8BEF100AABD7A /* Foundation.framework in Frameworks */,
@@ -270,7 +256,6 @@
 				04F705701BD7A9B700829651 /* IOKit.framework in Frameworks */,
 				046A36481BD79359004E0946 /* Cocoa.framework in Frameworks */,
 				046A36461BD7934D004E0946 /* Security.framework in Frameworks */,
-				040D6EE71D8B835E00A94F64 /* pc-core.a in Frameworks */,
 				046A36451BD79343004E0946 /* WebKit.framework in Frameworks */,
 				89580BEF40BDD88F96DECDEE /* Pods_PocketCluster.framework in Frameworks */,
 			);
@@ -297,7 +282,6 @@
 		0441A3D51BD8904100AABD7A /* Application */ = {
 			isa = PBXGroup;
 			children = (
-				040D6EE51D8B834F00A94F64 /* _cgo_export.h */,
 				0441A3F21BD892A400AABD7A /* VersionComparison.h */,
 				0441A3F31BD892A400AABD7A /* VersionComparison.m */,
 				0441A3ED1BD8921600AABD7A /* Util.h */,
@@ -335,9 +319,7 @@
 		046A35D91BD78AB8004E0946 /* Common */ = {
 			isa = PBXGroup;
 			children = (
-				04F705731BD7A9EE00829651 /* Serial */,
-				046A35DD1BD78AB8004E0946 /* Dictionary */,
-				046A35E01BD78AB8004E0946 /* DirectoryAddition */,
+				04C6D60A1E7F9EDD0004837A /* Dictionary */,
 				046A35E51BD78AB8004E0946 /* Drawing */,
 				046A35E81BD78AB8004E0946 /* Macro */,
 				046A35ED1BD78AB8004E0946 /* NSDate */,
@@ -347,26 +329,6 @@
 			);
 			name = Common;
 			path = manager/Common;
-			sourceTree = "<group>";
-		};
-		046A35DD1BD78AB8004E0946 /* Dictionary */ = {
-			isa = PBXGroup;
-			children = (
-				046A35DE1BD78AB8004E0946 /* NSDictionary+HTTPAddition.h */,
-				046A35DF1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m */,
-			);
-			path = Dictionary;
-			sourceTree = "<group>";
-		};
-		046A35E01BD78AB8004E0946 /* DirectoryAddition */ = {
-			isa = PBXGroup;
-			children = (
-				046A35E11BD78AB8004E0946 /* NSBundle+DirectoryPath.h */,
-				046A35E21BD78AB8004E0946 /* NSBundle+DirectoryPath.m */,
-				046A35E31BD78AB8004E0946 /* NSFileManager+DirectoryLocations.h */,
-				046A35E41BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m */,
-			);
-			path = DirectoryAddition;
 			sourceTree = "<group>";
 		};
 		046A35E51BD78AB8004E0946 /* Drawing */ = {
@@ -540,7 +502,6 @@
 		048677FC1BCF5FE20071594B = {
 			isa = PBXGroup;
 			children = (
-				040D6EE21D8B7F7100A94F64 /* go-setup.sh */,
 				04F705621BD7A94300829651 /* Vendors */,
 				046A35D91BD78AB8004E0946 /* Common */,
 				046F95EF1BDD9AA9006AA8EE /* Window */,
@@ -603,6 +564,15 @@
 			path = managerUITests;
 			sourceTree = "<group>";
 		};
+		04C6D60A1E7F9EDD0004837A /* Dictionary */ = {
+			isa = PBXGroup;
+			children = (
+				04C6D60B1E7F9EDD0004837A /* NSDictionary+HTTPAddition.h */,
+				04C6D60C1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m */,
+			);
+			path = Dictionary;
+			sourceTree = "<group>";
+		};
 		04F705621BD7A94300829651 /* Vendors */ = {
 			isa = PBXGroup;
 			children = (
@@ -611,18 +581,11 @@
 			path = manager/Vendors;
 			sourceTree = "<group>";
 		};
-		04F705731BD7A9EE00829651 /* Serial */ = {
-			isa = PBXGroup;
-			children = (
-				04F705741BD7AA0D00829651 /* DeviceSerialNumber.h */,
-				04F705751BD7AA0D00829651 /* DeviceSerialNumber.m */,
-			);
-			path = Serial;
-			sourceTree = "<group>";
-		};
 		3A1EA7B4E3AB3B354460F41A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				04C6D6051E7F9CEA0004837A /* libstatic-core.a */,
+				04C6D6071E7F9CFD0004837A /* CoreWLAN.framework */,
 				041023EC1BE434290083D62E /* AppKit.framework */,
 				0441A4161BD8BF3E00AABD7A /* CoreServices.framework */,
 				0441A4131BD8BEAA00AABD7A /* SystemConfiguration.framework */,
@@ -673,7 +636,6 @@
 			buildConfigurationList = 0486782C1BCF5FE20071594B /* Build configuration list for PBXNativeTarget "PocketCluster" */;
 			buildPhases = (
 				34B2DA13C3350D6C611A64AA /* [CP] Check Pods Manifest.lock */,
-				040D6EE41D8B811E00A94F64 /* PC-CORE BINARY CP */,
 				048678011BCF5FE20071594B /* Sources */,
 				048678021BCF5FE20071594B /* Frameworks */,
 				048678031BCF5FE20071594B /* Resources */,
@@ -815,20 +777,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		040D6EE41D8B811E00A94F64 /* PC-CORE BINARY CP */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "PC-CORE BINARY CP";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = "/bin/bash ${HOME}/Workspace/pc-osx-manager/PC-APP-V2/PC-APP/manager/go-setup.sh";
-			shellScript = "";
-		};
 		0427673E1BF8CEF8002C1FAE /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 8;
@@ -911,17 +859,14 @@
 				047F32B31D8A898E00568210 /* LinkMACVendors.m in Sources */,
 				047F32B01D8A898E00568210 /* LinkInterface.m in Sources */,
 				04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */,
-				046A360E1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
+				04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
 				0441A3EF1BD8921600AABD7A /* Util.m in Sources */,
-				046A360B1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
 				047F32B21D8A898E00568210 /* LinkMACAddress.m in Sources */,
 				046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
 				046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */,
-				046A36081BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */,
 				047F32B41D8A898E00568210 /* PCInterfaceList.m in Sources */,
-				04F705761BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				047F32B11D8A898E00568210 /* LinkInterfaces.m in Sources */,
 				046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
@@ -936,22 +881,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				046A36241BD78AB8004E0946 /* timeutil.m in Sources */,
-				046A360C1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
 				0441A3E41BD8904100AABD7A /* main.m in Sources */,
 				04C585871BE5BF3B004B2839 /* PCConstants.m in Sources */,
 				046A361B1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				0486781D1BCF5FE20071594B /* managerTests.m in Sources */,
-				046A36091BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */,
 				046A36151BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
 				0441A3F51BD892A400AABD7A /* VersionComparison.m in Sources */,
 				046A36121BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				046A36181BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				0441A3E11BD8904100AABD7A /* AppDelegate.m in Sources */,
 				046A36211BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
-				04F705771BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A361E1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				046A35B91BD783CE004E0946 /* BaseWindowController.m in Sources */,
-				046A360F1BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
 				046F960A1BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				0441A3F01BD8921600AABD7A /* Util.m in Sources */,
 			);
@@ -962,22 +903,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				046A36251BD78AB8004E0946 /* timeutil.m in Sources */,
-				046A360D1BD78AB8004E0946 /* NSBundle+DirectoryPath.m in Sources */,
 				0441A3E51BD8904100AABD7A /* main.m in Sources */,
 				04C585881BE5BF3B004B2839 /* PCConstants.m in Sources */,
 				046A361C1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				048678281BCF5FE20071594B /* managerUITests.m in Sources */,
-				046A360A1BD78AB8004E0946 /* NSDictionary+HTTPAddition.m in Sources */,
 				046A36161BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
 				0441A3F61BD892A400AABD7A /* VersionComparison.m in Sources */,
 				046A36131BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				046A36191BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				0441A3E21BD8904100AABD7A /* AppDelegate.m in Sources */,
 				046A36221BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
-				04F705781BD7AA0D00829651 /* DeviceSerialNumber.m in Sources */,
 				046A361F1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				046A35BA1BD783CE004E0946 /* BaseWindowController.m in Sources */,
-				046A36101BD78AB8004E0946 /* NSFileManager+DirectoryLocations.m in Sources */,
 				046F960B1BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				0441A3F11BD8921600AABD7A /* Util.m in Sources */,
 			);
