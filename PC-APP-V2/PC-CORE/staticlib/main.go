@@ -51,10 +51,11 @@ func main() {
         wg.Wait()
     }()
 
-    context.DebugContextPrepare()
+    // setup context
     ctx := context.SharedHostContext()
     config.SetupBaseConfigPath(ctx)
 
+    // open database
     db, err := config.OpenStorageInstance(ctx)
     if err != nil {
         log.Info(err)
