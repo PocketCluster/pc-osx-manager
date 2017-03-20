@@ -52,6 +52,7 @@ func main() {
     }()
 
     // setup context
+    context.DebugContextPrepare()
     ctx := context.SharedHostContext()
     config.SetupBaseConfigPath(ctx)
 
@@ -75,5 +76,6 @@ func main() {
 
     srv.Stop(time.Second)
     config.CloseStorageInstance(db)
+    context.DebugContextDestroy()
     fmt.Println("pc-core terminated!")
 }

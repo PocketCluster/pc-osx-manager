@@ -1064,6 +1064,12 @@
 					"$(PROJECT_DIR)/manager",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					"\"Sparkle\"",
+					"-Wl,-no_pie",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.manager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
@@ -1091,6 +1097,12 @@
 					"$(PROJECT_DIR)/manager",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					"\"Sparkle\"",
+					"-Wl,-no_pie",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.manager;
 				PRODUCT_NAME = PocketCluster;
 				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
