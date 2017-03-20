@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		040D6EE81D8B835E00A94F64 /* pc-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 040D6EE61D8B835E00A94F64 /* pc-core.a */; };
 		041023ED1BE434290083D62E /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 041023EC1BE434290083D62E /* AppKit.framework */; };
 		041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
 		041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
@@ -141,7 +140,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		040D6EE61D8B835E00A94F64 /* pc-core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "pc-core.a"; sourceTree = "<group>"; };
 		041023EC1BE434290083D62E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		041FB3B61BD0F3FA0027136F /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
 		0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = ../Pods/Sparkle/Sparkle.framework; sourceTree = "<group>"; };
@@ -265,7 +263,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				040D6EE81D8B835E00A94F64 /* pc-core.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -502,7 +499,6 @@
 		048677FC1BCF5FE20071594B = {
 			isa = PBXGroup;
 			children = (
-				04F705621BD7A94300829651 /* Vendors */,
 				046A35D91BD78AB8004E0946 /* Common */,
 				046F95EF1BDD9AA9006AA8EE /* Window */,
 				046A36491BD793BB004E0946 /* ViewController */,
@@ -533,7 +529,6 @@
 		048678071BCF5FE20071594B /* manager */ = {
 			isa = PBXGroup;
 			children = (
-				040D6EE61D8B835E00A94F64 /* pc-core.a */,
 				04DCF3071C115F0F007B1DC8 /* Bridging-Header.h */,
 				0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */,
 				04E51DBF1BDC88E3001F1F22 /* Resources.bundle */,
@@ -571,14 +566,6 @@
 				04C6D60C1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m */,
 			);
 			path = Dictionary;
-			sourceTree = "<group>";
-		};
-		04F705621BD7A94300829651 /* Vendors */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Vendors;
-			path = manager/Vendors;
 			sourceTree = "<group>";
 		};
 		3A1EA7B4E3AB3B354460F41A /* Frameworks */ = {
