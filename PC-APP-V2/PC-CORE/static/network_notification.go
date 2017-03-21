@@ -15,39 +15,15 @@ import (
 
     "github.com/stkim1/pc-core/context"
     log "github.com/Sirupsen/logrus"
+    "github.com/davecgh/go-spew/spew"
 )
 
-//export NetworkChangeNotificationGateway
-func NetworkChangeNotificationGateway(gatewayArray **C.SCNIGateway, length C.uint) C.bool {
-    log.Debugf("NetworkChangeNotificationGateway")
-    var arrayLen int = int(length)
-    if arrayLen == 0 || gatewayArray == nil {
-        return C.bool(true)
-    }
-
-    var gatewaySlice []*C.SCNIGateway = (*[1 << 10]*C.SCNIGateway)(unsafe.Pointer(gatewayArray))[:arrayLen:arrayLen]
-    var hostGateways []*context.HostNetworkGateway = make([]*context.HostNetworkGateway, arrayLen, arrayLen)
-
-    for idx, gw := range gatewaySlice {
-        hostGateways[idx] = &context.HostNetworkGateway{
-            Family      : uint8(gw.family),
-            IsDefault   : bool(gw.is_default),
-            IfaceName   : C.GoString(gw.ifname),
-            Address     : C.GoString(gw.addr),
-        }
-    }
-    context.MonitorNetworkGateways(hostGateways)
-    return C.bool(true)
-}
-
-func convertAddressStruct(addrArray **C.SCNIAddress, addrCount C.uint) (addresses []*context.HostIPAddress) {
-    if addrCount == 0 || addrArray == nil {
-        addresses = nil
-    }
-
-    var addrLength uint = uint(addrCount)
-    var addrSlice []*C.SCNIAddress = (*[1 << 10]*C.SCNIAddress)(unsafe.Pointer(addrArray))[:addrLength:addrLength]
-    addresses = make([]*context.HostIPAddress, addrLength, addrLength)
+func convertAddressStruct(addrArray **C.SCNIAddress, addrCount C.uint) ([]*context.HostIPAddress) {
+    var (
+        addrLength uint                    = uint(addrCount)
+        addrSlice []*C.SCNIAddress         = (*[1 << 10]*C.SCNIAddress)(unsafe.Pointer(addrArray))[:addrLength:addrLength]
+        addresses []*context.HostIPAddress = make([]*context.HostIPAddress, addrLength, addrLength)
+    )
 
     for idx, addr := range addrSlice {
         addresses[idx] = &context.HostIPAddress{
@@ -60,15 +36,17 @@ func convertAddressStruct(addrArray **C.SCNIAddress, addrCount C.uint) (addresse
             Peer        : C.GoString(addr.peer),
         }
     }
-    return
+    return addresses
 }
 
 //export NetworkChangeNotificationInterface
-func NetworkChangeNotificationInterface(interfaceArray **C.PCNetworkInterface, length C.uint) C.bool {
+func NetworkChangeNotificationInterface(interfaceArray **C.PCNetworkInterface, length C.uint) {
     log.Debugf("NetworkChangeNotificationInterface")
+    return
+
     var arrayLen int = int(length)
     if arrayLen == 0 || interfaceArray == nil {
-        return C.bool(true)
+        return
     }
 
     var interfaceSlice []*C.PCNetworkInterface = (*[1 << 10]*C.PCNetworkInterface)(unsafe.Pointer(interfaceArray))[:arrayLen:arrayLen]
@@ -90,5 +68,26 @@ func NetworkChangeNotificationInterface(interfaceArray **C.PCNetworkInterface, l
         }
     }
     context.MonitorNetworkInterfaces(hostInterfaces)
-    return C.bool(true)
+}
+
+//export NetworkChangeNotificationGateway
+func NetworkChangeNotificationGateway(gatewayArray **C.SCNIGateway, length C.uint) {
+    var arrayLen int = int(length)
+    if arrayLen == 0 || gatewayArray == nil {
+        return
+    }
+    var (
+        gatewaySlice []*C.SCNIGateway = (*[1 << 10]*C.SCNIGateway)(unsafe.Pointer(gatewayArray))[:arrayLen:arrayLen]
+        hostGateways []*context.HostNetworkGateway = make([]*context.HostNetworkGateway, arrayLen, arrayLen)
+    )
+    for idx, gw := range gatewaySlice {
+        hostGateways[idx] = &context.HostNetworkGateway{
+            Family:       uint8(gw.family),
+            IsDefault:    bool(gw.is_default),
+            IfaceName:    C.GoString(gw.ifname),
+            Address:      C.GoString(gw.addr),
+        }
+    }
+    log.Debugf(spew.Sdump(hostGateways))
+    context.MonitorNetworkGateways(hostGateways)
 }
