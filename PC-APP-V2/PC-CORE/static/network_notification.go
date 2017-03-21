@@ -55,11 +55,11 @@ func convertAddressStruct(addrArray **C.SCNIAddress, addrCount C.uint) ([]*conte
 
 //export NetworkChangeNotificationInterface
 func NetworkChangeNotificationInterface(interfaceArray **C.PCNetworkInterface, length C.uint) {
-    var arrayLen int = int(length)
-    if arrayLen == 0 || interfaceArray == nil {
+    if interfaceArray == nil || int(length) {
         return
     }
     var (
+        arrayLen int = int(length)
         interfaceSlice []*C.PCNetworkInterface = (*[1 << 10]*C.PCNetworkInterface)(unsafe.Pointer(interfaceArray))[:arrayLen:arrayLen]
         hostInterfaces []*context.HostNetworkInterface = make([]*context.HostNetworkInterface, arrayLen, arrayLen)
     )
@@ -101,11 +101,11 @@ func NetworkChangeNotificationInterface(interfaceArray **C.PCNetworkInterface, l
 
 //export NetworkChangeNotificationGateway
 func NetworkChangeNotificationGateway(gatewayArray **C.SCNIGateway, length C.uint) {
-    var arrayLen int = int(length)
-    if arrayLen == 0 || gatewayArray == nil {
+    if gatewayArray == nil || int(length) == 0 {
         return
     }
     var (
+        arrayLen int = int(length)
         gatewaySlice []*C.SCNIGateway = (*[1 << 10]*C.SCNIGateway)(unsafe.Pointer(gatewayArray))[:arrayLen:arrayLen]
         hostGateways []*context.HostNetworkGateway = make([]*context.HostNetworkGateway, arrayLen, arrayLen)
     )
