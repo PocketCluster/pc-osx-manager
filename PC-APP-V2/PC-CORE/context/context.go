@@ -98,7 +98,11 @@ func singletonContextInstance() (*hostContext) {
 }
 
 // take network interfaces
-func (ctx *hostContext) monitorNetworkInterfaces(interfaces []*HostNetworkInterface) {
+func MonitorNetworkInterfaces(interfaces []*HostNetworkInterface) {
+    singletonContextInstance().refreshNetworkInterfaces(interfaces)
+}
+
+func (ctx *hostContext) refreshNetworkInterfaces(interfaces []*HostNetworkInterface) {
     // TODO : we make an assumption that host's primary interface and network addresses are at the same network segment. This could not be the case, we'll look into it v0.1.5
     ctx.hostInterfaces = &interfaces
 
@@ -128,7 +132,11 @@ func (ctx *hostContext) monitorNetworkInterfaces(interfaces []*HostNetworkInterf
     }
 }
 
-func (ctx *hostContext) monitorNetworkGateways(gateways []*HostNetworkGateway) {
+func MonitorNetworkGateways(gateways []*HostNetworkGateway) {
+    singletonContextInstance().refreshNetworkGateways(gateways)
+}
+
+func (ctx *hostContext) refreshNetworkGateways(gateways []*HostNetworkGateway) {
     for _, gw := range gateways {
         if gw.IsDefault {
             ctx.primaryGateway = gw

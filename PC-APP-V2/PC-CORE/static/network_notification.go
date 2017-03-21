@@ -1,9 +1,9 @@
 // +build darwin
-package context
+package main
 
 /*
 #cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -Wl,-U,_interface_status_with_callback,-U,_interface_status_with_gocall,-U,_gateway_status_with_callback,-U,_gateway_status_with_gocall
+#cgo LDFLAGS: -Wl,-U,_interface_status_with_callback,-U,_gateway_status_with_callback
 
 #include "SCNetworkTypes.h"
 #include "PCInterfaceTypes.h"
@@ -12,47 +12,42 @@ package context
 import "C"
 import (
     "unsafe"
+    "github.com/stkim1/pc-core/context"
 )
 
-//export passGatewayArray
-func passGatewayArray(gatewayArray **C.SCNIGateway, length C.uint) C.bool {
+//export NetworkChangeNotificationGateway
+func NetworkChangeNotificationGateway(gatewayArray **C.SCNIGateway, length C.uint) C.bool {
     var arrayLen int = int(length)
     if arrayLen == 0 || gatewayArray == nil {
         return C.bool(true)
     }
 
     var gatewaySlice []*C.SCNIGateway = (*[1 << 10]*C.SCNIGateway)(unsafe.Pointer(gatewayArray))[:arrayLen:arrayLen]
-    var hostGateways []*HostNetworkGateway = make([]*HostNetworkGateway, arrayLen, arrayLen)
+    var hostGateways []*context.HostNetworkGateway = make([]*context.HostNetworkGateway, arrayLen, arrayLen)
 
     for idx, gw := range gatewaySlice {
-        hostGateways[idx] = &HostNetworkGateway{
+        hostGateways[idx] = &context.HostNetworkGateway{
             Family      : uint8(gw.family),
             IsDefault   : bool(gw.is_default),
             IfaceName   : C.GoString(gw.ifname),
             Address     : C.GoString(gw.addr),
         }
     }
-    singletonContextInstance().monitorNetworkGateways(hostGateways)
-
+    context.MonitorNetworkGateways(hostGateways)
     return C.bool(true)
 }
 
-func FindSystemGatewayStatus() {
-    C.gateway_status_with_gocall()
-}
-
-
-func convertAddressStruct(addrArray **C.SCNIAddress, addrCount C.uint) (addresses []*HostIPAddress) {
+func convertAddressStruct(addrArray **C.SCNIAddress, addrCount C.uint) (addresses []*context.HostIPAddress) {
     if addrCount == 0 || addrArray == nil {
         addresses = nil
     }
 
     var addrLength uint = uint(addrCount)
     var addrSlice []*C.SCNIAddress = (*[1 << 10]*C.SCNIAddress)(unsafe.Pointer(addrArray))[:addrLength:addrLength]
-    addresses = make([]*HostIPAddress, addrLength, addrLength)
+    addresses = make([]*context.HostIPAddress, addrLength, addrLength)
 
     for idx, addr := range addrSlice {
-        addresses[idx] = &HostIPAddress{
+        addresses[idx] = &context.HostIPAddress{
             Flags       : uint(addr.flags),
             Family      : uint8(addr.family),
             IsPrimary   : bool(addr.is_primary),
@@ -65,20 +60,20 @@ func convertAddressStruct(addrArray **C.SCNIAddress, addrCount C.uint) (addresse
     return
 }
 
-//export passInterfaceArray
-func passInterfaceArray(interfaceArray **C.PCNetworkInterface, length C.uint) C.bool {
+//export NetworkChangeNotificationInterface
+func NetworkChangeNotificationInterface(interfaceArray **C.PCNetworkInterface, length C.uint) C.bool {
     var arrayLen int = int(length)
     if arrayLen == 0 || interfaceArray == nil {
         return C.bool(true)
     }
 
     var interfaceSlice []*C.PCNetworkInterface = (*[1 << 10]*C.PCNetworkInterface)(unsafe.Pointer(interfaceArray))[:arrayLen:arrayLen]
-    var hostInterfaces []*HostNetworkInterface = make([]*HostNetworkInterface, arrayLen, arrayLen)
+    var hostInterfaces []*context.HostNetworkInterface = make([]*context.HostNetworkInterface, arrayLen, arrayLen)
     for idx, iface := range interfaceSlice {
 
         addresses := convertAddressStruct(iface.address, iface.addrCount)
 
-        hostInterfaces[idx] = &HostNetworkInterface{
+        hostInterfaces[idx] = &context.HostNetworkInterface{
             WifiPowerOff : bool(iface.wifiPowerOff),
             IsActive     : bool(iface.isActive),
             IsPrimary    : bool(iface.isPrimary),
@@ -90,10 +85,6 @@ func passInterfaceArray(interfaceArray **C.PCNetworkInterface, length C.uint) C.
             MediaType    : C.GoString(iface.mediaType),
         }
     }
-    singletonContextInstance().monitorNetworkInterfaces(hostInterfaces)
+    context.MonitorNetworkInterfaces(hostInterfaces)
     return C.bool(true)
-}
-
-func FindSystemInterfaceStatus() {
-    C.interface_status_with_gocall()
 }

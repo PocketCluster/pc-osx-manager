@@ -5,6 +5,7 @@ package main
 #cgo LDFLAGS: -Wl,-U,_osxmain -framework Cocoa
 
 extern int osxmain(int argc, const char * argv[]);
+
 */
 import "C"
 import (
@@ -70,8 +71,6 @@ func main() {
 
     // setup context
     ctx := context.SharedHostContext()
-    context.FindSystemInterfaceStatus()
-    context.FindSystemGatewayStatus()
     config.SetupBaseConfigPath(ctx)
 
     // open database

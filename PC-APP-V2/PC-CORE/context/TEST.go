@@ -108,8 +108,8 @@ func DebugContextPrepare() (HostContext) {
         CaSigner:                    caSigner,
     }
 
-    _context.monitorNetworkGateways(test_gateways)
-    _context.monitorNetworkInterfaces(test_intefaces)
+    _context.refreshNetworkGateways(test_gateways)
+    _context.refreshNetworkInterfaces(test_intefaces)
 
     return _context
 }
