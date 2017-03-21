@@ -24,7 +24,7 @@ func TestDefaultGateway(t *testing.T) {
     DebugContextPrepare()
     defer DebugContextDestroy()
 
-    singletonContextInstance().refreshNetworkInterfaces(test_gateways)
+    singletonContextInstance().refreshNetworkGateways(test_gateways)
 
     addr, err := SharedHostContext().HostDefaultGatewayAddress()
     if err != nil {
