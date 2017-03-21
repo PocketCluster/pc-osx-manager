@@ -66,8 +66,7 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
     return true;
 }
 
-
-@interface AppDelegate ()
+@interface AppDelegate ()<PCInterfaceStatusNotification>
 
 @property (weak) IBOutlet NSWindow *window;
 @property (strong) PCInterfaceStatus *status;
@@ -75,12 +74,21 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
 
 @implementation AppDelegate
 
+-(void)PCInterfaceStatusChanged:(PCInterfaceStatus *)monitor interfaceStatus:(PCNetworkInterface**)status count:(unsigned int)count {
+    pc_interface_list(status, count);
+}
+
+-(void)PCGatewayStatusChanged:(PCInterfaceStatus *)monitor gatewayStatus:(SCNIGateway**)status count:(unsigned int)count {
+    gateway_list(status, count);
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     
     interface_status_with_callback(&pc_interface_list);
     gateway_status_with_callback(&gateway_list);
+    NSLog(@"\n--- --- --- CALLBACK C CALL ENDED --- --- ---");
     
-    self.status = [PCInterfaceStatus new];
+    self.status = [[PCInterfaceStatus alloc] initWithStatusAudience:self];
     [self.status startMonitoring];
 }
 

@@ -27,8 +27,6 @@
 		0497C5971DC0027F006FEE0F /* PCInterfaceStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5851DC0027F006FEE0F /* PCInterfaceStatus.m */; };
 		0497C5981DC0027F006FEE0F /* SCNetworkInterfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = 0497C58A1DC0027F006FEE0F /* SCNetworkInterfaces.c */; };
 		0497C5991DC0027F006FEE0F /* SCNetworkInterfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = 0497C58A1DC0027F006FEE0F /* SCNetworkInterfaces.c */; };
-		0497C59C1DC0027F006FEE0F /* LinkMACVendors.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5901DC0027F006FEE0F /* LinkMACVendors.m */; };
-		0497C59D1DC0027F006FEE0F /* LinkMACVendors.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5901DC0027F006FEE0F /* LinkMACVendors.m */; };
 		0497C59E1DC0027F006FEE0F /* LinkObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5921DC0027F006FEE0F /* LinkObserver.m */; };
 		0497C59F1DC0027F006FEE0F /* LinkObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 0497C5921DC0027F006FEE0F /* LinkObserver.m */; };
 /* End PBXBuildFile section */
@@ -67,8 +65,6 @@
 		0497C5881DC0027F006FEE0F /* SCNetworkTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCNetworkTypes.h; sourceTree = "<group>"; };
 		0497C58A1DC0027F006FEE0F /* SCNetworkInterfaces.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SCNetworkInterfaces.c; sourceTree = "<group>"; };
 		0497C58B1DC0027F006FEE0F /* SCNetworkInterfaces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCNetworkInterfaces.h; sourceTree = "<group>"; };
-		0497C58F1DC0027F006FEE0F /* LinkMACVendors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkMACVendors.h; sourceTree = "<group>"; };
-		0497C5901DC0027F006FEE0F /* LinkMACVendors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkMACVendors.m; sourceTree = "<group>"; };
 		0497C5911DC0027F006FEE0F /* LinkObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkObserver.h; sourceTree = "<group>"; };
 		0497C5921DC0027F006FEE0F /* LinkObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinkObserver.m; sourceTree = "<group>"; };
 		0497C5A21DC002A6006FEE0F /* common.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.pch; sourceTree = "<group>"; };
@@ -218,8 +214,6 @@
 		0497C58C1DC0027F006FEE0F /* model */ = {
 			isa = PBXGroup;
 			children = (
-				0497C58F1DC0027F006FEE0F /* LinkMACVendors.h */,
-				0497C5901DC0027F006FEE0F /* LinkMACVendors.m */,
 				0497C5911DC0027F006FEE0F /* LinkObserver.h */,
 				0497C5921DC0027F006FEE0F /* LinkObserver.m */,
 			);
@@ -328,7 +322,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				0497C5961DC0027F006FEE0F /* PCInterfaceStatus.m in Sources */,
-				0497C59C1DC0027F006FEE0F /* LinkMACVendors.m in Sources */,
 				04259C121E7F841C0071648E /* PCStaticUtility.m in Sources */,
 				0497C5581DC00254006FEE0F /* main.m in Sources */,
 				0497C5981DC0027F006FEE0F /* SCNetworkInterfaces.c in Sources */,
@@ -341,7 +334,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0497C59D1DC0027F006FEE0F /* LinkMACVendors.m in Sources */,
 				0497C59F1DC0027F006FEE0F /* LinkObserver.m in Sources */,
 				0497C5971DC0027F006FEE0F /* PCInterfaceStatus.m in Sources */,
 				0497C5991DC0027F006FEE0F /* SCNetworkInterfaces.c in Sources */,
