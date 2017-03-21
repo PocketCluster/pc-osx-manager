@@ -55,7 +55,7 @@ func convertAddressStruct(addrArray **C.SCNIAddress, addrCount C.uint) ([]*conte
 
 //export NetworkChangeNotificationInterface
 func NetworkChangeNotificationInterface(interfaceArray **C.PCNetworkInterface, length C.uint) {
-    if interfaceArray == nil || int(length) {
+    if interfaceArray == nil || int(length) == 0 {
         return
     }
     var (
