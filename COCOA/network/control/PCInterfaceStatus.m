@@ -87,12 +87,11 @@ _gateway_status(CFMutableArrayRef, unsigned int*);
 }
 
 #pragma mark - LinkObserverNotification protocol
-- (void)networkConfigurationDidChange:(LinkObserver *)observer configChanged:(NSDictionary *)configChanged {
-NSLog(@"%s", __PRETTY_FUNCTION__);
-    if (self.audience != nil || !_shouldMonitor) {
+- (void)broadcastNetworkChangeAudience {
+    if (self.audience == nil || !_shouldMonitor) {
         return;
     }
-
+    
     // --- same as gateway_status_with_callback() --- //
     if ([self.audience respondsToSelector:@selector(PCInterfaceStatusChanged:interfaceStatus:count:)]) {
         unsigned int gatewayCount = 0;
@@ -138,9 +137,13 @@ NSLog(@"%s", __PRETTY_FUNCTION__);
     }
 }
 
+- (void)networkConfigurationDidChange:(LinkObserver *)observer configChanged:(NSDictionary *)configChanged {
+    [self broadcastNetworkChangeAudience];
+}
+
 - (void)networkConfigurationDidChangeForKey:(NSString *)configKey {
-// (03/21/2017) this delegation support ipv6 which we don't as of now.
 #if 0
+    //(03/21/2017) this delegation support ipv6 which we don't as of now.
     NSLog(@"Network configuration has changed %@ - %@", configKey, [[NSDate date] description]);
     if (![configKey hasPrefix:@"State:/Network/Global/IPv4"]) {
         // anything other than network *interface* status will be ignored
@@ -152,6 +155,7 @@ NSLog(@"%s", __PRETTY_FUNCTION__);
         NSLog(@"!!! this not main thread!!!\n\n");
     }
 #endif
+    [self broadcastNetworkChangeAudience];
 }
 
 @end

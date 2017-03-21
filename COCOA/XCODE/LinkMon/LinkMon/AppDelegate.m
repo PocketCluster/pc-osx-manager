@@ -75,10 +75,12 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
 @implementation AppDelegate
 
 -(void)PCInterfaceStatusChanged:(PCInterfaceStatus *)monitor interfaceStatus:(PCNetworkInterface**)status count:(unsigned int)count {
+    NSLog(@"%s", __PRETTY_FUNCTION__);
     pc_interface_list(status, count);
 }
 
 -(void)PCGatewayStatusChanged:(PCInterfaceStatus *)monitor gatewayStatus:(SCNIGateway**)status count:(unsigned int)count {
+    NSLog(@"%s", __PRETTY_FUNCTION__);
     gateway_list(status, count);
 }
 
