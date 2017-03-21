@@ -3,6 +3,10 @@
 # Exit if any command fails
 set -e
 
+#pushd ${PWD}
+#cd ${PROJECT_DIR}/../../../PC-APP-V2/pc-core/static/ && source ./build.sh
+#popd
+
 # Environmental variables
 GO_BUILD="${PROJECT_DIR}/../../../PC-APP-V2/.build/"
 

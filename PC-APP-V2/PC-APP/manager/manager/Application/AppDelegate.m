@@ -20,6 +20,7 @@
 
 bool
 pc_interface_list(PCNetworkInterface** interfaces, unsigned int count) {
+#ifdef COMPARE_NATIVE_GO_OUTPUT
     printf("\n\n---- total intefaces count %d ----\n\n", count);
     for (unsigned int i = 0; i < count; i++) {
         
@@ -47,12 +48,12 @@ pc_interface_list(PCNetworkInterface** interfaces, unsigned int count) {
         printf("macAddress: %s\n",iface->macAddress);
         printf("mediaType: %s\n--------------------\n",iface->mediaType);
     }
-    
     if ([NSThread isMainThread]) {
         printf("!!! THIS IS M.A.I.N THREAD!!!\n\n");
     } else {
         printf("!!! this not main thread!!!\n\n");
     }
+#endif
 
     NetworkChangeNotificationInterface(interfaces, count);
     return true;
@@ -60,6 +61,7 @@ pc_interface_list(PCNetworkInterface** interfaces, unsigned int count) {
 
 bool
 gateway_list(SCNIGateway** gateways, unsigned int count) {
+#ifdef COMPARE_NATIVE_GO_OUTPUT
     printf("\n\n---- Total gateway count %d ----\n", count);
     for (unsigned int i = 0; i < count; i++) {
         SCNIGateway *gw = *(gateways + i);
@@ -73,7 +75,8 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
     } else {
         printf("!!! this not main thread!!!\n\n");
     }
-    
+#endif
+
     NetworkChangeNotificationGateway(gateways, count);
     return true;
 }

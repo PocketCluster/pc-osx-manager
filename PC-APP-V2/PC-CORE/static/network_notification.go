@@ -24,16 +24,30 @@ func convertAddressStruct(addrArray **C.SCNIAddress, addrCount C.uint) ([]*conte
         addrSlice []*C.SCNIAddress         = (*[1 << 10]*C.SCNIAddress)(unsafe.Pointer(addrArray))[:addrLength:addrLength]
         addresses []*context.HostIPAddress = make([]*context.HostIPAddress, addrLength, addrLength)
     )
-
     for idx, addr := range addrSlice {
+        var (
+            address, netmask, broadcast, peer = "", "", "", ""
+        )
+        if addr.addr != nil {
+            address = C.GoString(addr.addr)
+        }
+        if addr.netmask != nil {
+            netmask = C.GoString(addr.netmask)
+        }
+        if addr.broadcast != nil {
+            broadcast = C.GoString(addr.broadcast)
+        }
+        if addr.peer != nil {
+            peer = C.GoString(addr.peer)
+        }
         addresses[idx] = &context.HostIPAddress{
-            Flags       : uint(addr.flags),
-            Family      : uint8(addr.family),
-            IsPrimary   : bool(addr.is_primary),
-            Address     : C.GoString(addr.addr),
-            Netmask     : C.GoString(addr.netmask),
-            Broadcast   : C.GoString(addr.broadcast),
-            Peer        : C.GoString(addr.peer),
+            Flags:        uint(addr.flags),
+            Family:       uint8(addr.family),
+            IsPrimary:    bool(addr.is_primary),
+            Address:      address,
+            Netmask:      netmask,
+            Broadcast:    broadcast,
+            Peer:         peer,
         }
     }
     return addresses
@@ -41,32 +55,47 @@ func convertAddressStruct(addrArray **C.SCNIAddress, addrCount C.uint) ([]*conte
 
 //export NetworkChangeNotificationInterface
 func NetworkChangeNotificationInterface(interfaceArray **C.PCNetworkInterface, length C.uint) {
-    log.Debugf("NetworkChangeNotificationInterface")
-    return
-
     var arrayLen int = int(length)
     if arrayLen == 0 || interfaceArray == nil {
         return
     }
-
-    var interfaceSlice []*C.PCNetworkInterface = (*[1 << 10]*C.PCNetworkInterface)(unsafe.Pointer(interfaceArray))[:arrayLen:arrayLen]
-    var hostInterfaces []*context.HostNetworkInterface = make([]*context.HostNetworkInterface, arrayLen, arrayLen)
+    var (
+        interfaceSlice []*C.PCNetworkInterface = (*[1 << 10]*C.PCNetworkInterface)(unsafe.Pointer(interfaceArray))[:arrayLen:arrayLen]
+        hostInterfaces []*context.HostNetworkInterface = make([]*context.HostNetworkInterface, arrayLen, arrayLen)
+    )
     for idx, iface := range interfaceSlice {
-
-        addresses := convertAddressStruct(iface.address, iface.addrCount)
-
+        var (
+            addresses []*context.HostIPAddress = nil
+            bsdName, displayName, macAddress, mediaType = "", "", "", ""
+        )
+        if iface.address != nil && 0 < uint(iface.addrCount) {
+            addresses = convertAddressStruct(iface.address, iface.addrCount)
+        }
+        if iface.bsdName != nil {
+            bsdName = C.GoString(iface.bsdName)
+        }
+        if iface.displayName != nil {
+            displayName = C.GoString(iface.displayName)
+        }
+        if iface.macAddress != nil {
+            macAddress = C.GoString(iface.macAddress)
+        }
+        if iface.mediaType != nil {
+            mediaType = C.GoString(iface.mediaType)
+        }
         hostInterfaces[idx] = &context.HostNetworkInterface{
             WifiPowerOff : bool(iface.wifiPowerOff),
             IsActive     : bool(iface.isActive),
             IsPrimary    : bool(iface.isPrimary),
             AddrCount    : uint(iface.addrCount),
             Address      : addresses,
-            BsdName      : C.GoString(iface.bsdName),
-            DisplayName  : C.GoString(iface.displayName),
-            MacAddress   : C.GoString(iface.macAddress),
-            MediaType    : C.GoString(iface.mediaType),
+            BsdName      : bsdName,
+            DisplayName  : displayName,
+            MacAddress   : macAddress,
+            MediaType    : mediaType,
         }
     }
+    log.Debugf(spew.Sdump(hostInterfaces))
     context.MonitorNetworkInterfaces(hostInterfaces)
 }
 

@@ -4,9 +4,12 @@
 set -e
 
 # Figure out where things are coming from and going to
+GOREPO=${GOREPO:-"${HOME}/Workspace/POCKETPKG"}
+GOPATH=${GOPATH:-"${GOREPO}:$GOWORKPLACE"}
 GO=${GOROOT}/bin/go
 GG_BUILD="${PWD}/../../.build"
 ARCHIVE="${GG_BUILD}/pc-core.a"
+PATH=${PATH:-"$GEM_HOME/ruby/2.0.0/bin:$HOME/.util:$GOROOT/bin:$GOREPO/bin:$GOWORKPLACE/bin:$HOME/.util:$NATIVE_PATH"}
 
 # Clean old directory
 if [ -d ${GG_BUILD} ]; then
