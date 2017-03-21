@@ -143,7 +143,11 @@ _gateway_status(CFMutableArrayRef, unsigned int*);
 
 - (void)networkConfigurationDidChangeForKey:(NSString *)configKey {
 #if 0
-    //(03/21/2017) this delegation support ipv6 which we don't as of now.
+    /*
+     * (03/21/2017)
+     * 1. This delegation support ipv6 which we don't as of now.
+     * 2. We need to notify if link is down that filtering below will be disabled
+     */
     NSLog(@"Network configuration has changed %@ - %@", configKey, [[NSDate date] description]);
     if (![configKey hasPrefix:@"State:/Network/Global/IPv4"]) {
         // anything other than network *interface* status will be ignored
@@ -298,8 +302,8 @@ _interface_status(unsigned int* pcIfaceCount, CFMutableArrayRef allAddresses) {
     static char ifaceBSDName[256];
     
     PCNetworkInterface** pcIfaceArray = NULL;
-    const char* primaryAddress;
-    const char* primaryInterface;
+    const char* primaryAddress = NULL;
+    const char* primaryInterface = NULL;
     
     _primary_interface_address(&primaryInterface, &primaryAddress);
     
