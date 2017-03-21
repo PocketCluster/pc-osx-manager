@@ -12,11 +12,14 @@ package main
 import "C"
 import (
     "unsafe"
+
     "github.com/stkim1/pc-core/context"
+    log "github.com/Sirupsen/logrus"
 )
 
 //export NetworkChangeNotificationGateway
 func NetworkChangeNotificationGateway(gatewayArray **C.SCNIGateway, length C.uint) C.bool {
+    log.Debugf("NetworkChangeNotificationGateway")
     var arrayLen int = int(length)
     if arrayLen == 0 || gatewayArray == nil {
         return C.bool(true)
@@ -62,6 +65,7 @@ func convertAddressStruct(addrArray **C.SCNIAddress, addrCount C.uint) (addresse
 
 //export NetworkChangeNotificationInterface
 func NetworkChangeNotificationInterface(interfaceArray **C.PCNetworkInterface, length C.uint) C.bool {
+    log.Debugf("NetworkChangeNotificationInterface")
     var arrayLen int = int(length)
     if arrayLen == 0 || interfaceArray == nil {
         return C.bool(true)

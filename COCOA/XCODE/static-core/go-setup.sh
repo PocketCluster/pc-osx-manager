@@ -10,8 +10,11 @@ echo "Project directory : ${PROJECT_DIR}"
 echo "Project source : ${SRCROOT}"
 echo "Go binary destination : ${GO_BUILD}"
 
-# Copy header file
-cp "${GO_BUILD}/_cgo_export.h" "${PROJECT_DIR}/static-core/"
+# Copy header to goheader
+if [[ -f "${PROJECT_DIR}/../../goheader/_cgo_export.h" ]]; then
+    rm "${PROJECT_DIR}/../../goheader/_cgo_export.h"
+fi
+cp "${GO_BUILD}/_cgo_export.h" "${PROJECT_DIR}/../../goheader/"
 
 # Copy PC-CORE binary
 if [[ -f "${PROJECT_DIR}/static-core/pc-core.a" ]]; then

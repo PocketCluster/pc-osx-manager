@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		04259BB71E7F7FFA0071648E /* _cgo_export.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BB51E7F7FFA0071648E /* _cgo_export.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04259BB81E7F7FFA0071648E /* pc-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259BB61E7F7FFA0071648E /* pc-core.a */; };
 		04259BE71E7F80940071648E /* PCApplicationPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BBB1E7F80940071648E /* PCApplicationPath.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04259BE81E7F80940071648E /* PCUserEnvironment.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BBC1E7F80940071648E /* PCUserEnvironment.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -41,12 +40,12 @@
 		04259C141E7F869F0071648E /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C131E7F869F0071648E /* CFNetwork.framework */; };
 		04259C161E7F86B20071648E /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C151E7F86B20071648E /* SystemConfiguration.framework */; };
 		04259C181E7F86BE0071648E /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C171E7F86BE0071648E /* CoreWLAN.framework */; };
+		04D6AD831E80DCF800A015FA /* _cgo_export.h in Headers */ = {isa = PBXBuildFile; fileRef = 04D6AD821E80DCF800A015FA /* _cgo_export.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		04259B4F1E7F7E300071648E /* libstatic-core.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libstatic-core.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		04259BB31E7F7F9C0071648E /* go-setup.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "go-setup.sh"; sourceTree = "<group>"; };
-		04259BB51E7F7FFA0071648E /* _cgo_export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _cgo_export.h; sourceTree = "<group>"; };
 		04259BB61E7F7FFA0071648E /* pc-core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "pc-core.a"; sourceTree = "<group>"; };
 		04259BBB1E7F80940071648E /* PCApplicationPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCApplicationPath.h; sourceTree = "<group>"; };
 		04259BBC1E7F80940071648E /* PCUserEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCUserEnvironment.h; sourceTree = "<group>"; };
@@ -80,6 +79,7 @@
 		04259C131E7F869F0071648E /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		04259C151E7F86B20071648E /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		04259C171E7F86BE0071648E /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
+		04D6AD821E80DCF800A015FA /* _cgo_export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _cgo_export.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +110,7 @@
 				04259C091E7F82240071648E /* PrefixHeader.pch */,
 				04259BB31E7F7F9C0071648E /* go-setup.sh */,
 				04259BB91E7F80940071648E /* directory */,
+				04D6AD811E80DCC700A015FA /* goheader */,
 				04259BC41E7F80940071648E /* macro */,
 				04259BC91E7F80940071648E /* network */,
 				04259BDA1E7F80940071648E /* serial */,
@@ -132,7 +133,6 @@
 		04259B511E7F7E300071648E /* static-core */ = {
 			isa = PBXGroup;
 			children = (
-				04259BB51E7F7FFA0071648E /* _cgo_export.h */,
 				04259BB61E7F7FFA0071648E /* pc-core.a */,
 			);
 			path = "static-core";
@@ -276,6 +276,15 @@
 			path = ../../utility;
 			sourceTree = "<group>";
 		};
+		04D6AD811E80DCC700A015FA /* goheader */ = {
+			isa = PBXGroup;
+			children = (
+				04D6AD821E80DCF800A015FA /* _cgo_export.h */,
+			);
+			name = goheader;
+			path = ../../goheader;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -283,7 +292,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				04259BB71E7F7FFA0071648E /* _cgo_export.h in Headers */,
+				04D6AD831E80DCF800A015FA /* _cgo_export.h in Headers */,
 				04259BEB1E7F80940071648E /* NSFileManager+DirectoryLocations.h in Headers */,
 				04259BE91E7F80940071648E /* NSBundle+DirectoryPath.h in Headers */,
 				04259C001E7F80950071648E /* DeviceSerialNumber.h in Headers */,
