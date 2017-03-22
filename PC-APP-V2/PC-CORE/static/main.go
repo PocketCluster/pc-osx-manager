@@ -91,17 +91,55 @@ func main_old() {
     fmt.Println("pc-core terminated!")
 }
 
+func prepEnviornment() {
+    setLogger(true)
+
+    // setup context
+    ctx := context.SharedHostContext()
+    config.SetupBaseConfigPath(ctx)
+
+    // open database
+    db, err := config.OpenStorageInstance(ctx)
+    if err != nil {
+        log.Info(err)
+    }
+    // cert engine
+    certStorage, err := pcrypto.NewPocketCertStorage(db)
+    if err != nil {
+        log.Info(err)
+    }
+
+    cfg := service.MakeCoreConfig(ctx, true)
+    cfg.AssignCertStorage(certStorage)
+
+    log.Info(spew.Sdump(ctx))
+}
+
 func main() {
+
+    prepEnviornment()
+
     mainLifeCycle(func(a App) {
         for e := range a.Events() {
             switch e := a.Filter(e).(type) {
             case lifecycle.Event:
-                switch e.Crosses(lifecycle.StageVisible) {
+                // become alive
+                switch e.Crosses(lifecycle.StageAlive) {
                     case lifecycle.CrossOn: {
-                        log.Debugf("%v", e.String())
+                        log.Debugf("[LIFE] app is now alive %v", e.String())
                     }
                     case lifecycle.CrossOff: {
-                        log.Debugf("%v", e.String())
+                        log.Debugf("[LIFE] app is inactive %v", e.String())
+                    }
+                }
+
+                // become visible
+                switch e.Crosses(lifecycle.StageVisible) {
+                    case lifecycle.CrossOn: {
+                        log.Debugf("[LIFE] app is visible %v", e.String())
+                    }
+                    case lifecycle.CrossOff: {
+                        log.Debugf("[LIFE] app is invisible %v", e.String())
                     }
                 }
             }

@@ -44,7 +44,7 @@ func init() {
 // this was app package of main()
 func mainLifeCycle(f func(App)) {
     if tid := uint64(C.PCNativeThreadID()); tid != initThreadID {
-        log.Fatalf("app.Main called on thread %d, but app.init ran on %d", tid, initThreadID)
+        log.Fatalf("[CRITICAL] engine main called on thread %d, but inititaed from %d", tid, initThreadID)
     }
 
     go func() {

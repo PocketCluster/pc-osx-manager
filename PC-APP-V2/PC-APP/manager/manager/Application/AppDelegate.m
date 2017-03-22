@@ -91,7 +91,7 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     lifecycleAlive();
-/*
+
     //initialize updates
     [[SUUpdater sharedUpdater] setDelegate:self];
     [[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
@@ -103,14 +103,16 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
     interface_status_with_callback(&pc_interface_list);
     gateway_status_with_callback(&gateway_list);
     NSLog(@"\n--- --- --- CALLBACK C CALL ENDED --- --- ---");
-*/
-    
+
     // opened window list
     self.openWindows = [[NSMutableArray alloc] init];
     
     //create popup and status menu item
     self.nativeMenu = [[NativeMenu alloc] init];
 
+    [[NSRunningApplication currentApplication] activateWithOptions:(NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps)];
+    //[self.window makeKeyAndOrderFront:self];
+    
     lifecycleVisible();
     Log(@"Application Started");
 }
