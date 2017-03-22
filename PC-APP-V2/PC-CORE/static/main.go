@@ -1,12 +1,5 @@
 package main
 
-/*
-#cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -Wl,-U,_osxmain -framework Cocoa
-
-extern int osxmain(int argc, const char * argv[]);
-
-*/
 import "C"
 import (
     "net/http"
@@ -20,6 +13,7 @@ import (
 
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/config"
+    "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pcrypto"
 )
 import (
@@ -59,7 +53,7 @@ func setLogger(debug bool) {
     }
 }
 
-func main() {
+func main_old() {
     setLogger(true)
 
     var wg sync.WaitGroup
@@ -90,9 +84,27 @@ func main() {
     log.Info(spew.Sdump(ctx))
 
     // Perhaps the first thing main() function needs to do is initiate OSX main
-    C.osxmain(0, nil)
+    //C.osxmain(0, nil)
 
     srv.Stop(time.Second)
     config.CloseStorageInstance(db)
     fmt.Println("pc-core terminated!")
+}
+
+func main() {
+    mainLifeCycle(func(a App) {
+        for e := range a.Events() {
+            switch e := a.Filter(e).(type) {
+            case lifecycle.Event:
+                switch e.Crosses(lifecycle.StageVisible) {
+                    case lifecycle.CrossOn: {
+                        log.Debugf("%v", e.String())
+                    }
+                    case lifecycle.CrossOff: {
+                        log.Debugf("%v", e.String())
+                    }
+                }
+            }
+        }
+    })
 }

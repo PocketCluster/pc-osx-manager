@@ -6,6 +6,12 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-int osxmain(int argc, const char * argv[]) {
+int
+PCNativeMainStart(int argc, const char * argv[]) {
     return NSApplicationMain(argc, argv);
+}
+
+void
+PCNativeMainStop() {
+    [NSApp terminate:nil];
 }

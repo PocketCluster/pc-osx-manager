@@ -90,6 +90,8 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    lifecycleAlive();
+/*
     //initialize updates
     [[SUUpdater sharedUpdater] setDelegate:self];
     [[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
@@ -97,11 +99,11 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
     
     self.interfaceStatus = [[PCInterfaceStatus alloc] initWithStatusAudience:self];
     [self.interfaceStatus startMonitoring];
-    
+ 
     interface_status_with_callback(&pc_interface_list);
     gateway_status_with_callback(&gateway_list);
     NSLog(@"\n--- --- --- CALLBACK C CALL ENDED --- --- ---");
-
+*/
     
     // opened window list
     self.openWindows = [[NSMutableArray alloc] init];
@@ -109,12 +111,26 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
     //create popup and status menu item
     self.nativeMenu = [[NativeMenu alloc] init];
 
+    lifecycleVisible();
     Log(@"Application Started");
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
-    [self.interfaceStatus stopMonitoring];
+//    [self.interfaceStatus stopMonitoring];
     self.interfaceStatus = nil;
+    lifecycleDead();
+}
+
+- (void)applicationDidHide:(NSNotification *)aNotification {
+    lifecycleAlive();
+}
+
+- (void)applicationWillUnhide:(NSNotification *)notification {
+    lifecycleVisible();
+}
+
+- (void)windowWillClose:(NSNotification *)notification {
+    lifecycleAlive();
 }
 
 - (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {

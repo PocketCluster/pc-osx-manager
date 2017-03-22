@@ -32,7 +32,6 @@
 		04259C021E7F80950071648E /* PCDeviceSerial.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BDE1E7F80940071648E /* PCDeviceSerial.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04259C031E7F80950071648E /* PCSystemInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BE21E7F80940071648E /* PCSystemInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04259C041E7F80950071648E /* PCSystemInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BE31E7F80940071648E /* PCSystemInfo.m */; };
-		04259C051E7F80950071648E /* PCStaticUtility.h in Headers */ = {isa = PBXBuildFile; fileRef = 04259BE51E7F80940071648E /* PCStaticUtility.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04259C061E7F80950071648E /* PCStaticUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 04259BE61E7F80940071648E /* PCStaticUtility.m */; };
 		04259C0A1E7F82240071648E /* PrefixHeader.pch in Headers */ = {isa = PBXBuildFile; fileRef = 04259C091E7F82240071648E /* PrefixHeader.pch */; settings = {ATTRIBUTES = (Private, ); }; };
 		04259C0C1E7F82E10071648E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C0B1E7F82E10071648E /* Foundation.framework */; };
@@ -41,6 +40,10 @@
 		04259C161E7F86B20071648E /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C151E7F86B20071648E /* SystemConfiguration.framework */; };
 		04259C181E7F86BE0071648E /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C171E7F86BE0071648E /* CoreWLAN.framework */; };
 		04D6AD831E80DCF800A015FA /* _cgo_export.h in Headers */ = {isa = PBXBuildFile; fileRef = 04D6AD821E80DCF800A015FA /* _cgo_export.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		04E7301A1E822A8F00BE83DD /* PCLifeCycle.h in Headers */ = {isa = PBXBuildFile; fileRef = 04E730191E822A8F00BE83DD /* PCLifeCycle.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		04E7301D1E822BC300BE83DD /* PCNativeThread.c in Sources */ = {isa = PBXBuildFile; fileRef = 04E7301B1E822BC300BE83DD /* PCNativeThread.c */; };
+		04E730221E822D3200BE83DD /* PCNativeThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 04E730201E822D3200BE83DD /* PCNativeThread.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		04E730231E822D3200BE83DD /* PCStaticUtility.h in Headers */ = {isa = PBXBuildFile; fileRef = 04E730211E822D3200BE83DD /* PCStaticUtility.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -71,7 +74,6 @@
 		04259BDE1E7F80940071648E /* PCDeviceSerial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCDeviceSerial.h; sourceTree = "<group>"; };
 		04259BE21E7F80940071648E /* PCSystemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSystemInfo.h; sourceTree = "<group>"; };
 		04259BE31E7F80940071648E /* PCSystemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSystemInfo.m; sourceTree = "<group>"; };
-		04259BE51E7F80940071648E /* PCStaticUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCStaticUtility.h; sourceTree = "<group>"; };
 		04259BE61E7F80940071648E /* PCStaticUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCStaticUtility.m; sourceTree = "<group>"; };
 		04259C091E7F82240071648E /* PrefixHeader.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
 		04259C0B1E7F82E10071648E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -80,6 +82,10 @@
 		04259C151E7F86B20071648E /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		04259C171E7F86BE0071648E /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
 		04D6AD821E80DCF800A015FA /* _cgo_export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _cgo_export.h; sourceTree = "<group>"; };
+		04E730191E822A8F00BE83DD /* PCLifeCycle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCLifeCycle.h; sourceTree = "<group>"; };
+		04E7301B1E822BC300BE83DD /* PCNativeThread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PCNativeThread.c; sourceTree = "<group>"; };
+		04E730201E822D3200BE83DD /* PCNativeThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCNativeThread.h; sourceTree = "<group>"; };
+		04E730211E822D3200BE83DD /* PCStaticUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCStaticUtility.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,6 +117,7 @@
 				04259BB31E7F7F9C0071648E /* go-setup.sh */,
 				04259BB91E7F80940071648E /* directory */,
 				04D6AD811E80DCC700A015FA /* goheader */,
+				04E730181E822A6700BE83DD /* lifecycle */,
 				04259BC41E7F80940071648E /* macro */,
 				04259BC91E7F80940071648E /* network */,
 				04259BDA1E7F80940071648E /* serial */,
@@ -269,8 +276,9 @@
 		04259BE41E7F80940071648E /* utility */ = {
 			isa = PBXGroup;
 			children = (
-				04259BE51E7F80940071648E /* PCStaticUtility.h */,
+				04E7301F1E822D3200BE83DD /* header */,
 				04259BE61E7F80940071648E /* PCStaticUtility.m */,
+				04E7301B1E822BC300BE83DD /* PCNativeThread.c */,
 			);
 			name = utility;
 			path = ../../utility;
@@ -283,6 +291,24 @@
 			);
 			name = goheader;
 			path = ../../goheader;
+			sourceTree = "<group>";
+		};
+		04E730181E822A6700BE83DD /* lifecycle */ = {
+			isa = PBXGroup;
+			children = (
+				04E730191E822A8F00BE83DD /* PCLifeCycle.h */,
+			);
+			name = lifecycle;
+			path = ../../lifecycle;
+			sourceTree = "<group>";
+		};
+		04E7301F1E822D3200BE83DD /* header */ = {
+			isa = PBXGroup;
+			children = (
+				04E730201E822D3200BE83DD /* PCNativeThread.h */,
+				04E730211E822D3200BE83DD /* PCStaticUtility.h */,
+			);
+			path = header;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -306,7 +332,9 @@
 				04259BF61E7F80940071648E /* PCInterfaceTypes.h in Headers */,
 				04259BF41E7F80940071648E /* PCInterfaceStatus.h in Headers */,
 				04259BE81E7F80940071648E /* PCUserEnvironment.h in Headers */,
-				04259C051E7F80950071648E /* PCStaticUtility.h in Headers */,
+				04E730231E822D3200BE83DD /* PCStaticUtility.h in Headers */,
+				04E730221E822D3200BE83DD /* PCNativeThread.h in Headers */,
+				04E7301A1E822A8F00BE83DD /* PCLifeCycle.h in Headers */,
 				04259BF91E7F80940071648E /* SCNetworkInterfaces.h in Headers */,
 				04259BF71E7F80940071648E /* SCNetworkTypes.h in Headers */,
 				04259C0A1E7F82240071648E /* PrefixHeader.pch in Headers */,
@@ -388,6 +416,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				04259BEA1E7F80940071648E /* NSBundle+DirectoryPath.m in Sources */,
+				04E7301D1E822BC300BE83DD /* PCNativeThread.c in Sources */,
 				04259BFF1E7F80950071648E /* LinkObserver.m in Sources */,
 				04259BEC1E7F80940071648E /* NSFileManager+DirectoryLocations.m in Sources */,
 				04259C061E7F80950071648E /* PCStaticUtility.m in Sources */,
