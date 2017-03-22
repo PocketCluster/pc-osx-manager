@@ -47,6 +47,8 @@ type HostContext interface {
 }
 
 type hostContext struct {
+    sync.Mutex
+
     hostInterfaces               *[]*HostNetworkInterface
     hostGateways                 *[]*HostNetworkGateway
 
@@ -103,6 +105,9 @@ func MonitorNetworkInterfaces(interfaces []*HostNetworkInterface) {
 }
 
 func (ctx *hostContext) refreshNetworkInterfaces(interfaces []*HostNetworkInterface) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
     // TODO : we make an assumption that host's primary interface and network addresses are at the same network segment. This could not be the case, we'll look into it v0.1.5
     ctx.hostInterfaces = &interfaces
 
@@ -137,6 +142,9 @@ func MonitorNetworkGateways(gateways []*HostNetworkGateway) {
 }
 
 func (ctx *hostContext) refreshNetworkGateways(gateways []*HostNetworkGateway) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
     for _, gw := range gateways {
         if gw.IsDefault {
             ctx.primaryGateway = gw

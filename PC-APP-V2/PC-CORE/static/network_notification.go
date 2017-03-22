@@ -14,8 +14,7 @@ import (
     "unsafe"
 
     "github.com/stkim1/pc-core/context"
-    log "github.com/Sirupsen/logrus"
-    "github.com/davecgh/go-spew/spew"
+    "github.com/stkim1/pc-core/event/network"
 )
 
 func convertAddressStruct(addrArray **C.SCNIAddress, addrCount C.uint) ([]*context.HostIPAddress) {
@@ -95,8 +94,10 @@ func NetworkChangeNotificationInterface(interfaceArray **C.PCNetworkInterface, l
             MediaType    : mediaType,
         }
     }
-    log.Debugf(spew.Sdump(hostInterfaces))
-    context.MonitorNetworkInterfaces(hostInterfaces)
+    theApp.eventsIn <- network.Event {
+        NetworkEvent:      network.NetworkChangeInterface,
+        HostInterfaces:    hostInterfaces,
+    }
 }
 
 //export NetworkChangeNotificationGateway
@@ -117,6 +118,8 @@ func NetworkChangeNotificationGateway(gatewayArray **C.SCNIGateway, length C.uin
             Address:      C.GoString(gw.addr),
         }
     }
-    log.Debugf(spew.Sdump(hostGateways))
-    context.MonitorNetworkGateways(hostGateways)
+    theApp.eventsIn <- network.Event {
+        NetworkEvent:    network.NetworkChangeGateway,
+        HostGateways:    hostGateways,
+    }
 }

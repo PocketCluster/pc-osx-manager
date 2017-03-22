@@ -14,6 +14,7 @@ import (
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/config"
     "github.com/stkim1/pc-core/event/lifecycle"
+    "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pcrypto"
 )
 import (
@@ -122,24 +123,38 @@ func main() {
     mainLifeCycle(func(a App) {
         for e := range a.Events() {
             switch e := a.Filter(e).(type) {
-            case lifecycle.Event:
-                // become alive
-                switch e.Crosses(lifecycle.StageAlive) {
-                    case lifecycle.CrossOn: {
-                        log.Debugf("[LIFE] app is now alive %v", e.String())
+                case lifecycle.Event: {
+                    // become alive
+                    switch e.Crosses(lifecycle.StageAlive) {
+                        case lifecycle.CrossOn: {
+                            log.Debugf("[LIFE] app is now alive %v", e.String())
+                        }
+                        case lifecycle.CrossOff: {
+                            log.Debugf("[LIFE] app is inactive %v", e.String())
+                        }
                     }
-                    case lifecycle.CrossOff: {
-                        log.Debugf("[LIFE] app is inactive %v", e.String())
+
+                    // become visible
+                    switch e.Crosses(lifecycle.StageVisible) {
+                        case lifecycle.CrossOn: {
+                            log.Debugf("[LIFE] app is visible %v", e.String())
+                        }
+                        case lifecycle.CrossOff: {
+                            log.Debugf("[LIFE] app is invisible %v", e.String())
+                        }
                     }
                 }
 
-                // become visible
-                switch e.Crosses(lifecycle.StageVisible) {
-                    case lifecycle.CrossOn: {
-                        log.Debugf("[LIFE] app is visible %v", e.String())
-                    }
-                    case lifecycle.CrossOff: {
-                        log.Debugf("[LIFE] app is invisible %v", e.String())
+                case network.Event: {
+                    switch e.NetworkEvent {
+                        case network.NetworkChangeInterface: {
+                            log.Debugf(spew.Sdump(e.HostInterfaces))
+                            context.MonitorNetworkInterfaces(e.HostInterfaces)
+                        }
+                        case network.NetworkChangeGateway: {
+                            log.Debugf(spew.Sdump(e.HostGateways))
+                            context.MonitorNetworkGateways(e.HostGateways)
+                        }
                     }
                 }
             }
