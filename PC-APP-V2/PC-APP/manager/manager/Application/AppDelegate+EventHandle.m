@@ -16,7 +16,6 @@
 
 void
 PCEventHandle(const char* engineMessage) {
-
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         // Parse in the background
         NSData *msgData = \
@@ -26,7 +25,7 @@ PCEventHandle(const char* engineMessage) {
                  freeWhenDone:YES];
         
         NSError *error = nil;
-        NSDictionary* message = \
+        NSDictionary* msgDict = \
             [NSJSONSerialization
                  JSONObjectWithData:msgData
                  options:NSJSONReadingMutableContainers
@@ -40,11 +39,10 @@ PCEventHandle(const char* engineMessage) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [(AppDelegate *)[[NSApplication sharedApplication] delegate]
                  performSelectorOnMainThread:@selector(HandleEventMessage:)
-                 withObject:message
+                 withObject:msgDict
                  waitUntilDone:NO];
         });
     });
-
 }
 
 @implementation AppDelegate (EventHandle)

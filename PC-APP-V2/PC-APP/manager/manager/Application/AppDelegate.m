@@ -19,6 +19,7 @@
 
 #import "AppDelegate.h"
 #import "AppDelegate+EventHandle.h"
+#import "AppDelegate+Notification.h"
 
 bool
 pc_interface_list(PCNetworkInterface** interfaces, unsigned int count) {
@@ -94,6 +95,9 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     lifecycleAlive();
 
+    // register awake/sleep notification
+    [self addSleepNotifications];
+    
     //initialize updates
     [[SUUpdater sharedUpdater] setDelegate:self];
     [[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
@@ -120,7 +124,8 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
-//    [self.interfaceStatus stopMonitoring];
+    [self.interfaceStatus stopMonitoring];
+    [self removeSleepNotifications];
     self.interfaceStatus = nil;
     lifecycleDead();
 }

@@ -21,9 +21,9 @@ package main
 */
 import "C"
 import (
-    "log"
     "runtime"
 
+    log "github.com/Sirupsen/logrus"
     "github.com/stkim1/pc-core/event/lifecycle"
 )
 
@@ -75,3 +75,14 @@ func lifecycleFocused() {
     theApp.sendLifecycle(lifecycle.StageFocused)
 }
 
+//export lifecycleAwaken
+func lifecycleAwaken() {
+    //TODO this is to be done later
+    log.Debugf("lifecycleAwaken")
+}
+
+//export lifecycleSleep
+func lifecycleSleep() {
+    //TODO this is to be done later
+    log.Debugf("lifecycleSleep")
+}

@@ -124,25 +124,43 @@ func main() {
     mainLifeCycle(func(a App) {
         for e := range a.Events() {
             switch e := a.Filter(e).(type) {
+
                 case lifecycle.Event: {
-                    // become alive
+                    switch e.Crosses(lifecycle.StageDead) {
+                        case lifecycle.CrossOn: {
+                            log.Debugf("[LIFE] app is Dead %v", e.String())
+                        }
+                        case lifecycle.CrossOff: {
+                            log.Debugf("[LIFE] app is not dead %v", e.String())
+                        }
+                    }
+
                     switch e.Crosses(lifecycle.StageAlive) {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is now alive %v", e.String())
+
+                            hostapi.SendFeedBack("successfully initiated engine ...")
                         }
                         case lifecycle.CrossOff: {
                             log.Debugf("[LIFE] app is inactive %v", e.String())
                         }
                     }
 
-                    // become visible
                     switch e.Crosses(lifecycle.StageVisible) {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is visible %v", e.String())
-                            hostapi.SendFeedBack("successfully initiated engine ...")
                         }
                         case lifecycle.CrossOff: {
                             log.Debugf("[LIFE] app is invisible %v", e.String())
+                        }
+                    }
+
+                    switch e.Crosses(lifecycle.StageFocused) {
+                        case lifecycle.CrossOn: {
+                            log.Debugf("[LIFE] app is focused %v", e.String())
+                        }
+                        case lifecycle.CrossOff: {
+                            log.Debugf("[LIFE] app is not focused %v", e.String())
                         }
                     }
                 }
