@@ -21,15 +21,16 @@ PCEventHandle(const char* engineMessage) {
         // Parse in the background
         NSData *msgData = \
             [[NSData alloc]
-             initWithBytesNoCopy:(void *)engineMessage
-             length:strlen((const char*)engineMessage)
-             freeWhenDone:YES];
+                 initWithBytesNoCopy:(void *)engineMessage
+                 length:strlen((const char*)engineMessage)
+                 freeWhenDone:YES];
         
         NSError *error = nil;
-        NSDictionary* message = [NSJSONSerialization
-             JSONObjectWithData:msgData
-             options:NSJSONReadingMutableContainers
-             error:&error];
+        NSDictionary* message = \
+            [NSJSONSerialization
+                 JSONObjectWithData:msgData
+                 options:NSJSONReadingMutableContainers
+                 error:&error];
 
         if (error != nil) {
             Log(@"%@", [error description]);
