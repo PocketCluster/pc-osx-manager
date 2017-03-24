@@ -125,8 +125,9 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     [self.interfaceStatus stopMonitoring];
-    [self removeSleepNotifications];
     self.interfaceStatus = nil;
+
+    [self removeSleepNotifications];
     lifecycleDead();
 }
 
