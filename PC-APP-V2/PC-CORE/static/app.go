@@ -27,12 +27,7 @@ type App interface {
     // Send sends an event on the events channel. It does not block.
     Send(event interface{})
 
-    // Publish flushes any pending drawing commands, such as OpenGL calls, and
-    // swaps the back buffer to the screen.
-    Publish() PublishResult
-
     // TODO: replace filters (and the Events channel) with a NextEvent method?
-
     // Filter calls each registered event filter function in sequence.
     Filter(event interface{}) interface{}
 
@@ -43,18 +38,9 @@ type App interface {
     RegisterFilter(f func(interface{}) interface{})
 }
 
-// PublishResult is the result of an App.Publish call.
-type PublishResult struct {
-    // BackBufferPreserved is whether the contents of the back buffer was
-    // preserved. If false, the contents are undefined.
-    BackBufferPreserved bool
-}
-
 var theApp = &app{
     eventsOut:      make(chan interface{}),
     lifecycleStage: lifecycle.StageDead,
-    publish:        make(chan struct{}),
-    publishResult:  make(chan PublishResult),
 }
 
 func init() {
@@ -74,12 +60,9 @@ func (a *app) sendLifecycle(to lifecycle.Stage) {
 
 type app struct {
     filters []func(interface{}) interface{}
-
     eventsOut      chan interface{}
     eventsIn       chan interface{}
     lifecycleStage lifecycle.Stage
-    publish        chan struct{}
-    publishResult  chan PublishResult
 }
 
 func (a *app) Events() <-chan interface{} {
@@ -88,18 +71,6 @@ func (a *app) Events() <-chan interface{} {
 
 func (a *app) Send(event interface{}) {
     a.eventsIn <- event
-}
-
-func (a *app) Publish() PublishResult {
-    // gl.Flush is a lightweight (on modern GL drivers) blocking call
-    // that ensures all GL functions pending in the gl package have
-    // been passed onto the GL driver before the app package attempts
-    // to swap the screen buffer.
-    //
-    // This enforces that the final receive (for this paint cycle) on
-    // gl.WorkAvailable happens before the send on endPaint.
-    a.publish <- struct{}{}
-    return <-a.publishResult
 }
 
 func (a *app) Filter(event interface{}) interface{} {

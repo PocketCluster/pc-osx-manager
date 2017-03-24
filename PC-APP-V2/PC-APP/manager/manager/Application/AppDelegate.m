@@ -12,11 +12,13 @@
     #import <NMSSH/NMSSH.h>
 #endif
 
+#include "_cgo_export.h"
 #import "Util.h"
-#import "AppDelegate.h"
 #import "NativeMenu.h"
 #import "PCInterfaceStatus.h"
-#import "_cgo_export.h"
+
+#import "AppDelegate.h"
+#import "AppDelegate+EventHandle.h"
 
 bool
 pc_interface_list(PCNetworkInterface** interfaces, unsigned int count) {

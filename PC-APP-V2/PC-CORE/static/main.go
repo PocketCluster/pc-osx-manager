@@ -20,6 +20,7 @@ import (
 import (
     "github.com/tylerb/graceful"
     "github.com/davecgh/go-spew/spew"
+    "github.com/stkim1/pc-core/hostapi"
 )
 
 func RunWebServer(wg *sync.WaitGroup) *graceful.Server {
@@ -138,6 +139,7 @@ func main() {
                     switch e.Crosses(lifecycle.StageVisible) {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is visible %v", e.String())
+                            hostapi.SendFeedBack("successfully initiated engine ...")
                         }
                         case lifecycle.CrossOff: {
                             log.Debugf("[LIFE] app is invisible %v", e.String())

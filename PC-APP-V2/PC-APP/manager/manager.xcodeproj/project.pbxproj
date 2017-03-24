@@ -78,6 +78,7 @@
 		0486781D1BCF5FE20071594B /* managerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0486781C1BCF5FE20071594B /* managerTests.m */; };
 		048678281BCF5FE20071594B /* managerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 048678271BCF5FE20071594B /* managerUITests.m */; };
 		0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */; };
+		04AF2B081E84B19B00F4DF09 /* AppDelegate+EventHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AF2B071E84B19B00F4DF09 /* AppDelegate+EventHandle.m */; };
 		04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
 		04C585871BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
 		04C585881BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
@@ -212,6 +213,8 @@
 		048678271BCF5FE20071594B /* managerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = managerUITests.m; sourceTree = "<group>"; };
 		048678291BCF5FE20071594B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
+		04AF2B061E84B19B00F4DF09 /* AppDelegate+EventHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+EventHandle.h"; sourceTree = "<group>"; };
+		04AF2B071E84B19B00F4DF09 /* AppDelegate+EventHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+EventHandle.m"; sourceTree = "<group>"; };
 		04C585841BE5BF3B004B2839 /* PCConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCConstants.h; sourceTree = "<group>"; };
 		04C585851BE5BF3B004B2839 /* PCConstants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCConstants.m; sourceTree = "<group>"; };
 		04C6D6051E7F9CEA0004837A /* libstatic-core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libstatic-core.a"; path = "../../../COCOA/XCODE/static-core/build/Debug/libstatic-core.a"; sourceTree = "<group>"; };
@@ -285,12 +288,21 @@
 				0441A3EE1BD8921600AABD7A /* Util.m */,
 				0441A3D61BD8904100AABD7A /* AppDelegate.h */,
 				0441A3D71BD8904100AABD7A /* AppDelegate.m */,
+				04AF2B061E84B19B00F4DF09 /* AppDelegate+EventHandle.h */,
+				04AF2B071E84B19B00F4DF09 /* AppDelegate+EventHandle.m */,
 				0441A3D81BD8904100AABD7A /* main.m */,
 				04C585841BE5BF3B004B2839 /* PCConstants.h */,
 				04C585851BE5BF3B004B2839 /* PCConstants.m */,
 			);
 			name = Application;
 			path = manager/Application;
+			sourceTree = "<group>";
+		};
+		04552D391E84B8AA0081D3FD /* MessagePack */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = MessagePack;
 			sourceTree = "<group>";
 		};
 		046A35B51BD783CE004E0946 /* WindowController */ = {
@@ -318,6 +330,7 @@
 			children = (
 				04C6D60A1E7F9EDD0004837A /* Dictionary */,
 				046A35E51BD78AB8004E0946 /* Drawing */,
+				04552D391E84B8AA0081D3FD /* MessagePack */,
 				046A35E81BD78AB8004E0946 /* Macro */,
 				046A35ED1BD78AB8004E0946 /* NSDate */,
 				046A35F01BD78AB8004E0946 /* Protocols */,
@@ -859,6 +872,7 @@
 				046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
 				046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				0441A3E31BD8904100AABD7A /* main.m in Sources */,
+				04AF2B081E84B19B00F4DF09 /* AppDelegate+EventHandle.m in Sources */,
 				04DCF30D1C11601F007B1DC8 /* AboutWindow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
