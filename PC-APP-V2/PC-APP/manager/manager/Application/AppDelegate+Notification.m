@@ -17,10 +17,12 @@
 @implementation AppDelegate (Notification)
 - (void) receiveSleepNote: (NSNotification*) notification {
     Log(@"receiveSleepNote: %@", [notification name]);
+    lifecycleSleep();
 }
 
 - (void) receiveWakeNote: (NSNotification*) notification {
     Log(@"receiveWakeNote: %@", [notification name]);
+    lifecycleAwaken();
 }
 
 - (void) addSleepNotifications {
