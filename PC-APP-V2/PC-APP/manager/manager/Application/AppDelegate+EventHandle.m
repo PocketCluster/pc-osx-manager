@@ -51,6 +51,14 @@ PCEventHandle(const char* engineMessage) {
 
 - (void)HandleEventMessage:(NSDictionary *)message {
     Log(@"message %@", message);
+    
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert addButtonWithTitle:@"OK"];
+    [alert addButtonWithTitle:@"Cancel"];
+    [alert setMessageText:[message valueForKey:@"feed_msg"]];
+    [alert setInformativeText:@"Deleted records cannot be restored."];
+    [alert setAlertStyle:NSWarningAlertStyle];
+    [alert runModal];
 }
 
 @end
