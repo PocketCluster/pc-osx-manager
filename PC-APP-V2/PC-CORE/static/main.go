@@ -8,6 +8,7 @@ import (
     "sync"
 
     log "github.com/Sirupsen/logrus"
+    "github.com/gravitational/teleport/lib/defaults"
     "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/utils"
 
@@ -20,7 +21,6 @@ import (
 import (
     "github.com/tylerb/graceful"
     "github.com/davecgh/go-spew/spew"
-    "github.com/gravitational/teleport/lib/defaults"
 )
 
 func RunWebServer(wg *sync.WaitGroup) *graceful.Server {
@@ -79,7 +79,7 @@ func main_old() {
         log.Info(err)
     }
 
-    cfg := service.MakeCoreConfig(ctx, true)
+    cfg := service.MakeCoreConfig(dataDir, true)
     cfg.AssignCertStorage(rec.Certdb())
 
     log.Info(spew.Sdump(ctx))
@@ -109,8 +109,14 @@ func prepEnviornment() {
         log.Info(err)
     }
 
-    cfg := service.MakeCoreConfig(ctx, true)
+    cfg := service.MakeCoreConfig(dataDir, true)
+    cfg.AssignDatabaseEngine(rec.DataBase())
     cfg.AssignCertStorage(rec.Certdb())
+    //cfg.AssignCASigner()
+    err = service.ValidateCoreConfig(cfg)
+    if err != nil {
+        log.Debugf(err.Error())
+    }
 
     log.Info(spew.Sdump(ctx))
 }
