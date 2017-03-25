@@ -11,6 +11,7 @@ import (
     "github.com/gravitational/teleport/lib/defaults"
     "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/utils"
+    "github.com/cloudflare/cfssl/certdb"
 
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/event/lifecycle"
@@ -108,7 +109,8 @@ func prepEnviornment() {
     if err != nil {
         log.Info(err)
     }
-
+    
+    // make teleport core config
     cfg := service.MakeCoreConfig(dataDir, true)
     cfg.AssignDatabaseEngine(rec.DataBase())
     cfg.AssignCertStorage(rec.Certdb())

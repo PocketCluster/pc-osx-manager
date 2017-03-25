@@ -89,8 +89,10 @@ func FindAllSlaveNode() ([]SlaveNode, error) {
         nodes []SlaveNode = nil
         err error = nil
     )
-
     SharedRecordGate().Session().Find(&nodes)
+    if len(nodes) == 0 {
+        return nil, NoItemFound
+    }
     return nodes, err
 }
 

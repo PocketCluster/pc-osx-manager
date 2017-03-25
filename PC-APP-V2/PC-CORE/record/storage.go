@@ -25,7 +25,18 @@ type RecordGate interface {
     Session() (*gorm.DB)
 }
 
+type ngError struct {
+    s string
+}
+
+func (n *ngError) Error() string {
+    return n.s
+}
+
 var (
+    // ItemNotFound
+    NoItemFound       = &ngError{"[ERR] NotFound: No items are found"}
+
     gate *dbGate      = nil
     once sync.Once    = sync.Once{}
 )
@@ -80,10 +91,10 @@ func OpenRecordGate(dataDir, recordFile string) (RecordGate, error) {
     }
 
     if !sess.HasTable(&SlaveNode{}) {
-        sess.CreateTable(&SlaveNode{})
+        sess.CreateTable(&SlaveNode{}, &ClusterMeta{})
     } else {
         // Migrate the schema
-        sess.AutoMigrate(&SlaveNode{});
+        sess.AutoMigrate(&SlaveNode{}, &ClusterMeta{});
     }
 
     return openStorageGate(database, cert, sess), nil

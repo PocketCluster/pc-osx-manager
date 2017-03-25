@@ -131,6 +131,13 @@ func (s *RecordSuite) TestSlaveNodeCRUD(c *C) {
     c.Assert(err, IsNil)
 
     nodes, err = FindAllSlaveNode()
-    c.Assert(err, IsNil)
-    c.Assert(len(nodes), Equals, 0)
+    c.Assert(err, Equals, NoItemFound)
+    c.Assert(nodes, IsNil)
+}
+
+func (s *RecordSuite) TestSingleton(c *C) {
+    // this is to just see if singleton opens fine
+    nodes, err := FindAllSlaveNode()
+    c.Assert(err, Equals, NoItemFound)
+    c.Assert(nodes, IsNil)
 }

@@ -21,10 +21,6 @@ func (ctx *hostContext) RefreshStatus() error {
     ctx.physicalMemorySize          = findSystemPhysicalMemorySize()
 
     ctx.hostDeviceSerial            = findSerialNumber()
-    // TODO set pcrypto Public/Private/Cert/CA
-    //ctx.publicKeyData               =
-    //ctx.privateKeyData              =
-
     ctx.currentLanguageCode         = findCurrentLanguageCode()
     ctx.currentCountryCode          = findCurrentCountryCode()
 

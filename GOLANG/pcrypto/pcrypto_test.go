@@ -198,11 +198,17 @@ func TestAESKeyGeneration(t *testing.T) {
     t.Log("Key 2 - randBytesWithMask : " + string(key2))
     t.Log("Key 3 - randBytesWithMaskSrc : " + string(randBytesWithMaskSrc(32)))
     t.Log("Key 4 - randBytesWithMaskSrc: " + string(randBytesWithMaskSrc(32)))
-    key, _ := randCryptoBytes(32)
+    key := randCryptoBytes(32)
     t.Log("Key 5 - randCryptoBytes: " + string(key))
-    key, _ = randCryptoBytes(32)
+    key = randCryptoBytes(32)
     t.Log("Key 6 - randCryptoBytes: " + string(key))
 
+    if key1 == nil || len(key1) != 32 {
+        t.Errorf("Incorrect key size")
+    }
+    if key2 == nil || len(key2) != 32 {
+        t.Errorf("Incorrect key size")
+    }
     if reflect.DeepEqual(key1, key2) {
         t.Error("Randome AES Keys are not different enough")
     }
