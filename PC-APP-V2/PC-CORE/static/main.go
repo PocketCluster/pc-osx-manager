@@ -12,15 +12,15 @@ import (
     "github.com/gravitational/teleport/lib/utils"
 
     "github.com/stkim1/pc-core/context"
-    "github.com/stkim1/pc-core/config"
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/network"
-    "github.com/stkim1/pcrypto"
+    "github.com/stkim1/pc-core/hostapi"
+    "github.com/stkim1/pc-core/record"
 )
 import (
     "github.com/tylerb/graceful"
     "github.com/davecgh/go-spew/spew"
-    "github.com/stkim1/pc-core/hostapi"
+    "github.com/gravitational/teleport/lib/defaults"
 )
 
 func RunWebServer(wg *sync.WaitGroup) *graceful.Server {
@@ -67,21 +67,20 @@ func main_old() {
 
     // setup context
     ctx := context.SharedHostContext()
-    config.SetupBaseConfigPath(ctx)
+    context.SetupBase(ctx)
 
     // open database
-    db, err := config.OpenStorageInstance(ctx)
+    dataDir, err := ctx.ApplicationUserDataDirectory()
     if err != nil {
         log.Info(err)
     }
-    // cert engine
-    certStorage, err := pcrypto.NewPocketCertStorage(db)
+    rec, err := record.OpenRecordGate(dataDir, defaults.CoreKeysSqliteFile)
     if err != nil {
         log.Info(err)
     }
 
     cfg := service.MakeCoreConfig(ctx, true)
-    cfg.AssignCertStorage(certStorage)
+    cfg.AssignCertStorage(rec.Certdb())
 
     log.Info(spew.Sdump(ctx))
 
@@ -89,7 +88,7 @@ func main_old() {
     //C.osxmain(0, nil)
 
     srv.Stop(time.Second)
-    config.CloseStorageInstance(db)
+    record.CloseRecordGate()
     fmt.Println("pc-core terminated!")
 }
 
@@ -98,21 +97,20 @@ func prepEnviornment() {
 
     // setup context
     ctx := context.SharedHostContext()
-    config.SetupBaseConfigPath(ctx)
+    context.SetupBase(ctx)
 
     // open database
-    db, err := config.OpenStorageInstance(ctx)
+    dataDir, err := ctx.ApplicationUserDataDirectory()
     if err != nil {
         log.Info(err)
     }
-    // cert engine
-    certStorage, err := pcrypto.NewPocketCertStorage(db)
+    rec, err := record.OpenRecordGate(dataDir, defaults.CoreKeysSqliteFile)
     if err != nil {
         log.Info(err)
     }
 
     cfg := service.MakeCoreConfig(ctx, true)
-    cfg.AssignCertStorage(certStorage)
+    cfg.AssignCertStorage(rec.Certdb())
 
     log.Info(spew.Sdump(ctx))
 }

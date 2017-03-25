@@ -1,14 +1,12 @@
-package model
+package record
 
 import (
-    "fmt"
     "strconv"
     "time"
 
+    "github.com/pkg/errors"
     "github.com/jinzhu/gorm"
 )
-
-const slaveNodeCreation string = `CREATE TABLE IF NOT EXISTS slavenode (id INTEGER PRIMARY KEY ASC, joined DATETIME, departed DATETIME, last_alive DATETIME, mac_address VARCHAR(32), arch VARCHAR(32), node_name VARCHAR(64), state VARCHAR(32), ip4_address VARCHAR(32), ip4_gateway VARCHAR(32), ip4_netmask VARCHAR(32), public_key TEXT, private_key TEXT);`
 
 const slaveNodeTable string = `slavenode`
 
@@ -66,72 +64,59 @@ func (SlaveNode) TableName() string {
 }
 
 func NewSlaveNode() *SlaveNode {
-    return &SlaveNode{
-        ModelVersion: SlaveNodeModelVersion,
-        State       : SNMStateJoined,
+    return &SlaveNode {
+        ModelVersion:    SlaveNodeModelVersion,
+        State:           SNMStateJoined,
     }
 }
 
-func InsertSlaveNode(slave *SlaveNode) (err error) {
+func InsertSlaveNode(slave *SlaveNode) (error) {
     if slave == nil {
-        return fmt.Errorf("[ERR] Slave node is null")
+        return errors.Errorf("[ERR] Slave node is null")
     }
     if slave.State != SNMStateJoined {
-        return fmt.Errorf("[ERR] Slave node state is not SNMStateJoined : " + slave.State)
+        return errors.Errorf("[ERR] Slave node state is not SNMStateJoined : " + slave.State)
     }
     if slave.ModelVersion != SlaveNodeModelVersion {
-        return fmt.Errorf("[ERR] ")
+        return errors.Errorf("[ERR] incorrect slave model version")
     }
-    db, err := SharedModelRepoInstance().Session()
-    if err != nil {
-        return
-    }
-    db.Create(slave)
-    return
+    SharedRecordGate().Session().Create(slave)
+    return nil
 }
 
-func FindAllSlaveNode() (nodes []SlaveNode, err error) {
-    db, err := SharedModelRepoInstance().Session()
-    if err != nil {
-        return
-    }
-    db.Find(&nodes)
-    return
+func FindAllSlaveNode() ([]SlaveNode, error) {
+    var (
+        nodes []SlaveNode = nil
+        err error = nil
+    )
+
+    SharedRecordGate().Session().Find(&nodes)
+    return nodes, err
 }
 
-func FindSlaveNode(query interface{}, args ...interface{}) (nodes []SlaveNode, err error) {
-    db, err := SharedModelRepoInstance().Session()
-    if err != nil {
-        return
-    }
-    db.Where(query, args).Find(&nodes)
-    return
+func FindSlaveNode(query interface{}, args ...interface{}) ([]SlaveNode, error) {
+    var (
+        nodes []SlaveNode = nil
+        err error = nil
+    )
+    SharedRecordGate().Session().Where(query, args).Find(&nodes)
+    return nodes, err
 }
 
 func FindSlaveNameCandiate() (string, error) {
-    db, err := SharedModelRepoInstance().Session()
-    if err != nil {
-        return "", err
-    }
-    var nodes []SlaveNode
-    db.Where(string(SNMFieldState + " = ?"), SNMStateJoined).Find(&nodes)
+    var (
+        nodes []SlaveNode = nil
+    )
+    SharedRecordGate().Session().Where(string(SNMFieldState + " = ?"), SNMStateJoined).Find(&nodes)
     return "pc-node" + strconv.Itoa(len(nodes) + 1), nil
 }
 
-func UpdateSlaveNode(slave *SlaveNode) (err error) {
-    db, err := SharedModelRepoInstance().Session()
-    if err != nil {
-        return
-    }
-    db.Save(slave)
-    return
+func UpdateSlaveNode(slave *SlaveNode) (error) {
+    SharedRecordGate().Session().Save(slave)
+    return nil
 }
 
-func DeleteAllSlaveNode() (err error) {
-    db, err := SharedModelRepoInstance().Session()
-    if err != nil {
-        return
-    }
-    db.Delete(SlaveNode{})
-    return
+func DeleteAllSlaveNode() (error) {
+    SharedRecordGate().Session().Delete(SlaveNode{})
+    return nil
 }

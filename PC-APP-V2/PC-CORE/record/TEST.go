@@ -1,31 +1,33 @@
-package model
+package record
 
 import (
     "os"
-    "github.com/stkim1/pc-core/context"
-    "time"
-    "github.com/stkim1/pcrypto"
-    "github.com/stkim1/pc-node-agent/slcontext"
+    "path/filepath"
     "runtime"
+    "sync"
+    "time"
+
+    "github.com/stkim1/pc-node-agent/slcontext"
+    "github.com/stkim1/pcrypto"
 )
 
-const DEBUG_SLAVE_NODE_NAME string = "pc-node1"
+const (
+    DEBUG_SLAVE_NODE_NAME string = "pc-node1"
+    PC_CORE_TEST_STORAGE_FILE = "pc-test-core.db"
+)
 
-func DebugModelRepoPrepare() (ModelRepo) {
-    context.DebugContextPrepare()
-
-    // invalidate singleton instance
-    singletonModelRepoInstance()
-    repository = &modelRepo{}
-    initializeModelRepo(repository)
-    return repository
+func DebugRecordGatePrepare(dataDir string) (RecordGate, error) {
+    return OpenRecordGate(dataDir, PC_CORE_TEST_STORAGE_FILE)
 }
 
-func DebugModelRepoDestroy() {
-    CloseModelRepo()
-    userDataPath, _ := context.SharedHostContext().ApplicationUserDataDirectory()
-    os.Remove(userDataPath + "/core/pc-core.db")
-    repository = nil
+func DebugRecordGateDestroy(dataDir string) error {
+    var err error = CloseRecordGate()
+    dbPath := filepath.Join(dataDir, PC_CORE_TEST_STORAGE_FILE)
+    os.Remove(dbPath)
+
+    // here we reset once literature to make sure it is reset for next test
+    once = sync.Once{}
+    return err
 }
 
 func DebugTestSlaveNode() *SlaveNode {
