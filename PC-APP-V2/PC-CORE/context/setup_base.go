@@ -4,10 +4,9 @@ import (
     "os"
 
     "github.com/pkg/errors"
-    "github.com/stkim1/pc-core/context"
 )
 
-func SetupBase() error {
+func SetupBasePath() error {
     var (
         dataDir string = ""
         err error = nil

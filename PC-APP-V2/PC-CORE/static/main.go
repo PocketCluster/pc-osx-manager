@@ -67,7 +67,7 @@ func main_old() {
 
     // setup context
     ctx := context.SharedHostContext()
-    context.SetupBase(ctx)
+    context.SetupBasePath()
 
     // open database
     dataDir, err := ctx.ApplicationUserDataDirectory()
@@ -97,7 +97,7 @@ func prepEnviornment() {
 
     // setup context
     ctx := context.SharedHostContext()
-    context.SetupBase(ctx)
+    context.SetupBasePath()
 
     // open database
     dataDir, err := ctx.ApplicationUserDataDirectory()
