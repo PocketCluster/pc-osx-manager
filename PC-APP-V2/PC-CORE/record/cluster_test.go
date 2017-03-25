@@ -48,14 +48,15 @@ func (s *ClusterSuite) TearDownTest(c *C) {
 }
 
 func (s *ClusterSuite) TestSlaveNodeCRUD(c *C) {
-    var meta = NewClusterMeta()
-    meta, err := ReadClusterMeta()
+    meta, err := FindClusterMeta()
     c.Assert(err, Equals, NoItemFound)
     c.Assert(meta, IsNil)
-    err = UpsertClusterMeta(meta)
+
+    newMeta := NewClusterMeta()
+    err = UpsertClusterMeta(newMeta)
     c.Assert(err, IsNil)
 
-    meta, err = ReadClusterMeta()
+    meta, err = FindClusterMeta()
     c.Assert(err, IsNil)
     c.Assert(len(meta), Equals, 1)
 

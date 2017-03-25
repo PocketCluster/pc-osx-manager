@@ -24,9 +24,9 @@ func NewClusterMeta() (*ClusterMeta) {
     }
 }
 
-func ReadClusterMeta() ([]ClusterMeta, error) {
+func FindClusterMeta() ([]*ClusterMeta, error) {
     var (
-        meta []ClusterMeta = nil
+        meta []*ClusterMeta = nil
         err error = nil
     )
     SharedRecordGate().Session().Find(&meta)

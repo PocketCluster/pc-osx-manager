@@ -11,8 +11,6 @@ import (
     "github.com/gravitational/teleport/lib/defaults"
     "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/utils"
-    "github.com/cloudflare/cfssl/certdb"
-
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/network"
@@ -109,9 +107,25 @@ func prepEnviornment() {
     if err != nil {
         log.Info(err)
     }
-    
+
+    // new cluster id
+    var meta *record.ClusterMeta = nil
+    cluster, err := record.FindClusterMeta()
+    if err != nil {
+        if err == record.NoItemFound {
+            meta = record.NewClusterMeta()
+            record.UpsertClusterMeta(meta)
+        } else {
+            log.Info(err)
+        }
+    } else {
+        meta = cluster[0]
+    }
+    log.Debugf("Cluster ID %v | UUID %v", meta.ClusterID, meta.ClusterUUID)
+
     // make teleport core config
     cfg := service.MakeCoreConfig(dataDir, true)
+    cfg.AssignHostUUID(meta.ClusterUUID)
     cfg.AssignDatabaseEngine(rec.DataBase())
     cfg.AssignCertStorage(rec.Certdb())
     //cfg.AssignCASigner()
