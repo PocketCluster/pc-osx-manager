@@ -19,7 +19,10 @@ type ClusterMeta struct {
 
 func NewClusterMeta() (*ClusterMeta) {
     return &ClusterMeta{
-        ClusterID:    utils.NewRandomString(32),
+        // (03/25/2017)
+        // cluster id length is 16 for now. It should suffice to count all the cluster in the world.
+        // Later, if it's necessary, we'll increase the length to cover
+        ClusterID:    utils.NewRandomString(16),
         ClusterUUID:  uuid.New(),
     }
 }
