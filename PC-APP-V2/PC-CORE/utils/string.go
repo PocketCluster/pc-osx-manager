@@ -19,7 +19,6 @@ func NewRandomString(length int) string {
     )
     b := make([]byte, length)
 
-
     // A rand.Int63() generates 63 random bits, enough for letterIdxMax letters!
     for i, cache, remain := length - 1, mathrand.Int63(), letterIdxMax; i >= 0; {
         if remain == 0 {

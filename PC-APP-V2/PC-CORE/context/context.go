@@ -153,6 +153,16 @@ func (ctx *hostContext) refreshNetworkGateways(gateways []*HostNetworkGateway) {
     return
 }
 
+func SetupCertAuthSigner(caSigner *pcrypto.CaSigner) {
+    singletonContextInstance().setCertAuthSigner(caSigner)
+}
+
+func (ctx *hostContext) setCertAuthSigner(caSigner *pcrypto.CaSigner) {
+    ctx.Lock()
+    defer ctx.Unlock()
+    ctx.CaSigner = caSigner
+}
+
 func (ctx *hostContext) CocoaHomeDirectory() (string, error) {
     if len(ctx.cocoaHomePath) == 0 {
         return "", errors.Errorf("[ERR] Invalid Cocoa Home Directory")
@@ -340,7 +350,6 @@ func (ctx *hostContext) CurrentLanguageCode() (string, error) {
     return ctx.currentLanguageCode, nil
 }
 
-// TODO : Cert Authority generation
 func (ctx *hostContext) MasterCaAuthority() (*pcrypto.CaSigner, error) {
     if ctx.CaSigner == nil {
         return nil, errors.Errorf("[ERR] Invalid Cert Authority")

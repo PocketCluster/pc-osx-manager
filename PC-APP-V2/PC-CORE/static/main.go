@@ -8,19 +8,23 @@ import (
     "sync"
 
     log "github.com/Sirupsen/logrus"
-    "github.com/gravitational/teleport/lib/defaults"
+    teledefaults "github.com/gravitational/teleport/lib/defaults"
     "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/utils"
+    "github.com/pkg/errors"
 
     "github.com/stkim1/pc-core/context"
+    pcdefaults "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/hostapi"
     "github.com/stkim1/pc-core/record"
+    "github.com/stkim1/pcrypto"
 )
 import (
     "github.com/tylerb/graceful"
     "github.com/davecgh/go-spew/spew"
+    "github.com/cloudflare/cfssl/certdb"
 )
 
 func RunWebServer(wg *sync.WaitGroup) *graceful.Server {
@@ -74,7 +78,7 @@ func main_old() {
     if err != nil {
         log.Info(err)
     }
-    rec, err := record.OpenRecordGate(dataDir, defaults.CoreKeysSqliteFile)
+    rec, err := record.OpenRecordGate(dataDir, teledefaults.CoreKeysSqliteFile)
     if err != nil {
         log.Info(err)
     }
@@ -104,7 +108,7 @@ func prepEnviornment() {
     if err != nil {
         log.Info(err)
     }
-    rec, err := record.OpenRecordGate(dataDir, defaults.CoreKeysSqliteFile)
+    rec, err := record.OpenRecordGate(dataDir, teledefaults.CoreKeysSqliteFile)
     if err != nil {
         log.Info(err)
     }
@@ -117,6 +121,7 @@ func prepEnviornment() {
             meta = record.NewClusterMeta()
             record.UpsertClusterMeta(meta)
         } else {
+            // This is critical error. report it to UI and ask them to clean & re-install
             log.Info(err)
         }
     } else {
@@ -124,12 +129,82 @@ func prepEnviornment() {
     }
     log.Debugf("Cluster ID %v | UUID %v", meta.ClusterID, meta.ClusterUUID)
 
+    country, err := ctx.CurrentCountryCode()
+    if err != nil {
+        // (03/26/2017) skip coutry code error and defaults it to US
+        log.Debugf(err.Error())
+        country = "US"
+    }
+
+    //certificate authority generation
+    var (
+        prvKey, pubKey, certPem []byte = nil, nil, nil
+        caPrvKey, rerr = rec.Certdb().GetCertificate(pcdefaults.MasterCertAuthPrivateKey, meta.ClusterUUID)
+        caPubKey, uerr = rec.Certdb().GetCertificate(pcdefaults.MasterCertAuthPublicKey, meta.ClusterUUID)
+        caCert, cerr   = rec.Certdb().GetCertificate(pcdefaults.MasterCertAuthCertificate, meta.ClusterUUID)
+    )
+    if (rerr != nil || uerr != nil || cerr != nil) || (len(caPrvKey) == 0 || len(caPubKey) == 0 || len(caCert) == 0) {
+        pubKey, prvKey, certPem, err = pcrypto.GenerateClusterCertificateAuthorityData(meta.ClusterID, country)
+        if err != nil {
+            // this is critical
+            log.Debugf(errors.WithStack(err).Error())
+        }
+        // save private key
+        err = rec.Certdb().InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(prvKey),
+            Serial:     pcdefaults.MasterCertAuthPrivateKey,
+            AKI:        meta.ClusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            // this is critical
+            log.Debugf(errors.WithStack(err).Error())
+        }
+        // save public key
+        err = rec.Certdb().InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(pubKey),
+            Serial:     pcdefaults.MasterCertAuthPublicKey,
+            AKI:        meta.ClusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            // this is critical
+            log.Debugf(errors.WithStack(err).Error())
+        }
+        // save certificate
+        err = rec.Certdb().InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(certPem),
+            Serial:     pcdefaults.MasterCertAuthCertificate,
+            AKI:        meta.ClusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            // this is critical
+            log.Debugf(errors.WithStack(err).Error())
+        }
+    } else {
+        prvKey  = []byte(caPrvKey[0].PEM)
+        pubKey  = []byte(caPubKey[0].PEM)
+        certPem = []byte(caCert[0].PEM)
+    }
+    caSigner, err := pcrypto.NewCertAuthoritySigner(prvKey, certPem, meta.ClusterID, country)
+    if err != nil {
+        // this is critical
+        log.Debugf(errors.WithStack(err).Error())
+    }
+    context.SetupCertAuthSigner(caSigner)
+
+
+
     // make teleport core config
     cfg := service.MakeCoreConfig(dataDir, true)
     cfg.AssignHostUUID(meta.ClusterUUID)
     cfg.AssignDatabaseEngine(rec.DataBase())
     cfg.AssignCertStorage(rec.Certdb())
-    //cfg.AssignCASigner()
+    cfg.AssignCASigner(caSigner)
     err = service.ValidateCoreConfig(cfg)
     if err != nil {
         log.Debugf(err.Error())
