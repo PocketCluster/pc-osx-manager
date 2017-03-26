@@ -13,6 +13,8 @@ import (
     "math/big"
     "time"
     "strings"
+
+    "golang.org/x/crypto/ssh"
 )
 
 type certError struct {
@@ -22,6 +24,10 @@ type certError struct {
 func (n *certError) Error() string {
     return n.s
 }
+
+const (
+    pcCertAuthName string = "pc-cert-auth"
+)
 
 // ComputeSKI derives an SKI from the certificate's public key in a
 // standard manner. This is done by computing the SHA-1 digest of the
@@ -44,7 +50,7 @@ func computeSKI(template *x509.Certificate) ([]byte, error) {
 
 // makeSelfCertAuth generates a self signed certificate that
 // is valid for given domain names and ips, returns PEM-encoded bytes with key and cert
-func makeSelfCertAuth(commonName, dnsName, country string) ([]byte, []byte, []byte, error) {
+func makeSelfCertAuth(commonName, dnsName, country string) ([]byte, []byte, []byte, []byte, error) {
     var (
         privateKey *rsa.PrivateKey
         privDer, pubDer, certDer []byte
@@ -58,24 +64,24 @@ func makeSelfCertAuth(commonName, dnsName, country string) ([]byte, []byte, []by
 
     // check country code
     if len(commonName) == 0 {
-        return nil, nil, nil, fmt.Errorf("[ERR] Invalid common name")
-    }
-    if len(country) == 0 {
-        return nil, nil, nil, fmt.Errorf("[ERR] Invalid country code")
+        return nil, nil, nil, nil, fmt.Errorf("[ERR] Invalid common name")
     }
     if len(dnsName) == 0 {
-        return nil, nil, nil, fmt.Errorf("[ERR] Invalid DNSName")
+        return nil, nil, nil, nil, fmt.Errorf("[ERR] Invalid dns name")
+    }
+    if len(country) == 0 {
+        return nil, nil, nil, nil, fmt.Errorf("[ERR] Invalid country code")
     }
 
     // generate private key
     privateKey, err = rsa.GenerateKey(rand.Reader, rsaStrongKeySize)
     if err != nil {
-        return nil, nil, nil, err
+        return nil, nil, nil, nil, err
     }
     // check the key generated
     err = privateKey.Validate()
     if err != nil {
-        return nil, nil, nil, err
+        return nil, nil, nil, nil, err
     }
     // build private key
     privDer = x509.MarshalPKCS1PrivateKey(privateKey)
@@ -89,7 +95,7 @@ func makeSelfCertAuth(commonName, dnsName, country string) ([]byte, []byte, []by
     //// generate and public key
     pubDer, err = x509.MarshalPKIXPublicKey(privateKey.Public())
     if err != nil {
-        return nil, nil, nil, err
+        return nil, nil, nil, nil, err
     }
     pubBlock = &pem.Block{
         Type:   "PUBLIC KEY",
@@ -106,7 +112,7 @@ func makeSelfCertAuth(commonName, dnsName, country string) ([]byte, []byte, []by
     //serialNumber, err = rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 128))
     serialNumber, err = rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 64))
     if err != nil {
-        return nil, nil, nil, err
+        return nil, nil, nil, nil, err
     }
     /*
     TODO : Subject Key ID -> Authority key id. There must be a link between. We'll handle this later
@@ -146,12 +152,12 @@ func makeSelfCertAuth(commonName, dnsName, country string) ([]byte, []byte, []by
 */
     ski, err = computeSKI(certTemplate)
     if err != nil {
-        return nil, nil, nil, err
+        return nil, nil, nil, nil, err
     }
     certTemplate.SubjectKeyId = ski
     certDer, err = x509.CreateCertificate(rand.Reader, certTemplate, certTemplate, privateKey.Public(), privateKey)
     if err != nil {
-        return nil, nil, nil, err
+        return nil, nil, nil, nil, err
     }
     certBlock = &pem.Block{
         Type: "CERTIFICATE",
@@ -159,26 +165,30 @@ func makeSelfCertAuth(commonName, dnsName, country string) ([]byte, []byte, []by
     }
     certPem = pem.EncodeToMemory(certBlock)
 
-    return pubPem, privPem, certPem, nil
+    // ssh checking key. added for teleport
+    sshpub, err := ssh.NewPublicKey(privateKey.Public())
+    if err != nil {
+        return nil, nil, nil, nil, err
+    }
+    sshpubBytes := ssh.MarshalAuthorizedKey(sshpub)
+    return pubPem, privPem, certPem, sshpubBytes, nil
 }
 
 // TODO : Add Test
 // CreateSelfSignedHTTPSCert generates and self-signs a TLS key+cert pair for https connection to the proxy server.
-func GenerateClusterCertificateAuthorityFiles(pubKeyPath, prvKeyPath, certPath, clusterID, country string) error {
-    if len(clusterID) == 0 {
+func GenerateClusterCertificateAuthorityFiles(pubKeyPath, prvKeyPath, certPath, sshPath, domainName, country string) error {
+    if len(domainName) == 0 {
         return &certError{"[ERR] bad cluster id"}
     }
     if len(country) == 0 {
         return &certError{"[ERR] bad country id"}
     }
-
-    pub, prv, cert, err := makeSelfCertAuth("pc-cert-auth",
-        fmt.Sprintf("pc-cert-auth.%s.cluster.pocketcluster.io", clusterID),
+    pub, prv, cert, sshbyte, err := makeSelfCertAuth(pcCertAuthName,
+        fmt.Sprintf("%s.%s", pcCertAuthName, domainName),
         strings.ToUpper(country))
     if err != nil {
         return err
     }
-
     if len(pubKeyPath) != 0 && len(pub) != 0 {
         err = ioutil.WriteFile(pubKeyPath, pub, rsaKeyFilePerm)
         if err != nil {
@@ -197,19 +207,25 @@ func GenerateClusterCertificateAuthorityFiles(pubKeyPath, prvKeyPath, certPath, 
             return err
         }
     }
+    if len(sshPath) != 0 && len(sshbyte) != 0 {
+        err = ioutil.WriteFile(sshPath, sshbyte, rsaKeyFilePerm)
+        if err != nil {
+            return err
+        }
+    }
     return nil
 }
 
 // TODO : Add Test
-// return : public, private, certificate, error
-func GenerateClusterCertificateAuthorityData(clusterID, country string) ([]byte, []byte, []byte, error) {
-    if len(clusterID) == 0 {
-        return nil, nil, nil, &certError{"[ERR] bad cluster id"}
+// return : public, private, certificate, sshbyte, error
+func GenerateClusterCertificateAuthorityData(domainName, country string) ([]byte, []byte, []byte, []byte, error) {
+    if len(domainName) == 0 {
+        return nil, nil, nil, nil, &certError{"[ERR] bad cluster id"}
     }
     if len(country) == 0 {
-        return nil, nil, nil, &certError{"[ERR] bad country id"}
+        return nil, nil, nil, nil, &certError{"[ERR] bad country id"}
     }
-    return makeSelfCertAuth("pc-cert-auth",
-        fmt.Sprintf("pc-cert-auth.%s.cluster.pocketcluster.io", clusterID),
+    return makeSelfCertAuth(pcCertAuthName,
+        fmt.Sprintf("%s.%s",pcCertAuthName, domainName),
         strings.ToUpper(country))
 }

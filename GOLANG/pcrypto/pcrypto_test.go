@@ -324,7 +324,7 @@ func ExampleStrongRsaKeyEncryption() {
 }
 
 func TestLoadStrongX509KeyPair(t *testing.T) {
-    if err := GenerateClusterCertificateAuthorityFiles("recvtest.pub", "recvtest.pem", "recvtest.cert", "cluster-id-here", "KR"); err != nil {
+    if err := GenerateClusterCertificateAuthorityFiles("recvtest.pub", "recvtest.pem", "recvtest.cert", "recvtest.ssh","example.cluster.pocketcluster.io", "KR"); err != nil {
         t.Errorf("failed to generate a key pair %v", err)
     }
 
@@ -336,5 +336,5 @@ func TestLoadStrongX509KeyPair(t *testing.T) {
         t.Error(err.Error())
     }
 
-    os.Remove("recvtest.pub");os.Remove("recvtest.pem");os.Remove("recvtest.cert");
+    os.Remove("recvtest.pub");os.Remove("recvtest.pem");os.Remove("recvtest.cert");os.Remove("recvtest.ssh");
 }

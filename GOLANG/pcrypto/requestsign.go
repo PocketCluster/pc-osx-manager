@@ -357,11 +357,11 @@ type CaSigner struct {
     caCert      []byte
     sigAlgo     x509.SignatureAlgorithm
     policy      *config.Signing
-    clusterID   string
+    domainName  string
     country     string
 }
 
-func NewCertAuthoritySigner(caKey, caCert []byte, clusterID, country string) (*CaSigner, error) {
+func NewCertAuthoritySigner(caKey, caCert []byte, domainName, country string) (*CaSigner, error) {
     caPrvKeyPEM, err := helpers.ParsePrivateKeyPEM(caKey)
     if err != nil {
         return nil, err
@@ -374,7 +374,7 @@ func NewCertAuthoritySigner(caKey, caCert []byte, clusterID, country string) (*C
         Profiles: map[string]*config.SigningProfile{},
         Default:  config.DefaultConfig(),
     }
-    if len(clusterID) == 0 {
+    if len(domainName) == 0 {
         return nil, &certError{"[ERR] Invalid cluster id"}
     }
     if len(country) == 0 {
@@ -386,7 +386,7 @@ func NewCertAuthoritySigner(caKey, caCert []byte, clusterID, country string) (*C
         caCert:        caCert,
         sigAlgo:       helpers.DefaultSigAlgo(caPrvKeyPEM),
         policy:        policy,
-        clusterID:     clusterID,
+        domainName:    domainName,
         country:       strings.ToUpper(country),
     }, nil
 }
@@ -410,8 +410,9 @@ func (s *CaSigner) GenerateSignedCertificate(hostname, ipAddress string, private
     if err != nil {
         return nil, err
     }
+    fqdn := fmt.Sprintf("%s.%s", strings.ToLower(hostname), s.domainName)
     creq := signRequest{
-        dnsName:    []string{fmt.Sprintf("%s.%s.cluster.pocketcluster.io", strings.ToLower(hostname), s.clusterID)},
+        dnsName:    []string{hostname, fqdn},
         Request:    string(nodereq),
         Subject:    subject,
     }

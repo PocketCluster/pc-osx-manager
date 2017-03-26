@@ -103,13 +103,15 @@ func certAuthSigner(certRec certdb.Accessor, meta *record.ClusterMeta, country s
         prvKey []byte  = nil
         pubKey []byte  = nil
         crtPem []byte  = nil
+        sshChk []byte  = nil
         err error      = nil
         caPrvRec, rerr = certRec.GetCertificate(pcdefaults.ClusterCertAuthPrivateKey, meta.ClusterUUID)
         caPubRec, uerr = certRec.GetCertificate(pcdefaults.ClusterCertAuthPublicKey, meta.ClusterUUID)
         caCrtRec, cerr = certRec.GetCertificate(pcdefaults.ClusterCertAuthCertificate, meta.ClusterUUID)
+        caSshRec, serr = certRec.GetCertificate(pcdefaults.ClusterCertAuthSshCheck, meta.ClusterUUID)
     )
-    if (rerr != nil || uerr != nil || cerr != nil) || (len(caPrvRec) == 0 || len(caPubRec) == 0 || len(caCrtRec) == 0) {
-        pubKey, prvKey, crtPem, err = pcrypto.GenerateClusterCertificateAuthorityData(meta.ClusterID, country)
+    if (rerr != nil || uerr != nil || cerr != nil || serr != nil) || (len(caPrvRec) == 0 || len(caPubRec) == 0 || len(caCrtRec) == 0 || len(caSshRec) == 0) {
+        pubKey, prvKey, crtPem, sshChk, err = pcrypto.GenerateClusterCertificateAuthorityData(meta.ClusterDomain, country)
         if err != nil {
             return nil, errors.WithStack(err)
         }
@@ -146,12 +148,24 @@ func certAuthSigner(certRec certdb.Accessor, meta *record.ClusterMeta, country s
         if err != nil {
             return nil, errors.WithStack(err)
         }
+        // save ssh checker
+        err = certRec.InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(sshChk),
+            Serial:     pcdefaults.ClusterCertAuthSshCheck,
+            AKI:        meta.ClusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
     } else {
         prvKey = []byte(caPrvRec[0].PEM)
         pubKey = []byte(caPubRec[0].PEM)
         crtPem = []byte(caCrtRec[0].PEM)
+        sshChk = []byte(caSshRec[0].PEM)
     }
-    signer, err = pcrypto.NewCertAuthoritySigner(prvKey, crtPem, meta.ClusterID, country)
+    signer, err = pcrypto.NewCertAuthoritySigner(prvKey, crtPem, meta.ClusterDomain, country)
     if err != nil {
         return nil, errors.WithStack(err)
     }
@@ -160,9 +174,11 @@ func certAuthSigner(certRec certdb.Accessor, meta *record.ClusterMeta, country s
         CAPrvKey:    prvKey,
         CAPubKey:    pubKey,
         CACrtPem:    crtPem,
+        CASSHChk:    sshChk,
     }, nil
 }
 
+// host certificate
 func hostCertificate(certRec certdb.Accessor, caSigner *pcrypto.CaSigner, hostname, clusterUUID string) (*context.HostCertBundle, error) {
     var (
         prvKey []byte  = nil
@@ -307,6 +323,7 @@ func prepEnviornment() {
     cfg.AssignDatabaseEngine(rec.DataBase())
     cfg.AssignCertStorage(rec.Certdb())
     cfg.AssignCASigner(caBundle.CASigner)
+    cfg.AssignHostCertAuth(caBundle.CAPrvKey, caBundle.CASSHChk, meta.ClusterDomain)
     err = service.ValidateCoreConfig(cfg)
     if err != nil {
         log.Debugf(err.Error())

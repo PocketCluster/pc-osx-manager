@@ -7,6 +7,8 @@ const (
 
     ClusterCertAuthCertificate string   = "pc_cert_auth.certificate"
 
+    ClusterCertAuthSshCheck string      = "pc_cert_auth_ssh.check"
+
     MasterHostPrivateKey string         = "pc_master_host_private.key"
 
     MasterHostPublicKey string          = "pc_master_host_public.key"

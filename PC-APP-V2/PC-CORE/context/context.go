@@ -84,6 +84,7 @@ type hostContext struct {
     caPrivateKey                 []byte
     caPublicKey                  []byte
     caCertificate                []byte
+    caSSHChecker                 []byte
 
     // host certificate
     hostPrivateKey               []byte
@@ -167,6 +168,7 @@ type CertAuthBundle struct {
     CAPrvKey []byte
     CAPubKey []byte
     CACrtPem []byte
+    CASSHChk []byte
 }
 
 func UpdateCertAuth(bundle *CertAuthBundle) {
@@ -178,6 +180,7 @@ func UpdateCertAuth(bundle *CertAuthBundle) {
     ctx.caPrivateKey    = bundle.CAPrvKey
     ctx.caPublicKey     = bundle.CAPubKey
     ctx.caCertificate   = bundle.CACrtPem
+    ctx.caSSHChecker    = bundle.CASSHChk
 }
 
 type HostCertBundle struct {

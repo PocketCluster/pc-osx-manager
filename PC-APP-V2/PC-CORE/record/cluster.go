@@ -5,25 +5,31 @@ import (
     "github.com/pborman/uuid"
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/utils"
+    "fmt"
 )
 
 type ClusterMeta struct {
     gorm.Model
-
     // this is short id
-    ClusterID      string
-
+    ClusterID        string
     // this is for teleport and other things
-    ClusterUUID    string
+    ClusterUUID      string
+    // Cluster Domain name
+    ClusterDomain    string
 }
 
 func NewClusterMeta() (*ClusterMeta) {
+    var (
+        cid string = utils.NewRandomString(16)
+        domain string = fmt.Sprintf("%s.cluster.pocketcluster.io", cid)
+    )
     return &ClusterMeta{
         // (03/25/2017)
         // cluster id length is 16 for now. It should suffice to count all the cluster in the world.
         // Later, if it's necessary, we'll increase the length to cover
-        ClusterID:    utils.NewRandomString(16),
-        ClusterUUID:  uuid.New(),
+        ClusterID:        cid,
+        ClusterUUID:      uuid.New(),
+        ClusterDomain:    domain,
     }
 }
 
@@ -48,6 +54,9 @@ func UpsertClusterMeta(meta *ClusterMeta) (error) {
     }
     if len(meta.ClusterUUID) == 0 {
         return errors.Errorf("[ERR] invalid cluster UUID")
+    }
+    if len(meta.ClusterDomain) == 0 {
+        return errors.Errorf("[ERR] invalid cluster domain name")
     }
     SharedRecordGate().Session().Create(meta)
     return nil
