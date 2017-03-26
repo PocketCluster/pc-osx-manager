@@ -100,12 +100,15 @@ func DebugContextPrepare() (HostContext) {
         activeProcessorCount:        8,
         physicalMemorySize:          34359738368,
 
-        publicKeyData:               pcrypto.TestMasterPublicKey(),
-        privateKeyData:              pcrypto.TestMasterPrivateKey(),
-
         currentLanguageCode:         "EN",
         currentCountryCode:          "KR",
+
+        // cert authority
         CaSigner:                    caSigner,
+
+        // host certificate
+        hostPublicKey:               pcrypto.TestMasterPublicKey(),
+        hostPrivateKey:              pcrypto.TestMasterPrivateKey(),
     }
 
     _context.refreshNetworkGateways(test_gateways)

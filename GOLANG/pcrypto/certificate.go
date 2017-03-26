@@ -3,17 +3,25 @@ package pcrypto
 import (
     "crypto/rsa"
     "crypto/rand"
+    "crypto/sha1"
     "crypto/x509/pkix"
     "crypto/x509"
-    "encoding/pem"
-    "io/ioutil"
-    "time"
-    "math/big"
-    "fmt"
-    "strings"
-    "crypto/sha1"
     "encoding/asn1"
+    "encoding/pem"
+    "fmt"
+    "io/ioutil"
+    "math/big"
+    "time"
+    "strings"
 )
+
+type certError struct {
+    s string
+}
+
+func (n *certError) Error() string {
+    return n.s
+}
 
 // ComputeSKI derives an SKI from the certificate's public key in a
 // standard manner. This is done by computing the SHA-1 digest of the
@@ -156,9 +164,16 @@ func makeSelfCertAuth(commonName, dnsName, country string) ([]byte, []byte, []by
 
 // TODO : Add Test
 // CreateSelfSignedHTTPSCert generates and self-signs a TLS key+cert pair for https connection to the proxy server.
-func GenerateClusterCertificateAuthorityFiles(pubKeyPath, prvKeyPath, certPath, clusterId, country string) error {
+func GenerateClusterCertificateAuthorityFiles(pubKeyPath, prvKeyPath, certPath, clusterID, country string) error {
+    if len(clusterID) == 0 {
+        return &certError{"[ERR] bad cluster id"}
+    }
+    if len(country) == 0 {
+        return &certError{"[ERR] bad country id"}
+    }
+
     pub, prv, cert, err := makeSelfCertAuth("pc-cert-auth",
-        fmt.Sprintf("pc-cert-auth.%s.cluster.pocketcluster.io", clusterId),
+        fmt.Sprintf("pc-cert-auth.%s.cluster.pocketcluster.io", clusterID),
         strings.ToUpper(country))
     if err != nil {
         return err
@@ -187,8 +202,14 @@ func GenerateClusterCertificateAuthorityFiles(pubKeyPath, prvKeyPath, certPath, 
 
 // TODO : Add Test
 // return : public, private, certificate, error
-func GenerateClusterCertificateAuthorityData(clusterId, country string) ([]byte, []byte, []byte, error) {
+func GenerateClusterCertificateAuthorityData(clusterID, country string) ([]byte, []byte, []byte, error) {
+    if len(clusterID) == 0 {
+        return nil, nil, nil, &certError{"[ERR] bad cluster id"}
+    }
+    if len(country) == 0 {
+        return nil, nil, nil, &certError{"[ERR] bad country id"}
+    }
     return makeSelfCertAuth("pc-cert-auth",
-        fmt.Sprintf("pc-cert-auth.%s.cluster.pocketcluster.io", clusterId),
+        fmt.Sprintf("pc-cert-auth.%s.cluster.pocketcluster.io", clusterID),
         strings.ToUpper(country))
 }

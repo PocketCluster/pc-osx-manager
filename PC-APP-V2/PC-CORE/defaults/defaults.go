@@ -1,15 +1,17 @@
 package defaults
 
 const (
-    MasterCertAuthPrivateKey string     = "pc_cert_auth_private.key"
+    ClusterCertAuthPrivateKey string    = "pc_cert_auth_private.key"
 
-    MasterCertAuthPublicKey string      = "pc_cert_auth_public.key"
+    ClusterCertAuthPublicKey string     = "pc_cert_auth_public.key"
 
-    MasterCertAuthCertificate string    = "pc_cert_auth.certificate"
+    ClusterCertAuthCertificate string   = "pc_cert_auth.certificate"
 
-    MasterHostPrivateKey string         = "pc_master_private.key"
+    MasterHostPrivateKey string         = "pc_master_host_private.key"
 
-    MasterHostPublicKey string          = "pc_master_public.key"
+    MasterHostPublicKey string          = "pc_master_host_public.key"
 
-    MasterhostCertificate string        = "pc_master.certificate"
+    MasterHostSshKey string             = "pc_master_host_ssh.key"
+
+    MasterHostCertificate string        = "pc_master_host.certificate"
 )

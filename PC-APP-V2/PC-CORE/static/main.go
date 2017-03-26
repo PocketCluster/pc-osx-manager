@@ -11,6 +11,7 @@ import (
     teledefaults "github.com/gravitational/teleport/lib/defaults"
     "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/utils"
+    "github.com/cloudflare/cfssl/certdb"
     "github.com/pkg/errors"
 
     "github.com/stkim1/pc-core/context"
@@ -24,7 +25,6 @@ import (
 import (
     "github.com/tylerb/graceful"
     "github.com/davecgh/go-spew/spew"
-    "github.com/cloudflare/cfssl/certdb"
 )
 
 func RunWebServer(wg *sync.WaitGroup) *graceful.Server {
@@ -96,6 +96,155 @@ func main_old() {
     fmt.Println("pc-core terminated!")
 }
 
+//certificate authority generation
+func certAuthSigner(certRec certdb.Accessor, meta *record.ClusterMeta, country string) (*context.CertAuthBundle, error) {
+    var (
+        signer *pcrypto.CaSigner = nil
+        prvKey []byte  = nil
+        pubKey []byte  = nil
+        crtPem []byte  = nil
+        err error      = nil
+        caPrvRec, rerr = certRec.GetCertificate(pcdefaults.ClusterCertAuthPrivateKey, meta.ClusterUUID)
+        caPubRec, uerr = certRec.GetCertificate(pcdefaults.ClusterCertAuthPublicKey, meta.ClusterUUID)
+        caCrtRec, cerr = certRec.GetCertificate(pcdefaults.ClusterCertAuthCertificate, meta.ClusterUUID)
+    )
+    if (rerr != nil || uerr != nil || cerr != nil) || (len(caPrvRec) == 0 || len(caPubRec) == 0 || len(caCrtRec) == 0) {
+        pubKey, prvKey, crtPem, err = pcrypto.GenerateClusterCertificateAuthorityData(meta.ClusterID, country)
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+        // save private key
+        err = certRec.InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(prvKey),
+            Serial:     pcdefaults.ClusterCertAuthPrivateKey,
+            AKI:        meta.ClusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+        // save public key
+        err = certRec.InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(pubKey),
+            Serial:     pcdefaults.ClusterCertAuthPublicKey,
+            AKI:        meta.ClusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+        // save certificate
+        err = certRec.InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(crtPem),
+            Serial:     pcdefaults.ClusterCertAuthCertificate,
+            AKI:        meta.ClusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+    } else {
+        prvKey = []byte(caPrvRec[0].PEM)
+        pubKey = []byte(caPubRec[0].PEM)
+        crtPem = []byte(caCrtRec[0].PEM)
+    }
+    signer, err = pcrypto.NewCertAuthoritySigner(prvKey, crtPem, meta.ClusterID, country)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+    return &context.CertAuthBundle{
+        CASigner:    signer,
+        CAPrvKey:    prvKey,
+        CAPubKey:    pubKey,
+        CACrtPem:    crtPem,
+    }, nil
+}
+
+func hostCertificate(certRec certdb.Accessor, caSigner *pcrypto.CaSigner, hostname, clusterUUID string) (*context.HostCertBundle, error) {
+    var (
+        prvKey []byte  = nil
+        pubKey []byte  = nil
+        crtPem []byte  = nil
+        sshPem []byte  = nil
+        err error      = nil
+
+        prvRec, rerr = certRec.GetCertificate(pcdefaults.MasterHostPrivateKey, clusterUUID)
+        pubRec, uerr = certRec.GetCertificate(pcdefaults.MasterHostPublicKey, clusterUUID)
+        crtRec, cerr = certRec.GetCertificate(pcdefaults.MasterHostCertificate, clusterUUID)
+        sshRec, serr = certRec.GetCertificate(pcdefaults.MasterHostSshKey, clusterUUID)
+    )
+
+    if (rerr != nil || uerr != nil || cerr != nil || serr != nil) || (len(prvRec) == 0 || len(pubRec) == 0 || len(crtRec) == 0 || len(sshRec) == 0) {
+        pubKey, prvKey, sshPem, err = pcrypto.GenerateStrongKeyPair()
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+        // we're not going to proide ip address for now
+        crtPem, err = caSigner.GenerateSignedCertificate(hostname, "", prvKey)
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+        // save private key
+        err = certRec.InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(prvKey),
+            Serial:     pcdefaults.MasterHostPrivateKey,
+            AKI:        clusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+        // save public key
+        err = certRec.InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(pubKey),
+            Serial:     pcdefaults.MasterHostPublicKey,
+            AKI:        clusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+        // save cert pem
+        err = certRec.InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(crtPem),
+            Serial:     pcdefaults.MasterHostCertificate,
+            AKI:        clusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+        // save ssh pem
+        err = certRec.InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(sshPem),
+            Serial:     pcdefaults.MasterHostSshKey,
+            AKI:        clusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+    } else {
+        prvKey = []byte(prvRec[0].PEM)
+        pubKey = []byte(pubRec[0].PEM)
+        crtPem = []byte(crtRec[0].PEM)
+        sshPem = []byte(sshRec[0].PEM)
+    }
+    return &context.HostCertBundle{
+        PrivateKey:     prvKey,
+        PublicKey:      pubKey,
+        SshKey:         sshPem,
+        Certificate:    crtPem,
+    }, nil
+}
+
 func prepEnviornment() {
     setLogger(true)
 
@@ -132,71 +281,24 @@ func prepEnviornment() {
     country, err := ctx.CurrentCountryCode()
     if err != nil {
         // (03/26/2017) skip coutry code error and defaults it to US
-        log.Debugf(err.Error())
         country = "US"
     }
 
-    //certificate authority generation
-    var (
-        prvKey, pubKey, certPem []byte = nil, nil, nil
-        caPrvKey, rerr = rec.Certdb().GetCertificate(pcdefaults.MasterCertAuthPrivateKey, meta.ClusterUUID)
-        caPubKey, uerr = rec.Certdb().GetCertificate(pcdefaults.MasterCertAuthPublicKey, meta.ClusterUUID)
-        caCert, cerr   = rec.Certdb().GetCertificate(pcdefaults.MasterCertAuthCertificate, meta.ClusterUUID)
-    )
-    if (rerr != nil || uerr != nil || cerr != nil) || (len(caPrvKey) == 0 || len(caPubKey) == 0 || len(caCert) == 0) {
-        pubKey, prvKey, certPem, err = pcrypto.GenerateClusterCertificateAuthorityData(meta.ClusterID, country)
-        if err != nil {
-            // this is critical
-            log.Debugf(errors.WithStack(err).Error())
-        }
-        // save private key
-        err = rec.Certdb().InsertCertificate(certdb.CertificateRecord{
-            PEM:        string(prvKey),
-            Serial:     pcdefaults.MasterCertAuthPrivateKey,
-            AKI:        meta.ClusterUUID,
-            Status:     "good",
-            Reason:     0,
-        })
-        if err != nil {
-            // this is critical
-            log.Debugf(errors.WithStack(err).Error())
-        }
-        // save public key
-        err = rec.Certdb().InsertCertificate(certdb.CertificateRecord{
-            PEM:        string(pubKey),
-            Serial:     pcdefaults.MasterCertAuthPublicKey,
-            AKI:        meta.ClusterUUID,
-            Status:     "good",
-            Reason:     0,
-        })
-        if err != nil {
-            // this is critical
-            log.Debugf(errors.WithStack(err).Error())
-        }
-        // save certificate
-        err = rec.Certdb().InsertCertificate(certdb.CertificateRecord{
-            PEM:        string(certPem),
-            Serial:     pcdefaults.MasterCertAuthCertificate,
-            AKI:        meta.ClusterUUID,
-            Status:     "good",
-            Reason:     0,
-        })
-        if err != nil {
-            // this is critical
-            log.Debugf(errors.WithStack(err).Error())
-        }
-    } else {
-        prvKey  = []byte(caPrvKey[0].PEM)
-        pubKey  = []byte(caPubKey[0].PEM)
-        certPem = []byte(caCert[0].PEM)
-    }
-    caSigner, err := pcrypto.NewCertAuthoritySigner(prvKey, certPem, meta.ClusterID, country)
+    // certificate authority
+    caBundle, err := certAuthSigner(rec.Certdb(), meta, country)
     if err != nil {
         // this is critical
-        log.Debugf(errors.WithStack(err).Error())
+        log.Debugf(err.Error())
     }
-    context.SetupCertAuthSigner(caSigner)
+    context.UpdateCertAuth(caBundle)
 
+    // host certificate
+    hostBundle, err := hostCertificate(rec.Certdb(), caBundle.CASigner, teledefaults.CoreHostName, meta.ClusterUUID)
+    if err != nil {
+        // this is critical
+        log.Debugf(err.Error())
+    }
+    context.UpdateHostCert(hostBundle)
 
 
     // make teleport core config
@@ -204,7 +306,7 @@ func prepEnviornment() {
     cfg.AssignHostUUID(meta.ClusterUUID)
     cfg.AssignDatabaseEngine(rec.DataBase())
     cfg.AssignCertStorage(rec.Certdb())
-    cfg.AssignCASigner(caSigner)
+    cfg.AssignCASigner(caBundle.CASigner)
     err = service.ValidateCoreConfig(cfg)
     if err != nil {
         log.Debugf(err.Error())

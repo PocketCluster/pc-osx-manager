@@ -38,12 +38,16 @@ type HostContext interface {
 
     CurrentCountryCode() (string, error)
     CurrentLanguageCode() (string, error)
-
     MasterAgentName() (string, error)
-    MasterPublicKey() ([]byte, error)
-    MasterPrivateKey() ([]byte, error)
 
+    // cert authority
     MasterCaAuthority() (*pcrypto.CaSigner, error)
+
+    // host certificate
+    MasterPrivateKey() ([]byte, error)
+    MasterPublicKey() ([]byte, error)
+    MasterSSHKey() ([]byte, error)
+    MasterCertificate() ([]byte, error)
 }
 
 type hostContext struct {
@@ -72,15 +76,22 @@ type hostContext struct {
     processorCount               uint
     activeProcessorCount         uint
     physicalMemorySize           uint64
-
     hostDeviceSerial             string
-    publicKeyData                []byte
-    privateKeyData               []byte
 
     currentCountryCode           string
     currentLanguageCode          string
 
+    // certificate authority
     *pcrypto.CaSigner
+    caPrivateKey                 []byte
+    caPublicKey                  []byte
+    caCertificate                []byte
+
+    // host certificate
+    hostPrivateKey               []byte
+    hostPublicKey                []byte
+    hostSshKey                   []byte
+    hostCertifcate               []byte
 }
 
 // singleton initialization
@@ -153,14 +164,40 @@ func (ctx *hostContext) refreshNetworkGateways(gateways []*HostNetworkGateway) {
     return
 }
 
-func SetupCertAuthSigner(caSigner *pcrypto.CaSigner) {
-    singletonContextInstance().setCertAuthSigner(caSigner)
+type CertAuthBundle struct {
+    CASigner *pcrypto.CaSigner
+    CAPrvKey []byte
+    CAPubKey []byte
+    CACrtPem []byte
 }
 
-func (ctx *hostContext) setCertAuthSigner(caSigner *pcrypto.CaSigner) {
+func UpdateCertAuth(bundle *CertAuthBundle) {
+    ctx := singletonContextInstance()
     ctx.Lock()
     defer ctx.Unlock()
-    ctx.CaSigner = caSigner
+
+    ctx.CaSigner        = bundle.CASigner
+    ctx.caPrivateKey    = bundle.CAPrvKey
+    ctx.caPublicKey     = bundle.CAPubKey
+    ctx.caCertificate   = bundle.CACrtPem
+}
+
+type HostCertBundle struct {
+    PrivateKey     []byte
+    PublicKey      []byte
+    SshKey         []byte
+    Certificate    []byte
+}
+
+func UpdateHostCert(bundle *HostCertBundle) {
+    ctx := singletonContextInstance()
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    ctx.hostPrivateKey  = bundle.PrivateKey
+    ctx.hostPublicKey   = bundle.PublicKey
+    ctx.hostSshKey      = bundle.SshKey
+    ctx.hostCertifcate  = bundle.Certificate
 }
 
 func (ctx *hostContext) CocoaHomeDirectory() (string, error) {
@@ -322,20 +359,6 @@ func (ctx *hostContext) MasterAgentName() (string, error) {
     return ctx.hostDeviceSerial, nil
 }
 
-func (ctx *hostContext) MasterPublicKey() ([]byte, error) {
-    if len(ctx.publicKeyData) == 0 {
-        return nil, errors.Errorf("[ERR] Invalid master public key data")
-    }
-    return ctx.publicKeyData, nil
-}
-
-func (ctx *hostContext) MasterPrivateKey() ([]byte, error) {
-    if len(ctx.privateKeyData) == 0 {
-        return nil, errors.Errorf("[ERR] Invalid master private key data")
-    }
-    return ctx.privateKeyData, nil
-}
-
 func (ctx *hostContext) CurrentCountryCode() (string, error) {
     if len(ctx.currentCountryCode) == 0 {
         return "", errors.Errorf("[ERR] Invalid country code")
@@ -355,4 +378,32 @@ func (ctx *hostContext) MasterCaAuthority() (*pcrypto.CaSigner, error) {
         return nil, errors.Errorf("[ERR] Invalid Cert Authority")
     }
     return ctx.CaSigner, nil
+}
+
+func (ctx *hostContext) MasterPrivateKey() ([]byte, error) {
+    if len(ctx.hostPrivateKey) == 0 {
+        return nil, errors.Errorf("[ERR] Invalid master private key data")
+    }
+    return ctx.hostPrivateKey, nil
+}
+
+func (ctx *hostContext) MasterPublicKey() ([]byte, error) {
+    if len(ctx.hostPublicKey) == 0 {
+        return nil, errors.Errorf("[ERR] Invalid master public key data")
+    }
+    return ctx.hostPublicKey, nil
+}
+
+func (ctx *hostContext) MasterSSHKey() ([]byte, error) {
+    if len(ctx.hostSshKey) == 0 {
+        return nil, errors.Errorf("[ERR] Invalid master ssh key data")
+    }
+    return ctx.hostSshKey, nil
+}
+
+func (ctx *hostContext) MasterCertificate() ([]byte, error) {
+    if len(ctx.hostCertifcate) == 0 {
+        return nil, errors.Errorf("[ERR] Invalid master certificate data")
+    }
+    return ctx.hostCertifcate, nil
 }
