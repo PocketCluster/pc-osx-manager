@@ -41,13 +41,11 @@ type HostContext interface {
     MasterAgentName() (string, error)
 
     // cert authority
-    MasterCaAuthority() (*pcrypto.CaSigner, error)
-
+    CertAuthSigner() (*pcrypto.CaSigner, error)
+    CertAuthPublicKey() ([]byte, error)
     // host certificate
-    MasterPrivateKey() ([]byte, error)
-    MasterPublicKey() ([]byte, error)
-    MasterSSHKey() ([]byte, error)
-    MasterCertificate() ([]byte, error)
+    MasterHostPrivateKey() ([]byte, error)
+    MasterHostCertificate() ([]byte, error)
 }
 
 type hostContext struct {
@@ -373,35 +371,28 @@ func (ctx *hostContext) CurrentLanguageCode() (string, error) {
     return ctx.currentLanguageCode, nil
 }
 
-func (ctx *hostContext) MasterCaAuthority() (*pcrypto.CaSigner, error) {
+func (ctx *hostContext) CertAuthSigner() (*pcrypto.CaSigner, error) {
     if ctx.CaSigner == nil {
-        return nil, errors.Errorf("[ERR] Invalid Cert Authority")
+        return nil, errors.Errorf("[ERR] invalid cert authority signer")
     }
     return ctx.CaSigner, nil
 }
 
-func (ctx *hostContext) MasterPrivateKey() ([]byte, error) {
+func (ctx *hostContext) CertAuthPublicKey() ([]byte, error) {
+    if ctx.caPublicKey == nil {
+        return nil, errors.Errorf("[ERR] invalid cert public key")
+    }
+    return ctx.caPublicKey, nil
+}
+
+func (ctx *hostContext) MasterHostPrivateKey() ([]byte, error) {
     if len(ctx.hostPrivateKey) == 0 {
         return nil, errors.Errorf("[ERR] Invalid master private key data")
     }
     return ctx.hostPrivateKey, nil
 }
 
-func (ctx *hostContext) MasterPublicKey() ([]byte, error) {
-    if len(ctx.hostPublicKey) == 0 {
-        return nil, errors.Errorf("[ERR] Invalid master public key data")
-    }
-    return ctx.hostPublicKey, nil
-}
-
-func (ctx *hostContext) MasterSSHKey() ([]byte, error) {
-    if len(ctx.hostSshKey) == 0 {
-        return nil, errors.Errorf("[ERR] Invalid master ssh key data")
-    }
-    return ctx.hostSshKey, nil
-}
-
-func (ctx *hostContext) MasterCertificate() ([]byte, error) {
+func (ctx *hostContext) MasterHostCertificate() ([]byte, error) {
     if len(ctx.hostCertifcate) == 0 {
         return nil, errors.Errorf("[ERR] Invalid master certificate data")
     }
