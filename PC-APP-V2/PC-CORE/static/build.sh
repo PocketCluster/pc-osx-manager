@@ -23,6 +23,7 @@ echo "Generate _cgo_export.h and copy into source folder"
 ${GO} tool cgo -objdir ${GG_BUILD} *.go
 
 echo "Compile and produce object files"
+# CGO_ENABLED=1 CC=clang ${GO} build -v -x -ldflags '-v -tmpdir '${GG_BUILD}' -linkmode external -extld clang' ./...
 CGO_ENABLED=1 CC=clang ${GO} build -ldflags '-tmpdir '${GG_BUILD}' -linkmode external' ./...
 
 echo "Combine the object files into a static library"
