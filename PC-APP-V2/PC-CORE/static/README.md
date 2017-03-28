@@ -3,7 +3,7 @@
 This is a self contained package and it should be as it links to "C" and
 being compiled to a static binary. Do not import this package from others.
 
-### GO buildmode
+## GO buildmode
 
 Go 1.7.5 has following buildmode
 
@@ -47,3 +47,13 @@ Go 1.7.5 has following buildmode
     be those functions exported using a cgo //export comment.
     Non-main packages are ignored.
 ```
+
+## Build, link flags
+
+- default mode (we need main() function), disable go.dwarf generation (-w), strip symbol (-s)
+
+  ```sh
+  CGO_ENABLED=1 CC=clang ${GO} build -v -x -ldflags '-v -w -s -tmpdir '${GG_BUILD}' -linkmode external' ./...
+  ```
+
+  <http://stackoverflow.com/questions/30005878/avoid-debugging-information-on-golang>
