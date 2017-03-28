@@ -1097,6 +1097,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.manager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = NO;
 				USER_HEADER_SEARCH_PATHS = "${PROJECT_DIR}/../../../COCOA/**";
 			};
 			name = Debug;
@@ -1133,6 +1134,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.manager;
 				PRODUCT_NAME = PocketCluster;
+				STRIP_INSTALLED_PRODUCT = NO;
 				USER_HEADER_SEARCH_PATHS = "${PROJECT_DIR}/../../../COCOA/**";
 			};
 			name = Release;
