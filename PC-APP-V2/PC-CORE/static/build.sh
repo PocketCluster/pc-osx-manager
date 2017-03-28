@@ -23,10 +23,23 @@ echo "Generate _cgo_export.h and copy into source folder"
 ${GO} tool cgo -objdir ${GG_BUILD} *.go
 
 echo "Compile and produce object files"
-# CGO_ENABLED=1 CC=clang ${GO} build -v -x -ldflags '-v -tmpdir '${GG_BUILD}' -linkmode external -extld clang' ./...
+# [Default mode] First trial
 CGO_ENABLED=1 CC=clang ${GO} build -ldflags '-tmpdir '${GG_BUILD}' -linkmode external' ./...
+
+# [Default mode] External clang linker
+#CGO_ENABLED=1 CC=clang ${GO} build -v -x -ldflags '-v -tmpdir '${GG_BUILD}' -linkmode external -extld clang' ./...
+
+# [Archive mode]
+#CGO_ENABLED=1 CC=clang ${GO} build -v -x -buildmode=c-archive -ldflags '-v -tmpdir '${GG_BUILD}' -linkmode external' ./...
+
+# [Shared mode] go.dwarf file
+#CGO_ENABLED=1 CC=clang ${GO} build -v -x -buildmode=c-shared -ldflags '-v -tmpdir '${GG_BUILD}' -linkmode external' ./...
+
+# [Archive mode] prevents go.dwarf generated (-w), strip symbol (-s)
+#CGO_ENABLED=1 CC=clang ${GO} build -v -x -buildmode=c-archive -ldflags '-v -w -s -tmpdir '${GG_BUILD}' -linkmode external' ./...
 
 echo "Combine the object files into a static library"
 ar rcs ${ARCHIVE} ${GG_BUILD}/*.o
-rm static
+mv ${GG_BUILD}/_cgo_export.h ${GG_BUILD}/pc-core.h
+rm static*
 echo "${ARCHIVE} generated!"

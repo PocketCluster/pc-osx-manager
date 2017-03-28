@@ -12,10 +12,10 @@
     #import <NMSSH/NMSSH.h>
 #endif
 
-#include "_cgo_export.h"
 #import "Util.h"
 #import "NativeMenu.h"
 #import "PCInterfaceStatus.h"
+#include "pc-core.h"
 
 #import "AppDelegate.h"
 #import "AppDelegate+EventHandle.h"

@@ -7,7 +7,7 @@
 //
 
 #import "AppDelegate+Notification.h"
-#include "_cgo_export.h"
+#include "pc-core.h"
 
 @interface AppDelegate (Notification_Private)
 - (void) receiveSleepNote: (NSNotification*) notification;
