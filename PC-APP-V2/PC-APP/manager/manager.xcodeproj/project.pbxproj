@@ -1000,7 +1000,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer: xylopia@gmail.com (UP5T97JY43)";
+				CODE_SIGN_IDENTITY = "Mac Developer: Sung Taek Kim (DL54GSK8VG)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1045,7 +1045,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer: xylopia@gmail.com (UP5T97JY43)";
+				CODE_SIGN_IDENTITY = "Developer ID Application: Colorful Glue (NWE35T42PK)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1099,8 +1099,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.manager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				USER_HEADER_SEARCH_PATHS = "${PROJECT_DIR}/../../../COCOA/**";
 			};
 			name = Debug;
@@ -1137,7 +1135,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.pocketcluster.manager;
 				PRODUCT_NAME = PocketCluster;
-				SWIFT_OBJC_BRIDGING_HEADER = "manager/Bridging-Header.h";
 				USER_HEADER_SEARCH_PATHS = "${PROJECT_DIR}/../../../COCOA/**";
 			};
 			name = Release;
