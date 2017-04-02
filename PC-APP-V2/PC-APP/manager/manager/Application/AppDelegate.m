@@ -86,13 +86,6 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
     return true;
 }
 
-/*
-static void
-onCrash(const KSCrashReportWriter* writer) {
-    // let's go runtime to crash
-    crashEmergentExit();
-}
-*/
 
 @interface AppDelegate ()<SUUpdaterDelegate, NSUserNotificationCenterDelegate, PCInterfaceStatusNotification>
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
@@ -105,7 +98,7 @@ onCrash(const KSCrashReportWriter* writer) {
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
-    [Sentry installWithDsn:@"https://c5ec94d4d592495f986ab0e032cb5428:54e779c402a34b0db7f317066037b768@sentry.io/154027"];
+    [Sentry installWithDsn:@"https://c5ec94d4d592495f986ab0e032cb5428:54e779c402a34b0db7f317066037b768@sentry.io/154027" extraOnCrash:&crashEmergentExit];
     
     lifecycleAlive();
 

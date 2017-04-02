@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		041023ED1BE434290083D62E /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 041023EC1BE434290083D62E /* AppKit.framework */; };
+		0419FA141E90F61400031628 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0419FA131E90F61400031628 /* libc++.tbd */; };
+		0419FA161E90F61900031628 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0419FA151E90F61900031628 /* libz.tbd */; };
 		041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
 		041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
 		041FB3B91BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
@@ -143,6 +145,8 @@
 
 /* Begin PBXFileReference section */
 		041023EC1BE434290083D62E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		0419FA131E90F61400031628 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
+		0419FA151E90F61900031628 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		041FB3B61BD0F3FA0027136F /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
 		0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = ../Pods/Sparkle/Sparkle.framework; sourceTree = "<group>"; };
 		0441A3D61BD8904100AABD7A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -248,6 +252,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0419FA161E90F61900031628 /* libz.tbd in Frameworks */,
+				0419FA141E90F61400031628 /* libc++.tbd in Frameworks */,
 				04C6D6061E7F9CEA0004837A /* libstatic-core.a in Frameworks */,
 				04C6D6091E7F9D210004837A /* CoreWLAN.framework in Frameworks */,
 				041023ED1BE434290083D62E /* AppKit.framework in Frameworks */,
@@ -589,6 +595,8 @@
 		3A1EA7B4E3AB3B354460F41A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0419FA151E90F61900031628 /* libz.tbd */,
+				0419FA131E90F61400031628 /* libc++.tbd */,
 				04C6D6051E7F9CEA0004837A /* libstatic-core.a */,
 				04C6D6071E7F9CFD0004837A /* CoreWLAN.framework */,
 				041023EC1BE434290083D62E /* AppKit.framework */,
