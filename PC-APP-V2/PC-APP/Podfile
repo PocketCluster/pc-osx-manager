@@ -6,6 +6,7 @@ target 'PocketCluster' do
     project 'manager/manager.xcodeproj'
     use_frameworks!
     pod 'Sparkle'
+    pod 'Sentry', :git => 'git@github.com:getsentry/sentry-objc.git'
 end
 
 # target 'managerTests' do

@@ -25,6 +25,7 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/stkim1/pc-core/event/lifecycle"
+    "github.com/stkim1/pc-core/event/crash"
 )
 
 var initThreadID uint64
@@ -85,4 +86,9 @@ func lifecycleAwaken() {
 func lifecycleSleep() {
     //TODO this is to be done later
     log.Debugf("lifecycleSleep")
+}
+
+//export crashEmergentExit
+func crashEmergentExit() {
+    theApp.sendCrash(crash.CrashEmergentExit)
 }

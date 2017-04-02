@@ -9,6 +9,7 @@ package main
 import "C"
 import (
     "github.com/stkim1/pc-core/event/lifecycle"
+    "github.com/stkim1/pc-core/event/crash"
 )
 
 // App is how a GUI mobile application interacts with the OS.
@@ -47,17 +48,6 @@ func init() {
     theApp.eventsIn = pump(theApp.eventsOut)
 }
 
-func (a *app) sendLifecycle(to lifecycle.Stage) {
-    if a.lifecycleStage == to {
-        return
-    }
-    a.eventsIn <- lifecycle.Event{
-        From:        a.lifecycleStage,
-        To:          to,
-    }
-    a.lifecycleStage = to
-}
-
 type app struct {
     filters []func(interface{}) interface{}
     eventsOut      chan interface{}
@@ -82,6 +72,23 @@ func (a *app) Filter(event interface{}) interface{} {
 
 func (a *app) RegisterFilter(f func(interface{}) interface{}) {
     a.filters = append(a.filters, f)
+}
+
+func (a *app) sendLifecycle(to lifecycle.Stage) {
+    if a.lifecycleStage == to {
+        return
+    }
+    a.eventsIn <- lifecycle.Event{
+        From:        a.lifecycleStage,
+        To:          to,
+    }
+    a.lifecycleStage = to
+}
+
+func (a *app) sendCrash(reason crash.CrashType) {
+    a.eventsIn <- crash.Crash{
+        Reason:      reason,
+    }
 }
 
 type stopPumping struct{}

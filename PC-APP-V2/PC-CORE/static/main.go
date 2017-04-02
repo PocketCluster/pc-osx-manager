@@ -18,6 +18,7 @@ import (
     pcdefaults "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/network"
+    "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/hostapi"
     "github.com/stkim1/pc-core/record"
     "github.com/stkim1/pcrypto"
@@ -390,6 +391,17 @@ func main() {
                             log.Debugf(spew.Sdump(e.HostGateways))
                             context.MonitorNetworkGateways(e.HostGateways)
                         }
+                    }
+                }
+
+                // artificial crash
+                case crash.Crash: {
+                    switch e.Reason {
+                    case crash.CrashEmergentExit: {
+                        log.Printf("[CRASH] COCOA SIDE RUNTIME IS DESTORYED. WE NEED TO CLOSE GOLANG SIDE AS WELL. %v", e.String())
+                    }
+                    default:
+                        log.Printf("crash! %v", e.String())
                     }
                 }
             }

@@ -84,6 +84,8 @@ extern void lifecycleAwaken();
 
 extern void lifecycleSleep();
 
+extern void crashEmergentExit();
+
 extern void NetworkChangeNotificationInterface(PCNetworkInterface** p0, unsigned int p1);
 
 extern void NetworkChangeNotificationGateway(SCNIGateway** p0, unsigned int p1);

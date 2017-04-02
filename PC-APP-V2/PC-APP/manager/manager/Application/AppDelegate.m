@@ -16,6 +16,8 @@
 #import "NativeMenu.h"
 #import "PCInterfaceStatus.h"
 #include "pc-core.h"
+#import <KSCrash/KSCrash.h>
+#import "Sentry.h"
 
 #import "AppDelegate.h"
 #import "AppDelegate+EventHandle.h"
@@ -84,6 +86,14 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
     return true;
 }
 
+/*
+static void
+onCrash(const KSCrashReportWriter* writer) {
+    // let's go runtime to crash
+    crashEmergentExit();
+}
+*/
+
 @interface AppDelegate ()<SUUpdaterDelegate, NSUserNotificationCenterDelegate, PCInterfaceStatusNotification>
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
 @property (nonatomic, strong) NSMutableArray *openWindows;
@@ -93,6 +103,10 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    
+    [[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
+    [Sentry installWithDsn:@"https://c5ec94d4d592495f986ab0e032cb5428:54e779c402a34b0db7f317066037b768@sentry.io/154027"];
+    
     lifecycleAlive();
 
     // register awake/sleep notification
