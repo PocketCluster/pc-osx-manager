@@ -22,6 +22,7 @@
 #import "AppDelegate.h"
 #import "AppDelegate+EventHandle.h"
 #import "AppDelegate+Notification.h"
+#import "AppDelegate+Sparkle.h"
 
 bool
 pc_interface_list(PCNetworkInterface** interfaces, unsigned int count) {
@@ -87,7 +88,7 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
 }
 
 
-@interface AppDelegate ()<SUUpdaterDelegate, NSUserNotificationCenterDelegate, PCInterfaceStatusNotification>
+@interface AppDelegate ()<NSUserNotificationCenterDelegate, PCInterfaceStatusNotification>
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
 @property (nonatomic, strong) NSMutableArray *openWindows;
 @property (strong) PCInterfaceStatus *interfaceStatus;
@@ -107,7 +108,7 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
     
     //initialize updates
     [[SUUpdater sharedUpdater] setDelegate:self];
-    [[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
+    //[[SUUpdater sharedUpdater] setSendsSystemProfile:[Util shouldSendProfileData]];
     [[SUUpdater sharedUpdater] checkForUpdateInformation];
     
     self.interfaceStatus = [[PCInterfaceStatus alloc] initWithStatusAudience:self];

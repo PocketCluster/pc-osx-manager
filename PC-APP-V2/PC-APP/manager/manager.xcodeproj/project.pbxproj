@@ -89,6 +89,7 @@
 		04C6D6091E7F9D210004837A /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04C6D6071E7F9CFD0004837A /* CoreWLAN.framework */; };
 		04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6D60C1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m */; };
 		04CB13D91E85075D00F2D6EE /* AppDelegate+Notification.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CB13D81E85075D00F2D6EE /* AppDelegate+Notification.m */; };
+		04D5A48E1E9269AE0057012A /* AppDelegate+Sparkle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */; };
 		04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
 		04E51DC11BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
 		04E51DC21BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
@@ -230,6 +231,8 @@
 		04C6D60C1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+HTTPAddition.m"; sourceTree = "<group>"; };
 		04CB13D71E85075D00F2D6EE /* AppDelegate+Notification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Notification.h"; sourceTree = "<group>"; };
 		04CB13D81E85075D00F2D6EE /* AppDelegate+Notification.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Notification.m"; sourceTree = "<group>"; };
+		04D5A48C1E9269AE0057012A /* AppDelegate+Sparkle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Sparkle.h"; sourceTree = "<group>"; };
+		04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Sparkle.m"; sourceTree = "<group>"; };
 		04E51DBF1BDC88E3001F1F22 /* Resources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Resources.bundle; sourceTree = "<group>"; };
 		04F7056F1BD7A9B700829651 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		04F705711BD7A9BD00829651 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
@@ -295,15 +298,17 @@
 				0441A3F31BD892A400AABD7A /* VersionComparison.m */,
 				0441A3ED1BD8921600AABD7A /* Util.h */,
 				0441A3EE1BD8921600AABD7A /* Util.m */,
+				0441A3D81BD8904100AABD7A /* main.m */,
+				04C585841BE5BF3B004B2839 /* PCConstants.h */,
+				04C585851BE5BF3B004B2839 /* PCConstants.m */,
 				0441A3D61BD8904100AABD7A /* AppDelegate.h */,
 				0441A3D71BD8904100AABD7A /* AppDelegate.m */,
 				04AF2B061E84B19B00F4DF09 /* AppDelegate+EventHandle.h */,
 				04AF2B071E84B19B00F4DF09 /* AppDelegate+EventHandle.m */,
-				0441A3D81BD8904100AABD7A /* main.m */,
-				04C585841BE5BF3B004B2839 /* PCConstants.h */,
-				04C585851BE5BF3B004B2839 /* PCConstants.m */,
 				04CB13D71E85075D00F2D6EE /* AppDelegate+Notification.h */,
 				04CB13D81E85075D00F2D6EE /* AppDelegate+Notification.m */,
+				04D5A48C1E9269AE0057012A /* AppDelegate+Sparkle.h */,
+				04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */,
 			);
 			name = Application;
 			path = manager/Application;
@@ -869,6 +874,7 @@
 				0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */,
 				0441A3F41BD892A400AABD7A /* VersionComparison.m in Sources */,
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
+				04D5A48E1E9269AE0057012A /* AppDelegate+Sparkle.m in Sources */,
 				047F32AC1D8A898E00568210 /* NativeMenu.m in Sources */,
 				047F32B31D8A898E00568210 /* LinkMACVendors.m in Sources */,
 				047F32B01D8A898E00568210 /* LinkInterface.m in Sources */,
