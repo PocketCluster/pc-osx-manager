@@ -21,7 +21,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>0.1.4</string>
+	<string>4</string>
 	<key>Configuration</key>
 	<string>${CONFIGURATION}</string>
 	<key>LSApplicationCategoryType</key>
@@ -49,5 +49,11 @@
 	<string>https://raw.githubusercontent.com/stkim1/pocketcluster/update/version.xml</string>
 	<key>SUPublicDSAKeyFile</key>
 	<string>dsa_pub.pem</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUAllowsAutomaticUpdates</key>
+	<true/>
+	<key>SUAutomaticallyUpdate</key>
+	<true/>
 </dict>
 </plist>
