@@ -109,7 +109,9 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
     //initialize updates
     [[SUUpdater sharedUpdater] setDelegate:self];
     [[SUUpdater sharedUpdater] setSendsSystemProfile:NO];
-    [[SUUpdater sharedUpdater] checkForUpdateInformation];
+    [[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:YES];
+    [[SUUpdater sharedUpdater] setAutomaticallyDownloadsUpdates:YES];
+    [[SUUpdater sharedUpdater] checkForUpdates:nil];
     
     self.interfaceStatus = [[PCInterfaceStatus alloc] initWithStatusAudience:self];
     [self.interfaceStatus startMonitoring];
