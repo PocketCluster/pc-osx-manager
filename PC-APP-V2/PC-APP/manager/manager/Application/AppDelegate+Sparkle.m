@@ -18,11 +18,13 @@
 // Called when a valid update is found by the update driver.
 - (void)updater:(SUUpdater *)updater didFindValidUpdate:(SUAppcastItem *)item {
     Log(@"%s %@",__PRETTY_FUNCTION__, item.fileURL.description);
+    //TODO : make sure when didFindValudUpdate or updaterDidNotFindUpdate gets called before execute engine
 }
 
 // Called when a valid update is not found.
 - (void)updaterDidNotFindUpdate:(SUUpdater *)updater {
     Log(@"%s",__PRETTY_FUNCTION__);
+    //TODO : make sure when didFindValudUpdate or updaterDidNotFindUpdate gets called before execute engine
 }
 
 //  Called immediately before downloading the specified update.

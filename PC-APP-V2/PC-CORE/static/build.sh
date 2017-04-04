@@ -10,6 +10,7 @@ GO=${GOROOT}/bin/go
 GG_BUILD="${PWD}/../../.build"
 ARCHIVE="${GG_BUILD}/pc-core.a"
 PATH=${PATH:-"$GEM_HOME/ruby/2.0.0/bin:$HOME/.util:$GOROOT/bin:$GOREPO/bin:$GOWORKPLACE/bin:$HOME/.util:$NATIVE_PATH"}
+VERBOSE=${VERBOSE:-0}
 
 # Clean old directory
 if [ -d ${GG_BUILD} ]; then
@@ -20,7 +21,7 @@ echo "Make the temp folders for go objects"
 mkdir -p ${GG_BUILD}
 
 echo "Generate _cgo_export.h and copy into source folder"
-${GO} tool cgo -objdir ${GG_BUILD} *.go
+${GO} tool cgo -objdir ${GG_BUILD} darwin_amd64.go network_notification.go main.go
 
 echo "Compile and produce object files"
 # [Default mode] First trial
@@ -39,7 +40,11 @@ echo "Compile and produce object files"
 #CGO_ENABLED=1 CC=clang ${GO} build -v -x -buildmode=c-archive -ldflags '-v -w -s -tmpdir '${GG_BUILD}' -linkmode external' ./...
 
 # [Default mode] default mode (we need main() function), disable go.dwarf generation (-w), strip symbol (-s)
-CGO_ENABLED=1 CC=clang ${GO} build -v -x -ldflags '-v -s -w -tmpdir '${GG_BUILD}' -linkmode external' ./...
+if [[ ${VERBOSE} -eq 1 ]]; then
+    CGO_ENABLED=1 CC=clang ${GO} build -v -x -ldflags '-v -s -w -tmpdir '${GG_BUILD}' -linkmode external' ./...
+else
+    CGO_ENABLED=1 CC=clang ${GO} build -ldflags '-s -w -tmpdir '${GG_BUILD}' -linkmode external' ./...
+fi
 
 echo "Combine the object files into a static library"
 ar rcs ${ARCHIVE} ${GG_BUILD}/*.o

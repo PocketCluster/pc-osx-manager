@@ -11,17 +11,12 @@ import (
     teledefaults "github.com/gravitational/teleport/lib/defaults"
     "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/utils"
-    "github.com/cloudflare/cfssl/certdb"
-    "github.com/pkg/errors"
-
     "github.com/stkim1/pc-core/context"
-    pcdefaults "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/hostapi"
     "github.com/stkim1/pc-core/record"
-    "github.com/stkim1/pcrypto"
 )
 import (
     "github.com/tylerb/graceful"
@@ -97,174 +92,7 @@ func main_old() {
     fmt.Println("pc-core terminated!")
 }
 
-//certificate authority generation
-func certAuthSigner(certRec certdb.Accessor, meta *record.ClusterMeta, country string) (*context.CertAuthBundle, error) {
-    var (
-        signer *pcrypto.CaSigner = nil
-        prvKey []byte  = nil
-        pubKey []byte  = nil
-        crtPem []byte  = nil
-        sshChk []byte  = nil
-        err error      = nil
-        caPrvRec, rerr = certRec.GetCertificate(pcdefaults.ClusterCertAuthPrivateKey, meta.ClusterUUID)
-        caPubRec, uerr = certRec.GetCertificate(pcdefaults.ClusterCertAuthPublicKey, meta.ClusterUUID)
-        caCrtRec, cerr = certRec.GetCertificate(pcdefaults.ClusterCertAuthCertificate, meta.ClusterUUID)
-        caSshRec, serr = certRec.GetCertificate(pcdefaults.ClusterCertAuthSshCheck, meta.ClusterUUID)
-    )
-    if (rerr != nil || uerr != nil || cerr != nil || serr != nil) || (len(caPrvRec) == 0 || len(caPubRec) == 0 || len(caCrtRec) == 0 || len(caSshRec) == 0) {
-        pubKey, prvKey, crtPem, sshChk, err = pcrypto.GenerateClusterCertificateAuthorityData(meta.ClusterDomain, country)
-        if err != nil {
-            return nil, errors.WithStack(err)
-        }
-        // save private key
-        err = certRec.InsertCertificate(certdb.CertificateRecord{
-            PEM:        string(prvKey),
-            Serial:     pcdefaults.ClusterCertAuthPrivateKey,
-            AKI:        meta.ClusterUUID,
-            Status:     "good",
-            Reason:     0,
-        })
-        if err != nil {
-            return nil, errors.WithStack(err)
-        }
-        // save public key
-        err = certRec.InsertCertificate(certdb.CertificateRecord{
-            PEM:        string(pubKey),
-            Serial:     pcdefaults.ClusterCertAuthPublicKey,
-            AKI:        meta.ClusterUUID,
-            Status:     "good",
-            Reason:     0,
-        })
-        if err != nil {
-            return nil, errors.WithStack(err)
-        }
-        // save certificate
-        err = certRec.InsertCertificate(certdb.CertificateRecord{
-            PEM:        string(crtPem),
-            Serial:     pcdefaults.ClusterCertAuthCertificate,
-            AKI:        meta.ClusterUUID,
-            Status:     "good",
-            Reason:     0,
-        })
-        if err != nil {
-            return nil, errors.WithStack(err)
-        }
-        // save ssh checker
-        err = certRec.InsertCertificate(certdb.CertificateRecord{
-            PEM:        string(sshChk),
-            Serial:     pcdefaults.ClusterCertAuthSshCheck,
-            AKI:        meta.ClusterUUID,
-            Status:     "good",
-            Reason:     0,
-        })
-        if err != nil {
-            return nil, errors.WithStack(err)
-        }
-    } else {
-        prvKey = []byte(caPrvRec[0].PEM)
-        pubKey = []byte(caPubRec[0].PEM)
-        crtPem = []byte(caCrtRec[0].PEM)
-        sshChk = []byte(caSshRec[0].PEM)
-    }
-    signer, err = pcrypto.NewCertAuthoritySigner(prvKey, crtPem, meta.ClusterDomain, country)
-    if err != nil {
-        return nil, errors.WithStack(err)
-    }
-    return &context.CertAuthBundle{
-        CASigner:    signer,
-        CAPrvKey:    prvKey,
-        CAPubKey:    pubKey,
-        CACrtPem:    crtPem,
-        CASSHChk:    sshChk,
-    }, nil
-}
-
-// host certificate
-func hostCertificate(certRec certdb.Accessor, caSigner *pcrypto.CaSigner, hostname, clusterUUID string) (*context.HostCertBundle, error) {
-    var (
-        prvKey []byte  = nil
-        pubKey []byte  = nil
-        crtPem []byte  = nil
-        sshPem []byte  = nil
-        err error      = nil
-
-        prvRec, rerr = certRec.GetCertificate(pcdefaults.MasterHostPrivateKey, clusterUUID)
-        pubRec, uerr = certRec.GetCertificate(pcdefaults.MasterHostPublicKey, clusterUUID)
-        crtRec, cerr = certRec.GetCertificate(pcdefaults.MasterHostCertificate, clusterUUID)
-        sshRec, serr = certRec.GetCertificate(pcdefaults.MasterHostSshKey, clusterUUID)
-    )
-
-    if (rerr != nil || uerr != nil || cerr != nil || serr != nil) || (len(prvRec) == 0 || len(pubRec) == 0 || len(crtRec) == 0 || len(sshRec) == 0) {
-        pubKey, prvKey, sshPem, err = pcrypto.GenerateStrongKeyPair()
-        if err != nil {
-            return nil, errors.WithStack(err)
-        }
-        // we're not going to proide ip address for now
-        crtPem, err = caSigner.GenerateSignedCertificate(hostname, "", prvKey)
-        if err != nil {
-            return nil, errors.WithStack(err)
-        }
-        // save private key
-        err = certRec.InsertCertificate(certdb.CertificateRecord{
-            PEM:        string(prvKey),
-            Serial:     pcdefaults.MasterHostPrivateKey,
-            AKI:        clusterUUID,
-            Status:     "good",
-            Reason:     0,
-        })
-        if err != nil {
-            return nil, errors.WithStack(err)
-        }
-        // save public key
-        err = certRec.InsertCertificate(certdb.CertificateRecord{
-            PEM:        string(pubKey),
-            Serial:     pcdefaults.MasterHostPublicKey,
-            AKI:        clusterUUID,
-            Status:     "good",
-            Reason:     0,
-        })
-        if err != nil {
-            return nil, errors.WithStack(err)
-        }
-        // save cert pem
-        err = certRec.InsertCertificate(certdb.CertificateRecord{
-            PEM:        string(crtPem),
-            Serial:     pcdefaults.MasterHostCertificate,
-            AKI:        clusterUUID,
-            Status:     "good",
-            Reason:     0,
-        })
-        if err != nil {
-            return nil, errors.WithStack(err)
-        }
-        // save ssh pem
-        err = certRec.InsertCertificate(certdb.CertificateRecord{
-            PEM:        string(sshPem),
-            Serial:     pcdefaults.MasterHostSshKey,
-            AKI:        clusterUUID,
-            Status:     "good",
-            Reason:     0,
-        })
-        if err != nil {
-            return nil, errors.WithStack(err)
-        }
-    } else {
-        prvKey = []byte(prvRec[0].PEM)
-        pubKey = []byte(pubRec[0].PEM)
-        crtPem = []byte(crtRec[0].PEM)
-        sshPem = []byte(sshRec[0].PEM)
-    }
-    return &context.HostCertBundle{
-        PrivateKey:     prvKey,
-        PublicKey:      pubKey,
-        SshKey:         sshPem,
-        Certificate:    crtPem,
-    }, nil
-}
-
 func prepEnviornment() {
-    setLogger(true)
-
     // setup context
     ctx := context.SharedHostContext()
     context.SetupBasePath()
@@ -317,7 +145,6 @@ func prepEnviornment() {
     }
     context.UpdateHostCert(hostBundle)
 
-
     // make teleport core config
     cfg := service.MakeCoreConfig(dataDir, true)
     cfg.AssignHostUUID(meta.ClusterUUID)
@@ -330,12 +157,10 @@ func prepEnviornment() {
         log.Debugf(err.Error())
     }
 
-    log.Info(spew.Sdump(ctx))
+    //log.Info(spew.Sdump(ctx))
 }
 
 func main() {
-
-    prepEnviornment()
 
     mainLifeCycle(func(a App) {
         for e := range a.Events() {
@@ -354,7 +179,8 @@ func main() {
                     switch e.Crosses(lifecycle.StageAlive) {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is now alive %v", e.String())
-
+                            log.Debugf("[PREP] PREPARING GOLANG CONTEXT")
+                            prepEnviornment()
                             hostapi.SendFeedBack("successfully initiated engine ...")
                         }
                         case lifecycle.CrossOff: {
@@ -384,11 +210,13 @@ func main() {
                 case network.Event: {
                     switch e.NetworkEvent {
                         case network.NetworkChangeInterface: {
-                            log.Debugf(spew.Sdump(e.HostInterfaces))
+                            //log.Debugf(spew.Sdump(e.HostInterfaces))
+                            log.Debugf("[NET] %v", e.String())
                             context.MonitorNetworkInterfaces(e.HostInterfaces)
                         }
                         case network.NetworkChangeGateway: {
-                            log.Debugf(spew.Sdump(e.HostGateways))
+                            //log.Debugf(spew.Sdump(e.HostGateways))
+                            log.Debugf("[NET] %v", e.String())
                             context.MonitorNetworkGateways(e.HostGateways)
                         }
                     }

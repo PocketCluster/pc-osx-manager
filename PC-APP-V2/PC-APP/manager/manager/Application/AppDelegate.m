@@ -6,6 +6,8 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
+#import <KSCrash/KSCrash.h>
+#import "Sentry.h"
 #import <Sparkle/Sparkle.h>
 
 #ifdef USE_LIBSSH2
@@ -16,8 +18,6 @@
 #import "NativeMenu.h"
 #import "PCInterfaceStatus.h"
 #include "pc-core.h"
-#import <KSCrash/KSCrash.h>
-#import "Sentry.h"
 
 #import "AppDelegate.h"
 #import "AppDelegate+EventHandle.h"
@@ -97,36 +97,53 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-    
+    // 1. install crash reporter
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
     [Sentry installWithDsn:@"https://c5ec94d4d592495f986ab0e032cb5428:54e779c402a34b0db7f317066037b768@sentry.io/154027" extraOnCrash:&crashEmergentExit];
     
-    lifecycleAlive();
+    // 2. setup network monitor. It does not report to delegate, thus it's safe to execute at this stage
+    // but when it crashes, we will see what went wrong
+    self.interfaceStatus = [[PCInterfaceStatus alloc] initWithStatusAudience:self];
 
-    // register awake/sleep notification
+    // 3. golang debug
+#ifdef DEBUG
+    engineDebugOutput(1);
+#else 
+    engineDebugOutput(0);
+#endif
+
+    // 4. make golang context
+    lifecycleAlive();
+    
+    // 5. register awake/sleep notification
     [self addSleepNotifications];
     
-    //initialize updates
+    // 6.UI
+    // a. opened window list
+    self.openWindows = [[NSMutableArray alloc] init];
+    // b. create popup and status menu item
+    self.nativeMenu = [[NativeMenu alloc] init];
+
+    // 7. setup application mode
+    [[NSRunningApplication currentApplication] activateWithOptions:(NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps)];
+    //[self.window makeKeyAndOrderFront:self];
+
+    /// --- now, system base notifications are all set --- ///
+    
+    // 8. initialize updates
     [[SUUpdater sharedUpdater] setDelegate:self];
     [[SUUpdater sharedUpdater] setSendsSystemProfile:NO];
     [[SUUpdater sharedUpdater] checkForUpdateInformation];
     
-    self.interfaceStatus = [[PCInterfaceStatus alloc] initWithStatusAudience:self];
-    [self.interfaceStatus startMonitoring];
- 
+    // 9. refresh network status -> this might update OSX side as well, so we need UI to be working beforehand.
+    // Plus, it delayed execution give a room to golang to be initialized
+    Log(@"\n[NET] REFRESHING INTERFACE...\n");
     interface_status_with_callback(&pc_interface_list);
     gateway_status_with_callback(&gateway_list);
-    NSLog(@"\n--- --- --- CALLBACK C CALL ENDED --- --- ---");
+    // now let interface to be updated
+    [self.interfaceStatus startMonitoring];
 
-    // opened window list
-    self.openWindows = [[NSMutableArray alloc] init];
-    
-    //create popup and status menu item
-    self.nativeMenu = [[NativeMenu alloc] init];
-
-    [[NSRunningApplication currentApplication] activateWithOptions:(NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps)];
-    //[self.window makeKeyAndOrderFront:self];
-    
+    // 10. finalize app ready
     lifecycleVisible();
     Log(@"Application Started");
 }

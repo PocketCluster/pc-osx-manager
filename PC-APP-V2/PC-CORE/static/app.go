@@ -6,7 +6,6 @@
 
 package main
 
-import "C"
 import (
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/crash"

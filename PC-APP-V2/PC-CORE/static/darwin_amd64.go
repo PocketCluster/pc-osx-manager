@@ -43,7 +43,7 @@ func init() {
 }
 
 // this was app package of main()
-func mainLifeCycle(f func(App)) {
+func mainLifeCycle(f func(App)) int {
     if tid := uint64(C.PCNativeThreadID()); tid != initThreadID {
         log.Fatalf("[CRITICAL] engine main called on thread %d, but inititaed from %d", tid, initThreadID)
     }
@@ -53,7 +53,7 @@ func mainLifeCycle(f func(App)) {
         C.PCNativeMainStop()
         // TODO(crawshaw): trigger PCNativeMainStart to return
     }()
-    C.PCNativeMainStart(0, nil)
+    return int(C.PCNativeMainStart(0, nil))
 }
 
 //export lifecycleDead
@@ -91,4 +91,13 @@ func lifecycleSleep() {
 //export crashEmergentExit
 func crashEmergentExit() {
     theApp.sendCrash(crash.CrashEmergentExit)
+}
+
+//export engineDebugOutput
+func engineDebugOutput(debug C.int) {
+    if int(debug) == 0 {
+        setLogger(false)
+    } else {
+        setLogger(true)
+    }
 }
