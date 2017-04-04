@@ -18,6 +18,10 @@
 // Called when a valid update is found by the update driver.
 - (void)updater:(SUUpdater *)updater didFindValidUpdate:(SUAppcastItem *)item {
     NSLog(@"%s %@",__PRETTY_FUNCTION__, item.fileURL.description);
+
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [[SUUpdater sharedUpdater] checkForUpdates:nil];
+    }];
 }
 
 // Called when a valid update is not found.
