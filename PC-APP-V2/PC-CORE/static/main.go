@@ -15,7 +15,7 @@ import (
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/event/crash"
-    "github.com/stkim1/pc-core/hostapi"
+    "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/record"
 )
 import (
@@ -181,7 +181,7 @@ func main() {
                             log.Debugf("[LIFE] app is now alive %v", e.String())
                             log.Debugf("[PREP] PREPARING GOLANG CONTEXT")
                             prepEnviornment()
-                            hostapi.SendFeedBack("successfully initiated engine ...")
+                            FeedSend("successfully initiated engine ...")
                         }
                         case lifecycle.CrossOff: {
                             log.Debugf("[LIFE] app is inactive %v", e.String())
@@ -230,6 +230,14 @@ func main() {
                     }
                     default:
                         log.Printf("crash! %v", e.String())
+                    }
+                }
+
+                // operational Command
+                case operation.Operation: {
+                    switch e.Command {
+                    default:
+                        log.Print("Operation Command")
                     }
                 }
             }

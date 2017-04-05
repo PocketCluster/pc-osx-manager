@@ -26,6 +26,15 @@
 
 
 
+#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/feedhost.go"
+
+
+
+
+#include "PCEventHandle.h"
+
+
+
 
 /* End of preamble from import "C" comments.  */
 
@@ -91,6 +100,10 @@ extern void engineDebugOutput(int p0);
 extern void NetworkChangeNotificationInterface(PCNetworkInterface** p0, unsigned int p1);
 
 extern void NetworkChangeNotificationGateway(SCNIGateway** p0, unsigned int p1);
+
+extern void FeedStart();
+
+extern void FeedStop();
 
 #ifdef __cplusplus
 }

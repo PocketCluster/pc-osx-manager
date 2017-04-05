@@ -115,27 +115,30 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
     // 4. make golang context
     lifecycleAlive();
     
-    // 5. register awake/sleep notification
+    // 5. bind feed to host
+    FeedStart();
+    
+    // 6. register awake/sleep notification
     [self addSleepNotifications];
     
-    // 6.UI
+    // 7.UI
     // a. opened window list
     self.openWindows = [[NSMutableArray alloc] init];
     // b. create popup and status menu item
     self.nativeMenu = [[NativeMenu alloc] init];
 
-    // 7. setup application mode
+    // 8. setup application mode
     [[NSRunningApplication currentApplication] activateWithOptions:(NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps)];
     //[self.window makeKeyAndOrderFront:self];
 
     /// --- now, system base notifications are all set --- ///
     
-    // 8. initialize updates
+    // 9. initialize updates
     [[SUUpdater sharedUpdater] setDelegate:self];
     [[SUUpdater sharedUpdater] setSendsSystemProfile:NO];
     [[SUUpdater sharedUpdater] checkForUpdateInformation];
     
-    // 9. refresh network status -> this might update OSX side as well, so we need UI to be working beforehand.
+    // 10. refresh network status -> this might update OSX side as well, so we need UI to be working beforehand.
     // Plus, it delayed execution give a room to golang to be initialized
     Log(@"\n[NET] REFRESHING INTERFACE...\n");
     interface_status_with_callback(&pc_interface_list);
@@ -143,7 +146,7 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
     // now let interface to be updated
     [self.interfaceStatus startMonitoring];
 
-    // 10. finalize app ready
+    // 11. finalize app ready
     lifecycleVisible();
     Log(@"Application Started");
 }
@@ -152,7 +155,13 @@ gateway_list(SCNIGateway** gateways, unsigned int count) {
     [self.interfaceStatus stopMonitoring];
     self.interfaceStatus = nil;
 
+    // Stop host feed
+    FeedStop();
+    
+    // stop sleep notification
     [self removeSleepNotifications];
+    
+    // stop lifecycle
     lifecycleDead();
 }
 
