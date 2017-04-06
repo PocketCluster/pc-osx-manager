@@ -5,7 +5,16 @@
 /* Start of preamble from import "C" comments.  */
 
 
-#line 13 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/darwin_amd64.go"
+#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_feedhost.go"
+
+
+
+
+#include "PCEventHandle.h"
+
+
+
+#line 13 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_lifecycle.go"
 
 
 
@@ -16,22 +25,13 @@
 
 
 
-#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/network_notification.go"
+#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_netnoti.go"
 
 
 
 
 #include "SCNetworkTypes.h"
 #include "PCInterfaceTypes.h"
-
-
-
-#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/feedhost.go"
-
-
-
-
-#include "PCEventHandle.h"
 
 
 
@@ -81,6 +81,10 @@ extern "C" {
 #endif
 
 
+extern void FeedStart();
+
+extern void FeedStop();
+
 extern void lifecycleDead();
 
 extern void lifecycleAlive();
@@ -100,10 +104,6 @@ extern void engineDebugOutput(int p0);
 extern void NetworkChangeNotificationInterface(PCNetworkInterface** p0, unsigned int p1);
 
 extern void NetworkChangeNotificationGateway(SCNIGateway** p0, unsigned int p1);
-
-extern void FeedStart();
-
-extern void FeedStop();
 
 #ifdef __cplusplus
 }

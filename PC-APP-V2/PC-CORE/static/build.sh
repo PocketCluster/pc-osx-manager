@@ -21,7 +21,7 @@ echo "Make the temp folders for go objects"
 mkdir -p ${GG_BUILD}
 
 echo "Generate _cgo_export.h and copy into source folder"
-${GO} tool cgo -objdir ${GG_BUILD} darwin_amd64.go network_notification.go feedhost.go main.go
+${GO} tool cgo -objdir ${GG_BUILD} native_*.go main.go
 
 echo "Compile and produce object files"
 # [Default mode] First trial
