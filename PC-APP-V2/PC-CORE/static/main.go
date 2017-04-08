@@ -11,6 +11,8 @@ import (
     teledefaults "github.com/gravitational/teleport/lib/defaults"
     "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/utils"
+    "github.com/pkg/errors"
+
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/network"
@@ -92,7 +94,7 @@ func main_old() {
     fmt.Println("pc-core terminated!")
 }
 
-func prepEnviornment() {
+func openContext() (*service.PocketConfig, error) {
     // setup context
     ctx := context.SharedHostContext()
     context.SetupBasePath()
@@ -101,10 +103,12 @@ func prepEnviornment() {
     dataDir, err := ctx.ApplicationUserDataDirectory()
     if err != nil {
         log.Info(err)
+        return nil, errors.WithStack(err)
     }
     rec, err := record.OpenRecordGate(dataDir, teledefaults.CoreKeysSqliteFile)
     if err != nil {
         log.Info(err)
+        return nil, errors.WithStack(err)
     }
 
     // new cluster id
@@ -116,7 +120,7 @@ func prepEnviornment() {
             record.UpsertClusterMeta(meta)
         } else {
             // This is critical error. report it to UI and ask them to clean & re-install
-            log.Info(err)
+            return nil, errors.WithStack(err)
         }
     } else {
         meta = cluster[0]
@@ -134,6 +138,7 @@ func prepEnviornment() {
     if err != nil {
         // this is critical
         log.Debugf(err.Error())
+        return nil, errors.WithStack(err)
     }
     context.UpdateCertAuth(caBundle)
 
@@ -142,6 +147,7 @@ func prepEnviornment() {
     if err != nil {
         // this is critical
         log.Debugf(err.Error())
+        return nil, errors.WithStack(err)
     }
     context.UpdateHostCert(hostBundle)
 
@@ -155,14 +161,22 @@ func prepEnviornment() {
     err = service.ValidateCoreConfig(cfg)
     if err != nil {
         log.Debugf(err.Error())
+        return nil, errors.WithStack(err)
     }
 
     //log.Info(spew.Sdump(ctx))
+    return cfg, nil
 }
 
 func main() {
 
     mainLifeCycle(func(a App) {
+
+        var (
+            teleCfg *service.PocketConfig
+            err error
+        )
+
         for e := range a.Events() {
             switch e := a.Filter(e).(type) {
 
@@ -180,8 +194,11 @@ func main() {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is now alive %v", e.String())
                             log.Debugf("[PREP] PREPARING GOLANG CONTEXT")
-                            prepEnviornment()
-                            FeedSend("successfully initiated engine ...")
+                            teleCfg, err = openContext()
+                            if err != nil {
+                                // TODO send error report
+                            }
+                            FeedSend("successfully initiated engine ..." + teleCfg.HostUUID)
                         }
                         case lifecycle.CrossOff: {
                             log.Debugf("[LIFE] app is inactive %v", e.String())
