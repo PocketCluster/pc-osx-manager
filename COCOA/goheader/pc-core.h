@@ -5,6 +5,11 @@
 /* Start of preamble from import "C" comments.  */
 
 
+#line 3 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_debug.go"
+
+
+
+
 #line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_feedhost.go"
 
 
@@ -80,6 +85,10 @@ typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
 extern "C" {
 #endif
 
+
+extern void OpsCmdTeleportStart();
+
+extern void OpsCmdTeleportStop();
 
 extern void FeedStart();
 

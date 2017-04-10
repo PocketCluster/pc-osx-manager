@@ -253,8 +253,14 @@ func main() {
                 // operational Command
                 case operation.Operation: {
                     switch e.Command {
+                    case operation.CmdTeleportStart: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdTeleportStop: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
                     default:
-                        log.Print("Operation Command")
+                        log.Print("[OP] %v", e.String())
                     }
                 }
             }
