@@ -80,6 +80,8 @@
 		04C6D6061E7F9CEA0004837A /* libstatic-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04C6D6051E7F9CEA0004837A /* libstatic-core.a */; };
 		04C6D6091E7F9D210004837A /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04C6D6071E7F9CFD0004837A /* CoreWLAN.framework */; };
 		04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6D60C1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m */; };
+		04CAE2E71E9B8A4900B23B22 /* DebugWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CAE2E51E9B8A4900B23B22 /* DebugWindow.m */; };
+		04CAE2E81E9B8A4900B23B22 /* DebugWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04CAE2E61E9B8A4900B23B22 /* DebugWindow.xib */; };
 		04CB13D91E85075D00F2D6EE /* AppDelegate+Notification.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CB13D81E85075D00F2D6EE /* AppDelegate+Notification.m */; };
 		04D5A48E1E9269AE0057012A /* AppDelegate+Sparkle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */; };
 		04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
@@ -213,6 +215,9 @@
 		04C6D6071E7F9CFD0004837A /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
 		04C6D60B1E7F9EDD0004837A /* NSDictionary+HTTPAddition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+HTTPAddition.h"; sourceTree = "<group>"; };
 		04C6D60C1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+HTTPAddition.m"; sourceTree = "<group>"; };
+		04CAE2E41E9B8A4900B23B22 /* DebugWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DebugWindow.h; sourceTree = "<group>"; };
+		04CAE2E51E9B8A4900B23B22 /* DebugWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DebugWindow.m; sourceTree = "<group>"; };
+		04CAE2E61E9B8A4900B23B22 /* DebugWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DebugWindow.xib; sourceTree = "<group>"; };
 		04CB13D71E85075D00F2D6EE /* AppDelegate+Notification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Notification.h"; sourceTree = "<group>"; };
 		04CB13D81E85075D00F2D6EE /* AppDelegate+Notification.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Notification.m"; sourceTree = "<group>"; };
 		04D5A48C1E9269AE0057012A /* AppDelegate+Sparkle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Sparkle.h"; sourceTree = "<group>"; };
@@ -308,6 +313,7 @@
 			children = (
 				046A35B61BD783CE004E0946 /* BaseWindowController.h */,
 				046A35B71BD783CE004E0946 /* BaseWindowController.m */,
+				04CAE2E31E9B8A2A00B23B22 /* Debug */,
 				046A35C31BD7871B004E0946 /* About */,
 			);
 			name = WindowController;
@@ -573,6 +579,16 @@
 			path = Dictionary;
 			sourceTree = "<group>";
 		};
+		04CAE2E31E9B8A2A00B23B22 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				04CAE2E41E9B8A4900B23B22 /* DebugWindow.h */,
+				04CAE2E51E9B8A4900B23B22 /* DebugWindow.m */,
+				04CAE2E61E9B8A4900B23B22 /* DebugWindow.xib */,
+			);
+			path = Debug;
+			sourceTree = "<group>";
+		};
 		3A1EA7B4E3AB3B354460F41A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -745,6 +761,7 @@
 				046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */,
 				048678121BCF5FE20071594B /* MainMenu.xib in Resources */,
+				04CAE2E81E9B8A4900B23B22 /* DebugWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -864,6 +881,7 @@
 				046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				0441A3E31BD8904100AABD7A /* main.m in Sources */,
 				04AD71C51E9B749A00DB6AE9 /* Util.m in Sources */,
+				04CAE2E71E9B8A4900B23B22 /* DebugWindow.m in Sources */,
 				04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */,
 				04AF2B081E84B19B00F4DF09 /* AppDelegate+EventHandle.m in Sources */,
 			);

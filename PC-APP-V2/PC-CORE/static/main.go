@@ -255,6 +255,7 @@ func main() {
                     switch e.Command {
                     case operation.CmdTeleportStart: {
                         log.Debugf("[OP] %v", e.String())
+                        startTeleportCore(teleCfg)
                     }
                     case operation.CmdTeleportStop: {
                         log.Debugf("[OP] %v", e.String())
