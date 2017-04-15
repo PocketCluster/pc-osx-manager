@@ -23,6 +23,7 @@ import (
 import (
     "github.com/tylerb/graceful"
     "github.com/davecgh/go-spew/spew"
+    "github.com/gravitational/teleport/lib/process"
 )
 
 func RunWebServer(wg *sync.WaitGroup) *graceful.Server {
@@ -173,8 +174,9 @@ func main() {
     mainLifeCycle(func(a App) {
 
         var (
-            teleCfg *service.PocketConfig
-            err error
+            teleConfig *service.PocketConfig = nil
+            teleProc *process.PocketCoreProcess = nil
+            err error = nil
         )
 
         for e := range a.Events() {
@@ -194,11 +196,11 @@ func main() {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is now alive %v", e.String())
                             log.Debugf("[PREP] PREPARING GOLANG CONTEXT")
-                            teleCfg, err = openContext()
+                            teleConfig, err = openContext()
                             if err != nil {
                                 // TODO send error report
                             }
-                            FeedSend("successfully initiated engine ..." + teleCfg.HostUUID)
+                            FeedSend("successfully initiated engine ..." + teleConfig.HostUUID)
                         }
                         case lifecycle.CrossOff: {
                             log.Debugf("[LIFE] app is inactive %v", e.String())
@@ -255,10 +257,17 @@ func main() {
                     switch e.Command {
                     case operation.CmdTeleportStart: {
                         log.Debugf("[OP] %v", e.String())
-                        startTeleportCore(teleCfg)
+                        teleProc, err = startTeleportCore(teleConfig)
+                        if err != nil {
+                            log.Debugf("[ERR] " + err.Error())
+                        }
                     }
                     case operation.CmdTeleportStop: {
                         log.Debugf("[OP] %v", e.String())
+                        err = teleProc.Close()
+                        if err != nil {
+                            log.Debugf("[ERR] " + err.Error())
+                        }
                     }
                     default:
                         log.Print("[OP] %v", e.String())
