@@ -257,18 +257,31 @@ func main() {
                     switch e.Command {
                     case operation.CmdTeleportStart: {
                         log.Debugf("[OP] %v", e.String())
-                        teleProc, err = startTeleportCore(teleConfig)
+
+                        teleProc, err = newTeleportCore(teleConfig)
+                        if err != nil {
+                            log.Debugf("[ERR] " + err.Error())
+                        }
+                        err = teleProc.Start()
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
                     }
                     case operation.CmdTeleportStop: {
-                        log.Debugf("[OP] %v", e.String())
                         err = teleProc.Close()
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
+                        err = teleProc.Wait()
+                        if err != nil {
+                            log.Debugf("[ERR] " + err.Error())
+                        }
+                        log.Debugf("[OP] %v", e.String())
                     }
+
+                    case
+
+
                     default:
                         log.Print("[OP] %v", e.String())
                     }
