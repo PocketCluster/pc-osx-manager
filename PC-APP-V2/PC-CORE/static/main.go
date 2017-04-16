@@ -21,6 +21,7 @@ import (
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/record"
     telesrv "github.com/stkim1/pc-core/extsrv/teleport"
+    regisrv "github.com/stkim1/pc-core/extsrv/registry"
 )
 import (
     "github.com/tylerb/graceful"
@@ -96,7 +97,12 @@ func main_old() {
     fmt.Println("pc-core terminated!")
 }
 
-func openContext() (*service.PocketConfig, error) {
+type serviceConfig struct {
+    teleConfig    *service.PocketConfig
+    regConfig     *regisrv.PocketRegistryConfig
+}
+
+func openContext() (*serviceConfig, error) {
     // setup context
     ctx := context.SharedHostContext()
     context.SetupBasePath()
@@ -154,20 +160,30 @@ func openContext() (*service.PocketConfig, error) {
     context.UpdateHostCert(hostBundle)
 
     // make teleport core config
-    cfg := service.MakeCoreConfig(dataDir, true)
-    cfg.AssignHostUUID(meta.ClusterUUID)
-    cfg.AssignDatabaseEngine(rec.DataBase())
-    cfg.AssignCertStorage(rec.Certdb())
-    cfg.AssignCASigner(caBundle.CASigner)
-    cfg.AssignHostCertAuth(caBundle.CAPrvKey, caBundle.CASSHChk, meta.ClusterDomain)
-    err = service.ValidateCoreConfig(cfg)
+    teleCfg := service.MakeCoreConfig(dataDir, true)
+    teleCfg.AssignHostUUID(meta.ClusterUUID)
+    teleCfg.AssignDatabaseEngine(rec.DataBase())
+    teleCfg.AssignCertStorage(rec.Certdb())
+    teleCfg.AssignCASigner(caBundle.CASigner)
+    teleCfg.AssignHostCertAuth(caBundle.CAPrvKey, caBundle.CASSHChk, meta.ClusterDomain)
+    err = service.ValidateCoreConfig(teleCfg)
+    if err != nil {
+        log.Debugf(err.Error())
+        return nil, errors.WithStack(err)
+    }
+
+    // registry configuration
+    regCfg, err := regisrv.NewPocketRegistryConfig(false, "rootdir", caBundle.CACrtPem, caBundle.CAPrvKey)
     if err != nil {
         log.Debugf(err.Error())
         return nil, errors.WithStack(err)
     }
 
     //log.Info(spew.Sdump(ctx))
-    return cfg, nil
+    return &serviceConfig {
+        teleConfig: teleCfg,
+        regConfig: regCfg,
+    }, nil
 }
 
 func main() {
@@ -175,8 +191,9 @@ func main() {
     mainLifeCycle(func(a App) {
 
         var (
-            teleConfig *service.PocketConfig = nil
+            serviceConfig *serviceConfig = nil
             teleProc *process.PocketCoreProcess = nil
+            regiProc *regisrv.PocketRegistry = nil
             err error = nil
         )
 
@@ -197,11 +214,11 @@ func main() {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is now alive %v", e.String())
                             log.Debugf("[PREP] PREPARING GOLANG CONTEXT")
-                            teleConfig, err = openContext()
+                            serviceConfig, err = openContext()
                             if err != nil {
                                 // TODO send error report
                             }
-                            FeedSend("successfully initiated engine ..." + teleConfig.HostUUID)
+                            FeedSend("successfully initiated engine ..." + serviceConfig.teleConfig.HostUUID)
                         }
                         case lifecycle.CrossOff: {
                             log.Debugf("[LIFE] app is inactive %v", e.String())
@@ -259,7 +276,7 @@ func main() {
                     case operation.CmdTeleportStart: {
                         log.Debugf("[OP] %v", e.String())
 
-                        teleProc, err = telesrv.NewTeleportCore(teleConfig)
+                        teleProc, err = telesrv.NewTeleportCore(serviceConfig.teleConfig)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
@@ -281,10 +298,15 @@ func main() {
                     }
 
                     case operation.CmdImageRegistryStart: {
-
+                        log.Debugf("[OP] %v", e.String())
+                        regiProc, err = regisrv.NewPocketRegistry(serviceConfig.regConfig)
+                        if err != nil {
+                            log.Debugf("[ERR] " + err.Error())
+                        }
+                        regiProc.ListenAndServe()
                     }
                     case operation.CmdImageRegistryStop: {
-
+                        log.Debugf("[OP] %v", e.String())
                     }
 
 
