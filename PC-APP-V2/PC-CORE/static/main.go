@@ -10,6 +10,7 @@ import (
     log "github.com/Sirupsen/logrus"
     teledefaults "github.com/gravitational/teleport/lib/defaults"
     "github.com/gravitational/teleport/lib/service"
+    "github.com/gravitational/teleport/lib/process"
     "github.com/gravitational/teleport/lib/utils"
     "github.com/pkg/errors"
 
@@ -19,11 +20,11 @@ import (
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/record"
+    telesrv "github.com/stkim1/pc-core/extsrv/teleport"
 )
 import (
     "github.com/tylerb/graceful"
     "github.com/davecgh/go-spew/spew"
-    "github.com/gravitational/teleport/lib/process"
 )
 
 func RunWebServer(wg *sync.WaitGroup) *graceful.Server {
@@ -258,7 +259,7 @@ func main() {
                     case operation.CmdTeleportStart: {
                         log.Debugf("[OP] %v", e.String())
 
-                        teleProc, err = newTeleportCore(teleConfig)
+                        teleProc, err = telesrv.NewTeleportCore(teleConfig)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
@@ -279,7 +280,12 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
 
-                    case
+                    case operation.CmdImageRegistryStart: {
+
+                    }
+                    case operation.CmdImageRegistryStop: {
+
+                    }
 
 
                     default:

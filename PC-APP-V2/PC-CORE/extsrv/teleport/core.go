@@ -1,4 +1,4 @@
-package main
+package teleport
 
 import (
     "time"
@@ -11,7 +11,7 @@ import (
     "github.com/pkg/errors"
 )
 
-func newTeleportCore(cfg *service.PocketConfig) (*process.PocketCoreProcess, error) {
+func NewTeleportCore(cfg *service.PocketConfig) (*process.PocketCoreProcess, error) {
     // add static tokens
     for _, token := range []config.StaticToken{"node:d52527f9-b260-41d0-bb5a-e23b0cfe0f8f", "node:c9s93fd9-3333-91d3-9999-c9s93fd98f43"} {
         roles, tokenValue, err := token.Parse()

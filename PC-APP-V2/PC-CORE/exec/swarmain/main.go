@@ -1,7 +1,7 @@
 package main
 
 import (
-    "github.com/stkim1/pc-core/lib/swarm"
+    "github.com/stkim1/pc-core/extsrv/swarm"
 )
 
 /*
