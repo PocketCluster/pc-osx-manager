@@ -18,6 +18,7 @@ import (
 
     log "github.com/Sirupsen/logrus"
     logstash "github.com/bshuster-repo/logrus-logstash-hook"
+    "github.com/pkg/errors"
 )
 
 func logLevel(level configuration.Loglevel) log.Level {
@@ -100,7 +101,7 @@ func ParseYamlConfig(configPath string) (*configuration.Configuration, error) {
     return config, err
 }
 
-func NewRegistryConfig() *configuration.Configuration {
+func NewRegistrySampleConfig() *configuration.Configuration {
     var(
         // logging options
         accessLog = struct {
@@ -345,5 +346,202 @@ func GarbageCollection(config *configuration.Configuration) {
     if err != nil {
         fmt.Fprintf(os.Stderr, "failed to garbage collect: %v", err)
         os.Exit(1)
-    }}
+    }
+}
 
+func NewRegistryConfig(enableLog bool, rootDir string) (*configuration.Configuration, error) {
+    if len(rootDir) == 0 {
+        return nil, errors.Errorf("[ERR] invalid path for root dir")
+    }
+
+
+    var(
+        // logging options
+        accessLog = struct {
+            Disabled        bool                        `yaml:"disabled,omitempty"`
+        } {
+            Disabled:       enableLog,
+        }
+        log = struct {
+            AccessLog struct {
+                Disabled    bool                        `yaml:"disabled,omitempty"`
+            }                                           `yaml:"accesslog,omitempty"`
+            Level           configuration.Loglevel      `yaml:"level"`
+            Formatter       string                      `yaml:"formatter,omitempty"`
+            Fields          map[string]interface{}      `yaml:"fields,omitempty"`
+            Hooks           []configuration.LogHook     `yaml:"hooks,omitempty"`
+        }{
+            AccessLog:      accessLog,
+            Level:          configuration.Loglevel("debug"),
+            Formatter:      "text",
+            Fields:         map[string]interface{} {
+                "service": "registry",
+                "environment": "pc-master",
+            },
+            Hooks:          nil,
+        }
+
+        // storage options
+        storage = configuration.Storage {
+            "cache": configuration.Parameters {
+                "blobdescriptor": "inmemory",
+            },
+            "filesystem": configuration.Parameters {
+                "rootdirectory": rootDir,
+                "maxthreads": 32,
+            },
+            "maintenance": configuration.Parameters {
+                "readonly": map[interface{}]interface{} {
+                    "enabled": false,
+                },
+                "uploadpurging": map[interface{}]interface{} {
+                    "enabled": true,
+                    "age": "24h",
+                    "interval": "3h",
+                    "dryrun": false,
+                },
+            },
+        }
+
+        // http connection options
+        letsEncrypt = struct {
+            CacheFile        string     `yaml:"cachefile,omitempty"`
+            Email            string     `yaml:"email,omitempty"`
+        } {}
+        tls = struct {
+            Certificate      string     `yaml:"certificate,omitempty"`
+            Key              string     `yaml:"key,omitempty"`
+            ClientCAs        []string   `yaml:"clientcas,omitempty"`
+            LetsEncrypt      struct {
+                CacheFile    string     `yaml:"cachefile,omitempty"`
+                Email string            `yaml:"email,omitempty"`
+            }                           `yaml:"letsencrypt,omitempty"`
+        } {
+            Certificate:     "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert",
+            Key:             "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key",
+            ClientCAs:       nil,
+            LetsEncrypt:     letsEncrypt,
+        }
+        debug = struct {
+            Addr string                 `yaml:"addr,omitempty"`
+        } {
+            "",
+        }
+        http2 = struct {
+            Disabled        bool        `yaml:"disabled,omitempty"`
+        } {
+            Disabled:       false,
+        }
+
+        // HTTP contains configuration parameters for the registry's http
+        // interface.
+        http = struct {
+            Addr            string      `yaml:"addr,omitempty"`
+            Net             string      `yaml:"net,omitempty"`
+            Host            string      `yaml:"host,omitempty"`
+            Prefix          string      `yaml:"prefix,omitempty"`
+            Secret          string      `yaml:"secret,omitempty"`
+            RelativeURLs    bool        `yaml:"relativeurls,omitempty"`
+            TLS struct {
+                Certificate string      `yaml:"certificate,omitempty"`
+                Key         string      `yaml:"key,omitempty"`
+                ClientCAs   []string    `yaml:"clientcas,omitempty"`
+                LetsEncrypt struct {
+                    CacheFile string    `yaml:"cachefile,omitempty"`
+                    Email   string      `yaml:"email,omitempty"`
+                }                       `yaml:"letsencrypt,omitempty"`
+            }                           `yaml:"tls,omitempty"`
+            Headers http.Header         `yaml:"headers,omitempty"`
+            Debug struct {
+                Addr        string      `yaml:"addr,omitempty"`
+            }                           `yaml:"debug,omitempty"`
+            HTTP2 struct {
+                Disabled    bool        `yaml:"disabled,omitempty"`
+            }                           `yaml:"http2,omitempty"`
+        } {
+            Addr:           "0.0.0.0:5000",
+            Net:            "tcp",
+            Host:           "",
+            Prefix:         "",
+            Secret:         "",
+            RelativeURLs:   false,
+            TLS:            tls,
+            Headers:        http.Header {
+                "X-Content-Type-Options": []string{"nosniff"},
+            },
+            Debug:          debug,
+            HTTP2:          http2,
+        }
+
+        // Notifications specifies configuration about various endpoint to which
+        // registry events are dispatched.
+        notifications = configuration.Notifications {
+            Endpoints:  nil,
+        }
+
+        // Redis configures the redis pool available to the registry webapp.
+        redis = struct {
+            Addr           string       `yaml:"addr,omitempty"`
+            Password       string       `yaml:"password,omitempty"`
+            DB             int          `yaml:"db,omitempty"`
+            DialTimeout    time.Duration `yaml:"dialtimeout,omitempty"`
+            ReadTimeout    time.Duration `yaml:"readtimeout,omitempty"`
+            WriteTimeout   time.Duration `yaml:"writetimeout,omitempty"`
+            Pool struct {
+                MaxIdle    int          `yaml:"maxidle,omitempty"`
+                MaxActive  int          `yaml:"maxactive,omitempty"`
+                IdleTimeout time.Duration `yaml:"idletimeout,omitempty"`
+            }                           `yaml:"pool,omitempty"`
+        } {}
+
+        // TODO : health check
+        health = configuration.Health {
+            FileCheckers:  nil,
+            HTTPCheckers:  nil,
+            TCPCheckers:   nil,
+        }
+
+        // Compatibility is used for configurations of working with older or deprecated features.
+        compatibility = struct {
+            Schema1 struct {
+                TrustKey string `yaml:"signingkeyfile,omitempty"`
+            } `yaml:"schema1,omitempty"`
+        } {}
+
+        // TODO : Validation configures validation options for the registry.
+        validation = struct {
+            Enabled        bool         `yaml:"enabled,omitempty"`
+            Manifests struct {
+                URLs struct {
+                    Allow  []string     `yaml:"allow,omitempty"`
+                    Deny   []string     `yaml:"deny,omitempty"`
+                }                       `yaml:"urls,omitempty"`
+            }                           `yaml:"manifests,omitempty"`
+        } {}
+
+        // TODO : Policy configures registry policy options.
+        policy = struct {
+            Repository struct {
+                Classes []string        `yaml:"classes"`
+            }                           `yaml:"repository,omitempty"`
+        } {}
+    )
+
+    return &configuration.Configuration {
+        Version:        configuration.MajorMinorVersion(0, 1),
+        Log:            log,
+        Loglevel:       configuration.Loglevel("info"),
+        Storage:        storage,
+        Auth:           nil,
+        Middleware:     nil,
+        Reporting:      configuration.Reporting {},
+        HTTP:           http,
+        Notifications:  notifications,
+        Redis:          redis,
+        Health:         health,
+        Proxy:          configuration.Proxy{},
+        Compatibility:  compatibility,
+        Validation:     validation,
+        Policy:         policy,
+    }
+}

@@ -48,7 +48,7 @@ func main() {
     if false {
         config, _ = registry.ParseYamlConfig("/Users/almightykim/Workspace/DKIMG/REGISTRY/config/config.yml")
     } else {
-        config = registry.NewRegistryConfig()
+        config = registry.NewRegistrySampleConfig()
     }
     log.Info(spew.Sdump(config))
     registry.Serve(config)
