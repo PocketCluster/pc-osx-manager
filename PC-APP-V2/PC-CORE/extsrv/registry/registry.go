@@ -19,14 +19,6 @@ import (
     "github.com/docker/distribution/version"
 )
 
-// A Registry represents a complete instance of the registry.
-// TODO(aaronl): It might make sense for Registry to become an interface.
-type PocketRegistry struct {
-    config        *PocketRegistryConfig
-    app           *handlers.App
-    server 		  *http.Server
-}
-
 // NewRegistry creates a new registry from a context and configuration struct.
 func NewPocketRegistry(config *PocketRegistryConfig) (*PocketRegistry, error) {
     var (
@@ -79,8 +71,8 @@ func NewPocketRegistry(config *PocketRegistryConfig) (*PocketRegistry, error) {
 }
 
 // ListenAndServe runs the registry's HTTP server.
-func (registry *PocketRegistry) ListenAndServe() error {
-    config := registry.config
+func (r *PocketRegistry) ListenAndServe() error {
+    config := r.config
 
     ln, err := listener.NewListener(config.regConfig.HTTP.Net, config.regConfig.HTTP.Addr)
     if err != nil {
@@ -88,8 +80,16 @@ func (registry *PocketRegistry) ListenAndServe() error {
     }
 
 	ln = tls.NewListener(ln, config.tlsConfig)
-	context.GetLogger(registry.app).Infof("listening on %v, tls", ln.Addr())
-    return registry.server.Serve(ln)
+	context.GetLogger(r.app).Infof("listening on %v, tls", ln.Addr())
+    return r.server.Serve(ln)
+}
+
+// A Registry represents a complete instance of the registry.
+// TODO(aaronl): It might make sense for Registry to become an interface.
+type PocketRegistry struct {
+    config        *PocketRegistryConfig
+    app           *handlers.App
+    server 		  *http.Server
 }
 
 func configureReporting(app *handlers.App) http.Handler {
