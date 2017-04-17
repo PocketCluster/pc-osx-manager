@@ -100,7 +100,7 @@ func NewContextWithCertAndKey(host, nodeList string, tlsCa, tlsCert, tlsKey []by
     discoveryOpt := make(map[string]string)
     clusterOpt := cluster.DriverOpts{}
 
-    // TODO : (04/17/2017) We should check if verifying clients with CA would results in errors for clients to connect
+    // TODO : (04/17/2017) We should check if verifying clients with CA would results in errors for clients to connect. It appears to be ok with file version
     tlsConfig, err := buildTLSConfig(tlsCa, tlsCert, tlsKey, true)
     if err != nil {
         errors.WithStack(err)
