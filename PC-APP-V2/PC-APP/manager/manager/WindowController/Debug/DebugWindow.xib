@@ -60,6 +60,26 @@
                             <action selector="opsCmdRegistryStop:" target="-2" id="K8Z-bR-psy"/>
                         </connections>
                     </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IZm-4D-r1b">
+                        <rect key="frame" x="14" y="90" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Swarm Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ahB-73-4pz">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="opsCmdCntrOrchStart:" target="-2" id="1Aw-WP-YRY"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IUE-Nl-gA0">
+                        <rect key="frame" x="14" y="57" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Swarm Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xtO-bm-buX">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="opsCmdCntrOrchStop:" target="-2" id="H2F-oj-eIc"/>
+                        </connections>
+                    </button>
                 </subviews>
             </view>
             <connections>

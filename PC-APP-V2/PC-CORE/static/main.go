@@ -316,6 +316,12 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
 
+                    case operation.CmdCntrOrchStart: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdCntrOrchStop: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
                     default:
                         log.Print("[OP] %v", e.String())
                     }

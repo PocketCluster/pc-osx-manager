@@ -94,6 +94,10 @@ extern void OpsCmdRegistryStart();
 
 extern void OpsCmdRegistryStop();
 
+extern void OpsCmdCntrOrchStart();
+
+extern void OpsCmdCntrOrchStop();
+
 extern void FeedStart();
 
 extern void FeedStop();

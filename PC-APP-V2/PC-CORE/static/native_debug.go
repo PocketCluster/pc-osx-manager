@@ -33,3 +33,17 @@ func OpsCmdRegistryStop() {
         Command:    operation.CmdRegistryStop,
     }
 }
+
+//export OpsCmdCntrOrchStart
+func OpsCmdCntrOrchStart() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdCntrOrchStart,
+    }
+}
+
+//export OpsCmdCntrOrchStop
+func OpsCmdCntrOrchStop() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdCntrOrchStop,
+    }
+}
