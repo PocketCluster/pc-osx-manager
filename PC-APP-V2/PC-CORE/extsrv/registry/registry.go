@@ -6,6 +6,7 @@ import (
     "net/http"
     "os"
     "time"
+    "io"
 
     log "github.com/Sirupsen/logrus"
     //logstash "github.com/bshuster-repo/logrus-logstash-hook"
@@ -70,6 +71,15 @@ func NewPocketRegistry(config *PocketRegistryConfig) (*PocketRegistry, error) {
     }, nil
 }
 
+// A Registry represents a complete instance of the registry.
+// TODO(aaronl): It might make sense for Registry to become an interface.
+type PocketRegistry struct {
+    config        *PocketRegistryConfig
+    app           *handlers.App
+    server 		  *http.Server
+    listener      io.Closer
+}
+
 // ListenAndServe runs the registry's HTTP server.
 func (r *PocketRegistry) ListenAndServe() error {
     config := r.config
@@ -84,12 +94,35 @@ func (r *PocketRegistry) ListenAndServe() error {
     return r.server.Serve(ln)
 }
 
-// A Registry represents a complete instance of the registry.
-// TODO(aaronl): It might make sense for Registry to become an interface.
-type PocketRegistry struct {
-    config        *PocketRegistryConfig
-    app           *handlers.App
-    server 		  *http.Server
+// ListenAndServe runs the registry's HTTP server.
+func (r *PocketRegistry) Start() (error) {
+    config := r.config
+
+    ln, err := listener.NewListener(config.regConfig.HTTP.Net, config.regConfig.HTTP.Addr)
+    if err != nil {
+        return err
+    }
+
+    ln = tls.NewListener(ln, config.tlsConfig)
+    context.GetLogger(r.app).Infof("listening on %v, tls", ln.Addr())
+    go func() {
+        var err = r.server.Serve(ln)
+        if err != nil {
+            log.Println("HTTP Server Error - ", err)
+        }
+    }()
+
+    r.listener = ln
+    return nil
+}
+
+func (r *PocketRegistry) Close() error {
+    if r.listener == nil {
+        return nil
+    }
+    ln := r.listener
+    r.listener = nil
+    return ln.Close()
 }
 
 func configureReporting(app *handlers.App) http.Handler {
@@ -184,6 +217,7 @@ func logLevel(level configuration.Loglevel) log.Level {
     return l
 }
 
+// TODO : insert sentry.io here
 // panicHandler add an HTTP handler to web app. The handler recover the happening
 // panic. logrus.Panic transmits panic message to pre-config log hooks, which is
 // defined in config.yml.

@@ -297,18 +297,24 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
 
-                    case operation.CmdImageRegistryStart: {
+                    case operation.CmdRegistryStart: {
                         log.Debugf("[OP] %v", e.String())
                         regiProc, err = regisrv.NewPocketRegistry(serviceConfig.regConfig)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
-                        regiProc.ListenAndServe()
+                        err = regiProc.Start()
+                        if err != nil {
+                            log.Debugf("[ERR] " + err.Error())
+                        }
                     }
-                    case operation.CmdImageRegistryStop: {
+                    case operation.CmdRegistryStop: {
+                        err = regiProc.Close()
+                        if err != nil {
+                            log.Debugf("[ERR] " + err.Error())
+                        }
                         log.Debugf("[OP] %v", e.String())
                     }
-
 
                     default:
                         log.Print("[OP] %v", e.String())

@@ -90,6 +90,10 @@ extern void OpsCmdTeleportStart();
 
 extern void OpsCmdTeleportStop();
 
+extern void OpsCmdRegistryStart();
+
+extern void OpsCmdRegistryStop();
+
 extern void FeedStart();
 
 extern void FeedStop();

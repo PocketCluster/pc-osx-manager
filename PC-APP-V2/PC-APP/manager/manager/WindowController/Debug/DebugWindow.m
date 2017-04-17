@@ -29,4 +29,12 @@
     OpsCmdTeleportStop();
 }
 
+- (IBAction)opsCmdRegistryStart:(id)sender {
+    OpsCmdRegistryStart();
+}
+
+- (IBAction)opsCmdRegistryStop:(id)sender {
+    OpsCmdRegistryStop();
+}
+
 @end

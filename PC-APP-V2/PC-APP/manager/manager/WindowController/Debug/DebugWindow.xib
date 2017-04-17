@@ -40,6 +40,26 @@
                             <action selector="opsCmdTeleportStop:" target="-2" id="lbj-jJ-Aqw"/>
                         </connections>
                     </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lOe-An-aD8">
+                        <rect key="frame" x="14" y="156" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Registry Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="8Tk-t9-kvl">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="opsCmdRegistryStart:" target="-2" id="KUx-WY-G4K"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="s57-yG-QMq">
+                        <rect key="frame" x="14" y="123" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Registry Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="02s-Yb-hZe">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="opsCmdRegistryStop:" target="-2" id="K8Z-bR-psy"/>
+                        </connections>
+                    </button>
                 </subviews>
             </view>
             <connections>

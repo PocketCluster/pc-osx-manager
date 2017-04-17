@@ -20,4 +20,16 @@ func OpsCmdTeleportStop() {
     }
 }
 
+//export OpsCmdRegistryStart
+func OpsCmdRegistryStart() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdRegistryStart,
+    }
+}
 
+//export OpsCmdRegistryStop
+func OpsCmdRegistryStop() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdRegistryStop,
+    }
+}

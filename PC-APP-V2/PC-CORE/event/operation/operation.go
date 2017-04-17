@@ -28,8 +28,8 @@ const (
     CmdCntrOrchStop
 
     // Registry control
-    CmdImageRegistryStart
-    CmdImageRegistryStop
+    CmdRegistryStart
+    CmdRegistryStop
 )
 
 func (c CommandType) String() string {
@@ -54,9 +54,9 @@ func (c CommandType) String() string {
             return "CmdCntrOrchStart"
         case CmdCntrOrchStop:
             return "CmdCntrOrchStop"
-        case CmdImageRegistryStart:
+        case CmdRegistryStart:
             return "CmdImageRegistryStart"
-        case CmdImageRegistryStop:
+        case CmdRegistryStop:
             return "CmdImageRegistryStop"
         default:
             return fmt.Sprintf("CommandType(%d)", c)
