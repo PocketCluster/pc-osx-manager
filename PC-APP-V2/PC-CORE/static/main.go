@@ -22,10 +22,12 @@ import (
     "github.com/stkim1/pc-core/record"
     telesrv "github.com/stkim1/pc-core/extsrv/teleport"
     regisrv "github.com/stkim1/pc-core/extsrv/registry"
+    swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
 )
 import (
     "github.com/tylerb/graceful"
     "github.com/davecgh/go-spew/spew"
+
 )
 
 func RunWebServer(wg *sync.WaitGroup) *graceful.Server {
@@ -98,8 +100,9 @@ func main_old() {
 }
 
 type serviceConfig struct {
-    teleConfig    *service.PocketConfig
-    regConfig     *regisrv.PocketRegistryConfig
+    teleConfig     *service.PocketConfig
+    regConfig      *regisrv.PocketRegistryConfig
+    swarmConfig    *swarmsrv.SwarmContext
 }
 
 func openContext() (*serviceConfig, error) {
@@ -173,8 +176,22 @@ func openContext() (*serviceConfig, error) {
     }
 
     // registry configuration
-    regCfg, err := regisrv.NewPocketRegistryConfig(false, "rootdir", caBundle.CACrtPem, caBundle.CAPrvKey)
+    regCfg, err := regisrv.NewPocketRegistryConfig(false, "rootdir", hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
+        log.Debugf(err.Error())
+        return nil, errors.WithStack(err)
+    }
+
+    // swarm configuration
+    context, err := swarmsrv.NewContextWithCertAndKey(
+        "0.0.0.0:3376",
+        "192.168.1.150:2375,192.168.1.151:2375,192.168.1.152:2375,192.168.1.153:2375,192.168.1.161:2375,192.168.1.162:2375,192.168.1.163:2375,192.168.1.164:2375,192.168.1.165:2375,192.168.1.166:2375",
+        caBundle.CAPubKey,
+        hostBundle.Certificate,
+        hostBundle.PrivateKey,
+    )
+    if err != nil {
+        // this is critical
         log.Debugf(err.Error())
         return nil, errors.WithStack(err)
     }
@@ -183,6 +200,7 @@ func openContext() (*serviceConfig, error) {
     return &serviceConfig {
         teleConfig: teleCfg,
         regConfig: regCfg,
+        swarmConfig: context,
     }, nil
 }
 

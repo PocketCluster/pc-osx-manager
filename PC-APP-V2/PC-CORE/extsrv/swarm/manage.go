@@ -1,10 +1,6 @@
 package swarm
 
 import (
-    "crypto/tls"
-    "crypto/x509"
-    "fmt"
-    "io/ioutil"
     "time"
 
     log "github.com/Sirupsen/logrus"
@@ -17,6 +13,8 @@ import (
     "github.com/docker/swarm/scheduler"
     "github.com/docker/swarm/scheduler/filter"
     "github.com/docker/swarm/scheduler/strategy"
+
+    "github.com/pkg/errors"
 )
 
 type logHandler struct {
@@ -59,68 +57,23 @@ func (h *statusHandler) Status() [][2]string {
     return status
 }
 
-// Load the TLS certificates/keys and, if verify is true, the CA.
-func loadTLSConfig(ca, cert, key string, verify bool) (*tls.Config, error) {
-    c, err := tls.LoadX509KeyPair(cert, key)
-    if err != nil {
-        return nil, fmt.Errorf("Couldn't load X509 key pair (%s, %s): %s. Key encrypted?",
-            cert, key, err)
-    }
-
-    config := &tls.Config{
-        Certificates: []tls.Certificate{c},
-        MinVersion:   tls.VersionTLS10,
-    }
-
-    if verify {
-        certPool := x509.NewCertPool()
-        file, err := ioutil.ReadFile(ca)
-        if err != nil {
-            return nil, fmt.Errorf("Couldn't read CA certificate: %s", err)
-        }
-        certPool.AppendCertsFromPEM(file)
-        config.RootCAs = certPool
-        config.ClientAuth = tls.RequireAndVerifyClientCert
-        config.ClientCAs = certPool
-    } else {
-        // If --tlsverify is not supplied, disable CA validation.
-        config.InsecureSkipVerify = true
-    }
-
-    return config, nil
-}
-
-func (context *SwarmContext) Manage() {
-    var (
-        tlsConfig *tls.Config
-        err       error
-    )
-
-    tlsConfig, err = loadTLSConfig(
-        context.tlsCa,
-        context.tlsCert,
-        context.tlsKey,
-        true)
-    if err != nil {
-        log.Fatal(err)
-    }
-
+func (context *SwarmContext) Manage() error {
     refreshMinInterval := context.refreshMinInterval
     refreshMaxInterval := context.refreshMaxInterval
     if refreshMinInterval <= time.Duration(0) * time.Second {
-        log.Fatal("min refresh interval should be a positive number")
+        return errors.Errorf("min refresh interval should be a positive number")
     }
     if refreshMaxInterval < refreshMinInterval {
-        log.Fatal("max refresh interval cannot be less than min refresh interval")
+        return errors.Errorf("max refresh interval cannot be less than min refresh interval")
     }
     // engine-refresh-retry is deprecated
     refreshRetry := context.refreshRetry
     if refreshRetry != 3 {
-        log.Fatal("--engine-refresh-retry is deprecated. Use --engine-failure-retry")
+        return errors.Errorf("--engine-refresh-retry is deprecated. Use --engine-failure-retry")
     }
     failureRetry := context.failureRetry
     if failureRetry <= 0 {
-        log.Fatal("invalid failure retry count")
+        return errors.Errorf("invalid failure retry count")
     }
     engineOpts := &cluster.EngineOpts {
         RefreshMinInterval: refreshMinInterval,
@@ -131,33 +84,33 @@ func (context *SwarmContext) Manage() {
     // FIXME : this should check the validity of node list (form, # of items, etc)
     uri := context.nodeList
     if uri == "" {
-        log.Fatalf("discovery required to manage a cluster.")
+        return errors.Errorf("discovery required to manage a cluster.")
     }
     discovery := createNodeDiscovery(context)
     s, err := strategy.New(context.strategy)
     if err != nil {
-        log.Fatal(err)
+        return errors.WithStack(err)
     }
 
     // see https://github.com/codegangsta/cli/issues/160
     names := []string{"health", "port", "containerslots", "dependency", "affinity", "constraint"}
     fs, err := filter.New(names)
     if err != nil {
-        log.Fatal(err)
+        return errors.WithStack(err)
     }
 
     sched := scheduler.New(s, fs)
     var cl cluster.Cluster
-    cl, err = swarm.NewCluster(sched, tlsConfig, discovery, context.clusterOpt, engineOpts)
+    cl, err = swarm.NewCluster(sched, context.tlsConfig, discovery, context.clusterOpt, engineOpts)
     if err != nil {
-        log.Fatal(err)
+        return errors.WithStack(err)
     }
 
     hosts := context.managerHost
-    server := NewServer(hosts, tlsConfig)
-    primary := api.NewPrimary(cl, tlsConfig, &statusHandler{cl, nil, nil}, context.debug, context.cors)
+    server := NewServer(hosts, context.tlsConfig)
+    primary := api.NewPrimary(cl, context.tlsConfig, &statusHandler{cl, nil, nil}, context.debug, context.cors)
     server.SetHandler(primary)
     cluster.NewWatchdog(cl)
 
-    log.Fatal(server.ListenAndServe())
+    return errors.WithStack(server.ListenAndServe())
 }
