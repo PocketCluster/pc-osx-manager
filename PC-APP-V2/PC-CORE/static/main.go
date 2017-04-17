@@ -183,7 +183,7 @@ func openContext() (*serviceConfig, error) {
     }
 
     // swarm configuration
-    context, err := swarmsrv.NewContextWithCertAndKey(
+    swarmCfg, err := swarmsrv.NewContextWithCertAndKey(
         "0.0.0.0:3376",
         "192.168.1.150:2375,192.168.1.151:2375,192.168.1.152:2375,192.168.1.153:2375,192.168.1.161:2375,192.168.1.162:2375,192.168.1.163:2375,192.168.1.164:2375,192.168.1.165:2375,192.168.1.166:2375",
         caBundle.CAPubKey,
@@ -200,7 +200,7 @@ func openContext() (*serviceConfig, error) {
     return &serviceConfig {
         teleConfig: teleCfg,
         regConfig: regCfg,
-        swarmConfig: context,
+        swarmConfig: swarmCfg,
     }, nil
 }
 
@@ -212,6 +212,7 @@ func main() {
             serviceConfig *serviceConfig = nil
             teleProc *process.PocketCoreProcess = nil
             regiProc *regisrv.PocketRegistry = nil
+            swarmProc *swarmsrv.Server
             err error = nil
         )
 
@@ -335,6 +336,14 @@ func main() {
                     }
 
                     case operation.CmdCntrOrchStart: {
+                        swarmProc, err = swarmsrv.NewSwarmServer(serviceConfig.swarmConfig)
+                        if err != nil {
+                            log.Debugf("[ERR] " + err.Error())
+                        }
+                        err = swarmProc.ListenAndServe()
+                        if err != nil {
+                            log.Debugf("[ERR] " + err.Error())
+                        }
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdCntrOrchStop: {

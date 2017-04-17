@@ -99,6 +99,8 @@ func loadTLSConfigFromFiles(ca, cert, key string, verify bool) (*tls.Config, err
 func NewContextWithCertAndKey(host, nodeList string, tlsCa, tlsCert, tlsKey []byte) (*SwarmContext, error) {
     discoveryOpt := make(map[string]string)
     clusterOpt := cluster.DriverOpts{}
+
+    // TODO : (04/17/2017) We should check if verifying clients with CA would results in errors for clients to connect
     tlsConfig, err := buildTLSConfig(tlsCa, tlsCert, tlsKey, true)
     if err != nil {
         errors.WithStack(err)

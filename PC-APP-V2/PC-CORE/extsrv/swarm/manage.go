@@ -114,3 +114,61 @@ func (context *SwarmContext) Manage() error {
 
     return errors.WithStack(server.ListenAndServe())
 }
+
+func NewSwarmServer(context *SwarmContext) (*Server, error) {
+    refreshMinInterval := context.refreshMinInterval
+    refreshMaxInterval := context.refreshMaxInterval
+    if refreshMinInterval <= time.Duration(0) * time.Second {
+        return nil, errors.Errorf("min refresh interval should be a positive number")
+    }
+    if refreshMaxInterval < refreshMinInterval {
+        return nil, errors.Errorf("max refresh interval cannot be less than min refresh interval")
+    }
+    // engine-refresh-retry is deprecated
+    refreshRetry := context.refreshRetry
+    if refreshRetry != 3 {
+        return nil, errors.Errorf("--engine-refresh-retry is deprecated. Use --engine-failure-retry")
+    }
+    failureRetry := context.failureRetry
+    if failureRetry <= 0 {
+        return nil, errors.Errorf("invalid failure retry count")
+    }
+    engineOpts := &cluster.EngineOpts {
+        RefreshMinInterval: refreshMinInterval,
+        RefreshMaxInterval: refreshMaxInterval,
+        FailureRetry:       failureRetry,
+    }
+
+    // FIXME : this should check the validity of node list (form, # of items, etc)
+    uri := context.nodeList
+    if uri == "" {
+        return nil, errors.Errorf("discovery required to manage a cluster.")
+    }
+    discovery := createNodeDiscovery(context)
+    s, err := strategy.New(context.strategy)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+
+    // see https://github.com/codegangsta/cli/issues/160
+    names := []string{"health", "port", "containerslots", "dependency", "affinity", "constraint"}
+    fs, err := filter.New(names)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+
+    sched := scheduler.New(s, fs)
+    var cl cluster.Cluster
+    cl, err = swarm.NewCluster(sched, context.tlsConfig, discovery, context.clusterOpt, engineOpts)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+
+    hosts := context.managerHost
+    server := NewServer(hosts, context.tlsConfig)
+    primary := api.NewPrimary(cl, context.tlsConfig, &statusHandler{cl, nil, nil}, context.debug, context.cors)
+    server.SetHandler(primary)
+    cluster.NewWatchdog(cl)
+
+    return server, nil
+}
