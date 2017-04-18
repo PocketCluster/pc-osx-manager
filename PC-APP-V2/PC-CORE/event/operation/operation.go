@@ -21,7 +21,7 @@ const (
 
     // ETCD control
     CmdStorageStart
-    CmdStroageStop
+    CmdStorageStop
 
     // swarm control
     CmdCntrOrchStart
@@ -48,7 +48,7 @@ func (c CommandType) String() string {
             return "CmdTeleportStop"
         case CmdStorageStart:
             return "CmdStorageStart"
-        case CmdStroageStop:
+        case CmdStorageStop:
             return "CmdStroageStop"
         case CmdCntrOrchStart:
             return "CmdCntrOrchStart"

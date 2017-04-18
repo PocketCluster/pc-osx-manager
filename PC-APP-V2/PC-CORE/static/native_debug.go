@@ -47,3 +47,17 @@ func OpsCmdCntrOrchStop() {
         Command:    operation.CmdCntrOrchStop,
     }
 }
+
+//export OpsCmdStorageStart
+func OpsCmdStorageStart() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdStorageStart,
+    }
+}
+
+//export OpsCmdStorageStop
+func OpsCmdStorageStop() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdStorageStop,
+    }
+}

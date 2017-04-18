@@ -98,6 +98,10 @@ extern void OpsCmdCntrOrchStart();
 
 extern void OpsCmdCntrOrchStop();
 
+extern void OpsCmdStorageStart();
+
+extern void OpsCmdStorageStop();
+
 extern void FeedStart();
 
 extern void FeedStop();

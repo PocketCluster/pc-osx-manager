@@ -45,4 +45,12 @@
     OpsCmdCntrOrchStop();
 }
 
+- (IBAction)opsCmdStorageStart:(id)sender {
+    OpsCmdStorageStart();
+}
+
+- (IBAction)opsCmdStorageStop:(id)sender {
+    OpsCmdStorageStop();
+}
+
 @end

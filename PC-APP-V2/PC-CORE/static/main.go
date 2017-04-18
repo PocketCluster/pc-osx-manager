@@ -12,6 +12,8 @@ import (
     "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/process"
     "github.com/gravitational/teleport/lib/utils"
+
+    "github.com/coreos/etcd/embed"
     "github.com/pkg/errors"
 
     "github.com/stkim1/pc-core/context"
@@ -23,6 +25,7 @@ import (
     telesrv "github.com/stkim1/pc-core/extsrv/teleport"
     regisrv "github.com/stkim1/pc-core/extsrv/registry"
     swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
+    etcdsrv "github.com/stkim1/pc-core/extsrv/etcd"
 )
 import (
     "github.com/tylerb/graceful"
@@ -100,6 +103,7 @@ func main_old() {
 }
 
 type serviceConfig struct {
+    etcdConfig     *embed.Config
     teleConfig     *service.PocketConfig
     regConfig      *regisrv.PocketRegistryConfig
     swarmConfig    *swarmsrv.SwarmContext
@@ -176,7 +180,8 @@ func openContext() (*serviceConfig, error) {
     }
 
     // registry configuration
-    regCfg, err := regisrv.NewPocketRegistryConfig(false, "rootdir", hostBundle.Certificate, hostBundle.PrivateKey)
+    // TODO : fix datadir. Plus, is it ok not to pass CA pub key? we need to unify TLS configuration
+    regCfg, err := regisrv.NewPocketRegistryConfig(false, dataDir, hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
         log.Debugf(err.Error())
         return nil, errors.WithStack(err)
@@ -196,8 +201,17 @@ func openContext() (*serviceConfig, error) {
         return nil, errors.WithStack(err)
     }
 
+    //etcd configuration
+    // TODO fix datadir
+    etcdCfg, err := etcdsrv.NewEtcdConfig(dataDir,caBundle.CAPubKey, hostBundle.Certificate, hostBundle.PrivateKey)
+    if err != nil {
+        // this is critical
+        log.Debugf(err.Error())
+        return nil, errors.WithStack(err)
+    }
     //log.Info(spew.Sdump(ctx))
     return &serviceConfig {
+        etcdConfig: etcdCfg,
         teleConfig: teleCfg,
         regConfig: regCfg,
         swarmConfig: swarmCfg,
@@ -213,6 +227,7 @@ func main() {
             teleProc *process.PocketCoreProcess = nil
             regiProc *regisrv.PocketRegistry = nil
             swarmProc *swarmsrv.Server
+            etcdProc *embed.Etcd
             err error = nil
         )
 
@@ -348,6 +363,19 @@ func main() {
                     }
                     case operation.CmdCntrOrchStop: {
                         log.Debugf("[OP] %v", e.String())
+                    }
+
+                    case operation.CmdStorageStart: {
+                        log.Debugf("[OP] %v", e.String())
+                        etcdProc, err = embed.StartEtcd(serviceConfig.etcdConfig)
+                        if err != nil {
+                            log.Debugf("[ERR] " + err.Error())
+                        }
+                        etcdProc.Server.Start()
+                    }
+                    case operation.CmdStorageStop: {
+                        log.Debugf("[OP] %v", e.String())
+                        etcdProc.Server.Stop()
                     }
                     default:
                         log.Print("[OP] %v", e.String())
