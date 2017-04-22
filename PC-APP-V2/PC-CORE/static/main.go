@@ -25,7 +25,6 @@ import (
     telesrv "github.com/stkim1/pc-core/extsrv/teleport"
     regisrv "github.com/stkim1/pc-core/extsrv/registry"
     swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
-    etcdsrv "github.com/stkim1/pc-core/extsrv/etcd"
 )
 import (
     "github.com/tylerb/graceful"
@@ -103,7 +102,7 @@ func main_old() {
 }
 
 type serviceConfig struct {
-    etcdConfig     *embed.Config
+    etcdConfig     *embed.PocketConfig
     teleConfig     *service.PocketConfig
     regConfig      *regisrv.PocketRegistryConfig
     swarmConfig    *swarmsrv.SwarmContext
@@ -203,7 +202,7 @@ func openContext() (*serviceConfig, error) {
 
     //etcd configuration
     // TODO fix datadir
-    etcdCfg, err := etcdsrv.NewEtcdConfig(dataDir,caBundle.CAPubKey, hostBundle.Certificate, hostBundle.PrivateKey)
+    etcdCfg, err := embed.NewPocketConfig(dataDir, caBundle.CAPubKey, hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
         // this is critical
         log.Debugf(err.Error())
@@ -227,7 +226,7 @@ func main() {
             teleProc *process.PocketCoreProcess = nil
             regiProc *regisrv.PocketRegistry = nil
             swarmProc *swarmsrv.Server
-            etcdProc *embed.Etcd
+            etcdProc *embed.PocketEtcd
             err error = nil
         )
 
@@ -367,7 +366,7 @@ func main() {
 
                     case operation.CmdStorageStart: {
                         log.Debugf("[OP] %v", e.String())
-                        etcdProc, err = embed.StartEtcd(serviceConfig.etcdConfig)
+                        etcdProc, err = embed.StartPocketEtcd(serviceConfig.etcdConfig)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
