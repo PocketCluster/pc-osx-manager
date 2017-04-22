@@ -96,8 +96,11 @@ func NewEtcdConfig() *embed.Config {
 }
 
 func main() {
-    cfg := NewEtcdConfig()
-    e, err := embed.StartEtcd(cfg)
+    cfg, err := embed.NewPocketConfig("/Users/almightykim/Workspace/DKIMG/ETCD/data", nil, nil, nil)
+    if err != nil {
+        log.Fatal(err)
+    }
+    e, err := embed.StartPocketEtcd(cfg)
     if err != nil {
         log.Fatal(err)
     }
