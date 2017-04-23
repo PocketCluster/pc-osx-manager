@@ -226,7 +226,7 @@ func main() {
             teleProc *process.PocketCoreProcess = nil
             regiProc *regisrv.PocketRegistry = nil
             swarmProc *swarmsrv.Server
-            etcdProc *embed.PocketEtcd
+//            etcdProc *embed.PocketEtcd
             err error = nil
         )
 
@@ -366,15 +366,33 @@ func main() {
 
                     case operation.CmdStorageStart: {
                         log.Debugf("[OP] %v", e.String())
+/*
                         etcdProc, err = embed.StartPocketEtcd(serviceConfig.etcdConfig)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
                         etcdProc.Server.Start()
+*/
+                        go func() {
+                            e, err := embed.StartPocketEtcd(serviceConfig.etcdConfig)
+                            if err != nil {
+                                log.Debugf(err.Error())
+                                return
+                            }
+                            defer e.Close()
+                            select {
+                            case <-e.Server.ReadyNotify():
+                                log.Printf("Server is ready!")
+                            case <-time.After(60 * time.Second):
+                                e.Server.Stop() // trigger a shutdown
+                                log.Printf("Server took too long to start!")
+                            }
+                            log.Fatal(<-e.Err())
+                        }()
                     }
                     case operation.CmdStorageStop: {
                         log.Debugf("[OP] %v", e.String())
-                        etcdProc.Server.Stop()
+//                        etcdProc.Server.Stop()
                     }
                     default:
                         log.Print("[OP] %v", e.String())
