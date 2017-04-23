@@ -3,100 +3,16 @@ package main
 import (
     "log"
     "time"
-    "net/url"
+    "io/ioutil"
 
     "github.com/coreos/etcd/embed"
-    "github.com/coreos/etcd/pkg/cors"
-    "github.com/coreos/etcd/etcdserver"
-    "github.com/coreos/etcd/pkg/transport"
 )
-
-const (
-    DefaultName                     = "pc-master"
-    DefaultInitialClusterMember     = "pc-master=http://127.0.0.1:2380"
-    DefaultAdvertiseClientURLs      = "https://pc-master:2379"
-    DefaultListenClientURLs         = "https://0.0.0.0:2379"
-    DefaultInitialAdvertisePeerURLs = "http://127.0.0.1:2380"
-    DefaultListenPeerURLs           = "http://127.0.0.1:2380"
-    DefaultInitialClusterToken      = "pocketcluster-kvstorage"
-)
-
-/*
-# leaner config. listen to local only for peer
---data-dir =                    "/Users/almightykim/Workspace/DKIMG/ETCD/data"
---name =                        "pc-master"
-
---heartbeat-interval =          5000
---election-timeout =            50000
-
---listen-peer-urls =            "http://127.0.0.1:2380"
---listen-client-urls =          "https://0.0.0.0:2379"
---initial-advertise-peer-urls = "http://127.0.0.1:2380"
---advertise-client-urls =       "https://pc-master:2379"
-
---initial-cluster =             "pc-master=http://127.0.0.1:2380"
-
---cert-file =                   "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert"
---key-file =                    "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key"
---trusted-ca-file =             "/Users/almightykim/Workspace/DKIMG/CERT/ca-cert.pub"
---client-cert-auth =            true
-*/
-
-// For full Config options, take a look at "github.com/coreos/etcd/etcdmain/config.go"
-// Those hard-coded values should be adjusted at later re-iteration
-
-func NewEtcdConfig() *embed.Config {
-    // --listen-peer-urls
-    lpurl, _ := url.Parse(DefaultListenPeerURLs)
-    // --initial-advertise-peer-urls
-    apurl, _ := url.Parse(DefaultInitialAdvertisePeerURLs)
-    // --listen-client-urls
-    lcurl, _ := url.Parse(DefaultListenClientURLs)
-    // --advertise-client-urls
-    acurl, _ := url.Parse(DefaultAdvertiseClientURLs)
-
-    cfg := &embed.Config {
-        CorsInfo:               &cors.CORSInfo{},
-        MaxSnapFiles:           embed.DefaultMaxSnapshots,
-        MaxWalFiles:            embed.DefaultMaxWALs,
-        SnapCount:              etcdserver.DefaultSnapCount,
-        // --data-dir
-        Dir:                    "/Users/almightykim/Workspace/DKIMG/ETCD/data",
-        Name:                   DefaultName,                       // --name
-        TickMs:                 5000,                              // --heartbeat-interval
-        ElectionMs:             50000,                             // --election-timeout
-        LPUrls:                 []url.URL{*lpurl},                 // --listen-peer-urls
-        LCUrls:                 []url.URL{*lcurl},                 // --listen-client-urls
-        APUrls:                 []url.URL{*apurl},                 // --initial-advertise-peer-urls
-        ACUrls:                 []url.URL{*acurl},                 // --advertise-client-urls
-        ClusterState:           embed.ClusterStateFlagNew,
-        InitialCluster:         DefaultInitialClusterMember,       // --initial-cluster
-        InitialClusterToken:    DefaultInitialClusterToken,
-        StrictReconfigCheck:    true,
-        Metrics:                "basic",
-
-        // Do not auto generate any certificate
-        ClientAutoTLS:          false,
-        PeerAutoTLS:            false,
-        Debug:                  false,
-
-        // client certificate options
-        ClientTLSInfo:          transport.TLSInfo {
-            // --cert-file
-            CertFile:           "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert",
-            // --key-file
-            KeyFile:            "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key",
-            // --trusted-ca-file
-            TrustedCAFile:      "/Users/almightykim/Workspace/DKIMG/CERT/ca-cert.pub",
-            // --client-cert-auth
-            ClientCertAuth:     true,
-        },
-    }
-    return cfg
-}
 
 func main() {
-    cfg, err := embed.NewPocketConfig("/Users/almightykim/Workspace/DKIMG/ETCD/data", nil, nil, nil)
+    cert, _ := ioutil.ReadFile("/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert")
+    key, _  := ioutil.ReadFile("/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key")
+    ca, _   := ioutil.ReadFile("/Users/almightykim/Workspace/DKIMG/CERT/ca-cert.pub")
+    cfg, err := embed.NewPocketConfig("/Users/almightykim/Workspace/DKIMG/ETCD/data", ca, cert, key)
     if err != nil {
         log.Fatal(err)
     }
