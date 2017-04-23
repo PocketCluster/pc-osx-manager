@@ -190,7 +190,7 @@ func openContext() (*serviceConfig, error) {
     swarmCfg, err := swarmsrv.NewContextWithCertAndKey(
         "0.0.0.0:3376",
         "192.168.1.150:2375,192.168.1.151:2375,192.168.1.152:2375,192.168.1.153:2375,192.168.1.161:2375,192.168.1.162:2375,192.168.1.163:2375,192.168.1.164:2375,192.168.1.165:2375,192.168.1.166:2375",
-        caBundle.CAPubKey,
+        caBundle.CACrtPem,
         hostBundle.Certificate,
         hostBundle.PrivateKey,
     )
@@ -202,7 +202,7 @@ func openContext() (*serviceConfig, error) {
 
     //etcd configuration
     // TODO fix datadir
-    etcdCfg, err := embed.NewPocketConfig(dataDir, caBundle.CAPubKey, hostBundle.Certificate, hostBundle.PrivateKey)
+    etcdCfg, err := embed.NewPocketConfig(dataDir, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
         // this is critical
         log.Debugf(err.Error())
