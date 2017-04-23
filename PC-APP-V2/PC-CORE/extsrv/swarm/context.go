@@ -103,7 +103,7 @@ func NewContextWithCertAndKey(host, nodeList string, tlsCa, tlsCert, tlsKey []by
     // TODO : (04/17/2017) We should check if verifying clients with CA would results in errors for clients to connect. It appears to be ok with file version
     tlsConfig, err := buildTLSConfig(tlsCa, tlsCert, tlsKey, true)
     if err != nil {
-        errors.WithStack(err)
+        return nil, errors.WithStack(err)
     }
 
     return &SwarmContext {
