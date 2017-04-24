@@ -114,17 +114,20 @@ func randBytesWithMaskSrc(n int) []byte {
 }
 
 // this is crypto rand function generator
-func randCryptoBytes(n int) ([]byte, error) {
+func randCryptoBytes(n int) ([]byte) {
     b := make([]byte, n)
-    _, err := cryptorand.Read(b)
-    // Note that err == nil only if we read len(b) bytes.
-    if err != nil {
-        return nil, err
+    for {
+        _, err := cryptorand.Read(b)
+        // Note that err == nil only if we read len(b) bytes.
+        if err == nil {
+            break
+        }
     }
-
-    return b, nil
+    return b
 }
 
 func NewAESKey32Byte() []byte {
-    return randBytesWithMask(32)
+    // when Cryptography is asked, cryptography grade random string should be in place
+    // return randBytesWithMask(32)
+    return randCryptoBytes(32)
 }

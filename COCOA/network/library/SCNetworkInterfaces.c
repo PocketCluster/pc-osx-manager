@@ -21,7 +21,7 @@
  */
 
 #include "SCNetworkInterfaces.h"
-#include "util.h"
+#include "PCStaticUtility.h"
 
 // in general, it is recommended to copy struct data to CF- collection, but in
 // in order to reduce memory ops, we'll not going to copy struct.

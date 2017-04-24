@@ -1,23 +1,21 @@
 package pcrypto
 
-
 import (
-    "encoding/pem"
     "crypto"
     "crypto/rand"
     "crypto/x509"
     "crypto/x509/pkix"
+    "encoding/pem"
     "encoding/asn1"
     "fmt"
+    "io"
     "math/big"
     "net"
     "strings"
     "time"
-    "io"
 
     "github.com/cloudflare/cfssl/config"
     "github.com/stkim1/pcrypto/helpers"
-
 )
 
 type basicConstraints struct {
@@ -359,11 +357,11 @@ type CaSigner struct {
     caCert      []byte
     sigAlgo     x509.SignatureAlgorithm
     policy      *config.Signing
-    clusterID   string
+    domainName  string
     country     string
 }
 
-func NewCertAuthoritySigner(caKey, caCert []byte, clusterID, country string) (*CaSigner, error) {
+func NewCertAuthoritySigner(caKey, caCert []byte, domainName, country string) (*CaSigner, error) {
     caPrvKeyPEM, err := helpers.ParsePrivateKeyPEM(caKey)
     if err != nil {
         return nil, err
@@ -376,11 +374,11 @@ func NewCertAuthoritySigner(caKey, caCert []byte, clusterID, country string) (*C
         Profiles: map[string]*config.SigningProfile{},
         Default:  config.DefaultConfig(),
     }
-    if len(clusterID) == 0 {
-        return nil, fmt.Errorf("[ERR] Invalid cluster identification")
+    if len(domainName) == 0 {
+        return nil, &certError{"[ERR] Invalid cluster id"}
     }
     if len(country) == 0 {
-        return nil, fmt.Errorf("[ERR] Invalid country code")
+        return nil, &certError{"[ERR] Invalid country code"}
     }
     return &CaSigner{
         caPrvKeyPEM:   caPrvKeyPEM,
@@ -388,7 +386,7 @@ func NewCertAuthoritySigner(caKey, caCert []byte, clusterID, country string) (*C
         caCert:        caCert,
         sigAlgo:       helpers.DefaultSigAlgo(caPrvKeyPEM),
         policy:        policy,
-        clusterID:     strings.ToLower(clusterID),
+        domainName:    domainName,
         country:       strings.ToUpper(country),
     }, nil
 }
@@ -397,7 +395,7 @@ func NewCertAuthoritySigner(caKey, caCert []byte, clusterID, country string) (*C
 // GenerateSignedCertificate returned a signed certificate
 func (s *CaSigner) GenerateSignedCertificate(hostname, ipAddress string, privateKey []byte) ([]byte, error) {
     if len(hostname) == 0 {
-        return nil, fmt.Errorf("[ERR] Invalid hostname")
+        return nil, &certError{"[ERR] Invalid hostname"}
     }
     // TODO : we need to check if CA's cluster id the same as csr's clusteid
     subject := &requestSubject{
@@ -412,8 +410,9 @@ func (s *CaSigner) GenerateSignedCertificate(hostname, ipAddress string, private
     if err != nil {
         return nil, err
     }
+    fqdn := fmt.Sprintf("%s.%s", strings.ToLower(hostname), s.domainName)
     creq := signRequest{
-        dnsName:    []string{fmt.Sprintf("%s.%s.cluster.pocketcluster.io", strings.ToLower(hostname), s.clusterID)},
+        dnsName:    []string{hostname, fqdn},
         Request:    string(nodereq),
         Subject:    subject,
     }
@@ -421,7 +420,7 @@ func (s *CaSigner) GenerateSignedCertificate(hostname, ipAddress string, private
         creq.ipAddress = []string{ipAddress}
     }
     if !s.policy.Valid() {
-        return nil, fmt.Errorf("[ERR] Invalid Certificate Authority Policy")
+        return nil, &certError{"[ERR] Invalid Certificate Authority Policy"}
     }
     return signCertificateRequest(s, creq)
 }

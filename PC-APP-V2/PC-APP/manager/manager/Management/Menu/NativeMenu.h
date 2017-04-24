@@ -5,8 +5,8 @@
 //  Copyright (c) 2014 Lanayo. All rights reserved.
 //
 
-#import "PocketCluster-Swift.h"
 #import "Util.h"
+#import "AboutWindow.h"
 
 @interface NativeMenu : NSObject <NSMenuDelegate>{
 @private

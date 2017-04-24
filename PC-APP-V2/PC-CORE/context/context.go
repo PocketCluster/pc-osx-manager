@@ -2,11 +2,11 @@
 package context
 
 import (
+    "os"
     "sync"
-    "fmt"
 
     "github.com/ricochet2200/go-disk-usage/du"
-    "os"
+    "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
 )
 
@@ -38,15 +38,19 @@ type HostContext interface {
 
     CurrentCountryCode() (string, error)
     CurrentLanguageCode() (string, error)
-
     MasterAgentName() (string, error)
-    MasterPublicKey() ([]byte, error)
-    MasterPrivateKey() ([]byte, error)
 
-    MasterCaAuthority() (*pcrypto.CaSigner, error)
+    // cert authority
+    CertAuthSigner() (*pcrypto.CaSigner, error)
+    CertAuthPublicKey() ([]byte, error)
+    // host certificate
+    MasterHostPrivateKey() ([]byte, error)
+    MasterHostCertificate() ([]byte, error)
 }
 
 type hostContext struct {
+    sync.Mutex
+
     hostInterfaces               *[]*HostNetworkInterface
     hostGateways                 *[]*HostNetworkGateway
 
@@ -70,38 +74,50 @@ type hostContext struct {
     processorCount               uint
     activeProcessorCount         uint
     physicalMemorySize           uint64
-
     hostDeviceSerial             string
-    publicKeyData                []byte
-    privateKeyData               []byte
 
     currentCountryCode           string
     currentLanguageCode          string
 
+    // certificate authority
     *pcrypto.CaSigner
+    caPrivateKey                 []byte
+    caPublicKey                  []byte
+    caCertificate                []byte
+    caSSHChecker                 []byte
+
+    // host certificate
+    hostPrivateKey               []byte
+    hostPublicKey                []byte
+    hostSshKey                   []byte
+    hostCertifcate               []byte
 }
 
 // singleton initialization
-var context *hostContext = nil
-var once sync.Once
+var _context *hostContext = nil
+var _once sync.Once
 
 func SharedHostContext() (HostContext) {
     return singletonContextInstance()
 }
 
 func singletonContextInstance() (*hostContext) {
-    once.Do(func() {
-        context = &hostContext{}
-        initializeHostContext(context)
+    _once.Do(func() {
+        _context = &hostContext{}
+        _context.RefreshStatus()
     })
-    return context
-}
-
-func initializeHostContext(ctx *hostContext) {
+    return _context
 }
 
 // take network interfaces
-func (ctx *hostContext) monitorNetworkInterfaces(interfaces []*HostNetworkInterface) {
+func MonitorNetworkInterfaces(interfaces []*HostNetworkInterface) {
+    singletonContextInstance().refreshNetworkInterfaces(interfaces)
+}
+
+func (ctx *hostContext) refreshNetworkInterfaces(interfaces []*HostNetworkInterface) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
     // TODO : we make an assumption that host's primary interface and network addresses are at the same network segment. This could not be the case, we'll look into it v0.1.5
     ctx.hostInterfaces = &interfaces
 
@@ -131,7 +147,14 @@ func (ctx *hostContext) monitorNetworkInterfaces(interfaces []*HostNetworkInterf
     }
 }
 
-func (ctx *hostContext) monitorNetworkGateways(gateways []*HostNetworkGateway) {
+func MonitorNetworkGateways(gateways []*HostNetworkGateway) {
+    singletonContextInstance().refreshNetworkGateways(gateways)
+}
+
+func (ctx *hostContext) refreshNetworkGateways(gateways []*HostNetworkGateway) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
     for _, gw := range gateways {
         if gw.IsDefault {
             ctx.primaryGateway = gw
@@ -140,79 +163,117 @@ func (ctx *hostContext) monitorNetworkGateways(gateways []*HostNetworkGateway) {
     return
 }
 
+type CertAuthBundle struct {
+    CASigner *pcrypto.CaSigner
+    CAPrvKey []byte
+    CAPubKey []byte
+    CACrtPem []byte
+    CASSHChk []byte
+}
+
+func UpdateCertAuth(bundle *CertAuthBundle) {
+    ctx := singletonContextInstance()
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    ctx.CaSigner        = bundle.CASigner
+    ctx.caPrivateKey    = bundle.CAPrvKey
+    ctx.caPublicKey     = bundle.CAPubKey
+    ctx.caCertificate   = bundle.CACrtPem
+    ctx.caSSHChecker    = bundle.CASSHChk
+}
+
+type HostCertBundle struct {
+    PrivateKey     []byte
+    PublicKey      []byte
+    SshKey         []byte
+    Certificate    []byte
+}
+
+func UpdateHostCert(bundle *HostCertBundle) {
+    ctx := singletonContextInstance()
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    ctx.hostPrivateKey  = bundle.PrivateKey
+    ctx.hostPublicKey   = bundle.PublicKey
+    ctx.hostSshKey      = bundle.SshKey
+    ctx.hostCertifcate  = bundle.Certificate
+}
+
 func (ctx *hostContext) CocoaHomeDirectory() (string, error) {
     if len(ctx.cocoaHomePath) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid Cocoa Home Directory")
+        return "", errors.Errorf("[ERR] Invalid Cocoa Home Directory")
     }
     return ctx.cocoaHomePath, nil
 }
 
 func (ctx *hostContext) PosixHomeDirectory() (string, error) {
     if len(ctx.posixHomePath) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid Posix Home Directory")
+        return "", errors.Errorf("[ERR] Invalid Posix Home Directory")
     }
     return ctx.posixHomePath, nil
 }
 
 func (ctx *hostContext) FullUserName() (string, error) {
     if len(ctx.fullUserName) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid Full Username")
+        return "", errors.Errorf("[ERR] Invalid Full Username")
     }
     return ctx.fullUserName, nil
 }
 
 func (ctx *hostContext) LoginUserName() (string, error) {
     if len(ctx.loginUserName) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid Login user name")
+        return "", errors.Errorf("[ERR] Invalid Login user name")
     }
     return ctx.loginUserName, nil
 }
 
 func (ctx *hostContext) UserTemporaryDirectory() (string, error) {
     if len(ctx.userTempPath) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid user temp directory")
+        return "", errors.Errorf("[ERR] Invalid user temp directory")
     }
     return ctx.userTempPath, nil
 }
 
 func (ctx *hostContext) ApplicationSupportDirectory() (string, error) {
     if len(ctx.applicationSupportPath) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid App support directory")
+        return "", errors.Errorf("[ERR] Invalid App support directory")
     }
     return ctx.applicationSupportPath, nil
 }
 
 func (ctx *hostContext) ApplicationDocumentsDirectoru() (string, error) {
     if len(ctx.applicationDocumentPath) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid App doc directory")
+        return "", errors.Errorf("[ERR] Invalid App doc directory")
     }
     return ctx.applicationDocumentPath, nil
 }
 
 func (ctx *hostContext) ApplicationTemporaryDirectory() (string, error) {
     if len(ctx.applicationTempPath) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid App temp directory")
+        return "", errors.Errorf("[ERR] Invalid App temp directory")
     }
     return ctx.applicationTempPath, nil
 }
 
 func (ctx *hostContext) ApplicationLibraryCacheDirectory() (string, error) {
     if len(ctx.applicationLibCachePath) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid App lib cache directory")
+        return "", errors.Errorf("[ERR] Invalid App lib cache directory")
     }
     return ctx.applicationLibCachePath, nil
 }
 
 func (ctx *hostContext) ApplicationResourceDirectory() (string, error) {
     if len(ctx.applicationResourcePath) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid app resource directory")
+        return "", errors.Errorf("[ERR] Invalid app resource directory")
     }
     return ctx.applicationResourcePath, nil
 }
 
 func (ctx *hostContext) ApplicationExecutableDirectory() (string, error) {
     if len(ctx.applicationExecutablePath) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid app exec directory")
+        return "", errors.Errorf("[ERR] Invalid app exec directory")
     }
     return ctx.applicationExecutablePath, nil
 }
@@ -238,7 +299,7 @@ func (ctx *hostContext) ApplicationUserDataDirectory() (string, error) {
 
 func (ctx *hostContext) HostDeviceSerial() (string, error) {
     if len(ctx.hostDeviceSerial) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid host device serial")
+        return "", errors.Errorf("[ERR] Invalid host device serial")
     }
     return ctx.hostDeviceSerial, nil
 }
@@ -249,7 +310,7 @@ func (ctx *hostContext) HostPrimaryAddress() (string, error) {
         return addr.Address, nil
     }
 
-    return "", fmt.Errorf("[ERR] No primary address has been found")
+    return "", errors.Errorf("[ERR] No primary address has been found")
 }
 
 func (ctx *hostContext) HostDefaultGatewayAddress() (string, error) {
@@ -258,7 +319,7 @@ func (ctx *hostContext) HostDefaultGatewayAddress() (string, error) {
         return gateway.Address, nil
     }
 
-    return "", fmt.Errorf("[ERR] No default gateway is found")
+    return "", errors.Errorf("[ERR] No default gateway is found")
 }
 
 func (ctx *hostContext) HostProcessorCount() uint {
@@ -277,6 +338,7 @@ func (ctx *hostContext) HostPhysicalMemorySize() uint64 {
 func (ctx *hostContext) HostStorageSpaceStatus() (total uint64, available uint64) {
     var MB = uint64(1024 * 1024)
     usage := du.NewDiskUsage("/")
+
 /*
     fmt.Println("Free:", usage.Free()/(MB))
     fmt.Println("Available:", usage.Available()/(MB))
@@ -293,43 +355,49 @@ func (ctx *hostContext) HostStorageSpaceStatus() (total uint64, available uint64
 //TODO : master specific identifier is necessary
 func (ctx *hostContext) MasterAgentName() (string, error) {
     if len(ctx.hostDeviceSerial) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid host device serial")
+        return "", errors.Errorf("[ERR] Invalid host device serial")
     }
     return ctx.hostDeviceSerial, nil
 }
 
-func (ctx *hostContext) MasterPublicKey() ([]byte, error) {
-    if len(ctx.publicKeyData) == 0 {
-        return nil, fmt.Errorf("[ERR] Invalid master public key data")
-    }
-    return ctx.publicKeyData, nil
-}
-
-func (ctx *hostContext) MasterPrivateKey() ([]byte, error) {
-    if len(ctx.privateKeyData) == 0 {
-        return nil, fmt.Errorf("[ERR] Invalid master private key data")
-    }
-    return ctx.privateKeyData, nil
-}
-
 func (ctx *hostContext) CurrentCountryCode() (string, error) {
     if len(ctx.currentCountryCode) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid country code")
+        return "", errors.Errorf("[ERR] Invalid country code")
     }
     return ctx.currentCountryCode, nil
 }
 
 func (ctx *hostContext) CurrentLanguageCode() (string, error) {
     if len(ctx.currentLanguageCode) == 0 {
-        return "", fmt.Errorf("[ERR] Invalid language code")
+        return "", errors.Errorf("[ERR] Invalid language code")
     }
     return ctx.currentLanguageCode, nil
 }
 
-// TODO : Cert Authority generation
-func (ctx *hostContext) MasterCaAuthority() (*pcrypto.CaSigner, error) {
+func (ctx *hostContext) CertAuthSigner() (*pcrypto.CaSigner, error) {
     if ctx.CaSigner == nil {
-        return nil, fmt.Errorf("[ERR] Invalid Cert Authority")
+        return nil, errors.Errorf("[ERR] invalid cert authority signer")
     }
     return ctx.CaSigner, nil
+}
+
+func (ctx *hostContext) CertAuthPublicKey() ([]byte, error) {
+    if ctx.caPublicKey == nil {
+        return nil, errors.Errorf("[ERR] invalid cert public key")
+    }
+    return ctx.caPublicKey, nil
+}
+
+func (ctx *hostContext) MasterHostPrivateKey() ([]byte, error) {
+    if len(ctx.hostPrivateKey) == 0 {
+        return nil, errors.Errorf("[ERR] Invalid master private key data")
+    }
+    return ctx.hostPrivateKey, nil
+}
+
+func (ctx *hostContext) MasterHostCertificate() ([]byte, error) {
+    if len(ctx.hostCertifcate) == 0 {
+        return nil, errors.Errorf("[ERR] Invalid master certificate data")
+    }
+    return ctx.hostCertifcate, nil
 }

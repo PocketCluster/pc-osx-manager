@@ -1,0 +1,114 @@
+version: '2'
+
+services:
+  namenode:
+    image: pocketcluster/amd64-jupyter-master-4.2.1:dev
+#    pid: "host"
+    container_name: pc-core
+    hostname: pc-core
+    ports:
+      - "8080:8080"
+      - "8888:8888"
+    networks:
+      hadoop:
+        ipv4_address: 172.16.128.253
+    volumes:
+      - /pocket/hadoop/2.7.3:/pocket/hadoop
+      - /pocket/spark/2.1.0:/pocket/spark
+      - /pocket/workspace:/pocket/workspace
+    tmpfs:
+      - /tmp
+    environment:
+      - CLUSTER_NAME=pocketcluster/hadoop-spark-note
+      - SLAVE_NODES=pc-node1=172.16.128.1;pc-node2=172.16.128.2;pc-node3=172.16.128.3;pc-node4=172.16.128.4;pc-node5=172.16.128.5
+      - constraint:node==pc-core
+    depends_on:
+      - datanode1
+      - datanode2
+      - datanode3
+      - datanode4
+      - datanode5
+
+  datanode1:
+    image: pocketcluster/armhf-jupyter-slave-4.2.1:latest
+    container_name: pc-node1
+    hostname: pc-node1
+    networks:
+      hadoop:
+        ipv4_address: 172.16.128.1
+    volumes:
+      - /pocket/hadoop/2.7.3:/pocket/hadoop
+      - /pocket/spark/2.1.0:/pocket/spark
+    tmpfs:
+      - /tmp
+    environment:
+      - constraint:node==pc-node1
+
+  datanode2:
+    image: pocketcluster/armhf-jupyter-slave-4.2.1:latest
+    container_name: pc-node2
+    hostname: pc-node2
+    networks:
+      hadoop:
+        ipv4_address: 172.16.128.2
+    volumes:
+      - /pocket/hadoop/2.7.3:/pocket/hadoop
+      - /pocket/spark/2.1.0:/pocket/spark
+    tmpfs:
+      - /tmp
+    environment:
+      - constraint:node==pc-node2
+
+  datanode3:
+    image: pocketcluster/armhf-jupyter-slave-4.2.1:latest
+    container_name: pc-node3
+    hostname: pc-node3
+    networks:
+      hadoop:
+        ipv4_address: 172.16.128.3
+    volumes:
+      - /pocket/hadoop/2.7.3:/pocket/hadoop
+      - /pocket/spark/2.1.0:/pocket/spark
+    tmpfs:
+      - /tmp
+    environment:
+      - constraint:node==pc-node3
+
+  datanode4:
+    image: pocketcluster/armhf-jupyter-slave-4.2.1:latest
+    container_name: pc-node4
+    hostname: pc-node4
+    networks:
+      hadoop:
+        ipv4_address: 172.16.128.4
+    volumes:
+      - /pocket/hadoop/2.7.3:/pocket/hadoop
+      - /pocket/spark/2.1.0:/pocket/spark
+    tmpfs:
+      - /tmp
+    environment:
+      - constraint:node==pc-node4
+
+  datanode5:
+    image: pocketcluster/armhf-jupyter-slave-4.2.1:latest
+    container_name: pc-node5
+    hostname: pc-node5
+    networks:
+      hadoop:
+        ipv4_address: 172.16.128.5
+    volumes:
+      - /pocket/hadoop/2.7.3:/pocket/hadoop
+      - /pocket/spark/2.1.0:/pocket/spark
+    tmpfs:
+      - /tmp
+    environment:
+      - constraint:node==pc-node5
+
+networks:
+  hadoop:
+    driver: overlay
+    ipam:
+      config:
+        - subnet: 172.16.128.0/24
+          gateway: 172.16.128.254
+          ip_range: 172.16.128.0/24

@@ -198,11 +198,17 @@ func TestAESKeyGeneration(t *testing.T) {
     t.Log("Key 2 - randBytesWithMask : " + string(key2))
     t.Log("Key 3 - randBytesWithMaskSrc : " + string(randBytesWithMaskSrc(32)))
     t.Log("Key 4 - randBytesWithMaskSrc: " + string(randBytesWithMaskSrc(32)))
-    key, _ := randCryptoBytes(32)
+    key := randCryptoBytes(32)
     t.Log("Key 5 - randCryptoBytes: " + string(key))
-    key, _ = randCryptoBytes(32)
+    key = randCryptoBytes(32)
     t.Log("Key 6 - randCryptoBytes: " + string(key))
 
+    if key1 == nil || len(key1) != 32 {
+        t.Errorf("Incorrect key size")
+    }
+    if key2 == nil || len(key2) != 32 {
+        t.Errorf("Incorrect key size")
+    }
     if reflect.DeepEqual(key1, key2) {
         t.Error("Randome AES Keys are not different enough")
     }
@@ -318,7 +324,7 @@ func ExampleStrongRsaKeyEncryption() {
 }
 
 func TestLoadStrongX509KeyPair(t *testing.T) {
-    if err := GenerateClusterCertificateAuthorityFiles("recvtest.pub", "recvtest.pem", "recvtest.cert", "cluster-id-here", "KR"); err != nil {
+    if err := GenerateClusterCertificateAuthorityFiles("recvtest.pub", "recvtest.pem", "recvtest.cert", "recvtest.ssh","example.cluster.pocketcluster.io", "KR"); err != nil {
         t.Errorf("failed to generate a key pair %v", err)
     }
 
@@ -330,5 +336,5 @@ func TestLoadStrongX509KeyPair(t *testing.T) {
         t.Error(err.Error())
     }
 
-    os.Remove("recvtest.pub");os.Remove("recvtest.pem");os.Remove("recvtest.cert");
+    os.Remove("recvtest.pub");os.Remove("recvtest.pem");os.Remove("recvtest.cert");os.Remove("recvtest.ssh");
 }

@@ -6,10 +6,10 @@ import (
 )
 
 func TestSearchPrimaryIPCandidate(t *testing.T) {
-    debugContextSetup()
-    defer debugContextTeardown()
+    DebugContextPrepare()
+    defer DebugContextDestroy()
 
-    singletonContextInstance().monitorNetworkInterfaces(test_intefaces)
+    singletonContextInstance().refreshNetworkInterfaces(test_intefaces)
 
     addr, err := SharedHostContext().HostPrimaryAddress()
     if err != nil {
@@ -21,10 +21,10 @@ func TestSearchPrimaryIPCandidate(t *testing.T) {
 }
 
 func TestDefaultGateway(t *testing.T) {
-    debugContextSetup()
-    defer debugContextTeardown()
+    DebugContextPrepare()
+    defer DebugContextDestroy()
 
-    singletonContextInstance().monitorNetworkGateways(test_gateways)
+    singletonContextInstance().refreshNetworkGateways(test_gateways)
 
     addr, err := SharedHostContext().HostDefaultGatewayAddress()
     if err != nil {
@@ -36,15 +36,15 @@ func TestDefaultGateway(t *testing.T) {
 }
 
 func ExampleFreeSpace() {
-    debugContextSetup()
-    defer debugContextTeardown()
+    DebugContextPrepare()
+    defer DebugContextDestroy()
 
     SharedHostContext().HostStorageSpaceStatus()
 }
 
 func ExampleSystemInfo() {
-    debugContextSetup()
-    defer debugContextTeardown()
+    DebugContextPrepare()
+    defer DebugContextDestroy()
 
     log.Println(SharedHostContext().HostProcessorCount())
     log.Println(SharedHostContext().HostActiveProcessorCount())

@@ -5,6 +5,9 @@
       location = "group:manager/manager.xcodeproj">
    </FileRef>
    <FileRef
+      location = "group:../../COCOA/XCODE/static-core/static-core.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:Pods/Pods.xcodeproj">
    </FileRef>
 </Workspace>

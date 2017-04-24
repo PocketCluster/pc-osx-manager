@@ -29,15 +29,9 @@ typedef bool (*pc_interface_callback)(PCNetworkInterface**, unsigned int);
 extern void
 interface_status_with_callback(pc_interface_callback);
 
-extern void
-interface_status_with_gocall();
-
 typedef bool (*scni_gateway_callback)(SCNIGateway**, unsigned int);
 
 extern void
 gateway_status_with_callback(scni_gateway_callback);
-
-extern void
-gateway_status_with_gocall();
 
 #endif

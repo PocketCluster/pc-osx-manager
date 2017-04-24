@@ -15,7 +15,7 @@
 #import "PCInterfaceStatus.h"
 #import "SCNetworkInterfaces.h"
 #import "LinkObserver.h"
-#import "util.h"
+#import "PCStaticUtility.h"
 
 static const CFStringRef kPocketClusterPrimaryInterface = CFSTR("PocketClusterPrimary");
 
@@ -51,16 +51,18 @@ _gateway_status(CFMutableArrayRef, unsigned int*);
 
 @interface PCInterfaceStatus()<LinkObserverNotification>
 @property (readonly) LinkObserver *linkObserver;
+@property (weak) NSObject<PCInterfaceStatusNotification>* audience;
 @end
 
 @implementation PCInterfaceStatus {
-    BOOL    _shouldStartMonitor;
+    BOOL    _shouldMonitor;
 }
 @synthesize linkObserver;
--(instancetype)init {
+- (instancetype)initWithStatusAudience:(NSObject<PCInterfaceStatusNotification>*)audience {
     self = [super init];
-    if (self) {
-        _shouldStartMonitor = NO;
+    if (self != nil) {
+        _shouldMonitor = NO;
+        self.audience = audience;
         [self.linkObserver setDelegate:self];
     }
     return self;
@@ -77,29 +79,87 @@ _gateway_status(CFMutableArrayRef, unsigned int*);
 
 #pragma mark - METHODS
 - (void)startMonitoring {
-    _shouldStartMonitor = YES;
+    _shouldMonitor = YES;
 }
 
 - (void)stopMonitoring {
-    _shouldStartMonitor = NO;
+    _shouldMonitor = NO;
 }
 
 #pragma mark - LinkObserverNotification protocol
+- (void)broadcastNetworkChangeAudience {
+    if (self.audience == nil || !_shouldMonitor) {
+        return;
+    }
+    
+    // --- same as gateway_status_with_callback() --- //
+    if ([self.audience respondsToSelector:@selector(PCInterfaceStatusChanged:interfaceStatus:count:)]) {
+        unsigned int gatewayCount = 0;
+        CFMutableArrayRef allGateways = SCNIMutableGatewayArray();
+        SCNIGateway** scniGateways = _gateway_status(allGateways, &gatewayCount);
+        
+        if (scniGateways != NULL && 0 < gatewayCount) {
+            [self.audience PCGatewayStatusChanged:self gatewayStatus:scniGateways count:gatewayCount];
+        } else {
+            [self.audience PCGatewayStatusChanged:self gatewayStatus:NULL count:0];
+        }
+        
+        // release phase
+        _SCNIGatewayArrayRelease(scniGateways);
+        
+        // release phase
+        SCNetworkGatewayRelease(allGateways);
+    }
+    
+    // --- same as interface_status_with_callback() --- //
+    if ([self.audience respondsToSelector:@selector(PCInterfaceStatusChanged:interfaceStatus:count:)]) {
+        unsigned int interfacesCount = 0;
+        CFMutableArrayRef allAddresses = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
+        PCNetworkInterface** interfaces = _interface_status(&interfacesCount, allAddresses);
+        
+        // we don't mind if Golang has successfully received the interface array. We only care
+        // if we can safely release all the memories
+        if (interfaces != NULL && 0 < interfacesCount) {
+            [self.audience PCInterfaceStatusChanged:self interfaceStatus:interfaces count:interfacesCount];
+        } else {
+            [self.audience PCInterfaceStatusChanged:self interfaceStatus:NULL count:0];
+        }
+        
+        // release phase
+        _pc_interface_array_release(interfaces, interfacesCount);
+        
+        for (CFIndex i = CFArrayGetCount(allAddresses) - 1; 0 <= i; i--) {
+            CFMutableArrayRef addr = (CFMutableArrayRef)CFArrayGetValueAtIndex(allAddresses, i);
+            CFArrayRemoveValueAtIndex(allAddresses, i);
+            SCNetworkInterfaceAddressRelease(addr);
+        }
+        CFRelease(allAddresses);
+    }
+}
+
 - (void)networkConfigurationDidChange:(LinkObserver *)observer configChanged:(NSDictionary *)configChanged {
-    NSLog(@"Network configuration has changed");
+    [self broadcastNetworkChangeAudience];
 }
 
 - (void)networkConfigurationDidChangeForKey:(NSString *)configKey {
+#if 0
+    /*
+     * (03/21/2017)
+     * 1. This delegation support ipv6 which we don't as of now.
+     * 2. We need to notify if link is down that filtering below will be disabled
+     */
     NSLog(@"Network configuration has changed %@ - %@", configKey, [[NSDate date] description]);
     if (![configKey hasPrefix:@"State:/Network/Global/IPv4"]) {
         // anything other than network *interface* status will be ignored
         return;
     }
     if ([NSThread isMainThread]) {
-        printf("!!! THIS IS M.A.I.N THREAD!!!\n\n");
+        NSLog(@"!!! THIS IS M.A.I.N THREAD!!!\n\n");
     } else {
-        printf("!!! this not main thread!!!\n\n");
+        NSLog(@"!!! this not main thread!!!\n\n");
     }
+#endif
+    [self broadcastNetworkChangeAudience];
 }
 
 @end
@@ -242,8 +302,8 @@ _interface_status(unsigned int* pcIfaceCount, CFMutableArrayRef allAddresses) {
     static char ifaceBSDName[256];
     
     PCNetworkInterface** pcIfaceArray = NULL;
-    const char* primaryAddress;
-    const char* primaryInterface;
+    const char* primaryAddress = NULL;
+    const char* primaryInterface = NULL;
     
     _primary_interface_address(&primaryInterface, &primaryAddress);
     
@@ -363,10 +423,12 @@ _interface_status(unsigned int* pcIfaceCount, CFMutableArrayRef allAddresses) {
             }
         }
     }
-    
+
+    // TODO : fix when there is no address presents
     if (primaryAddress != NULL) {
         free((void *) primaryAddress);
     }
+    // TODO : fix when there is no interface presents
     if (primaryInterface != NULL) {
         free((void *) primaryInterface);
     }
@@ -391,27 +453,6 @@ interface_status_with_callback(pc_interface_callback callback) {
     } else {
         callback(NULL, 0);
     }
-    
-    // release phase
-    _pc_interface_array_release(interfaces, interfacesCount);
-    
-    for (CFIndex i = CFArrayGetCount(allAddresses) - 1; 0 <= i; i--) {
-        CFMutableArrayRef addr = (CFMutableArrayRef)CFArrayGetValueAtIndex(allAddresses, i);
-        CFArrayRemoveValueAtIndex(allAddresses, i);
-        SCNetworkInterfaceAddressRelease(addr);
-    }
-    CFRelease(allAddresses);
-}
-
-void
-interface_status_with_gocall() {
-    
-    unsigned int interfacesCount = 0;
-    CFMutableArrayRef allAddresses = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
-    PCNetworkInterface** interfaces = _interface_status(&interfacesCount, allAddresses);
-    
-    /* PLACE GOCALL here */
-    
     
     // release phase
     _pc_interface_array_release(interfaces, interfacesCount);
@@ -482,10 +523,4 @@ gateway_status_with_callback(scni_gateway_callback callback) {
     
     // release phase
     SCNetworkGatewayRelease(allGateways);
-}
-
-void
-gateway_status_with_gocall() {
-
-    return;
 }
