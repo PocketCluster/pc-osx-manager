@@ -27,7 +27,7 @@ import (
     swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
 )
 import (
-    "github.com/tylerb/graceful"
+    "gopkg.in/tylerb/graceful.v1"
     "github.com/davecgh/go-spew/spew"
 
 )
@@ -227,6 +227,9 @@ func main() {
             regiProc *regisrv.PocketRegistry = nil
             swarmProc *swarmsrv.Server
 //            etcdProc *embed.PocketEtcd
+            swarmSrv *graceful.Server
+
+            srvWaiter sync.WaitGroup
             err error = nil
         )
 
@@ -354,7 +357,7 @@ func main() {
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
-                        err = swarmProc.ListenAndServe()
+                        swarmSrv, err = swarmProc.ListenAndServeOnWaitGroup(&srvWaiter)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
@@ -362,6 +365,10 @@ func main() {
                     }
                     case operation.CmdCntrOrchStop: {
                         log.Debugf("[OP] %v", e.String())
+                        go func() {
+                            srvWaiter.Wait()
+                        }()
+                        swarmSrv.Stop(time.Second)
                     }
 
                     case operation.CmdStorageStart: {

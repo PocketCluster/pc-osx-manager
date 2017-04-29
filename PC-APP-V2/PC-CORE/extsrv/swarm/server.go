@@ -6,9 +6,12 @@ import (
     "net"
     "net/http"
     "strings"
+    "time"
+    "sync"
 
     log "github.com/Sirupsen/logrus"
     "github.com/docker/swarm/api"
+    "gopkg.in/tylerb/graceful.v1"
 )
 
 // Dispatcher is a meta http.Handler. It acts as an http.Handler and forwards
@@ -122,4 +125,121 @@ func (s *Server) ListenAndServe() error {
         }
     }
     return nil
+}
+
+func (s *Server) ListenAndServeMultiHostsOnWaitGroup(wg *sync.WaitGroup) ([]*graceful.Server, []error) {
+    var (
+        chErrors    = make(chan error, len(s.hosts))
+        chServers   = make(chan *graceful.Server, len(s.hosts))
+
+        slErrors    = []error{}
+        slServers   = []*graceful.Server{}
+    )
+
+    for _, host := range s.hosts {
+        protoAddrParts := strings.SplitN(host, "://", 2)
+        if len(protoAddrParts) == 1 {
+            protoAddrParts = append([]string{"tcp"}, protoAddrParts...)
+        }
+
+        go func() {
+            defer wg.Done()
+            log.WithFields(log.Fields{"proto": protoAddrParts[0], "addr": protoAddrParts[1]}).Info("Listening for HTTP")
+
+            var (
+                l      net.Listener
+                err    error
+                server = &graceful.Server{
+                    Timeout: 10 * time.Second,
+                    NoSignalHandling: true,
+                    Server: &http.Server{
+                        Addr:    protoAddrParts[1],
+                        Handler: s.dispatcher,
+                    },
+                }
+            )
+
+            switch protoAddrParts[0] {
+            //case "unix":
+            //    l, err = newUnixListener(protoAddrParts[1], s.tlsConfig)
+            case "tcp":
+                l, err = newListener("tcp", protoAddrParts[1], s.tlsConfig)
+            default:
+                err = fmt.Errorf("unsupported protocol: %q", protoAddrParts[0])
+            }
+
+            if err != nil {
+                chErrors <- err
+                chServers <- nil
+            } else {
+                chErrors <- server.Serve(l)
+                chServers <- server
+            }
+        }()
+    }
+
+    for i := 0; i < len(s.hosts); i++ {
+        err := <-chErrors
+        if err != nil {
+            slErrors = append(slErrors, err)
+        }
+
+        srv := <-chServers
+        if srv != nil {
+            slServers = append(slServers, srv)
+        }
+    }
+    return slServers, slErrors
+}
+
+func (s *Server) ListenAndServeOnWaitGroup(wg *sync.WaitGroup) (*graceful.Server, error) {
+    var (
+        chErrors    = make(chan error)
+        chServers   = make(chan *graceful.Server)
+    )
+
+    host := s.hosts[0]
+    protoAddrParts := strings.SplitN(host, "://", 2)
+    if len(protoAddrParts) == 1 {
+        protoAddrParts = append([]string{"tcp"}, protoAddrParts...)
+    }
+
+    go func() {
+        defer wg.Done()
+        log.WithFields(log.Fields{"proto": protoAddrParts[0], "addr": protoAddrParts[1]}).Info("Listening for HTTP")
+
+        var (
+            l      net.Listener
+            err    error
+            server = &graceful.Server{
+                Timeout: 10 * time.Second,
+                NoSignalHandling: true,
+                Server: &http.Server{
+                    Addr:    protoAddrParts[1],
+                    Handler: s.dispatcher,
+                },
+            }
+        )
+
+        switch protoAddrParts[0] {
+        //case "unix":
+        //    l, err = newUnixListener(protoAddrParts[1], s.tlsConfig)
+        case "tcp":
+            l, err = newListener("tcp", protoAddrParts[1], s.tlsConfig)
+        default:
+            err = fmt.Errorf("unsupported protocol: %q", protoAddrParts[0])
+        }
+
+        if err != nil {
+            chErrors <- err
+            chServers <- nil
+        } else {
+            chErrors <- server.Serve(l)
+            chServers <- server
+        }
+    }()
+
+    err := <-chErrors
+    srv := <-chServers
+    return srv, err
 }
