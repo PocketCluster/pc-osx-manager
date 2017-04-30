@@ -192,6 +192,12 @@ func (s *Server) ListenAndServeMultiHostsOnWaitGroup(wg *sync.WaitGroup) ([]*gra
     return slServers, slErrors
 }
 
+// ListenAndServeOnWaitGroup starts an HTTP server on the first host in the list to listen on its
+// TCP or Unix network address and calls Serve on each host's server
+// to handle requests on incoming connections.
+//
+// The expected format for a host string is [protocol://]address. The protocol
+// must be either "tcp" or "unix", with "tcp" used by default if not specified.
 func (s *Server) ListenAndServeOnWaitGroup(wg *sync.WaitGroup) (*graceful.Server, error) {
     var (
         chErrors    = make(chan error)
@@ -204,7 +210,7 @@ func (s *Server) ListenAndServeOnWaitGroup(wg *sync.WaitGroup) (*graceful.Server
         protoAddrParts = append([]string{"tcp"}, protoAddrParts...)
     }
 
-    go func() {
+    go func(wg *sync.WaitGroup) {
         defer wg.Done()
         log.WithFields(log.Fields{"proto": protoAddrParts[0], "addr": protoAddrParts[1]}).Info("Listening for HTTP")
 
@@ -230,16 +236,21 @@ func (s *Server) ListenAndServeOnWaitGroup(wg *sync.WaitGroup) (*graceful.Server
             err = fmt.Errorf("unsupported protocol: %q", protoAddrParts[0])
         }
 
+        chServers <- server
+        chErrors <- err
+        server.Serve(l)
+/*
+        // TODO : this error message has to be routed toward UI layer
         if err != nil {
             chErrors <- err
-            chServers <- nil
         } else {
             chErrors <- server.Serve(l)
-            chServers <- server
         }
-    }()
+*/
+    }(wg)
 
-    err := <-chErrors
     srv := <-chServers
+    err := <-chErrors
+    log.Print("all the values retrieved")
     return srv, err
 }

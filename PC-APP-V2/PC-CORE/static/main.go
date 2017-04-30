@@ -233,6 +233,10 @@ func main() {
             err error = nil
         )
 
+        go func(wg *sync.WaitGroup) {
+            wg.Wait()
+        }(&srvWaiter)
+
         for e := range a.Events() {
             switch e := a.Filter(e).(type) {
 
@@ -339,16 +343,19 @@ func main() {
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
-                        err = regiProc.Start()
+                        err = regiProc.StartOnWaitGroup(&srvWaiter)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
                     }
                     case operation.CmdRegistryStop: {
+/*
                         err = regiProc.Close()
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
+*/
+                        regiProc.Stop(time.Second)
                         log.Debugf("[OP] %v", e.String())
                     }
 
