@@ -18,6 +18,7 @@ import (
     telesrv "github.com/stkim1/pc-core/extsrv/teleport"
     regisrv "github.com/stkim1/pc-core/extsrv/registry"
     swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
+    "github.com/stkim1/pc-core/slvcomm"
 )
 
 func main() {
@@ -116,6 +117,19 @@ func main() {
                 // operational Command
                 case operation.Operation: {
                     switch e.Command {
+
+                    case operation.CmdBeaconStart: {
+                        srvWaiter.Add(2)
+                        // TODO : use network interface
+                        slvcomm.ServeMcastListenerOnWaitGroup("eth0", &srvWaiter)
+                        slvcomm.ServeUcastLocationOnWaitGroup(&srvWaiter)
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdBeaconStop: {
+
+                        log.Debugf("[OP] %v", e.String())
+                    }
+
                     case operation.CmdTeleportStart: {
                         log.Debugf("[OP] %v", e.String())
 
@@ -146,6 +160,7 @@ func main() {
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
+                        srvWaiter.Add(1)
                         err = regiProc.StartOnWaitGroup(&srvWaiter)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
@@ -167,6 +182,7 @@ func main() {
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
+                        srvWaiter.Add(1)
                         swarmSrv, err = swarmProc.ListenAndServeOnWaitGroup(&srvWaiter)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
@@ -190,7 +206,9 @@ func main() {
                         }
                         etcdProc.Server.Start()
 */
+                        srvWaiter.Add(1)
                         go func() {
+                            defer srvWaiter.Done()
                             e, err := embed.StartPocketEtcd(serviceConfig.etcdConfig)
                             if err != nil {
                                 log.Debugf(err.Error())

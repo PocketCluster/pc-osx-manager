@@ -3,8 +3,9 @@ package mcast
 import (
     "net"
     "sync"
-    "log"
-    "fmt"
+
+    log "github.com/Sirupsen/logrus"
+    "github.com/pkg/errors"
 )
 
 type multiListener struct {
@@ -15,19 +16,23 @@ type multiListener struct {
     closeLock    sync.Mutex
 
     ChRead       chan *CastPkg
-    log          *log.Logger
 }
 
-func NewMultiListener(iface *net.Interface, log *log.Logger) (*multiListener, error) {
+func NewMcastListener(niface string) (*multiListener, error) {
+    iface, err := net.InterfaceByName(niface)
+    if err != nil {
+        log.Error(err)
+        return nil, errors.WithStack(err)
+    }
     mconn4, err := net.ListenMulticastUDP("udp4", iface, ipv4McastAddr)
     if err != nil {
-        return nil, fmt.Errorf("failed to bind to any multicast udp port : " + err.Error())
+        log.Errorf("[ERR] failed to bind to any multicast udp port %v", err)
+        return nil, errors.Errorf("[ERR] failed to bind to any multicast udp port", err)
     }
     listener := &multiListener{
         ipv4mconn    : mconn4,
         closedCh     : make(chan struct{}),
         ChRead       : make(chan *CastPkg, PC_MCAST_LISTENER_CHAN_CAP),
-        log          : log,
     }
     go listener.read()
     return listener, nil
@@ -64,9 +69,7 @@ func (ml *multiListener) read() {
         pack.Message = make([]byte, PC_MAX_MCAST_UDP_BUF_SIZE)
         count, pack.Address, err = ml.ipv4mconn.ReadFromUDP(pack.Message)
         if err != nil {
-            if ml.log != nil {
-                ml.log.Printf("[ERR] beacon channel : Failed to read packet: %v", err)
-            }
+            log.Info("[INFO] beacon channel : Failed to read packet: %v", err)
             continue
         }
 

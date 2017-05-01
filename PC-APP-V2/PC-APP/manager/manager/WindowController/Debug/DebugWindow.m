@@ -53,4 +53,13 @@
     OpsCmdStorageStop();
 }
 
+- (IBAction)opsCmdBeaconStart:(id)sender {
+    OpsCmdBeaconStart();
+}
+
+- (IBAction)opsCmdBeaconStop:(id)sender {
+    OpsCmdBeaconStop();
+}
+
+
 @end

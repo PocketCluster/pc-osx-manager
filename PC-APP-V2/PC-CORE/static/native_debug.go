@@ -61,3 +61,17 @@ func OpsCmdStorageStop() {
         Command:    operation.CmdStorageStop,
     }
 }
+
+//export OpsCmdBeaconStart
+func OpsCmdBeaconStart() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdBeaconStart,
+    }
+}
+
+//export OpsCmdBeaconStop
+func OpsCmdBeaconStop() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdBeaconStop,
+    }
+}

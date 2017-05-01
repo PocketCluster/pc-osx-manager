@@ -3,9 +3,11 @@ package mcast
 import (
     "net"
     "sync"
-    "log"
     "fmt"
     "time"
+
+    log "github.com/Sirupsen/logrus"
+    "github.com/pkg/errors"
 )
 
 type multiCaster struct {
@@ -16,10 +18,9 @@ type multiCaster struct {
     closeLock           sync.Mutex
 
     chWrite             chan *CastPkg
-    log                 *log.Logger
 }
 
-func NewMultiCaster(log *log.Logger) (*multiCaster, error) {
+func NewMultiCaster() (*multiCaster, error) {
     // Create a IPv4 listener
     uconn4, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: 0})
     if err != nil {
@@ -30,7 +31,6 @@ func NewMultiCaster(log *log.Logger) (*multiCaster, error) {
         ipv4UnicastConn      : uconn4,
         closedCh             : make(chan struct{}),
         chWrite              : make(chan *CastPkg),//, PC_MCAST_CASTER_CHAN_CAP),
-        log                  : log,
     }
     go mc.write()
     return mc, nil
@@ -56,8 +56,8 @@ func (mc *multiCaster) write() {
     for cp := range mc.chWrite {
         // TODO : we can timeout if necessary
         _, e := mc.ipv4UnicastConn.WriteToUDP(cp.Message, ipv4McastAddr)
-        if e != nil && mc.log != nil {
-            mc.log.Println(e)
+        if e != nil {
+            log.Info(errors.WithStack(e))
         }
     }
 }
@@ -65,13 +65,13 @@ func (mc *multiCaster) write() {
 // sendQuery is used to multicast a query out
 func (mc *multiCaster) Send(message []byte) error {
     if len(message) == 0 {
-        return fmt.Errorf("[ERR] Multicast message is empty")
+        return errors.Errorf("[ERR] Multicast message is empty")
     }
     cp := &CastPkg{
-        Message     : message,
+        Message: message,
     }
     mc.chWrite <- cp
 
     time.After(time.Millisecond)
-    return
+    return nil
 }
