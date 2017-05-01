@@ -1,6 +1,7 @@
 package beacon
 
 import (
+    "os"
     "time"
 
     "github.com/stkim1/pc-core/context"
@@ -17,7 +18,7 @@ var (
 func setUp() {
     mctx := context.DebugContextPrepare()
     slcontext.DebugSlcontextPrepare()
-    model.DebugModelRepoPrepare()
+    model.DebugRecordGatePrepare(os.Getenv("TMPDIR"))
 
     masterAgentName, _ = mctx.MasterAgentName()
     slaveNodeName = model.DEBUG_SLAVE_NODE_NAME
@@ -25,7 +26,7 @@ func setUp() {
 }
 
 func tearDown() {
-    model.DebugModelRepoDestroy()
+    model.DebugRecordGateDestroy(os.Getenv("TMPDIR"))
     slcontext.DebugSlcontextDestroy()
     context.DebugContextDestroy()
 }

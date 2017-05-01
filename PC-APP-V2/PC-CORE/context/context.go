@@ -44,6 +44,7 @@ type HostContext interface {
     CertAuthSigner() (*pcrypto.CaSigner, error)
     CertAuthPublicKey() ([]byte, error)
     // host certificate
+    MasterHostPublicKey() ([]byte, error)
     MasterHostPrivateKey() ([]byte, error)
     MasterHostCertificate() ([]byte, error)
 }
@@ -388,9 +389,16 @@ func (ctx *hostContext) CertAuthPublicKey() ([]byte, error) {
     return ctx.caPublicKey, nil
 }
 
+func (ctx *hostContext) MasterHostPublicKey() ([]byte, error) {
+    if len(ctx.hostPublicKey) == 0 {
+        return nil, errors.Errorf("[ERR] Invalid master public key")
+    }
+    return ctx.hostPublicKey, nil
+}
+
 func (ctx *hostContext) MasterHostPrivateKey() ([]byte, error) {
     if len(ctx.hostPrivateKey) == 0 {
-        return nil, errors.Errorf("[ERR] Invalid master private key data")
+        return nil, errors.Errorf("[ERR] Invalid master private key")
     }
     return ctx.hostPrivateKey, nil
 }

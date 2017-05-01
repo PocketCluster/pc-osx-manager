@@ -10,7 +10,7 @@ import (
     "github.com/pkg/errors"
 
     "github.com/stkim1/pc-core/context"
-    "github.com/stkim1/pc-core/record"
+    "github.com/stkim1/pc-core/model"
     regisrv "github.com/stkim1/pc-core/extsrv/registry"
     swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
 )
@@ -44,19 +44,19 @@ func setupServiceConfig() (*serviceConfig, error) {
         log.Info(err)
         return nil, errors.WithStack(err)
     }
-    rec, err := record.OpenRecordGate(dataDir, teledefaults.CoreKeysSqliteFile)
+    rec, err := model.OpenRecordGate(dataDir, teledefaults.CoreKeysSqliteFile)
     if err != nil {
         log.Info(err)
         return nil, errors.WithStack(err)
     }
 
     // new cluster id
-    var meta *record.ClusterMeta = nil
-    cluster, err := record.FindClusterMeta()
+    var meta *model.ClusterMeta = nil
+    cluster, err := model.FindClusterMeta()
     if err != nil {
-        if err == record.NoItemFound {
-            meta = record.NewClusterMeta()
-            record.UpsertClusterMeta(meta)
+        if err == model.NoItemFound {
+            meta = model.NewClusterMeta()
+            model.UpsertClusterMeta(meta)
         } else {
             // This is critical error. report it to UI and ask them to clean & re-install
             return nil, errors.WithStack(err)

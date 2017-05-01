@@ -44,7 +44,7 @@ func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (BeaconState,
     b.aesCryptor = aesCryptor
 
     // set RSA encryptor
-    masterPrvKey, err := context.SharedHostContext().MasterPrivateKey()
+    masterPrvKey, err := context.SharedHostContext().MasterHostPrivateKey()
     if err != nil {
         b.Close()
         return nil, err
