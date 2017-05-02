@@ -30,7 +30,6 @@ func main() {
             teleProc *process.PocketCoreProcess = nil
             regiProc *regisrv.PocketRegistry = nil
             swarmProc *swarmsrv.Server
-//            etcdProc *embed.PocketEtcd
             swarmSrv *graceful.Server
 
             srvWaiter sync.WaitGroup
@@ -44,6 +43,8 @@ func main() {
         for e := range a.Events() {
             switch e := a.Filter(e).(type) {
 
+                // APPLICATION LIFECYCLE //
+
                 case lifecycle.Event: {
                     switch e.Crosses(lifecycle.StageDead) {
                         case lifecycle.CrossOn: {
@@ -53,7 +54,6 @@ func main() {
                             log.Debugf("[LIFE] app is not dead %v", e.String())
                         }
                     }
-
                     switch e.Crosses(lifecycle.StageAlive) {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is now alive %v", e.String())
@@ -68,7 +68,6 @@ func main() {
                             log.Debugf("[LIFE] app is inactive %v", e.String())
                         }
                     }
-
                     switch e.Crosses(lifecycle.StageVisible) {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is visible %v", e.String())
@@ -77,7 +76,6 @@ func main() {
                             log.Debugf("[LIFE] app is invisible %v", e.String())
                         }
                     }
-
                     switch e.Crosses(lifecycle.StageFocused) {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is focused %v", e.String())
@@ -87,6 +85,8 @@ func main() {
                         }
                     }
                 }
+
+                // NETWORK EVENT //
 
                 case network.Event: {
                     switch e.NetworkEvent {
@@ -103,7 +103,8 @@ func main() {
                     }
                 }
 
-                // artificial crash
+                // [DEBUG] ARTIFICIAL CRASH //
+
                 case crash.Crash: {
                     switch e.Reason {
                     case crash.CrashEmergentExit: {
@@ -114,9 +115,12 @@ func main() {
                     }
                 }
 
-                // operational Command
+                // OPERATIONAL COMMAND //
+
                 case operation.Operation: {
                     switch e.Command {
+
+                    /// BEACON ///
 
                     case operation.CmdBeaconStart: {
                         srvWaiter.Add(2)
@@ -129,6 +133,8 @@ func main() {
 
                         log.Debugf("[OP] %v", e.String())
                     }
+
+                    /// TELEPORT ///
 
                     case operation.CmdTeleportStart: {
                         log.Debugf("[OP] %v", e.String())
@@ -154,6 +160,8 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
 
+                    /// REGISTRY ///
+
                     case operation.CmdRegistryStart: {
                         log.Debugf("[OP] %v", e.String())
                         regiProc, err = regisrv.NewPocketRegistry(serviceConfig.regConfig)
@@ -177,6 +185,8 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
 
+                    /// ORCHESTRATION ///
+
                     case operation.CmdCntrOrchStart: {
                         swarmProc, err = swarmsrv.NewSwarmServer(serviceConfig.swarmConfig)
                         if err != nil {
@@ -196,6 +206,8 @@ func main() {
                         }()
                         swarmSrv.Stop(time.Second)
                     }
+
+                    /// STORAGE ///
 
                     case operation.CmdStorageStart: {
                         log.Debugf("[OP] %v", e.String())
@@ -229,8 +241,9 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
 //                        etcdProc.Server.Stop()
                     }
+
                     default:
-                        log.Print("[OP] %v", e.String())
+                        log.Debug("[OP-ERROR] THIS SHOULD NOT HAPPEN %v", e.String())
                     }
                 }
             }
