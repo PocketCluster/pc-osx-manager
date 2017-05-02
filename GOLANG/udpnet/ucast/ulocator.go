@@ -3,34 +3,34 @@ package ucast
 import (
     "net"
     "sync"
-    "fmt"
     "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
 )
 
-type locatorChannel struct {
-    closed       bool
+type LocatorChannel struct {
     closedCh     chan struct{}
     closeLock    sync.Mutex
 
     conn         *net.UDPConn
-    ChRead       chan *ChanPkg
-    chWrite      chan *ChanPkg
+    waiter       *sync.WaitGroup
+    ChRead       chan BeaconPack
+    chWrite      chan BeaconPack
 }
 
 // New constructor of a new server
-func NewPocketLocatorChannel() (*locatorChannel, error) {
+func NewPocketLocatorChannel(srvWaiter *sync.WaitGroup) (*LocatorChannel, error) {
     conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: PAGENT_RECV_PORT})
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    locator := &locatorChannel {
-        conn       : conn,
-        ChRead     : make(chan *ChanPkg, PC_UCAST_LOCATOR_CHAN_CAP),
-        chWrite    : make(chan *ChanPkg, PC_UCAST_LOCATOR_CHAN_CAP),
-        closedCh   : make(chan struct{}),
+    locator := &LocatorChannel{
+        conn:        conn,
+        waiter:      srvWaiter,
+        ChRead:      make(chan BeaconPack, PC_UCAST_LOCATOR_CHAN_CAP),
+        chWrite:     make(chan BeaconPack, PC_UCAST_LOCATOR_CHAN_CAP),
+        closedCh:    make(chan struct{}),
     }
     go locator.reader()
     go locator.writer()
@@ -38,74 +38,111 @@ func NewPocketLocatorChannel() (*locatorChannel, error) {
 }
 
 // Close is used to cleanup the client
-func (lc *locatorChannel) Close() error {
+func (lc *LocatorChannel) Close() error {
     lc.closeLock.Lock()
     defer lc.closeLock.Unlock()
 
-    log.Debugf("[INFO] locator channel closing : %v", *lc)
-    if lc.closed {
+    _, isOpen := <- lc.closedCh
+    if !isOpen {
         return nil
     }
-    lc.closed = true
+
+    log.Debugf("[INFO] locator channel closing : %v", *lc)
 
     close(lc.closedCh)
     close(lc.ChRead)
     close(lc.chWrite)
 
-    if lc.conn != nil {
-        lc.conn.Close()
-    }
-    return nil
+    return lc.conn.Close()
 }
 
-func (lc *locatorChannel) reader() {
+func (lc *LocatorChannel) reader() {
     var (
-        err error
-        count int
+        buff []byte          = make([]byte, PC_MAX_UCAST_UDP_BUF_SIZE)
+        addr *net.UDPAddr    = nil
+        terr, err error      = nil, nil
+        count int            = 0
+        ticker *time.Ticker  = time.NewTicker(readTimeout)
     )
 
-    for !lc.closed {
-        pack := &ChanPkg{}
-        pack.Message = make([]byte, PC_MAX_UCAST_UDP_BUF_SIZE)
-        count, pack.Address, err = lc.conn.ReadFromUDP(pack.Message)
-        if err != nil {
-            log.Infof("[INFO] locator channel : Failed to read packet: %v", err)
-            continue
-        }
+    copyUDPAddr := func(adr *net.UDPAddr) net.UDPAddr {
+        lenIP := len(adr.IP)
+        ip := make([]byte, lenIP)
+        copy(ip, adr.IP)
+        zone := string([]byte(adr.Zone))
 
-        log.Debugf("[DEBUG] %d bytes have been received", count)
-        pack.Message = pack.Message[:count]
+        return net.UDPAddr {
+            IP:     ip,
+            Port:   adr.Port,
+            Zone:   zone,
+        }
+    }
+    defer lc.waiter.Done()
+    defer ticker.Stop()
+
+    for {
         select {
-        case lc.ChRead <- pack:
-        case <-lc.closedCh:
-            return
+            case <- lc.closedCh:
+                return
+
+            case <- ticker.C:
+                terr = lc.conn.SetReadDeadline(time.Now().Add(readTimeout))
+                if terr != nil {
+                    continue
+                }
+                count, addr, err = lc.conn.ReadFromUDP(buff)
+                if err != nil {
+                    log.Infof("[INFO] locator channel : Failed to read packet: %v", err)
+                    continue
+                }
+                if count == 0 {
+                    log.Infof("[INFO] empty message. ignore")
+                    continue
+                }
+                adr := copyUDPAddr(addr)
+                msg := make([]byte, count)
+                copy(msg, buff[:count])
+                pack := BeaconPack{
+                    Address:    adr,
+                    Message:    msg,
+                }
+                lc.ChRead <- pack
         }
     }
 }
 
-func (lc *locatorChannel) writer() {
-    for v := range lc.chWrite {
-        _, e := lc.conn.WriteToUDP(v.Message, v.Address)
-        if e != nil {
-            log.Info(e)
-        }
+func (lc *LocatorChannel) writer() {
+    defer lc.waiter.Done()
+    for {
+        select {
+            case <- lc.closedCh:
+                return
+
+            case v := <-lc.chWrite:
+                if len(v.Message) == 0 {
+                    continue
+                }
+                _, err := lc.conn.WriteToUDP(v.Message, &v.Address)
+                if err != nil {
+                    log.Info(err)
+                }
+            }
     }
 }
 
-func (lc *locatorChannel) Send(targetHost string, buf []byte) error {
+func (lc *LocatorChannel) Send(targetHost string, buf []byte) error {
     if len(targetHost) == 0 || len(buf) == 0 {
-        return fmt.Errorf("[ERR] Cannot send null data to null host")
+        return errors.Errorf("[ERR] Cannot send null data to null host")
     }
-    targetAddr := &net.UDPAddr{
-        IP      : net.ParseIP(targetHost),
-        Port    : PAGENT_SEND_PORT,
-    }
-    lc.chWrite <- &ChanPkg{
-        Message    : buf,
-        Address    : targetAddr,
+    lc.chWrite <- BeaconPack{
+        Message: buf,
+        Address: net.UDPAddr {
+            IP:      net.ParseIP(targetHost),
+            Port:    PAGENT_SEND_PORT,
+        },
     }
 
     // TODO : find ways to remove this. We'll wait artificially for now (v0.1.4)
-    time.After(time.Millisecond)
+    //time.After(time.Millisecond)
     return nil
 }

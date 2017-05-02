@@ -2,35 +2,35 @@ package ucast
 
 import (
     "net"
-    "log"
-    "sync"
-    "fmt"
     "time"
+    "sync"
+
+    log "github.com/Sirupsen/logrus"
+    "github.com/pkg/errors"
 )
 
 type BeaconChannel struct {
-    closed       bool
     closedCh     chan struct{}
     closeLock    sync.Mutex
-    log          *log.Logger
 
     conn         *net.UDPConn
-    ChRead       chan *ChanPkg
-    chWrite      chan *ChanPkg
+    waiter       *sync.WaitGroup
+    ChRead       chan BeaconPack
+    chWrite      chan BeaconPack
 }
 
 // New constructor of a new server
-func NewPocketBeaconChannel(log *log.Logger) (*BeaconChannel, error) {
+func NewPocketBeaconChannel(waiter *sync.WaitGroup) (*BeaconChannel, error) {
     conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: PAGENT_SEND_PORT})
     if err != nil {
-        return nil, err
+        return nil, errors.WithStack(err)
     }
     beacon := &BeaconChannel {
-        conn       : conn,
-        ChRead     : make(chan *ChanPkg, PC_UCAST_BEACON_CHAN_CAP),
-        chWrite    : make(chan *ChanPkg, PC_UCAST_BEACON_CHAN_CAP),
-        closedCh   : make(chan struct{}),
-        log        : log,
+        conn:       conn,
+        waiter:     waiter,
+        ChRead:     make(chan BeaconPack, PC_UCAST_BEACON_CHAN_CAP),
+        chWrite:    make(chan BeaconPack, PC_UCAST_BEACON_CHAN_CAP),
+        closedCh:   make(chan struct{}),
     }
     go beacon.reader()
     go beacon.writer()
@@ -42,71 +42,105 @@ func (bc *BeaconChannel) Close() error {
     bc.closeLock.Lock()
     defer bc.closeLock.Unlock()
 
-    if bc.log != nil {
-        log.Printf("[INFO] beacon channel closing : %v", *bc)
-    }
-
-    if bc.closed {
+    _, isOpen := <- bc.closedCh
+    if !isOpen {
         return nil
     }
-    bc.closed = true
+
+    log.Debugf("[INFO] locator channel closing : %v", *bc)
 
     close(bc.closedCh)
     close(bc.ChRead)
     close(bc.chWrite)
 
-    if bc.conn != nil {
-        bc.conn.Close()
-    }
-    return nil
+    return bc.conn.Close()
 }
 
 func (bc *BeaconChannel) reader() {
     var (
-        err error
-        count int
+        buff []byte          = make([]byte, PC_MAX_UCAST_UDP_BUF_SIZE)
+        addr *net.UDPAddr    = nil
+        terr, err error      = nil, nil
+        count int            = 0
+        ticker *time.Ticker  = time.NewTicker(readTimeout)
     )
 
-    for !bc.closed {
-        pack := &ChanPkg{}
-        pack.Message = make([]byte, PC_MAX_UCAST_UDP_BUF_SIZE)
-        count, pack.Address, err = bc.conn.ReadFromUDP(pack.Message)
-        if err != nil {
-            if bc.log != nil {
-                bc.log.Printf("[ERR] beacon channel : Failed to read packet: %v", err)
-            }
-            continue
-        }
+    copyUDPAddr := func(adr *net.UDPAddr) net.UDPAddr {
+        lenIP := len(adr.IP)
+        ip := make([]byte, lenIP)
+        copy(ip, adr.IP)
+        zone := string([]byte(adr.Zone))
 
-        pack.Message = pack.Message[:count]
+        return net.UDPAddr {
+            IP:     ip,
+            Port:   adr.Port,
+            Zone:   zone,
+        }
+    }
+    defer bc.waiter.Done()
+    defer ticker.Stop()
+
+    for {
         select {
-            case bc.ChRead <- pack:
-            case <-bc.closedCh:
-                return
+        case <- bc.closedCh:
+            return
+
+        case <- ticker.C:
+            terr = bc.conn.SetReadDeadline(time.Now().Add(readTimeout))
+            if terr != nil {
+                continue
+            }
+            count, addr, err = bc.conn.ReadFromUDP(buff)
+            if err != nil {
+                log.Infof("[INFO] locator channel : Failed to read packet: %v", err)
+                continue
+            }
+            if count == 0 {
+                log.Infof("[INFO] empty message. ignore")
+                continue
+            }
+            adr := copyUDPAddr(addr)
+            msg := make([]byte, count)
+            copy(msg, buff[:count])
+            pack := BeaconPack{
+                Address:    adr,
+                Message:    msg,
+            }
+            bc.ChRead <- pack
         }
     }
 }
 
 func (bc *BeaconChannel) writer() {
-    for v := range bc.chWrite {
-        _, e := bc.conn.WriteToUDP(v.Message, v.Address)
-        if e != nil && bc.log != nil {
-            bc.log.Println(e)
+    defer bc.waiter.Done()
+    for {
+        select {
+        case <- bc.closedCh:
+            return
+
+        case v := <-bc.chWrite:
+            if len(v.Message) == 0 {
+                continue
+            }
+            _, err := bc.conn.WriteToUDP(v.Message, &v.Address)
+            if err != nil {
+                log.Info(err)
+            }
         }
     }
+
 }
 
 func (bc *BeaconChannel) Send(targetHost string, buf []byte) error {
     if len(targetHost) == 0 || len(buf) == 0 {
-        return fmt.Errorf("[ERR] Cannot send null data to null host")
+        return errors.Errorf("[ERR] Cannot send null data to null host")
     }
-    targetAddr := &net.UDPAddr{
-        IP      : net.ParseIP(targetHost),
-        Port    : PAGENT_RECV_PORT,
-    }
-    bc.chWrite <- &ChanPkg{
-        Message    : buf,
-        Address    : targetAddr,
+    bc.chWrite <- BeaconPack{
+        Message: buf,
+        Address: net.UDPAddr {
+            IP:      net.ParseIP(targetHost),
+            Port:    PAGENT_SEND_PORT,
+        },
     }
 
     // TODO : find ways to remove this. We'll wait artificially for now (v0.1.4)

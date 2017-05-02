@@ -2,6 +2,7 @@ package ucast
 
 import (
     "net"
+    "time"
 )
 
 const (
@@ -20,9 +21,11 @@ const (
 
     // locator channel capacitor doesn't need to be big. just big enough to hold communication with beacon
     PC_UCAST_LOCATOR_CHAN_CAP = 4
+
+    readTimeout = time.Second * 3
 )
 
-type ChanPkg struct {
+type BeaconPack struct {
     Message     []byte
-    Address     *net.UDPAddr
+    Address     net.UDPAddr
 }

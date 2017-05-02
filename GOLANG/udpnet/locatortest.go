@@ -3,13 +3,13 @@ package main
 import (
     "log"
     "strconv"
+    "time"
 
     "github.com/stkim1/udpnet/ucast"
-    "time"
 )
 
 func ucastLocatorTest() {
-    channel, err := ucast.NewPocketLocatorChannel(nil)
+    channel, err := ucast.NewPocketLocatorChannel()
     if err != nil {
         log.Fatal(err.Error())
         return

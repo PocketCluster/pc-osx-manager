@@ -1,22 +1,25 @@
 package slvcomm
 
 import (
-    "strconv"
     "sync"
-    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
-
     "github.com/stkim1/udpnet/ucast"
 )
 
-func ServeUcastLocationOnWaitGroup(wg *sync.WaitGroup) error {
-    var chErrors = make(chan error)
-    go func (w *sync.WaitGroup) {
-        defer w.Done()
+type BeaconSendPack struct {
+    Message    []byte
+    DstAddr    string
+}
 
-        channel, err := ucast.NewPocketLocatorChannel()
+func ServeUcastBeaconOnWaitGroup(wg *sync.WaitGroup, chRead chan ucast.BeaconPack, chSend chan BeaconSendPack, chClose chan bool) error {
+    var chErrors = make(chan error)
+    wg.Add(1)
+    go func () {
+        defer wg.Done()
+
+        channel, err := ucast.NewPocketLocatorChannel(wg)
         if err != nil {
             chErrors <- errors.WithStack(err)
             return
@@ -24,14 +27,22 @@ func ServeUcastLocationOnWaitGroup(wg *sync.WaitGroup) error {
         defer channel.Close()
         chErrors <- nil
 
-        for i := 0; i < 10; i++ {
-            err := channel.Send("192.168.1.220", []byte("HELLO! - " + strconv.Itoa(i)))
-            if err != nil {
-                log.Fatal(err.Error())
+        for {
+            select {
+                case <- chClose:
+                    return
+
+                case s := <-chSend:
+                    err := channel.Send(s.DstAddr, s.Message)
+                    if err != nil {
+                        log.Debug(errors.WithStack(err))
+                    }
+
+                case r := <- channel.ChRead:
+                    chRead <- r
             }
         }
-        time.After(time.Millisecond)
-    }(wg)
+    }()
 
     return <- chErrors
 }

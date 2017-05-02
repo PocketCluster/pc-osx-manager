@@ -126,7 +126,7 @@ func main() {
                         srvWaiter.Add(2)
                         // TODO : use network interface
                         slvcomm.ServeMcastListenerOnWaitGroup("eth0", &srvWaiter)
-                        slvcomm.ServeUcastLocationOnWaitGroup(&srvWaiter)
+                        slvcomm.ServeUcastBeaconOnWaitGroup(&srvWaiter, nil, nil, nil)
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdBeaconStop: {
