@@ -3,6 +3,7 @@ package ucast
 import (
     "net"
     "sync"
+    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -10,6 +11,8 @@ import (
 
 type BeaconAgent struct {
     isClosed     bool
+    closeLock    sync.Mutex
+
     conn         *net.UDPConn
     waiter       *sync.WaitGroup
     ChRead       chan BeaconPack
@@ -40,11 +43,12 @@ func NewBeaconAgent(waiter *sync.WaitGroup) (*BeaconAgent, error) {
 
 // Close is used to cleanup the client
 func (bc *BeaconAgent) Close() error {
+    bc.closeLock.Lock()
+    defer bc.closeLock.Unlock()
+
     if bc.isClosed {
         return nil
     }
-    log.Debugf("[INFO] locator channel closing : %v", *bc)
-
     bc.isClosed = true
     close(bc.ChRead)
     close(bc.chWrite)
@@ -80,11 +84,9 @@ func (bc *BeaconAgent) reader() {
 
         count, addr, err = bc.conn.ReadFromUDP(buff)
         if err != nil {
-            log.Infof("[INFO] Failed to read packet: %v", err)
             continue
         }
         if count == 0 {
-            log.Infof("[INFO] empty message. ignore")
             continue
         }
         adr := copyUDPAddr(addr)
@@ -126,6 +128,6 @@ func (bc *BeaconAgent) Send(targetHost string, buf []byte) error {
     }
 
     // TODO : find ways to remove this. We'll wait artificially for now (v0.1.4)
-    //time.After(time.Millisecond)
+    time.After(time.Millisecond)
     return nil
 }

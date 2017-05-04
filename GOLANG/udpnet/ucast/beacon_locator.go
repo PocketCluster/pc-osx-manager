@@ -3,6 +3,7 @@ package ucast
 import (
     "net"
     "sync"
+    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -10,6 +11,7 @@ import (
 
 type BeaconLocator struct {
     isClosed     bool
+    closeLock    sync.Mutex
 
     conn         *net.UDPConn
     waiter       *sync.WaitGroup
@@ -41,11 +43,12 @@ func NewBeaconLocator(waiter *sync.WaitGroup) (*BeaconLocator, error) {
 
 // Close is used to cleanup the client
 func (lc *BeaconLocator) Close() error {
+    lc.closeLock.Lock()
+    defer lc.closeLock.Unlock()
+
     if lc.isClosed {
         return nil
     }
-    log.Debugf("[INFO] locator channel closing : %v", *lc)
-
     lc.isClosed = true
     close(lc.ChRead)
     close(lc.chWrite)
@@ -77,15 +80,13 @@ func (lc *BeaconLocator) read() {
     for !lc.isClosed {
         // Set a deadline for reading. Read operation will fail if no data
         // is received after deadline.
-        //lc.conn.SetReadDeadline(time.Now().Add(readTimeout))
+        lc.conn.SetReadDeadline(time.Now().Add(readTimeout))
 
         count, addr, err = lc.conn.ReadFromUDP(buff)
         if err != nil {
-            log.Debugf("[DEBUG] failed to read packet: %v", err)
             continue
         }
         if count == 0 {
-            log.Infof("[INFO] empty message. ignore")
             continue
         }
         adr := copyUDPAddr(addr)
@@ -97,7 +98,6 @@ func (lc *BeaconLocator) read() {
         }
         lc.ChRead <- pack
     }
-    log.Debugf("Locator Closed")
 }
 
 func (lc *BeaconLocator) write() {
@@ -127,6 +127,6 @@ func (lc *BeaconLocator) Send(targetHost string, buf []byte) error {
     }
 
     // TODO : find ways to remove this. We'll wait artificially for now (v0.1.4)
-    //time.After(time.Millisecond)
+    time.After(time.Millisecond)
     return nil
 }

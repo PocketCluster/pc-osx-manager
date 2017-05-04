@@ -33,14 +33,12 @@ func main() {
             regiProc *regisrv.PocketRegistry = nil
             swarmProc *swarmsrv.Server
             swarmSrv *graceful.Server
-
-            srvWaiter sync.WaitGroup
             err error = nil
 
+            srvWaiter sync.WaitGroup
             catcher *mcast.SearchCatcher
             locator *ucast.BeaconLocator
             chClose chan bool
-
         )
 
         go func(wg *sync.WaitGroup) {

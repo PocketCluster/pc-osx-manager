@@ -6,10 +6,12 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+    "time"
 )
 
 type SearchCatcher struct {
     isClosed     bool
+    closeLock    sync.Mutex
 
     waiter       *sync.WaitGroup
     conn         *net.UDPConn
@@ -24,11 +26,9 @@ func NewSearchCatcher(niface string, waiter *sync.WaitGroup) (*SearchCatcher, er
     }
     conn, err := net.ListenMulticastUDP("udp4", iface, ipv4McastAddr)
     if err != nil {
-        log.Errorf("[ERR] failed to bind to any multicast udp port %v", err)
         return nil, errors.Errorf("[ERR] failed to bind to any multicast udp port", err)
     }
     conn.SetReadBuffer(PC_MAX_MCAST_UDP_BUF_SIZE)
-    conn.SetWriteBuffer(PC_MAX_MCAST_UDP_BUF_SIZE)
     listener := &SearchCatcher{
         waiter:    waiter,
         conn:      conn,
@@ -41,10 +41,12 @@ func NewSearchCatcher(niface string, waiter *sync.WaitGroup) (*SearchCatcher, er
 
 // Close is used to cleanup the client
 func (sl *SearchCatcher) Close() error {
+    sl.closeLock.Lock()
+    defer sl.closeLock.Unlock()
+
     if sl.isClosed {
         return nil
     }
-
     sl.isClosed = true
     close(sl.ChRead)
     return sl.conn.Close()
@@ -75,15 +77,13 @@ func (sl *SearchCatcher) read() {
     for !sl.isClosed {
         // Set a deadline for reading. Read operation will fail if no data
         // is received after deadline.
-        //lc.conn.SetReadDeadline(time.Now().Add(readTimeout))
+        sl.conn.SetReadDeadline(time.Now().Add(readTimeout))
 
         count, addr, err = sl.conn.ReadFromUDP(buff)
         if err != nil {
-            log.Debugf("[DEBUG] failed to read packet: %v", err)
             continue
         }
         if count == 0 {
-            log.Infof("[INFO] empty message. ignore")
             continue
         }
         adr := copyUDPAddr(addr)
@@ -95,5 +95,4 @@ func (sl *SearchCatcher) read() {
         }
         sl.ChRead <- pack
     }
-    log.Debugf("Locator Closed")
 }

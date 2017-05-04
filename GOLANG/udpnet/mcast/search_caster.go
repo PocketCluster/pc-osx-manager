@@ -11,6 +11,7 @@ import (
 
 type SearchCaster struct {
     isClosed    bool
+    closeLock   sync.Mutex
 
     waiter      *sync.WaitGroup
     conn        *net.UDPConn
@@ -23,7 +24,6 @@ func NewSearchCaster(waiter *sync.WaitGroup) (*SearchCaster, error) {
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    conn.SetReadBuffer(PC_MAX_MCAST_UDP_BUF_SIZE)
     conn.SetWriteBuffer(PC_MAX_MCAST_UDP_BUF_SIZE)
     mc := &SearchCaster{
         waiter:     waiter,
@@ -37,10 +37,12 @@ func NewSearchCaster(waiter *sync.WaitGroup) (*SearchCaster, error) {
 
 // Close is used to cleanup the client
 func (mc *SearchCaster) Close() error {
+    mc.closeLock.Lock()
+    defer mc.closeLock.Unlock()
+
     if mc.isClosed {
         return nil
     }
-
     mc.isClosed = true
     close(mc.chWrite)
     return errors.WithStack(mc.conn.Close())
