@@ -6,6 +6,7 @@ import (
     "sync"
 
     log "github.com/Sirupsen/logrus"
+    "github.com/pkg/errors"
     "github.com/gravitational/teleport/lib/process"
     "github.com/coreos/etcd/embed"
     "gopkg.in/tylerb/graceful.v1"
@@ -18,7 +19,8 @@ import (
     telesrv "github.com/stkim1/pc-core/extsrv/teleport"
     regisrv "github.com/stkim1/pc-core/extsrv/registry"
     swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
-    "github.com/stkim1/pc-core/slvcomm"
+    "github.com/stkim1/udpnet/ucast"
+    "github.com/stkim1/udpnet/mcast"
 )
 
 func main() {
@@ -34,6 +36,11 @@ func main() {
 
             srvWaiter sync.WaitGroup
             err error = nil
+
+            catcher *mcast.SearchCatcher
+            locator *ucast.BeaconLocator
+            chClose chan bool
+
         )
 
         go func(wg *sync.WaitGroup) {
@@ -123,14 +130,59 @@ func main() {
                     /// BEACON ///
 
                     case operation.CmdBeaconStart: {
-                        srvWaiter.Add(2)
+                        chClose = make(chan bool)
+
                         // TODO : use network interface
-                        slvcomm.ServeMcastListenerOnWaitGroup("eth0", &srvWaiter)
-                        slvcomm.ServeUcastBeaconOnWaitGroup(&srvWaiter, nil, nil, nil)
+                        catcher, err = mcast.NewSearchCatcher("en0", &srvWaiter)
+                        if err != nil {
+                            log.Debug(errors.WithStack(err))
+                        } else {
+                            go func() {
+                                log.Debugf("NewSearchCatcher :: MAIN BEGIN")
+                                for {
+                                    select {
+                                        case <- chClose:
+                                            log.Debugf("NewSearchCatcher :: MAIN CLOSE")
+                                            return
+
+                                        case r := <-catcher.ChRead: {
+                                            log.Debugf("%v", r.Message)
+                                        }
+                                    }
+                                }
+                            }()
+                        }
+
+                        locator, err = ucast.NewBeaconLocator(&srvWaiter)
+                        if err != nil {
+                            log.Debug(errors.WithStack(err))
+                        } else {
+                            go func() {
+                                log.Debugf("NewBeaconLocator :: MAIN BEGIN")
+                                for {
+                                    select {
+                                        case <- chClose:
+                                            log.Debugf("NewBeaconLocator :: MAIN CLOSE")
+                                            return
+
+                                        case r := <-locator.ChRead: {
+                                            log.Debugf("%v", r.Message)
+                                        }
+                                    }
+                                }
+                            }()
+                        }
+
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdBeaconStop: {
+                        close(chClose)
+                        locator.Close()
+                        catcher.Close()
 
+                        chClose = nil
+                        locator = nil
+                        catcher = nil
                         log.Debugf("[OP] %v", e.String())
                     }
 

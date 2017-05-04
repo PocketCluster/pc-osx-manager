@@ -33,9 +33,9 @@ var (
 )
 
 type (
-    CastPkg struct {
+    CastPack struct {
         Message     []byte
-        Address     *net.UDPAddr
+        Address     net.UDPAddr
         Timeout     time.Duration
     }
 )

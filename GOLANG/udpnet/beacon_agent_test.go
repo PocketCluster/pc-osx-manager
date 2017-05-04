@@ -1,14 +1,16 @@
 package main
 
 import (
-    "log"
     "fmt"
+    "log"
+    "sync"
 
     "github.com/stkim1/udpnet/ucast"
 )
 
-func ucastBeaonTest() {
-    channel, err := ucast.NewPocketBeaconChannel(nil)
+func main() {
+    var wg sync.WaitGroup
+    channel, err := ucast.NewBeaconAgent(&wg)
     if err != nil {
         log.Fatal(err.Error())
         return
@@ -16,8 +18,4 @@ func ucastBeaonTest() {
     for entry := range channel.ChRead {
         fmt.Printf("Got new entry: %s\n", string(entry.Message))
     }
-}
-
-func main() {
-    ucastBeaonTest()
 }

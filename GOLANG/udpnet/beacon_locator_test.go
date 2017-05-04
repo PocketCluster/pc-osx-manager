@@ -3,13 +3,15 @@ package main
 import (
     "log"
     "strconv"
+    "sync"
     "time"
 
     "github.com/stkim1/udpnet/ucast"
 )
 
-func ucastLocatorTest() {
-    channel, err := ucast.NewPocketLocatorChannel()
+func main() {
+    var wg sync.WaitGroup
+    channel, err := ucast.NewBeaconLocator(&wg)
     if err != nil {
         log.Fatal(err.Error())
         return
@@ -23,8 +25,4 @@ func ucastLocatorTest() {
     }
     time.After(time.Millisecond)
     channel.Close()
-}
-
-func main() {
-    ucastLocatorTest()
 }
