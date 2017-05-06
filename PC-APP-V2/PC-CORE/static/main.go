@@ -38,7 +38,6 @@ func main() {
             srvWaiter sync.WaitGroup
             catcher *mcast.SearchCatcher
             locator *ucast.BeaconLocator
-            chClose chan bool
         )
 
         go func(wg *sync.WaitGroup) {
@@ -128,59 +127,38 @@ func main() {
                     /// BEACON ///
 
                     case operation.CmdBeaconStart: {
-                        chClose = make(chan bool)
-
                         // TODO : use network interface
-                        catcher, err = mcast.NewSearchCatcher("en0", &srvWaiter)
+                        catcher, err = mcast.NewSearchCatcher("en0")
                         if err != nil {
                             log.Debug(errors.WithStack(err))
                         } else {
                             go func() {
                                 log.Debugf("NewSearchCatcher :: MAIN BEGIN")
-                                for {
-                                    select {
-                                        case <- chClose:
-                                            log.Debugf("NewSearchCatcher :: MAIN CLOSE")
-                                            return
-
-                                        case r := <-catcher.ChRead: {
-                                            log.Debugf("%v", r.Message)
-                                        }
-                                    }
+                                for r := range catcher.ChRead {
+                                    log.Debugf("%v", r.Message)
                                 }
+                                log.Debugf("NewSearchCatcher :: MAIN CLOSE")
                             }()
                         }
 
-                        locator, err = ucast.NewBeaconLocator(&srvWaiter)
+                        locator, err = ucast.NewBeaconLocator()
                         if err != nil {
                             log.Debug(errors.WithStack(err))
                         } else {
                             go func() {
                                 log.Debugf("NewBeaconLocator :: MAIN BEGIN")
-                                for {
-                                    select {
-                                        case <- chClose:
-                                            log.Debugf("NewBeaconLocator :: MAIN CLOSE")
-                                            return
-
-                                        case r := <-locator.ChRead: {
-                                            log.Debugf("%v", r.Message)
-                                        }
-                                    }
+                                for r := range locator.ChRead {
+                                    log.Debugf("%v", r.Message)
                                 }
+                                log.Debugf("NewBeaconLocator :: MAIN CLOSE")
                             }()
                         }
-
                         log.Debugf("[OP] %v", e.String())
                     }
-                    case operation.CmdBeaconStop: {
-                        close(chClose)
-                        locator.Close()
-                        catcher.Close()
 
-                        chClose = nil
-                        locator = nil
-                        catcher = nil
+                    case operation.CmdBeaconStop: {
+                        catcher.Close(); catcher = nil
+                        locator.Close(); locator = nil
                         log.Debugf("[OP] %v", e.String())
                     }
 

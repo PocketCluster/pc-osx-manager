@@ -11,16 +11,16 @@ import (
 
 type BeaconLocator struct {
     isClosed     bool
-    closeLock    sync.Mutex
+    waiter       sync.WaitGroup
+    chClosed     chan bool
 
     conn         *net.UDPConn
-    waiter       *sync.WaitGroup
     ChRead       chan BeaconPack
     chWrite      chan BeaconPack
 }
 
 // New constructor of a new server
-func NewBeaconLocator(waiter *sync.WaitGroup) (*BeaconLocator, error) {
+func NewBeaconLocator() (*BeaconLocator, error) {
     conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: PAGENT_RECV_PORT})
     if err != nil {
         return nil, errors.WithStack(err)
@@ -29,13 +29,12 @@ func NewBeaconLocator(waiter *sync.WaitGroup) (*BeaconLocator, error) {
     conn.SetWriteBuffer(PC_MAX_UCAST_UDP_BUF_SIZE)
     locator := &BeaconLocator{
         isClosed:    false,
-
+        chClosed:    make(chan bool),
         conn:        conn,
-        waiter:      waiter,
-        ChRead:      make(chan BeaconPack, PC_UCAST_LOCATOR_CHAN_CAP),
-        chWrite:     make(chan BeaconPack, PC_UCAST_LOCATOR_CHAN_CAP),
+        ChRead:      make(chan BeaconPack),
+        chWrite:     make(chan BeaconPack),
     }
-    waiter.Add(2)
+    locator.waiter.Add(2)
     go locator.read()
     go locator.write()
     return locator, nil
@@ -43,16 +42,20 @@ func NewBeaconLocator(waiter *sync.WaitGroup) (*BeaconLocator, error) {
 
 // Close is used to cleanup the client
 func (lc *BeaconLocator) Close() error {
-    lc.closeLock.Lock()
-    defer lc.closeLock.Unlock()
-
     if lc.isClosed {
         return nil
     }
     lc.isClosed = true
+    err := lc.conn.Close()
+
+    // broad case close action
+    close(lc.chClosed)
+    // wait...
+    lc.waiter.Wait()
+    // then close channels
     close(lc.ChRead)
     close(lc.chWrite)
-    return lc.conn.Close()
+    return err
 }
 
 func (lc *BeaconLocator) read() {
@@ -75,41 +78,40 @@ func (lc *BeaconLocator) read() {
             Zone:   zone,
         }
     }
-    defer lc.waiter.Done()
 
     for !lc.isClosed {
-        // Set a deadline for reading. Read operation will fail if no data
-        // is received after deadline.
-        lc.conn.SetReadDeadline(time.Now().Add(readTimeout))
+        /*** Set a deadline for reading. Read operation will fail if no data is received after deadline. ***/
+        //lc.conn.SetReadDeadline(time.Now().Add(readTimeout))
 
         count, addr, err = lc.conn.ReadFromUDP(buff)
         if err != nil {
             continue
         }
-        if count == 0 {
-            continue
-        }
         adr := copyUDPAddr(addr)
         msg := make([]byte, count)
         copy(msg, buff[:count])
-        pack := BeaconPack{
-            Address:    adr,
-            Message:    msg,
-        }
-        lc.ChRead <- pack
+        lc.ChRead <- BeaconPack{Address:adr,Message:msg}
     }
+
+    lc.waiter.Done()
 }
 
 func (lc *BeaconLocator) write() {
     defer lc.waiter.Done()
-
-    for v := range lc.chWrite {
-        if len(v.Message) == 0 {
-            continue
-        }
-        _, err := lc.conn.WriteToUDP(v.Message, &v.Address)
-        if err != nil {
-            log.Info(err)
+    for {
+        select {
+            case <- lc.chClosed: {
+                return
+            }
+            case v := <- lc.chWrite: {
+                if len(v.Message) == 0 {
+                    continue
+                }
+                _, err := lc.conn.WriteToUDP(v.Message, &v.Address)
+                if err != nil {
+                    log.Info(err)
+                }
+            }
         }
     }
 }
@@ -117,6 +119,9 @@ func (lc *BeaconLocator) write() {
 func (lc *BeaconLocator) Send(targetHost string, buf []byte) error {
     if len(targetHost) == 0 || len(buf) == 0 {
         return errors.Errorf("[ERR] Cannot send null data to null host")
+    }
+    if lc.isClosed {
+        return nil
     }
     lc.chWrite <- BeaconPack{
         Message: buf,
