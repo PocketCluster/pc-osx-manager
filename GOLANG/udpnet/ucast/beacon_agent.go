@@ -11,48 +11,49 @@ import (
 
 type BeaconAgent struct {
     isClosed     bool
-    closeLock    sync.Mutex
+    waiter       sync.WaitGroup
+    chClosed     chan bool
 
     conn         *net.UDPConn
-    waiter       *sync.WaitGroup
     ChRead       chan BeaconPack
     chWrite      chan BeaconPack
 }
 
 // New constructor of a new server
-func NewBeaconAgent(waiter *sync.WaitGroup) (*BeaconAgent, error) {
+func NewBeaconAgent() (*BeaconAgent, error) {
     conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: PAGENT_SEND_PORT})
     if err != nil {
         return nil, errors.WithStack(err)
     }
     conn.SetReadBuffer(PC_MAX_UCAST_UDP_BUF_SIZE)
     conn.SetWriteBuffer(PC_MAX_UCAST_UDP_BUF_SIZE)
-    beacon := &BeaconAgent{
+    agent := &BeaconAgent{
         isClosed:    false,
+        chClosed:    make(chan bool),
 
-        conn:       conn,
-        waiter:     waiter,
-        ChRead:     make(chan BeaconPack, PC_UCAST_BEACON_CHAN_CAP),
-        chWrite:    make(chan BeaconPack, PC_UCAST_BEACON_CHAN_CAP),
+        conn:        conn,
+        ChRead:      make(chan BeaconPack),
+        chWrite:     make(chan BeaconPack),
     }
-    waiter.Add(2)
-    go beacon.reader()
-    go beacon.writer()
-    return beacon, nil
+    agent.waiter.Add(2)
+    go agent.reader()
+    go agent.writer()
+    return agent, nil
 }
 
 // Close is used to cleanup the client
 func (bc *BeaconAgent) Close() error {
-    bc.closeLock.Lock()
-    defer bc.closeLock.Unlock()
-
     if bc.isClosed {
         return nil
     }
     bc.isClosed = true
+    err := bc.conn.Close()
+
+    close(bc.chClosed)
+    bc.waiter.Wait()
     close(bc.ChRead)
     close(bc.chWrite)
-    return bc.conn.Close()
+    return err
 }
 
 func (bc *BeaconAgent) reader() {
@@ -75,7 +76,6 @@ func (bc *BeaconAgent) reader() {
             Zone:   zone,
         }
     }
-    defer bc.waiter.Done()
 
     for !bc.isClosed {
         // Set a deadline for reading. Read operation will fail if no data
@@ -86,48 +86,62 @@ func (bc *BeaconAgent) reader() {
         if err != nil {
             continue
         }
-        if count == 0 {
-            continue
-        }
         adr := copyUDPAddr(addr)
         msg := make([]byte, count)
         copy(msg, buff[:count])
-        pack := BeaconPack{
-            Address:    adr,
-            Message:    msg,
-        }
-        bc.ChRead <- pack
+        bc.ChRead <- BeaconPack{Address:adr,Message:msg}
     }
+
+    bc.waiter.Done()
 }
 
 func (bc *BeaconAgent) writer() {
     defer bc.waiter.Done()
 
-    for v := range bc.chWrite {
-        if len(v.Message) == 0 {
-            continue
-        }
-        _, err := bc.conn.WriteToUDP(v.Message, &v.Address)
-        if err != nil {
-            log.Info(err)
+    for {
+        select {
+            case <- bc.chClosed: {
+                return
+            }
+            case v, ok := <- bc.chWrite: {
+                if !ok {
+                    return
+                }
+                if len(v.Message) == 0 {
+                    continue
+                }
+                _, err := bc.conn.WriteToUDP(v.Message, &v.Address)
+                if err != nil {
+                    log.Info(err)
+                }
+            }
         }
     }
-
 }
 
 func (bc *BeaconAgent) Send(targetHost string, buf []byte) error {
     if len(targetHost) == 0 || len(buf) == 0 {
         return errors.Errorf("[ERR] Cannot send null data to null host")
     }
-    bc.chWrite <- BeaconPack{
-        Message: buf,
-        Address: net.UDPAddr {
-            IP:      net.ParseIP(targetHost),
-            Port:    PAGENT_SEND_PORT,
-        },
+    if bc.isClosed {
+        return nil
     }
 
-    // TODO : find ways to remove this. We'll wait artificially for now (v0.1.4)
-    time.After(time.Millisecond)
+    select {
+        case <- bc.chClosed: {
+            return nil
+        }
+        case  bc.chWrite <- BeaconPack{
+            Message: buf,
+            Address: net.UDPAddr {
+                IP:      net.ParseIP(targetHost),
+                Port:    PAGENT_SEND_PORT,
+            },
+        }: {
+            // TODO : find ways to remove this. We'll wait artificially for now (v0.1.4)
+            time.After(time.Millisecond)
+        }
+    }
+
     return nil
 }

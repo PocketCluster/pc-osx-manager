@@ -98,6 +98,7 @@ func (lc *BeaconLocator) read() {
 
 func (lc *BeaconLocator) write() {
     defer lc.waiter.Done()
+
     for {
         select {
             case <- lc.chClosed: {
