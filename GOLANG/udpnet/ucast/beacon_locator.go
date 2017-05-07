@@ -103,7 +103,10 @@ func (lc *BeaconLocator) write() {
             case <- lc.chClosed: {
                 return
             }
-            case v := <- lc.chWrite: {
+            case v, ok := <- lc.chWrite: {
+                if !ok {
+                    return
+                }
                 if len(v.Message) == 0 {
                     continue
                 }
@@ -123,15 +126,22 @@ func (lc *BeaconLocator) Send(targetHost string, buf []byte) error {
     if lc.isClosed {
         return nil
     }
-    lc.chWrite <- BeaconPack{
-        Message: buf,
-        Address: net.UDPAddr {
-            IP:      net.ParseIP(targetHost),
-            Port:    PAGENT_SEND_PORT,
-        },
+
+    select {
+        case <-lc.chClosed: {
+            return nil
+        }
+        case lc.chWrite <- BeaconPack{
+            Message: buf,
+            Address: net.UDPAddr{
+                IP:      net.ParseIP(targetHost),
+                Port:    PAGENT_SEND_PORT,
+            },
+        }: {
+            // TODO : find ways to remove this. We'll wait artificially for now (v0.1.4)
+            time.After(time.Millisecond)
+        }
     }
 
-    // TODO : find ways to remove this. We'll wait artificially for now (v0.1.4)
-    time.After(time.Millisecond)
     return nil
 }
