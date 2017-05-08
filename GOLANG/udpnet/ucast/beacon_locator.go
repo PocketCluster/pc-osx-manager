@@ -121,8 +121,11 @@ func (lc *BeaconLocator) write() {
 }
 
 func (lc *BeaconLocator) Send(targetHost string, buf []byte) error {
-    if len(targetHost) == 0 || len(buf) == 0 {
-        return errors.Errorf("[ERR] Cannot send null data to null host")
+    if len(targetHost) == 0 {
+        return errors.Errorf("[ERR] BeaconLocator.Send() :: cannot send data to null host")
+    }
+    if len(buf) == 0 {
+        return errors.Errorf("[ERR] BeaconLocator.Send() :: cannot send null data")
     }
     if lc.isClosed {
         return nil

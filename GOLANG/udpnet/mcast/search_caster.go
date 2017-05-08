@@ -2,7 +2,6 @@ package mcast
 
 import (
     "net"
-    "sync"
     "time"
 
     log "github.com/Sirupsen/logrus"
