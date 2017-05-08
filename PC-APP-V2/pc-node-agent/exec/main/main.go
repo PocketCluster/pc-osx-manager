@@ -162,10 +162,10 @@ func initAgentService(app *PocketApplication) error {
                     log.Debugf("[AGENT] dhcp recieved %v", spew.Sdump(d.Payload))
                 }
                 case <- unbounded.C: {
-
+                    log.Debugf("[AGENT] unbounded %v", time.Now())
                 }
                 case <- bounded.C: {
-
+                    log.Debugf("[AGENT] bounded %v", time.Now())
                 }
             }
         }
