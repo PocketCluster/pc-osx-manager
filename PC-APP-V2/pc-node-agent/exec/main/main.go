@@ -30,15 +30,15 @@ func initDhcpListner(app *PocketApplication) error {
 
         // firstly clear off previous socket
         os.Remove(dhcp.DHCPEventSocketPath)
-        listen, err := net.ListenUnix("unix", &net.UnixAddr{dhcp.DHCPEventSocketPath, "unix"})
+        dhcpListener, err := net.ListenUnix("unix", &net.UnixAddr{dhcp.DHCPEventSocketPath, "unix"})
         if err != nil {
             return errors.WithStack(err)
         }
         defer os.Remove(dhcp.DHCPEventSocketPath)
-        defer listen.Close()
+        defer dhcpListener.Close()
 
         for {
-            conn, err := listen.AcceptUnix()
+            conn, err := dhcpListener.AcceptUnix()
             if err != nil {
                 log.Error(errors.WithStack(err))
                 continue
@@ -62,6 +62,8 @@ func initDhcpListner(app *PocketApplication) error {
                 continue
             }
         }
+
+        return nil
     })
 
     return nil
@@ -127,6 +129,7 @@ func initBeaconService(app *PocketApplication) error {
 
             }
         }
+
         return beacon.Close()
     })
     return nil
@@ -150,6 +153,7 @@ func initAgentService(app *PocketApplication) error {
                 }
             }
         }
+        log.Debugf("[AGENT] finishing agent service...")
         return nil
     })
     return nil
