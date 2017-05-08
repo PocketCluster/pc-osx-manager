@@ -2,16 +2,15 @@ package main
 
 import (
     "encoding/json"
-    "errors"
     "flag"
     "net"
     "os"
     "time"
 
-    dhcp "github.com/stkim1/pc-node-agent/network"
+    "github.com/stkim1/pc-node-agent/dhcp"
     "gopkg.in/vmihailenco/msgpack.v2"
     log "github.com/Sirupsen/logrus"
-    "github.com/gravitational/trace"
+    "github.com/pkg/errors"
     "github.com/davecgh/go-spew/spew"
     process "github.com/mitchellh/go-ps"
 )
@@ -29,27 +28,27 @@ var (
 
 func dhcpAgent() {
     if os.Getuid() != 0 {
-        log.Error(trace.Wrap(errors.New("Insufficient Permission")))
+        log.Error(errors.WithStack(errors.New("Insufficient Permission")))
         return
     }
     // dhclient-script pid
     sps, err := process.FindProcess(os.Getppid())
     if err != nil {
-        log.Error(trace.Wrap(err))
+        log.Error(errors.WithStack(err))
         return
     }
     if sps.Executable() != "dhclient-script" {
-        log.Error(trace.Wrap(errors.New("Incorrect preliminary executable")))
+        log.Error(errors.WithStack(errors.New("Incorrect preliminary executable")))
         return
     }
     // real dhclient pid
     rps, err := process.FindProcess(sps.PPid())
     if err != nil {
-        log.Error(trace.Wrap(err))
+        log.Error(errors.WithStack(err))
         return
     }
     if rps.Executable() != "dhclient" {
-        log.Error(trace.Wrap(errors.New("Incorrect postliminary executable")))
+        log.Error(errors.WithStack(errors.New("Incorrect postliminary executable")))
         return
     }
 
@@ -158,20 +157,20 @@ func dhcpAgent() {
 
     conn, err := net.DialUnix("unix", nil, &net.UnixAddr{dhcpEventSocketPath, "unix"})
     if err != nil {
-        log.Error(trace.Wrap(err))
+        log.Error(errors.WithStack(err))
         return
     }
     defer conn.Close()
 
     msg, err := msgpack.Marshal(dhcpEvent)
     if err != nil {
-        log.Error(trace.Wrap(err))
+        log.Error(errors.WithStack(err))
         return
     }
 
     _, err = conn.Write(msg)
     if err != nil {
-        log.Error(trace.Wrap(err))
+        log.Error(errors.WithStack(err))
     }
 
     if len(*dev) != 0 && *dev == devJsonPrint {
@@ -197,7 +196,7 @@ func pocketDaemon() {
     os.Remove(dhcpEventSocketPath)
     listen, err := net.ListenUnix("unix", &net.UnixAddr{dhcpEventSocketPath, "unix"})
     if err != nil {
-        log.Error(trace.Wrap(err))
+        log.Error(errors.WithStack(err))
         return
     }
     defer os.Remove(dhcpEventSocketPath)
@@ -206,17 +205,17 @@ func pocketDaemon() {
     for {
         conn, err := listen.AcceptUnix()
         if err != nil {
-            log.Error(trace.Wrap(err))
+            log.Error(errors.WithStack(err))
             continue
         }
         count, err := conn.Read(buf)
         if err != nil {
-            log.Error(trace.Wrap(err))
+            log.Error(errors.WithStack(err))
             continue
         }
         err = msgpack.Unmarshal(buf[0:count], dhcpEvent)
         if err != nil {
-            log.Error(trace.Wrap(err))
+            log.Error(errors.WithStack(err))
             continue
         }
 
@@ -224,7 +223,7 @@ func pocketDaemon() {
 
         err = conn.Close()
         if err != nil {
-            log.Error(trace.Wrap(err))
+            log.Error(errors.WithStack(err))
             continue
         }
     }

@@ -1,4 +1,9 @@
-package network
+package dhcp
+
+const (
+    DHCPEventSocketPath = "/var/run/pocketd.sock"
+    DHCPModeAgent       = "dhcpagent"
+)
 
 type DhcpMeta struct {
     Reason                          string    `json:"reason, omitempty"                             msgpack:"reason, omitempty"`
