@@ -14,15 +14,16 @@ import (
 )
 
 const (
-    NodeServiceSearch = "node_service_search"
-    NodeServiceBeacon = "node_service_beacon"
-    NodeServiceAgent  = "node_service_agent"
+    nodeServiceSearch  = "service_search"
+    nodeServiceBeacon  = "service_beacon"
+    nodeFeedbackBeacon = "feedback_beacon"
+    nodeFeedbackDHCP   = "feedback_dhcp"
 )
 
 func initDhcpListner(app *PocketApplication) error {
 
     app.RegisterFunc(func () error {
-        log.Info("[DHCP] dhcp listner started...")
+        log.Debugf("[DHCP] dhcp listner started...")
 
         buf := make([]byte, 20480)
         dhcpEvent := &dhcp.DhcpEvent{}
@@ -37,31 +38,28 @@ func initDhcpListner(app *PocketApplication) error {
         defer listen.Close()
 
         for {
-            select {
-                case conn, err := listen.AcceptUnix(): {
-                    if err != nil {
-                        log.Error(errors.WithStack(err))
-                        continue
-                    }
-                    count, err := conn.Read(buf)
-                    if err != nil {
-                        log.Error(errors.WithStack(err))
-                        continue
-                    }
-                    err = msgpack.Unmarshal(buf[0:count], dhcpEvent)
-                    if err != nil {
-                        log.Error(errors.WithStack(err))
-                        continue
-                    }
+            conn, err := listen.AcceptUnix()
+            if err != nil {
+                log.Error(errors.WithStack(err))
+                continue
+            }
+            count, err := conn.Read(buf)
+            if err != nil {
+                log.Error(errors.WithStack(err))
+                continue
+            }
+            err = msgpack.Unmarshal(buf[0:count], dhcpEvent)
+            if err != nil {
+                log.Error(errors.WithStack(err))
+                continue
+            }
 
-                    //log.Info(spew.Sdump(dhcpEvent))
+            app.BroadcastEvent(Event{Name:nodeFeedbackDHCP, Payload:dhcpEvent})
 
-                    err = conn.Close()
-                    if err != nil {
-                        log.Error(errors.WithStack(err))
-                        continue
-                    }
-                }
+            err = conn.Close()
+            if err != nil {
+                log.Error(errors.WithStack(err))
+                continue
             }
         }
     })
@@ -75,16 +73,22 @@ func initSearchService(app *PocketApplication) error {
         return err
     }
     eventsC := make(chan Event)
-    cancleC := make(chan struct{})
+    app.WaitForEvent(nodeServiceSearch, eventsC, make(chan struct{}))
 
-    app.WaitForEvent(NodeServiceSearch, eventsC, cancleC)
     app.RegisterFunc(func() error {
         log.Debugf("[SEARCH] starting master serach service...")
 
         for {
             select {
-                case _ = <- eventsC: {
-                    caster.Send(nil)
+                case e := <- eventsC: {
+                    cm, ok := e.Payload.([]byte)
+                    if ok {
+                        log.Debugf("[SEARCH] casting message...")
+                        err := caster.Send(cm)
+                        if err != nil {
+                            log.Errorf("[SEARCH] casting error %v", err)
+                        }
+                    }
                 }
             }
         }
@@ -101,32 +105,53 @@ func initBeaconService(app *PocketApplication) error {
         return err
     }
     eventsC := make(chan Event)
-    cancelC := make(chan struct{})
+    app.WaitForEvent(nodeServiceBeacon, eventsC, make(chan struct{}))
 
-    app.WaitForEvent(NodeServiceBeacon, eventsC, cancelC)
     app.RegisterFunc(func() error {
         log.Debugf("[BEACON] starting beacon service...")
         go func() {
             for v := range beacon.ChRead {
-                log.Debugf("Received message %v", v.Message)
+                log.Debugf("[BEACON] message received %v", v)
             }
         }()
 
         for {
             select {
-                case _ = <- eventsC: {
-                    beacon.Send("", nil)
+                case e := <- eventsC: {
+                    bs, ok := e.Payload.(ucast.BeaconSend)
+                    if ok {
+                        log.Debugf("[BEACON] sending message %v", bs)
+                        beacon.Send(bs.Host, bs.Payload)
+                    }
                 }
 
             }
         }
-        //return agent.Close()
-        return nil
+        return beacon.Close()
     })
     return nil
 }
 
 func initAgentService(app *PocketApplication) error {
+    beaconC := make(chan Event)
+    dhcpC := make(chan Event)
+    app.WaitForEvent(nodeFeedbackBeacon, beaconC, make(chan struct{}))
+    app.WaitForEvent(nodeFeedbackDHCP, dhcpC, make(chan struct{}))
+
+    app.RegisterFunc(func() error {
+        log.Debugf("[AGENT] starting agent service...")
+        for {
+            select {
+                case b := <- beaconC: {
+                    log.Debugf("[AGENT] beacon recieved %v", b)
+                }
+                case d := <- dhcpC: {
+                    log.Debugf("[AGENT] dhcp recieved %v", d)
+                }
+            }
+        }
+        return nil
+    })
     return nil
 }
 
@@ -135,6 +160,7 @@ func main() {
         err error = nil
         app *PocketApplication
     )
+    log.SetLevel(log.DebugLevel)
     app = NewPocketApplication()
 
     // dhcp listner
@@ -144,13 +170,19 @@ func main() {
     }
 
     // search service
-    initSearchService(app)
+    err = initSearchService(app)
     if err != nil {
         log.Panic(errors.WithStack(err))
     }
 
     // beacon service
-    initBeaconService(app)
+    err = initBeaconService(app)
+    if err != nil {
+        log.Panic(errors.WithStack(err))
+    }
+
+    // agent service
+    err = initAgentService(app)
     if err != nil {
         log.Panic(errors.WithStack(err))
     }

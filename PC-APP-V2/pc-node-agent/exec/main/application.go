@@ -86,7 +86,7 @@ func (p *PocketApplication) serve(srv *Service) {
                 break
             }
         }
-        log.Debugf("[SUPERVISOR] Service %v is done (%v)", *srv, len(p.services))
+        log.Debugf("[APPLICATION] Service %v is done (%v)", *srv, len(p.services))
     }
 
     p.wg.Add(1)
@@ -94,7 +94,7 @@ func (p *PocketApplication) serve(srv *Service) {
         defer p.wg.Done()
         defer removeService()
 
-        log.Debugf("[SUPERVISOR] Service %v started (%v)", *srv, p.ServiceCount())
+        log.Debugf("[APPLICATION] Service %v started (%v)", *srv, p.ServiceCount())
         err := (*srv).Serve()
         if err != nil {
             errors.WithStack(err)

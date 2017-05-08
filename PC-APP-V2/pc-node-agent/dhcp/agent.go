@@ -13,7 +13,7 @@ import (
 
 func DHCPEventAgent() {
     if os.Getuid() != 0 {
-        log.Error(errors.WithStack(errors.New("Insufficient Permission")))
+        log.Error(errors.WithStack(errors.New("invalid permission")))
         return
     }
     // dhclient-script pid
@@ -23,7 +23,7 @@ func DHCPEventAgent() {
         return
     }
     if sps.Executable() != "dhclient-script" {
-        log.Error(errors.WithStack(errors.New("Incorrect preliminary executable")))
+        log.Error(errors.WithStack(errors.New("incorrect preliminary executable")))
         return
     }
     // real dhclient pid
@@ -33,7 +33,7 @@ func DHCPEventAgent() {
         return
     }
     if rps.Executable() != "dhclient" {
-        log.Error(errors.WithStack(errors.New("Incorrect postliminary executable")))
+        log.Error(errors.WithStack(errors.New("invalid postliminary executable")))
         return
     }
 

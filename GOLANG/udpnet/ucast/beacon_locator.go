@@ -136,11 +136,11 @@ func (lc *BeaconLocator) Send(targetHost string, buf []byte) error {
             return nil
         }
         case lc.chWrite <- BeaconPack{
-            Message: buf,
             Address: net.UDPAddr{
                 IP:      net.ParseIP(targetHost),
                 Port:    PAGENT_SEND_PORT,
             },
+            Message: buf,
         }: {
             // TODO : find ways to remove this. We'll wait artificially for now (v0.1.4)
             time.After(time.Millisecond)

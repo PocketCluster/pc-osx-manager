@@ -26,6 +26,11 @@ const (
 )
 
 type BeaconPack struct {
-    Message     []byte
-    Address     net.UDPAddr
+    Address    net.UDPAddr
+    Message    []byte
+}
+
+type BeaconSend struct {
+    Host       string
+    Payload    []byte
 }
