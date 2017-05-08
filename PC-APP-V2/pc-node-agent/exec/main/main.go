@@ -1,8 +1,9 @@
 package main
 
 import (
-    "os"
     "net"
+    "os"
+    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -11,6 +12,10 @@ import (
     "github.com/stkim1/pc-node-agent/dhcp"
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/udpnet/ucast"
+)
+
+import (
+    "github.com/davecgh/go-spew/spew"
 )
 
 const (
@@ -142,14 +147,25 @@ func initAgentService(app *PocketApplication) error {
     app.WaitForEvent(nodeFeedbackDHCP, dhcpC, make(chan struct{}))
 
     app.RegisterFunc(func() error {
+        unbounded := time.NewTicker(time.Second * 5)
+        bounded := time.NewTicker(time.Second * 10)
+        defer unbounded.Stop()
+        defer bounded.Stop()
+
         log.Debugf("[AGENT] starting agent service...")
         for {
             select {
                 case b := <- beaconC: {
-                    log.Debugf("[AGENT] beacon recieved %v", b)
+                    log.Debugf("[AGENT] beacon recieved %v", spew.Sdump(b.Payload))
                 }
                 case d := <- dhcpC: {
-                    log.Debugf("[AGENT] dhcp recieved %v", d)
+                    log.Debugf("[AGENT] dhcp recieved %v", spew.Sdump(d.Payload))
+                }
+                case <- unbounded.C: {
+
+                }
+                case <- bounded.C: {
+
                 }
             }
         }
