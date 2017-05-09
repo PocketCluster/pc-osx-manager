@@ -6,8 +6,8 @@ import (
 )
 
 const (
-    PAGENT_SEND_PORT    = 10060
-    PAGENT_RECV_PORT    = 10061
+    POCKET_LOCATOR_PORT = 10060
+    POCKET_AGENT_PORT   = 10061
 
     //http://stackoverflow.com/questions/1098897/what-is-the-largest-safe-udp-packet-size-on-the-internet
     PC_SAFE_UDP_PKT_SIZE = 508

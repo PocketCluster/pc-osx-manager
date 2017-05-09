@@ -135,7 +135,7 @@ func main() {
                             go func() {
                                 log.Debugf("NewSearchCatcher :: MAIN BEGIN")
                                 for r := range catcher.ChRead {
-                                    log.Debugf("%v", r.Message)
+                                    log.Debugf("SearchCatcher %v", r.Message)
                                 }
                                 log.Debugf("NewSearchCatcher :: MAIN CLOSE")
                             }()
@@ -148,7 +148,7 @@ func main() {
                             go func() {
                                 log.Debugf("NewBeaconLocator :: MAIN BEGIN")
                                 for r := range locator.ChRead {
-                                    log.Debugf("%v", r.Message)
+                                    log.Debugf("BeaconLocator %v", r.Message)
                                 }
                                 log.Debugf("NewBeaconLocator :: MAIN CLOSE")
                             }()

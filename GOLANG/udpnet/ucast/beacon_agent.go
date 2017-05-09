@@ -21,7 +21,7 @@ type BeaconAgent struct {
 
 // New constructor of a new server
 func NewBeaconAgent() (*BeaconAgent, error) {
-    conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: PAGENT_SEND_PORT})
+    conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: POCKET_AGENT_PORT})
     if err != nil {
         return nil, errors.WithStack(err)
     }
@@ -134,7 +134,7 @@ func (bc *BeaconAgent) Send(targetHost string, buf []byte) error {
         case  bc.chWrite <- BeaconPack{
             Address: net.UDPAddr {
                 IP:      net.ParseIP(targetHost),
-                Port:    PAGENT_SEND_PORT,
+                Port:    POCKET_LOCATOR_PORT,
             },
             Message: buf,
         }: {

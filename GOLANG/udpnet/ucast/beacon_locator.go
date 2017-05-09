@@ -21,7 +21,7 @@ type BeaconLocator struct {
 
 // New constructor of a new server
 func NewBeaconLocator() (*BeaconLocator, error) {
-    conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: PAGENT_RECV_PORT})
+    conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: POCKET_LOCATOR_PORT})
     if err != nil {
         return nil, errors.WithStack(err)
     }
@@ -138,7 +138,7 @@ func (lc *BeaconLocator) Send(targetHost string, buf []byte) error {
         case lc.chWrite <- BeaconPack{
             Address: net.UDPAddr{
                 IP:      net.ParseIP(targetHost),
-                Port:    PAGENT_SEND_PORT,
+                Port:    POCKET_AGENT_PORT,
             },
             Message: buf,
         }: {
