@@ -119,6 +119,30 @@ func (p *PocketApplication) RegisterFunc(fn ServiceFunc) {
     p.Register(fn)
 }
 
+func (p *PocketApplication) BroadcastEvent(event Event) {
+    p.Lock()
+    defer p.Unlock()
+    p.events[event.Name] = event
+    log.Debugf("PocketApplication.BroadcastEvent: %v", &event)
+
+    go func() {
+        p.eventsC <- event
+    }()
+}
+
+func (p *PocketApplication) WaitForEvent(name string, eventC chan Event, cancelC chan struct{}) {
+    p.Lock()
+    defer p.Unlock()
+
+    waiter := &waiter{eventC: eventC, cancelC: cancelC}
+    event, ok := p.events[name]
+    if ok {
+        go p.notifyWaiter(waiter, event)
+        return
+    }
+    p.eventWaiters[name] = append(p.eventWaiters[name], waiter)
+}
+
 // ServiceCount returns the number of registered and actively running services
 func (p *PocketApplication) ServiceCount() int {
     p.Lock()
@@ -149,30 +173,17 @@ func (p *PocketApplication) Wait() error {
     return nil
 }
 
-func (p *PocketApplication) BroadcastEvent(event Event) {
-    p.Lock()
-    defer p.Unlock()
-    p.events[event.Name] = event
-    log.Debugf("PocketApplication.BroadcastEvent: %v", &event)
-
+// onExit allows individual services to register a callback function which will be
+// called when Teleport Process is asked to exit. Usually services terminate themselves
+// when the callback is called
+func (p *PocketApplication) OnExit(callback func(interface{})) {
     go func() {
-        p.eventsC <- event
+        select {
+            case <- p.closer.C:
+                callback(nil)
+        }
     }()
 }
-
-func (p *PocketApplication) WaitForEvent(name string, eventC chan Event, cancelC chan struct{}) {
-    p.Lock()
-    defer p.Unlock()
-
-    waiter := &waiter{eventC: eventC, cancelC: cancelC}
-    event, ok := p.events[name]
-    if ok {
-        go p.notifyWaiter(waiter, event)
-        return
-    }
-    p.eventWaiters[name] = append(p.eventWaiters[name], waiter)
-}
-
 
 // Event is a special service event that can be generated
 // by various goroutines in the supervisor

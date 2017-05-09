@@ -26,21 +26,17 @@ const (
 )
 
 func initDhcpListner(app *PocketApplication) error {
+    // firstly clear off previous socket
+    os.Remove(dhcp.DHCPEventSocketPath)
+    dhcpListener, err := net.ListenUnix("unix", &net.UnixAddr{dhcp.DHCPEventSocketPath, "unix"})
+    if err != nil {
+        return errors.WithStack(err)
+    }
 
     app.RegisterFunc(func () error {
-        log.Debugf("[DHCP] dhcp listner started...")
-
+        log.Debugf("[DHCP] starting dhcp listner...")
         buf := make([]byte, 20480)
         dhcpEvent := &dhcp.DhcpEvent{}
-
-        // firstly clear off previous socket
-        os.Remove(dhcp.DHCPEventSocketPath)
-        dhcpListener, err := net.ListenUnix("unix", &net.UnixAddr{dhcp.DHCPEventSocketPath, "unix"})
-        if err != nil {
-            return errors.WithStack(err)
-        }
-        defer os.Remove(dhcp.DHCPEventSocketPath)
-        defer dhcpListener.Close()
 
         for {
             conn, err := dhcpListener.AcceptUnix()
@@ -71,6 +67,12 @@ func initDhcpListner(app *PocketApplication) error {
         return nil
     })
 
+    app.OnExit(func(payload interface{}) {
+        dhcpListener.Close()
+        os.Remove(dhcp.DHCPEventSocketPath)
+        log.Debugf("[DHCP] close dhcp listner...")
+    })
+
     return nil
 }
 
@@ -85,22 +87,24 @@ func initSearchService(app *PocketApplication) error {
     app.RegisterFunc(func() error {
         log.Debugf("[SEARCH] starting master serach service...")
 
-        for {
-            select {
-                case e := <- eventsC: {
-                    cm, ok := e.Payload.([]byte)
-                    if ok {
-                        log.Debugf("[SEARCH] casting message...")
-                        err := caster.Send(cm)
-                        if err != nil {
-                            log.Errorf("[SEARCH] casting error %v", err)
-                        }
-                    }
+        for e := range eventsC {
+            cm, ok := e.Payload.([]byte)
+            if ok {
+                log.Debugf("[SEARCH] casting message...")
+                err := caster.Send(cm)
+                if err != nil {
+                    log.Errorf("[SEARCH] casting error %v", err)
                 }
             }
         }
 
-        return caster.Close()
+        return nil
+    })
+
+    app.OnExit(func(payload interface{}) {
+        close(eventsC)
+        caster.Close()
+        log.Debugf("[SEARCH] close master serach service...")
     })
 
     return nil
@@ -115,28 +119,33 @@ func initBeaconService(app *PocketApplication) error {
     app.WaitForEvent(nodeServiceBeacon, eventsC, make(chan struct{}))
 
     app.RegisterFunc(func() error {
+        for v := range beacon.ChRead {
+            log.Debugf("[BEACON] message received %v", v)
+            app.BroadcastEvent(Event{Name:nodeFeedbackBeacon, Payload:v})
+        }
+        return nil
+    })
+
+    app.RegisterFunc(func() error {
         log.Debugf("[BEACON] starting beacon service...")
-        go func() {
-            for v := range beacon.ChRead {
-                log.Debugf("[BEACON] message received %v", v)
-            }
-        }()
 
-        for {
-            select {
-                case e := <- eventsC: {
-                    bs, ok := e.Payload.(ucast.BeaconSend)
-                    if ok {
-                        log.Debugf("[BEACON] sending message %v", bs)
-                        beacon.Send(bs.Host, bs.Payload)
-                    }
-                }
-
+        for e := range eventsC {
+            bs, ok := e.Payload.(ucast.BeaconSend)
+            if ok {
+                log.Debugf("[BEACON] sending message %v", bs)
+                beacon.Send(bs.Host, bs.Payload)
             }
         }
 
-        return beacon.Close()
+        return nil
     })
+
+    app.OnExit(func(payload interface{}) {
+        close(eventsC)
+        beacon.Close()
+        log.Debugf("[BEACON] close beacon service...")
+    })
+
     return nil
 }
 
@@ -163,15 +172,23 @@ func initAgentService(app *PocketApplication) error {
                 }
                 case <- unbounded.C: {
                     log.Debugf("[AGENT] unbounded %v", time.Now())
+                    app.BroadcastEvent(Event{Name: nodeServiceSearch, Payload:[]byte{0x00, 0x11, 0x22, 0x33, 0x44}})
                 }
                 case <- bounded.C: {
                     log.Debugf("[AGENT] bounded %v", time.Now())
+                    app.BroadcastEvent(Event{Name: nodeServiceBeacon, Payload: ucast.BeaconSend{Host:"192.168.1.105", Payload:[]byte{0x44, 0x33, 0x22, 0x11, 0x00}}})
                 }
             }
         }
-        log.Debugf("[AGENT] finishing agent service...")
         return nil
     })
+
+    app.OnExit(func(payload interface{}) {
+        close(beaconC)
+        close(dhcpC)
+        log.Debugf("[AGENT] close agent service...")
+    })
+
     return nil
 }
 
