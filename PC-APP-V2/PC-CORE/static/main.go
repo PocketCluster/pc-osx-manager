@@ -25,7 +25,7 @@ import (
 
 func main() {
 
-    mainLifeCycle(func(a App) {
+    mainLifeCycle(func(a *mainLife) {
 
         var (
             serviceConfig *serviceConfig = nil
@@ -268,6 +268,57 @@ func main() {
                     case operation.CmdStorageStop: {
                         log.Debugf("[OP] %v", e.String())
 //                        etcdProc.Server.Stop()
+                    }
+
+
+                    case operation.CmdServiceBundleStart: {
+                        eventC := make(chan Event)
+                        a.WaitForEvent("TEST_EVENT", eventC, make(chan struct{}))
+
+                        a.RegisterService(Service{
+                            Serve:func() error {
+                                log.Debugf("[TEST SERV 1] test for-select loop started...")
+                                for {
+                                    select {
+                                        case <- a.StopChannel():
+                                            log.Debugf("[TEST SERV 1] test for-select loop stopping...")
+                                            return nil
+                                        case <- eventC:
+                                            log.Debugf("[TEST SERV 1] new Event received...")
+                                    }
+                                }
+                            },
+                            Stop:func() error {
+                                log.Debugf("[TEST SERV 1] test ending...")
+                                return nil
+                            },
+                        })
+
+                        a.RegisterService(Service{
+                            Serve:func() error {
+                                log.Debugf("[TEST SERV 2] test started")
+                                for {
+                                    if a.IsStopped() {
+                                        log.Debugf("[TEST SERV 2] test stopping")
+                                        return nil
+                                    }
+                                    a.BroadcastEvent(Event{Name:"TEST_EVENT"})
+
+                                    time.Sleep(time.Second)
+                                }
+                                return nil
+                            },
+                            Stop:func() error {
+                                log.Debugf("[TEST SERV 2] test ending...")
+                                return nil
+                            },
+                        })
+                        a.StartServices()
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdServiceBundleStop: {
+                        a.StopServices()
+                        log.Debugf("[OP] %v", e.String())
                     }
 
                     default:

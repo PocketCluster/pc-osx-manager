@@ -3,7 +3,7 @@ package main
 import (
     log "github.com/Sirupsen/logrus"
     teledefaults "github.com/gravitational/teleport/lib/defaults"
-    "github.com/gravitational/teleport/lib/service"
+    teleservice "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/utils"
 
     "github.com/coreos/etcd/embed"
@@ -28,7 +28,7 @@ func setLogger(debug bool) {
 
 type serviceConfig struct {
     etcdConfig     *embed.PocketConfig
-    teleConfig     *service.PocketConfig
+    teleConfig     *teleservice.PocketConfig
     regConfig      *regisrv.PocketRegistryConfig
     swarmConfig    *swarmsrv.SwarmContext
 }
@@ -91,13 +91,13 @@ func setupServiceConfig() (*serviceConfig, error) {
     context.UpdateHostCert(hostBundle)
 
     // make teleport core config
-    teleCfg := service.MakeCoreConfig(dataDir, true)
+    teleCfg := teleservice.MakeCoreConfig(dataDir, true)
     teleCfg.AssignHostUUID(meta.ClusterUUID)
     teleCfg.AssignDatabaseEngine(rec.DataBase())
     teleCfg.AssignCertStorage(rec.Certdb())
     teleCfg.AssignCASigner(caBundle.CASigner)
     teleCfg.AssignHostCertAuth(caBundle.CAPrvKey, caBundle.CASSHChk, meta.ClusterDomain)
-    err = service.ValidateCoreConfig(teleCfg)
+    err = teleservice.ValidateCoreConfig(teleCfg)
     if err != nil {
         log.Debugf(err.Error())
         return nil, errors.WithStack(err)

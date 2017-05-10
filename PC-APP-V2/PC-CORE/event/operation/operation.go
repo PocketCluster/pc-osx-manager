@@ -30,6 +30,10 @@ const (
     // Registry control
     CmdRegistryStart
     CmdRegistryStop
+
+    // debug bundle start & stop
+    CmdServiceBundleStart
+    CmdServiceBundleStop
 )
 
 func (c CommandType) String() string {
@@ -58,7 +62,11 @@ func (c CommandType) String() string {
             return "CmdImageRegistryStart"
         case CmdRegistryStop:
             return "CmdImageRegistryStop"
-        default:
+        case CmdServiceBundleStart:
+            return "CmdServiceBundleStart"
+        case CmdServiceBundleStop:
+            return "CmdServiceBundleStop"
+    default:
             return fmt.Sprintf("CommandType(%d)", c)
     }
 }

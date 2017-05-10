@@ -61,5 +61,13 @@
     OpsCmdBeaconStop();
 }
 
+- (IBAction)opsCmdServiceBundleStart:(id)sender {
+    OpsCmdServiceBundleStart();
+}
+
+- (IBAction)opsCmdServiceBundleStop:(id)sender {
+    OpsCmdServiceBundleStop();
+}
+
 
 @end

@@ -1,7 +1,6 @@
 package main
 
 import (
-    "fmt"
     "sync"
 
     log "github.com/Sirupsen/logrus"
@@ -75,6 +74,7 @@ func (p *PocketApplication) fanOut() {
         }
     }
 }
+
 func (p *PocketApplication) serve(srv *Service) {
     // this func will be called _after_ a service stops running:
     removeService := func() {
@@ -186,16 +186,11 @@ func (p *PocketApplication) OnExit(callback func(interface{})) {
 }
 
 // Event is a special service event that can be generated
-// by various goroutines in the supervisor
+// by various goroutines in the application
 type Event struct {
     Name    string
     Payload interface{}
 }
-
-func (e *Event) String() string {
-    return fmt.Sprintf("event(%v)", e.Name)
-}
-
 
 type waiter struct {
     eventC  chan Event

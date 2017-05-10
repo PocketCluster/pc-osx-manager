@@ -122,6 +122,26 @@
                             <action selector="opsCmdBeaconStop:" target="-2" id="ooX-cR-jTj"/>
                         </connections>
                     </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cBU-OD-CkW">
+                        <rect key="frame" x="14" y="129" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Service Bundle Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sYh-uy-ENa">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="opsCmdServiceBundleStart:" target="-2" id="EIi-6d-OxG"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8fA-uY-IZj">
+                        <rect key="frame" x="14" y="96" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Service Bundle Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Grt-ZS-VHa">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="opsCmdServiceBundleStop:" target="-2" id="l0g-Mv-RVx"/>
+                        </connections>
+                    </button>
                 </subviews>
             </view>
             <connections>
