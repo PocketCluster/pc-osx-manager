@@ -275,43 +275,39 @@ func main() {
                         eventC := make(chan Event)
                         a.WaitForEvent("TEST_EVENT", eventC, make(chan struct{}))
 
-                        a.RegisterService(Service{
-                            Serve:func() error {
-                                log.Debugf("[TEST SERV 1] test for-select loop started...")
-                                for {
-                                    select {
-                                        case <- a.StopChannel():
-                                            log.Debugf("[TEST SERV 1] test for-select loop stopping...")
-                                            return nil
-                                        case <- eventC:
-                                            log.Debugf("[TEST SERV 1] new Event received...")
-                                    }
+                        a.RegisterServiceFunc(func() error {
+                            defer log.Debugf("[TEST SERV 1] -- SERVICE 1 ENDED --")
+                            log.Debugf("[TEST SERV 1] test for-select loop started...")
+
+                            for {
+                                select {
+                                    case <- a.StopChannel():
+                                        log.Debugf("[TEST SERV 1] [TEST 1 STOPPING]")
+                                        return nil
+                                    case <- eventC:
+                                        log.Debugf("[TEST SERV 1] new Event received...")
                                 }
-                            },
-                            Stop:func() error {
-                                log.Debugf("[TEST SERV 1] test ending...")
-                                return nil
-                            },
+                            }
+
+                            return nil
                         })
 
-                        a.RegisterService(Service{
-                            Serve:func() error {
-                                log.Debugf("[TEST SERV 2] test started")
-                                for {
-                                    if a.IsStopped() {
-                                        log.Debugf("[TEST SERV 2] test stopping")
-                                        return nil
-                                    }
-                                    a.BroadcastEvent(Event{Name:"TEST_EVENT"})
+                        a.RegisterServiceFunc(func() error {
+                            defer log.Debugf("[TEST SERV 2] -- SERVICE 2 ENDED --")
+                            log.Debugf("[TEST SERV 2] test started")
 
-                                    time.Sleep(time.Second)
+                            for {
+                                if a.IsStopped() {
+                                    log.Debugf("[TEST SERV 2] [TEST 2 STOPPING]")
+                                    return nil
                                 }
-                                return nil
-                            },
-                            Stop:func() error {
-                                log.Debugf("[TEST SERV 2] test ending...")
-                                return nil
-                            },
+
+                                a.BroadcastEvent(Event{Name:"TEST_EVENT"})
+
+                                time.Sleep(time.Second)
+                            }
+
+                            return nil
                         })
                         a.StartServices()
                         log.Debugf("[OP] %v", e.String())
