@@ -6,6 +6,7 @@ import (
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
+    "time"
 )
 
 const (
@@ -83,6 +84,43 @@ func initBeaconLoator(a *mainLife) error {
                     belocat.Send(bs.Host, bs.Payload)
                 }
             }
+            }
+        }
+        return nil
+    })
+
+    return nil
+}
+
+func initMasterAgentService(a *mainLife) error {
+    var (
+        beaconC = make(chan Event)
+        searchC = make(chan Event)
+    )
+    a.WaitForEvent(coreFeedbackBeacon, beaconC, make(chan struct{}))
+    a.WaitForEvent(coreFeedbackSearch, searchC, make(chan struct{}))
+
+    a.RegisterServiceFunc(func() error {
+        bounded := time.NewTicker(time.Second * 10)
+        defer bounded.Stop()
+
+        log.Debugf("[AGENT] starting agent service...")
+        for {
+            select {
+                case <-a.StopChannel(): {
+                    log.Debugf("[AGENT] stopping agent service...")
+                    return nil
+                }
+                case b := <-beaconC: {
+                    log.Debugf("[AGENT] beacon recieved %v", b.Payload)
+                }
+                case s := <-searchC: {
+                    log.Debugf("[AGENT] search recieved %v", s.Payload)
+                }
+                case <-bounded.C: {
+                    log.Debugf("[AGENT] bounded %v", time.Now())
+                    a.BroadcastEvent(Event{Name: coreServiceBeacon, Payload:ucast.BeaconSend{Host:"192.168.1.152", Payload:[]byte{0x55, 0x66, 0x77, 0x88, 0x99}}})
+                }
             }
         }
         return nil

@@ -167,8 +167,10 @@ func initBeaconService(app *PocketApplication) error {
 }
 
 func initAgentService(app *PocketApplication) error {
-    beaconC := make(chan Event)
-    dhcpC := make(chan Event)
+    var (
+        beaconC = make(chan Event)
+        dhcpC   = make(chan Event)
+    )
     app.WaitForEvent(nodeFeedbackBeacon, beaconC, make(chan struct{}))
     app.WaitForEvent(nodeFeedbackDHCP, dhcpC, make(chan struct{}))
 

@@ -132,6 +132,11 @@ func main() {
                             log.Debug(err)
                         }
 
+                        err = initMasterAgentService(a)
+                        if err != nil {
+                            log.Debug(err)
+                        }
+
                         a.StartServices()
                         log.Debugf("[OP] %v", e.String())
                     }
