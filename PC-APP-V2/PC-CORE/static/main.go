@@ -6,7 +6,6 @@ import (
     "sync"
 
     log "github.com/Sirupsen/logrus"
-    "github.com/pkg/errors"
     "github.com/gravitational/teleport/lib/process"
     "github.com/coreos/etcd/embed"
     "gopkg.in/tylerb/graceful.v1"
@@ -19,14 +18,6 @@ import (
     telesrv "github.com/stkim1/pc-core/extsrv/teleport"
     regisrv "github.com/stkim1/pc-core/extsrv/registry"
     swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
-    "github.com/stkim1/udpnet/ucast"
-    "github.com/stkim1/udpnet/mcast"
-)
-
-const (
-    coreFeedbackSearch = "feedback_search"
-    coreFeedbackBeacon = "feedback_beacon"
-    coreServiceBeacon  = "service_beacon"
 )
 
 func main() {
@@ -131,76 +122,16 @@ func main() {
                     /// BEACON ///
 
                     case operation.CmdBeaconStart: {
-                        // TODO : use network interface
-                        catcher, err := mcast.NewSearchCatcher("en0")
+                        err = initSearchCatcher(a)
                         if err != nil {
-                            log.Debug(errors.WithStack(err))
-                        } else {
-                            a.RegisterServiceFunc(func() error {
-                                log.Debugf("NewSearchCatcher :: MAIN BEGIN")
-                                for {
-                                    select {
-                                        case <-a.StopChannel(): {
-                                            catcher.Close()
-                                            log.Debugf("NewSearchCatcher :: MAIN CLOSE")
-                                            return nil
-                                        }
-                                        case r := <-catcher.ChRead: {
-                                            log.Debugf("SearchCatcher %v", r.Message)
-                                            a.BroadcastEvent(Event{Name:coreFeedbackSearch, Payload:r})
-                                        }
-                                    }
-                                }
-                                return nil
-                            })
+                            log.Debug(err)
                         }
 
-                        belocat, err := ucast.NewBeaconLocator()
+                        err = initBeaconLoator(a)
                         if err != nil {
-                            log.Debug(errors.WithStack(err))
-                        } else {
-                            // beacon locator read
-                            a.RegisterServiceFunc(func() error {
-                                log.Debugf("NewBeaconLocator READ :: MAIN BEGIN")
-                                for {
-                                    select {
-                                        case <- a.StopChannel(): {
-                                            belocat.Close()
-                                            log.Debugf("NewBeaconLocator READ :: MAIN CLOSE")
-                                            return nil
-                                        }
-                                        case r := <- belocat.ChRead: {
-                                            log.Debugf("BeaconLocator READ %v", r.Message)
-                                            a.BroadcastEvent(Event{Name:coreFeedbackBeacon, Payload:r.Message})
-                                        }
-                                    }
-                                }
-                                return nil
-                            })
-
-                            // beacon locator write
-                            beaconC := make(chan Event)
-                            a.WaitForEvent(coreServiceBeacon, beaconC, make(chan struct{}))
-                            a.RegisterServiceFunc(func() error {
-                                log.Debugf("NewBeaconLocator WRITE :: MAIN BEGIN")
-                                for {
-                                    select {
-                                        case <- a.StopChannel(): {
-                                            log.Debugf("NewBeaconLocator WRITE :: MAIN CLOSE")
-                                            return nil
-                                        }
-                                        case b := <- beaconC: {
-                                            bs, ok := b.Payload.(ucast.BeaconSend)
-                                            if ok {
-                                                log.Debugf("NewBeaconLocator WRITE %v", bs.Host)
-                                                belocat.Send(bs.Host, bs.Payload)
-                                            }
-                                        }
-                                    }
-                                }
-                                return nil
-                            })
+                            log.Debug(err)
                         }
+
                         a.StartServices()
                         log.Debugf("[OP] %v", e.String())
                     }
