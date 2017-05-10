@@ -31,7 +31,7 @@ type Event struct {
 
 type Waiter struct {
     eventC     chan Event
-    exitC      chan struct{}
+    cancelC    chan struct{}
 }
 
 type ServiceSupervisor interface {
@@ -79,7 +79,7 @@ func (s *srvSupervisor) getWaiters(name string) []*Waiter {
 func (s *srvSupervisor) notifyWaiter(w *Waiter, evt Event) {
     select {
         case w.eventC <- evt:
-        case <-w.exitC:
+        case <-w.cancelC:
     }
 }
 
@@ -159,7 +159,7 @@ func (s *srvSupervisor) WaitForEvent(name string, eventC chan Event, cancelC cha
     s.Lock()
     defer s.Unlock()
 
-    waiter := &Waiter{eventC: eventC, exitC: cancelC}
+    waiter := &Waiter{eventC: eventC, cancelC: cancelC}
     event, ok := s.events[name]
     if ok {
         go s.notifyWaiter(waiter, event)
@@ -236,7 +236,7 @@ func (s *srvSupervisor) StopServices() error {
     for _, waiters = range s.eventWaiters {
         for _, w = range waiters {
             close(w.eventC)
-            close(w.exitC)
+            close(w.cancelC)
         }
     }
 

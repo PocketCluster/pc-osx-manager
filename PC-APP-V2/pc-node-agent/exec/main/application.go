@@ -8,36 +8,40 @@ import (
 )
 
 const (
-    stateCreated    = iota
+    stateStopped = iota
     stateStarted
 )
 
 type PocketApplication struct {
-    state int
+    state           int
     sync.Mutex
-    wg              *sync.WaitGroup
 
+    serviceWG       *sync.WaitGroup
     services        []*Service
-    errors          []error
+
     events          map[string]Event
     eventsC         chan Event
     eventWaiters    map[string][]*waiter
-    closer          *CloseBroadcaster
+
+    stoppedC        chan struct{}
 }
 
 // NewSupervisor returns new instance of initialized supervisor
 func NewPocketApplication() *PocketApplication {
     srv := &PocketApplication{
+        state:           stateStopped,
         services:        []*Service{},
-        wg:              &sync.WaitGroup{},
+        serviceWG:       &sync.WaitGroup{},
 
         events:          map[string]Event{},
         eventsC:         make(chan Event, 100),
         eventWaiters:    make(map[string][]*waiter),
-        closer:          &CloseBroadcaster{
-            C: make(chan struct{}),
-        },
+
+        stoppedC:        make(chan struct{}),
     }
+
+    // for fanOut function
+    srv.serviceWG.Add(1)
     go srv.fanOut()
     return srv
 }
@@ -56,28 +60,30 @@ func (p *PocketApplication) getWaiters(name string) []*waiter {
 
 func (p *PocketApplication) notifyWaiter(w *waiter, event Event) {
     select {
-    case w.eventC <- event:
-    case <-w.cancelC:
+        case w.eventC <- event:
+        case <-w.cancelC:
     }
 }
 
 func (p *PocketApplication) fanOut() {
+    defer p.serviceWG.Done()
+
     for {
         select {
-        case event := <-p.eventsC:
-            waiters := p.getWaiters(event.Name)
-            for _, waiter := range waiters {
-                go p.notifyWaiter(waiter, event)
-            }
-        case <-p.closer.C:
-            return
+            case <-p.stoppedC:
+                return
+            case event := <-p.eventsC:
+                waiters := p.getWaiters(event.Name)
+                for _, waiter := range waiters {
+                    p.notifyWaiter(waiter, event)
+                }
         }
     }
 }
 
-func (p *PocketApplication) serve(srv *Service) {
+func (p *PocketApplication) serve(service *Service) {
     // this func will be called _after_ a service stops running:
-    removeService := func() {
+    removeService := func(srv *Service) {
         p.Lock()
         defer p.Unlock()
         for i, el := range p.services {
@@ -89,17 +95,17 @@ func (p *PocketApplication) serve(srv *Service) {
         log.Debugf("[APPLICATION] Service %v is done (%v)", *srv, len(p.services))
     }
 
-    p.wg.Add(1)
-    go func() {
-        defer p.wg.Done()
-        defer removeService()
+    p.serviceWG.Add(1)
+    go func(srv *Service) {
+        defer p.serviceWG.Done()
+        defer removeService(srv)
 
         log.Debugf("[APPLICATION] Service %v started (%v)", *srv, p.ServiceCount())
         err := (*srv).Serve()
         if err != nil {
-            errors.WithStack(err)
+            log.Debug(errors.WithStack(err))
         }
-    }()
+    }(service)
 }
 
 
@@ -122,8 +128,9 @@ func (p *PocketApplication) RegisterFunc(fn ServiceFunc) {
 func (p *PocketApplication) BroadcastEvent(event Event) {
     p.Lock()
     defer p.Unlock()
+
     p.events[event.Name] = event
-    log.Debugf("PocketApplication.BroadcastEvent: %v", &event)
+    log.Debugf("[APPLICATION] BroadcastEvent: %v", &event)
 
     go func() {
         p.eventsC <- event
@@ -150,6 +157,17 @@ func (p *PocketApplication) ServiceCount() int {
     return len(p.services)
 }
 
+func (p *PocketApplication) IsStopped() bool {
+    p.Lock()
+    defer p.Unlock()
+
+    if p.state == stateStarted {
+        return false
+    } else {
+        return true
+    }
+}
+
 func (p *PocketApplication) Start() error {
     p.Lock()
     defer p.Unlock()
@@ -167,9 +185,38 @@ func (p *PocketApplication) Start() error {
     return nil
 }
 
+func (s *PocketApplication) Stop() error {
+    // this double locking to to prevent ServiceFunc from deadlocked, but enable other variables to be reset
+    s.Lock()
+    if s.state == stateStopped {
+        defer s.Unlock()
+        return nil
+    }
+    s.state = stateStopped
+    s.Unlock()
+
+    log.Warning("[SUPERVISOR] stopping services...")
+    // we broadcast stopping and wait for all goroutines closed with event channels intact to give grace period
+    close(s.stoppedC)
+    return nil
+}
+
 func (p *PocketApplication) Wait() error {
-    defer p.closer.Close()
-    p.wg.Wait()
+    var (
+        waiters []*waiter
+        w *waiter
+    )
+    p.serviceWG.Wait()
+
+    // we close event channel after stopping all go routines and fanOut function that we can safely close
+    close(p.eventsC)
+    for _, waiters = range p.eventWaiters {
+        for _, w = range waiters {
+            close(w.eventC)
+            close(w.cancelC)
+        }
+    }
+
     return nil
 }
 
@@ -179,7 +226,7 @@ func (p *PocketApplication) Wait() error {
 func (p *PocketApplication) OnExit(callback func(interface{})) {
     go func() {
         select {
-            case <- p.closer.C:
+            case <- p.stoppedC:
                 callback(nil)
         }
     }()
@@ -201,26 +248,8 @@ type Service interface {
     Serve() error
 }
 
-
 type ServiceFunc func() error
 
 func (s ServiceFunc) Serve() error {
     return s()
-}
-
-
-// CloseBroadcaster is a helper struct
-// that implements io.Closer and uses channel
-// to broadcast it's closed state once called
-type CloseBroadcaster struct {
-    sync.Once
-    C chan struct{}
-}
-
-// Close closes channel (once) to start broadcasting it's closed state
-func (b *CloseBroadcaster) Close() error {
-    b.Do(func() {
-        close(b.C)
-    })
-    return nil
 }
