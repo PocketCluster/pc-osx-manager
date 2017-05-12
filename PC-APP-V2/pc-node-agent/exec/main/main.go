@@ -10,6 +10,7 @@ import (
     "gopkg.in/vmihailenco/msgpack.v2"
 
     "github.com/stkim1/pc-node-agent/dhcp"
+    "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/udpnet/ucast"
 )
@@ -95,7 +96,7 @@ func initSearchService(app *PocketApplication) error {
                 case e := <-eventsC: {
                     cm, ok := e.Payload.([]byte)
                     if ok {
-                        log.Debugf("[SEARCH] casting message...")
+//                        log.Debugf("[SEARCH] casting message... %v", cm)
                         err := caster.Send(cm)
                         if err != nil {
                             log.Errorf("[SEARCH] casting error %v", err)
@@ -130,7 +131,7 @@ func initBeaconService(app *PocketApplication) error {
                 case <- app.stoppedC:
                     return nil
                 case v := <- beacon.ChRead: {
-                    log.Debugf("[BEACON] message received %v", v)
+//                    log.Debugf("[BEACON] message received %v", v)
                     app.BroadcastEvent(Event{Name:nodeFeedbackBeacon, Payload:v})
                 }
             }
@@ -148,7 +149,7 @@ func initBeaconService(app *PocketApplication) error {
                 case e := <- eventsC: {
                     bs, ok := e.Payload.(ucast.BeaconSend)
                     if ok {
-                        log.Debugf("[BEACON] sending message %v", bs)
+//                        log.Debugf("[BEACON] sending message %v", bs)
                         beacon.Send(bs.Host, bs.Payload)
                     }
                 }
@@ -186,18 +187,54 @@ func initAgentService(app *PocketApplication) error {
                 case <- app.stoppedC:
                     return nil
                 case b := <- beaconC: {
-                    log.Debugf("[AGENT] beacon recieved %v", spew.Sdump(b.Payload))
+                    log.Debugf("[AGENT-BEACON] RECEIVED\n %v", spew.Sdump(b.Payload))
                 }
                 case d := <- dhcpC: {
-                    log.Debugf("[AGENT] dhcp recieved %v", spew.Sdump(d.Payload))
+                    log.Debugf("[AGENT-DHCP] RECEIVED\n %v", spew.Sdump(d.Payload))
                 }
                 case <- unbounded.C: {
-                    log.Debugf("[AGENT] unbounded %v", time.Now())
-                    app.BroadcastEvent(Event{Name: nodeServiceSearch, Payload:[]byte{0x00, 0x11, 0x22, 0x33, 0x44}})
+//                    log.Debugf("[AGENT] unbounded %v", time.Now())
+                    ua, err := slagent.UnboundedMasterDiscovery()
+                    if err != nil {
+                        log.Debugf("[AGENT-UNBOUNDED] UnboundedMasterDiscovery error %v", err)
+                        continue
+                    }
+                    sm, err := slagent.UnboundedMasterDiscoveryMeta(ua)
+                    if err != nil {
+                        log.Debugf("[AGENT-UNBOUNDED] UnboundedMasterDiscoveryMeta error %v", err)
+                        continue
+                    }
+                    psm, err := slagent.PackedSlaveMeta(sm)
+                    if err != nil {
+                        log.Debugf("[AGENT-UNBOUNDED] PackedSlaveMeta error %v", err)
+                        continue
+                    }
+                    app.BroadcastEvent(Event{Name: nodeServiceSearch, Payload:psm})
                 }
                 case <- bounded.C: {
-                    log.Debugf("[AGENT] bounded %v", time.Now())
-                    app.BroadcastEvent(Event{Name: nodeServiceBeacon, Payload: ucast.BeaconSend{Host:"192.168.1.105", Payload:[]byte{0x44, 0x33, 0x22, 0x11, 0x00}}})
+//                    log.Debugf("[AGENT] bounded %v", time.Now())
+                    ba, err := slagent.BrokenBindDiscovery("PC-MASTER")
+                    if err != nil {
+                        log.Debugf("[AGENT-BOUNDED] BrokenBindDiscovery error %v", err)
+                        continue
+                    }
+                    bm, err := slagent.BrokenBindMeta(ba)
+                    if err != nil {
+                        log.Debugf("[AGENT-BOUNDED] BrokenBindMeta error %v", err)
+                        continue
+                    }
+                    pbm, err := slagent.PackedSlaveMeta(bm)
+                    if err != nil {
+                        log.Debugf("[AGENT-BOUNDED] PackedSlaveMeta error %v", err)
+                        continue
+                    }
+                    app.BroadcastEvent(Event{
+                        Name: nodeServiceBeacon,
+                        Payload: ucast.BeaconSend{
+                            Host:"192.168.1.105",
+                            Payload:pbm,
+                        },
+                    })
                 }
             }
         }

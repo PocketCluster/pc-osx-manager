@@ -148,7 +148,7 @@ func (s *srvSupervisor) BroadcastEvent(event Event) {
     defer s.Unlock()
 
     s.events[event.Name] = event
-    log.Debugf("[SUPERVISOR] BroadcastEvent: %v", &event)
+//    log.Debugf("[SUPERVISOR] BroadcastEvent: %v", &event)
 
     go func() {
         s.eventsC <- event

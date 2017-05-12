@@ -130,7 +130,7 @@ func (p *PocketApplication) BroadcastEvent(event Event) {
     defer p.Unlock()
 
     p.events[event.Name] = event
-    log.Debugf("[APPLICATION] BroadcastEvent: %v", &event)
+//    log.Debugf("[APPLICATION] BroadcastEvent: %v", &event)
 
     go func() {
         p.eventsC <- event

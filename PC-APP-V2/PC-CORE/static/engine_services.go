@@ -1,12 +1,18 @@
 package main
 
 import (
+    "time"
+
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
-    "time"
+    "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/pc-core/msagent"
+)
+import (
+    "github.com/davecgh/go-spew/spew"
 )
 
 const (
@@ -73,17 +79,17 @@ func initBeaconLoator(a *mainLife) error {
         log.Debugf("NewBeaconLocator WRITE :: MAIN BEGIN")
         for {
             select {
-            case <- a.StopChannel(): {
-                log.Debugf("NewBeaconLocator WRITE :: MAIN CLOSE")
-                return nil
-            }
-            case b := <- beaconC: {
-                bs, ok := b.Payload.(ucast.BeaconSend)
-                if ok {
-                    log.Debugf("NewBeaconLocator WRITE %v", bs.Host)
-                    belocat.Send(bs.Host, bs.Payload)
+                case <- a.StopChannel(): {
+                    log.Debugf("NewBeaconLocator WRITE :: MAIN CLOSE")
+                    return nil
                 }
-            }
+                case b := <- beaconC: {
+                    bs, ok := b.Payload.(ucast.BeaconSend)
+                    if ok {
+//                        log.Debugf("NewBeaconLocator WRITE %v", bs.Host)
+                        belocat.Send(bs.Host, bs.Payload)
+                    }
+                }
             }
         }
         return nil
@@ -112,14 +118,41 @@ func initMasterAgentService(a *mainLife) error {
                     return nil
                 }
                 case b := <-beaconC: {
-                    log.Debugf("[AGENT] beacon recieved %v", b.Payload)
+//                    log.Debugf("[AGENT-BEACON] recieved %v", b.Payload)
+                    psm, ok := b.Payload.([]byte)
+                    if ok {
+                        // suppose we've sort out what this is.
+                        usm, err := slagent.UnpackedSlaveMeta(psm)
+                        if err == nil {
+                            log.Debugf("[AGENT-BEACON] UNPACK SUCCESS %v", spew.Sdump(usm))
+                        }
+                    }
                 }
                 case s := <-searchC: {
-                    log.Debugf("[AGENT] search recieved %v", s.Payload)
+//                    log.Debugf("[AGENT-SEARCH] recieved %v", s.Payload)
+                    cp, ok := s.Payload.(mcast.CastPack)
+                    if ok {
+                        // suppose we've sort out what this is.
+                        usm, err := slagent.UnpackedSlaveMeta(cp.Message)
+                        if err == nil {
+                            log.Debugf("[AGENT-SEARCH] UNPACK SUCCESS %v FROM %v", spew.Sdump(usm), cp.Address)
+                        }
+                    }
                 }
                 case <-bounded.C: {
-                    log.Debugf("[AGENT] bounded %v", time.Now())
-                    a.BroadcastEvent(Event{Name: coreServiceBeacon, Payload:ucast.BeaconSend{Host:"192.168.1.152", Payload:[]byte{0x55, 0x66, 0x77, 0x88, 0x99}}})
+//                    log.Debugf("[AGENT] bounded %v", time.Now())
+                    msa, _ := slagent.TestSlaveUnboundedMasterSearchDiscovery()
+                    cmd, _ := msagent.SlaveIdentityInqueryRespond(msa.DiscoveryAgent)
+                    meta := msagent.SlaveIdentityInquiryMeta(cmd)
+                    mp, _ := msagent.PackedMasterMeta(meta)
+
+                    a.BroadcastEvent(Event{
+                        Name: coreServiceBeacon,
+                        Payload:ucast.BeaconSend{
+                            Host:"192.168.1.152",
+                            Payload:mp,
+                        },
+                    })
                 }
             }
         }
