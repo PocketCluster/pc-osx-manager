@@ -18,7 +18,8 @@ func TestUnboundedState_InquiredTransition(t *testing.T) {
         return
     }
 
-    sd, err := NewSlaveLocator(SlaveUnbounded, &DebugCommChannel{})
+    debugComm := &DebugCommChannel{}
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
     if err != nil {
         t.Error(err.Error())
         return
@@ -46,7 +47,7 @@ func Test_Unbounded_Unbounded_TxActionFail(t *testing.T) {
     defer tearDown()
 
     debugComm := &DebugCommChannel{}
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
     if err != nil {
         t.Error(err.Error())
         return
@@ -88,7 +89,7 @@ func Test_Unbounded_Inquired_MasterMetaFail(t *testing.T) {
     // unbounded state
     debugComm := &DebugCommChannel{}
     slaveTS := time.Now().Add(time.Second)
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
     if err != nil {
         t.Error(err.Error())
         return
@@ -136,7 +137,7 @@ func Test_Unbounded_Inquired_TxActionFail(t *testing.T) {
     // inquired transition
     debugComm := &DebugCommChannel{}
     slaveTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
     if err != nil {
         t.Error(err.Error())
         return

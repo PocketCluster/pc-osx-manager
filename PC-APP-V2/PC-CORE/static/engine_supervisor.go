@@ -7,7 +7,11 @@ import (
     "github.com/pkg/errors"
 )
 
-/*** SERVICE SECTION ***/
+
+const (
+    broadcastChannelSize = 64
+)
+
 const (
     stateStopped    = iota
     stateStarted
@@ -242,7 +246,7 @@ func (s *srvSupervisor) StopServices() error {
 
     // reset
     s.serviceWG    = &sync.WaitGroup{}
-    s.eventsC      = make(chan Event, 100)
+    s.eventsC      = make(chan Event, broadcastChannelSize)
     s.events       = map[string]Event{}
     s.eventWaiters = make(map[string][]*Waiter)
     s.stoppedC     = make(chan struct{})
@@ -256,7 +260,7 @@ func newServiceSupervisor() *srvSupervisor {
         serviceWG:       &sync.WaitGroup{},
         services:        []*Service{},
 
-        eventsC:         make(chan Event, 100),
+        eventsC:         make(chan Event, broadcastChannelSize),
         events:          map[string]Event{},
         eventWaiters:    make(map[string][]*Waiter),
 

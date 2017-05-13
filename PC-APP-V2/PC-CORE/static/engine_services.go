@@ -13,6 +13,7 @@ import (
 )
 import (
     "github.com/davecgh/go-spew/spew"
+    "github.com/stkim1/pc-node-agent/slcontext"
 )
 
 const (
@@ -105,6 +106,8 @@ func initMasterAgentService(a *mainLife) error {
     )
     a.WaitForEvent(coreFeedbackBeacon, beaconC, make(chan struct{}))
     a.WaitForEvent(coreFeedbackSearch, searchC, make(chan struct{}))
+
+    slcontext.DebugSlcontextPrepare()
 
     a.RegisterServiceFunc(func() error {
         bounded := time.NewTicker(time.Second * 10)

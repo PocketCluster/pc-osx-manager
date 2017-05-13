@@ -24,13 +24,14 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
         return
     }
 
+    debugComm := &DebugCommChannel{}
     // set to slave discovery state to "Inquired"
-    sd, err := NewSlaveLocator(SlaveUnbounded, &DebugCommChannel{})
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    sd.(*slaveLocator).state = newInquiredState(&DebugCommChannel{})
+    sd.(*slaveLocator).state = newInquiredState(debugComm, debugComm)
 
     // execute state transition
     slaveTS := masterTS.Add(time.Second)
@@ -97,7 +98,7 @@ func Test_Keyexchange_Cryptocheck_MasterMetaFail(t *testing.T) {
     context := slcontext.SharedSlaveContext()
     debugComm := &DebugCommChannel{}
     slaveTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
     if err != nil {
         t.Error(err.Error())
         return
@@ -229,7 +230,7 @@ func Test_keyexchange_Cryptocheck_TxActionFail(t *testing.T) {
     context := slcontext.SharedSlaveContext()
     debugComm := &DebugCommChannel{}
     slaveTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
     if err != nil {
         t.Error(err.Error())
         return

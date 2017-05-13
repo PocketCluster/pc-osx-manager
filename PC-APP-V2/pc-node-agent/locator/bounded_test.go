@@ -16,8 +16,9 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
     defer tearDown()
 
     context := slcontext.SharedSlaveContext()
+    debugComm := &DebugCommChannel{}
 
-    sd, err := NewSlaveLocator(SlaveUnbounded, &DebugCommChannel{})
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
     if err != nil {
         t.Error(err.Error())
         return
@@ -128,8 +129,9 @@ func Test_Bounded_Unbroken_Loop(t *testing.T) {
     defer tearDown()
 
     context := slcontext.SharedSlaveContext()
+    debugComm := &DebugCommChannel{}
 
-    sd, err := NewSlaveLocator(SlaveUnbounded, &DebugCommChannel{})
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
     if err != nil {
         t.Error(err.Error())
         return
@@ -264,7 +266,7 @@ func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
     context := slcontext.SharedSlaveContext()
     debugComm := &DebugCommChannel{}
     slaveTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
     if err != nil {
         t.Error(err.Error())
         return
@@ -426,7 +428,7 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
     context.SetSlaveNodeName(slaveNodeName)
 
     // have a slave locator
-    sd, err := NewSlaveLocator(SlaveBindBroken, debugComm)
+    sd, err := NewSlaveLocator(SlaveBindBroken, debugComm, debugComm)
     if err != nil {
         t.Error(err.Error())
         return

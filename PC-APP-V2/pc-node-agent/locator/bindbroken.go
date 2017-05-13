@@ -2,14 +2,14 @@ package locator
 
 import (
     "time"
-    "fmt"
 
+    "github.com/pkg/errors"
     "github.com/stkim1/pc-core/msagent"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
-func newBindbrokenState(comm CommChannel) LocatorState {
+func newBindbrokenState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
     bs := &bindbroken{}
 
     bs.constState                   = SlaveBindBroken
@@ -26,7 +26,8 @@ func newBindbrokenState(comm CommChannel) LocatorState {
     bs.onTransitionSuccess          = bs.onStateTranstionSuccess
     bs.onTransitionFailure          = bs.onStateTranstionFailure
 
-    bs.commChannel                  = comm
+    bs.searchComm                   = searchComm
+    bs.beaconComm                   = beaconComm
     return bs
 }
 
@@ -42,66 +43,66 @@ func (ls *bindbroken) transitionActionWithTimestamp(slaveTimestamp time.Time) er
     slctx := slcontext.SharedSlaveContext()
     masterAgentName, err := slctx.GetMasterAgent()
     if err != nil {
-        return nil
+        return errors.WithStack(err)
     }
     ba, err := slagent.BrokenBindDiscovery(masterAgentName)
     if err != nil {
-        return nil
+        return errors.WithStack(err)
     }
     sm, err := slagent.BrokenBindMeta(ba)
     if err != nil {
-        return nil
+        return errors.WithStack(err)
     }
     pm, err := slagent.PackedSlaveMeta(sm)
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
-    if ls.commChannel == nil {
-        return fmt.Errorf("[ERR] Comm Channel is nil")
+    if ls.searchComm == nil {
+        return errors.Errorf("[ERR] Comm Channel is nil")
     }
-    return ls.commChannel.McastSend(pm)
+    return ls.searchComm.McastSend(pm)
 }
 
 func (ls *bindbroken) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {
     if meta == nil || meta.MetaVersion != msagent.MASTER_META_VERSION {
         // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
-        return SlaveTransitionIdle, fmt.Errorf("[ERR] Null or incorrect version of master meta")
+        return SlaveTransitionIdle, errors.Errorf("[ERR] Null or incorrect version of master meta")
     }
     if len(meta.EncryptedMasterRespond) == 0 {
-        return SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect encrypted master respond")
+        return SlaveTransitionFail, errors.Errorf("[ERR] Null or incorrect encrypted master respond")
     }
     if len(meta.EncryptedAESKey) == 0 {
-        return SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect AES key from Master command")
+        return SlaveTransitionFail, errors.Errorf("[ERR] Null or incorrect AES key from Master command")
     }
     if len(meta.RsaCryptoSignature) == 0 {
-        return SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect RSA signature from Master command")
+        return SlaveTransitionFail, errors.Errorf("[ERR] Null or incorrect RSA signature from Master command")
     }
 
     aeskey, err := slcontext.SharedSlaveContext().DecryptByRSA(meta.EncryptedAESKey, meta.RsaCryptoSignature)
     if err != nil {
-        return SlaveTransitionFail, err
+        return SlaveTransitionFail, errors.WithStack(err)
     }
     slcontext.SharedSlaveContext().SetAESKey(aeskey)
 
     // aes decryption of command
     pckedRsp, err := slcontext.SharedSlaveContext().DecryptByAES(meta.EncryptedMasterRespond)
     if err != nil {
-        return SlaveTransitionFail, err
+        return SlaveTransitionFail, errors.WithStack(err)
     }
     msRsp, err := msagent.UnpackedMasterRespond(pckedRsp)
     if err != nil {
-        return SlaveTransitionFail, err
+        return SlaveTransitionFail, errors.WithStack(err)
     }
 
     msAgent, err := slcontext.SharedSlaveContext().GetMasterAgent()
     if err != nil {
-        return SlaveTransitionFail, err
+        return SlaveTransitionFail, errors.WithStack(err)
     }
     if msRsp.MasterBoundAgent != msAgent {
-        return SlaveTransitionFail, fmt.Errorf("[ERR] Master bound agent is different than commissioned one %s", msAgent)
+        return SlaveTransitionFail, errors.Errorf("[ERR] Master bound agent is different than commissioned one %s", msAgent)
     }
     if msRsp.Version != msagent.MASTER_RESPOND_VERSION {
-        return SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of master meta")
+        return SlaveTransitionFail, errors.Errorf("[ERR] Null or incorrect version of master meta")
     }
     // if command is not for exchange key, just ignore
     if msRsp.MasterCommandType != msagent.COMMAND_RECOVER_BIND {
@@ -110,7 +111,7 @@ func (ls *bindbroken) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMe
 
     // set the master ip address
     if len(msRsp.MasterAddress) == 0 {
-        return SlaveTransitionFail, fmt.Errorf("[ERR] Null or incorrect master address")
+        return SlaveTransitionFail, errors.Errorf("[ERR] Null or incorrect master address")
     }
     slcontext.SharedSlaveContext().SetMasterIP4Address(msRsp.MasterAddress)
 

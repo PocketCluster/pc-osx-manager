@@ -11,12 +11,15 @@ import (
 
     "github.com/stkim1/pc-node-agent/dhcp"
     "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/udpnet/ucast"
 )
 
 import (
     "github.com/davecgh/go-spew/spew"
+    "github.com/stkim1/pc-core/msagent"
+    "github.com/stkim1/pc-node-agent/locator"
 )
 
 const (
@@ -176,56 +179,60 @@ func initAgentService(app *PocketApplication) error {
     app.WaitForEvent(nodeFeedbackDHCP, dhcpC, make(chan struct{}))
 
     app.RegisterFunc(func() error {
-        unbounded := time.NewTicker(time.Second * 5)
-        bounded := time.NewTicker(time.Second * 10)
+        var (
+            unbounded = time.NewTicker(time.Second * 5)
+            bounded = time.NewTicker(time.Second * 10)
+            context = slcontext.SharedSlaveContext()
+            loc locator.SlaveLocator = nil
+            err error = nil
+        )
         defer unbounded.Stop()
         defer bounded.Stop()
 
+        // setup slave locator
+        uuid, err := context.GetSlaveNodeUUID()
+        if err == nil && len(uuid) != 0 {
+            loc, err = locator.NewSlaveLocator(locator.SlaveBindBroken, nil)
+        } else {
+            loc, err = locator.NewSlaveLocator(locator.SlaveUnbounded, nil)
+        }
+        if err != nil {
+            return errors.WithStack(err)
+        }
+        defer loc.Close()
+
         log.Debugf("[AGENT] starting agent service...")
+
         for {
             select {
                 case <- app.stoppedC:
                     return nil
                 case b := <- beaconC: {
-                    log.Debugf("[AGENT-BEACON] RECEIVED\n %v", spew.Sdump(b.Payload))
+                    mp, ok := b.Payload.(ucast.BeaconPack)
+                    if ok {
+                        mup, err := msagent.UnpackedMasterMeta(mp.Message)
+                        if err == nil {
+                            log.Debugf("[AGENT-BEACON] RECEIVED\n %v \n %v", spew.Sdump(mp.Address), spew.Sdump(mup))
+                        }
+                    }
                 }
                 case d := <- dhcpC: {
                     log.Debugf("[AGENT-DHCP] RECEIVED\n %v", spew.Sdump(d.Payload))
                 }
                 case <- unbounded.C: {
 //                    log.Debugf("[AGENT] unbounded %v", time.Now())
-                    ua, err := slagent.UnboundedMasterDiscovery()
+                    pums, err := slagent.SlavePackedUnboundedMasterSearch()
                     if err != nil {
-                        log.Debugf("[AGENT-UNBOUNDED] UnboundedMasterDiscovery error %v", err)
+                        log.Debugf("[AGENT-UNBOUNDED] SlavePackedUnboundedMasterSearch error %v", err)
                         continue
                     }
-                    sm, err := slagent.UnboundedMasterDiscoveryMeta(ua)
-                    if err != nil {
-                        log.Debugf("[AGENT-UNBOUNDED] UnboundedMasterDiscoveryMeta error %v", err)
-                        continue
-                    }
-                    psm, err := slagent.PackedSlaveMeta(sm)
-                    if err != nil {
-                        log.Debugf("[AGENT-UNBOUNDED] PackedSlaveMeta error %v", err)
-                        continue
-                    }
-                    app.BroadcastEvent(Event{Name: nodeServiceSearch, Payload:psm})
+                    app.BroadcastEvent(Event{Name: nodeServiceSearch, Payload:pums})
                 }
                 case <- bounded.C: {
 //                    log.Debugf("[AGENT] bounded %v", time.Now())
-                    ba, err := slagent.BrokenBindDiscovery("PC-MASTER")
+                    pbm, err := slagent.SlavePackedBindBrokenSearch("PC-MASTER")
                     if err != nil {
-                        log.Debugf("[AGENT-BOUNDED] BrokenBindDiscovery error %v", err)
-                        continue
-                    }
-                    bm, err := slagent.BrokenBindMeta(ba)
-                    if err != nil {
-                        log.Debugf("[AGENT-BOUNDED] BrokenBindMeta error %v", err)
-                        continue
-                    }
-                    pbm, err := slagent.PackedSlaveMeta(bm)
-                    if err != nil {
-                        log.Debugf("[AGENT-BOUNDED] PackedSlaveMeta error %v", err)
+                        log.Debugf("[AGENT-BOUNDED] SlavePackedBindBrokenSearch error %v", err)
                         continue
                     }
                     app.BroadcastEvent(Event{
@@ -254,6 +261,11 @@ func main() {
         app *PocketApplication
     )
     log.SetLevel(log.DebugLevel)
+
+    // TODO check user and reject if not root
+
+    // initialize slave context
+    slcontext.SharedSlaveContext()
     app = NewPocketApplication()
 
     // dhcp listner

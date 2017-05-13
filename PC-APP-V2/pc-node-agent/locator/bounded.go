@@ -2,14 +2,14 @@ package locator
 
 import (
     "time"
-    "fmt"
 
+    "github.com/pkg/errors"
     "github.com/stkim1/pc-core/msagent"
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-node-agent/slcontext"
 )
 
-func newBoundedState(comm CommChannel) LocatorState {
+func newBoundedState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
     bs := &bounded{}
 
     bs.constState                   = SlaveBounded
@@ -26,7 +26,8 @@ func newBoundedState(comm CommChannel) LocatorState {
     bs.onTransitionSuccess          = bs.onStateTranstionSuccess
     bs.onTransitionFailure          = bs.onStateTranstionFailure
 
-    bs.commChannel                  = comm
+    bs.searchComm                   = searchComm
+    bs.beaconComm                   = beaconComm
     return bs
 }
 
@@ -39,42 +40,42 @@ func (ls *bounded) transitionActionWithTimestamp(slaveTimestamp time.Time) error
 
     masterAgentName, err := slctx.GetMasterAgent()
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     slaveAgentName, err := slctx.GetSlaveNodeName()
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     aesCryptor, err := slctx.AESCryptor()
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     sa, err := slagent.SlaveBoundedStatus(masterAgentName, slaveAgentName, slaveTimestamp)
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     sm, err := slagent.SlaveBoundedMeta(sa, aesCryptor)
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     pm, err := slagent.PackedSlaveMeta(sm)
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     ma, err := slcontext.SharedSlaveContext().GetMasterIP4Address()
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
-    if ls.commChannel == nil {
-        return fmt.Errorf("[ERR] Comm Channel is nil")
+    if ls.beaconComm == nil {
+        return errors.Errorf("[ERR] Comm Channel is nil")
     }
-    return ls.commChannel.UcastSend(pm, ma)
+    return ls.beaconComm.UcastSend(pm, ma)
 }
 
 func (ls *bounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {
     if meta == nil || meta.MetaVersion != msagent.MASTER_META_VERSION {
         // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
-        return SlaveTransitionIdle, fmt.Errorf("[ERR] Null or incorrect version of master meta")
+        return SlaveTransitionIdle, errors.Errorf("[ERR] Null or incorrect version of master meta")
     }
 
     // We'll reset TX action count to 0 and now so successful tx action can happen infinitely

@@ -20,7 +20,7 @@ func Test_Cryptocheck_Bounded_MasterMetaFail(t *testing.T) {
     context := slcontext.SharedSlaveContext()
     debugComm := &DebugCommChannel{}
     slaveTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
     if err != nil {
         t.Error(err.Error())
         return
@@ -177,7 +177,7 @@ func Test_Cryptocheck_Bounded_TxActionFail(t *testing.T) {
     context := slcontext.SharedSlaveContext()
     debugComm := &DebugCommChannel{}
     slaveTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
     if err != nil {
         t.Error(err.Error())
         return

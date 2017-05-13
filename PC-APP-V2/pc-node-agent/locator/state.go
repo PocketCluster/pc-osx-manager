@@ -1,11 +1,11 @@
 package locator
 
 import (
-    "time"
-    "log"
-    "fmt"
     "bytes"
+    "log"
+    "time"
 
+    "github.com/pkg/errors"
     "github.com/stkim1/pc-core/msagent"
 )
 
@@ -71,19 +71,22 @@ type locatorState struct {
 
     /* ----------------------------------------- transition functions ----------------------------------------------- */
     // master transition func
-    masterMetaTransition        transitionWithMasterMeta
+    masterMetaTransition transitionWithMasterMeta
 
     // timestamp transition func
-    timestampTransition         transitionActionWithTimestamp
+    timestampTransition  transitionActionWithTimestamp
 
     // onSuccess
-    onTransitionSuccess         onStateTranstionSuccess
+    onTransitionSuccess  onStateTranstionSuccess
 
     // onFailure
-    onTransitionFailure         onStateTranstionFailure
+    onTransitionFailure  onStateTranstionFailure
 
     /* ---------------------------------------- Communication Channel ----------------------------------------------- */
-    commChannel                 CommChannel
+    // master search caster
+    searchComm           SearchTx
+    // master beacon agent
+    beaconComm           BeaconTx
 }
 
 // property functions
@@ -114,7 +117,8 @@ func (ls *locatorState) Close() error {
     ls.timestampTransition   = nil
     ls.onTransitionSuccess   = nil
     ls.onTransitionFailure   = nil
-    ls.commChannel           = nil
+    ls.searchComm            = nil
+    ls.beaconComm            = nil
     return nil
 }
 
@@ -124,29 +128,30 @@ func newLocatorStateForState(ls *locatorState, newState, oldState SlaveLocatingS
         return ls
     }
 
-    var comm CommChannel = ls.commChannel
+    var search SearchTx = ls.searchComm
+    var beacon BeaconTx = ls.beaconComm
     var newLocatorState LocatorState = nil
     switch newState {
         case SlaveUnbounded:
-            newLocatorState = newUnboundedState(comm)
+            newLocatorState = newUnboundedState(search, beacon)
 
         case SlaveInquired:
-            newLocatorState = newInquiredState(comm)
+            newLocatorState = newInquiredState(search, beacon)
 
         case SlaveKeyExchange:
-            newLocatorState = newKeyexchangeState(comm)
+            newLocatorState = newKeyexchangeState(search, beacon)
 
         case SlaveCryptoCheck:
-            newLocatorState = newCryptocheckState(comm)
+            newLocatorState = newCryptocheckState(search, beacon)
 
         case SlaveBounded:
-            newLocatorState = newBoundedState(comm)
+            newLocatorState = newBoundedState(search, beacon)
 
         case SlaveBindBroken:
-            newLocatorState = newBindbrokenState(comm)
+            newLocatorState = newBindbrokenState(search, beacon)
 
         default:
-            newLocatorState = newUnboundedState(comm)
+            newLocatorState = newUnboundedState(search, beacon)
     }
     // invalidate old LocatorState CommChannel for GC
     ls.Close()
@@ -295,7 +300,7 @@ func runTxStateActionWithTimestamp(ls *locatorState, slaveTimestamp time.Time) (
         return SlaveTransitionIdle, transErr
     }
     // this is failure. the fact that this is called indicate that we're ready to move to failure state
-    return SlaveTransitionFail, fmt.Errorf("[ERR] Transmission count has exceeded a given limit")
+    return SlaveTransitionFail, errors.Errorf("[ERR] Transmission count has exceeded a given limit")
 }
 
 func (ls *locatorState) TimestampTransition(slaveTimestamp time.Time) (LocatorState, error) {

@@ -2,8 +2,8 @@ package locator
 
 import (
     "time"
-    "fmt"
 
+    "github.com/pkg/errors"
     "github.com/stkim1/pc-core/msagent"
 )
 
@@ -48,6 +48,14 @@ type CommChannel interface {
     UcastSend(data []byte, target string) error
 }
 
+type SearchTx interface {
+    McastSend(data []byte) error
+}
+
+type BeaconTx interface {
+    UcastSend(data []byte, target string) error
+}
+
 type SlaveLocator interface {
     CurrentState() (SlaveLocatingState, error)
     TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) error
@@ -60,18 +68,21 @@ type slaveLocator struct {
 }
 
 // New slaveLocator starts only from unbounded or bindbroken
-func NewSlaveLocator(state SlaveLocatingState, comm CommChannel) (SlaveLocator, error) {
-    if comm == nil {
-        return nil, fmt.Errorf("[ERR] communication channel cannot be void")
+func NewSlaveLocator(state SlaveLocatingState, searchComm SearchTx, beaconComm BeaconTx) (SlaveLocator, error) {
+    if searchComm == nil {
+        return nil, errors.Errorf("[ERR] MasterSearch cannot be void")
+    }
+    if beaconComm == nil {
+        return nil, errors.Errorf("[ERR] BeaconAgent cannot be void")
     }
 
     switch state {
-    case SlaveUnbounded:
-        return &slaveLocator{state: newUnboundedState(comm)}, nil
-    case SlaveBindBroken:
-        return &slaveLocator{state: newBindbrokenState(comm)}, nil
+        case SlaveUnbounded:
+            return &slaveLocator{state: newUnboundedState(searchComm, beaconComm)}, nil
+        case SlaveBindBroken:
+            return &slaveLocator{state: newBindbrokenState(searchComm, beaconComm)}, nil
     }
-    return nil, fmt.Errorf("[ERR] SlaveLocator can initiated from SlaveUnbounded or SlaveBindBroken only")
+    return nil, errors.Errorf("[ERR] SlaveLocator can initiated from SlaveUnbounded or SlaveBindBroken only")
 }
 
 func (sl *slaveLocator) CurrentState() (SlaveLocatingState, error) {
@@ -83,7 +94,7 @@ func (sl *slaveLocator) CurrentState() (SlaveLocatingState, error) {
 
 func (sl *slaveLocator) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) error {
     if sl.state == nil {
-        return fmt.Errorf("[ERR] LocatorState is nil. Cannot make transition with master meta")
+        return errors.Errorf("[ERR] LocatorState is nil. Cannot make transition with master meta")
     }
     var err error
     sl.state, err = sl.state.MasterMetaTransition(meta, slaveTimestamp)
@@ -92,7 +103,7 @@ func (sl *slaveLocator) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentM
 
 func (sl *slaveLocator) TranstionWithTimestamp(slaveTimestamp time.Time) error {
     if sl.state == nil {
-        return fmt.Errorf("[ERR] LocatorState is nil. Cannot make transition with master meta")
+        return errors.Errorf("[ERR] LocatorState is nil. Cannot make transition with master meta")
     }
     var err error
     sl.state, err = sl.state.TimestampTransition(slaveTimestamp)
