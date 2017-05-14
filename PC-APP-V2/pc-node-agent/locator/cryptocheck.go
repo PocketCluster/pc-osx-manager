@@ -69,7 +69,7 @@ func (ls *cryptocheck) transitionActionWithTimestamp(slaveTimestamp time.Time) e
     if ls.beaconComm == nil {
         return errors.Errorf("[ERR] Comm Channel is nil")
     }
-    return ls.beaconComm.UcastSend(pm, ma)
+    return ls.beaconComm.UcastSend(ma, pm)
 }
 
 func (ls *cryptocheck) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {

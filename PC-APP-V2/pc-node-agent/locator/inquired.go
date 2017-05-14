@@ -55,7 +55,7 @@ func (ls *inquired) transitionActionWithTimestamp(slaveTimestamp time.Time) erro
     if ls.beaconComm == nil {
         return errors.Errorf("[ERR] Comm Channel is nil")
     }
-    return ls.beaconComm.UcastSend(pm, ma)
+    return ls.beaconComm.UcastSend(ma, pm)
 }
 
 func (ls *inquired) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {

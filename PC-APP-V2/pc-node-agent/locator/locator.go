@@ -43,17 +43,22 @@ func (st SlaveLocatingState) String() string {
     return state
 }
 
-type CommChannel interface {
-    McastSend(data []byte) error
-    UcastSend(data []byte, target string) error
-}
-
 type SearchTx interface {
     McastSend(data []byte) error
 }
 
+type SearchTxFunc func(data []byte) error
+func (s SearchTxFunc) McastSend(data []byte) error {
+    return s(data)
+}
+
 type BeaconTx interface {
-    UcastSend(data []byte, target string) error
+    UcastSend(target string, data []byte) error
+}
+
+type BeaconTxFunc func(target string, data []byte) error
+func (b BeaconTxFunc) UcastSend(target string, data []byte) error {
+    return b(target, data)
 }
 
 type SlaveLocator interface {
@@ -65,6 +70,10 @@ type SlaveLocator interface {
 
 type slaveLocator struct {
     state       LocatorState
+}
+
+func NewSlaveLocatorWithFunc(state SlaveLocatingState, searchComm SearchTxFunc, beaconComm BeaconTxFunc) (SlaveLocator, error) {
+    return NewSlaveLocator(state, searchComm, beaconComm)
 }
 
 // New slaveLocator starts only from unbounded or bindbroken

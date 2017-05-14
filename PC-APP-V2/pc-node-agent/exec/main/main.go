@@ -10,7 +10,6 @@ import (
     "gopkg.in/vmihailenco/msgpack.v2"
 
     "github.com/stkim1/pc-node-agent/dhcp"
-    "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/udpnet/ucast"
@@ -189,12 +188,29 @@ func initAgentService(app *PocketApplication) error {
         defer unbounded.Stop()
         defer bounded.Stop()
 
+        searchTx := func(data []byte) error {
+            log.Debugf("SearchTx Func %v", data)
+            app.BroadcastEvent(Event{Name: nodeServiceSearch, Payload:data})
+            return nil
+        }
+        beaconTx := func(target string, data []byte) error {
+            log.Debugf("BeaconTx Func % v| %v", target, data)
+            app.BroadcastEvent(Event{
+                Name: nodeServiceBeacon,
+                Payload: ucast.BeaconSend{
+                    Host:"192.168.1.105",
+                    Payload:data,
+                },
+            })
+            return nil
+        }
+
         // setup slave locator
         uuid, err := context.GetSlaveNodeUUID()
         if err == nil && len(uuid) != 0 {
-            loc, err = locator.NewSlaveLocator(locator.SlaveBindBroken, nil)
+            loc, err = locator.NewSlaveLocatorWithFunc(locator.SlaveBindBroken, searchTx, beaconTx)
         } else {
-            loc, err = locator.NewSlaveLocator(locator.SlaveUnbounded, nil)
+            loc, err = locator.NewSlaveLocatorWithFunc(locator.SlaveUnbounded, searchTx, beaconTx)
         }
         if err != nil {
             return errors.WithStack(err)
@@ -221,27 +237,9 @@ func initAgentService(app *PocketApplication) error {
                 }
                 case <- unbounded.C: {
 //                    log.Debugf("[AGENT] unbounded %v", time.Now())
-                    pums, err := slagent.SlavePackedUnboundedMasterSearch()
-                    if err != nil {
-                        log.Debugf("[AGENT-UNBOUNDED] SlavePackedUnboundedMasterSearch error %v", err)
-                        continue
-                    }
-                    app.BroadcastEvent(Event{Name: nodeServiceSearch, Payload:pums})
                 }
                 case <- bounded.C: {
 //                    log.Debugf("[AGENT] bounded %v", time.Now())
-                    pbm, err := slagent.SlavePackedBindBrokenSearch("PC-MASTER")
-                    if err != nil {
-                        log.Debugf("[AGENT-BOUNDED] SlavePackedBindBrokenSearch error %v", err)
-                        continue
-                    }
-                    app.BroadcastEvent(Event{
-                        Name: nodeServiceBeacon,
-                        Payload: ucast.BeaconSend{
-                            Host:"192.168.1.105",
-                            Payload:pbm,
-                        },
-                    })
                 }
             }
         }
