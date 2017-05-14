@@ -11,7 +11,7 @@ type DebugCommChannel struct {
     UCommCount       uint
 }
 
-func (dc *DebugCommChannel) UcastSend(data []byte, target string) error {
+func (dc *DebugCommChannel) UcastSend(target string, data []byte) error {
     dc.LastUcastMessage = data
     dc.LastUcastHost = target
     dc.UCommCount++

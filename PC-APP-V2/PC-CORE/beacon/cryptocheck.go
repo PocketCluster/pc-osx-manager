@@ -61,7 +61,7 @@ func (b *cryptocheck) transitionActionWithTimestamp(masterTimestamp time.Time) e
     if b.commChan == nil {
         errors.Errorf("[ERR] Communication channel is null. This should never happen")
     }
-    return b.commChan.UcastSend(pm, b.slaveNode.IP4Address)
+    return b.commChan.UcastSend(b.slaveNode.IP4Address, pm)
 }
 
 func (b *cryptocheck) cryptoCheck(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {

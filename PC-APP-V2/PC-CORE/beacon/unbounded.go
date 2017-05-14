@@ -54,7 +54,7 @@ func (b *unbounded) transitionActionWithTimestamp(masterTimestamp time.Time) err
     if b.commChan == nil {
         errors.Errorf("[ERR] Communication channel is null. This should never happen")
     }
-    return b.commChan.UcastSend(pm, b.slaveNode.IP4Address)
+    return b.commChan.UcastSend(b.slaveNode.IP4Address, pm)
 }
 
 func (b *unbounded) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {

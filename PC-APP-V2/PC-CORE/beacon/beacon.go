@@ -55,7 +55,12 @@ func (st MasterBeaconState) String() string {
 
 type CommChannel interface {
     //McastSend(data []byte) error
-    UcastSend(data []byte, target string) error
+    UcastSend(target string, data []byte) error
+}
+
+type CommChannelFunc func(target string, data []byte) error
+func (c CommChannelFunc) UcastSend(target string, data []byte) error {
+    return c(target, data)
 }
 
 // MasterBeacon is assigned individually for each slave node.
@@ -65,6 +70,10 @@ type MasterBeacon interface {
     TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error
 
     SlaveNode() *model.SlaveNode
+}
+
+func NewMasterBeaconWithFunc(state MasterBeaconState, slaveNode *model.SlaveNode, comm CommChannelFunc) (MasterBeacon, error) {
+    return NewMasterBeacon(state, slaveNode, comm)
 }
 
 func NewMasterBeacon(state MasterBeaconState, slaveNode *model.SlaveNode, comm CommChannel) (MasterBeacon, error) {
