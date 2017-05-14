@@ -1,8 +1,9 @@
 package beacon
 
 import (
-    "github.com/stkim1/pcrypto"
     "time"
+
+    "github.com/stkim1/pcrypto"
 )
 
 type DebugCommChannel struct {
