@@ -4,7 +4,6 @@ import (
     "os"
     "path/filepath"
     "runtime"
-    "sync"
     "time"
 
     "github.com/stkim1/pc-node-agent/slcontext"
@@ -24,9 +23,6 @@ func DebugRecordGateDestroy(dataDir string) error {
     var err error = CloseRecordGate()
     dbPath := filepath.Join(dataDir, PC_CORE_TEST_STORAGE_FILE)
     os.Remove(dbPath)
-
-    // here we reset once literature to make sure it is reset for next test
-    once = sync.Once{}
     return err
 }
 

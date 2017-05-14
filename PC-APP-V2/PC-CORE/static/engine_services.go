@@ -9,11 +9,11 @@ import (
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/pc-node-agent/slagent"
-    "github.com/stkim1/pc-core/msagent"
+    "github.com/stkim1/pc-node-agent/slcontext"
+    "github.com/stkim1/pc-core/model"
 )
 import (
     "github.com/davecgh/go-spew/spew"
-    "github.com/stkim1/pc-node-agent/slcontext"
 )
 
 const (
@@ -110,8 +110,21 @@ func initMasterAgentService(a *mainLife) error {
     slcontext.DebugSlcontextPrepare()
 
     a.RegisterServiceFunc(func() error {
-        bounded := time.NewTicker(time.Second * 10)
-        defer bounded.Stop()
+        var (
+            timer = time.NewTicker(time.Second)
+            _ = func(target string, data []byte) error {
+                a.BroadcastEvent(Event{
+                    Name: coreServiceBeacon,
+                    Payload:ucast.BeaconSend{
+                        Host:"192.168.1.152",
+                        Payload:data,
+                    },
+                })
+                return nil
+            }
+        )
+
+        defer timer.Stop()
 
         log.Debugf("[AGENT] starting agent service...")
         for {
@@ -128,6 +141,7 @@ func initMasterAgentService(a *mainLife) error {
                         usm, err := slagent.UnpackedSlaveMeta(psm)
                         if err == nil {
                             log.Debugf("[AGENT-BEACON] UNPACK SUCCESS %v", spew.Sdump(usm))
+                            model.FindSlaveNode("category = ?", usm.SlaveID)
                         }
                     }
                 }
@@ -142,20 +156,9 @@ func initMasterAgentService(a *mainLife) error {
                         }
                     }
                 }
-                case <-bounded.C: {
-//                    log.Debugf("[AGENT] bounded %v", time.Now())
-                    msa, _ := slagent.TestSlaveUnboundedMasterSearchDiscovery()
-                    cmd, _ := msagent.SlaveIdentityInqueryRespond(msa.DiscoveryAgent)
-                    meta := msagent.SlaveIdentityInquiryMeta(cmd)
-                    mp, _ := msagent.PackedMasterMeta(meta)
-
-                    a.BroadcastEvent(Event{
-                        Name: coreServiceBeacon,
-                        Payload:ucast.BeaconSend{
-                            Host:"192.168.1.152",
-                            Payload:mp,
-                        },
-                    })
+                case <-timer.C: {
+                    log.Debugf("[AGENT] bounded %v", time.Now())
+                    continue
                 }
             }
         }
