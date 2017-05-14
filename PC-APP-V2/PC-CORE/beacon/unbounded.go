@@ -1,9 +1,9 @@
 package beacon
 
 import (
-    "fmt"
     "time"
 
+    "github.com/pkg/errors"
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-core/msagent"
 )
@@ -40,43 +40,43 @@ type unbounded struct {
 
 func (b *unbounded) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     if b.slaveLocation == nil {
-        return fmt.Errorf("[ERR] SlaveDiscoveryAgent is nil. We cannot form a proper response")
+        return errors.Errorf("[ERR] SlaveDiscoveryAgent is nil. We cannot form a proper response")
     }
     cmd, err := msagent.SlaveIdentityInqueryRespond(b.slaveLocation)
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     meta := msagent.SlaveIdentityInquiryMeta(cmd)
     pm, err := msagent.PackedMasterMeta(meta)
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     if b.commChan == nil {
-        fmt.Errorf("[ERR] Communication channel is null. This should never happen")
+        errors.Errorf("[ERR] Communication channel is null. This should never happen")
     }
     return b.commChan.UcastSend(pm, b.slaveNode.IP4Address)
 }
 
 func (b *unbounded) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
     if meta.StatusAgent == nil || meta.StatusAgent.Version != slagent.SLAVE_STATUS_VERSION {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave status")
+        return MasterTransitionFail, errors.Errorf("[ERR] Null or incorrect version of slave status")
     }
     // check if slave response is what we look for
     if meta.StatusAgent.SlaveResponse != slagent.SLAVE_WHO_I_AM {
         return MasterTransitionIdle, nil
     }
     if meta.SlaveID != meta.StatusAgent.SlaveNodeMacAddr {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave ID")
+        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave ID")
     }
     if b.slaveNode.IP4Address != meta.StatusAgent.SlaveAddress {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave ip address")
+        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
     }
     if b.slaveNode.MacAddress != meta.StatusAgent.SlaveNodeMacAddr {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave MAC address")
+        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
     // slave hardware architecture
     if len(meta.StatusAgent.SlaveHardware) == 0 {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave architecture")
+        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave architecture")
     }
     b.slaveNode.Arch = meta.StatusAgent.SlaveHardware
 

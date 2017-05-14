@@ -2,10 +2,10 @@ package beacon
 
 import (
     "time"
-    "fmt"
     "log"
     "bytes"
 
+    "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-core/model"
@@ -294,10 +294,10 @@ func (b *beaconState) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta
     }
 
     if meta == nil || meta.MetaVersion != slagent.SLAVE_META_VERSION {
-        return nil, fmt.Errorf("[ERR] Null or incorrect version of slave meta")
+        return nil, errors.Errorf("[ERR] Null or incorrect version of slave meta")
     }
     if len(meta.SlaveID) == 0 {
-        return nil, fmt.Errorf("[ERR] Null or incorrect slave ID")
+        return nil, errors.Errorf("[ERR] Null or incorrect slave ID")
     }
 
     transitionCandidate, transErr = b.slaveMetaTransition(meta, masterTimestamp)
@@ -343,7 +343,7 @@ func (b *beaconState) TransitionWithTimestamp(masterTimestamp time.Time) (Beacon
             return MasterTransitionIdle, transErr
         }
         // this is failure. the fact that this is called indicate that we're ready to move to failure state
-        return MasterTransitionFail, fmt.Errorf("[ERR] Transmission count has exceeded a given limit")
+        return MasterTransitionFail, errors.Errorf("[ERR] Transmission count has exceeded a given limit")
     }(b, masterTimestamp)
 
     if transition == MasterTransitionFail {

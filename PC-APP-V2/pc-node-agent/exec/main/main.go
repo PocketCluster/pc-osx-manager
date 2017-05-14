@@ -179,43 +179,43 @@ func initAgentService(app *PocketApplication) error {
 
     app.RegisterFunc(func() error {
         var (
-            unbounded = time.NewTicker(time.Second * 5)
-            bounded = time.NewTicker(time.Second * 10)
+            timer = time.NewTicker(time.Second)
             context = slcontext.SharedSlaveContext()
             loc locator.SlaveLocator = nil
+            locState locator.SlaveLocatingState = locator.SlaveUnbounded
             err error = nil
-        )
-        defer unbounded.Stop()
-        defer bounded.Stop()
 
-        searchTx := func(data []byte) error {
-            log.Debugf("SearchTx Func %v", data)
-            app.BroadcastEvent(Event{Name: nodeServiceSearch, Payload:data})
-            return nil
-        }
-        beaconTx := func(target string, data []byte) error {
-            log.Debugf("BeaconTx Func % v| %v", target, data)
-            app.BroadcastEvent(Event{
-                Name: nodeServiceBeacon,
-                Payload: ucast.BeaconSend{
-                    Host:"192.168.1.105",
-                    Payload:data,
-                },
-            })
-            return nil
-        }
+            searchTx = func(data []byte) error {
+                log.Debugf("SearchTx Func %v", data)
+                app.BroadcastEvent(Event{Name: nodeServiceSearch, Payload:data})
+                return nil
+            }
+            beaconTx = func(target string, data []byte) error {
+                log.Debugf("BeaconTx Func % v| %v", target, data)
+                app.BroadcastEvent(Event{
+                    Name: nodeServiceBeacon,
+                    Payload: ucast.BeaconSend{
+                        Host:"192.168.1.105",
+                        Payload:data,
+                    },
+                })
+                return nil
+            }
+        )
 
         // setup slave locator
         uuid, err := context.GetSlaveNodeUUID()
         if err == nil && len(uuid) != 0 {
-            loc, err = locator.NewSlaveLocatorWithFunc(locator.SlaveBindBroken, searchTx, beaconTx)
+            locState = locator.SlaveBindBroken
         } else {
-            loc, err = locator.NewSlaveLocatorWithFunc(locator.SlaveUnbounded, searchTx, beaconTx)
+            locState = locator.SlaveUnbounded
         }
+        loc, err = locator.NewSlaveLocatorWithFunc(locState, searchTx, beaconTx)
         if err != nil {
             return errors.WithStack(err)
         }
         defer loc.Close()
+        defer timer.Stop()
 
         log.Debugf("[AGENT] starting agent service...")
 
@@ -229,17 +229,22 @@ func initAgentService(app *PocketApplication) error {
                         mup, err := msagent.UnpackedMasterMeta(mp.Message)
                         if err == nil {
                             log.Debugf("[AGENT-BEACON] RECEIVED\n %v \n %v", spew.Sdump(mp.Address), spew.Sdump(mup))
+                            err = loc.TranstionWithMasterMeta(mup, time.Now())
+                            if err != nil {
+                                log.Debugf(err.Error())
+                            }
                         }
                     }
                 }
                 case d := <- dhcpC: {
                     log.Debugf("[AGENT-DHCP] RECEIVED\n %v", spew.Sdump(d.Payload))
                 }
-                case <- unbounded.C: {
-//                    log.Debugf("[AGENT] unbounded %v", time.Now())
-                }
-                case <- bounded.C: {
-//                    log.Debugf("[AGENT] bounded %v", time.Now())
+                case <- timer.C: {
+                    log.Debugf("[AGENT] Tick %v", time.Now())
+                    err = loc.TranstionWithTimestamp(time.Now())
+                    if err != nil {
+                        log.Debugf(err.Error())
+                    }
                 }
             }
         }

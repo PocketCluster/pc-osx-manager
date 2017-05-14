@@ -1,9 +1,9 @@
 package beacon
 
 import (
-    "fmt"
     "time"
 
+    "github.com/pkg/errors"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pcrypto"
@@ -44,29 +44,29 @@ type inquired struct {
 func (b *inquired) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     masterPubKey, err := context.SharedHostContext().MasterHostPublicKey()
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     if b.slaveStatus == nil {
-        return fmt.Errorf("[ERR] SlaveStatusAgent is nil. We cannot form a proper response")
+        return errors.Errorf("[ERR] SlaveStatusAgent is nil. We cannot form a proper response")
     }
     cmd, err := msagent.MasterDeclarationCommand(b.slaveStatus, masterTimestamp)
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     meta := msagent.MasterDeclarationMeta(cmd, masterPubKey)
     pm, err := msagent.PackedMasterMeta(meta)
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     if b.commChan == nil {
-        fmt.Errorf("[ERR] Communication channel is null. This should never happen")
+        errors.Errorf("[ERR] Communication channel is null. This should never happen")
     }
     return b.commChan.UcastSend(pm, b.slaveNode.IP4Address)
 }
 
 func (b *inquired) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
     if meta.StatusAgent == nil || meta.StatusAgent.Version != slagent.SLAVE_STATUS_VERSION {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave status")
+        return MasterTransitionFail, errors.Errorf("[ERR] Null or incorrect version of slave status")
     }
     // check if slave response is what we look for
     if meta.StatusAgent.SlaveResponse != slagent.SLAVE_SEND_PUBKEY {
@@ -74,35 +74,35 @@ func (b *inquired) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.T
     }
     masterAgentName, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
-        return MasterTransitionFail, err
+        return MasterTransitionFail, errors.WithStack(err)
     }
     if masterAgentName != meta.StatusAgent.MasterBoundAgent {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Slave reports to incorrect master agent")
+        return MasterTransitionFail, errors.Errorf("[ERR] Slave reports to incorrect master agent")
     }
     if b.slaveNode.IP4Address != meta.StatusAgent.SlaveAddress {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave ip address")
+        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
     }
     if meta.SlaveID != meta.StatusAgent.SlaveNodeMacAddr {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave ID")
+        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave ID")
     }
     if b.slaveNode.MacAddress != meta.StatusAgent.SlaveNodeMacAddr {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave MAC address")
+        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
     if b.slaveNode.Arch != meta.StatusAgent.SlaveHardware {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave architecture")
+        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave architecture")
     }
     if len(meta.SlavePubKey) == 0 {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave public key")
+        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave public key")
     }
 
     // master public key
     masterPrvKey, err := context.SharedHostContext().MasterHostPrivateKey()
     if err != nil {
-        return MasterTransitionFail, err
+        return MasterTransitionFail, errors.WithStack(err)
     }
     encryptor, err := pcrypto.NewRsaEncryptorFromKeyData(meta.SlavePubKey, masterPrvKey)
     if err != nil {
-        return MasterTransitionFail, err
+        return MasterTransitionFail, errors.WithStack(err)
     }
     b.slaveNode.PublicKey = meta.SlavePubKey
     b.rsaEncryptor = encryptor
@@ -111,14 +111,14 @@ func (b *inquired) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.T
     aesKey := pcrypto.NewAESKey32Byte()
     aesCryptor, err := pcrypto.NewAESCrypto(aesKey)
     if err != nil {
-        return MasterTransitionFail, err
+        return MasterTransitionFail, errors.WithStack(err)
     }
     b.aesKey = aesKey
     b.aesCryptor = aesCryptor
 
     nodeName, err := model.FindSlaveNameCandiate()
     if err != nil {
-        return MasterTransitionFail, err
+        return MasterTransitionFail, errors.WithStack(err)
     }
     b.slaveNode.NodeName = nodeName
 
