@@ -51,7 +51,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
 
     // get master meta with aeskey
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -152,7 +152,7 @@ func Test_Keyexchange_Cryptocheck_MasterMetaFail(t *testing.T) {
     for i := 0; i <= int(TransitionFailureLimit); i++ {
         // keyexchange -> cryptocheck
         masterTS = slaveTS.Add(time.Millisecond * 100)
-        meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
+        meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
         if err != nil {
             t.Error(err.Error())
             return

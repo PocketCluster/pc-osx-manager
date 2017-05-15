@@ -121,8 +121,11 @@ func (ls *keyexchange) transitionWithMasterMeta(meta *msagent.PocketMasterAgentM
     if err != nil {
         return SlaveTransitionFail, errors.WithStack(err)
     }
-    if len(nodeIdentity.SlaveNodeName) == 0 || len(nodeIdentity.SlaveUUID) == 0 {
-        return SlaveTransitionFail, errors.Errorf("[ERR] invalid slave node identity")
+    if len(nodeIdentity.SlaveNodeName) == 0 {
+        return SlaveTransitionFail, errors.Errorf("[ERR] invalid slave node name")
+    }
+    if len(nodeIdentity.SlaveUUID) == 0 {
+        return SlaveTransitionFail, errors.Errorf("[ERR] invalid slave node UUID")
     }
     err = slcontext.SharedSlaveContext().SetSlaveNodeName(nodeIdentity.SlaveNodeName)
     if err != nil {

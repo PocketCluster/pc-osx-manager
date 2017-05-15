@@ -68,7 +68,7 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
 
     // keyexchange -> cryptocheck
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -90,7 +90,7 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
 
     // cryptocheck -> bounded
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveUUID, slaveNodeName, pcrypto.TestAESCryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -181,7 +181,7 @@ func Test_Bounded_Unbroken_Loop(t *testing.T) {
 
     // keyexchange -> cryptocheck
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -205,7 +205,7 @@ func Test_Bounded_Unbroken_Loop(t *testing.T) {
     for i := 0 ; i < 100; i++ {
         // MASTER META TRANSITION ACTION
         masterTS = slaveTS.Add(time.Second)
-        meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, masterTS)
+        meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, masterTS)
         if err != nil {
             t.Error(err.Error())
             return
@@ -317,7 +317,7 @@ func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
     }
     // keyexchange -> cryptocheck
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -338,7 +338,7 @@ func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
     }
     // cryptocheck -> bounded
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -362,7 +362,7 @@ func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
     for i := 0; i <= int(TransitionFailureLimit); i++ {
         // cryptocheck -> bounded
         masterTS = slaveTS.Add(time.Second)
-        meta, masterTS, err = msagent.TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, masterTS)
+        meta, masterTS, err = msagent.TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, masterTS)
         if err != nil {
             t.Error(err.Error())
             return
@@ -426,6 +426,7 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
     context.SetMasterPublicKey(pcrypto.TestMasterPublicKey())
     context.SetMasterAgent(masterAgentName)
     context.SetSlaveNodeName(slaveNodeName)
+    context.SetSlaveNodeUUID(slaveUUID)
 
     // have a slave locator
     sd, err := NewSlaveLocator(SlaveBindBroken, debugComm, debugComm)
