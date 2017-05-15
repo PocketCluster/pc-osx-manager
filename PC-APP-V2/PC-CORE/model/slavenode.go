@@ -46,13 +46,14 @@ type SlaveNode struct {
     MacAddress      string       `gorm:"column:mac_address;type:VARCHAR(32)"`
     Arch            string       `gorm:"column:arch;type:VARCHAR(32)"`
     NodeName        string       `gorm:"column:node_name;type:VARCHAR(64)"`
+    SlaveID         string       `gorm:"column:slave_id;type:VARCHAR(64)"`
 
     // slave node       s tate : joined/ departed/ more in the future
     State           string       `gorm:"column:state;type:VARCHAR(32)"`
 
+    // these two are last known addresses
     IP4Address      string       `gorm:"column:ip4_address;type:VARCHAR(32)"`
     IP4Gateway      string       `gorm:"column:ip4_gateway;type:VARCHAR(32)"`
-    IP4Netmask      string       `gorm:"column:ip4_netmask;type:VARCHAR(32)"`
 
     UserMadeName    string       `gorm:"column:user_made_name;type:VARCHAR(256)"`
     PublicKey       []byte       `gorm:"column:public_key;type:BLOB"`
