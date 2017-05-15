@@ -1,23 +1,13 @@
 package slcontext
 
 import (
-    "sync"
-    "fmt"
-    "net"
     "log"
+    "sync"
 
+    "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
-    "github.com/stkim1/netifaces"
     "github.com/stkim1/pc-node-agent/slcontext/config"
 )
-
-type NetworkInterface struct {
-    *net.Interface
-    *net.IP
-    *net.IPMask
-    *net.HardwareAddr
-    GatewayAddr             string
-}
 
 type PocketSlaveContext interface {
     // Once sync, all the configuration is saved, and slave node is bounded
@@ -60,8 +50,6 @@ type PocketSlaveContext interface {
     SetSlaveNodeUUID(uuid string) error
     GetSlaveNodeUUID() (string, error)
 
-    PrimaryNetworkInterface() (*NetworkInterface, error)
-
     SlaveKeyAndCertPath() string
     SlaveConfigPath() string
 }
@@ -103,7 +91,6 @@ func getSingletonSlaveContext() *slaveContext {
 }
 
 // --- Sync All ---
-// TODO : Wrap error message
 func initWithConfig(sc *slaveContext, cfg *config.PocketSlaveConfig) error {
     var err error
     sc.config = cfg
@@ -111,13 +98,13 @@ func initWithConfig(sc *slaveContext, cfg *config.PocketSlaveConfig) error {
     // pocket public key
     sc.pocketPublicKey , err = cfg.SlavePublicKey()
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
 
     // pocket private key
     sc.pocketPrivateKey, err = cfg.SlavePrivateKey()
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
 
     // if master public key exists
@@ -129,22 +116,19 @@ func initWithConfig(sc *slaveContext, cfg *config.PocketSlaveConfig) error {
         }
     }
 
-    paddr, err := sc.PrimaryNetworkInterface()
+    paddr, err := PrimaryNetworkInterface()
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
 
-    if paddr.HardwareAddr.String() != cfg.SlaveSection.SlaveMacAddr {
-        cfg.SlaveSection.SlaveMacAddr  = paddr.HardwareAddr.String()
+    if paddr.HardwareAddr != cfg.SlaveSection.SlaveMacAddr {
+        cfg.SlaveSection.SlaveMacAddr  = paddr.HardwareAddr
     }
-    if paddr.IP.String() != cfg.SlaveSection.SlaveIP4Addr {
-        cfg.SlaveSection.SlaveIP4Addr  = paddr.IP.String()
+    if paddr.PrimaryIP4Addr() != cfg.SlaveSection.SlaveIP4Addr {
+        cfg.SlaveSection.SlaveIP4Addr  = paddr.PrimaryIP4Addr()
     }
     if paddr.GatewayAddr != cfg.SlaveSection.SlaveGateway {
         cfg.SlaveSection.SlaveGateway  = paddr.GatewayAddr
-    }
-    if paddr.IPMask.String() != cfg.SlaveSection.SlaveNetMask {
-        cfg.SlaveSection.SlaveNetMask  = paddr.IPMask.String()
     }
     if config.SLAVE_NAMESRV_VALUE != cfg.SlaveSection.SlaveNameServ {
         cfg.SlaveSection.SlaveNameServ = config.SLAVE_NAMESRV_VALUE
@@ -158,22 +142,19 @@ func initWithConfig(sc *slaveContext, cfg *config.PocketSlaveConfig) error {
 // No other place can execute this
 func (sc *slaveContext) SyncAll() error {
     // slave network section
-    paddr, err := sc.PrimaryNetworkInterface()
+    paddr, err := PrimaryNetworkInterface()
     if err != nil {
         return err
     }
     cfg := sc.config
-    if paddr.HardwareAddr.String() != cfg.SlaveSection.SlaveMacAddr {
-        cfg.SlaveSection.SlaveMacAddr  = paddr.HardwareAddr.String()
+    if paddr.HardwareAddr != cfg.SlaveSection.SlaveMacAddr {
+        cfg.SlaveSection.SlaveMacAddr  = paddr.HardwareAddr
     }
-    if paddr.IP.String() != cfg.SlaveSection.SlaveIP4Addr {
-        cfg.SlaveSection.SlaveIP4Addr  = paddr.IP.String()
+    if paddr.PrimaryIP4Addr() != cfg.SlaveSection.SlaveIP4Addr {
+        cfg.SlaveSection.SlaveIP4Addr  = paddr.PrimaryIP4Addr()
     }
     if paddr.GatewayAddr != cfg.SlaveSection.SlaveGateway {
         cfg.SlaveSection.SlaveGateway  = paddr.GatewayAddr
-    }
-    if paddr.IPMask.String() != cfg.SlaveSection.SlaveNetMask {
-        cfg.SlaveSection.SlaveNetMask  = paddr.IPMask.String()
     }
     if config.SLAVE_NAMESRV_VALUE != cfg.SlaveSection.SlaveNameServ {
         cfg.SlaveSection.SlaveNameServ = config.SLAVE_NAMESRV_VALUE
@@ -217,18 +198,22 @@ func (sc *slaveContext) SaveConfiguration() error {
     // master pubkey
     mpubkey, err := sc.GetMasterPublicKey()
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     sc.config.SaveMasterPublicKey(mpubkey)
+
+    // TODO : (2017-05-15) we'll re-evaluate this option later. For not, this is none critical
+/*
     // slave network interface
     err = sc.config.SaveFixedNetworkInterface()
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
+*/
     // save slave node name to hostname
     err = sc.config.SaveHostname()
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     // whole slave config
     return sc.config.SaveSlaveConfig()
@@ -245,7 +230,7 @@ func (sc *slaveContext) GetPrivateKey() ([]byte) {
 
 func (sc *slaveContext) DecryptByRSA(crypted []byte, sendSig pcrypto.Signature) ([]byte, error) {
     if sc.pocketDecryptor == nil {
-        return nil, fmt.Errorf("[ERR] cannot decrypt with null decryptor")
+        return nil, errors.Errorf("[ERR] cannot decrypt with null decryptor")
     }
     return sc.pocketDecryptor.DecryptByRSA(crypted, sendSig)
 }
@@ -253,13 +238,13 @@ func (sc *slaveContext) DecryptByRSA(crypted []byte, sendSig pcrypto.Signature) 
 // --- Master Public key ---
 func (sc *slaveContext) SetMasterPublicKey(masterPubkey []byte) error {
     if len(masterPubkey) == 0 {
-        return fmt.Errorf("[ERR] Master public key is nil")
+        return errors.Errorf("[ERR] Master public key is nil")
     }
     sc.masterPubkey = masterPubkey
 
     decryptor, err := pcrypto.NewRsaDecryptorFromKeyData(masterPubkey, sc.pocketPrivateKey)
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     sc.pocketDecryptor = decryptor
     return nil
@@ -267,7 +252,7 @@ func (sc *slaveContext) SetMasterPublicKey(masterPubkey []byte) error {
 
 func (sc *slaveContext) GetMasterPublicKey() ([]byte, error) {
     if sc.masterPubkey == nil {
-        return nil, fmt.Errorf("[ERR] Empty master public key")
+        return nil, errors.Errorf("[ERR] Empty master public key")
     }
     return sc.masterPubkey, nil
 }
@@ -295,21 +280,21 @@ func (sc *slaveContext) DiscardAESKey() {
 
 func (sc *slaveContext) AESCryptor() (pcrypto.AESCryptor, error) {
     if sc.aesCryptor == nil {
-        return nil, fmt.Errorf("[ERR] AESKey or AESCryptor is not setup")
+        return nil, errors.Errorf("[ERR] AESKey or AESCryptor is not setup")
     }
     return sc.aesCryptor, nil
 }
 
 func (sc *slaveContext) EncryptByAES(data []byte) ([]byte, error) {
     if sc.aesCryptor == nil {
-        return nil, fmt.Errorf("[ERR] Cannot AES encrypt with null cryptor")
+        return nil, errors.Errorf("[ERR] Cannot AES encrypt with null cryptor")
     }
     return sc.aesCryptor.EncryptByAES(data)
 }
 
 func (sc *slaveContext) DecryptByAES(data []byte) ([]byte, error) {
     if sc.aesCryptor == nil {
-        return nil, fmt.Errorf("[ERR] Cannot AES decrypt with null cryptor")
+        return nil, errors.Errorf("[ERR] Cannot AES decrypt with null cryptor")
     }
     return sc.aesCryptor.DecryptByAES(data)
 }
@@ -317,7 +302,7 @@ func (sc *slaveContext) DecryptByAES(data []byte) ([]byte, error) {
 // --- Master Agent Name ---
 func (sc *slaveContext) SetMasterAgent(agentName string) error {
     if len(agentName) == 0 {
-        return fmt.Errorf("[ERR] Cannot set empty master agent name")
+        return errors.Errorf("[ERR] Cannot set empty master agent name")
     }
     sc.config.MasterSection.MasterBoundAgent = agentName
     return nil
@@ -325,7 +310,7 @@ func (sc *slaveContext) SetMasterAgent(agentName string) error {
 
 func (sc *slaveContext) GetMasterAgent() (string, error) {
     if len(sc.config.MasterSection.MasterBoundAgent) == 0 {
-        return "", fmt.Errorf("[ERR] Empty master agent name")
+        return "", errors.Errorf("[ERR] Empty master agent name")
     }
     return sc.config.MasterSection.MasterBoundAgent, nil
 }
@@ -333,7 +318,7 @@ func (sc *slaveContext) GetMasterAgent() (string, error) {
 // --- Master IP4 Address ---
 func (sc *slaveContext) SetMasterIP4Address(ip4Address string) error {
     if len(ip4Address) == 0 {
-        return fmt.Errorf("[ERR] Cannot set empty master ip4 address")
+        return errors.Errorf("[ERR] Cannot set empty master ip4 address")
     }
     sc.config.MasterSection.MasterIP4Address = ip4Address
     return nil
@@ -341,7 +326,7 @@ func (sc *slaveContext) SetMasterIP4Address(ip4Address string) error {
 
 func (sc *slaveContext) GetMasterIP4Address() (string, error) {
     if len(sc.config.MasterSection.MasterIP4Address) == 0 {
-        return "", fmt.Errorf("[ERR] Empty master ip4 address")
+        return "", errors.Errorf("[ERR] Empty master ip4 address")
     }
     return sc.config.MasterSection.MasterIP4Address , nil
 }
@@ -349,7 +334,7 @@ func (sc *slaveContext) GetMasterIP4Address() (string, error) {
 // --- Slave Node Name ---
 func (sc *slaveContext) SetSlaveNodeName(nodeName string) error {
     if len(nodeName) == 0 {
-        return fmt.Errorf("[ERR] Cannot set empty slave nodename")
+        return errors.Errorf("[ERR] Cannot set empty slave nodename")
     }
     sc.config.SlaveSection.SlaveNodeName = nodeName
     return nil
@@ -357,7 +342,7 @@ func (sc *slaveContext) SetSlaveNodeName(nodeName string) error {
 
 func (sc *slaveContext) GetSlaveNodeName() (string, error) {
     if len(sc.config.SlaveSection.SlaveNodeName) == 0 {
-        return "", fmt.Errorf("[ERR] empty slave node name")
+        return "", errors.Errorf("[ERR] empty slave node name")
     }
     return sc.config.SlaveSection.SlaveNodeName, nil
 }
@@ -365,7 +350,7 @@ func (sc *slaveContext) GetSlaveNodeName() (string, error) {
 // --- Slave Node UUID ---
 func (sc *slaveContext) SetSlaveNodeUUID(uuid string) error {
     if len(uuid) == 0 {
-        return fmt.Errorf("[ERR] Cannot set empty slave UUID")
+        return errors.Errorf("[ERR] Cannot set empty slave UUID")
     }
     sc.config.SlaveSection.SlaveNodeUUID = uuid
     return nil
@@ -373,83 +358,9 @@ func (sc *slaveContext) SetSlaveNodeUUID(uuid string) error {
 
 func (sc *slaveContext) GetSlaveNodeUUID() (string, error) {
     if len(sc.config.SlaveSection.SlaveNodeUUID) == 0 {
-        return "", fmt.Errorf("[ERR] Empty slave node UUID")
+        return "", errors.Errorf("[ERR] Empty slave node UUID")
     }
     return sc.config.SlaveSection.SlaveNodeUUID, nil
-}
-
-// --- Network ---
-type ip4addr struct {
-    *net.IP
-    *net.IPMask
-}
-
-func ip4Address(iface *net.Interface) ([]*ip4addr, error) {
-    ifAddrs, err := iface.Addrs()
-    if err != nil {
-        return nil, err
-    }
-
-    var addrs []*ip4addr
-    for _, addr := range ifAddrs {
-        switch v := addr.(type) {
-        case *net.IPNet:
-            if ip4 := v.IP.To4(); ip4 != nil {
-                addrs = append(addrs, &ip4addr{IP:&ip4, IPMask:&v.Mask})
-            }
-        // TODO : make sure net.IPAddr only represents IP6
-        /*
-        case *net.IPAddr:
-            if ip4 := v.IP.To4(); ip4 != nil {
-                addrs = append(addrs, &IP4Addr{IP:&ip4, IPMask:nil})
-            }
-        */
-        }
-    }
-    if len(addrs) == 0 {
-        return nil, fmt.Errorf("[ERR] No IPv4 address is given to interface %s", iface.Name);
-    }
-    return addrs, nil
-}
-
-func (sc *slaveContext) PrimaryNetworkInterface() (*NetworkInterface, error) {
-    gateway, err := netifaces.FindSystemGateways()
-    if err != nil {
-        return nil, err
-    }
-    defer gateway.Release()
-
-    gwaddr, gwiface, err := gateway.DefaultIP4Gateway()
-    if err != nil {
-        return nil, err
-    }
-    if len(gwaddr) == 0 {
-        return nil, fmt.Errorf("[ERR] Inappropriate gateway adress")
-    }
-    if len(gwiface) == 0 {
-        return nil, fmt.Errorf("[ERR] Inappropriate gateway interface")
-    }
-    // TODO : fix wrong interface name on RPI "eth0v" issue
-    iface, err := net.InterfaceByName(gwiface)
-    //iface, err := net.InterfaceByName("eth0")
-    if err != nil {
-        return nil, err
-    }
-    ipaddrs, err := ip4Address(iface)
-    if err != nil {
-        return nil, err
-    }
-    if len(ipaddrs) == 0 {
-        return nil, fmt.Errorf("[ERR] No IP Address is available")
-    }
-
-    return &NetworkInterface{
-        Interface       : iface,
-        IP              : ipaddrs[0].IP,
-        IPMask          : ipaddrs[0].IPMask,
-        HardwareAddr    : &(iface.HardwareAddr),
-        GatewayAddr     : gwaddr,
-    }, nil
 }
 
 // TODO : add tests

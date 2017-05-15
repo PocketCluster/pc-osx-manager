@@ -42,67 +42,67 @@ func UnpackedSlaveStatus(message []byte) (status *PocketSlaveStatus, err error) 
 
 // Unbounded
 func AnswerMasterInquiryStatus(timestamp time.Time) (*PocketSlaveStatus, error) {
-    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    piface, err := slcontext.PrimaryNetworkInterface()
     if err != nil {
         return nil, err
     }
     return &PocketSlaveStatus {
-        Version         : SLAVE_STATUS_VERSION,
-        SlaveResponse   : SLAVE_WHO_I_AM,
-        SlaveAddress    : piface.IP.String(),
-        SlaveNodeMacAddr: piface.HardwareAddr.String(),
-        SlaveHardware   : runtime.GOARCH,
-        SlaveTimestamp  : timestamp,
+        Version:             SLAVE_STATUS_VERSION,
+        SlaveResponse:       SLAVE_WHO_I_AM,
+        SlaveAddress:        piface.PrimaryIP4Addr(),
+        SlaveNodeMacAddr:    piface.HardwareAddr,
+        SlaveHardware:       runtime.GOARCH,
+        SlaveTimestamp:      timestamp,
     }, nil
 }
 
 func KeyExchangeStatus(master string, timestamp time.Time) (*PocketSlaveStatus, error) {
-    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    piface, err := slcontext.PrimaryNetworkInterface()
     if err != nil {
         return nil, err
     }
     return &PocketSlaveStatus {
-        Version         : SLAVE_STATUS_VERSION,
-        MasterBoundAgent: master,
-        SlaveResponse   : SLAVE_SEND_PUBKEY,
-        SlaveAddress    : piface.IP.String(),
-        SlaveNodeMacAddr: piface.HardwareAddr.String(),
-        SlaveHardware   : runtime.GOARCH,
-        SlaveTimestamp  : timestamp,
+        Version:             SLAVE_STATUS_VERSION,
+        MasterBoundAgent:    master,
+        SlaveResponse:       SLAVE_SEND_PUBKEY,
+        SlaveAddress:        piface.PrimaryIP4Addr(),
+        SlaveNodeMacAddr:    piface.HardwareAddr,
+        SlaveHardware:       runtime.GOARCH,
+        SlaveTimestamp:      timestamp,
     }, nil
 }
 
 func CheckSlaveCryptoStatus(master, nodename string, timestamp time.Time) (*PocketSlaveStatus, error) {
-    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    piface, err := slcontext.PrimaryNetworkInterface()
     if err != nil {
         return nil, err
     }
     return &PocketSlaveStatus {
-        Version         : SLAVE_STATUS_VERSION,
-        MasterBoundAgent: master,
-        SlaveResponse   : SLAVE_CHECK_CRYPTO,
-        SlaveNodeName   : nodename,
-        SlaveAddress    : piface.IP.String(),
-        SlaveNodeMacAddr: piface.HardwareAddr.String(),
-        SlaveHardware   : runtime.GOARCH,
-        SlaveTimestamp  : timestamp,
+        Version:             SLAVE_STATUS_VERSION,
+        MasterBoundAgent:    master,
+        SlaveResponse:       SLAVE_CHECK_CRYPTO,
+        SlaveNodeName:       nodename,
+        SlaveAddress:        piface.PrimaryIP4Addr(),
+        SlaveNodeMacAddr:    piface.HardwareAddr,
+        SlaveHardware:       runtime.GOARCH,
+        SlaveTimestamp:      timestamp,
     }, nil
 }
 
 func SlaveBoundedStatus(master, nodename string, timestamp time.Time) (*PocketSlaveStatus, error) {
-    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    piface, err := slcontext.PrimaryNetworkInterface()
     if err != nil {
         return nil, err
     }
     return &PocketSlaveStatus {
-        Version         : SLAVE_STATUS_VERSION,
-        MasterBoundAgent: master,
-        SlaveResponse   : SLAVE_REPORT_STATUS,
-        SlaveNodeName   : nodename,
-        SlaveAddress    : piface.IP.String(),
-        SlaveNodeMacAddr: piface.HardwareAddr.String(),
-        SlaveHardware   : runtime.GOARCH,
-        SlaveTimestamp  : timestamp,
+        Version:             SLAVE_STATUS_VERSION,
+        MasterBoundAgent:    master,
+        SlaveResponse:       SLAVE_REPORT_STATUS,
+        SlaveNodeName:       nodename,
+        SlaveAddress:        piface.PrimaryIP4Addr(),
+        SlaveNodeMacAddr:    piface.HardwareAddr,
+        SlaveHardware:       runtime.GOARCH,
+        SlaveTimestamp:      timestamp,
     }, nil
 }
 
@@ -129,21 +129,18 @@ func ConvertBindAttemptDiscoveryAgent(discovery *PocketSlaveDiscovery, slaveNode
     if len(discovery.SlaveGateway) == 0 {
         return nil, errors.Errorf("[ERR] incorrect slave gateway")
     }
-    if len(discovery.SlaveNetmask) == 0 {
-        return nil, errors.Errorf("[ERR] incorrect slave netmask")
-    }
     if len(discovery.SlaveNodeMacAddr) == 0 {
         return nil, errors.Errorf("[ERR] incorrect slave macaddress")
     }
     return &PocketSlaveStatus{
-        Version             : SLAVE_STATUS_VERSION,
-        MasterBoundAgent    : discovery.MasterBoundAgent,
-        SlaveResponse       : SLAVE_REPORT_STATUS,
-        SlaveNodeName       : slaveNode,
-        SlaveAddress        : discovery.SlaveAddress,
-        SlaveNodeMacAddr    : discovery.SlaveNodeMacAddr,
-        SlaveHardware       : slaveHardware,
+        Version:             SLAVE_STATUS_VERSION,
+        MasterBoundAgent:    discovery.MasterBoundAgent,
+        SlaveResponse:       SLAVE_REPORT_STATUS,
+        SlaveNodeName:       slaveNode,
+        SlaveAddress:        discovery.SlaveAddress,
+        SlaveNodeMacAddr:    discovery.SlaveNodeMacAddr,
+        SlaveHardware:       slaveHardware,
         // TODO : since discovery agent does not have timestamp, we'll use master timstamp.
-        SlaveTimestamp      : time.Now(),
+        SlaveTimestamp:      time.Now(),
     }, nil
 }

@@ -1,15 +1,15 @@
 package slagent
 
 import (
+    "reflect"
+    "runtime"
     "time"
     "testing"
-    "runtime"
 
+    "github.com/davecgh/go-spew/spew"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-node-agent/slcontext"
-    "reflect"
-    "github.com/davecgh/go-spew/spew"
 )
 
 var (
@@ -33,7 +33,7 @@ func TestUnboundedBroadcastMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    piface, _ := slcontext.PrimaryNetworkInterface()
 
     //--- testing body ---
     ma, err := TestSlaveUnboundedMasterSearchDiscovery()
@@ -53,7 +53,7 @@ func TestUnboundedBroadcastMeta(t *testing.T) {
     if ma.DiscoveryAgent.SlaveResponse != SLAVE_LOOKUP_AGENT {
         t.Error("[ERR] Incorrect DiscoveryAgent.SlaveResponse : " + ma.DiscoveryAgent.SlaveResponse + " Expected : " + SLAVE_LOOKUP_AGENT)
     }
-    if len(ma.DiscoveryAgent.SlaveAddress) == 0 || ma.DiscoveryAgent.SlaveAddress != piface.IP.String() {
+    if len(ma.DiscoveryAgent.SlaveAddress) == 0 || ma.DiscoveryAgent.SlaveAddress != piface.PrimaryIP4Addr() {
         t.Error("[ERR] Incorrect DiscoveryAgent.SlaveAddress")
         return
     }
@@ -61,11 +61,7 @@ func TestUnboundedBroadcastMeta(t *testing.T) {
         t.Error("[ERR] Incorrect DiscoveryAgent.SlaveGateway")
         return
     }
-    if len(ma.DiscoveryAgent.SlaveNetmask) == 0 || ma.DiscoveryAgent.SlaveNetmask != piface.IPMask.String() {
-        t.Error("[ERR] Incorrect DiscoveryAgent.SlaveNetmask")
-        return
-    }
-    if len(ma.DiscoveryAgent.SlaveNodeMacAddr) == 0 || ma.DiscoveryAgent.SlaveNodeMacAddr != piface.HardwareAddr.String() {
+    if len(ma.DiscoveryAgent.SlaveNodeMacAddr) == 0 || ma.DiscoveryAgent.SlaveNodeMacAddr != piface.HardwareAddr {
         t.Error("[ERR] Incorrect DiscoveryAgent.SlaveNetmask")
         return
     }
@@ -106,10 +102,6 @@ func TestUnboundedBroadcastMeta(t *testing.T) {
         t.Error("[ERR] Unidentical ma.DiscoveryAgent.SlaveGateway")
         return
     }
-    if ma.DiscoveryAgent.SlaveNetmask != up.DiscoveryAgent.SlaveNetmask {
-        t.Error("[ERR] Unidentical ma.DiscoveryAgent.SlaveNetmask")
-        return
-    }
     if ma.DiscoveryAgent.SlaveNodeMacAddr != up.DiscoveryAgent.SlaveNodeMacAddr {
         t.Error("[ERR] Unidentical DiscoveryAgent.SlaveNodeMacAddr")
         return
@@ -120,7 +112,7 @@ func TestInquiredMetaAgent(t *testing.T) {
     setUp()
     defer tearDown()
 
-    piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    piface, _ := slcontext.PrimaryNetworkInterface()
     ma, _, err := TestSlaveAnswerMasterInquiry(initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
@@ -138,11 +130,11 @@ func TestInquiredMetaAgent(t *testing.T) {
     if ma.StatusAgent.SlaveResponse != SLAVE_WHO_I_AM {
         t.Error("[ERR] Incorrect StatusAgent.SlaveResponse : " + ma.StatusAgent.SlaveResponse + " Expected : " + SLAVE_WHO_I_AM)
     }
-    if len(ma.StatusAgent.SlaveAddress) == 0 || ma.StatusAgent.SlaveAddress != piface.IP.String() {
+    if len(ma.StatusAgent.SlaveAddress) == 0 || ma.StatusAgent.SlaveAddress != piface.PrimaryIP4Addr() {
         t.Error("[ERR] Incorrect StatusAgent.SlaveAddress")
         return
     }
-    if len(ma.StatusAgent.SlaveNodeMacAddr) == 0 || ma.StatusAgent.SlaveNodeMacAddr != piface.HardwareAddr.String() {
+    if len(ma.StatusAgent.SlaveNodeMacAddr) == 0 || ma.StatusAgent.SlaveNodeMacAddr != piface.HardwareAddr {
         t.Error("[ERR] Incorrect StatusAgent.SlaveNodeMacAddr")
         return
     }
@@ -208,7 +200,7 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
     defer tearDown()
 
     // test comparison
-    piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    piface, _ := slcontext.PrimaryNetworkInterface()
     ma, _, err := TestSlaveKeyExchangeStatus(masterAgentName, pcrypto.TestSlavePublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
@@ -227,12 +219,12 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave status %s\n", SLAVE_SEND_PUBKEY)
         return
     }
-    if ma.StatusAgent.SlaveAddress != piface.IP.String() || len(ma.StatusAgent.SlaveAddress) == 0 {
-        t.Errorf("[ERR] Incorrect slave address %s\n", piface.IP.String())
+    if ma.StatusAgent.SlaveAddress != piface.PrimaryIP4Addr() || len(ma.StatusAgent.SlaveAddress) == 0 {
+        t.Errorf("[ERR] Incorrect slave address %s\n", piface.PrimaryIP4Addr())
         return
     }
-    if ma.StatusAgent.SlaveNodeMacAddr != piface.HardwareAddr.String() || len(ma.StatusAgent.SlaveNodeMacAddr) == 0 {
-        t.Errorf("[ERR] Incorrect slave mac address %s\n", piface.HardwareAddr.String())
+    if ma.StatusAgent.SlaveNodeMacAddr != piface.HardwareAddr || len(ma.StatusAgent.SlaveNodeMacAddr) == 0 {
+        t.Errorf("[ERR] Incorrect slave mac address %s\n", piface.HardwareAddr)
         return
     }
     if ma.StatusAgent.SlaveHardware != runtime.GOARCH {
@@ -294,7 +286,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
     setUp()
     defer tearDown()
 
-    piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    piface, _ := slcontext.PrimaryNetworkInterface()
     ma, _, err := TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
@@ -339,12 +331,12 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave agent name %s\n", slaveNodeName)
         return
     }
-    if sd.SlaveAddress != piface.IP.String()  {
-        t.Errorf("[ERR] Incorrect slave address %s\n", piface.IP.String())
+    if sd.SlaveAddress != piface.PrimaryIP4Addr()  {
+        t.Errorf("[ERR] Incorrect slave address %s\n", piface.PrimaryIP4Addr())
         return
     }
-    if sd.SlaveNodeMacAddr != piface.HardwareAddr.String() {
-        t.Errorf("[ERR] Incorrect slave mac address %s\n", piface.HardwareAddr.String())
+    if sd.SlaveNodeMacAddr != piface.HardwareAddr {
+        t.Errorf("[ERR] Incorrect slave mac address %s\n", piface.HardwareAddr)
         return
     }
     if sd.SlaveHardware != runtime.GOARCH {
@@ -438,7 +430,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
     setUp()
     defer tearDown()
 
-    piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    piface, _ := slcontext.PrimaryNetworkInterface()
     ma, _, err := TestSlaveBoundedStatus(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
@@ -478,12 +470,12 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave agent name %s\n", slaveNodeName)
         return
     }
-    if sd.SlaveAddress != piface.IP.String()  {
-        t.Errorf("[ERR] Incorrect slave address %s\n", piface.IP.String())
+    if sd.SlaveAddress != piface.PrimaryIP4Addr()  {
+        t.Errorf("[ERR] Incorrect slave address %s\n", piface.PrimaryIP4Addr())
         return
     }
-    if sd.SlaveNodeMacAddr != piface.HardwareAddr.String() {
-        t.Errorf("[ERR] Incorrect slave mac address %s\n", piface.HardwareAddr.String())
+    if sd.SlaveNodeMacAddr != piface.HardwareAddr {
+        t.Errorf("[ERR] Incorrect slave mac address %s\n", piface.HardwareAddr)
         return
     }
     if sd.SlaveHardware != runtime.GOARCH {
@@ -573,7 +565,7 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
     defer tearDown()
 
     // test comparison
-    piface, _ := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    piface, _ := slcontext.PrimaryNetworkInterface()
     ma, err := TestSlaveBindBroken(masterAgentName)
     if err != nil {
         t.Error(err.Error())
@@ -592,17 +584,14 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
     if ma.DiscoveryAgent.SlaveResponse != SLAVE_LOOKUP_AGENT {
         t.Errorf("[ERR] Slave is not in correct state %s\n", SLAVE_LOOKUP_AGENT)
     }
-    if ma.DiscoveryAgent.SlaveAddress != piface.IP.String() || len(ma.DiscoveryAgent.SlaveAddress) == 0 {
-        t.Errorf("[ERR] Slave address is incorrect %s\n", piface.IP.String())
+    if ma.DiscoveryAgent.SlaveAddress != piface.PrimaryIP4Addr() || len(ma.DiscoveryAgent.SlaveAddress) == 0 {
+        t.Errorf("[ERR] Slave address is incorrect %s\n", piface.PrimaryIP4Addr())
     }
     if ma.DiscoveryAgent.SlaveGateway != piface.GatewayAddr || len(ma.DiscoveryAgent.SlaveGateway) == 0 {
         t.Errorf("[ERR] Slave gateway is incorrect %s\n", piface.GatewayAddr)
     }
-    if ma.DiscoveryAgent.SlaveNetmask != piface.IPMask.String() || len(ma.DiscoveryAgent.SlaveNetmask) == 0 {
-        t.Errorf("[ERR] Slave netmask is incorrect %s\n", piface.IPMask.String())
-    }
-    if ma.DiscoveryAgent.SlaveNodeMacAddr != piface.HardwareAddr.String() || len(ma.DiscoveryAgent.SlaveNodeMacAddr) == 0 {
-        t.Errorf("[ERR] Slave MAC address is incorrect %s\n",piface.IPMask.String())
+    if ma.DiscoveryAgent.SlaveNodeMacAddr != piface.HardwareAddr || len(ma.DiscoveryAgent.SlaveNodeMacAddr) == 0 {
+        t.Errorf("[ERR] Slave MAC address is incorrect %s\n",piface.HardwareAddr)
     }
     mp, err := PackedSlaveMeta(ma)
     if err != nil {
@@ -635,9 +624,6 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
     }
     if ma.DiscoveryAgent.SlaveGateway != up.DiscoveryAgent.SlaveGateway {
         t.Errorf("[ERR] Slave gateway is incorrect %s\n", ma.DiscoveryAgent.SlaveGateway)
-    }
-    if ma.DiscoveryAgent.SlaveNetmask != up.DiscoveryAgent.SlaveNetmask {
-        t.Errorf("[ERR] Slave netmask is incorrect %s\n", ma.DiscoveryAgent.SlaveNetmask)
     }
     if ma.DiscoveryAgent.SlaveNodeMacAddr != up.DiscoveryAgent.SlaveNodeMacAddr {
         t.Errorf("[ERR] Slave MAC address is incorrect %s\n", ma.DiscoveryAgent.SlaveNodeMacAddr)

@@ -113,25 +113,21 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         return
     }
     // slave network section
-    paddr, err := SharedSlaveContext().PrimaryNetworkInterface()
+    paddr, err := PrimaryNetworkInterface()
     if err != nil {
         t.Error(err.Error())
         return
     }
     cfg := SharedSlaveContext().(*slaveContext).config
-    if paddr.HardwareAddr.String() != cfg.SlaveSection.SlaveMacAddr {
+    if paddr.HardwareAddr != cfg.SlaveSection.SlaveMacAddr {
         t.Error("[ERR] Incorrect slave mac address")
         return
     }
-    if paddr.IP.String() != cfg.SlaveSection.SlaveIP4Addr {
+    if paddr.PrimaryIP4Addr() != cfg.SlaveSection.SlaveIP4Addr {
         t.Error("[ERR] Incorrect slave ip address")
         return
     }
     if paddr.GatewayAddr != cfg.SlaveSection.SlaveGateway {
-        t.Error("[ERR] Incorrect slave gateway")
-        return
-    }
-    if paddr.IPMask.String() != cfg.SlaveSection.SlaveNetMask {
         t.Error("[ERR] Incorrect slave gateway")
         return
     }
@@ -220,25 +216,21 @@ func TestDiscardSaveLoadSlaveContext(t *testing.T) {
         return
     }
     // slave network section
-    paddr, err := SharedSlaveContext().PrimaryNetworkInterface()
+    paddr, err := PrimaryNetworkInterface()
     if err != nil {
         t.Error(err.Error())
         return
     }
     cfg := SharedSlaveContext().(*slaveContext).config
-    if paddr.HardwareAddr.String() != cfg.SlaveSection.SlaveMacAddr {
+    if paddr.HardwareAddr != cfg.SlaveSection.SlaveMacAddr {
         t.Error("[ERR] Incorrect slave mac address")
         return
     }
-    if paddr.IP.String() != cfg.SlaveSection.SlaveIP4Addr {
+    if paddr.PrimaryIP4Addr() != cfg.SlaveSection.SlaveIP4Addr {
         t.Error("[ERR] Incorrect slave ip address")
         return
     }
     if paddr.GatewayAddr != cfg.SlaveSection.SlaveGateway {
-        t.Error("[ERR] Incorrect slave gateway")
-        return
-    }
-    if paddr.IPMask.String() != cfg.SlaveSection.SlaveNetMask {
         t.Error("[ERR] Incorrect slave gateway")
         return
     }

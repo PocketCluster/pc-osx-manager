@@ -6,6 +6,7 @@ import (
     "io/ioutil"
     "strings"
 
+    "github.com/pkg/errors"
     "gopkg.in/yaml.v2"
     "github.com/stkim1/pcrypto"
 )
@@ -99,7 +100,6 @@ type ConfigSlaveSection struct {
     //SlaveIP6Addr        string
     SlaveIP4Addr        string                   `yaml:"slave-net-ip4"`
     SlaveGateway        string                   `yaml:"slave-net-gateway"`
-    SlaveNetMask        string                   `yaml:"slave-net-mask"`
     SlaveNameServ       string                   `yaml:"slave-net-nameserv"`
     //SlaveBroadcast      string                   `yaml:"slave-net-broadc"`
 }
@@ -121,12 +121,12 @@ func LoadPocketSlaveConfig() *PocketSlaveConfig {
 // --- func
 func _brandNewSlaveConfig(rootPath string) (*PocketSlaveConfig) {
     return &PocketSlaveConfig{
-        rootPath        :rootPath,
-        ConfigVersion   :SLAVE_CONFIG_VAL,
+        rootPath:         rootPath,
+        ConfigVersion:    SLAVE_CONFIG_VAL,
         // TODO : we need to avoid cyclic import but need to fix this
-        BindingStatus   : "SlaveUnbounded", //locator.SlaveUnbounded.String(),
-        MasterSection   :&ConfigMasterSection{},
-        SlaveSection    :&ConfigSlaveSection{},
+        BindingStatus:    "SlaveUnbounded", //locator.SlaveUnbounded.String(),
+        MasterSection:    &ConfigMasterSection{},
+        SlaveSection:     &ConfigSlaveSection{},
     }
 }
 
@@ -217,7 +217,7 @@ func (cfg *PocketSlaveConfig) SaveHostname() error {
 func (pc *PocketSlaveConfig) SlavePublicKey() ([]byte, error) {
     pubKeyPath := pc.rootPath + slave_public_Key_file
     if _, err := os.Stat(pubKeyPath); os.IsNotExist(err) {
-        return nil, fmt.Errorf("[ERR] keys have not been generated properly. This is a critical error")
+        return nil, errors.Errorf("[ERR] keys have not been generated properly. This is a critical error")
     }
     return ioutil.ReadFile(pubKeyPath)
 }
@@ -225,7 +225,7 @@ func (pc *PocketSlaveConfig) SlavePublicKey() ([]byte, error) {
 func (pc *PocketSlaveConfig) SlavePrivateKey() ([]byte, error) {
     prvKeyPath := pc.rootPath + slave_prvate_Key_file
     if _, err := os.Stat(prvKeyPath); os.IsNotExist(err) {
-        return nil, fmt.Errorf("[ERR] keys have not been generated properly. This is a critical error")
+        return nil, errors.Errorf("[ERR] keys have not been generated properly. This is a critical error")
     }
     return ioutil.ReadFile(prvKeyPath)
 }
@@ -233,14 +233,14 @@ func (pc *PocketSlaveConfig) SlavePrivateKey() ([]byte, error) {
 func (pc *PocketSlaveConfig) MasterPublicKey() ([]byte, error) {
     masterPubKey := pc.rootPath + master_public_Key_file
     if _, err := os.Stat(masterPubKey); os.IsNotExist(err) {
-        return nil, fmt.Errorf("[ERR] Master Publickey might have not been synced yet.")
+        return nil, errors.Errorf("[ERR] Master Publickey might have not been synced yet.")
     }
     return ioutil.ReadFile(masterPubKey)
 }
 
 func (pc *PocketSlaveConfig) SaveMasterPublicKey(masterPubKey []byte) error {
     if len(masterPubKey) == 0 {
-        return fmt.Errorf("[ERR] Cannot save empty master key")
+        return errors.Errorf("[ERR] Cannot save empty master key")
     }
     keyPath := pc.rootPath + master_public_Key_file
     return ioutil.WriteFile(keyPath, masterPubKey, 0600)
@@ -258,7 +258,6 @@ func _network_iface_redefined(slaveConfig *ConfigSlaveSection) []string {
         "iface eth0 inet static",
         fmt.Sprintf("%s %s", SLAVE_ADDRESS_KEY, slaveConfig.SlaveIP4Addr),
         fmt.Sprintf("%s %s", SLAVE_GATEWAY_KEY, slaveConfig.SlaveGateway),
-        fmt.Sprintf("%s %s", SLAVE_NETMASK_KEY, slaveConfig.SlaveNetMask),
         fmt.Sprintf("%s %s", SLAVE_NAMESRV_KEY, slaveConfig.SlaveNameServ),
         //fmt.Sprintf("%s %s", SLAVE_BROADCS_KEY, slaveConfig.SlaveBroadcast),
         POCKET_END,
