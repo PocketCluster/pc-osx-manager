@@ -53,6 +53,9 @@ func (b *beaconinit) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp ti
     if len(meta.DiscoveryAgent.MasterBoundAgent) != 0 {
         return MasterTransitionIdle, errors.Errorf("[ERR] Incorrect slave bind. Slave should not be bound to a master when it looks for joining")
     }
+
+    // TODO CHECK SLAVE MASK + GATEWAY FOR ITS ELIGIBILITY
+/*
     // slave ip address
     if len(meta.DiscoveryAgent.SlaveAddress) == 0 {
         return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave node address")
@@ -70,7 +73,7 @@ func (b *beaconinit) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp ti
         return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave node netmask")
     }
     b.slaveNode.IP4Netmask = meta.DiscoveryAgent.SlaveNetmask
-
+*/
     // slave mac address
     if meta.SlaveID != meta.DiscoveryAgent.SlaveNodeMacAddr {
         return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave ID")

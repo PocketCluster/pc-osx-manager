@@ -1,10 +1,10 @@
 package msagent
 
 import (
-    "github.com/stkim1/pc-node-agent/slagent"
-    "fmt"
-    "github.com/stkim1/pc-core/context"
     "gopkg.in/vmihailenco/msgpack.v2"
+    "github.com/pkg/errors"
+    "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/pc-core/context"
 )
 
 /*
@@ -68,79 +68,77 @@ func PackedMasterRespond(meta *PocketMasterRespond) ([]byte, error) {
 }
 
 func UnpackedMasterRespond(message []byte) (respond *PocketMasterRespond, err error) {
-    err = msgpack.Unmarshal(message, &respond)
+    err = errors.WithStack(msgpack.Unmarshal(message, &respond))
     return
 }
 
 // usd : unbounded slave discovery
-func SlaveIdentityInqueryRespond(usd *slagent.PocketSlaveDiscovery) (responder *PocketMasterRespond, err error) {
+func SlaveIdentityInqueryRespond(usd *slagent.PocketSlaveDiscovery) (*PocketMasterRespond, error) {
     if string(usd.Version) != string(MASTER_RESPOND_VERSION) {
-        return nil, fmt.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
+        return nil, errors.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
     if len(usd.MasterBoundAgent) != 0 {
-        return nil, fmt.Errorf("[ERR] Slave is already bounded to a master")
+        return nil, errors.Errorf("[ERR] Slave is already bounded to a master")
     }
     if usd.SlaveResponse != slagent.SLAVE_LOOKUP_AGENT {
-        return nil, fmt.Errorf("[ERR] Slave is not looking for Master")
+        return nil, errors.Errorf("[ERR] Slave is not looking for Master")
     }
     if !usd.IsAppropriateSlaveInfo() {
-        return nil, fmt.Errorf("[ERR] Inappropriate Slave information")
+        return nil, errors.Errorf("[ERR] Inappropriate Slave information")
     }
 
     // TODO : check if this agent could be bound
 
     sn, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
-        return
+        return nil, errors.WithStack(err)
     }
     ia, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil {
-        return nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
+        return nil, errors.WithStack(err)
     }
 
     // TODO : check ip address if this Slave can be bound
 
-    responder = &PocketMasterRespond{
-        Version          :MASTER_RESPOND_VERSION,
-        MasterBoundAgent :sn,
-        MasterCommandType:COMMAND_SLAVE_IDINQUERY,
-        MasterAddress    :ia,
-    }
-    return
+    return &PocketMasterRespond{
+        Version:              MASTER_RESPOND_VERSION,
+        MasterBoundAgent:     sn,
+        MasterCommandType:    COMMAND_SLAVE_IDINQUERY,
+        MasterAddress:        ia,
+    }, nil
 }
 
-func BrokenBindRecoverRespond(usd *slagent.PocketSlaveDiscovery) (responder *PocketMasterRespond, err error) {
+func BrokenBindRecoverRespond(usd *slagent.PocketSlaveDiscovery) (*PocketMasterRespond, error) {
     if string(usd.Version) != string(MASTER_RESPOND_VERSION) {
-        return nil, fmt.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
+        return nil, errors.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
     if len(usd.MasterBoundAgent) == 0 {
-        return nil, fmt.Errorf("[ERR] Slave is not looking for master agent")
+        return nil, errors.Errorf("[ERR] Slave is not looking for master agent")
     }
     if usd.SlaveResponse != slagent.SLAVE_LOOKUP_AGENT {
-        return nil, fmt.Errorf("[ERR] Slave is not looking for Master")
+        return nil, errors.Errorf("[ERR] Slave is not looking for Master")
     }
     if !usd.IsAppropriateSlaveInfo() {
-        return nil, fmt.Errorf("[ERR] Inappropriate Slave information")
+        return nil, errors.Errorf("[ERR] Inappropriate Slave information")
     }
 
     // TODO : check if this agent could be bound
 
     sn, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
-        return
+        return nil, errors.WithStack(err)
     }
     ia, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil {
-        return nil, fmt.Errorf("[ERR] Cannot find out Master ip address")
+        return nil, errors.WithStack(err)
     }
 
     // TODO : check ip address if this Slave can be bound
 
-    responder = &PocketMasterRespond{
-        Version          :MASTER_RESPOND_VERSION,
-        MasterBoundAgent :sn,
-        MasterCommandType:COMMAND_RECOVER_BIND,
-        MasterAddress    :ia,
-    }
-    return
+    return &PocketMasterRespond{
+        Version:              MASTER_RESPOND_VERSION,
+        MasterBoundAgent:     sn,
+        MasterCommandType:    COMMAND_RECOVER_BIND,
+        MasterAddress:        ia,
+    }, nil
 }

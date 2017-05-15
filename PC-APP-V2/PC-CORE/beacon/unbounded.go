@@ -68,9 +68,13 @@ func (b *unbounded) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time
     if meta.SlaveID != meta.StatusAgent.SlaveNodeMacAddr {
         return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave ID")
     }
+
+    // TODO CHECK SLAVE MASK + GATEWAY FOR ITS ELIGIBILITY
+/*
     if b.slaveNode.IP4Address != meta.StatusAgent.SlaveAddress {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
     }
+*/
     if b.slaveNode.MacAddress != meta.StatusAgent.SlaveNodeMacAddr {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }

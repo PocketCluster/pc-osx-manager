@@ -90,6 +90,9 @@ func (b *bindbroken) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp ti
     if masterAgentName != meta.DiscoveryAgent.MasterBoundAgent {
         return MasterTransitionIdle, nil
     }
+
+    // TODO CHECK SLAVE MASK + GATEWAY FOR ITS ELIGIBILITY
+/*
     if b.slaveNode.IP4Address != meta.DiscoveryAgent.SlaveAddress {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
     }
@@ -99,6 +102,7 @@ func (b *bindbroken) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp ti
     if b.slaveNode.IP4Netmask != meta.DiscoveryAgent.SlaveNetmask {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave netmask address")
     }
+*/
     if meta.SlaveID != meta.DiscoveryAgent.SlaveNodeMacAddr {
         return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave ID")
     }
