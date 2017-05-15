@@ -113,11 +113,25 @@ func (ls *keyexchange) transitionWithMasterMeta(meta *msagent.PocketMasterAgentM
         return SlaveTransitionIdle, nil
     }
     // set slave node name
-    nodeName, err := slcontext.SharedSlaveContext().DecryptByAES(meta.EncryptedSlaveStatus)
+    idPack, err := slcontext.SharedSlaveContext().DecryptByAES(meta.EncryptedSlaveStatus)
     if err != nil {
         return SlaveTransitionFail, errors.WithStack(err)
     }
-    slcontext.SharedSlaveContext().SetSlaveNodeName(string(nodeName))
+    nodeIdentity, err := slagent.UnpackedPocketSlaveIdentity(idPack)
+    if err != nil {
+        return SlaveTransitionFail, errors.WithStack(err)
+    }
+    if len(nodeIdentity.SlaveNodeName) == 0 || len(nodeIdentity.SlaveUUID) == 0 {
+        return SlaveTransitionFail, errors.Errorf("[ERR] invalid slave node identity")
+    }
+    err = slcontext.SharedSlaveContext().SetSlaveNodeName(nodeIdentity.SlaveNodeName)
+    if err != nil {
+        return SlaveTransitionFail, errors.WithStack(err)
+    }
+    err = slcontext.SharedSlaveContext().SetSlaveNodeUUID(nodeIdentity.SlaveUUID)
+    if err != nil {
+        return SlaveTransitionFail, errors.WithStack(err)
+    }
 
     return SlaveTransitionOk, nil
 }

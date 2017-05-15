@@ -46,11 +46,15 @@ func (ls *cryptocheck) transitionActionWithTimestamp(slaveTimestamp time.Time) e
     if err != nil {
         return errors.WithStack(err)
     }
+    slaveUUID, err := slctx.GetSlaveNodeUUID()
+    if err != nil {
+        return errors.WithStack(err)
+    }
     aesCryptor, err := slctx.AESCryptor()
     if err != nil {
         return errors.WithStack(err)
     }
-    sa, err := slagent.CheckSlaveCryptoStatus(masterAgentName, slaveAgentName, slaveTimestamp)
+    sa, err := slagent.CheckSlaveCryptoStatus(masterAgentName, slaveAgentName, slaveUUID, slaveTimestamp)
     if err != nil {
         return errors.WithStack(err)
     }

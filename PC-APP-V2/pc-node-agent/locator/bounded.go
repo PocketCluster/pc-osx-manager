@@ -46,11 +46,15 @@ func (ls *bounded) transitionActionWithTimestamp(slaveTimestamp time.Time) error
     if err != nil {
         return errors.WithStack(err)
     }
+    slaveUUID, err := slctx.GetSlaveNodeUUID()
+    if err != nil {
+        return errors.WithStack(err)
+    }
     aesCryptor, err := slctx.AESCryptor()
     if err != nil {
         return errors.WithStack(err)
     }
-    sa, err := slagent.SlaveBoundedStatus(masterAgentName, slaveAgentName, slaveTimestamp)
+    sa, err := slagent.SlaveBoundedStatus(masterAgentName, slaveAgentName, slaveUUID, slaveTimestamp)
     if err != nil {
         return errors.WithStack(err)
     }

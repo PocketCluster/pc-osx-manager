@@ -51,7 +51,7 @@ func MasterDeclarationMeta(command *PocketMasterCommand, pubkey []byte) (meta *P
 
 // AES key is encrypted with RSA for async encryption scheme, and rest of data, EncryptedMasterCommand &
 // EncryptedSlaveStatus, are encrypted with AES
-func ExchangeCryptoKeyAndNameMeta(command *PocketMasterCommand, status *slagent.PocketSlaveStatus, aeskey []byte, aescrypto pcrypto.AESCryptor, rsacrypto pcrypto.RsaEncryptor) (*PocketMasterAgentMeta, error) {
+func ExchangeCryptoKeyAndNameMeta(command *PocketMasterCommand, slaveIdentity *slagent.PocketSlaveIdentity, aeskey []byte, aescrypto pcrypto.AESCryptor, rsacrypto pcrypto.RsaEncryptor) (*PocketMasterAgentMeta, error) {
     // marshal command
     mc, err := PackedMasterCommand(command)
     if err != nil {
@@ -63,24 +63,17 @@ func ExchangeCryptoKeyAndNameMeta(command *PocketMasterCommand, status *slagent.
         return nil, errors.WithStack(err)
     }
 
-    //TODO : since including encrypted status bloats the final meta packet size to 633, we're here to omit it and put encrypted slave name instead. this should later be looked into again
-/*
-    // marshal status
-    ms, err := msgpack.Marshal(status)
-    if err != nil {
-        return
-    }
-    // encrypt the marshaled status with AES
-    encryptedStatus, err := aescrypto.Encrypt(ms)
-    if err != nil {
-        return
-    }
-*/
-    // encrypted slave name with AES
-    encryptedSlaveName, err := aescrypto.EncryptByAES([]byte(status.SlaveNodeName))
+    // packed slave name & uuid
+    pslid, err := slagent.PackPocketSlaveIdentity(slaveIdentity)
     if err != nil {
         return nil, errors.WithStack(err)
     }
+    // encrypt the marshaled status with AES
+    eslid, err := aescrypto.EncryptByAES(pslid)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+
     // encrypt the AES key with RSA
     encryptedAES, AESsignature, err := rsacrypto.EncryptByRSA(aeskey)
     if err != nil {
@@ -89,7 +82,7 @@ func ExchangeCryptoKeyAndNameMeta(command *PocketMasterCommand, status *slagent.
     return &PocketMasterAgentMeta {
         MetaVersion:               MASTER_META_VERSION,
         EncryptedMasterCommand:    encryptedCommand,
-        EncryptedSlaveStatus:      encryptedSlaveName, //encryptedStatus,
+        EncryptedSlaveStatus:      eslid,
         EncryptedAESKey:           encryptedAES,
         RsaCryptoSignature:        AESsignature,
     }, nil

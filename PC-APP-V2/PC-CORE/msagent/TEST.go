@@ -54,7 +54,7 @@ func TestMasterAgentDeclarationCommand(masterPubKey []byte, begin time.Time) (*P
     return MasterDeclarationMeta(cmd, masterPubKey), end, nil
 }
 
-func TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName string, slavePubKey []byte, aesKey []byte, aesCryptor pcrypto.AESCryptor, rsaEncryptor pcrypto.RsaEncryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+func TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, slaveUUID string, slavePubKey []byte, aesKey []byte, aesCryptor pcrypto.AESCryptor, rsaEncryptor pcrypto.RsaEncryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
     msa, end, err := slagent.TestSlaveKeyExchangeStatus(masterAgentName, slavePubKey, begin)
     if err != nil {
         return nil, begin, err
@@ -71,19 +71,19 @@ func TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName string, slavePu
     }
     // responding commnad
     masterTS := end.Add(time.Second)
-    cmd, slvstat, err := ExchangeCryptoKeyAndNameCommand(usm.StatusAgent, slaveNodeName, masterTS)
+    cmd, slid, err := ExchangeCryptoKeyAndNameCommand(usm.StatusAgent, slaveNodeName, slaveUUID, masterTS)
     if err != nil {
         return nil, begin, err
     }
-    meta, err := ExchangeCryptoKeyAndNameMeta(cmd, slvstat, aesKey, aesCryptor, rsaEncryptor)
+    meta, err := ExchangeCryptoKeyAndNameMeta(cmd, slid, aesKey, aesCryptor, rsaEncryptor)
     if err != nil {
         return nil, begin, err
     }
     return meta, begin, nil
 }
 
-func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
-    msa, end, err := slagent.TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, aesCryptor, begin)
+func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, slaveUUID string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+    msa, end, err := slagent.TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, slaveUUID, aesCryptor, begin)
     if err != nil {
         return nil, begin, err
     }
@@ -121,8 +121,8 @@ func TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName string, aesCryp
     return meta, end, nil
 }
 
-func TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
-    msa, end, err := slagent.TestSlaveBoundedStatus(masterAgentName, slaveNodeName, aesCryptor, begin)
+func TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, slaveUUID string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
+    msa, end, err := slagent.TestSlaveBoundedStatus(masterAgentName, slaveNodeName, slaveUUID, aesCryptor, begin)
     if err != nil {
         return nil, begin, err
     }

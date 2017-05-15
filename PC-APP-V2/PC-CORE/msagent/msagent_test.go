@@ -1,20 +1,20 @@
 package msagent
 
 import (
+    "bytes"
     "fmt"
     "time"
     "testing"
-    "bytes"
 
+    "github.com/davecgh/go-spew/spew"
+    "github.com/pborman/uuid"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pcrypto"
-    "github.com/davecgh/go-spew/spew"
 )
 
 var (
-    masterAgentName string
-    slaveNodeName = "pc-node1"
+    masterAgentName, slaveNodeName, slaveUUID string
     initTime time.Time
 )
 
@@ -23,6 +23,8 @@ func setUp() {
     slcontext.DebugSlcontextPrepare()
 
     masterAgentName, _ = context.SharedHostContext().MasterAgentName()
+    slaveNodeName = "pc-node1"
+    slaveUUID = uuid.New()
     initTime, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 }
 
@@ -199,7 +201,7 @@ func TestExecKeyExchangeMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, initTime)
+    meta, _, err := TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -251,7 +253,7 @@ func TestSendCryptoCheckMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initTime)
+    meta, _, err := TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -285,7 +287,7 @@ func TestBoundedStatusMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initTime)
+    meta, _, err := TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return
