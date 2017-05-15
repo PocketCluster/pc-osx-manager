@@ -6,7 +6,6 @@ import (
 
     "github.com/pkg/errors"
     "gopkg.in/vmihailenco/msgpack.v2"
-    "github.com/stkim1/pc-node-agent/slcontext"
 )
 
 type PocketSlaveStatus struct {
@@ -15,17 +14,16 @@ type PocketSlaveStatus struct {
     MasterBoundAgent    string          `msgpack:"m_ba,omitempty"`
     // slave response
     SlaveResponse       ResponseType    `msgpack:"s_rt,omitempty`
-    // slave
+    // slave nodename
     SlaveNodeName       string          `msgpack:"s_nm,omitempty"`
-    // current interface status
-    SlaveAddress        string          `msgpack:"s_i4"`
-    SlaveNodeMacAddr    string          `msgpack:"s_ma"`
+    // slave UUID
+    SlaveUUID           string          `msgpack:"s_uu,omitempty"`
     SlaveHardware       string          `msgpack:"s_hw"`
     SlaveTimestamp      time.Time       `msgpack:"s_ts"`
 }
 
 func (ssa *PocketSlaveStatus) IsAppropriateSlaveInfo() bool {
-    if len(ssa.SlaveAddress) == 0 || len(ssa.SlaveNodeMacAddr) == 0 || len(ssa.SlaveHardware) == 0 {
+    if len(ssa.SlaveHardware) == 0 {
         return false
     }
     return true
@@ -42,72 +40,50 @@ func UnpackedSlaveStatus(message []byte) (status *PocketSlaveStatus, err error) 
 
 // Unbounded
 func AnswerMasterInquiryStatus(timestamp time.Time) (*PocketSlaveStatus, error) {
-    piface, err := slcontext.PrimaryNetworkInterface()
-    if err != nil {
-        return nil, err
-    }
     return &PocketSlaveStatus {
         Version:             SLAVE_STATUS_VERSION,
         SlaveResponse:       SLAVE_WHO_I_AM,
-        SlaveAddress:        piface.PrimaryIP4Addr(),
-        SlaveNodeMacAddr:    piface.HardwareAddr,
         SlaveHardware:       runtime.GOARCH,
         SlaveTimestamp:      timestamp,
     }, nil
 }
 
 func KeyExchangeStatus(master string, timestamp time.Time) (*PocketSlaveStatus, error) {
-    piface, err := slcontext.PrimaryNetworkInterface()
-    if err != nil {
-        return nil, err
-    }
     return &PocketSlaveStatus {
         Version:             SLAVE_STATUS_VERSION,
         MasterBoundAgent:    master,
         SlaveResponse:       SLAVE_SEND_PUBKEY,
-        SlaveAddress:        piface.PrimaryIP4Addr(),
-        SlaveNodeMacAddr:    piface.HardwareAddr,
         SlaveHardware:       runtime.GOARCH,
         SlaveTimestamp:      timestamp,
     }, nil
 }
 
-func CheckSlaveCryptoStatus(master, nodename string, timestamp time.Time) (*PocketSlaveStatus, error) {
-    piface, err := slcontext.PrimaryNetworkInterface()
-    if err != nil {
-        return nil, err
-    }
+func CheckSlaveCryptoStatus(master, nodename, uuid string, timestamp time.Time) (*PocketSlaveStatus, error) {
     return &PocketSlaveStatus {
         Version:             SLAVE_STATUS_VERSION,
         MasterBoundAgent:    master,
         SlaveResponse:       SLAVE_CHECK_CRYPTO,
         SlaveNodeName:       nodename,
-        SlaveAddress:        piface.PrimaryIP4Addr(),
-        SlaveNodeMacAddr:    piface.HardwareAddr,
+        SlaveUUID:           uuid,
         SlaveHardware:       runtime.GOARCH,
         SlaveTimestamp:      timestamp,
     }, nil
 }
 
-func SlaveBoundedStatus(master, nodename string, timestamp time.Time) (*PocketSlaveStatus, error) {
-    piface, err := slcontext.PrimaryNetworkInterface()
-    if err != nil {
-        return nil, err
-    }
+func SlaveBoundedStatus(master, nodename, uuid string, timestamp time.Time) (*PocketSlaveStatus, error) {
     return &PocketSlaveStatus {
         Version:             SLAVE_STATUS_VERSION,
         MasterBoundAgent:    master,
         SlaveResponse:       SLAVE_REPORT_STATUS,
         SlaveNodeName:       nodename,
-        SlaveAddress:        piface.PrimaryIP4Addr(),
-        SlaveNodeMacAddr:    piface.HardwareAddr,
+        SlaveUUID:           uuid,
         SlaveHardware:       runtime.GOARCH,
         SlaveTimestamp:      timestamp,
     }, nil
 }
 
 // this is for master bindbroken state. Since majority of sanity check is done by beacon.bindbroken module, we'll just check simple things.
-func ConvertBindAttemptDiscoveryAgent(discovery *PocketSlaveDiscovery, slaveNode, slaveHardware string) (*PocketSlaveStatus, error) {
+func ConvertBindAttemptDiscoveryAgent(discovery *PocketSlaveDiscovery, slaveNode, slaveUUID, slaveHardware string) (*PocketSlaveStatus, error) {
     if len(slaveNode) == 0 {
         return nil, errors.Errorf("[ERR] incorrect slave name")
     }
@@ -137,8 +113,7 @@ func ConvertBindAttemptDiscoveryAgent(discovery *PocketSlaveDiscovery, slaveNode
         MasterBoundAgent:    discovery.MasterBoundAgent,
         SlaveResponse:       SLAVE_REPORT_STATUS,
         SlaveNodeName:       slaveNode,
-        SlaveAddress:        discovery.SlaveAddress,
-        SlaveNodeMacAddr:    discovery.SlaveNodeMacAddr,
+        SlaveUUID:           slaveUUID,
         SlaveHardware:       slaveHardware,
         // TODO : since discovery agent does not have timestamp, we'll use master timstamp.
         SlaveTimestamp:      time.Now(),

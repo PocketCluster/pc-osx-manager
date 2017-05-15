@@ -7,6 +7,7 @@ import (
     "testing"
 
     "github.com/davecgh/go-spew/spew"
+    "github.com/pborman/uuid"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-node-agent/slcontext"
@@ -123,20 +124,16 @@ func TestInquiredMetaAgent(t *testing.T) {
         t.Error("[ERR] Incorrect MetaVersion " + ma.MetaVersion + ". Expected : " + SLAVE_META_VERSION)
         return
     }
+    if len(ma.SlaveID) == 0 || ma.SlaveID != piface.HardwareAddr {
+        t.Error("[ERR] incorrect SlaveMeta.SlaveID")
+        return
+    }
     if ma.StatusAgent.Version != SLAVE_STATUS_VERSION {
         t.Error("[ERR] Incorrect StatusAgent.Version : " + ma.DiscoveryAgent.Version + " Expected : " + SLAVE_DISCOVER_VERSION)
         return
     }
     if ma.StatusAgent.SlaveResponse != SLAVE_WHO_I_AM {
         t.Error("[ERR] Incorrect StatusAgent.SlaveResponse : " + ma.StatusAgent.SlaveResponse + " Expected : " + SLAVE_WHO_I_AM)
-    }
-    if len(ma.StatusAgent.SlaveAddress) == 0 || ma.StatusAgent.SlaveAddress != piface.PrimaryIP4Addr() {
-        t.Error("[ERR] Incorrect StatusAgent.SlaveAddress")
-        return
-    }
-    if len(ma.StatusAgent.SlaveNodeMacAddr) == 0 || ma.StatusAgent.SlaveNodeMacAddr != piface.HardwareAddr {
-        t.Error("[ERR] Incorrect StatusAgent.SlaveNodeMacAddr")
-        return
     }
     if len(ma.StatusAgent.SlaveHardware) == 0 || ma.StatusAgent.SlaveHardware != runtime.GOARCH {
         t.Error("[ERR] Incorrect StatusAgent.SlaveHardware")
@@ -168,20 +165,16 @@ func TestInquiredMetaAgent(t *testing.T) {
         t.Error("[ERR] Unidentical MetaVersion")
         return
     }
+    if len(up.SlaveID) == 0 || up.SlaveID != ma.SlaveID {
+        t.Error("[ERR] incorrect SlaveMeta.SlaveID")
+        return
+    }
     if ma.StatusAgent.Version != up.StatusAgent.Version {
         t.Error("[ERR] Unidentical StatusAgent.Version")
         return
     }
     if ma.StatusAgent.SlaveResponse != up.StatusAgent.SlaveResponse {
         t.Error("[ERR] Unidentical StatusAgent.SlaveResponse")
-        return
-    }
-    if ma.StatusAgent.SlaveAddress != up.StatusAgent.SlaveAddress {
-        t.Error("[ERR] Unidentical StatusAgent.SlaveAddress")
-        return
-    }
-    if ma.StatusAgent.SlaveNodeMacAddr != up.StatusAgent.SlaveNodeMacAddr {
-        t.Error("[ERR] Unidentical StatusAgent.SlaveNodeMacAddr")
         return
     }
     if ma.StatusAgent.SlaveHardware != up.StatusAgent.SlaveHardware {
@@ -211,20 +204,16 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave meta version %s\n", SLAVE_META_VERSION)
         return
     }
+    if len(ma.SlaveID) == 0 || ma.SlaveID != piface.HardwareAddr {
+        t.Error("[ERR] incorrect SlaveMeta.SlaveID")
+        return
+    }
     if ma.StatusAgent.Version != SLAVE_STATUS_VERSION {
         t.Errorf("[ERR] Incorrect slave status version %s\n", SLAVE_STATUS_VERSION)
         return
     }
     if ma.StatusAgent.SlaveResponse != SLAVE_SEND_PUBKEY {
         t.Errorf("[ERR] Incorrect slave status %s\n", SLAVE_SEND_PUBKEY)
-        return
-    }
-    if ma.StatusAgent.SlaveAddress != piface.PrimaryIP4Addr() || len(ma.StatusAgent.SlaveAddress) == 0 {
-        t.Errorf("[ERR] Incorrect slave address %s\n", piface.PrimaryIP4Addr())
-        return
-    }
-    if ma.StatusAgent.SlaveNodeMacAddr != piface.HardwareAddr || len(ma.StatusAgent.SlaveNodeMacAddr) == 0 {
-        t.Errorf("[ERR] Incorrect slave mac address %s\n", piface.HardwareAddr)
         return
     }
     if ma.StatusAgent.SlaveHardware != runtime.GOARCH {
@@ -255,20 +244,16 @@ func TestKeyExchangeMetaAgent(t *testing.T) {
         t.Error("[ERR] Unidentical MetaVersion")
         return
     }
+    if len(up.SlaveID) == 0 || up.SlaveID != ma.SlaveID {
+        t.Error("[ERR] incorrect SlaveMeta.SlaveID")
+        return
+    }
     if ma.StatusAgent.Version != up.StatusAgent.Version {
         t.Error("[ERR] Unidentical StatusAgent.Version")
         return
     }
     if ma.StatusAgent.SlaveResponse != up.StatusAgent.SlaveResponse {
         t.Error("[ERR] Unidentical StatusAgent.SlaveResponse")
-        return
-    }
-    if ma.StatusAgent.SlaveAddress != up.StatusAgent.SlaveAddress {
-        t.Error("[ERR] Unidentical StatusAgent.SlaveAddress")
-        return
-    }
-    if ma.StatusAgent.SlaveNodeMacAddr != up.StatusAgent.SlaveNodeMacAddr {
-        t.Error("[ERR] Unidentical StatusAgent.SlaveNodeMacAddr")
         return
     }
     if ma.StatusAgent.SlaveHardware != up.StatusAgent.SlaveHardware {
@@ -286,8 +271,8 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
     setUp()
     defer tearDown()
 
-    piface, _ := slcontext.PrimaryNetworkInterface()
-    ma, _, err := TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initSendTimestmap)
+    slaveUUID := uuid.New()
+    ma, _, err := TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -331,12 +316,8 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave agent name %s\n", slaveNodeName)
         return
     }
-    if sd.SlaveAddress != piface.PrimaryIP4Addr()  {
-        t.Errorf("[ERR] Incorrect slave address %s\n", piface.PrimaryIP4Addr())
-        return
-    }
-    if sd.SlaveNodeMacAddr != piface.HardwareAddr {
-        t.Errorf("[ERR] Incorrect slave mac address %s\n", piface.HardwareAddr)
+    if sd.SlaveUUID != slaveUUID  {
+        t.Errorf("[ERR] Incorrect slave uuid %s\n", slaveUUID)
         return
     }
     if sd.SlaveHardware != runtime.GOARCH {
@@ -402,12 +383,8 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Error("[ERR] Unidentical StatusAgent.SlaveNodeName")
         return
     }
-    if sd.SlaveAddress != usd.SlaveAddress {
-        t.Error("[ERR] Unidentical StatusAgent.SlaveAddress")
-        return
-    }
-    if sd.SlaveNodeMacAddr != usd.SlaveNodeMacAddr {
-        t.Error("[ERR] Unidentical StatusAgent.SlaveNodeMacAddr")
+    if sd.SlaveUUID != usd.SlaveUUID{
+        t.Error("[ERR] Unidentical StatusAgent.SlaveUUID")
         return
     }
     if sd.SlaveHardware != usd.SlaveHardware {
@@ -430,8 +407,8 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
     setUp()
     defer tearDown()
 
-    piface, _ := slcontext.PrimaryNetworkInterface()
-    ma, _, err := TestSlaveBoundedStatus(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initSendTimestmap)
+    slaveUUID := uuid.New()
+    ma, _, err := TestSlaveBoundedStatus(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -470,12 +447,8 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave agent name %s\n", slaveNodeName)
         return
     }
-    if sd.SlaveAddress != piface.PrimaryIP4Addr()  {
-        t.Errorf("[ERR] Incorrect slave address %s\n", piface.PrimaryIP4Addr())
-        return
-    }
-    if sd.SlaveNodeMacAddr != piface.HardwareAddr {
-        t.Errorf("[ERR] Incorrect slave mac address %s\n", piface.HardwareAddr)
+    if sd.SlaveUUID != slaveUUID  {
+        t.Errorf("[ERR] Incorrect slave uuid %s\n", slaveUUID)
         return
     }
     if sd.SlaveHardware != runtime.GOARCH {
@@ -541,12 +514,8 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Error("[ERR] Unidentical StatusAgent.SlaveNodeName")
         return
     }
-    if sd.SlaveAddress != usd.SlaveAddress {
-        t.Error("[ERR] Unidentical StatusAgent.SlaveAddress")
-        return
-    }
-    if sd.SlaveNodeMacAddr != usd.SlaveNodeMacAddr {
-        t.Error("[ERR] Unidentical StatusAgent.SlaveNodeMacAddr")
+    if sd.SlaveUUID != usd.SlaveUUID{
+        t.Error("[ERR] Unidentical StatusAgent.SlaveUUID")
         return
     }
     if sd.SlaveHardware != usd.SlaveHardware {
