@@ -154,7 +154,11 @@ func initMasterAgentService(a *mainLife) error {
                         }
                     }
                 }
-                case <-timer.C: {
+                case t := <-timer.C: {
+                    err = beaconMan.TransitionWithTimestamp(t)
+                    if err != nil {
+                        log.Debug(err.Error())
+                    }
                     continue
                 }
             }
