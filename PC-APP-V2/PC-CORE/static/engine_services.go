@@ -8,12 +8,8 @@ import (
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
-    "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/pc-core/beacon"
     "github.com/stkim1/pc-node-agent/slcontext"
-    "github.com/stkim1/pc-core/model"
-)
-import (
-    "github.com/davecgh/go-spew/spew"
 )
 
 const (
@@ -38,8 +34,8 @@ func initSearchCatcher(a *mainLife) error {
                     log.Debugf("NewSearchCatcher :: MAIN CLOSE")
                     return nil
                 }
-                case r := <-catcher.ChRead: {
-                    a.BroadcastEvent(Event{Name:coreFeedbackSearch, Payload:r})
+                case cp := <-catcher.ChRead: {
+                    a.BroadcastEvent(Event{Name:coreFeedbackSearch, Payload:cp})
                 }
             }
         }
@@ -65,8 +61,8 @@ func initBeaconLoator(a *mainLife) error {
                     log.Debugf("NewBeaconLocator READ :: MAIN CLOSE")
                     return nil
                 }
-                case r := <- belocat.ChRead: {
-                    a.BroadcastEvent(Event{Name:coreFeedbackBeacon, Payload:r.Message})
+                case bp := <- belocat.ChRead: {
+                    a.BroadcastEvent(Event{Name:coreFeedbackBeacon, Payload:bp})
                 }
             }
         }
@@ -111,8 +107,12 @@ func initMasterAgentService(a *mainLife) error {
 
     a.RegisterServiceFunc(func() error {
         var (
+            err error = nil
             timer = time.NewTicker(time.Second)
-            _ = func(target string, data []byte) error {
+            beaconMan = beacon.NewBeaconManagerWithFunc(func(target string, data []byte) error {
+                log.Debugf("[BEACON-SLAVE] Host %v", target)
+                return nil
+
                 a.BroadcastEvent(Event{
                     Name: coreServiceBeacon,
                     Payload:ucast.BeaconSend{
@@ -121,43 +121,40 @@ func initMasterAgentService(a *mainLife) error {
                     },
                 })
                 return nil
-            }
+            })
         )
-
         defer timer.Stop()
 
         log.Debugf("[AGENT] starting agent service...")
         for {
             select {
                 case <-a.StopChannel(): {
+                    err = beaconMan.Shutdown()
+                    if err != nil {
+                        log.Debug(err.Error())
+                    }
                     log.Debugf("[AGENT] stopping agent service...")
                     return nil
                 }
                 case b := <-beaconC: {
-//                    log.Debugf("[AGENT-BEACON] recieved %v", b.Payload)
-                    psm, ok := b.Payload.([]byte)
+                    bp, ok := b.Payload.(ucast.BeaconPack)
                     if ok {
-                        // suppose we've sort out what this is.
-                        usm, err := slagent.UnpackedSlaveMeta(psm)
-                        if err == nil {
-                            log.Debugf("[AGENT-BEACON] UNPACK SUCCESS %v", spew.Sdump(usm))
-                            model.FindSlaveNode("category = ?", usm.SlaveID)
+                        err = beaconMan.TransitionWithBeaconData(bp)
+                        if err != nil {
+                            log.Debug(err.Error())
                         }
                     }
                 }
                 case s := <-searchC: {
-//                    log.Debugf("[AGENT-SEARCH] recieved %v", s.Payload)
                     cp, ok := s.Payload.(mcast.CastPack)
                     if ok {
-                        // suppose we've sort out what this is.
-                        usm, err := slagent.UnpackedSlaveMeta(cp.Message)
-                        if err == nil {
-                            log.Debugf("[AGENT-SEARCH] UNPACK SUCCESS %v FROM %v", spew.Sdump(usm), cp.Address.IP.String())
+                        err = beaconMan.TransitionWithSearchData(cp)
+                        if err != nil {
+                            log.Debug(err.Error())
                         }
                     }
                 }
                 case <-timer.C: {
-                    log.Debugf("[AGENT] bounded %v", time.Now())
                     continue
                 }
             }
