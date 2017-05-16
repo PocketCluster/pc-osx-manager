@@ -9,7 +9,6 @@ import (
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/pc-core/beacon"
-    "github.com/stkim1/pc-node-agent/slcontext"
 )
 
 const (
@@ -103,21 +102,19 @@ func initMasterAgentService(a *mainLife) error {
     a.WaitForEvent(coreFeedbackBeacon, beaconC, make(chan struct{}))
     a.WaitForEvent(coreFeedbackSearch, searchC, make(chan struct{}))
 
-    slcontext.DebugSlcontextPrepare()
-
     a.RegisterServiceFunc(func() error {
         var (
             err error = nil
             timer = time.NewTicker(time.Second)
-            beaconMan = beacon.NewBeaconManagerWithFunc(func(target string, data []byte) error {
-                log.Debugf("[BEACON-SLAVE] Host %v", target)
+            beaconMan = beacon.NewBeaconManagerWithFunc(func(host string, payload []byte) error {
+                log.Debugf("[BEACON-SLAVE] Host %v", host)
                 return nil
 
                 a.BroadcastEvent(Event{
                     Name: coreServiceBeacon,
                     Payload:ucast.BeaconSend{
-                        Host:"192.168.1.152",
-                        Payload:data,
+                        Host:       host,
+                        Payload:    payload,
                     },
                 })
                 return nil
@@ -126,6 +123,7 @@ func initMasterAgentService(a *mainLife) error {
         defer timer.Stop()
 
         log.Debugf("[AGENT] starting agent service...")
+
         for {
             select {
                 case <-a.StopChannel(): {

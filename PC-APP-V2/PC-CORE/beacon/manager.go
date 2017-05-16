@@ -10,7 +10,8 @@ import (
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-node-agent/slagent"
-
+)
+import (
     "github.com/davecgh/go-spew/spew"
 )
 
@@ -20,7 +21,8 @@ func NewBeaconManagerWithFunc(comm CommChannelFunc) BeaconManger {
 
 func NewBeaconManager(comm CommChannel) BeaconManger {
     return &beaconManger {
-
+        commChannel:    comm,
+        beaconList:     []MasterBeacon{},
     }
 }
 
@@ -32,7 +34,8 @@ type BeaconManger interface {
 }
 
 type beaconManger struct {
-
+    commChannel    CommChannel
+    beaconList     []MasterBeacon
 }
 
 func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack) error {
