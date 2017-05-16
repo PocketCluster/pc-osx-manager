@@ -6,6 +6,7 @@ import (
 
     "github.com/pkg/errors"
     "github.com/jinzhu/gorm"
+    "strings"
 )
 
 const slaveNodeTable string = `slavenode`
@@ -46,7 +47,7 @@ type SlaveNode struct {
     MacAddress      string       `gorm:"column:mac_address;type:VARCHAR(32)"`
     Arch            string       `gorm:"column:arch;type:VARCHAR(32)"`
     NodeName        string       `gorm:"column:node_name;type:VARCHAR(64)"`
-    SlaveID         string       `gorm:"column:slave_id;type:VARCHAR(64)"`
+    SlaveUUID       string       `gorm:"column:slave_uuid;type:VARCHAR(64)"`
 
     // slave node       s tate : joined/ departed/ more in the future
     State           string       `gorm:"column:state;type:VARCHAR(32)"`
@@ -62,6 +63,22 @@ type SlaveNode struct {
 
 func (SlaveNode) TableName() string {
     return slaveNodeTable
+}
+
+func IP4AddrToString(ip4Addr string) (string, error) {
+    if len(ip4Addr) == 0 {
+        return "", errors.Errorf("[ERR] empty address")
+    }
+    addrform := strings.Split(ip4Addr, "/")
+    if !strings.Contains(ip4Addr, "/") || len(addrform) != 2 {
+        return "", errors.Errorf("[ERR] invalid ip4 + subnet format")
+    }
+    return addrform[0], nil
+}
+
+// returns IP4 string part only
+func (s *SlaveNode) IP4AddrString() (string, error) {
+    return IP4AddrToString(s.IP4Address)
 }
 
 func NewSlaveNode() *SlaveNode {

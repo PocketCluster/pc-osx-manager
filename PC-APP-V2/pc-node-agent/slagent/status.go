@@ -83,9 +83,12 @@ func SlaveBoundedStatus(master, nodename, uuid string, timestamp time.Time) (*Po
 }
 
 // this is for master bindbroken state. Since majority of sanity check is done by beacon.bindbroken module, we'll just check simple things.
-func ConvertBindAttemptDiscoveryAgent(discovery *PocketSlaveDiscovery, slaveNode, slaveUUID, slaveHardware string) (*PocketSlaveStatus, error) {
+func ConvertDiscoveryToStatus(discovery *PocketSlaveDiscovery, slaveNode, slaveUUID, slaveHardware string) (*PocketSlaveStatus, error) {
     if len(slaveNode) == 0 {
         return nil, errors.Errorf("[ERR] incorrect slave name")
+    }
+    if len(slaveUUID) == 0 {
+        return nil, errors.Errorf("[ERR] incorrect slave uuid")
     }
     if len(slaveHardware) == 0 {
         return nil, errors.Errorf("[ERR] incrrect slave hardware architecture")

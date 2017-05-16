@@ -7,11 +7,7 @@ import (
 )
 
 func TestSlaveUnboundedMasterSearchDiscovery() (*PocketSlaveAgentMeta, error) {
-    ua, err := UnboundedMasterDiscovery()
-    if err != nil {
-        return nil, err
-    }
-    sm, err := UnboundedMasterDiscoveryMeta(ua)
+    sm, err := UnboundedMasterDiscoveryMeta()
     if err != nil {
         return nil, err
     }
@@ -68,11 +64,7 @@ func TestSlaveBoundedStatus(masterAgentName, slaveNodeName, slaveUUID string, ae
 }
 
 func TestSlaveBindBroken(masterAgentName string) (*PocketSlaveAgentMeta, error) {
-    ba, err := BrokenBindDiscovery(masterAgentName)
-    if err != nil {
-        return nil, err
-    }
-    bm, err := BrokenBindMeta(ba)
+    bm, err := BrokenBindMeta(masterAgentName)
     if err != nil {
         return nil, err
     }

@@ -33,7 +33,7 @@ func Test_BindRecovery_Bounded_Transition(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    err = mb.TransitionWithSlaveMeta(meta, masterTS)
+    err = mb.TransitionWithSlaveMeta(nil, meta, masterTS)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -44,13 +44,13 @@ func Test_BindRecovery_Bounded_Transition(t *testing.T) {
     }
     slaveTS = masterTS.Add(time.Second)
     aescryptor := mb.(*masterBeacon).state.(DebugState).AESCryptor()
-    sa, end, err := slagent.TestSlaveBoundedStatus(masterAgentName, slaveNodeName, aescryptor, slaveTS)
+    sa, end, err := slagent.TestSlaveBoundedStatus(masterAgentName, slaveNodeName, mb.SlaveNode().SlaveUUID, aescryptor, slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -86,7 +86,7 @@ func Test_BindRecovery_Bounded_TimeoutFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    err = mb.TransitionWithSlaveMeta(meta, masterTS)
+    err = mb.TransitionWithSlaveMeta(nil, meta, masterTS)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -99,13 +99,13 @@ func Test_BindRecovery_Bounded_TimeoutFail(t *testing.T) {
 
     // first trial with error
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err := slagent.TestSlaveBoundedStatus("WRONG_MASTER_NAME", slaveNodeName, aescryptor, slaveTS)
+    sa, end, err := slagent.TestSlaveBoundedStatus("WRONG_MASTER_NAME", slaveNodeName, slave.SlaveUUID, aescryptor, slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Log(err.Error())
     }
     if mb.CurrentState() != MasterBindRecovery {
@@ -115,13 +115,13 @@ func Test_BindRecovery_Bounded_TimeoutFail(t *testing.T) {
 
     // 2nd trial
     slaveTS = masterTS.Add(time.Millisecond + BoundedTimeout * time.Duration(TxActionLimit))
-    sa, end, err = slagent.TestSlaveBoundedStatus("WRONG_MASTER_NAME", slaveNodeName, aescryptor, slaveTS)
+    sa, end, err = slagent.TestSlaveBoundedStatus("WRONG_MASTER_NAME", slaveNodeName, slave.SlaveUUID, aescryptor, slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
     }
     masterTS = end.Add(time.Second)
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err != nil {
         t.Log(err.Error())
     }
@@ -155,7 +155,7 @@ func Test_BindRecovery_Bounded_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    err = mb.TransitionWithSlaveMeta(meta, masterTS)
+    err = mb.TransitionWithSlaveMeta(nil, meta, masterTS)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -169,13 +169,13 @@ func Test_BindRecovery_Bounded_TooManyMetaFail(t *testing.T) {
     for i := 0; i <= int(TransitionFailureLimit); i++ {
         // first trial with error
         slaveTS = masterTS.Add(time.Second)
-        sa, end, err := slagent.TestSlaveBoundedStatus("WRONG_MASTER_NAME", slaveNodeName, aescryptor, slaveTS)
+        sa, end, err := slagent.TestSlaveBoundedStatus("WRONG_MASTER_NAME", slaveNodeName, slave.SlaveUUID, aescryptor, slaveTS)
         if err != nil {
             t.Error(err.Error())
             return
         }
         masterTS = end.Add(time.Second)
-        err = mb.TransitionWithSlaveMeta(sa, masterTS)
+        err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
         if err != nil {
             t.Log(err.Error())
         }
@@ -210,7 +210,7 @@ func Test_BindRecovery_Bounded_TxActionFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    err = mb.TransitionWithSlaveMeta(meta, masterTS)
+    err = mb.TransitionWithSlaveMeta(nil, meta, masterTS)
     if err != nil {
         t.Errorf(err.Error())
         return

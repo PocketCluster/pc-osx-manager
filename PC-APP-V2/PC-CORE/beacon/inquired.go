@@ -1,8 +1,10 @@
 package beacon
 
 import (
+    "net"
     "time"
 
+    "github.com/pborman/uuid"
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-node-agent/slagent"
@@ -64,7 +66,10 @@ func (b *inquired) transitionActionWithTimestamp(masterTimestamp time.Time) erro
     return b.commChan.UcastSend(b.slaveNode.IP4Address, pm)
 }
 
-func (b *inquired) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+func (b *inquired) inquired(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+    if sender == nil {
+        return MasterTransitionIdle, errors.Errorf("[ERR] incorrect slave input. slave address should not be nil when checking identity.")
+    }
     if meta.StatusAgent == nil || meta.StatusAgent.Version != slagent.SLAVE_STATUS_VERSION {
         return MasterTransitionFail, errors.Errorf("[ERR] Null or incorrect version of slave status")
     }
@@ -79,13 +84,15 @@ func (b *inquired) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.T
     if masterAgentName != meta.StatusAgent.MasterBoundAgent {
         return MasterTransitionFail, errors.Errorf("[ERR] Slave reports to incorrect master agent")
     }
-    if b.slaveNode.IP4Address != meta.StatusAgent.SlaveAddress {
+    // address check
+    addr, err := b.slaveNode.IP4AddrString()
+    if err != nil {
+        return MasterTransitionFail, errors.WithStack(err)
+    }
+    if addr != sender.IP.String() {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
     }
-    if meta.SlaveID != meta.StatusAgent.SlaveNodeMacAddr {
-        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave ID")
-    }
-    if b.slaveNode.MacAddress != meta.StatusAgent.SlaveNodeMacAddr {
+    if b.slaveNode.MacAddress != meta.SlaveID {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
     if b.slaveNode.Arch != meta.StatusAgent.SlaveHardware {
@@ -116,11 +123,18 @@ func (b *inquired) inquired(meta *slagent.PocketSlaveAgentMeta, timestamp time.T
     b.aesKey = aesKey
     b.aesCryptor = aesCryptor
 
+    // find a suitable slave node name
     nodeName, err := model.FindSlaveNameCandiate()
     if err != nil {
         return MasterTransitionFail, errors.WithStack(err)
     }
     b.slaveNode.NodeName = nodeName
+
+    // assign new uuid
+    b.slaveNode.SlaveUUID = uuid.New()
+    if len(b.slaveNode.SlaveUUID) == 0 {
+        return MasterTransitionFail, errors.Errorf("[ERR] invalid slave uuid generated. give up on this")
+    }
 
     // save status for response generation
     b.slaveStatus = meta.StatusAgent

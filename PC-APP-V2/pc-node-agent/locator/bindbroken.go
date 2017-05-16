@@ -45,11 +45,7 @@ func (ls *bindbroken) transitionActionWithTimestamp(slaveTimestamp time.Time) er
     if err != nil {
         return errors.WithStack(err)
     }
-    ba, err := slagent.BrokenBindDiscovery(masterAgentName)
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    sm, err := slagent.BrokenBindMeta(ba)
+    sm, err := slagent.BrokenBindMeta(masterAgentName)
     if err != nil {
         return errors.WithStack(err)
     }

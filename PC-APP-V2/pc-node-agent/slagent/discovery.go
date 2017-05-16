@@ -30,6 +30,7 @@ func (sda *PocketSlaveDiscovery) IsAppropriateSlaveInfo() bool {
 }
 
 func UnboundedMasterDiscovery() (*PocketSlaveDiscovery, error) {
+    return nil, errors.Errorf("[ERR] UnboundedMasterDiscovery() is deprecated due to a combination with UnboundedMasterDiscoveryMeta()")
     piface, err := slcontext.PrimaryNetworkInterface()
     if err != nil {
         return nil, errors.WithStack(err)
@@ -44,6 +45,7 @@ func UnboundedMasterDiscovery() (*PocketSlaveDiscovery, error) {
 }
 
 func BrokenBindDiscovery(master string) (*PocketSlaveDiscovery, error) {
+    return nil, errors.Errorf("[ERR] BrokenBindDiscovery() is deprecated due to a combination with BrokenBindMeta()")
     piface, err := slcontext.PrimaryNetworkInterface()
     if err != nil {
         return nil, errors.WithStack(err)

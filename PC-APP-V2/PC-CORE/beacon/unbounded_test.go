@@ -29,7 +29,7 @@ func Test_Unbounded_Inquired_Transition_TimeoutFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(nil, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -47,7 +47,7 @@ func Test_Unbounded_Inquired_Transition_TimeoutFail(t *testing.T) {
     }
     // this is an error injection
     sa.StatusAgent.Version = ""
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err == nil {
         t.Errorf("[ERR] incorrect slave status version should generate error")
         return
@@ -65,7 +65,7 @@ func Test_Unbounded_Inquired_Transition_TimeoutFail(t *testing.T) {
     // update with timestamp
     masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout * time.Duration(TxActionLimit))
     t.Logf("[INFO] slaveTS - MasterBeacon.lastSuccessTimestmap : " + masterTS.Sub(mb.(*masterBeacon).state.(DebugState).TransitionSuccessTS()).String())
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err != nil {
         t.Log(err.Error())
     }
@@ -102,7 +102,7 @@ func Test_Unbounded_Inquired_Transition_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(nil, sa, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -124,7 +124,7 @@ func Test_Unbounded_Inquired_Transition_TooManyMetaFail(t *testing.T) {
         // this is an error injection
         sa.StatusAgent.Version = ""
         masterTS = end.Add(time.Second)
-        err = mb.TransitionWithSlaveMeta(sa, masterTS)
+        err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
         if err == nil {
             t.Errorf("[ERR] incorrect slave status version should generate error")
             return
@@ -166,7 +166,7 @@ func Test_Unbounded_Inquired_TxActionFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(nil, sa, masterTS)
     if err != nil {
         t.Error(err.Error())
         return

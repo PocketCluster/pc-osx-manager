@@ -1,6 +1,7 @@
 package beacon
 
 import (
+    "net"
     "time"
 
     "github.com/pkg/errors"
@@ -57,7 +58,10 @@ func (b *unbounded) transitionActionWithTimestamp(masterTimestamp time.Time) err
     return b.commChan.UcastSend(b.slaveNode.IP4Address, pm)
 }
 
-func (b *unbounded) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+func (b *unbounded) unbounded(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+    if sender == nil {
+        return MasterTransitionIdle, errors.Errorf("[ERR] incorrect slave input. slave address should not be nil when unbounded.")
+    }
     if meta.StatusAgent == nil || meta.StatusAgent.Version != slagent.SLAVE_STATUS_VERSION {
         return MasterTransitionFail, errors.Errorf("[ERR] Null or incorrect version of slave status")
     }
@@ -65,17 +69,15 @@ func (b *unbounded) unbounded(meta *slagent.PocketSlaveAgentMeta, timestamp time
     if meta.StatusAgent.SlaveResponse != slagent.SLAVE_WHO_I_AM {
         return MasterTransitionIdle, nil
     }
-    if meta.SlaveID != meta.StatusAgent.SlaveNodeMacAddr {
-        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave ID")
+    // check address
+    addr, err := b.slaveNode.IP4AddrString()
+    if err != nil {
+        return MasterTransitionFail, errors.WithStack(err)
     }
-
-    // TODO CHECK SLAVE MASK + GATEWAY FOR ITS ELIGIBILITY
-/*
-    if b.slaveNode.IP4Address != meta.StatusAgent.SlaveAddress {
+    if addr != sender.IP.String() {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
     }
-*/
-    if b.slaveNode.MacAddress != meta.StatusAgent.SlaveNodeMacAddr {
+    if b.slaveNode.MacAddress != meta.SlaveID {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
     // slave hardware architecture

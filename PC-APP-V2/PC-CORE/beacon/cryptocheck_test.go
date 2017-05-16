@@ -30,7 +30,7 @@ func Test_CryptoCheck_Bounded_TimeoutFail(t *testing.T) {
         return
     }
     masterTS := time.Now()
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(nil, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -41,7 +41,7 @@ func Test_CryptoCheck_Bounded_TimeoutFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -52,18 +52,18 @@ func Test_CryptoCheck_Bounded_TimeoutFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, mb.SlaveNode().SlaveUUID, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -74,13 +74,13 @@ func Test_CryptoCheck_Bounded_TimeoutFail(t *testing.T) {
 
     // --- test
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveBoundedStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
+    sa, end, err = slagent.TestSlaveBoundedStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.SlaveNode().SlaveUUID, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
     }
     masterTS = end.Add(time.Second)
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err == nil {
         t.Errorf("[ERR] Incorrect slave name should fail master beacon to transition")
         return
@@ -97,7 +97,7 @@ func Test_CryptoCheck_Bounded_TimeoutFail(t *testing.T) {
     }
     // fail with timestamp
     masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout * time.Duration(TxActionLimit))
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err == nil {
         t.Errorf("[ERR] Incorrect slave name should fail master beacon to transition")
         return
@@ -135,7 +135,7 @@ func Test_CryptoCheck_Bounded_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS := time.Now()
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(nil, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -146,7 +146,7 @@ func Test_CryptoCheck_Bounded_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -157,18 +157,18 @@ func Test_CryptoCheck_Bounded_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, mb.SlaveNode().SlaveUUID, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -183,13 +183,13 @@ func Test_CryptoCheck_Bounded_TooManyMetaFail(t *testing.T) {
     for i := 0; i < int(TransitionFailureLimit); i++ {
         slaveTS = masterTS.Add(time.Second)
         // error injection
-        sa, end, err = slagent.TestSlaveBoundedStatus(masterAgentName, "INCORRECT-SLAVE-NAME", aesCrypto, slaveTS)
+        sa, end, err = slagent.TestSlaveBoundedStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.SlaveNode().SlaveUUID, aesCrypto, slaveTS)
         if err != nil {
             t.Error(err.Error())
             return
         }
         masterTS = end.Add(time.Second)
-        err = mb.TransitionWithSlaveMeta(sa, masterTS)
+        err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
         if err == nil {
             t.Errorf("[ERR] Incorrect slave name should fail master beacon to transition")
             return
@@ -231,7 +231,7 @@ func Test_CryptoCheck_Bounded_TxActionFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(nil, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -242,7 +242,7 @@ func Test_CryptoCheck_Bounded_TxActionFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -253,18 +253,18 @@ func Test_CryptoCheck_Bounded_TxActionFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, mb.SlaveNode().NodeName, mb.SlaveNode().SlaveUUID, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }

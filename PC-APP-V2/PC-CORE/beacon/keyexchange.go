@@ -1,6 +1,7 @@
 package beacon
 
 import (
+    "net"
     "time"
 
     "github.com/pkg/errors"
@@ -46,7 +47,7 @@ func (b *keyexchange) transitionActionWithTimestamp(masterTimestamp time.Time) e
     if b.slaveStatus == nil {
         return errors.Errorf("[ERR] SlaveStatusAgent is nil. We cannot form a proper response")
     }
-    cmd, slvstat, err := msagent.ExchangeCryptoKeyAndNameCommand(b.slaveStatus, b.slaveNode.NodeName, masterTimestamp)
+    cmd, slvstat, err := msagent.ExchangeCryptoKeyAndNameCommand(b.slaveStatus, b.slaveNode.NodeName, b.slaveNode.SlaveUUID, masterTimestamp)
     if err != nil {
         return errors.WithStack(err)
     }
@@ -64,7 +65,10 @@ func (b *keyexchange) transitionActionWithTimestamp(masterTimestamp time.Time) e
     return b.commChan.UcastSend(b.slaveNode.IP4Address, pm)
 }
 
-func (b *keyexchange) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+func (b *keyexchange) keyExchange(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+    if sender == nil {
+        return MasterTransitionIdle, errors.Errorf("[ERR] incorrect slave input. slave address should not be nil when checking important credentials.")
+    }
     if len(meta.EncryptedStatus) == 0 {
         return MasterTransitionFail, errors.Errorf("[ERR] Null encrypted slave status")
     }
@@ -99,13 +103,18 @@ func (b *keyexchange) keyExchange(meta *slagent.PocketSlaveAgentMeta, timestamp 
     if b.slaveNode.NodeName != usm.SlaveNodeName {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave node name beacon [%s] / slave master [%s] ", b.slaveNode.NodeName, usm.SlaveNodeName)
     }
-    if b.slaveNode.IP4Address != usm.SlaveAddress {
+    if b.slaveNode.SlaveUUID != usm.SlaveUUID {
+        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave UUID")
+    }
+    // check address
+    addr, err := b.slaveNode.IP4AddrString()
+    if err != nil {
+        return MasterTransitionFail, errors.WithStack(err)
+    }
+    if addr != sender.IP.String() {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
     }
-    if meta.SlaveID != usm.SlaveNodeMacAddr {
-        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave ID")
-    }
-    if b.slaveNode.MacAddress != usm.SlaveNodeMacAddr {
+    if b.slaveNode.MacAddress != meta.SlaveID {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
     if b.slaveNode.Arch != usm.SlaveHardware {

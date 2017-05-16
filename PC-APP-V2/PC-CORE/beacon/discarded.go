@@ -1,6 +1,7 @@
 package beacon
 
 import (
+    "net"
     "time"
 
     "github.com/stkim1/pc-node-agent/slagent"
@@ -41,7 +42,7 @@ func (b *discarded) transitionActionWithTimestamp(masterTimestamp time.Time) err
     return nil
 }
 
-func (b *discarded) transitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+func (b *discarded) transitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
     return MasterTransitionOk, nil
 }
 

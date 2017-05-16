@@ -1,6 +1,7 @@
 package beacon
 
 import (
+    "net"
     "time"
     "log"
     "bytes"
@@ -21,7 +22,7 @@ const (
     BoundedTimeout              time.Duration = time.Second * 10
 )
 
-type transitionWithSlaveMeta          func (meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (MasterBeaconTransition, error)
+type transitionWithSlaveMeta          func (sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (MasterBeaconTransition, error)
 
 type transitionActionWithTimestamp    func (masterTimestamp time.Time) error
 
@@ -31,7 +32,7 @@ type onStateTranstionFailure          func (masterTimestamp time.Time) error
 
 type BeaconState interface {
     CurrentState() MasterBeaconState
-    TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (BeaconState, error)
+    TransitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (BeaconState, error)
     TransitionWithTimestamp(masterTimestamp time.Time) (BeaconState, error)
     SlaveNode() *model.SlaveNode
 }
@@ -283,7 +284,7 @@ func newBeaconForState(b* beaconState, newState, oldState MasterBeaconState) Bea
     return newBeaconState
 }
 
-func (b *beaconState) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (BeaconState, error) {
+func (b *beaconState) TransitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (BeaconState, error) {
     var (
         newState, oldState MasterBeaconState = b.CurrentState(), b.CurrentState()
         transitionCandidate, finalTransition MasterBeaconTransition
@@ -300,7 +301,7 @@ func (b *beaconState) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta
         return nil, errors.Errorf("[ERR] Null or incorrect slave ID")
     }
 
-    transitionCandidate, transErr = b.slaveMetaTransition(meta, masterTimestamp)
+    transitionCandidate, transErr = b.slaveMetaTransition(sender, meta, masterTimestamp)
 
     // this is to apply failed time count and timeout window
     finalTransition = b.translateStateWithTimeout(transitionCandidate, masterTimestamp)

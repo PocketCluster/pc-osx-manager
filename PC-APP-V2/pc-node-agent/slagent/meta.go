@@ -28,7 +28,7 @@ func UnpackedSlaveMeta(message []byte) (meta *PocketSlaveAgentMeta, err error) {
 
 // --- per-state meta funcs
 
-func UnboundedMasterDiscoveryMeta(agent *PocketSlaveDiscovery) (*PocketSlaveAgentMeta, error) {
+func UnboundedMasterDiscoveryMeta() (*PocketSlaveAgentMeta, error) {
     piface, err := slcontext.PrimaryNetworkInterface()
     if err != nil {
         return nil, errors.WithStack(err)
@@ -36,7 +36,13 @@ func UnboundedMasterDiscoveryMeta(agent *PocketSlaveDiscovery) (*PocketSlaveAgen
     return &PocketSlaveAgentMeta{
         MetaVersion:       SLAVE_META_VERSION,
         SlaveID:           piface.HardwareAddr,
-        DiscoveryAgent:    agent,
+        DiscoveryAgent:    &PocketSlaveDiscovery {
+            Version:             SLAVE_DISCOVER_VERSION,
+            SlaveResponse:       SLAVE_LOOKUP_AGENT,
+            SlaveAddress:        piface.PrimaryIP4Addr(),
+            SlaveGateway:        piface.GatewayAddr,
+            SlaveNodeMacAddr:    piface.HardwareAddr,
+        },
     }, nil
 }
 
@@ -108,7 +114,7 @@ func SlaveBoundedMeta(agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor) (*
     }, nil
 }
 
-func BrokenBindMeta(agent *PocketSlaveDiscovery) (*PocketSlaveAgentMeta, error) {
+func BrokenBindMeta(master string) (*PocketSlaveAgentMeta, error) {
     piface, err := slcontext.PrimaryNetworkInterface()
     if err != nil {
         return nil, errors.WithStack(err)
@@ -116,6 +122,13 @@ func BrokenBindMeta(agent *PocketSlaveDiscovery) (*PocketSlaveAgentMeta, error) 
     return &PocketSlaveAgentMeta{
         MetaVersion:      SLAVE_META_VERSION,
         SlaveID:          piface.HardwareAddr,
-        DiscoveryAgent:   agent,
+        DiscoveryAgent:   &PocketSlaveDiscovery {
+            Version:             SLAVE_DISCOVER_VERSION,
+            MasterBoundAgent:    master,
+            SlaveResponse:       SLAVE_LOOKUP_AGENT,
+            SlaveAddress:        piface.PrimaryIP4Addr(),
+            SlaveGateway:        piface.GatewayAddr,
+            SlaveNodeMacAddr:    piface.HardwareAddr,
+        },
     }, nil
 }

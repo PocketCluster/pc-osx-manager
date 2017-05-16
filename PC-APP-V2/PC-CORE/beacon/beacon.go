@@ -6,6 +6,7 @@ import (
     "github.com/pkg/errors"
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-core/model"
+    "net"
 )
 
 type MasterBeaconState int
@@ -67,7 +68,7 @@ func (c CommChannelFunc) UcastSend(target string, data []byte) error {
 type MasterBeacon interface {
     CurrentState() MasterBeaconState
     TransitionWithTimestamp(timestamp time.Time) error
-    TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error
+    TransitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error
 
     SlaveNode() *model.SlaveNode
 }
@@ -115,12 +116,12 @@ func (mb *masterBeacon) TransitionWithTimestamp(timestamp time.Time) error {
     return err
 }
 
-func (mb *masterBeacon) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+func (mb *masterBeacon) TransitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
     if mb.state == nil {
         return errors.Errorf("[ERR] BeaconState is nil. Cannot make transition with master meta")
     }
     var err error = nil
-    mb.state, err = mb.state.TransitionWithSlaveMeta(meta, timestamp)
+    mb.state, err = mb.state.TransitionWithSlaveMeta(sender, meta, timestamp)
     return errors.WithStack(err)
 }
 

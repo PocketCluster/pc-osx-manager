@@ -1,6 +1,7 @@
 package beacon
 
 import (
+    "net"
     "time"
 
     "github.com/pkg/errors"
@@ -42,7 +43,10 @@ func (b *beaconinit) transitionActionWithTimestamp(masterTimestamp time.Time) er
     return nil
 }
 
-func (b *beaconinit) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+func (b *beaconinit) beaconInit(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+    if sender != nil {
+        return MasterTransitionIdle, errors.Errorf("[ERR] incorrect slave input. slave address should be nil when receiving multicast while initializing bind.")
+    }
     if meta.DiscoveryAgent == nil || meta.DiscoveryAgent.Version != slagent.SLAVE_DISCOVER_VERSION {
         return MasterTransitionFail, errors.Errorf("[ERR] Null or incorrect version of slave discovery")
     }
@@ -54,26 +58,18 @@ func (b *beaconinit) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp ti
         return MasterTransitionIdle, errors.Errorf("[ERR] Incorrect slave bind. Slave should not be bound to a master when it looks for joining")
     }
 
-    // TODO CHECK SLAVE MASK + GATEWAY FOR ITS ELIGIBILITY
-/*
+    // TODO : (2015-05-16) we're not checking ip + subnet eligivility for now
     // slave ip address
-    if len(meta.DiscoveryAgent.SlaveAddress) == 0 {
-        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave node address")
+    _, err := model.IP4AddrToString(meta.DiscoveryAgent.SlaveAddress)
+    if err != nil {
+        return MasterTransitionFail, errors.WithStack(err)
     }
     b.slaveNode.IP4Address = meta.DiscoveryAgent.SlaveAddress
-
     // slave ip gateway
     if len(meta.DiscoveryAgent.SlaveGateway) == 0 {
         return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave node gateway")
     }
     b.slaveNode.IP4Gateway = meta.DiscoveryAgent.SlaveGateway
-
-    // slave ip netmask
-    if len(meta.DiscoveryAgent.SlaveNetmask) == 0 {
-        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave node netmask")
-    }
-    b.slaveNode.IP4Netmask = meta.DiscoveryAgent.SlaveNetmask
-*/
     // slave mac address
     if meta.SlaveID != meta.DiscoveryAgent.SlaveNodeMacAddr {
         return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave ID")
@@ -84,7 +80,7 @@ func (b *beaconinit) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp ti
     b.slaveNode.MacAddress = meta.DiscoveryAgent.SlaveNodeMacAddr
 
     // save slave discovery to send responsed
-    b.slaveLocation  = meta.DiscoveryAgent
+    b.slaveLocation = meta.DiscoveryAgent
 
     return MasterTransitionOk, nil
 }

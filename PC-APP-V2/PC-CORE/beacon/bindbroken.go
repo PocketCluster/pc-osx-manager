@@ -1,6 +1,7 @@
 package beacon
 
 import (
+    "net"
     "time"
 
     "github.com/pkg/errors"
@@ -74,7 +75,10 @@ func (b *bindbroken) transitionActionWithTimestamp(masterTimestamp time.Time) er
     return nil
 }
 
-func (b *bindbroken) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+func (b *bindbroken) bindBroken(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+    if sender != nil {
+        return MasterTransitionIdle, errors.Errorf("[ERR] incorrect slave input. slave address should be nil when receiving multicast in broken bind.")
+    }
     if meta.DiscoveryAgent == nil || meta.DiscoveryAgent.Version != slagent.SLAVE_DISCOVER_VERSION {
         return MasterTransitionFail, errors.Errorf("[ERR] Null or incorrect version of slave status")
     }
@@ -91,31 +95,36 @@ func (b *bindbroken) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp ti
         return MasterTransitionIdle, nil
     }
 
-    // TODO CHECK SLAVE MASK + GATEWAY FOR ITS ELIGIBILITY
-/*
-    if b.slaveNode.IP4Address != meta.DiscoveryAgent.SlaveAddress {
-        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
-    }
-    if b.slaveNode.IP4Gateway != meta.DiscoveryAgent.SlaveGateway {
-        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave gateway address")
-    }
-    if b.slaveNode.IP4Netmask != meta.DiscoveryAgent.SlaveNetmask {
-        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave netmask address")
-    }
-*/
+    // check mac address
     if meta.SlaveID != meta.DiscoveryAgent.SlaveNodeMacAddr {
         return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave ID")
     }
     if b.slaveNode.MacAddress != meta.DiscoveryAgent.SlaveNodeMacAddr {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
-
-    // save discovery agent for respond generation
-    discovery, err := slagent.ConvertBindAttemptDiscoveryAgent(meta.DiscoveryAgent, b.slaveNode.NodeName, b.slaveNode.Arch)
+    // slave ip address
+    // TODO : (2015-05-16) we're not checking ip + subnet eligivility for now
+    _, err = model.IP4AddrToString(meta.DiscoveryAgent.SlaveAddress)
     if err != nil {
         return MasterTransitionFail, errors.WithStack(err)
     }
-    b.slaveStatus = discovery
+    b.slaveNode.IP4Address = meta.DiscoveryAgent.SlaveAddress
+    // slave ip gateway
+    if len(meta.DiscoveryAgent.SlaveGateway) == 0 {
+        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave node gateway")
+    }
+    b.slaveNode.IP4Gateway = meta.DiscoveryAgent.SlaveGateway
+    // slave mac address
+    if meta.SlaveID != meta.DiscoveryAgent.SlaveNodeMacAddr {
+        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave ID")
+    }
+
+    // save discovery agent for respond generation
+    status, err := slagent.ConvertDiscoveryToStatus(meta.DiscoveryAgent, b.slaveNode.NodeName, b.slaveNode.SlaveUUID, b.slaveNode.Arch)
+    if err != nil {
+        return MasterTransitionFail, errors.WithStack(err)
+    }
+    b.slaveStatus = status
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil

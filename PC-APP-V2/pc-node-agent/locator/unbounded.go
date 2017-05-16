@@ -40,11 +40,7 @@ func (ls *unbounded) transitionActionWithTimestamp(slaveTimestamp time.Time) err
     // we need to reset the counter here than receiver
     ls.txActionCount = 0
 
-    ua, err := slagent.UnboundedMasterDiscovery()
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    sm, err := slagent.UnboundedMasterDiscoveryMeta(ua)
+    sm, err := slagent.UnboundedMasterDiscoveryMeta()
     if err != nil {
         return errors.WithStack(err)
     }

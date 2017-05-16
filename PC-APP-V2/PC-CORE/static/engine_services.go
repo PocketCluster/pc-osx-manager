@@ -152,7 +152,7 @@ func initMasterAgentService(a *mainLife) error {
                         // suppose we've sort out what this is.
                         usm, err := slagent.UnpackedSlaveMeta(cp.Message)
                         if err == nil {
-                            log.Debugf("[AGENT-SEARCH] UNPACK SUCCESS %v FROM %v", spew.Sdump(usm), cp.Address)
+                            log.Debugf("[AGENT-SEARCH] UNPACK SUCCESS %v FROM %v", spew.Sdump(usm), cp.Address.IP.String())
                         }
                     }
                 }
