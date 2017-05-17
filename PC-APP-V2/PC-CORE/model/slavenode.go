@@ -22,6 +22,7 @@ const (
     SNMFieldArch            = "arch"
     SNMFieldNodeName        = "node_name"
     SNMFieldState           = "state"
+    SNMFieldUUID            = "slave_uuid"
     SNMFieldIP4Address      = "ip4_address"
     SNMFieldIP4Gateway      = "ip4_gateway"
     SNMFieldIP4Netmask      = "ip4_netmask"

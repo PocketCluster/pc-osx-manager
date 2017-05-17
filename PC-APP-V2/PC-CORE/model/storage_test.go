@@ -4,6 +4,7 @@ import (
     "testing"
     "time"
 
+    log "github.com/Sirupsen/logrus"
     "github.com/stkim1/pcrypto"
     . "gopkg.in/check.v1"
 )
@@ -37,6 +38,13 @@ func (s *RecordSuite) expectChanges(c *C, expected ...interface{}) {
     }
 }
 
+func (s *RecordSuite) SetUpSuite(c *C) {
+    log.SetLevel(log.DebugLevel)
+}
+
+func (s *RecordSuite) TearDownSuite(c *C) {
+}
+
 func (s *RecordSuite) SetUpTest(c *C) {
     var err error
 
@@ -49,6 +57,7 @@ func (s *RecordSuite) SetUpTest(c *C) {
 
 func (s *RecordSuite) TearDownTest(c *C) {
     c.Assert(DebugRecordGateDestroy(s.dataDir), IsNil)
+    close(s.ChangesC)
 }
 
 func (s *RecordSuite) TestSlaveNodeCRUD(c *C) {

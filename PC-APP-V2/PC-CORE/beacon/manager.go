@@ -15,15 +15,31 @@ import (
     "github.com/davecgh/go-spew/spew"
 )
 
-func NewBeaconManagerWithFunc(comm CommChannelFunc) BeaconManger {
+func NewBeaconManagerWithFunc(comm CommChannelFunc) (BeaconManger, error) {
     return NewBeaconManager(comm)
 }
 
-func NewBeaconManager(comm CommChannel) BeaconManger {
-    // TODO find existing slave models and attach them
+func NewBeaconManager(comm CommChannel) (BeaconManger, error) {
+    var (
+        beacons []MasterBeacon = []MasterBeacon{}
+        nodes []model.SlaveNode = nil
+        mb MasterBeacon = nil
+        err error = nil
+    )
+    nodes, err = model.FindAllSlaveNode()
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+    for _, n := range nodes {
+        mb, err = NewMasterBeacon(MasterBindBroken, n, comm)
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+        beacons = append(beacons, mb)
+    }
     return &beaconManger {
         commChannel:    comm,
-        beaconList:     []MasterBeacon{},
+        beaconList:     beacons,
     }
 }
 
