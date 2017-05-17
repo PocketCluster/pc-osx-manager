@@ -41,56 +41,139 @@ type beaconManger struct {
 }
 
 func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack) error {
+    var (
+        err error               = nil
+        usm *slagent.PocketSlaveAgentMeta = nil
+        ts time.Time            = time.Now()
+        activeBC []MasterBeacon = []MasterBeacon{}
+    )
+
     // suppose we've sort out what this is.
-    usm, err := slagent.UnpackedSlaveMeta(beaconD.Message)
+    usm, err = slagent.UnpackedSlaveMeta(beaconD.Message)
     if err != nil {
         return errors.WithStack(err)
     }
 
     log.Debugf("[BEACON] %v", spew.Sdump(usm))
+
+    // this packet looks for something else
+    if len(usm.DiscoveryAgent.MasterBoundAgent) != 0 && usm.DiscoveryAgent.MasterBoundAgent != "current master" {
+        return nil
+    }
+
+    // remove discarded beacon
+    for _, bc := range b.beaconList {
+        if bc.CurrentState() != MasterDiscarded {
+            activeBC = append(activeBC, bc)
+        }
+    }
+    b.beaconList = activeBC
+
+    // check if beacon for this packet exists
+    for _, bc := range b.beaconList {
+        if bc.SlaveNode().MacAddress == usm.SlaveID {
+            switch bc.CurrentState() {
+                case MasterInit:
+                    fallthrough
+                case MasterBindBroken:
+                    fallthrough
+                case MasterDiscarded: {
+                    log.Debugf("We've found beacon for this packet, but they are not in proper mode. Let's stop")
+                    return nil
+                }
+                default: {
+                    return bc.TransitionWithSlaveMeta(&beaconD.Address, usm, ts)
+                }
+            }
+        }
+    }
+
     model.FindSlaveNode("slave_id = ?", usm.SlaveID)
     return nil
 }
 
 func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack) error {
     var (
-        bcFound bool = false
-        mc MasterBeacon = nil
-        ts time.Time = time.Now()
+        bcFound bool            = false
+        mc MasterBeacon         = nil
+        err error               = nil
+        usm *slagent.PocketSlaveAgentMeta = nil
+        state MasterBeaconState = MasterBounded
+        ts time.Time            = time.Now()
+        activeBC []MasterBeacon = []MasterBeacon{}
     )
 
-    usm, err := slagent.UnpackedSlaveMeta(searchD.Message)
+    usm, err = slagent.UnpackedSlaveMeta(searchD.Message)
     if err != nil {
         return errors.WithStack(err)
     }
 
     log.Debugf("[SEARCH] FROM %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
 
+    // this packet looks for something else
+    if len(usm.DiscoveryAgent.MasterBoundAgent) != 0 && usm.DiscoveryAgent.MasterBoundAgent != "current master" {
+        return nil
+    }
+
+    // remove discarded beacon
+    for _, bc := range b.beaconList {
+        if bc.CurrentState() != MasterDiscarded {
+            activeBC = append(activeBC, bc)
+        }
+    }
+    b.beaconList = activeBC
+
+    // check if beacon for this packet exists
     for _, bc := range b.beaconList {
         if bc.SlaveNode().MacAddress == usm.SlaveID {
 
-            // this beacon's state should be identified
-            err = bc.TransitionWithSlaveMeta(nil, usm, ts)
+            // this beacons are created and waiting for an input
+            state = bc.CurrentState()
+            if state == MasterInit || state == MasterBindBroken {
+                return bc.TransitionWithSlaveMeta(nil, usm, ts)
+            }
 
+            // if beacon is not in searching state, then mark and we've found target
             bcFound = true
             break
         }
     }
+
+    // since we've not found, create new beacon
     if !bcFound {
         mc, err = NewMasterBeacon(MasterInit, nil, b.commChannel)
         if err != nil {
             return errors.WithStack(err)
         }
         b.beaconList = append(b.beaconList, mc)
-        err = mc.TransitionWithSlaveMeta(nil, usm, ts)
-        if err != nil {
-            return errors.WithStack(err)
-        }
+        return mc.TransitionWithSlaveMeta(nil, usm, ts)
     }
-    return nil
+
+    return errors.Errorf("[ERR] TransitionWithSearchData reaches at the end. *this should never happen*")
 }
 
 func (b *beaconManger) TransitionWithTimestamp(ts time.Time) error {
+    var (
+        err error               = nil
+        ts time.Time            = time.Now()
+        activeBC []MasterBeacon = []MasterBeacon{}
+    )
+
+    // check if beacon for this packet exists
+    for _, bc := range b.beaconList {
+        err = bc.TransitionWithTimestamp(ts)
+        if err != nil {
+            log.Debugf(err.Error())
+        }
+    }
+
+    // remove discarded beacon
+    for _, bc := range b.beaconList {
+        if bc.CurrentState() != MasterDiscarded {
+            activeBC = append(activeBC, bc)
+        }
+    }
+    b.beaconList = activeBC
 
     return nil
 }
