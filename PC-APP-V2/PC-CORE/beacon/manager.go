@@ -31,7 +31,7 @@ func NewBeaconManager(comm CommChannel) (BeaconManger, error) {
         return nil, errors.WithStack(err)
     }
     for _, n := range nodes {
-        mb, err = NewMasterBeacon(MasterBindBroken, n, comm)
+        mb, err = NewMasterBeacon(MasterBindBroken, &n, comm)
         if err != nil {
             return nil, errors.WithStack(err)
         }
@@ -40,7 +40,7 @@ func NewBeaconManager(comm CommChannel) (BeaconManger, error) {
     return &beaconManger {
         commChannel:    comm,
         beaconList:     beacons,
-    }
+    }, nil
 }
 
 type BeaconManger interface {
@@ -171,7 +171,6 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack) error {
 func (b *beaconManger) TransitionWithTimestamp(ts time.Time) error {
     var (
         err error               = nil
-        ts time.Time            = time.Now()
         activeBC []MasterBeacon = []MasterBeacon{}
     )
 
