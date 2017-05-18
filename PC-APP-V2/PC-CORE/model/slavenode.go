@@ -104,30 +104,19 @@ func InsertSlaveNode(slave *SlaveNode) (error) {
 }
 
 func FindAllSlaveNode() ([]SlaveNode, error) {
-    var (
-        nodes []SlaveNode = nil
-        err error = nil
-    )
+    var nodes []SlaveNode = nil
     SharedRecordGate().Session().Find(&nodes)
-    if len(nodes) == 0 {
-        return nil, NoItemFound
-    }
-    return nodes, err
+    return nodes, nil
 }
 
 func FindSlaveNode(query interface{}, args ...interface{}) ([]SlaveNode, error) {
-    var (
-        nodes []SlaveNode = nil
-        err error = nil
-    )
+    var nodes []SlaveNode = nil
     SharedRecordGate().Session().Where(query, args).Find(&nodes)
-    return nodes, err
+    return nodes, nil
 }
 
 func FindSlaveNameCandiate() (string, error) {
-    var (
-        nodes []SlaveNode = nil
-    )
+    var nodes []SlaveNode = nil
     SharedRecordGate().Session().Where(string(SNMFieldState + " = ?"), SNMStateJoined).Find(&nodes)
     return "pc-node" + strconv.Itoa(len(nodes) + 1), nil
 }

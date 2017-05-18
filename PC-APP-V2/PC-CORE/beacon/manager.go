@@ -31,9 +31,13 @@ func NewBeaconManager(comm CommChannel) (BeaconManger, error) {
         return nil, errors.WithStack(err)
     }
     for _, n := range nodes {
-        mb, err = NewMasterBeacon(MasterBindBroken, &n, comm)
-        if err != nil {
-            return nil, errors.WithStack(err)
+        switch n.State {
+            case model.SNMStateJoined: {
+                mb, err = NewMasterBeacon(MasterBindBroken, &n, comm)
+                if err != nil {
+                    return nil, errors.WithStack(err)
+                }
+            }
         }
         beacons = append(beacons, mb)
     }
