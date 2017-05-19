@@ -99,8 +99,13 @@ func findCandiateSlaveName(b *beaconManger) string {
         var mCount = len(mbl)
         for i := 0; i < mCount; i++ {
             mb := mbl[i]
-            if mb.SlaveNode().NodeName == cname {
-                return true
+            switch mb.CurrentState() {
+                case MasterDiscarded:
+                    continue
+                default:
+                    if mb.SlaveNode().NodeName == cname {
+                        return true
+                    }
             }
         }
         return false
