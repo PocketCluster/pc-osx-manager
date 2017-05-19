@@ -1,6 +1,7 @@
 package beacon
 
 import (
+    "fmt"
     "sync"
     "time"
 
@@ -31,10 +32,11 @@ func NewBeaconManager(cid string, comm CommChannel) (BeaconManger, error) {
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    for _, n := range nodes {
+    for i, _ := range nodes {
+        n := &(nodes[i])
         switch n.State {
             case model.SNMStateJoined: {
-                mb, err = NewMasterBeacon(MasterBindBroken, &n, comm)
+                mb, err = NewMasterBeacon(MasterBindBroken, n, comm)
                 if err != nil {
                     return nil, errors.WithStack(err)
                 }
@@ -85,7 +87,32 @@ func insertMasterBeacon(b *beaconManger, m MasterBeacon) {
 }
 
 func findCandiateSlaveName(b *beaconManger) string {
-    return ""
+    b.Lock()
+    defer b.Unlock()
+
+    var (
+        ci int = 0
+        cname string = ""
+    )
+
+    findName := func(mbl []MasterBeacon, nName string) bool {
+        var mCount = len(mbl)
+        for i := 0; i < mCount; i++ {
+            mb := mbl[i]
+            if mb.SlaveNode().NodeName == cname {
+                return true
+            }
+        }
+        return false
+    }
+
+    for {
+        cname = fmt.Sprintf("pc-node%d", ci + 1)
+        if !findName(b.beaconList, cname) {
+            return cname
+        }
+        ci++
+    }
 }
 
 func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts time.Time) error {

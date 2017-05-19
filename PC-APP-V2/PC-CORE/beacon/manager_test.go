@@ -47,7 +47,7 @@ func insertTestNodes(c *C) []string {
     var uuidList []string = []string{}
     for i := 0; i < allNodeCount; i++ {
         sl := model.NewSlaveNode()
-        sl.NodeName = fmt.Sprintf("pc-node%d", i + 2)
+        sl.NodeName = fmt.Sprintf("pc-node%d", (i * 2) + 1)
         sl.MacAddress = fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i)
         sl.PublicKey = pcrypto.TestSlaveNodePublicKey()
         err := sl.JoinSlave()
@@ -175,4 +175,29 @@ func (s *ManagerSuite) TestBindInitAndTooManyTrialDiscard(c *C) {
 
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 1)
     c.Assert(man.(*beaconManger).beaconList[0].CurrentState(), Equals, MasterDiscarded)
+}
+
+func (s *ManagerSuite) TestNameGeneration(c *C) {
+    var (
+        _ = insertTestNodes(c)
+        comm = &DebugCommChannel{}
+        man, err = NewBeaconManager(masterAgentName, comm)
+    )
+    c.Assert(err, IsNil)
+    c.Assert(len(man.(*beaconManger).beaconList), Equals, allNodeCount)
+
+    for i := 0; i < allNodeCount; i++ {
+        name := fmt.Sprintf("pc-node%d", (i + 1) * 2)
+        c.Assert(findCandiateSlaveName(man.(*beaconManger)), Equals, name)
+
+        sl := model.NewSlaveNode()
+        sl.NodeName = name
+        sl.MacAddress = fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i)
+        sl.PublicKey = pcrypto.TestSlaveNodePublicKey()
+        mb, err := NewMasterBeacon(MasterBindBroken, sl, comm)
+        c.Assert(err, IsNil)
+        man.(*beaconManger).beaconList = append(man.(*beaconManger).beaconList, mb)
+    }
+
+    c.Assert(findCandiateSlaveName(man.(*beaconManger)), Equals, fmt.Sprintf("pc-node%d", allNodeCount * 2 + 1))
 }
