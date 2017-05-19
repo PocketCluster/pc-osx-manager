@@ -44,9 +44,7 @@ func (s *ManagerSuite) TearDownTest(c *C) {
 // --- test ---
 
 func insertTestNodes(c *C) []string {
-    var (
-        uuidList []string = []string{}
-    )
+    var uuidList []string = []string{}
     for i := 0; i < allNodeCount; i++ {
         sl := model.NewSlaveNode()
         sl.NodeName = fmt.Sprintf("pc-node%d", i + 1)
