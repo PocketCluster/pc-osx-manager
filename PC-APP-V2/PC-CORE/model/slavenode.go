@@ -7,6 +7,7 @@ import (
     "github.com/pkg/errors"
     "github.com/jinzhu/gorm"
     "strings"
+    "github.com/pborman/uuid"
 )
 
 const slaveNodeTable string = `slavenode`
@@ -32,6 +33,7 @@ const (
 )
 
 const (
+    SNMStateInit            = "node_init"
     SNMStateJoined          = "node_joined"
     SNMStateDeparted        = "node_departed"
 )
@@ -62,10 +64,6 @@ type SlaveNode struct {
     PrivateKey      []byte       `gorm:"column:private_key;type:BLOB"`
 }
 
-func (SlaveNode) TableName() string {
-    return slaveNodeTable
-}
-
 func IP4AddrToString(ip4Addr string) (string, error) {
     if len(ip4Addr) == 0 {
         return "", errors.Errorf("[ERR] empty address")
@@ -77,18 +75,16 @@ func IP4AddrToString(ip4Addr string) (string, error) {
     return addrform[0], nil
 }
 
-// returns IP4 string part only
-func (s *SlaveNode) IP4AddrString() (string, error) {
-    return IP4AddrToString(s.IP4Address)
-}
-
 func NewSlaveNode() *SlaveNode {
     return &SlaveNode {
         ModelVersion:    SlaveNodeModelVersion,
-        State:           SNMStateJoined,
+        // whenever slave is generated, new UUID should be assigned to it.
+        SlaveUUID:       uuid.New(),
+        State:           SNMStateInit,
     }
 }
 
+// TODO : this should be deprecated
 func InsertSlaveNode(slave *SlaveNode) (error) {
     if slave == nil {
         return errors.Errorf("[ERR] Slave node is null")
@@ -128,5 +124,57 @@ func UpdateSlaveNode(slave *SlaveNode) (error) {
 
 func DeleteAllSlaveNode() (error) {
     SharedRecordGate().Session().Delete(SlaveNode{})
+    return nil
+}
+
+// instance methods
+func (SlaveNode) TableName() string {
+    return slaveNodeTable
+}
+
+// returns IP4 string part only
+func (s *SlaveNode) IP4AddrString() (string, error) {
+    return IP4AddrToString(s.IP4Address)
+}
+
+func (s *SlaveNode) JoinSlave() error {
+    if s.ModelVersion != SlaveNodeModelVersion {
+        return errors.Errorf("[ERR] incorrect slave model version")
+    }
+    if len(s.SlaveUUID) != 36 {
+        return errors.Errorf("[ERR] incorrect uuid")
+    }
+    if len(s.NodeName) == 0 {
+        return errors.Errorf("[ERR] incorrect node name")
+    }
+    if len(s.PublicKey) == 0 {
+        return errors.Errorf("[ERR] incorrect slave primary key")
+    }
+    ts := time.Now()
+    s.State = SNMStateJoined
+    s.Joined = ts
+    s.LastAlive = ts
+    SharedRecordGate().Session().Create(s)
+    return nil
+}
+
+func (s *SlaveNode) Update() error {
+    if s.State != SNMStateJoined {
+        return errors.Errorf("[ERR] Slave node state is not SNMStateJoined : " + s.State)
+    }
+    if s.ModelVersion != SlaveNodeModelVersion {
+        return errors.Errorf("[ERR] incorrect slave model version")
+    }
+    if len(s.SlaveUUID) == 36 {
+        return errors.Errorf("[ERR] incorrect uuid")
+    }
+    if len(s.NodeName) == 0 {
+        return errors.Errorf("[ERR] incorrect node name")
+    }
+    if len(s.PrivateKey) == 0 {
+        return errors.Errorf("[ERR] incorrect slave primary key")
+    }
+    s.LastAlive = time.Now()
+    SharedRecordGate().Session().Save(s)
     return nil
 }

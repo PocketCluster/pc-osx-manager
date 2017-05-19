@@ -91,7 +91,7 @@ func ConvertDiscoveryToStatus(discovery *PocketSlaveDiscovery, slaveNode, slaveU
         return nil, errors.Errorf("[ERR] incorrect slave uuid")
     }
     if len(slaveHardware) == 0 {
-        return nil, errors.Errorf("[ERR] incrrect slave hardware architecture")
+        return nil, errors.Errorf("[ERR] incorrect slave hardware architecture")
     }
     if discovery.Version != SLAVE_DISCOVER_VERSION {
         return nil, errors.Errorf("[ERR] Incorrect SlaveDiscoveryAgent version")

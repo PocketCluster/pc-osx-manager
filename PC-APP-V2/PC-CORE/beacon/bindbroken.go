@@ -104,9 +104,12 @@ func (b *bindbroken) bindBroken(sender *net.UDPAddr, meta *slagent.PocketSlaveAg
     }
     // slave ip address
     // TODO : (2015-05-16) we're not checking ip + subnet eligivility for now
-    _, err = model.IP4AddrToString(meta.DiscoveryAgent.SlaveAddress)
+    addr, err := model.IP4AddrToString(meta.DiscoveryAgent.SlaveAddress)
     if err != nil {
         return MasterTransitionFail, errors.WithStack(err)
+    }
+    if addr != sender.IP.String() {
+        return MasterTransitionFail, errors.Errorf("[ERR] malicious slave ip address.")
     }
     b.slaveNode.IP4Address = meta.DiscoveryAgent.SlaveAddress
     // slave ip gateway

@@ -1,6 +1,7 @@
 package beacon
 
 import (
+    "sync"
     "time"
 
     log "github.com/Sirupsen/logrus"
@@ -15,11 +16,11 @@ import (
     "github.com/davecgh/go-spew/spew"
 )
 
-func NewBeaconManagerWithFunc(comm CommChannelFunc) (BeaconManger, error) {
-    return NewBeaconManager(comm)
+func NewBeaconManagerWithFunc(cid string, comm CommChannelFunc) (BeaconManger, error) {
+    return NewBeaconManager(cid, comm)
 }
 
-func NewBeaconManager(comm CommChannel) (BeaconManger, error) {
+func NewBeaconManager(cid string, comm CommChannel) (BeaconManger, error) {
     var (
         beacons []MasterBeacon = []MasterBeacon{}
         nodes []model.SlaveNode = nil
@@ -42,30 +43,55 @@ func NewBeaconManager(comm CommChannel) (BeaconManger, error) {
         beacons = append(beacons, mb)
     }
     return &beaconManger {
+        clusterID:      cid,
         commChannel:    comm,
         beaconList:     beacons,
     }, nil
 }
 
 type BeaconManger interface {
-    TransitionWithBeaconData(beaconD ucast.BeaconPack) error
-    TransitionWithSearchData(searchD mcast.CastPack) error
+    TransitionWithBeaconData(beaconD ucast.BeaconPack, ts time.Time) error
+    TransitionWithSearchData(searchD mcast.CastPack, ts time.Time) error
     TransitionWithTimestamp(ts time.Time) error
     Shutdown() error
 }
 
 // We might not need a locking mechanism as "select" statement will choose only "one input" at a time.
 type beaconManger struct {
-    commChannel  CommChannel
-    beaconList   []MasterBeacon
+    sync.Mutex
+    clusterID      string
+    commChannel    CommChannel
+    beaconList     []MasterBeacon
 }
 
-func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack) error {
+func pruneBeaconList(b *beaconManger) {
+    b.Lock()
+    defer b.Unlock()
+
+    var activeBC []MasterBeacon = []MasterBeacon{}
+    for _, bc := range b.beaconList {
+        if bc.CurrentState() != MasterDiscarded {
+            activeBC = append(activeBC, bc)
+        }
+    }
+    b.beaconList = activeBC
+}
+
+func insertMasterBeacon(b *beaconManger, m MasterBeacon) {
+    b.Lock()
+    defer b.Unlock()
+
+    b.beaconList = append(b.beaconList, m)
+}
+
+func findCandiateSlaveName(b *beaconManger) string {
+    return ""
+}
+
+func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts time.Time) error {
     var (
-        err error               = nil
+        err error = nil
         usm *slagent.PocketSlaveAgentMeta = nil
-        ts time.Time            = time.Now()
-        activeBC []MasterBeacon = []MasterBeacon{}
     )
 
     // suppose we've sort out what this is.
@@ -77,17 +103,12 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack) error 
     log.Debugf("[BEACON] FROM %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
 
     // this packet looks for something else
-    if len(usm.DiscoveryAgent.MasterBoundAgent) != 0 && usm.DiscoveryAgent.MasterBoundAgent != "current master" {
+    if len(usm.StatusAgent.MasterBoundAgent) != 0 && usm.StatusAgent.MasterBoundAgent != b.clusterID {
         return nil
     }
 
     // remove discarded beacon
-    for _, bc := range b.beaconList {
-        if bc.CurrentState() != MasterDiscarded {
-            activeBC = append(activeBC, bc)
-        }
-    }
-    b.beaconList = activeBC
+    pruneBeaconList(b)
 
     // check if beacon for this packet exists
     for _, bc := range b.beaconList {
@@ -108,19 +129,16 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack) error 
         }
     }
 
-    model.FindSlaveNode("slave_id = ?", usm.SlaveID)
     return nil
 }
 
-func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack) error {
+func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.Time) error {
     var (
         bcFound bool            = false
         mc MasterBeacon         = nil
         err error               = nil
         usm *slagent.PocketSlaveAgentMeta = nil
         state MasterBeaconState = MasterBounded
-        ts time.Time            = time.Now()
-        activeBC []MasterBeacon = []MasterBeacon{}
     )
 
     usm, err = slagent.UnpackedSlaveMeta(searchD.Message)
@@ -131,17 +149,13 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack) error {
     log.Debugf("[SEARCH] FROM %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
 
     // this packet looks for something else
-    if len(usm.DiscoveryAgent.MasterBoundAgent) != 0 && usm.DiscoveryAgent.MasterBoundAgent != "current master" {
+    if len(usm.DiscoveryAgent.MasterBoundAgent) != 0 && usm.DiscoveryAgent.MasterBoundAgent != b.clusterID {
+        log.Debugf("[SEARCH] this packet belong to other master | usm.DiscoveryAgent.MasterBoundAgent %v | b.clusterID %v", usm.DiscoveryAgent.MasterBoundAgent, b.clusterID)
         return nil
     }
 
     // remove discarded beacon
-    for _, bc := range b.beaconList {
-        if bc.CurrentState() != MasterDiscarded {
-            activeBC = append(activeBC, bc)
-        }
-    }
-    b.beaconList = activeBC
+    pruneBeaconList(b)
 
     // check if beacon for this packet exists
     for _, bc := range b.beaconList {
@@ -165,7 +179,7 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack) error {
         if err != nil {
             return errors.WithStack(err)
         }
-        b.beaconList = append(b.beaconList, mc)
+        insertMasterBeacon(b, mc)
         return mc.TransitionWithSlaveMeta(&searchD.Address, usm, ts)
     }
 
@@ -173,10 +187,10 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack) error {
 }
 
 func (b *beaconManger) TransitionWithTimestamp(ts time.Time) error {
-    var (
-        err error               = nil
-        activeBC []MasterBeacon = []MasterBeacon{}
-    )
+    var err error = nil
+
+    // remove discarded beacon
+    pruneBeaconList(b)
 
     // check if beacon for this packet exists
     for _, bc := range b.beaconList {
@@ -185,14 +199,6 @@ func (b *beaconManger) TransitionWithTimestamp(ts time.Time) error {
             log.Debugf(err.Error())
         }
     }
-
-    // remove discarded beacon
-    for _, bc := range b.beaconList {
-        if bc.CurrentState() != MasterDiscarded {
-            activeBC = append(activeBC, bc)
-        }
-    }
-    b.beaconList = activeBC
 
     return nil
 }
