@@ -132,3 +132,47 @@ func (s *ManagerSuite) TestBindBrokenAndTooManyTrialDiscard(c *C) {
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 1)
     c.Assert(man.(*beaconManger).beaconList[0].CurrentState(), Equals, MasterBindBroken)
 }
+
+func (s *ManagerSuite) TestBindInitAndTooManyTrialDiscard(c *C) {
+    var (
+        comm = &DebugCommChannel{}
+        masterTS, slaveTS = time.Now(), time.Now()
+    )
+
+    // initialize new search cast
+    sa, err := slagent.TestSlaveUnboundedMasterSearchDiscovery()
+    c.Assert(err, IsNil)
+    psm, err := slagent.PackedSlaveMeta(sa)
+    c.Assert(err, IsNil)
+
+    // new beacon master
+    man, err := NewBeaconManager(masterAgentName, comm)
+    c.Assert(err, IsNil)
+    c.Assert(len(man.(*beaconManger).beaconList), Equals, 0)
+
+    // check if this successfully generate new beacon and move the transition
+    err = man.TransitionWithSearchData(mcast.CastPack{Address:*slaveAddr, Message:psm}, masterTS)
+    c.Assert(err, IsNil)
+    c.Assert(len(man.(*beaconManger).beaconList), Equals, 1)
+    c.Assert(man.(*beaconManger).beaconList[0].CurrentState(), Equals, MasterUnbounded)
+    c.Assert(man.(*beaconManger).beaconList[0].SlaveNode(), NotNil)
+    c.Assert(len(man.(*beaconManger).beaconList[0].SlaveNode().SlaveUUID), Equals, 36)
+
+    // slave answering inquery
+    for i := 0; i < int(TransitionFailureLimit); i ++ {
+        slaveTS = masterTS.Add(time.Second)
+        sa, end, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
+        c.Assert(err, IsNil)
+        // this is an error injection
+        sa.StatusAgent.Version = ""
+        psm, err := slagent.PackedSlaveMeta(sa)
+        c.Assert(err, IsNil)
+
+        masterTS = end.Add(time.Second)
+        err = man.TransitionWithBeaconData(ucast.BeaconPack{Address:*slaveAddr, Message:psm}, masterTS)
+        c.Assert(err, NotNil)
+    }
+
+    c.Assert(len(man.(*beaconManger).beaconList), Equals, 1)
+    c.Assert(man.(*beaconManger).beaconList[0].CurrentState(), Equals, MasterDiscarded)
+}
