@@ -47,7 +47,7 @@ func insertTestNodes(c *C) []string {
     var uuidList []string = []string{}
     for i := 0; i < allNodeCount; i++ {
         sl := model.NewSlaveNode()
-        sl.NodeName = fmt.Sprintf("pc-node%d", i + 1)
+        sl.NodeName = fmt.Sprintf("pc-node%d", i + 2)
         sl.MacAddress = fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i)
         sl.PublicKey = pcrypto.TestSlaveNodePublicKey()
         err := sl.JoinSlave()
