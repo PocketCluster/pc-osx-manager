@@ -104,22 +104,26 @@ func initMasterAgentService(a *mainLife) error {
 
     a.RegisterServiceFunc(func() error {
         var (
+            beaconMan beacon.BeaconManger = nil
             err error = nil
             timer = time.NewTicker(time.Second)
-            beaconMan = beacon.NewBeaconManagerWithFunc(func(host string, payload []byte) error {
-                log.Debugf("[BEACON-SLAVE] Host %v", host)
-                return nil
-
-                a.BroadcastEvent(Event{
-                    Name: coreServiceBeacon,
-                    Payload:ucast.BeaconSend{
-                        Host:       host,
-                        Payload:    payload,
-                    },
-                })
-                return nil
-            })
         )
+        beaconMan, err = beacon.NewBeaconManagerWithFunc(func(host string, payload []byte) error {
+            log.Debugf("[BEACON-SLAVE] Host %v", host)
+            return nil
+
+            a.BroadcastEvent(Event{
+                Name: coreServiceBeacon,
+                Payload:ucast.BeaconSend{
+                    Host:       host,
+                    Payload:    payload,
+                },
+            })
+            return nil
+        })
+        if err != nil {
+            return errors.WithStack(err)
+        }
         defer timer.Stop()
 
         log.Debugf("[AGENT] starting agent service...")

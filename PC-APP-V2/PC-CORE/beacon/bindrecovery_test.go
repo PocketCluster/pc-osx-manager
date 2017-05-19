@@ -33,7 +33,7 @@ func Test_BindRecovery_Bounded_Transition(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    err = mb.TransitionWithSlaveMeta(nil, meta, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, meta, masterTS)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -86,7 +86,7 @@ func Test_BindRecovery_Bounded_TimeoutFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    err = mb.TransitionWithSlaveMeta(nil, meta, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, meta, masterTS)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -155,7 +155,7 @@ func Test_BindRecovery_Bounded_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    err = mb.TransitionWithSlaveMeta(nil, meta, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, meta, masterTS)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -210,7 +210,7 @@ func Test_BindRecovery_Bounded_TxActionFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    err = mb.TransitionWithSlaveMeta(nil, meta, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, meta, masterTS)
     if err != nil {
         t.Errorf(err.Error())
         return

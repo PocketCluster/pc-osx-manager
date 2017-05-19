@@ -76,8 +76,8 @@ func (b *bindbroken) transitionActionWithTimestamp(masterTimestamp time.Time) er
 }
 
 func (b *bindbroken) bindBroken(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
-    if sender != nil {
-        return MasterTransitionIdle, errors.Errorf("[ERR] incorrect slave input. slave address should be nil when receiving multicast in broken bind.")
+    if sender == nil {
+        return MasterTransitionIdle, errors.Errorf("[ERR] incorrect slave input. slave address should not be nil when receiving multicast in broken bind.")
     }
     if meta.DiscoveryAgent == nil || meta.DiscoveryAgent.Version != slagent.SLAVE_DISCOVER_VERSION {
         return MasterTransitionFail, errors.Errorf("[ERR] Null or incorrect version of slave status")

@@ -31,7 +31,7 @@ func Test_BeaconInit_Bounded_OnePass_Transition(t *testing.T) {
         return
     }
     masterTS := time.Now()
-    if err := mb.TransitionWithSlaveMeta(nil, sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -143,7 +143,7 @@ func Test_Bounded_Unbroken_Loop(t *testing.T) {
         return
     }
     masterTS := time.Now()
-    if err := mb.TransitionWithSlaveMeta(nil, sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -272,7 +272,7 @@ func Test_Bounded_BindBroken_TimeoutFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    if err := mb.TransitionWithSlaveMeta(nil, sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -386,7 +386,7 @@ func Test_Bounded_BindBroken_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    if err := mb.TransitionWithSlaveMeta(nil, sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -500,7 +500,7 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    if err := mb.TransitionWithSlaveMeta(nil, sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }

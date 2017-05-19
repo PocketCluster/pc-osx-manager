@@ -9,6 +9,8 @@ import (
     "github.com/pborman/uuid"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pcrypto"
+    "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/udpnet/mcast"
 )
 
 const (
@@ -76,4 +78,25 @@ func (s *ManagerSuite) TestLoadingNodes(c *C) {
         }
         c.Assert(nodeFound, Equals, true)
     }
+}
+
+func (s *ManagerSuite) TestSearchCatcher(c *C) {
+    var (
+        comm = &DebugCommChannel{}
+        man, err = NewBeaconManager(comm)
+    )
+    c.Assert(err, IsNil)
+
+    // initialize new search cast
+    sa, err := slagent.TestSlaveBindBroken(masterAgentName)
+    c.Assert(err, IsNil)
+    psm, err := slagent.PackedSlaveMeta(sa)
+    c.Assert(err, IsNil)
+
+    // check if this successfully generate new beacon and move the transition
+    err = man.TransitionWithSearchData(mcast.CastPack{Address:*slaveAddr, Message:psm})
+    c.Assert(err, IsNil)
+
+
+
 }

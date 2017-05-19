@@ -30,7 +30,7 @@ func Test_Inquired_KeyExchange_TimeoutFail(t *testing.T) {
         return
     }
     masterTS := time.Now()
-    if err := mb.TransitionWithSlaveMeta(nil, sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -108,7 +108,7 @@ func Test_Inquired_KeyExchange_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS := time.Now()
-    err = mb.TransitionWithSlaveMeta(nil, sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -187,7 +187,7 @@ func Test_Inquired_KeyExchange_TxActionFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    if err := mb.TransitionWithSlaveMeta(nil, sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }

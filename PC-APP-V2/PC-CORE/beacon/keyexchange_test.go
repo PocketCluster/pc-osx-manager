@@ -31,7 +31,7 @@ func Test_KeyExchange_CryptoCheck_TimeoutFail(t *testing.T) {
         return
     }
     masterTS := time.Now()
-    mb.TransitionWithSlaveMeta(nil, sa, masterTS)
+    mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if mb.CurrentState() != MasterUnbounded {
         t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
         return
@@ -121,7 +121,7 @@ func Test_KeyExchange_CryptoCheck_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS := time.Now()
-    mb.TransitionWithSlaveMeta(nil, sa, masterTS)
+    mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if mb.CurrentState() != MasterUnbounded {
         t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
         return
@@ -205,7 +205,7 @@ func Test_KeyExchange_CryptoCheck_TxActionFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    mb.TransitionWithSlaveMeta(nil, sa, masterTS)
+    mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if mb.CurrentState() != MasterUnbounded {
         t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
         return

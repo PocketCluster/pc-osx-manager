@@ -74,7 +74,7 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack) error 
         return errors.WithStack(err)
     }
 
-    log.Debugf("[BEACON] %v", spew.Sdump(usm))
+    log.Debugf("[BEACON] FROM %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
 
     // this packet looks for something else
     if len(usm.DiscoveryAgent.MasterBoundAgent) != 0 && usm.DiscoveryAgent.MasterBoundAgent != "current master" {
@@ -150,7 +150,7 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack) error {
             // this beacons are created and waiting for an input
             state = bc.CurrentState()
             if state == MasterInit || state == MasterBindBroken {
-                return bc.TransitionWithSlaveMeta(nil, usm, ts)
+                return bc.TransitionWithSlaveMeta(&searchD.Address, usm, ts)
             }
 
             // if beacon is not in searching state, then mark and we've found target
@@ -166,7 +166,7 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack) error {
             return errors.WithStack(err)
         }
         b.beaconList = append(b.beaconList, mc)
-        return mc.TransitionWithSlaveMeta(nil, usm, ts)
+        return mc.TransitionWithSlaveMeta(&searchD.Address, usm, ts)
     }
 
     return errors.Errorf("[ERR] TransitionWithSearchData reaches at the end. *this should never happen*")

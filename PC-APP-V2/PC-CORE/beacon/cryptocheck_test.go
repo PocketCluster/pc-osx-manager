@@ -30,7 +30,7 @@ func Test_CryptoCheck_Bounded_TimeoutFail(t *testing.T) {
         return
     }
     masterTS := time.Now()
-    if err := mb.TransitionWithSlaveMeta(nil, sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -135,7 +135,7 @@ func Test_CryptoCheck_Bounded_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS := time.Now()
-    if err := mb.TransitionWithSlaveMeta(nil, sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -231,7 +231,7 @@ func Test_CryptoCheck_Bounded_TxActionFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    if err := mb.TransitionWithSlaveMeta(nil, sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
