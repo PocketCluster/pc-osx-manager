@@ -66,81 +66,6 @@ type beaconManger struct {
     beaconList     []MasterBeacon
 }
 
-func pruneBeaconList(b *beaconManger) {
-    b.Lock()
-    defer b.Unlock()
-
-    var activeBC []MasterBeacon = []MasterBeacon{}
-    for _, bc := range b.beaconList {
-        if bc.CurrentState() != MasterDiscarded {
-            activeBC = append(activeBC, bc)
-        }
-    }
-    b.beaconList = activeBC
-}
-
-func insertMasterBeacon(b *beaconManger, m MasterBeacon) {
-    b.Lock()
-    defer b.Unlock()
-
-    b.beaconList = append(b.beaconList, m)
-}
-
-func assignSlaveNodeName(b *beaconManger, s *model.SlaveNode) {
-    b.Lock()
-    defer b.Unlock()
-
-    var (
-        ci int = 0
-        cname string = ""
-    )
-
-    findName := func(mbl []MasterBeacon, nUUID, nName string) bool {
-        var mCount = len(mbl)
-        for i := 0; i < mCount; i++ {
-            mb := mbl[i]
-            if mb.SlaveNode().SlaveUUID == nUUID {
-                continue
-            }
-            switch mb.CurrentState() {
-                case MasterDiscarded:
-                    continue
-                default:
-                    if mb.SlaveNode().NodeName == cname {
-                        return true
-                    }
-            }
-        }
-        return false
-    }
-
-    for {
-        cname = fmt.Sprintf("pc-node%d", ci + 1)
-        if !findName(b.beaconList, s.SlaveUUID, cname) {
-            s.NodeName = cname
-            return
-        }
-        ci++
-    }
-}
-
-func shutdownMasterBeacons(b *beaconManger) {
-    b.Lock()
-    defer b.Unlock()
-
-    var (
-        bLen = len(b.beaconList)
-        mb MasterBeacon = nil
-    )
-
-    for i := 0; i < bLen; i++ {
-        mb = b.beaconList[i]
-        mb.Shutdown()
-    }
-    // assign new slice to prevent nil crash
-    b.beaconList = []MasterBeacon{}
-}
-
 func (b *beaconManger) Sanitize(s *model.SlaveNode) error {
     assignSlaveNodeName(b, s)
     return nil
@@ -265,4 +190,79 @@ func (b *beaconManger) Shutdown() error {
     shutdownMasterBeacons(b)
     b.commChannel = nil
     return nil
+}
+
+func pruneBeaconList(b *beaconManger) {
+    b.Lock()
+    defer b.Unlock()
+
+    var activeBC []MasterBeacon = []MasterBeacon{}
+    for _, bc := range b.beaconList {
+        if bc.CurrentState() != MasterDiscarded {
+            activeBC = append(activeBC, bc)
+        }
+    }
+    b.beaconList = activeBC
+}
+
+func insertMasterBeacon(b *beaconManger, m MasterBeacon) {
+    b.Lock()
+    defer b.Unlock()
+
+    b.beaconList = append(b.beaconList, m)
+}
+
+func assignSlaveNodeName(b *beaconManger, s *model.SlaveNode) {
+    b.Lock()
+    defer b.Unlock()
+
+    var (
+        ci int = 0
+        cname string = ""
+    )
+
+    findName := func(mbl []MasterBeacon, nUUID, nName string) bool {
+        var mCount = len(mbl)
+        for i := 0; i < mCount; i++ {
+            mb := mbl[i]
+            if mb.SlaveNode().SlaveUUID == nUUID {
+                continue
+            }
+            switch mb.CurrentState() {
+            case MasterDiscarded:
+                continue
+            default:
+                if mb.SlaveNode().NodeName == cname {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    for {
+        cname = fmt.Sprintf("pc-node%d", ci + 1)
+        if !findName(b.beaconList, s.SlaveUUID, cname) {
+            s.NodeName = cname
+            return
+        }
+        ci++
+    }
+}
+
+func shutdownMasterBeacons(b *beaconManger) {
+    b.Lock()
+    defer b.Unlock()
+
+    var (
+        bLen = len(b.beaconList)
+        mb MasterBeacon = nil
+    )
+
+    for i := 0; i < bLen; i++ {
+        mb = b.beaconList[i]
+        mb.Shutdown()
+    }
+    // assign new slice to prevent nil crash
+    b.beaconList = []MasterBeacon{}
 }
