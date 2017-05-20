@@ -35,6 +35,7 @@ type BeaconState interface {
     TransitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (BeaconState, error)
     TransitionWithTimestamp(masterTimestamp time.Time) (BeaconState, error)
     SlaveNode() *model.SlaveNode
+    Close()
 }
 
 type beaconState struct {
@@ -111,17 +112,30 @@ func (b *beaconState) SlaveNode() (*model.SlaveNode) {
 }
 
 /* ------------------------------------------------ Helper Functions ------------------------------------------------ */
-// close func pointers and delegates to help GC
+// Since this disconnects relation to slavenode sanitizer, be extremely careful when you call this.
+//
+// Close should only be called when
+// 1) Disruptive event happens
+// 2) Completely abandon after MasterDiscarded state.
+// 3) BeaconManger shuts down
 func (b *beaconState) Close() {
-    b.slaveMetaTransition    = nil
+    if b.slaveNode != nil {
+        b.slaveNode.RemoveSanitizer()
+    }
+    b.gcHelper()
+}
+
+// gcHelper nullify pointers and delegates to help GC
+func (b *beaconState) gcHelper() {
     b.timestampTransition    = nil
+    b.slaveMetaTransition    = nil
     b.onTransitionSuccess    = nil
     b.onTransitionFailure    = nil
 
+    b.slaveNode              = nil
     b.aesKey                 = nil
     b.aesCryptor             = nil
     b.rsaEncryptor           = nil
-    b.slaveNode              = nil
     b.commChan               = nil
 
     b.slaveLocation          = nil
