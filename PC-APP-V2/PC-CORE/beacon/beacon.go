@@ -69,7 +69,7 @@ type MasterBeacon interface {
     CurrentState() MasterBeaconState
     TransitionWithTimestamp(timestamp time.Time) error
     TransitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error
-
+    Shutdown()
     SlaveNode() *model.SlaveNode
 }
 
@@ -132,3 +132,6 @@ func (mb *masterBeacon) SlaveNode() *model.SlaveNode {
     return mb.state.SlaveNode()
 }
 
+func (mb *masterBeacon) Shutdown() {
+    mb.state.Close()
+}

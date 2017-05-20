@@ -181,22 +181,33 @@ func (s *ManagerSuite) TestNameGeneration(c *C) {
     var (
         _ = insertTestNodes(c)
         comm = &DebugCommChannel{}
+        sa *model.SlaveNode
         man, err = NewBeaconManager(masterAgentName, comm)
     )
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, allNodeCount)
 
     for i := 0; i < allNodeCount; i++ {
-        name := fmt.Sprintf("pc-node%d", (i + 1) * 2)
-        //c.Assert(findCandiateSlaveName(man.(*beaconManger)), Equals, name)
-        sl := model.NewSlaveNode(nil)
-        sl.NodeName = name
-        sl.MacAddress = fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i)
-        sl.PublicKey = pcrypto.TestSlaveNodePublicKey()
-        mb, err := NewMasterBeacon(MasterBindBroken, sl, comm)
+        sa = model.NewSlaveNode(man.(*beaconManger))
+        mb, err := NewMasterBeacon(MasterInit, sa, comm)
         c.Assert(err, IsNil)
         man.(*beaconManger).beaconList = append(man.(*beaconManger).beaconList, mb)
+        // assign new name
+        assignSlaveNodeName(man.(*beaconManger), sa)
+        // check names are in order of 2,4,6,8
+        c.Assert(sa.NodeName, Equals, fmt.Sprintf("pc-node%d", (i + 1) * 2))
     }
+}
 
-    //c.Assert(findCandiateSlaveName(man.(*beaconManger)), Equals, fmt.Sprintf("pc-node%d", allNodeCount * 2 + 1))
+func (s *ManagerSuite) TestShutdown(c *C) {
+    var (
+        _ = insertTestNodes(c)
+        comm = &DebugCommChannel{}
+        man, err = NewBeaconManager(masterAgentName, comm)
+    )
+    c.Assert(err, IsNil)
+    c.Assert(len(man.(*beaconManger).beaconList), Equals, allNodeCount)
+
+    man.Shutdown()
+    c.Assert(len(man.(*beaconManger).beaconList), Equals, 0)
 }

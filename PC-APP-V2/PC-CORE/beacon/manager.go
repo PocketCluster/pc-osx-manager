@@ -86,7 +86,7 @@ func insertMasterBeacon(b *beaconManger, m MasterBeacon) {
     b.beaconList = append(b.beaconList, m)
 }
 
-func findAndSetCandiateSlaveName(b *beaconManger, s *model.SlaveNode) {
+func assignSlaveNodeName(b *beaconManger, s *model.SlaveNode) {
     b.Lock()
     defer b.Unlock()
 
@@ -118,13 +118,31 @@ func findAndSetCandiateSlaveName(b *beaconManger, s *model.SlaveNode) {
         cname = fmt.Sprintf("pc-node%d", ci + 1)
         if !findName(b.beaconList, s.SlaveUUID, cname) {
             s.NodeName = cname
+            return
         }
         ci++
     }
 }
 
+func shutdownMasterBeacons(b *beaconManger) {
+    b.Lock()
+    defer b.Unlock()
+
+    var (
+        bLen = len(b.beaconList)
+        mb MasterBeacon = nil
+    )
+
+    for i := 0; i < bLen; i++ {
+        mb = b.beaconList[i]
+        mb.Shutdown()
+    }
+    // assign new slice to prevent nil crash
+    b.beaconList = []MasterBeacon{}
+}
+
 func (b *beaconManger) Sanitize(s *model.SlaveNode) error {
-    findAndSetCandiateSlaveName(b, s)
+    assignSlaveNodeName(b, s)
     return nil
 }
 
@@ -244,6 +262,7 @@ func (b *beaconManger) TransitionWithTimestamp(ts time.Time) error {
 }
 
 func (b *beaconManger) Shutdown() error {
+    shutdownMasterBeacons(b)
     b.commChannel = nil
     return nil
 }
