@@ -31,7 +31,7 @@ func DebugTestSlaveNode() *SlaveNode {
     initTime, _ := time.Parse(time.RFC3339, "2016-11-01T22:08:41+00:00")
     piface, _ := slcontext.PrimaryNetworkInterface()
 
-    s := NewSlaveNode()
+    s := NewSlaveNode(nil)
 
     s.Joined          = initTime
     s.Departed        = initTime

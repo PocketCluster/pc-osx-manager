@@ -78,23 +78,26 @@ func NewMasterBeaconWithFunc(state MasterBeaconState, slaveNode *model.SlaveNode
 }
 
 func NewMasterBeacon(state MasterBeaconState, slaveNode *model.SlaveNode, comm CommChannel) (MasterBeacon, error) {
+    if slaveNode == nil {
+        return nil, errors.Errorf("[ERR] slavenode cannot be nil")
+    }
     if comm == nil {
-        return nil, errors.Errorf("[ERR] communication channel cannot be void")
+        return nil, errors.Errorf("[ERR] communication channel cannot be nil")
     }
 
     switch state {
-    case MasterInit:
-        return &masterBeacon{state:beaconinitState(comm)}, nil
+        case MasterInit:
+            return &masterBeacon{state:beaconinitState(slaveNode, comm)}, nil
 
-    case MasterBindBroken:
-        if slaveNode == nil {
-            return nil, errors.Errorf("[ERR] Slavenode cannot be nil")
-        }
-        bstate, err := bindbrokenState(slaveNode, comm)
-        if err != nil {
-            return nil, errors.WithStack(err)
-        }
-        return &masterBeacon{state:bstate}, nil
+        case MasterBindBroken:
+            if slaveNode == nil {
+                return nil, errors.Errorf("[ERR] Slavenode cannot be nil")
+            }
+            bstate, err := bindbrokenState(slaveNode, comm)
+            if err != nil {
+                return nil, errors.WithStack(err)
+            }
+            return &masterBeacon{state:bstate}, nil
     }
     return nil, errors.Errorf("[ERR] MasterBeacon can initiated from MasterInit or MasterBindBroken only")
 }

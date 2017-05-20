@@ -5,6 +5,7 @@ import (
     "time"
 
     "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/pc-core/model"
 )
 
 func Test_Init_Unbounded_Transition_TimeoutFail(t *testing.T) {
@@ -14,7 +15,7 @@ func Test_Init_Unbounded_Transition_TimeoutFail(t *testing.T) {
     debugComm := &DebugCommChannel{}
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -71,7 +72,7 @@ func Test_Init_Unbounded_Transition_TooManyMetaFail(t *testing.T) {
     debugComm := &DebugCommChannel{}
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -118,7 +119,7 @@ func Test_BeaconInit_Unbounded_TxActionFail(t *testing.T) {
     )
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return

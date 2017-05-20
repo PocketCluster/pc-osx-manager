@@ -5,6 +5,7 @@ import (
 
     . "gopkg.in/check.v1"
     "github.com/pborman/uuid"
+    "github.com/stkim1/pcrypto"
 )
 
 const (
@@ -15,9 +16,12 @@ const (
 
 func (s *RecordSuite) TestAllNodeCount(c *C) {
     for i := 0; i < allNodeCount; i++ {
-        sl := NewSlaveNode()
+        sl := NewSlaveNode(nil)
+        sl.NodeName = "pc-node1"
         sl.MacAddress = fmt.Sprintf("%d", i)
-        c.Assert(InsertSlaveNode(sl), IsNil)
+        sl.SlaveUUID = uuid.New()
+        sl.PublicKey = pcrypto.TestSlavePublicKey()
+        c.Assert(sl.JoinSlave(), IsNil)
     }
 
     nodes, err := FindAllSlaveNode()
@@ -32,11 +36,13 @@ func (s *RecordSuite) TestFindSingleNode(c *C) {
     )
     for i := 0; i < allNodeCount; i++ {
         ui := uuid.New()
-        sl := NewSlaveNode()
+        sl := NewSlaveNode(nil)
         sl.MacAddress = fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i)
         sl.SlaveUUID = ui
+        sl.NodeName = "pc-node1"
+        sl.PublicKey = pcrypto.TestSlavePublicKey()
         uuidList = append(uuidList, ui)
-        c.Assert(InsertSlaveNode(sl), IsNil)
+        c.Assert(sl.JoinSlave(), IsNil)
     }
     for i := 0; i < allNodeCount; i++ {
         nodes, err := FindSlaveNode(string(SNMFieldUUID + " = ?"), uuidList[i])
@@ -46,13 +52,14 @@ func (s *RecordSuite) TestFindSingleNode(c *C) {
     }
 }
 
-func (s *RecordSuite) TestNodeNameCandiate(c *C) {
+// this test is replaced with ones in beacon/manager_test.go
+func (s *RecordSuite) skipNodeNameCandiate(c *C) {
     for i := 0; i < allNodeCount; i++ {
         sn, err := FindSlaveNameCandiate()
         c.Assert(err, Equals, nil)
         c.Assert(sn, Equals, fmt.Sprintf("pc-node%d", i + 1))
 
-        sl := NewSlaveNode()
+        sl := NewSlaveNode(nil)
         sl.MacAddress = fmt.Sprintf("%d", i)
         InsertSlaveNode(sl)
     }

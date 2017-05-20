@@ -5,6 +5,7 @@ import (
     "time"
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pcrypto"
+    "github.com/stkim1/pc-core/model"
 )
 
 func Test_CryptoCheck_Bounded_TimeoutFail(t *testing.T) {
@@ -15,7 +16,7 @@ func Test_CryptoCheck_Bounded_TimeoutFail(t *testing.T) {
     debugComm := &DebugCommChannel{}
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -120,7 +121,7 @@ func Test_CryptoCheck_Bounded_TooManyMetaFail(t *testing.T) {
     debugComm := &DebugCommChannel{}
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -216,7 +217,7 @@ func Test_CryptoCheck_Bounded_TxActionFail(t *testing.T) {
         masterTS, slaveTS time.Time = time.Now(), time.Now()
     )
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return

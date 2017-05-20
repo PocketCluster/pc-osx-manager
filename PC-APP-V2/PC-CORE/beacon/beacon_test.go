@@ -17,6 +17,7 @@ var (
     masterAgentName, slaveNodeName string
     initTime time.Time
     slaveAddr *net.UDPAddr
+    slaveSanitizer model.NodeSanitizerFunc
 )
 
 func setUp() {
@@ -41,6 +42,11 @@ func setUp() {
         return
     }
     slaveAddr = sa
+
+    slaveSanitizer = func(s *model.SlaveNode) error {
+        s.NodeName = slaveNodeName
+        return nil
+    }
 }
 
 func tearDown() {

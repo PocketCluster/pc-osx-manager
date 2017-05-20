@@ -4,9 +4,7 @@ import (
     "net"
     "time"
 
-    "github.com/pborman/uuid"
     "github.com/pkg/errors"
-    "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/context"
@@ -123,17 +121,10 @@ func (b *inquired) inquired(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentM
     b.aesKey = aesKey
     b.aesCryptor = aesCryptor
 
-    // find a suitable slave node name
-    nodeName, err := model.FindSlaveNameCandiate()
+    // now assign node name and
+    err = b.slaveNode.SanitizeSlave()
     if err != nil {
         return MasterTransitionFail, errors.WithStack(err)
-    }
-    b.slaveNode.NodeName = nodeName
-
-    // assign new uuid
-    b.slaveNode.SlaveUUID = uuid.New()
-    if len(b.slaveNode.SlaveUUID) == 0 {
-        return MasterTransitionFail, errors.Errorf("[ERR] invalid slave uuid generated. give up on this")
     }
 
     // save status for response generation

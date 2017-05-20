@@ -38,6 +38,17 @@ const (
     SNMStateDeparted        = "node_departed"
 )
 
+// the purpose of node sanitization is 1) to give name, and 2) to make it aligned with other node data
+type NodeSanitizerFunc func(s *SlaveNode) error
+
+func (n NodeSanitizerFunc) Sanitize(s *SlaveNode) error {
+    return n(s)
+}
+
+type NodeSanitizer interface {
+    Sanitize(s *SlaveNode) error
+}
+
 type SlaveNode struct {
     gorm.Model
 
@@ -62,6 +73,8 @@ type SlaveNode struct {
     UserMadeName    string       `gorm:"column:user_made_name;type:VARCHAR(256)"`
     PublicKey       []byte       `gorm:"column:public_key;type:BLOB"`
     PrivateKey      []byte       `gorm:"column:private_key;type:BLOB"`
+
+    sanitizer       NodeSanitizer   `gorm:"-"`
 }
 
 func IP4AddrToString(ip4Addr string) (string, error) {
@@ -75,12 +88,13 @@ func IP4AddrToString(ip4Addr string) (string, error) {
     return addrform[0], nil
 }
 
-func NewSlaveNode() *SlaveNode {
+func NewSlaveNode(ns NodeSanitizer) *SlaveNode {
     return &SlaveNode {
         ModelVersion:    SlaveNodeModelVersion,
         // whenever slave is generated, new UUID should be assigned to it.
         SlaveUUID:       uuid.New(),
         State:           SNMStateInit,
+        sanitizer:       ns,
     }
 }
 
@@ -102,6 +116,9 @@ func InsertSlaveNode(slave *SlaveNode) (error) {
 func FindAllSlaveNode() ([]SlaveNode, error) {
     var nodes []SlaveNode = nil
     SharedRecordGate().Session().Find(&nodes)
+    if len(nodes) == 0 {
+        return nil, NoItemFound
+    }
     return nodes, nil
 }
 
@@ -112,6 +129,7 @@ func FindSlaveNode(query interface{}, args ...interface{}) ([]SlaveNode, error) 
 }
 
 func FindSlaveNameCandiate() (string, error) {
+    return "", errors.Errorf("[ERR] this function is deprecated")
     var nodes []SlaveNode = nil
     SharedRecordGate().Session().Where(string(SNMFieldState + " = ?"), SNMStateJoined).Find(&nodes)
     return "pc-node" + strconv.Itoa(len(nodes) + 1), nil
@@ -135,6 +153,13 @@ func (SlaveNode) TableName() string {
 // returns IP4 string part only
 func (s *SlaveNode) IP4AddrString() (string, error) {
     return IP4AddrToString(s.IP4Address)
+}
+
+func (s *SlaveNode) SanitizeSlave() error {
+    if s.sanitizer == nil {
+        return errors.Errorf("[ERR] node sanitizer is nil")
+    }
+    return s.sanitizer.Sanitize(s)
 }
 
 func (s *SlaveNode) JoinSlave() error {
@@ -177,4 +202,8 @@ func (s *SlaveNode) Update() error {
     s.LastAlive = time.Now()
     SharedRecordGate().Session().Save(s)
     return nil
+}
+
+func (s *SlaveNode) RemoveSanitizer() {
+    s.sanitizer = nil
 }

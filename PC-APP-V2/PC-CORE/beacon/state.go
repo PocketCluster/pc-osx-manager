@@ -251,7 +251,7 @@ func newBeaconForState(b* beaconState, newState, oldState MasterBeaconState) Bea
     var err error = nil
     switch newState {
         case MasterInit:
-            newBeaconState = beaconinitState(b.commChan)
+            newBeaconState = beaconinitState(b.slaveNode, b.commChan)
 
         case MasterUnbounded:
             newBeaconState = unboundedState(b)

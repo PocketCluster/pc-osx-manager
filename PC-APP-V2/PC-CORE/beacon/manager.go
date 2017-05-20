@@ -29,7 +29,7 @@ func NewBeaconManager(cid string, comm CommChannel) (BeaconManger, error) {
         err error = nil
     )
     nodes, err = model.FindAllSlaveNode()
-    if err != nil {
+    if err != nil && err != model.NoItemFound{
         return nil, errors.WithStack(err)
     }
     for i, _ := range nodes {
@@ -86,7 +86,7 @@ func insertMasterBeacon(b *beaconManger, m MasterBeacon) {
     b.beaconList = append(b.beaconList, m)
 }
 
-func findCandiateSlaveName(b *beaconManger) string {
+func findAndSetCandiateSlaveName(b *beaconManger, s *model.SlaveNode) {
     b.Lock()
     defer b.Unlock()
 
@@ -95,10 +95,13 @@ func findCandiateSlaveName(b *beaconManger) string {
         cname string = ""
     )
 
-    findName := func(mbl []MasterBeacon, nName string) bool {
+    findName := func(mbl []MasterBeacon, nUUID, nName string) bool {
         var mCount = len(mbl)
         for i := 0; i < mCount; i++ {
             mb := mbl[i]
+            if mb.SlaveNode().SlaveUUID == nUUID {
+                continue
+            }
             switch mb.CurrentState() {
                 case MasterDiscarded:
                     continue
@@ -113,11 +116,16 @@ func findCandiateSlaveName(b *beaconManger) string {
 
     for {
         cname = fmt.Sprintf("pc-node%d", ci + 1)
-        if !findName(b.beaconList, cname) {
-            return cname
+        if !findName(b.beaconList, s.SlaveUUID, cname) {
+            s.NodeName = cname
         }
         ci++
     }
+}
+
+func (b *beaconManger) Sanitize(s *model.SlaveNode) error {
+    findAndSetCandiateSlaveName(b, s)
+    return nil
 }
 
 func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts time.Time) error {
@@ -207,7 +215,7 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
 
     // since we've not found, create new beacon
     if !bcFound {
-        mc, err = NewMasterBeacon(MasterInit, nil, b.commChannel)
+        mc, err = NewMasterBeacon(MasterInit, model.NewSlaveNode(b), b.commChannel)
         if err != nil {
             return errors.WithStack(err)
         }

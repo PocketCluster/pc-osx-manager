@@ -91,7 +91,7 @@ func (s *RecordSuite) TestSlaveNodeCRUD(c *C) {
 
     // 2nd node
     ts2 := ts1.Add(time.Second)
-    slave3 := NewSlaveNode()
+    slave3 := NewSlaveNode(nil)
     slave3.Joined       = ts2
     slave3.Departed     = ts2
     slave3.LastAlive    = ts2
@@ -106,10 +106,6 @@ func (s *RecordSuite) TestSlaveNodeCRUD(c *C) {
     nodes, err = FindAllSlaveNode()
     c.Assert(err, IsNil)
     c.Assert(len(nodes), Equals, 2)
-
-    nodeName, err := FindSlaveNameCandiate()
-    c.Assert(err, IsNil)
-    c.Assert(nodeName, Equals, availableSlave)
 
     for _, n := range nodes {
         if n.NodeName == firstSlave {
