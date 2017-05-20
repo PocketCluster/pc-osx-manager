@@ -219,26 +219,25 @@ func assignSlaveNodeName(b *beaconManger, s *model.SlaveNode) {
     var (
         ci int = 0
         cname string = ""
-    )
-
-    findName := func(mbl []MasterBeacon, nUUID, nName string) bool {
-        var mCount = len(mbl)
-        for i := 0; i < mCount; i++ {
-            mb := mbl[i]
-            if mb.SlaveNode().SlaveUUID == nUUID {
-                continue
-            }
-            switch mb.CurrentState() {
-            case MasterDiscarded:
-                continue
-            default:
-                if mb.SlaveNode().NodeName == cname {
-                    return true
+        findName = func(mbl []MasterBeacon, nUUID, nName string) bool {
+            var mCount = len(mbl)
+            for i := 0; i < mCount; i++ {
+                mb := mbl[i]
+                if mb.SlaveNode().SlaveUUID == nUUID {
+                    continue
+                }
+                switch mb.CurrentState() {
+                case MasterDiscarded:
+                    continue
+                default:
+                    if mb.SlaveNode().NodeName == cname {
+                        return true
+                    }
                 }
             }
+            return false
         }
-        return false
-    }
+    )
 
     for {
         cname = fmt.Sprintf("pc-node%d", ci + 1)
