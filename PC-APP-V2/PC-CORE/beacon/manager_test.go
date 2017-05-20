@@ -175,6 +175,10 @@ func (s *ManagerSuite) TestBindInitAndTooManyTrialDiscard(c *C) {
 
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 1)
     c.Assert(man.(*beaconManger).beaconList[0].CurrentState(), Equals, MasterDiscarded)
+
+    err = man.TransitionWithTimestamp(masterTS.Add(time.Second))
+    c.Assert(err, IsNil)
+    c.Assert(len(man.(*beaconManger).beaconList), Equals, 0)
 }
 
 func (s *ManagerSuite) TestNameGeneration(c *C) {

@@ -28,11 +28,14 @@ func NewBeaconManager(cid string, comm CommChannel) (BeaconManger, error) {
         mb MasterBeacon = nil
         err error = nil
     )
+
     nodes, err = model.FindAllSlaveNode()
     if err != nil && err != model.NoItemFound{
         return nil, errors.WithStack(err)
     }
-    for i, _ := range nodes {
+
+    var nLen int = len(nodes)
+    for i := 0; i < nLen; i ++ {
         n := &(nodes[i])
         switch n.State {
             case model.SNMStateJoined: {
@@ -44,6 +47,7 @@ func NewBeaconManager(cid string, comm CommChannel) (BeaconManger, error) {
         }
         beacons = append(beacons, mb)
     }
+
     return &beaconManger {
         clusterID:      cid,
         commChannel:    comm,
@@ -94,7 +98,9 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts tim
     pruneBeaconList(b)
 
     // check if beacon for this packet exists
-    for _, bc := range b.beaconList {
+    var bLen int = len(b.beaconList)
+    for i := 0; i < bLen; i++  {
+        bc := b.beaconList[i]
         if bc.SlaveNode().MacAddress == usm.SlaveID {
             switch bc.CurrentState() {
                 case MasterInit:
@@ -141,7 +147,9 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
     pruneBeaconList(b)
 
     // check if beacon for this packet exists
-    for _, bc := range b.beaconList {
+    var bLen int = len(b.beaconList)
+    for i := 0; i < bLen; i++  {
+        bc := b.beaconList[i]
         if bc.SlaveNode().MacAddress == usm.SlaveID {
 
             // this beacons are created and waiting for an input
@@ -176,7 +184,9 @@ func (b *beaconManger) TransitionWithTimestamp(ts time.Time) error {
     pruneBeaconList(b)
 
     // check if beacon for this packet exists
-    for _, bc := range b.beaconList {
+    var bLen int = len(b.beaconList)
+    for i := 0; i < bLen; i++  {
+        bc := b.beaconList[i]
         err = bc.TransitionWithTimestamp(ts)
         if err != nil {
             log.Debugf(err.Error())
@@ -196,9 +206,16 @@ func pruneBeaconList(b *beaconManger) {
     b.Lock()
     defer b.Unlock()
 
-    var activeBC []MasterBeacon = []MasterBeacon{}
-    for _, bc := range b.beaconList {
-        if bc.CurrentState() != MasterDiscarded {
+    var (
+        activeBC []MasterBeacon = []MasterBeacon{}
+        bLen int = len(b.beaconList)
+    )
+
+    for i := 0; i < bLen; i++ {
+        bc := b.beaconList[i]
+        if bc.CurrentState() == MasterDiscarded {
+            bc.Shutdown()
+        } else {
             activeBC = append(activeBC, bc)
         }
     }
@@ -220,8 +237,8 @@ func assignSlaveNodeName(b *beaconManger, s *model.SlaveNode) {
         ci int = 0
         cname string = ""
         findName = func(mbl []MasterBeacon, nUUID, nName string) bool {
-            var mCount = len(mbl)
-            for i := 0; i < mCount; i++ {
+            var bLen = len(mbl)
+            for i := 0; i < bLen; i++ {
                 mb := mbl[i]
                 if mb.SlaveNode().SlaveUUID == nUUID {
                     continue
