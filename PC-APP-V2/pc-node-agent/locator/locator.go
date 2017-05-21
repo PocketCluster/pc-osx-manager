@@ -5,6 +5,11 @@ import (
 
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/msagent"
+    "github.com/stkim1/udpnet/ucast"
+)
+import (
+    log "github.com/Sirupsen/logrus"
+    "github.com/davecgh/go-spew/spew"
 )
 
 type SlaveLocatingState int
@@ -63,9 +68,12 @@ func (b BeaconTxFunc) UcastSend(target string, data []byte) error {
 
 type SlaveLocator interface {
     CurrentState() (SlaveLocatingState, error)
-    TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) error
+    TranstionWithMasterBeacon(bp ucast.BeaconPack, slaveTimestamp time.Time) error
     TranstionWithTimestamp(timestamp time.Time) error
     Close() error
+
+    // TODO : this should be deprecated for testing only
+    TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) error
 }
 
 type slaveLocator struct {
@@ -101,11 +109,20 @@ func (sl *slaveLocator) CurrentState() (SlaveLocatingState, error) {
     return sl.state.CurrentState(), nil
 }
 
-func (sl *slaveLocator) TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) error {
+func (sl *slaveLocator) TranstionWithMasterBeacon(bp ucast.BeaconPack, slaveTimestamp time.Time) error {
     if sl.state == nil {
         return errors.Errorf("[ERR] LocatorState is nil. Cannot make transition with master meta")
     }
-    var err error
+    // (2017-05-21) we're not looking into ucast.BeaconPack.Address for now as Master's interface address might vary
+    meta, err := msagent.UnpackedMasterMeta(bp.Message)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    // TODO : should we check MasterBindAgent here?
+
+    log.Debugf("[AGENT-BEACON] RECEIVED\n %v \n %v", spew.Sdump(bp.Address), spew.Sdump(meta))
+
     sl.state, err = sl.state.MasterMetaTransition(meta, slaveTimestamp)
     return err
 }

@@ -10,6 +10,7 @@ import (
     "gopkg.in/vmihailenco/msgpack.v2"
 
     "github.com/stkim1/pc-node-agent/dhcp"
+    "github.com/stkim1/pc-node-agent/locator"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/udpnet/ucast"
@@ -17,8 +18,6 @@ import (
 
 import (
     "github.com/davecgh/go-spew/spew"
-    "github.com/stkim1/pc-core/msagent"
-    "github.com/stkim1/pc-node-agent/locator"
 )
 
 const (
@@ -226,13 +225,9 @@ func initAgentService(app *PocketApplication) error {
                 case b := <- beaconC: {
                     mp, ok := b.Payload.(ucast.BeaconPack)
                     if ok {
-                        mup, err := msagent.UnpackedMasterMeta(mp.Message)
-                        if err == nil {
-                            log.Debugf("[AGENT-BEACON] RECEIVED\n %v \n %v", spew.Sdump(mp.Address), spew.Sdump(mup))
-                            err = loc.TranstionWithMasterMeta(mup, time.Now())
-                            if err != nil {
-                                log.Debugf(err.Error())
-                            }
+                        err = loc.TranstionWithMasterBeacon(mp, time.Now())
+                        if err != nil {
+                            log.Debug(err.Error())
                         }
                     }
                 }
