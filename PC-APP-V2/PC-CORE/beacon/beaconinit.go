@@ -54,7 +54,7 @@ func (b *beaconinit) beaconInit(sender *net.UDPAddr, meta *slagent.PocketSlaveAg
     if meta.DiscoveryAgent.SlaveResponse != slagent.SLAVE_LOOKUP_AGENT {
         return MasterTransitionIdle, nil
     }
-    if len(meta.DiscoveryAgent.MasterBoundAgent) != 0 {
+    if len(meta.MasterBoundAgent) != 0 {
         return MasterTransitionIdle, errors.Errorf("[ERR] Incorrect slave bind. Slave should not be bound to a master when it looks for joining")
     }
 
@@ -74,13 +74,10 @@ func (b *beaconinit) beaconInit(sender *net.UDPAddr, meta *slagent.PocketSlaveAg
     }
     b.slaveNode.IP4Gateway = meta.DiscoveryAgent.SlaveGateway
     // slave mac address
-    if meta.SlaveID != meta.DiscoveryAgent.SlaveNodeMacAddr {
-        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave ID")
-    }
-    if len(meta.DiscoveryAgent.SlaveNodeMacAddr) == 0 {
+    if len(meta.SlaveID) == 0 {
         return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave MAC address")
     }
-    b.slaveNode.MacAddress = meta.DiscoveryAgent.SlaveNodeMacAddr
+    b.slaveNode.MacAddress = meta.SlaveID
 
     // save slave discovery to send responsed
     b.slaveLocation = meta.DiscoveryAgent

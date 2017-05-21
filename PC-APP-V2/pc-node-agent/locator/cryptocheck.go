@@ -54,11 +54,11 @@ func (ls *cryptocheck) transitionActionWithTimestamp(slaveTimestamp time.Time) e
     if err != nil {
         return errors.WithStack(err)
     }
-    sa, err := slagent.CheckSlaveCryptoStatus(masterAgentName, slaveAgentName, slaveUUID, slaveTimestamp)
+    sa, err := slagent.CheckSlaveCryptoStatus(slaveAgentName, slaveUUID, slaveTimestamp)
     if err != nil {
         return errors.WithStack(err)
     }
-    sm, err := slagent.CheckSlaveCryptoMeta(sa, aesCryptor)
+    sm, err := slagent.CheckSlaveCryptoMeta(masterAgentName, sa, aesCryptor)
     if err != nil {
         return errors.WithStack(err)
     }
@@ -81,6 +81,13 @@ func (ls *cryptocheck) transitionWithMasterMeta(meta *msagent.PocketMasterAgentM
         // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
         return SlaveTransitionIdle, errors.Errorf("[ERR] Null or incorrect version of master meta")
     }
+    msAgent, err := slcontext.SharedSlaveContext().GetMasterAgent()
+    if err != nil {
+        return SlaveTransitionFail, errors.WithStack(err)
+    }
+    if meta.MasterBoundAgent != msAgent {
+        return SlaveTransitionFail, errors.Errorf("[ERR] Master bound agent is different than commissioned one %s", msAgent)
+    }
     if len(meta.EncryptedMasterCommand) == 0 {
         return SlaveTransitionFail, errors.Errorf("[ERR] Null or incorrect encrypted master command")
     }
@@ -92,13 +99,6 @@ func (ls *cryptocheck) transitionWithMasterMeta(meta *msagent.PocketMasterAgentM
     msCmd, err := msagent.UnpackedMasterCommand(pckedCmd)
     if err != nil {
         return SlaveTransitionFail, errors.WithStack(err)
-    }
-    msAgent, err := slcontext.SharedSlaveContext().GetMasterAgent()
-    if err != nil {
-        return SlaveTransitionFail, errors.WithStack(err)
-    }
-    if msCmd.MasterBoundAgent != msAgent {
-        return SlaveTransitionFail, errors.Errorf("[ERR] Master bound agent is different than commissioned one %s", msAgent)
     }
     if msCmd.Version != msagent.MASTER_COMMAND_VERSION {
         return SlaveTransitionFail, errors.Errorf("[ERR] Incorrect version of master command")

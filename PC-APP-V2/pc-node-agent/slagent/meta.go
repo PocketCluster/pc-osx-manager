@@ -9,6 +9,7 @@ import (
 
 type PocketSlaveAgentMeta struct {
     MetaVersion        MetaProtocol                `msgpack:"s_pm"`
+    MasterBoundAgent   string                      `msgpack:"m_ba, omitempty"`
     SlaveID            string                      `msgpack:"s_id"`
     DiscoveryAgent     *PocketSlaveDiscovery       `msgpack:"s_ad, inline, omitempty"`
     StatusAgent        *PocketSlaveStatus          `msgpack:"s_as, inline, omitempty"`
@@ -41,7 +42,6 @@ func UnboundedMasterDiscoveryMeta() (*PocketSlaveAgentMeta, error) {
             SlaveResponse:       SLAVE_LOOKUP_AGENT,
             SlaveAddress:        piface.PrimaryIP4Addr(),
             SlaveGateway:        piface.GatewayAddr,
-            SlaveNodeMacAddr:    piface.HardwareAddr,
         },
     }, nil
 }
@@ -52,13 +52,13 @@ func AnswerMasterInquiryMeta(agent *PocketSlaveStatus) (*PocketSlaveAgentMeta, e
         return nil, errors.WithStack(err)
     }
     return &PocketSlaveAgentMeta{
-        MetaVersion:       SLAVE_META_VERSION,
-        SlaveID:           piface.HardwareAddr,
-        StatusAgent:       agent,
+        MetaVersion:         SLAVE_META_VERSION,
+        SlaveID:             piface.HardwareAddr,
+        StatusAgent:         agent,
     }, nil
 }
 
-func KeyExchangeMeta(agent *PocketSlaveStatus, pubkey []byte) (*PocketSlaveAgentMeta, error) {
+func KeyExchangeMeta(master string, agent *PocketSlaveStatus, pubkey []byte) (*PocketSlaveAgentMeta, error) {
     if pubkey == nil {
         return nil, errors.Errorf("[ERR] You cannot pass an empty pubkey")
     }
@@ -67,19 +67,20 @@ func KeyExchangeMeta(agent *PocketSlaveStatus, pubkey []byte) (*PocketSlaveAgent
         return nil, errors.WithStack(err)
     }
     return &PocketSlaveAgentMeta{
-        MetaVersion:       SLAVE_META_VERSION,
-        SlaveID:           piface.HardwareAddr,
-        StatusAgent:       agent,
-        SlavePubKey:       pubkey,
+        MetaVersion:         SLAVE_META_VERSION,
+        MasterBoundAgent:    master,
+        SlaveID:             piface.HardwareAddr,
+        StatusAgent:         agent,
+        SlavePubKey:         pubkey,
     }, nil
 }
 
-func CheckSlaveCryptoMeta(agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor) (*PocketSlaveAgentMeta, error) {
+func CheckSlaveCryptoMeta(master string, agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor) (*PocketSlaveAgentMeta, error) {
     mp, err := PackedSlaveStatus(agent)
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    crypted, err := aescrypto.EncryptByAES(mp)
+    encrypted, err := aescrypto.EncryptByAES(mp)
     if err != nil {
         return nil, errors.WithStack(err)
     }
@@ -88,18 +89,19 @@ func CheckSlaveCryptoMeta(agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor
         return nil, errors.WithStack(err)
     }
     return &PocketSlaveAgentMeta{
-        MetaVersion:      SLAVE_META_VERSION,
-        SlaveID:          piface.HardwareAddr,
-        EncryptedStatus:  crypted,
+        MetaVersion:         SLAVE_META_VERSION,
+        MasterBoundAgent:    master,
+        SlaveID:             piface.HardwareAddr,
+        EncryptedStatus:     encrypted,
     }, nil
 }
 
-func SlaveBoundedMeta(agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor) (*PocketSlaveAgentMeta, error) {
+func SlaveBoundedMeta(master string, agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor) (*PocketSlaveAgentMeta, error) {
     mp, err := PackedSlaveStatus(agent)
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    crypted, err := aescrypto.EncryptByAES(mp)
+    encrypted, err := aescrypto.EncryptByAES(mp)
     if err != nil {
         return nil, errors.WithStack(err)
     }
@@ -108,9 +110,10 @@ func SlaveBoundedMeta(agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor) (*
         return nil, errors.WithStack(err)
     }
     return &PocketSlaveAgentMeta{
-        MetaVersion:      SLAVE_META_VERSION,
-        SlaveID:          piface.HardwareAddr,
-        EncryptedStatus:  crypted,
+        MetaVersion:         SLAVE_META_VERSION,
+        MasterBoundAgent:    master,
+        SlaveID:             piface.HardwareAddr,
+        EncryptedStatus:     encrypted,
     }, nil
 }
 
@@ -120,15 +123,14 @@ func BrokenBindMeta(master string) (*PocketSlaveAgentMeta, error) {
         return nil, errors.WithStack(err)
     }
     return &PocketSlaveAgentMeta{
-        MetaVersion:      SLAVE_META_VERSION,
-        SlaveID:          piface.HardwareAddr,
-        DiscoveryAgent:   &PocketSlaveDiscovery {
+        MetaVersion:         SLAVE_META_VERSION,
+        MasterBoundAgent:    master,
+        SlaveID:             piface.HardwareAddr,
+        DiscoveryAgent:      &PocketSlaveDiscovery {
             Version:             SLAVE_DISCOVER_VERSION,
-            MasterBoundAgent:    master,
             SlaveResponse:       SLAVE_LOOKUP_AGENT,
             SlaveAddress:        piface.PrimaryIP4Addr(),
             SlaveGateway:        piface.GatewayAddr,
-            SlaveNodeMacAddr:    piface.HardwareAddr,
         },
     }, nil
 }

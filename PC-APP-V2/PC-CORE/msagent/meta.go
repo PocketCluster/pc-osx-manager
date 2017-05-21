@@ -2,13 +2,16 @@ package msagent
 
 import (
     "github.com/pkg/errors"
+
     "gopkg.in/vmihailenco/msgpack.v2"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/pc-core/context"
 )
 
 type PocketMasterAgentMeta struct {
     MetaVersion               MetaProtocol            `msgpack:"m_pm"`
+    MasterBoundAgent          string                  `msgpack:"m_ba"`
     DiscoveryRespond          *PocketMasterRespond    `msgpack:"m_dr, inline, omitempty"`
     StatusCommand             *PocketMasterCommand    `msgpack:"m_sc, inline, omitempty"`
     EncryptedMasterCommand    []byte                  `msgpack:"m_ec, omitempty"`
@@ -32,21 +35,29 @@ func UnpackedMasterMeta(message []byte) (meta *PocketMasterAgentMeta, err error)
 
 // --- per-state meta function
 
-func SlaveIdentityInquiryMeta(respond *PocketMasterRespond) (meta *PocketMasterAgentMeta) {
-    meta = &PocketMasterAgentMeta {
-        MetaVersion:         MASTER_META_VERSION,
-        DiscoveryRespond:    respond,
+func SlaveIdentityInquiryMeta(respond *PocketMasterRespond) (*PocketMasterAgentMeta, error) {
+    sn, err := context.SharedHostContext().MasterAgentName()
+    if err != nil {
+        return nil, errors.WithStack(err)
     }
-    return
+    return &PocketMasterAgentMeta {
+        MetaVersion:         MASTER_META_VERSION,
+        MasterBoundAgent:    sn,
+        DiscoveryRespond:    respond,
+    }, nil
 }
 
-func MasterDeclarationMeta(command *PocketMasterCommand, pubkey []byte) (meta *PocketMasterAgentMeta) {
-    meta = &PocketMasterAgentMeta {
+func MasterDeclarationMeta(command *PocketMasterCommand, pubkey []byte) (*PocketMasterAgentMeta, error) {
+    sn, err := context.SharedHostContext().MasterAgentName()
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+    return &PocketMasterAgentMeta {
         MetaVersion:         MASTER_META_VERSION,
+        MasterBoundAgent:    sn,
         StatusCommand:       command,
         MasterPubkey:        pubkey,
-    }
-    return
+    }, nil
 }
 
 // AES key is encrypted with RSA for async encryption scheme, and rest of data, EncryptedMasterCommand &
@@ -79,8 +90,13 @@ func ExchangeCryptoKeyAndNameMeta(command *PocketMasterCommand, slaveIdentity *s
     if err != nil {
         return nil, errors.WithStack(err)
     }
+    sn, err := context.SharedHostContext().MasterAgentName()
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
     return &PocketMasterAgentMeta {
         MetaVersion:               MASTER_META_VERSION,
+        MasterBoundAgent:          sn,
         EncryptedMasterCommand:    encryptedCommand,
         EncryptedSlaveStatus:      eslid,
         EncryptedAESKey:           encryptedAES,
@@ -99,9 +115,14 @@ func MasterBindReadyMeta(command *PocketMasterCommand, aescrypto pcrypto.AESCryp
     if err != nil {
         return nil, errors.WithStack(err)
     }
+    sn, err := context.SharedHostContext().MasterAgentName()
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
     return &PocketMasterAgentMeta {
-        MetaVersion:              MASTER_META_VERSION,
-        EncryptedMasterCommand:   encryptedCommand,
+        MetaVersion:               MASTER_META_VERSION,
+        MasterBoundAgent:          sn,
+        EncryptedMasterCommand:    encryptedCommand,
     }, nil
 }
 
@@ -116,9 +137,14 @@ func BoundedSlaveAckMeta(command *PocketMasterCommand, aescrypto pcrypto.AESCryp
     if err != nil {
         return nil, errors.WithStack(err)
     }
+    sn, err := context.SharedHostContext().MasterAgentName()
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
     return &PocketMasterAgentMeta {
-        MetaVersion             :MASTER_META_VERSION,
-        EncryptedMasterCommand  :encryptedCommand,
+        MetaVersion:               MASTER_META_VERSION,
+        MasterBoundAgent:          sn,
+        EncryptedMasterCommand:    encryptedCommand,
     }, nil
 }
 
@@ -138,8 +164,13 @@ func BrokenBindRecoverMeta(respond *PocketMasterRespond, aeskey []byte, aescrypt
     if err != nil {
         return nil, errors.WithStack(err)
     }
+    sn, err := context.SharedHostContext().MasterAgentName()
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
     return &PocketMasterAgentMeta {
         MetaVersion:               MASTER_META_VERSION,
+        MasterBoundAgent:          sn,
         EncryptedMasterRespond:    er,
         EncryptedAESKey:           ea,
         RsaCryptoSignature:        as,

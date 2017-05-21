@@ -62,10 +62,6 @@ func TestUnboundedBroadcastMeta(t *testing.T) {
         t.Error("[ERR] Incorrect DiscoveryAgent.SlaveGateway")
         return
     }
-    if len(ma.DiscoveryAgent.SlaveNodeMacAddr) == 0 || ma.DiscoveryAgent.SlaveNodeMacAddr != piface.HardwareAddr {
-        t.Error("[ERR] Incorrect DiscoveryAgent.SlaveNetmask")
-        return
-    }
 
     mp, err := PackedSlaveMeta(ma)
     if err != nil {
@@ -101,10 +97,6 @@ func TestUnboundedBroadcastMeta(t *testing.T) {
     }
     if ma.DiscoveryAgent.SlaveGateway != up.DiscoveryAgent.SlaveGateway {
         t.Error("[ERR] Unidentical ma.DiscoveryAgent.SlaveGateway")
-        return
-    }
-    if ma.DiscoveryAgent.SlaveNodeMacAddr != up.DiscoveryAgent.SlaveNodeMacAddr {
-        t.Error("[ERR] Unidentical DiscoveryAgent.SlaveNodeMacAddr")
         return
     }
 }
@@ -282,6 +274,10 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave meta version %s\n", SLAVE_META_VERSION)
         return
     }
+    if ma.MasterBoundAgent != masterAgentName {
+        t.Errorf("[ERR] Incorrect master agent name %s\n", masterAgentName)
+        return
+    }
     if len(ma.EncryptedStatus) == 0 {
         t.Errorf("[ERR] Incorrect slave status data %s\n", len(ma.EncryptedStatus))
         return
@@ -302,10 +298,6 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
     }
     if sd.Version != SLAVE_STATUS_VERSION {
         t.Errorf("[ERR] Incorrect slave status version %s\n", SLAVE_STATUS_VERSION)
-        return
-    }
-    if sd.MasterBoundAgent != masterAgentName {
-        t.Errorf("[ERR] Incorrect master agent name %s\n", masterAgentName)
         return
     }
     if sd.SlaveResponse != SLAVE_CHECK_CRYPTO {
@@ -351,6 +343,10 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Error("[ERR] Unidentical MetaVersion")
         return
     }
+    if ma.MasterBoundAgent != up.MasterBoundAgent {
+        t.Error("[ERR] Unidentical StatusAgent.MasterBoundAgent")
+        return
+    }
     if len(up.EncryptedStatus) == 0 {
         t.Errorf("[ERR] Incorrect slave status data %s\n", len(up.EncryptedStatus))
         return
@@ -369,10 +365,6 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
 
     if sd.Version != usd.Version {
         t.Error("[ERR] Unidentical StatusAgent.Version")
-        return
-    }
-    if sd.MasterBoundAgent != usd.MasterBoundAgent {
-        t.Error("[ERR] Unidentical StatusAgent.MasterBoundAgent")
         return
     }
     if sd.SlaveResponse != usd.SlaveResponse {
@@ -417,6 +409,10 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave meta version %s\n", SLAVE_META_VERSION)
         return
     }
+    if ma.MasterBoundAgent != masterAgentName {
+        t.Errorf("[ERR] Incorrect master agent name %s\n", masterAgentName)
+        return
+    }
     if len(ma.EncryptedStatus) == 0 {
         t.Errorf("[ERR] Incorrect slave status data %s\n", len(ma.EncryptedStatus))
         return
@@ -433,10 +429,6 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
     }
     if sd.Version != SLAVE_STATUS_VERSION {
         t.Errorf("[ERR] Incorrect slave status version %s\n", SLAVE_STATUS_VERSION)
-        return
-    }
-    if sd.MasterBoundAgent != masterAgentName {
-        t.Errorf("[ERR] Incorrect master agent name %s\n", masterAgentName)
         return
     }
     if sd.SlaveResponse != SLAVE_REPORT_STATUS {
@@ -482,6 +474,10 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Error("[ERR] Unidentical MetaVersion")
         return
     }
+    if ma.MasterBoundAgent != up.MasterBoundAgent {
+        t.Error("[ERR] Unidentical StatusAgent.MasterBoundAgent")
+        return
+    }
     if len(up.EncryptedStatus) == 0 {
         t.Errorf("[ERR] Incorrect slave status data %s\n", len(up.EncryptedStatus))
         return
@@ -500,10 +496,6 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
 
     if sd.Version != usd.Version {
         t.Error("[ERR] Unidentical StatusAgent.Version")
-        return
-    }
-    if sd.MasterBoundAgent != usd.MasterBoundAgent {
-        t.Error("[ERR] Unidentical StatusAgent.MasterBoundAgent")
         return
     }
     if sd.SlaveResponse != usd.SlaveResponse {
@@ -544,11 +536,11 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
     if ma.MetaVersion != SLAVE_META_VERSION {
         t.Errorf("[ERR] slave meta protocol version differs from %s\n", SLAVE_META_VERSION)
     }
+    if ma.MasterBoundAgent != masterAgentName {
+        t.Errorf("[ERR] master bound agent name differs from %s\n", masterAgentName)
+    }
     if ma.DiscoveryAgent.Version != SLAVE_DISCOVER_VERSION {
         t.Errorf("[ERR] slave discovery protocol version differs from %s\n", SLAVE_DISCOVER_VERSION)
-    }
-    if ma.DiscoveryAgent.MasterBoundAgent != masterAgentName {
-        t.Errorf("[ERR] master bound agent name differs from %s\n", masterAgentName)
     }
     if ma.DiscoveryAgent.SlaveResponse != SLAVE_LOOKUP_AGENT {
         t.Errorf("[ERR] Slave is not in correct state %s\n", SLAVE_LOOKUP_AGENT)
@@ -558,9 +550,6 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
     }
     if ma.DiscoveryAgent.SlaveGateway != piface.GatewayAddr || len(ma.DiscoveryAgent.SlaveGateway) == 0 {
         t.Errorf("[ERR] Slave gateway is incorrect %s\n", piface.GatewayAddr)
-    }
-    if ma.DiscoveryAgent.SlaveNodeMacAddr != piface.HardwareAddr || len(ma.DiscoveryAgent.SlaveNodeMacAddr) == 0 {
-        t.Errorf("[ERR] Slave MAC address is incorrect %s\n",piface.HardwareAddr)
     }
     mp, err := PackedSlaveMeta(ma)
     if err != nil {
@@ -579,11 +568,11 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
     if ma.MetaVersion != up.MetaVersion {
         t.Errorf("[ERR] slave meta protocol version differs from %s\n", ma.MetaVersion)
     }
+    if ma.MasterBoundAgent != up.MasterBoundAgent {
+        t.Errorf("[ERR] master bound agent name differs from %s\n", ma.MasterBoundAgent)
+    }
     if ma.DiscoveryAgent.Version != up.DiscoveryAgent.Version {
         t.Errorf("[ERR] slave discovery protocol version differs from %s\n", ma.DiscoveryAgent.Version)
-    }
-    if ma.DiscoveryAgent.MasterBoundAgent != up.DiscoveryAgent.MasterBoundAgent {
-        t.Errorf("[ERR] master bound agent name differs from %s\n", ma.DiscoveryAgent.MasterBoundAgent)
     }
     if ma.DiscoveryAgent.SlaveResponse != up.DiscoveryAgent.SlaveResponse {
         t.Errorf("[ERR] Slave is not in correct state %s\n", ma.DiscoveryAgent.SlaveResponse)
@@ -593,8 +582,5 @@ func TestBindBrokenBroadcastMeta(t *testing.T) {
     }
     if ma.DiscoveryAgent.SlaveGateway != up.DiscoveryAgent.SlaveGateway {
         t.Errorf("[ERR] Slave gateway is incorrect %s\n", ma.DiscoveryAgent.SlaveGateway)
-    }
-    if ma.DiscoveryAgent.SlaveNodeMacAddr != up.DiscoveryAgent.SlaveNodeMacAddr {
-        t.Errorf("[ERR] Slave MAC address is incorrect %s\n", ma.DiscoveryAgent.SlaveNodeMacAddr)
     }
 }

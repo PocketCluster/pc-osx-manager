@@ -54,11 +54,11 @@ func (ls *bounded) transitionActionWithTimestamp(slaveTimestamp time.Time) error
     if err != nil {
         return errors.WithStack(err)
     }
-    sa, err := slagent.SlaveBoundedStatus(masterAgentName, slaveAgentName, slaveUUID, slaveTimestamp)
+    sa, err := slagent.SlaveBoundedStatus(slaveAgentName, slaveUUID, slaveTimestamp)
     if err != nil {
         return errors.WithStack(err)
     }
-    sm, err := slagent.SlaveBoundedMeta(sa, aesCryptor)
+    sm, err := slagent.SlaveBoundedMeta(masterAgentName, sa, aesCryptor)
     if err != nil {
         return errors.WithStack(err)
     }

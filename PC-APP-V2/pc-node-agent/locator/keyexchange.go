@@ -42,11 +42,11 @@ func (ls *keyexchange) transitionActionWithTimestamp(slaveTimestamp time.Time) e
     if err != nil {
         return err
     }
-    agent, err := slagent.KeyExchangeStatus(masterAgentName, slaveTimestamp)
+    agent, err := slagent.KeyExchangeStatus(slaveTimestamp)
     if err != nil {
         return err
     }
-    sm, err := slagent.KeyExchangeMeta(agent, slctx.GetPublicKey())
+    sm, err := slagent.KeyExchangeMeta(masterAgentName, agent, slctx.GetPublicKey())
     if err != nil {
         return err
     }
@@ -82,6 +82,14 @@ func (ls *keyexchange) transitionWithMasterMeta(meta *msagent.PocketMasterAgentM
         return SlaveTransitionFail, errors.Errorf("[ERR] Null or incorrect slave status from master command")
     }
 
+    msAgent, err := slcontext.SharedSlaveContext().GetMasterAgent()
+    if err != nil {
+        return SlaveTransitionFail, errors.WithStack(err)
+    }
+    if meta.MasterBoundAgent != msAgent {
+        return SlaveTransitionFail, errors.Errorf("[ERR] Master bound agent is different than current one %s", msAgent)
+    }
+
     aeskey, err := slcontext.SharedSlaveContext().DecryptByRSA(meta.EncryptedAESKey, meta.RsaCryptoSignature)
     if err != nil {
         return SlaveTransitionFail, errors.WithStack(err)
@@ -98,13 +106,6 @@ func (ls *keyexchange) transitionWithMasterMeta(meta *msagent.PocketMasterAgentM
         return SlaveTransitionFail, errors.WithStack(err)
     }
 
-    msAgent, err := slcontext.SharedSlaveContext().GetMasterAgent()
-    if err != nil {
-        return SlaveTransitionFail, errors.WithStack(err)
-    }
-    if msCmd.MasterBoundAgent != msAgent {
-        return SlaveTransitionFail, errors.Errorf("[ERR] Master bound agent is different than current one %s", msAgent)
-    }
     if msCmd.Version != msagent.MASTER_COMMAND_VERSION {
         return SlaveTransitionFail, errors.Errorf("[ERR] Incorrect version of master command")
     }

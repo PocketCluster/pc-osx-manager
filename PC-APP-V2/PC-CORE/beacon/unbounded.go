@@ -47,7 +47,10 @@ func (b *unbounded) transitionActionWithTimestamp(masterTimestamp time.Time) err
     if err != nil {
         return errors.WithStack(err)
     }
-    meta := msagent.SlaveIdentityInquiryMeta(cmd)
+    meta, err := msagent.SlaveIdentityInquiryMeta(cmd)
+    if err != nil {
+        return errors.WithStack(err)
+    }
     pm, err := msagent.PackedMasterMeta(meta)
     if err != nil {
         return errors.WithStack(err)
@@ -77,7 +80,7 @@ func (b *unbounded) unbounded(sender *net.UDPAddr, meta *slagent.PocketSlaveAgen
     if addr != sender.IP.String() {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
     }
-    if b.slaveNode.MacAddress != meta.SlaveID {
+    if b.slaveNode  .MacAddress != meta.SlaveID {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
     // slave hardware architecture

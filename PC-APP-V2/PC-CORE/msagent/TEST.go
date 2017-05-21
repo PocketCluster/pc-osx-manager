@@ -28,7 +28,7 @@ func TestMasterInquireSlaveRespond() (*PocketMasterAgentMeta, error) {
     if err != nil {
         return nil, err
     }
-    return SlaveIdentityInquiryMeta(cmd), nil
+    return SlaveIdentityInquiryMeta(cmd)
 }
 
 func TestMasterAgentDeclarationCommand(masterPubKey []byte, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {
@@ -51,7 +51,8 @@ func TestMasterAgentDeclarationCommand(masterPubKey []byte, begin time.Time) (*P
     if err != nil {
         return nil, begin, err
     }
-    return MasterDeclarationMeta(cmd, masterPubKey), end, nil
+    mdm, err := MasterDeclarationMeta(cmd, masterPubKey)
+    return mdm, end, err
 }
 
 func TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, slaveUUID string, slavePubKey []byte, aesKey []byte, aesCryptor pcrypto.AESCryptor, rsaEncryptor pcrypto.RsaEncryptor, begin time.Time) (*PocketMasterAgentMeta, time.Time, error) {

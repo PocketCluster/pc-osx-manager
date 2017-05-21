@@ -50,11 +50,10 @@ import (
 }
  */
 type PocketMasterCommand struct {
-    Version           CommandProtocol     `msgpack:"m_pc"`
-    MasterBoundAgent  string              `msgpack:"m_ba"`
-    MasterCommandType CommandType         `msgpack:"m_ct"`
-    MasterAddress     string              `msgpack:"m_i4"`
-    MasterTimestamp   time.Time           `msgpack:"m_ts"`
+    Version              CommandProtocol    `msgpack:"m_pc"`
+    MasterCommandType    CommandType        `msgpack:"m_ct"`
+    MasterAddress        string             `msgpack:"m_i4"`
+    MasterTimestamp      time.Time          `msgpack:"m_ts"`
 }
 
 func PackedMasterCommand(meta *PocketMasterCommand) ([]byte, error) {
@@ -71,18 +70,16 @@ func MasterDeclarationCommand(uss *slagent.PocketSlaveStatus, timestamp time.Tim
     if string(uss.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, errors.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
+/*
     if len(uss.MasterBoundAgent) != 0 {
         return nil, errors.Errorf("[ERR] Slave is already bounded to a master")
     }
+*/
     if uss.SlaveResponse != slagent.SLAVE_WHO_I_AM {
         return nil, errors.Errorf("[ERR] Slave is not show identity")
     }
     if !uss.IsAppropriateSlaveInfo() {
         return nil, errors.Errorf("[ERR] Inappropriate Slave information")
-    }
-    sn, err := context.SharedHostContext().MasterAgentName()
-    if err != nil {
-        return nil, errors.WithStack(err)
     }
     ia, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil || len(ia) == 0 {
@@ -93,7 +90,6 @@ func MasterDeclarationCommand(uss *slagent.PocketSlaveStatus, timestamp time.Tim
 
     return &PocketMasterCommand{
         Version:              MASTER_COMMAND_VERSION,
-        MasterBoundAgent:     sn,
         MasterCommandType:    COMMAND_MASTER_DECLARE,
         MasterAddress:        ia,
         MasterTimestamp:      timestamp,
@@ -105,18 +101,16 @@ func ExchangeCryptoKeyAndNameCommand(uss *slagent.PocketSlaveStatus, slavename, 
     if string(uss.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, nil, errors.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
+/*
     if len(uss.MasterBoundAgent) == 0 {
         return nil, nil, errors.Errorf("[ERR] Slave doesn't know its master")
     }
+*/
     if uss.SlaveResponse != slagent.SLAVE_SEND_PUBKEY {
         return nil, nil, errors.Errorf("[ERR] Slave is not sending its pubkey")
     }
     if !uss.IsAppropriateSlaveInfo() {
         return nil, nil, errors.Errorf("[ERR] Inappropriate Slave information")
-    }
-    sn, err := context.SharedHostContext().MasterAgentName()
-    if err != nil {
-        return nil, nil, errors.WithStack(err)
     }
     ia, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil {
@@ -126,7 +120,6 @@ func ExchangeCryptoKeyAndNameCommand(uss *slagent.PocketSlaveStatus, slavename, 
     slaveId := slagent.NewPocketSlaveIdentity(slavename, slaveUUID)
     command := &PocketMasterCommand{
         Version:              MASTER_COMMAND_VERSION,
-        MasterBoundAgent:     sn,
         MasterCommandType:    COMMAND_EXCHANGE_CRPTKEY,
         MasterAddress:        ia,
         MasterTimestamp:      timestamp,
@@ -138,18 +131,17 @@ func MasterBindReadyCommand(uss *slagent.PocketSlaveStatus, timestamp time.Time)
     if string(uss.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, errors.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
+// When decrypting status, we need to have this checked. Also, this should be checked in BeaconManager
+/*
     if len(uss.MasterBoundAgent) == 0 {
         return nil, errors.Errorf("[ERR] Slave doesn't know its master")
     }
+*/
     if uss.SlaveResponse != slagent.SLAVE_CHECK_CRYPTO {
         return nil, errors.Errorf("[ERR] Slave is not ready for binding")
     }
     if !uss.IsAppropriateSlaveInfo() {
         return nil, errors.Errorf("[ERR] Inappropriate Slave information")
-    }
-    sn, err := context.SharedHostContext().MasterAgentName()
-    if err != nil {
-        return nil, errors.WithStack(err)
     }
     ia, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil {
@@ -157,7 +149,6 @@ func MasterBindReadyCommand(uss *slagent.PocketSlaveStatus, timestamp time.Time)
     }
     return &PocketMasterCommand{
         Version:              MASTER_COMMAND_VERSION,
-        MasterBoundAgent:     sn,
         MasterCommandType:    COMMAND_MASTER_BIND_READY,
         MasterAddress:        ia,
         MasterTimestamp:      timestamp,
@@ -168,18 +159,17 @@ func BoundedSlaveAckCommand(uss *slagent.PocketSlaveStatus, timestamp time.Time)
     if string(uss.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, errors.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
+// When decrypting status, we need to have this checked. Also, this should be checked in BeaconManager
+/*
     if len(uss.MasterBoundAgent) == 0 {
         return nil, errors.Errorf("[ERR] Slave doesn't know its master")
     }
+*/
     if uss.SlaveResponse != slagent.SLAVE_REPORT_STATUS {
         return nil, errors.Errorf("[ERR] Slave is not propery bounded")
     }
     if !uss.IsAppropriateSlaveInfo() {
         return nil, errors.Errorf("[ERR] Inappropriate Slave information")
-    }
-    sn, err := context.SharedHostContext().MasterAgentName()
-    if err != nil {
-        return nil, errors.Errorf(err.Error())
     }
     ia, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil {
@@ -187,7 +177,6 @@ func BoundedSlaveAckCommand(uss *slagent.PocketSlaveStatus, timestamp time.Time)
     }
     return &PocketMasterCommand{
         Version:               MASTER_COMMAND_VERSION,
-        MasterBoundAgent:      sn,
         MasterCommandType:     COMMAND_SLAVE_ACK,
         MasterAddress:         ia,
         MasterTimestamp:       timestamp,

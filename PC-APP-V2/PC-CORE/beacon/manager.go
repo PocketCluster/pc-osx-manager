@@ -90,7 +90,7 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts tim
     log.Debugf("[BEACON] FROM %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
 
     // this packet looks for something else
-    if len(usm.StatusAgent.MasterBoundAgent) != 0 && usm.StatusAgent.MasterBoundAgent != b.clusterID {
+    if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != b.clusterID {
         return nil
     }
 
@@ -138,8 +138,8 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
     log.Debugf("[SEARCH] FROM %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
 
     // this packet looks for something else
-    if len(usm.DiscoveryAgent.MasterBoundAgent) != 0 && usm.DiscoveryAgent.MasterBoundAgent != b.clusterID {
-        log.Debugf("[SEARCH] this packet belong to other master | usm.DiscoveryAgent.MasterBoundAgent %v | b.clusterID %v", usm.DiscoveryAgent.MasterBoundAgent, b.clusterID)
+    if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != b.clusterID {
+        log.Debugf("[SEARCH] this packet belong to other master | usm.DiscoveryAgent.MasterBoundAgent %v | b.clusterID %v", usm.MasterBoundAgent, b.clusterID)
         return nil
     }
 
@@ -174,7 +174,7 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
         return mc.TransitionWithSlaveMeta(&searchD.Address, usm, ts)
     }
 
-    return errors.Errorf("[ERR] TransitionWithSearchData reaches at the end. *this should never happen*")
+    return errors.Errorf("[ERR] TransitionWithSearchData reaches at the end. *this should never happen, and might be a malicious attempt*")
 }
 
 func (b *beaconManger) TransitionWithTimestamp(ts time.Time) error {

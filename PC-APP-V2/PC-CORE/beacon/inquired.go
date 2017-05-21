@@ -53,7 +53,10 @@ func (b *inquired) transitionActionWithTimestamp(masterTimestamp time.Time) erro
     if err != nil {
         return errors.WithStack(err)
     }
-    meta := msagent.MasterDeclarationMeta(cmd, masterPubKey)
+    meta, err := msagent.MasterDeclarationMeta(cmd, masterPubKey)
+    if err != nil {
+        return errors.WithStack(err)
+    }
     pm, err := msagent.PackedMasterMeta(meta)
     if err != nil {
         return errors.WithStack(err)
@@ -79,7 +82,7 @@ func (b *inquired) inquired(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentM
     if err != nil {
         return MasterTransitionFail, errors.WithStack(err)
     }
-    if masterAgentName != meta.StatusAgent.MasterBoundAgent {
+    if masterAgentName != meta.MasterBoundAgent {
         return MasterTransitionFail, errors.Errorf("[ERR] Slave reports to incorrect master agent")
     }
     // address check

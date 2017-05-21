@@ -97,7 +97,7 @@ func (b *keyexchange) keyExchange(sender *net.UDPAddr, meta *slagent.PocketSlave
     if err != nil {
         return MasterTransitionFail, errors.WithStack(err)
     }
-    if masterAgentName != usm.MasterBoundAgent {
+    if masterAgentName != meta.MasterBoundAgent {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect master agent name from slave")
     }
     if b.slaveNode.NodeName != usm.SlaveNodeName {

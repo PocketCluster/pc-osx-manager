@@ -10,8 +10,6 @@ import (
 
 type PocketSlaveStatus struct {
     Version             StatusProtocol  `msgpack:"s_ps"`
-    // master
-    MasterBoundAgent    string          `msgpack:"m_ba,omitempty"`
     // slave response
     SlaveResponse       ResponseType    `msgpack:"s_rt,omitempty`
     // slave nodename
@@ -41,44 +39,41 @@ func UnpackedSlaveStatus(message []byte) (status *PocketSlaveStatus, err error) 
 // Unbounded
 func AnswerMasterInquiryStatus(timestamp time.Time) (*PocketSlaveStatus, error) {
     return &PocketSlaveStatus {
-        Version:             SLAVE_STATUS_VERSION,
-        SlaveResponse:       SLAVE_WHO_I_AM,
-        SlaveHardware:       runtime.GOARCH,
-        SlaveTimestamp:      timestamp,
+        Version:           SLAVE_STATUS_VERSION,
+        SlaveResponse:     SLAVE_WHO_I_AM,
+        SlaveHardware:     runtime.GOARCH,
+        SlaveTimestamp:    timestamp,
     }, nil
 }
 
-func KeyExchangeStatus(master string, timestamp time.Time) (*PocketSlaveStatus, error) {
+func KeyExchangeStatus(timestamp time.Time) (*PocketSlaveStatus, error) {
     return &PocketSlaveStatus {
-        Version:             SLAVE_STATUS_VERSION,
-        MasterBoundAgent:    master,
-        SlaveResponse:       SLAVE_SEND_PUBKEY,
-        SlaveHardware:       runtime.GOARCH,
-        SlaveTimestamp:      timestamp,
+        Version:           SLAVE_STATUS_VERSION,
+        SlaveResponse:     SLAVE_SEND_PUBKEY,
+        SlaveHardware:     runtime.GOARCH,
+        SlaveTimestamp:    timestamp,
     }, nil
 }
 
-func CheckSlaveCryptoStatus(master, nodename, uuid string, timestamp time.Time) (*PocketSlaveStatus, error) {
+func CheckSlaveCryptoStatus(nodename, uuid string, timestamp time.Time) (*PocketSlaveStatus, error) {
     return &PocketSlaveStatus {
-        Version:             SLAVE_STATUS_VERSION,
-        MasterBoundAgent:    master,
-        SlaveResponse:       SLAVE_CHECK_CRYPTO,
-        SlaveNodeName:       nodename,
-        SlaveUUID:           uuid,
-        SlaveHardware:       runtime.GOARCH,
-        SlaveTimestamp:      timestamp,
+        Version:           SLAVE_STATUS_VERSION,
+        SlaveResponse:     SLAVE_CHECK_CRYPTO,
+        SlaveNodeName:     nodename,
+        SlaveUUID:         uuid,
+        SlaveHardware:     runtime.GOARCH,
+        SlaveTimestamp:    timestamp,
     }, nil
 }
 
-func SlaveBoundedStatus(master, nodename, uuid string, timestamp time.Time) (*PocketSlaveStatus, error) {
+func SlaveBoundedStatus(nodename, uuid string, timestamp time.Time) (*PocketSlaveStatus, error) {
     return &PocketSlaveStatus {
-        Version:             SLAVE_STATUS_VERSION,
-        MasterBoundAgent:    master,
-        SlaveResponse:       SLAVE_REPORT_STATUS,
-        SlaveNodeName:       nodename,
-        SlaveUUID:           uuid,
-        SlaveHardware:       runtime.GOARCH,
-        SlaveTimestamp:      timestamp,
+        Version:           SLAVE_STATUS_VERSION,
+        SlaveResponse:     SLAVE_REPORT_STATUS,
+        SlaveNodeName:     nodename,
+        SlaveUUID:         uuid,
+        SlaveHardware:     runtime.GOARCH,
+        SlaveTimestamp:    timestamp,
     }, nil
 }
 
@@ -96,9 +91,6 @@ func ConvertDiscoveryToStatus(discovery *PocketSlaveDiscovery, slaveNode, slaveU
     if discovery.Version != SLAVE_DISCOVER_VERSION {
         return nil, errors.Errorf("[ERR] Incorrect SlaveDiscoveryAgent version")
     }
-    if len(discovery.MasterBoundAgent) == 0 {
-        return nil, errors.Errorf("[ERR] Incorrect master agent name")
-    }
     if discovery.SlaveResponse != SLAVE_LOOKUP_AGENT {
         return nil, errors.Errorf("[ERR] incorrect slave discovery response")
     }
@@ -108,17 +100,13 @@ func ConvertDiscoveryToStatus(discovery *PocketSlaveDiscovery, slaveNode, slaveU
     if len(discovery.SlaveGateway) == 0 {
         return nil, errors.Errorf("[ERR] incorrect slave gateway")
     }
-    if len(discovery.SlaveNodeMacAddr) == 0 {
-        return nil, errors.Errorf("[ERR] incorrect slave macaddress")
-    }
+    // TODO : since discovery agent does not have timestamp, we'll use master timstamp.
     return &PocketSlaveStatus{
-        Version:             SLAVE_STATUS_VERSION,
-        MasterBoundAgent:    discovery.MasterBoundAgent,
-        SlaveResponse:       SLAVE_REPORT_STATUS,
-        SlaveNodeName:       slaveNode,
-        SlaveUUID:           slaveUUID,
-        SlaveHardware:       slaveHardware,
-        // TODO : since discovery agent does not have timestamp, we'll use master timstamp.
-        SlaveTimestamp:      time.Now(),
+        Version:           SLAVE_STATUS_VERSION,
+        SlaveResponse:     SLAVE_REPORT_STATUS,
+        SlaveNodeName:     slaveNode,
+        SlaveUUID:         slaveUUID,
+        SlaveHardware:     slaveHardware,
+        SlaveTimestamp:    time.Now(),
     }, nil
 }

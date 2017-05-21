@@ -64,6 +64,13 @@ func (ls *bindbroken) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMe
         // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
         return SlaveTransitionIdle, errors.Errorf("[ERR] Null or incorrect version of master meta")
     }
+    msAgent, err := slcontext.SharedSlaveContext().GetMasterAgent()
+    if err != nil {
+        return SlaveTransitionFail, errors.WithStack(err)
+    }
+    if meta.MasterBoundAgent != msAgent {
+        return SlaveTransitionFail, errors.Errorf("[ERR] Master bound agent is different than commissioned one %s", msAgent)
+    }
     if len(meta.EncryptedMasterRespond) == 0 {
         return SlaveTransitionFail, errors.Errorf("[ERR] Null or incorrect encrypted master respond")
     }
@@ -90,13 +97,6 @@ func (ls *bindbroken) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMe
         return SlaveTransitionFail, errors.WithStack(err)
     }
 
-    msAgent, err := slcontext.SharedSlaveContext().GetMasterAgent()
-    if err != nil {
-        return SlaveTransitionFail, errors.WithStack(err)
-    }
-    if msRsp.MasterBoundAgent != msAgent {
-        return SlaveTransitionFail, errors.Errorf("[ERR] Master bound agent is different than commissioned one %s", msAgent)
-    }
     if msRsp.Version != msagent.MASTER_RESPOND_VERSION {
         return SlaveTransitionFail, errors.Errorf("[ERR] Null or incorrect version of master meta")
     }

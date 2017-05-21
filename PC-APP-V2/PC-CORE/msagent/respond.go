@@ -57,10 +57,9 @@ import (
 */
 
 type PocketMasterRespond struct {
-    Version           RespondProtocol        `msgpack:"m_pr"`
-    MasterBoundAgent  string                 `msgpack:"m_ba"`
-    MasterCommandType CommandType            `msgpack:"m_ct"`
-    MasterAddress     string                 `msgpack:"m_i4"`
+    Version              RespondProtocol    `msgpack:"m_pr"`
+    MasterCommandType    CommandType        `msgpack:"m_ct"`
+    MasterAddress        string             `msgpack:"m_i4"`
 }
 
 func PackedMasterRespond(meta *PocketMasterRespond) ([]byte, error) {
@@ -77,9 +76,11 @@ func SlaveIdentityInqueryRespond(usd *slagent.PocketSlaveDiscovery) (*PocketMast
     if string(usd.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, errors.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
+/*
     if len(usd.MasterBoundAgent) != 0 {
         return nil, errors.Errorf("[ERR] Slave is already bounded to a master")
     }
+*/
     if usd.SlaveResponse != slagent.SLAVE_LOOKUP_AGENT {
         return nil, errors.Errorf("[ERR] Slave is not looking for Master")
     }
@@ -89,10 +90,6 @@ func SlaveIdentityInqueryRespond(usd *slagent.PocketSlaveDiscovery) (*PocketMast
 
     // TODO : check if this agent could be bound
 
-    sn, err := context.SharedHostContext().MasterAgentName()
-    if err != nil {
-        return nil, errors.WithStack(err)
-    }
     ia, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil {
         return nil, errors.WithStack(err)
@@ -102,7 +99,6 @@ func SlaveIdentityInqueryRespond(usd *slagent.PocketSlaveDiscovery) (*PocketMast
 
     return &PocketMasterRespond{
         Version:              MASTER_RESPOND_VERSION,
-        MasterBoundAgent:     sn,
         MasterCommandType:    COMMAND_SLAVE_IDINQUERY,
         MasterAddress:        ia,
     }, nil
@@ -112,9 +108,11 @@ func BrokenBindRecoverRespond(usd *slagent.PocketSlaveDiscovery) (*PocketMasterR
     if string(usd.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, errors.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
+/*
     if len(usd.MasterBoundAgent) == 0 {
         return nil, errors.Errorf("[ERR] Slave is not looking for master agent")
     }
+*/
     if usd.SlaveResponse != slagent.SLAVE_LOOKUP_AGENT {
         return nil, errors.Errorf("[ERR] Slave is not looking for Master")
     }
@@ -124,10 +122,6 @@ func BrokenBindRecoverRespond(usd *slagent.PocketSlaveDiscovery) (*PocketMasterR
 
     // TODO : check if this agent could be bound
 
-    sn, err := context.SharedHostContext().MasterAgentName()
-    if err != nil {
-        return nil, errors.WithStack(err)
-    }
     ia, err := context.SharedHostContext().HostPrimaryAddress()
     if err != nil {
         return nil, errors.WithStack(err)
@@ -137,7 +131,6 @@ func BrokenBindRecoverRespond(usd *slagent.PocketSlaveDiscovery) (*PocketMasterR
 
     return &PocketMasterRespond{
         Version:              MASTER_RESPOND_VERSION,
-        MasterBoundAgent:     sn,
         MasterCommandType:    COMMAND_RECOVER_BIND,
         MasterAddress:        ia,
     }, nil

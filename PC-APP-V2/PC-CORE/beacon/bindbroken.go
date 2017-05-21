@@ -91,15 +91,12 @@ func (b *bindbroken) bindBroken(sender *net.UDPAddr, meta *slagent.PocketSlaveAg
         return MasterTransitionFail, errors.WithStack(err)
     }
     // since this node isn't looking for us, sliently ignore this request
-    if masterAgentName != meta.DiscoveryAgent.MasterBoundAgent {
+    if masterAgentName != meta.MasterBoundAgent {
         return MasterTransitionIdle, nil
     }
 
     // check mac address
-    if meta.SlaveID != meta.DiscoveryAgent.SlaveNodeMacAddr {
-        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave ID")
-    }
-    if b.slaveNode.MacAddress != meta.DiscoveryAgent.SlaveNodeMacAddr {
+    if b.slaveNode.MacAddress != meta.SlaveID {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
     // slave ip address
@@ -117,10 +114,6 @@ func (b *bindbroken) bindBroken(sender *net.UDPAddr, meta *slagent.PocketSlaveAg
         return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave node gateway")
     }
     b.slaveNode.IP4Gateway = meta.DiscoveryAgent.SlaveGateway
-    // slave mac address
-    if meta.SlaveID != meta.DiscoveryAgent.SlaveNodeMacAddr {
-        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave ID")
-    }
 
     // save discovery agent for respond generation
     status, err := slagent.ConvertDiscoveryToStatus(meta.DiscoveryAgent, b.slaveNode.NodeName, b.slaveNode.SlaveUUID, b.slaveNode.Arch)
