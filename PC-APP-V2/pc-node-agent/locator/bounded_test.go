@@ -200,12 +200,34 @@ func Test_Bounded_Unbroken_Loop(t *testing.T) {
         t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
         return
     }
+    // MASTER META TRANSITION ACTION
+    masterTS = slaveTS.Add(time.Second)
+    meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, masterTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    slaveTS = masterTS.Add(time.Second)
+    err = sd.TranstionWithMasterMeta(meta, slaveTS)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    state, err = sd.CurrentState()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if state != SlaveBounded {
+        t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
+        return
+    }
 
     // bounded loop
     for i := 0 ; i < 100; i++ {
         // MASTER META TRANSITION ACTION
         masterTS = slaveTS.Add(time.Second)
-        meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, masterTS)
+        meta, masterTS, err = msagent.TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, masterTS)
         if err != nil {
             t.Error(err.Error())
             return

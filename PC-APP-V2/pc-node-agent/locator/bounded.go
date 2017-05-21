@@ -82,6 +82,36 @@ func (ls *bounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta,
         return SlaveTransitionIdle, errors.Errorf("[ERR] Null or incorrect version of master meta")
     }
 
+    msAgent, err := slcontext.SharedSlaveContext().GetMasterAgent()
+    if err != nil {
+        return SlaveTransitionFail, errors.WithStack(err)
+    }
+    // The return value should be SlaveTransitionFail.
+    // But, that would lead to bind break with a malicious attack as MasterBoundAgent is exposed.
+    // So, we'll relax a bit here to accomodate attach and have room to accept correct input
+    if meta.MasterBoundAgent != msAgent {
+        return SlaveTransitionIdle, errors.Errorf("[ERR] master bound agent is different than commissioned one %s", msAgent)
+    }
+    if len(meta.EncryptedMasterCommand) == 0 {
+        return SlaveTransitionFail, errors.Errorf("[ERR] null or incorrect encrypted master command")
+    }
+    // aes decryption of command
+    pckedCmd, err := slcontext.SharedSlaveContext().DecryptByAES(meta.EncryptedMasterCommand)
+    if err != nil {
+        return SlaveTransitionFail, errors.WithStack(err)
+    }
+    msCmd, err := msagent.UnpackedMasterCommand(pckedCmd)
+    if err != nil {
+        return SlaveTransitionFail, errors.WithStack(err)
+    }
+    if msCmd.Version != msagent.MASTER_COMMAND_VERSION {
+        return SlaveTransitionFail, errors.Errorf("[ERR] incorrect version of master command")
+    }
+    // if command is not for exchange key, proceed to fail
+    if msCmd.MasterCommandType != msagent.COMMAND_SLAVE_ACK {
+        return SlaveTransitionFail, errors.Errorf("[ERR] invalid master command type")
+    }
+
     // We'll reset TX action count to 0 and now so successful tx action can happen infinitely
     // We need to reset the counter here when correct master meta comes in
     // It is b/c when succeeded in confirming with master, we should be able to keep receiving master meta
