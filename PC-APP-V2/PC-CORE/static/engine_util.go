@@ -65,6 +65,7 @@ func setupServiceConfig() (*serviceConfig, error) {
         meta = cluster[0]
     }
     log.Debugf("Cluster ID %v | UUID %v", meta.ClusterID, meta.ClusterUUID)
+    ctx.SetMasterAgentName(meta.ClusterID)
 
     country, err := ctx.CurrentCountryCode()
     if err != nil {

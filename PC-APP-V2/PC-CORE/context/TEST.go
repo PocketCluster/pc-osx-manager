@@ -94,7 +94,7 @@ func DebugContextPrepare() (HostContext) {
         applicationResourcePath:     "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/Resources",
         applicationExecutablePath:   "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/MacOS/SysUtil",
 
-        hostDeviceSerial:            "G8815052XYL",
+        clusterPublicName:           "G8815052XYLLWQCK",
 
         processorCount:              8,
         activeProcessorCount:        8,

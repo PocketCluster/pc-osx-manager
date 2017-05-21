@@ -122,6 +122,11 @@ func main() {
                     /// BEACON ///
 
                     case operation.CmdBeaconStart: {
+                        cid, err := context.SharedHostContext().MasterAgentName()
+                        if err != nil {
+                            log.Debug(err)
+                        }
+
                         err = initSearchCatcher(a)
                         if err != nil {
                             log.Debug(err)
@@ -132,7 +137,7 @@ func main() {
                             log.Debug(err)
                         }
 
-                        err = initMasterAgentService(a)
+                        err = initMasterAgentService(cid, a)
                         if err != nil {
                             log.Debug(err)
                         }
