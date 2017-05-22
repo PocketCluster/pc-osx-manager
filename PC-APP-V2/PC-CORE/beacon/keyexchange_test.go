@@ -258,7 +258,12 @@ func Test_KeyExchange_CryptoCheck_TxActionFail(t *testing.T) {
         t.Error("[ERR] CommChannel Ucast Message should contain proper messages")
         return
     }
-    if mb.SlaveNode().IP4Address != debugComm.(*DebugCommChannel).LastUcastHost {
+    addr, err := mb.SlaveNode().IP4AddrString()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if addr != debugComm.(*DebugCommChannel).LastUcastHost {
         t.Error("[ERR] CommChannel Ucast Message should match slave node address")
         return
     }

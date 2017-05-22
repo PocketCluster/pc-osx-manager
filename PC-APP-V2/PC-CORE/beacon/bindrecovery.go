@@ -64,10 +64,14 @@ func (b *bindrecovery) transitionActionWithTimestamp(masterTimestamp time.Time) 
     if err != nil {
         return errors.WithStack(err)
     }
+    addr, err := b.slaveNode.IP4AddrString()
+    if err != nil {
+        return errors.WithStack(err)
+    }
     if b.commChan == nil {
         errors.Errorf("[ERR] Communication channel is null. This should never happen")
     }
-    return b.commChan.UcastSend(b.slaveNode.IP4Address, pm)
+    return b.commChan.UcastSend(addr, pm)
 }
 
 func (b *bindrecovery) transitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (MasterBeaconTransition, error) {
