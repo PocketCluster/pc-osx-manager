@@ -49,7 +49,7 @@ type bindrecovery struct {
 func (b *bindrecovery) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     // master preperation
     if b.slaveLocation == nil {
-        return errors.Errorf("[ERR] SlaveDiscoveryAgent is nil. We cannot form a proper response")
+        return errors.Errorf("[ERR] SlaveDiscoveryAgent is nil. We cannot form a proper response %s", b.constState.String())
     }
     cmd, err := msagent.BrokenBindRecoverRespond(b.slaveLocation)
     if err != nil {

@@ -41,7 +41,7 @@ type unbounded struct {
 
 func (b *unbounded) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     if b.slaveLocation == nil {
-        return errors.Errorf("[ERR] SlaveDiscoveryAgent is nil. We cannot form a proper response")
+        return errors.Errorf("[ERR] SlaveDiscoveryAgent is nil. We cannot form a proper response %v", b.constState.String())
     }
     cmd, err := msagent.SlaveIdentityInqueryRespond(b.slaveLocation)
     if err != nil {
