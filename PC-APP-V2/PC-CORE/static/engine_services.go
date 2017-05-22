@@ -82,7 +82,6 @@ func initBeaconLoator(a *mainLife) error {
                 case b := <- beaconC: {
                     bs, ok := b.Payload.(ucast.BeaconSend)
                     if ok {
-//                        log.Debugf("NewBeaconLocator WRITE %v", bs.Host)
                         belocat.Send(bs.Host, bs.Payload)
                     }
                 }
@@ -110,8 +109,6 @@ func initMasterAgentService(clusterID string, a *mainLife) error {
         )
         beaconMan, err = beacon.NewBeaconManagerWithFunc(clusterID, func(host string, payload []byte) error {
             log.Debugf("[BEACON-SLAVE] Host %v", host)
-            return nil
-
             a.BroadcastEvent(Event{
                 Name: coreServiceBeacon,
                 Payload:ucast.BeaconSend{
