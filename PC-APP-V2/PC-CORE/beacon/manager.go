@@ -155,6 +155,7 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
             // this beacons are created and waiting for an input
             state = bc.CurrentState()
             if state == MasterInit || state == MasterBindBroken {
+                log.Debugf("[SEARCH-NODE-FOUND] (%s | %s) ", bc.SlaveNode().MacAddress, bc.CurrentState().String())
                 return bc.TransitionWithSlaveMeta(&searchD.Address, usm, ts)
             }
 

@@ -35,9 +35,9 @@ func bindrecoveryState(oldState *beaconState) BeaconState {
     b.slaveNode                     = oldState.slaveNode
     b.commChan                      = oldState.commChan
 
-    b.slaveLocation                 = nil
+    b.slaveLocation                 = oldState.slaveLocation
     // this status is generated from bindbroken
-    b.slaveStatus                   = oldState.slaveStatus
+    b.slaveStatus                   = nil
 
     return b
 }
@@ -49,7 +49,7 @@ type bindrecovery struct {
 func (b *bindrecovery) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     // master preperation
     if b.slaveLocation == nil {
-        return errors.Errorf("[ERR] SlaveDiscoveryAgent is nil. We cannot form a proper response %s", b.constState.String())
+        return errors.Errorf("[ERR] [%s | %s] SlaveDiscoveryAgent is nil. We cannot form a proper response %s", b.constState.String(), b.slaveNode.MacAddress)
     }
     cmd, err := msagent.BrokenBindRecoverRespond(b.slaveLocation)
     if err != nil {

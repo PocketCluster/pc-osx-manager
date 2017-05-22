@@ -115,12 +115,8 @@ func (b *bindbroken) bindBroken(sender *net.UDPAddr, meta *slagent.PocketSlaveAg
     }
     b.slaveNode.IP4Gateway = meta.DiscoveryAgent.SlaveGateway
 
-    // save discovery agent for respond generation
-    status, err := slagent.ConvertDiscoveryToStatus(meta.DiscoveryAgent, b.slaveNode.NodeName, b.slaveNode.SlaveUUID, b.slaveNode.Arch)
-    if err != nil {
-        return MasterTransitionFail, errors.WithStack(err)
-    }
-    b.slaveStatus = status
+    // save slave discovery agent
+    b.slaveLocation = meta.DiscoveryAgent
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil

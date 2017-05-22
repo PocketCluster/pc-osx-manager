@@ -4,7 +4,6 @@ import (
     "runtime"
     "time"
 
-    "github.com/pkg/errors"
     "gopkg.in/vmihailenco/msgpack.v2"
 )
 
@@ -74,39 +73,5 @@ func SlaveBoundedStatus(nodename, uuid string, timestamp time.Time) (*PocketSlav
         SlaveUUID:         uuid,
         SlaveHardware:     runtime.GOARCH,
         SlaveTimestamp:    timestamp,
-    }, nil
-}
-
-// this is for master bindbroken state. Since majority of sanity check is done by beacon.bindbroken module, we'll just check simple things.
-func ConvertDiscoveryToStatus(discovery *PocketSlaveDiscovery, slaveNode, slaveUUID, slaveHardware string) (*PocketSlaveStatus, error) {
-    if len(slaveNode) == 0 {
-        return nil, errors.Errorf("[ERR] incorrect slave name")
-    }
-    if len(slaveUUID) == 0 {
-        return nil, errors.Errorf("[ERR] incorrect slave uuid")
-    }
-    if len(slaveHardware) == 0 {
-        return nil, errors.Errorf("[ERR] incorrect slave hardware architecture")
-    }
-    if discovery.Version != SLAVE_DISCOVER_VERSION {
-        return nil, errors.Errorf("[ERR] Incorrect SlaveDiscoveryAgent version")
-    }
-    if discovery.SlaveResponse != SLAVE_LOOKUP_AGENT {
-        return nil, errors.Errorf("[ERR] incorrect slave discovery response")
-    }
-    if len(discovery.SlaveAddress) == 0 {
-        return nil, errors.Errorf("[ERR] incorrect slave address")
-    }
-    if len(discovery.SlaveGateway) == 0 {
-        return nil, errors.Errorf("[ERR] incorrect slave gateway")
-    }
-    // TODO : since discovery agent does not have timestamp, we'll use master timstamp.
-    return &PocketSlaveStatus{
-        Version:           SLAVE_STATUS_VERSION,
-        SlaveResponse:     SLAVE_REPORT_STATUS,
-        SlaveNodeName:     slaveNode,
-        SlaveUUID:         slaveUUID,
-        SlaveHardware:     slaveHardware,
-        SlaveTimestamp:    time.Now(),
     }, nil
 }

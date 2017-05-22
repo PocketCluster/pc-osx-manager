@@ -153,8 +153,8 @@ func initMasterAgentService(clusterID string, a *mainLife) error {
                         }
                     }
                 }
-                case t := <-timer.C: {
-                    err = beaconMan.TransitionWithTimestamp(t)
+                case <-timer.C: {
+                    err = beaconMan.TransitionWithTimestamp(time.Now())
                     if err != nil {
                         log.Debug(err.Error())
                     }
