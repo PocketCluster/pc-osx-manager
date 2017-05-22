@@ -108,7 +108,7 @@ func initMasterAgentService(clusterID string, a *mainLife) error {
             timer = time.NewTicker(time.Second)
         )
         beaconMan, err = beacon.NewBeaconManagerWithFunc(clusterID, func(host string, payload []byte) error {
-            log.Debugf("[BEACON-SLAVE] Host %v", host)
+            log.Debugf("[BEACON-SEND-SLAVE] Host %v", host)
             a.BroadcastEvent(Event{
                 Name: coreServiceBeacon,
                 Payload:ucast.BeaconSend{
@@ -140,7 +140,7 @@ func initMasterAgentService(clusterID string, a *mainLife) error {
                     if ok {
                         err = beaconMan.TransitionWithBeaconData(bp, time.Now())
                         if err != nil {
-                            log.Debug(err.Error())
+                            log.Debugf("[BEACON-TRANSITION] %v", err)
                         }
                     }
                 }
@@ -149,7 +149,7 @@ func initMasterAgentService(clusterID string, a *mainLife) error {
                     if ok {
                         err = beaconMan.TransitionWithSearchData(cp, time.Now())
                         if err != nil {
-                            log.Debug(err.Error())
+                            log.Debugf("[SEARCH-TRANSITION] %v", err)
                         }
                     }
                 }

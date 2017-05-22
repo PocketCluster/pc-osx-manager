@@ -132,7 +132,6 @@ func initBeaconService(app *PocketApplication) error {
                 case <- app.stoppedC:
                     return nil
                 case v := <- beacon.ChRead: {
-//                    log.Debugf("[BEACON] message received %v", v)
                     app.BroadcastEvent(Event{Name:nodeFeedbackBeacon, Payload:v})
                 }
             }
@@ -185,16 +184,16 @@ func initAgentService(app *PocketApplication) error {
             err error = nil
 
             searchTx = func(data []byte) error {
-                log.Debugf("SearchTx Func %v", time.Now())
+                log.Debugf("[SEARCH-TX] %v", time.Now())
                 app.BroadcastEvent(Event{Name: nodeServiceSearch, Payload:data})
                 return nil
             }
             beaconTx = func(target string, data []byte) error {
-                log.Debugf("BeaconTx Func %v :: %v| %v", time.Now(), target, data)
+                log.Debugf("[BEACON-TX] %v TO : %v", time.Now(), target)
                 app.BroadcastEvent(Event{
                     Name: nodeServiceBeacon,
                     Payload: ucast.BeaconSend{
-                        Host:"192.168.1.105",
+                        Host:target,
                         Payload:data,
                     },
                 })
@@ -232,7 +231,7 @@ func initAgentService(app *PocketApplication) error {
                     }
                 }
                 case d := <- dhcpC: {
-                    log.Debugf("[AGENT-DHCP] RECEIVED\n %v", spew.Sdump(d.Payload))
+                    log.Debugf("[DHCP] RECEIVED\n %v", spew.Sdump(d.Payload))
                 }
                 case <- timer.C: {
                     err = loc.TranstionWithTimestamp(time.Now())

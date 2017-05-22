@@ -87,7 +87,7 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts tim
         return errors.WithStack(err)
     }
 
-    log.Debugf("[BEACON] FROM %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
+    log.Debugf("[BEACON-FROM] %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
 
     // this packet looks for something else
     if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != b.clusterID {
@@ -108,7 +108,7 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts tim
                 case MasterBindBroken:
                     fallthrough
                 case MasterDiscarded: {
-                    log.Debugf("[ERR] (%s) [%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().SlaveUUID)
+                    log.Debugf("[BEACON-ERR] (%s) [%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().SlaveUUID)
                     return nil
                 }
                 default: {
@@ -135,11 +135,11 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
         return errors.WithStack(err)
     }
 
-    log.Debugf("[SEARCH] FROM %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
+    log.Debugf("[SEARCH-FROM] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
 
     // this packet looks for something else
     if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != b.clusterID {
-        log.Debugf("[SEARCH] this packet belong to other master | usm.DiscoveryAgent.MasterBoundAgent %v | b.clusterID %v", usm.MasterBoundAgent, b.clusterID)
+        log.Debugf("[SEARCH-FROM] this packet belong to other master | usm.DiscoveryAgent.MasterBoundAgent %v | b.clusterID %v", usm.MasterBoundAgent, b.clusterID)
         return nil
     }
 
@@ -174,7 +174,7 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
         return mc.TransitionWithSlaveMeta(&searchD.Address, usm, ts)
     }
 
-    return errors.Errorf("[ERR] TransitionWithSearchData reaches at the end. *this should never happen, and might be a malicious attempt*")
+    return errors.Errorf("[SEARCH-ERR] TransitionWithSearchData reaches at the end. *this should never happen, and might be a malicious attempt*")
 }
 
 func (b *beaconManger) TransitionWithTimestamp(ts time.Time) error {
