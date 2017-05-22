@@ -108,7 +108,7 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts tim
                 case MasterBindBroken:
                     fallthrough
                 case MasterDiscarded: {
-                    log.Debugf("[BEACON-ERR] (%s) [%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().SlaveUUID)
+                    log.Debugf("[BEACON-ERR] (%s):[%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().MacAddress)
                     return nil
                 }
                 default: {
