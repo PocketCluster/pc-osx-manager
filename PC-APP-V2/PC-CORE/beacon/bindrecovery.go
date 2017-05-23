@@ -138,7 +138,8 @@ func (b *bindrecovery) transitionWithSlaveMeta(sender *net.UDPAddr, meta *slagen
 }
 
 func (b *bindrecovery) onStateTranstionSuccess(masterTimestamp time.Time) error {
-    return errors.WithStack(b.slaveNode.Update())
+    err := b.slaveNode.Update()
+    return errors.WithStack(err)
 }
 
 func (b *bindrecovery) onStateTranstionFailure(masterTimestamp time.Time) error {

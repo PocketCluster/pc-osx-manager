@@ -133,7 +133,8 @@ func (b *cryptocheck) cryptoCheck(sender *net.UDPAddr, meta *slagent.PocketSlave
 }
 
 func (b *cryptocheck) onStateTranstionSuccess(masterTimestamp time.Time) error {
-    return errors.WithStack(b.slaveNode.JoinSlave())
+    err := b.slaveNode.JoinSlave()
+    return errors.WithStack(err)
 }
 
 func (b *cryptocheck) onStateTranstionFailure(masterTimestamp time.Time) error {
