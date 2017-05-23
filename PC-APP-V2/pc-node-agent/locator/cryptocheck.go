@@ -112,7 +112,13 @@ func (ls *cryptocheck) transitionWithMasterMeta(meta *msagent.PocketMasterAgentM
 }
 
 func (ls *cryptocheck) onStateTranstionSuccess(slaveTimestamp time.Time) error {
-    return slcontext.SharedSlaveContext().SyncAll()
+    // here we'll save all the detail and save it to disk
+    err := slcontext.SharedSlaveContext().SyncAll()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    err = slcontext.SharedSlaveContext().SaveConfiguration()
+    return errors.WithStack(err)
 }
 
 func (ls *cryptocheck) onStateTranstionFailure(slaveTimestamp time.Time) error {

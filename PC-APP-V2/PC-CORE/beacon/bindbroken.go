@@ -123,7 +123,7 @@ func (b *bindbroken) bindBroken(sender *net.UDPAddr, meta *slagent.PocketSlaveAg
 }
 
 func (b *bindbroken) onStateTranstionSuccess(masterTimestamp time.Time) error {
-    return nil
+    return errors.WithStack(b.slaveNode.Update())
 }
 
 func (b *bindbroken) onStateTranstionFailure(masterTimestamp time.Time) error {

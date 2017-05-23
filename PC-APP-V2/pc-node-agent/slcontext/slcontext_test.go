@@ -92,7 +92,8 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         t.Error("[ERR] Incorrect Master Name")
         return
     }
-
+/*
+    // Master IP address will not be saved as it is allowed to be on DHCP
     mia, err := SharedSlaveContext().GetMasterIP4Address()
     if err != nil {
         t.Error(err.Error())
@@ -102,7 +103,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         t.Error("[ERR] Incorrect Master ip address")
         return
     }
-
+*/
     snn, err := SharedSlaveContext().GetSlaveNodeName()
     if err != nil {
         t.Error(err.Error())

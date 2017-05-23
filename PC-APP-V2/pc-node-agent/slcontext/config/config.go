@@ -87,7 +87,7 @@ type ConfigMasterSection struct {
     // Master Agent Specific String
     MasterBoundAgent    string                   `yaml:"master-binder-agent"`
     // Last Known IP4
-    MasterIP4Address    string                   `yaml:"master-ip4-addr"`
+    MasterIP4Address    string                   `yaml:"-"`
     //MasterIP6Address    string
     //MasterHostName      string
     MasterTimeZone      string                   `yaml:"master-timezone"`
