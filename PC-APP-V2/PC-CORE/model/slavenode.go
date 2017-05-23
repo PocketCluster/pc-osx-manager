@@ -166,14 +166,17 @@ func (s *SlaveNode) JoinSlave() error {
     if s.ModelVersion != SlaveNodeModelVersion {
         return errors.Errorf("[ERR] incorrect slave model version")
     }
+    // TODO : check UUID format
     if len(s.SlaveUUID) != 36 {
-        return errors.Errorf("[ERR] incorrect uuid")
+        return errors.Errorf("[ERR] incorrect uuid length")
     }
+    // TODO : check node name formet
     if len(s.NodeName) == 0 {
         return errors.Errorf("[ERR] incorrect node name")
     }
+    // TODO : check key format
     if len(s.PublicKey) == 0 {
-        return errors.Errorf("[ERR] incorrect slave primary key")
+        return errors.Errorf("[ERR] incorrect slave Public key")
     }
     ts := time.Now()
     s.State = SNMStateJoined
@@ -190,14 +193,17 @@ func (s *SlaveNode) Update() error {
     if s.ModelVersion != SlaveNodeModelVersion {
         return errors.Errorf("[ERR] incorrect slave model version")
     }
-    if len(s.SlaveUUID) == 36 {
-        return errors.Errorf("[ERR] incorrect uuid")
+    // TODO : check UUID format
+    if len(s.SlaveUUID) != 36 {
+        return errors.Errorf("[ERR] incorrect uuid length")
     }
+    // TODO : check node name formet
     if len(s.NodeName) == 0 {
         return errors.Errorf("[ERR] incorrect node name")
     }
-    if len(s.PrivateKey) == 0 {
-        return errors.Errorf("[ERR] incorrect slave primary key")
+    // TODO : check key format
+    if len(s.PublicKey) == 0 {
+        return errors.Errorf("[ERR] incorrect slave Public key")
     }
     s.LastAlive = time.Now()
     SharedRecordGate().Session().Save(s)
