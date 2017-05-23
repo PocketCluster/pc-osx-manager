@@ -212,7 +212,7 @@ func initAgentService(app *PocketApplication) error {
         if err != nil {
             return errors.WithStack(err)
         }
-        defer loc.Close()
+        defer loc.Shutdown()
         defer timer.Stop()
 
         log.Debugf("[AGENT] starting agent service...")

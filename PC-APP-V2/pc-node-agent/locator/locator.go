@@ -70,7 +70,7 @@ type SlaveLocator interface {
     CurrentState() (SlaveLocatingState, error)
     TranstionWithMasterBeacon(bp ucast.BeaconPack, slaveTimestamp time.Time) error
     TranstionWithTimestamp(timestamp time.Time) error
-    Close() error
+    Shutdown() error
 
     // TODO : this should be deprecated for testing only
     TranstionWithMasterMeta(meta *msagent.PocketMasterAgentMeta, timestamp time.Time) error
@@ -136,8 +136,9 @@ func (sl *slaveLocator) TranstionWithTimestamp(slaveTimestamp time.Time) error {
     return err
 }
 
-func (sl *slaveLocator) Close() error {
-    // TODO : TO BE CONTINUED
-    return nil
+func (sl *slaveLocator) Shutdown() error {
+    err := errors.WithStack(sl.state.Close())
+    sl.state = nil
+    return err
 }
 

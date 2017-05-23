@@ -35,6 +35,7 @@ type LocatorState interface {
     CurrentState() SlaveLocatingState
     MasterMetaTransition(meta *msagent.PocketMasterAgentMeta, slaveTimestamp time.Time) (LocatorState, error)
     TimestampTransition(slaveTimestamp time.Time) (LocatorState, error)
+    Close() error
 }
 
 type locatorState struct {

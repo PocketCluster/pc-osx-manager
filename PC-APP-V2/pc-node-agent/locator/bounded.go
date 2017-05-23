@@ -117,7 +117,9 @@ func (ls *bounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta,
     // It is b/c when succeeded in confirming with master, we should be able to keep receiving master meta
     ls.txActionCount = 0
 
-    // TODO : send answer to master
+    // we do not reply here so there will not be an endless master <-> slave loop across network.
+    // In fact, one second delayed respose might increase a window of opportunity to get unbounded,
+    // but it would not create a chance of overflowing network.
 
     return SlaveTransitionOk, nil
 }

@@ -295,6 +295,7 @@ func newBeaconForState(b* beaconState, newState, oldState MasterBeaconState) Bea
         case MasterDiscarded:
             newBeaconState = discardedState(b)
     }
+    // TODO : need to help GC on old beaconState look how slave node has done it
     return newBeaconState
 }
 
