@@ -138,7 +138,7 @@ func (b *bounded) bounded(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMet
 }
 
 func (b *bounded) onStateTranstionSuccess(masterTimestamp time.Time) error {
-    return errors.WithStack(b.slaveNode.JoinSlave())
+    return nil
 }
 
 func (b *bounded) onStateTranstionFailure(masterTimestamp time.Time) error {
