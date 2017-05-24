@@ -12,14 +12,18 @@ func TestUnboundedState_InquiredTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+    )
+
     meta, err := msagent.TestMasterInquireSlaveRespond()
     if err != nil {
         t.Error(err.Error())
         return
     }
 
-    debugComm := &DebugCommChannel{}
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -46,8 +50,12 @@ func Test_Unbounded_Unbounded_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    debugComm := &DebugCommChannel{}
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+    )
+
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -86,10 +94,13 @@ func Test_Unbounded_Inquired_MasterMetaFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    // unbounded state
-    debugComm := &DebugCommChannel{}
-    slaveTS := time.Now().Add(time.Second)
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        slaveTS = time.Now().Add(time.Second)
+    )
+
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -135,9 +146,13 @@ func Test_Unbounded_Inquired_TxActionFail(t *testing.T) {
     defer tearDown()
 
     // inquired transition
-    debugComm := &DebugCommChannel{}
-    slaveTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        slaveTS = time.Now()
+    )
+
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return

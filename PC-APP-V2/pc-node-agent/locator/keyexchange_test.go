@@ -17,21 +17,25 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    context := slcontext.SharedSlaveContext()
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+    )
+
     meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
     }
 
-    debugComm := &DebugCommChannel{}
     // set to slave discovery state to "Inquired"
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    sd.(*slaveLocator).state = newInquiredState(debugComm, debugComm)
+    sd.(*slaveLocator).state = newInquiredState(debugComm, debugComm, debugEvent)
 
     // execute state transition
     slaveTS := masterTS.Add(time.Second)
@@ -95,10 +99,14 @@ func Test_Keyexchange_Cryptocheck_MasterMetaFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    context := slcontext.SharedSlaveContext()
-    debugComm := &DebugCommChannel{}
-    slaveTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+        slaveTS = time.Now()
+    )
+
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -227,10 +235,14 @@ func Test_keyexchange_Cryptocheck_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    context := slcontext.SharedSlaveContext()
-    debugComm := &DebugCommChannel{}
-    slaveTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+        slaveTS = time.Now()
+    )
+
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return

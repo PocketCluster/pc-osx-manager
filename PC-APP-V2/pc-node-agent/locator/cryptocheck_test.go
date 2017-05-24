@@ -17,10 +17,14 @@ func Test_Cryptocheck_Bounded_MasterMetaFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    context := slcontext.SharedSlaveContext()
-    debugComm := &DebugCommChannel{}
-    slaveTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+        slaveTS time.Time = time.Now()
+    )
+
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -174,10 +178,14 @@ func Test_Cryptocheck_Bounded_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    context := slcontext.SharedSlaveContext()
-    debugComm := &DebugCommChannel{}
-    slaveTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+        slaveTS time.Time = time.Now()
+    )
+
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return

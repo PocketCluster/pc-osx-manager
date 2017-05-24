@@ -15,10 +15,13 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
     setUp()
     defer tearDown()
 
-    context := slcontext.SharedSlaveContext()
-    debugComm := &DebugCommChannel{}
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+    )
 
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -128,10 +131,13 @@ func Test_Bounded_Unbroken_Loop(t *testing.T) {
     setUp()
     defer tearDown()
 
-    context := slcontext.SharedSlaveContext()
-    debugComm := &DebugCommChannel{}
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+    )
 
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -285,10 +291,14 @@ func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    context := slcontext.SharedSlaveContext()
-    debugComm := &DebugCommChannel{}
-    slaveTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+        slaveTS = time.Now()
+    )
+
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -442,27 +452,31 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    // Let's have a bounded state
-    debugComm := &DebugCommChannel{}
-    context := slcontext.SharedSlaveContext()
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+        masterTS, slaveTS = time.Now(), time.Now()
+    )
+
     context.SetMasterPublicKey(pcrypto.TestMasterPublicKey())
     context.SetMasterAgent(masterAgentName)
     context.SetSlaveNodeName(slaveNodeName)
     context.SetSlaveNodeUUID(slaveUUID)
 
     // have a slave locator
-    sd, err := NewSlaveLocator(SlaveBindBroken, debugComm, debugComm)
+    sd, err := NewSlaveLocator(SlaveBindBroken, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    masterTS := time.Now()
+    masterTS = time.Now()
     meta, err := msagent.TestMasterBrokenBindRecoveryCommand(masterAgentName, pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    slaveTS := masterTS.Add(time.Second)
+    slaveTS = masterTS.Add(time.Second)
     err = sd.TranstionWithMasterMeta(meta, slaveTS);
     if err != nil {
         t.Error(err.Error())

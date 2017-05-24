@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
-func newInquiredState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
+func newInquiredState(searchComm SearchTx, beaconComm BeaconTx, event LocatorOnTransitionEvent) LocatorState {
     is := &inquired{}
 
     is.constState                   = SlaveInquired
@@ -23,9 +23,8 @@ func newInquiredState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
 
     is.timestampTransition          = is.transitionActionWithTimestamp
     is.masterMetaTransition         = is.transitionWithMasterMeta
-    is.onTransitionSuccess          = is.onStateTranstionSuccess
-    is.onTransitionFailure          = is.onStateTranstionFailure
 
+    is.LocatorOnTransitionEvent     = event
     is.searchComm                   = searchComm
     is.beaconComm                   = beaconComm
     return is
@@ -85,12 +84,4 @@ func (ls *inquired) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta
     }
 
     return SlaveTransitionOk, nil
-}
-
-func (ls *inquired) onStateTranstionSuccess(slaveTimestamp time.Time) error {
-    return nil
-}
-
-func (ls *inquired) onStateTranstionFailure(slaveTimestamp time.Time) error {
-    return slcontext.SharedSlaveContext().DiscardAll()
 }

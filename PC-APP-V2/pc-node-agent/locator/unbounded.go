@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slcontext"
 )
 
-func newUnboundedState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
+func newUnboundedState(searchComm SearchTx, beaconComm BeaconTx, event LocatorOnTransitionEvent) LocatorState {
     us := &unbounded{}
 
     us.constState                   = SlaveUnbounded
@@ -23,9 +23,8 @@ func newUnboundedState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
 
     us.timestampTransition          = us.transitionActionWithTimestamp
     us.masterMetaTransition         = us.transitionWithMasterMeta
-    us.onTransitionSuccess          = us.onStateTranstionSuccess
-    us.onTransitionFailure          = us.onStateTranstionFailure
 
+    us.LocatorOnTransitionEvent     = event
     us.searchComm                   = searchComm
     us.beaconComm                   = beaconComm
     return us
@@ -73,13 +72,4 @@ func (ls *unbounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMet
     slcontext.SharedSlaveContext().SetMasterIP4Address(meta.DiscoveryRespond.MasterAddress)
 
     return SlaveTransitionOk, nil
-}
-
-func (ls *unbounded) onStateTranstionSuccess(slaveTimestamp time.Time) error {
-    // nothing to do for unbounded -> inquired state failure
-    return nil
-}
-
-func (ls *unbounded) onStateTranstionFailure(slaveTimestamp time.Time) error {
-    return slcontext.SharedSlaveContext().DiscardAll()
 }

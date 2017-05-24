@@ -66,6 +66,15 @@ func (b BeaconTxFunc) UcastSend(target string, data []byte) error {
     return b(target, data)
 }
 
+type LocatorOnTransitionEventFunc func(isSuccess bool, state SlaveLocatingState, ts time.Time) error
+func (l LocatorOnTransitionEventFunc) OnStateTranstionSuccess(state SlaveLocatingState, ts time.Time) error {
+    return l(true, state, ts)
+}
+
+func (l LocatorOnTransitionEventFunc) OnStateTranstionFailure(state SlaveLocatingState, ts time.Time) error {
+    return l(false, state, ts)
+}
+
 type SlaveLocator interface {
     CurrentState() (SlaveLocatingState, error)
     TranstionWithMasterBeacon(bp ucast.BeaconPack, slaveTimestamp time.Time) error
@@ -80,24 +89,27 @@ type slaveLocator struct {
     state       LocatorState
 }
 
-func NewSlaveLocatorWithFunc(state SlaveLocatingState, searchComm SearchTxFunc, beaconComm BeaconTxFunc) (SlaveLocator, error) {
-    return NewSlaveLocator(state, searchComm, beaconComm)
+func NewSlaveLocatorWithFunc(state SlaveLocatingState, searchComm SearchTxFunc, beaconComm BeaconTxFunc, event LocatorOnTransitionEventFunc) (SlaveLocator, error) {
+    return NewSlaveLocator(state, searchComm, beaconComm, event)
 }
 
 // New slaveLocator starts only from unbounded or bindbroken
-func NewSlaveLocator(state SlaveLocatingState, searchComm SearchTx, beaconComm BeaconTx) (SlaveLocator, error) {
+func NewSlaveLocator(state SlaveLocatingState, searchComm SearchTx, beaconComm BeaconTx, event LocatorOnTransitionEvent) (SlaveLocator, error) {
     if searchComm == nil {
-        return nil, errors.Errorf("[ERR] MasterSearch cannot be void")
+        return nil, errors.Errorf("[ERR] MasterSearch cannot be null")
     }
     if beaconComm == nil {
-        return nil, errors.Errorf("[ERR] BeaconAgent cannot be void")
+        return nil, errors.Errorf("[ERR] BeaconAgent cannot be null")
+    }
+    if event == nil {
+        return nil, errors.Errorf("[ERR] LocatorOnTransitionEvent cannot be null")
     }
 
     switch state {
         case SlaveUnbounded:
-            return &slaveLocator{state: newUnboundedState(searchComm, beaconComm)}, nil
+            return &slaveLocator{state: newUnboundedState(searchComm, beaconComm, event)}, nil
         case SlaveBindBroken:
-            return &slaveLocator{state: newBindbrokenState(searchComm, beaconComm)}, nil
+            return &slaveLocator{state: newBindbrokenState(searchComm, beaconComm, event)}, nil
     }
     return nil, errors.Errorf("[ERR] SlaveLocator can initiated from SlaveUnbounded or SlaveBindBroken only")
 }

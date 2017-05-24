@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
-func newBindbrokenState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
+func newBindbrokenState(searchComm SearchTx, beaconComm BeaconTx, event LocatorOnTransitionEvent) LocatorState {
     bs := &bindbroken{}
 
     bs.constState                   = SlaveBindBroken
@@ -23,9 +23,8 @@ func newBindbrokenState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
 
     bs.timestampTransition          = bs.transitionActionWithTimestamp
     bs.masterMetaTransition         = bs.transitionWithMasterMeta
-    bs.onTransitionSuccess          = bs.onStateTranstionSuccess
-    bs.onTransitionFailure          = bs.onStateTranstionFailure
 
+    bs.LocatorOnTransitionEvent     = event
     bs.searchComm                   = searchComm
     bs.beaconComm                   = beaconComm
     return bs
@@ -112,13 +111,4 @@ func (ls *bindbroken) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMe
     slcontext.SharedSlaveContext().SetMasterIP4Address(msRsp.MasterAddress)
 
     return SlaveTransitionOk, nil
-}
-
-func (ls *bindbroken) onStateTranstionSuccess(slaveTimestamp time.Time) error {
-    return slcontext.SharedSlaveContext().SyncAll()
-}
-
-func (ls *bindbroken) onStateTranstionFailure(slaveTimestamp time.Time) error {
-    slcontext.SharedSlaveContext().DiscardAESKey()
-    return nil
 }

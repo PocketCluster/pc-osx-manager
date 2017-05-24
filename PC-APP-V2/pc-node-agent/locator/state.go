@@ -27,9 +27,10 @@ type transitionWithMasterMeta       func (meta *msagent.PocketMasterAgentMeta, s
 
 type transitionActionWithTimestamp  func (slaveTimestamp time.Time) error
 
-type onStateTranstionSuccess        func (slaveTimestamp time.Time) error
-
-type onStateTranstionFailure        func (slaveTimestamp time.Time) error
+type LocatorOnTransitionEvent interface {
+    OnStateTranstionSuccess(state SlaveLocatingState, ts time.Time) error
+    OnStateTranstionFailure(state SlaveLocatingState, ts time.Time) error
+}
 
 type LocatorState interface {
     CurrentState() SlaveLocatingState
@@ -77,11 +78,8 @@ type locatorState struct {
     // timestamp transition func
     timestampTransition  transitionActionWithTimestamp
 
-    // onSuccess
-    onTransitionSuccess  onStateTranstionSuccess
-
-    // onFailure
-    onTransitionFailure  onStateTranstionFailure
+    // onSuccess && onFailure
+    LocatorOnTransitionEvent
 
     /* ---------------------------------------- Communication Channel ----------------------------------------------- */
     // master search caster
@@ -114,12 +112,11 @@ func (ls *locatorState) txTimeWindow() time.Duration {
 /* ------------------------------------------------ Helper Functions ------------------------------------------------ */
 // close func pointers and delegates to help GC
 func (ls *locatorState) Close() error {
-    ls.masterMetaTransition  = nil
-    ls.timestampTransition   = nil
-    ls.onTransitionSuccess   = nil
-    ls.onTransitionFailure   = nil
-    ls.searchComm            = nil
-    ls.beaconComm            = nil
+    ls.masterMetaTransition        = nil
+    ls.timestampTransition         = nil
+    ls.LocatorOnTransitionEvent    = nil
+    ls.searchComm                  = nil
+    ls.beaconComm                  = nil
     return nil
 }
 
@@ -131,36 +128,40 @@ func newLocatorStateForState(ls *locatorState, newState, oldState SlaveLocatingS
 
     var search SearchTx = ls.searchComm
     var beacon BeaconTx = ls.beaconComm
+    var event LocatorOnTransitionEvent = ls.LocatorOnTransitionEvent
     var newLocatorState LocatorState = nil
     switch newState {
         case SlaveUnbounded:
-            newLocatorState = newUnboundedState(search, beacon)
+            newLocatorState = newUnboundedState(search, beacon, event)
 
         case SlaveInquired:
-            newLocatorState = newInquiredState(search, beacon)
+            newLocatorState = newInquiredState(search, beacon, event)
 
         case SlaveKeyExchange:
-            newLocatorState = newKeyexchangeState(search, beacon)
+            newLocatorState = newKeyexchangeState(search, beacon, event)
 
         case SlaveCryptoCheck:
-            newLocatorState = newCryptocheckState(search, beacon)
+            newLocatorState = newCryptocheckState(search, beacon, event)
 
         case SlaveBounded:
-            newLocatorState = newBoundedState(search, beacon)
+            newLocatorState = newBoundedState(search, beacon, event)
 
         case SlaveBindBroken:
-            newLocatorState = newBindbrokenState(search, beacon)
+            newLocatorState = newBindbrokenState(search, beacon, event)
 
         default:
-            newLocatorState = newUnboundedState(search, beacon)
+            newLocatorState = newUnboundedState(search, beacon, event)
     }
     // invalidate old LocatorState CommChannel for GC
-    ls.Close()
+    if newLocatorState != nil {
+        ls.Close()
+    }
     return newLocatorState
 }
 
 func stateTransition(currState SlaveLocatingState, nextCondition SlaveLocatingTransition) SlaveLocatingState {
     var nextState SlaveLocatingState
+
     // Succeed to transition to the next
     if  nextCondition == SlaveTransitionOk {
         switch currState {
@@ -182,7 +183,8 @@ func stateTransition(currState SlaveLocatingState, nextCondition SlaveLocatingTr
             default:
                 nextState = SlaveUnbounded
         }
-        // Fail to transition to the next
+
+    // Fail to transition to the next
     } else if nextCondition == SlaveTransitionFail {
         switch currState {
             case SlaveUnbounded:
@@ -204,7 +206,8 @@ func stateTransition(currState SlaveLocatingState, nextCondition SlaveLocatingTr
             default:
                 nextState = SlaveUnbounded
         }
-        // Idle
+
+    // Idle
     } else {
         nextState = currState
     }
@@ -244,14 +247,12 @@ func finalizeTransitionWithTimeout(ls *locatorState, nextStateCandiate SlaveLoca
 func executeOnTransitionEvents(ls *locatorState, newState, oldState SlaveLocatingState, transition SlaveLocatingTransition, slaveTimestamp time.Time) error {
     if newState != oldState {
         switch transition {
-            case SlaveTransitionOk:
-                if ls.onTransitionSuccess != nil {
-                    return ls.onTransitionSuccess(slaveTimestamp)
-                }
+            case SlaveTransitionOk: {
+                return ls.OnStateTranstionSuccess(ls.CurrentState(), slaveTimestamp)
+            }
+
             case SlaveTransitionFail: {
-                if ls.onTransitionFailure != nil {
-                    return ls.onTransitionFailure(slaveTimestamp)
-                }
+                return ls.OnStateTranstionFailure(ls.CurrentState(), slaveTimestamp)
             }
         }
     }

@@ -142,6 +142,7 @@ func (b *beaconState) gcHelper() {
 /* ------------------------------------------ Meta Transition Functions --------------------------------------------- */
 func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTransition) MasterBeaconState {
     var nextState MasterBeaconState
+
     // successfully transition to the next
     if nextCondition == MasterTransitionOk {
         switch currState {
@@ -171,10 +172,10 @@ func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTran
             default:
                 nextState = currState
             }
-            // failed to transit
+
+    // failed to transit
     } else if nextCondition == MasterTransitionFail {
         switch currState {
-
             case MasterInit:
                 fallthrough
             case MasterUnbounded:
@@ -200,7 +201,8 @@ func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTran
             default:
                 nextState = currState
             }
-            // idle
+
+    // idle
     } else  {
         nextState = currState
     }
@@ -239,8 +241,9 @@ func translateStateWithTimeout(b *beaconState, nextStateCandiate MasterBeaconTra
 func runOnTransitionEvents(b *beaconState, newState, oldState MasterBeaconState, transition MasterBeaconTransition, masterTimestamp time.Time) error {
     if newState != oldState {
         switch transition {
-            case MasterTransitionOk:
+            case MasterTransitionOk: {
                 return b.OnStateTranstionSuccess(b.CurrentState(), b.SlaveNode(), masterTimestamp)
+            }
 
             case MasterTransitionFail: {
                 return b.OnStateTranstionFailure(b.CurrentState(), b.SlaveNode(), masterTimestamp)

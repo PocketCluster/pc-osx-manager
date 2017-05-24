@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slcontext"
 )
 
-func newBoundedState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
+func newBoundedState(searchComm SearchTx, beaconComm BeaconTx, event LocatorOnTransitionEvent) LocatorState {
     bs := &bounded{}
 
     bs.constState                   = SlaveBounded
@@ -23,9 +23,8 @@ func newBoundedState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
 
     bs.timestampTransition          = bs.transitionActionWithTimestamp
     bs.masterMetaTransition         = bs.transitionWithMasterMeta
-    bs.onTransitionSuccess          = bs.onStateTranstionSuccess
-    bs.onTransitionFailure          = bs.onStateTranstionFailure
 
+    bs.LocatorOnTransitionEvent     = event
     bs.searchComm                   = searchComm
     bs.beaconComm                   = beaconComm
     return bs
@@ -122,13 +121,4 @@ func (ls *bounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta,
     // but it would not create a chance of overflowing network.
 
     return SlaveTransitionOk, nil
-}
-
-func (ls *bounded) onStateTranstionSuccess(slaveTimestamp time.Time) error {
-    return nil
-}
-
-func (ls *bounded) onStateTranstionFailure(slaveTimestamp time.Time) error {
-    slcontext.SharedSlaveContext().DiscardAESKey()
-    return nil
 }
