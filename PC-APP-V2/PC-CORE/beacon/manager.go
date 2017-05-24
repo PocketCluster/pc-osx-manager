@@ -24,11 +24,21 @@ func NewBeaconManagerWithFunc(cid string, comm CommChannelFunc) (BeaconManger, e
 func NewBeaconManager(cid string, comm CommChannel) (BeaconManger, error) {
     var (
         beacons []MasterBeacon = []MasterBeacon{}
+        bm *beaconManger = nil
         nodes []model.SlaveNode = nil
         mb MasterBeacon = nil
         err error = nil
     )
+    if comm == nil {
+        return nil, errors.Errorf("[ERR] comm channel cannot be nil")
+    }
 
+    bm = &beaconManger {
+        clusterID:      cid,
+        commChannel:    comm,
+    }
+
+    // respawn nodes
     nodes, err = model.FindAllSlaveNode()
     if err != nil && err != model.NoItemFound{
         return nil, errors.WithStack(err)
@@ -39,7 +49,7 @@ func NewBeaconManager(cid string, comm CommChannel) (BeaconManger, error) {
         n := &(nodes[i])
         switch n.State {
             case model.SNMStateJoined: {
-                mb, err = NewMasterBeacon(MasterBindBroken, n, comm)
+                mb, err = NewMasterBeacon(MasterBindBroken, n, comm, bm)
                 if err != nil {
                     return nil, errors.WithStack(err)
                 }
@@ -47,12 +57,9 @@ func NewBeaconManager(cid string, comm CommChannel) (BeaconManger, error) {
         }
         beacons = append(beacons, mb)
     }
+    bm.beaconList = beacons
 
-    return &beaconManger {
-        clusterID:      cid,
-        commChannel:    comm,
-        beaconList:     beacons,
-    }, nil
+    return bm, nil
 }
 
 type BeaconManger interface {
@@ -167,7 +174,7 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
 
     // since we've not found, create new beacon
     if !bcFound {
-        mc, err = NewMasterBeacon(MasterInit, model.NewSlaveNode(b), b.commChannel)
+        mc, err = NewMasterBeacon(MasterInit, model.NewSlaveNode(b), b.commChannel, b)
         if err != nil {
             return errors.WithStack(err)
         }
@@ -202,6 +209,32 @@ func (b *beaconManger) Shutdown() error {
     b.commChannel = nil
     return nil
 }
+
+// --- BeaconOnTransitionEvent methods --- //
+
+// state transition success from
+func (b *beaconManger) OnStateTranstionSuccess(state MasterBeaconState, slave *model.SlaveNode, ts time.Time) error {
+
+    switch state {
+        case MasterCryptoCheck: {
+            err := slave.JoinSlave()
+            return errors.WithStack(err)
+        }
+        case MasterBindRecovery: {
+            err := slave.Update()
+            return errors.WithStack(err)
+        }
+    }
+
+    return nil
+}
+
+// state transition failure from
+func (b *beaconManger) OnStateTranstionFailure(state MasterBeaconState, slave *model.SlaveNode, ts time.Time) error {
+    return nil
+}
+
+// --- private static methods --- //
 
 func pruneBeaconList(b *beaconManger) {
     b.Lock()
@@ -282,4 +315,5 @@ func shutdownMasterBeacons(b *beaconManger) {
     }
     // assign new slice to prevent nil crash
     b.beaconList = []MasterBeacon{}
+    b.commChannel = nil
 }

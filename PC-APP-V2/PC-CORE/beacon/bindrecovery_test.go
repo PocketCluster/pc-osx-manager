@@ -14,11 +14,12 @@ func Test_BindRecovery_Bounded_Transition(t *testing.T) {
 
     var (
         debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
         masterTS, slaveTS time.Time = time.Now(), time.Now()
     )
 
     slave := model.DebugTestSlaveNode()
-    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm)
+    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -67,11 +68,12 @@ func Test_BindRecovery_Bounded_TimeoutFail(t *testing.T) {
 
     var (
         debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
         masterTS, slaveTS time.Time = time.Now(), time.Now()
     )
 
     slave := model.DebugTestSlaveNode()
-    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm)
+    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -136,11 +138,12 @@ func Test_BindRecovery_Bounded_TooManyMetaFail(t *testing.T) {
 
     var (
         debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
         masterTS, slaveTS time.Time = time.Now(), time.Now()
     )
 
     slave := model.DebugTestSlaveNode()
-    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm)
+    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -191,11 +194,12 @@ func Test_BindRecovery_Bounded_TxActionFail(t *testing.T) {
 
     var (
         debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
         masterTS time.Time = time.Now()
     )
 
     slave := model.DebugTestSlaveNode()
-    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm)
+    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return

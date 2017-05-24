@@ -11,7 +11,7 @@ import (
     "github.com/stkim1/pcrypto"
 )
 
-func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (BeaconState, error) {
+func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel, event BeaconOnTransitionEvent) (BeaconState, error) {
     b := &bindbroken{}
 
     b.constState                    = MasterBindBroken
@@ -25,9 +25,8 @@ func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (BeaconState,
 
     b.timestampTransition           = b.transitionActionWithTimestamp
     b.slaveMetaTransition           = b.bindBroken
-    b.onTransitionSuccess           = b.onStateTranstionSuccess
-    b.onTransitionFailure           = b.onStateTranstionFailure
 
+    b.BeaconOnTransitionEvent       = event
     b.slaveNode                     = slaveNode
     b.commChan                      = comm
 
@@ -120,12 +119,4 @@ func (b *bindbroken) bindBroken(sender *net.UDPAddr, meta *slagent.PocketSlaveAg
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil
-}
-
-func (b *bindbroken) onStateTranstionSuccess(masterTimestamp time.Time) error {
-    return nil
-}
-
-func (b *bindbroken) onStateTranstionFailure(masterTimestamp time.Time) error {
-    return nil
 }

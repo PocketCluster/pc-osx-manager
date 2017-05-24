@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-core/model"
 )
 
-func beaconinitState(slaveNode *model.SlaveNode, comm CommChannel) BeaconState {
+func beaconinitState(slaveNode *model.SlaveNode, comm CommChannel, event BeaconOnTransitionEvent) BeaconState {
     b := &beaconinit{}
 
     b.constState                    = MasterInit
@@ -23,9 +23,8 @@ func beaconinitState(slaveNode *model.SlaveNode, comm CommChannel) BeaconState {
 
     b.timestampTransition           = b.transitionActionWithTimestamp
     b.slaveMetaTransition           = b.beaconInit
-    b.onTransitionSuccess           = b.onStateTranstionSuccess
-    b.onTransitionFailure           = b.onStateTranstionFailure
 
+    b.BeaconOnTransitionEvent       = event
     b.slaveNode                     = slaveNode
     b.commChan                      = comm
 
@@ -83,12 +82,4 @@ func (b *beaconinit) beaconInit(sender *net.UDPAddr, meta *slagent.PocketSlaveAg
     b.slaveLocation = meta.DiscoveryAgent
 
     return MasterTransitionOk, nil
-}
-
-func (b *beaconinit) onStateTranstionSuccess(masterTimestamp time.Time) error {
-    return nil
-}
-
-func (b *beaconinit) onStateTranstionFailure(masterTimestamp time.Time) error {
-    return nil
 }

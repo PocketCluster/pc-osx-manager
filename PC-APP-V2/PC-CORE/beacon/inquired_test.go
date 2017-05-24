@@ -13,10 +13,13 @@ func Test_Inquired_KeyExchange_TimeoutFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    debugComm := &DebugCommChannel{}
+    var (
+        debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
+    )
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -91,10 +94,13 @@ func Test_Inquired_KeyExchange_TooManyMetaFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    debugComm := &DebugCommChannel{}
+    var (
+        debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
+    )
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -169,11 +175,12 @@ func Test_Inquired_KeyExchange_TxActionFail(t *testing.T) {
 
     var (
         debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
         masterTS, slaveTS time.Time = time.Now(), time.Now()
     )
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return

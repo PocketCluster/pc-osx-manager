@@ -22,9 +22,8 @@ func discardedState(oldState *beaconState) BeaconState {
 
     b.timestampTransition           = b.transitionActionWithTimestamp
     b.slaveMetaTransition           = b.transitionWithSlaveMeta
-    b.onTransitionSuccess           = b.onStateTranstionSuccess
-    b.onTransitionFailure           = b.onStateTranstionFailure
 
+    b.BeaconOnTransitionEvent       = oldState.BeaconOnTransitionEvent
     b.aesKey                        = oldState.aesKey
     b.aesCryptor                    = oldState.aesCryptor
     b.rsaEncryptor                  = oldState.rsaEncryptor
@@ -44,12 +43,4 @@ func (b *discarded) transitionActionWithTimestamp(masterTimestamp time.Time) err
 
 func (b *discarded) transitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
     return MasterTransitionOk, nil
-}
-
-func (b *discarded) onStateTranstionSuccess(masterTimestamp time.Time) error {
-    return nil
-}
-
-func (b *discarded) onStateTranstionFailure(masterTimestamp time.Time) error {
-    return nil
 }

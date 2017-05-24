@@ -24,9 +24,8 @@ func cryptocheckState(oldState *beaconState) BeaconState {
 
     b.timestampTransition           = b.transitionActionWithTimestamp
     b.slaveMetaTransition           = b.cryptoCheck
-    b.onTransitionSuccess           = b.onStateTranstionSuccess
-    b.onTransitionFailure           = b.onStateTranstionFailure
 
+    b.BeaconOnTransitionEvent       = oldState.BeaconOnTransitionEvent
     b.aesKey                        = oldState.aesKey
     b.aesCryptor                    = oldState.aesCryptor
     b.rsaEncryptor                  = oldState.rsaEncryptor
@@ -130,13 +129,4 @@ func (b *cryptocheck) cryptoCheck(sender *net.UDPAddr, meta *slagent.PocketSlave
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil
-}
-
-func (b *cryptocheck) onStateTranstionSuccess(masterTimestamp time.Time) error {
-    err := b.slaveNode.JoinSlave()
-    return errors.WithStack(err)
-}
-
-func (b *cryptocheck) onStateTranstionFailure(masterTimestamp time.Time) error {
-    return nil
 }

@@ -85,6 +85,7 @@ func (s *ManagerSuite) TestNameGeneration(c *C) {
     var (
         _ = insertTestNodes(allNodeCount, c)
         comm = &DebugCommChannel{}
+        event = &DebugTransitionEventReceiver{}
         sa *model.SlaveNode
         man, err = NewBeaconManager(masterAgentName, comm)
     )
@@ -93,7 +94,7 @@ func (s *ManagerSuite) TestNameGeneration(c *C) {
 
     for i := 0; i < allNodeCount; i++ {
         sa = model.NewSlaveNode(man.(*beaconManger))
-        mb, err := NewMasterBeacon(MasterInit, sa, comm)
+        mb, err := NewMasterBeacon(MasterInit, sa, comm, event)
         c.Assert(err, IsNil)
         man.(*beaconManger).beaconList = append(man.(*beaconManger).beaconList, mb)
         // assign new name
@@ -281,4 +282,12 @@ func (s *ManagerSuite) TestBindBroken_To_Bounded(c *C) {
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 1)
     c.Assert(man.(*beaconManger).beaconList[0].CurrentState(), Equals, MasterBounded)
+}
+
+func (s *ManagerSuite) Test_SlaveNode_Save(c *C) {
+    // TODO : need to check if slave nodes are properly saved
+}
+
+func (s *ManagerSuite) Test_SlaveNode_Updated(c *C) {
+    // TODO : need to check if slave nodes are properly updated
 }

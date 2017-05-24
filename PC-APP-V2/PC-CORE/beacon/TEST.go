@@ -4,6 +4,7 @@ import (
     "time"
 
     "github.com/stkim1/pcrypto"
+    "github.com/stkim1/pc-core/model"
 )
 
 type DebugCommChannel struct {
@@ -50,4 +51,25 @@ func (b *beaconState) TxActionTS() time.Time {
 
 func (b *beaconState) TxActionFailed() uint {
     return b.txActionCount
+}
+
+type DebugTransitionEventReceiver struct {
+    LastStateSuccessFrom     MasterBeaconState
+    LastStateFailureFrom     MasterBeaconState
+    Slave                    *model.SlaveNode
+    TransitionTS             time.Time
+}
+
+func (d *DebugTransitionEventReceiver) OnStateTranstionSuccess(state MasterBeaconState, slave *model.SlaveNode, ts time.Time) error {
+    d.LastStateSuccessFrom = state
+    d.Slave = slave
+    d.TransitionTS = ts
+    return nil
+}
+
+func (d *DebugTransitionEventReceiver) OnStateTranstionFailure(state MasterBeaconState, slave *model.SlaveNode, ts time.Time) error {
+    d.LastStateFailureFrom = state
+    d.Slave = slave
+    d.TransitionTS = ts
+    return nil
 }

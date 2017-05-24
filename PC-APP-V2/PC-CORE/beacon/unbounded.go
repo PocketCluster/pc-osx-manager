@@ -23,9 +23,8 @@ func unboundedState(oldState *beaconState) BeaconState {
 
     b.timestampTransition           = b.transitionActionWithTimestamp
     b.slaveMetaTransition           = b.unbounded
-    b.onTransitionSuccess           = b.onStateTranstionSuccess
-    b.onTransitionFailure           = b.onStateTranstionFailure
 
+    b.BeaconOnTransitionEvent       = oldState.BeaconOnTransitionEvent
     b.slaveNode                     = oldState.slaveNode
     b.commChan                      = oldState.commChan
 
@@ -98,12 +97,4 @@ func (b *unbounded) unbounded(sender *net.UDPAddr, meta *slagent.PocketSlaveAgen
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil
-}
-
-func (b *unbounded) onStateTranstionSuccess(masterTimestamp time.Time) error {
-    return nil
-}
-
-func (b *unbounded) onStateTranstionFailure(masterTimestamp time.Time) error {
-    return nil
 }

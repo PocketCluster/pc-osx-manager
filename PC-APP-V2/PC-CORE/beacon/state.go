@@ -26,9 +26,10 @@ type transitionWithSlaveMeta          func (sender *net.UDPAddr, meta *slagent.P
 
 type transitionActionWithTimestamp    func (masterTimestamp time.Time) error
 
-type onStateTranstionSuccess          func (masterTimestamp time.Time) error
-
-type onStateTranstionFailure          func (masterTimestamp time.Time) error
+type BeaconOnTransitionEvent interface {
+    OnStateTranstionSuccess(state MasterBeaconState, slave *model.SlaveNode, ts time.Time) error
+    OnStateTranstionFailure(state MasterBeaconState, slave *model.SlaveNode, ts time.Time) error
+}
 
 type BeaconState interface {
     CurrentState() MasterBeaconState
@@ -68,11 +69,8 @@ type beaconState struct {
     // timestamp transition func
     timestampTransition         transitionActionWithTimestamp
 
-    // onSuccess
-    onTransitionSuccess         onStateTranstionSuccess
-
-    // onFailure
-    onTransitionFailure         onStateTranstionFailure
+    // onSuccess && onFailure
+    BeaconOnTransitionEvent
 
     /* ---------------------------------------- all-states properties ----------------------------------------------- */
     slaveNode                   *model.SlaveNode
@@ -127,19 +125,18 @@ func (b *beaconState) Close() {
 
 // gcHelper nullify pointers and delegates to help GC
 func (b *beaconState) gcHelper() {
-    b.timestampTransition    = nil
-    b.slaveMetaTransition    = nil
-    b.onTransitionSuccess    = nil
-    b.onTransitionFailure    = nil
+    b.timestampTransition        = nil
+    b.slaveMetaTransition        = nil
 
-    b.slaveNode              = nil
-    b.aesKey                 = nil
-    b.aesCryptor             = nil
-    b.rsaEncryptor           = nil
-    b.commChan               = nil
+    b.BeaconOnTransitionEvent    = nil
+    b.slaveNode                  = nil
+    b.aesKey                     = nil
+    b.aesCryptor                 = nil
+    b.rsaEncryptor               = nil
+    b.commChan                   = nil
 
-    b.slaveLocation          = nil
-    b.slaveStatus            = nil
+    b.slaveLocation              = nil
+    b.slaveStatus                = nil
 }
 
 /* ------------------------------------------ Meta Transition Functions --------------------------------------------- */
@@ -148,69 +145,69 @@ func stateTransition(currState MasterBeaconState, nextCondition MasterBeaconTran
     // successfully transition to the next
     if nextCondition == MasterTransitionOk {
         switch currState {
-        case MasterInit:
-            nextState = MasterUnbounded
-        case MasterUnbounded:
-            nextState = MasterInquired
-        case MasterInquired:
-            nextState = MasterKeyExchange
-        case MasterKeyExchange:
-            nextState = MasterCryptoCheck
+            case MasterInit:
+                nextState = MasterUnbounded
+            case MasterUnbounded:
+                nextState = MasterInquired
+            case MasterInquired:
+                nextState = MasterKeyExchange
+            case MasterKeyExchange:
+                nextState = MasterCryptoCheck
 
-        case MasterCryptoCheck:
-            fallthrough
-        case MasterBounded:
-            fallthrough
-        case MasterBindRecovery:
-            nextState = MasterBounded
-            break
+            case MasterCryptoCheck:
+                fallthrough
+            case MasterBounded:
+                fallthrough
+            case MasterBindRecovery:
+                nextState = MasterBounded
+                break
 
-        case MasterBindBroken:
-            nextState = MasterBindRecovery
-            break
+            case MasterBindBroken:
+                nextState = MasterBindRecovery
+                break
 
-        case MasterDiscarded:
-            fallthrough
-        default:
-            nextState = currState
-        }
-        // failed to transit
+            case MasterDiscarded:
+                fallthrough
+            default:
+                nextState = currState
+            }
+            // failed to transit
     } else if nextCondition == MasterTransitionFail {
         switch currState {
 
-        case MasterInit:
-            fallthrough
-        case MasterUnbounded:
-            fallthrough
-        case MasterInquired:
-            fallthrough
-        case MasterKeyExchange:
-            fallthrough
-        case MasterCryptoCheck:
-            nextState = MasterDiscarded
-            break
+            case MasterInit:
+                fallthrough
+            case MasterUnbounded:
+                fallthrough
+            case MasterInquired:
+                fallthrough
+            case MasterKeyExchange:
+                fallthrough
+            case MasterCryptoCheck:
+                nextState = MasterDiscarded
+                break
 
-        case MasterBounded:
-            fallthrough
-        case MasterBindRecovery:
-            fallthrough
-        case MasterBindBroken:
-            nextState = MasterBindBroken
-            break
+            case MasterBounded:
+                fallthrough
+            case MasterBindRecovery:
+                fallthrough
+            case MasterBindBroken:
+                nextState = MasterBindBroken
+                break
 
-        case MasterDiscarded:
-            fallthrough
-        default:
-            nextState = currState
-        }
-        // idle
+            case MasterDiscarded:
+                fallthrough
+            default:
+                nextState = currState
+            }
+            // idle
     } else  {
         nextState = currState
     }
     return nextState
 }
 
-func (b *beaconState) translateStateWithTimeout(nextStateCandiate MasterBeaconTransition, masterTimestamp time.Time) MasterBeaconTransition {
+func translateStateWithTimeout(b *beaconState, nextStateCandiate MasterBeaconTransition, masterTimestamp time.Time) MasterBeaconTransition {
     var nextConfirmedState MasterBeaconTransition
 
     switch nextStateCandiate {
@@ -243,13 +240,10 @@ func runOnTransitionEvents(b *beaconState, newState, oldState MasterBeaconState,
     if newState != oldState {
         switch transition {
             case MasterTransitionOk:
-                if b.onTransitionSuccess != nil {
-                    return b.onTransitionSuccess(masterTimestamp)
-                }
+                return b.OnStateTranstionSuccess(b.CurrentState(), b.SlaveNode(), masterTimestamp)
+
             case MasterTransitionFail: {
-                if b.onTransitionFailure != nil {
-                    return b.onTransitionFailure(masterTimestamp)
-                }
+                return b.OnStateTranstionFailure(b.CurrentState(), b.SlaveNode(), masterTimestamp)
             }
         }
     }
@@ -265,7 +259,7 @@ func newBeaconForState(b* beaconState, newState, oldState MasterBeaconState) Bea
     var err error = nil
     switch newState {
         case MasterInit:
-            newBeaconState = beaconinitState(b.slaveNode, b.commChan)
+            newBeaconState = beaconinitState(b.slaveNode, b.commChan, b.BeaconOnTransitionEvent)
 
         case MasterUnbounded:
             newBeaconState = unboundedState(b)
@@ -286,7 +280,7 @@ func newBeaconForState(b* beaconState, newState, oldState MasterBeaconState) Bea
             newBeaconState = bindrecoveryState(b)
 
         case MasterBindBroken:
-            newBeaconState, err = bindbrokenState(b.slaveNode, b.commChan)
+            newBeaconState, err = bindbrokenState(b.slaveNode, b.commChan, b.BeaconOnTransitionEvent)
             if err != nil {
                 // this should never happen
                 log.Panic(err.Error())
@@ -295,7 +289,12 @@ func newBeaconForState(b* beaconState, newState, oldState MasterBeaconState) Bea
         case MasterDiscarded:
             newBeaconState = discardedState(b)
     }
-    // TODO : need to help GC on old beaconState look how slave node has done it
+
+    // since it's clear that newBeaconState will be returned, we'll scrap old beaconState
+    if newBeaconState != nil {
+        b.gcHelper()
+    }
+
     return newBeaconState
 }
 
@@ -319,7 +318,7 @@ func (b *beaconState) TransitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent
     transitionCandidate, transErr = b.slaveMetaTransition(sender, meta, masterTimestamp)
 
     // this is to apply failed time count and timeout window
-    finalTransition = b.translateStateWithTimeout(transitionCandidate, masterTimestamp)
+    finalTransition = translateStateWithTimeout(b, transitionCandidate, masterTimestamp)
 
     // finalize master beacon state
     newState = stateTransition(oldState, finalTransition)
