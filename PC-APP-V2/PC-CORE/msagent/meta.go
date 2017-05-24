@@ -1,13 +1,17 @@
 package msagent
 
 import (
+    "github.com/pkg/errors"
+
     "gopkg.in/vmihailenco/msgpack.v2"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/pc-core/context"
 )
 
 type PocketMasterAgentMeta struct {
     MetaVersion               MetaProtocol            `msgpack:"m_pm"`
+    MasterBoundAgent          string                  `msgpack:"m_ba"`
     DiscoveryRespond          *PocketMasterRespond    `msgpack:"m_dr, inline, omitempty"`
     StatusCommand             *PocketMasterCommand    `msgpack:"m_sc, inline, omitempty"`
     EncryptedMasterCommand    []byte                  `msgpack:"m_ec, omitempty"`
@@ -20,137 +24,155 @@ type PocketMasterAgentMeta struct {
 
 
 func PackedMasterMeta(meta *PocketMasterAgentMeta) ([]byte, error) {
-    return msgpack.Marshal(meta)
+    m, err := msgpack.Marshal(meta)
+    return m, errors.WithStack(err)
 }
 
 func UnpackedMasterMeta(message []byte) (meta *PocketMasterAgentMeta, err error) {
-    err = msgpack.Unmarshal(message, &meta)
+    err = errors.WithStack(msgpack.Unmarshal(message, &meta))
     return
 }
 
 // --- per-state meta function
 
-func SlaveIdentityInquiryMeta(respond *PocketMasterRespond) (meta *PocketMasterAgentMeta) {
-    meta = &PocketMasterAgentMeta {
-        MetaVersion         :MASTER_META_VERSION,
-        DiscoveryRespond    :respond,
+func SlaveIdentityInquiryMeta(respond *PocketMasterRespond) (*PocketMasterAgentMeta, error) {
+    sn, err := context.SharedHostContext().MasterAgentName()
+    if err != nil {
+        return nil, errors.WithStack(err)
     }
-    return
+    return &PocketMasterAgentMeta {
+        MetaVersion:         MASTER_META_VERSION,
+        MasterBoundAgent:    sn,
+        DiscoveryRespond:    respond,
+    }, nil
 }
 
-func MasterDeclarationMeta(command *PocketMasterCommand, pubkey []byte) (meta *PocketMasterAgentMeta) {
-    meta = &PocketMasterAgentMeta {
-        MetaVersion         :MASTER_META_VERSION,
-        StatusCommand       :command,
-        MasterPubkey        :pubkey,
+func MasterDeclarationMeta(command *PocketMasterCommand, pubkey []byte) (*PocketMasterAgentMeta, error) {
+    sn, err := context.SharedHostContext().MasterAgentName()
+    if err != nil {
+        return nil, errors.WithStack(err)
     }
-    return
+    return &PocketMasterAgentMeta {
+        MetaVersion:         MASTER_META_VERSION,
+        MasterBoundAgent:    sn,
+        StatusCommand:       command,
+        MasterPubkey:        pubkey,
+    }, nil
 }
 
 // AES key is encrypted with RSA for async encryption scheme, and rest of data, EncryptedMasterCommand &
 // EncryptedSlaveStatus, are encrypted with AES
-func ExchangeCryptoKeyAndNameMeta(command *PocketMasterCommand, status *slagent.PocketSlaveStatus, aeskey []byte, aescrypto pcrypto.AESCryptor, rsacrypto pcrypto.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
+func ExchangeCryptoKeyAndNameMeta(command *PocketMasterCommand, slaveIdentity *slagent.PocketSlaveIdentity, aeskey []byte, aescrypto pcrypto.AESCryptor, rsacrypto pcrypto.RsaEncryptor) (*PocketMasterAgentMeta, error) {
     // marshal command
     mc, err := PackedMasterCommand(command)
     if err != nil {
-        return
+        return nil, errors.WithStack(err)
     }
     // encrypt the marshaled command with AES
     encryptedCommand, err := aescrypto.EncryptByAES(mc)
     if err != nil {
-        return
+        return nil, errors.WithStack(err)
     }
 
-    //TODO : since including encrypted status bloats the final meta packet size to 633, we're here to omit it and put encrypted slave name instead. this should later be looked into again
-/*
-    // marshal status
-    ms, err := msgpack.Marshal(status)
+    // packed slave name & uuid
+    pslid, err := slagent.PackPocketSlaveIdentity(slaveIdentity)
     if err != nil {
-        return
+        return nil, errors.WithStack(err)
     }
     // encrypt the marshaled status with AES
-    encryptedStatus, err := aescrypto.Encrypt(ms)
+    eslid, err := aescrypto.EncryptByAES(pslid)
     if err != nil {
-        return
+        return nil, errors.WithStack(err)
     }
-*/
-    // encrypted slave name with AES
-    encryptedSlaveName, err := aescrypto.EncryptByAES([]byte(status.SlaveNodeName))
-    if err != nil {
-        return
-    }
+
     // encrypt the AES key with RSA
     encryptedAES, AESsignature, err := rsacrypto.EncryptByRSA(aeskey)
     if err != nil {
-        return
+        return nil, errors.WithStack(err)
     }
-    meta = &PocketMasterAgentMeta {
-        MetaVersion             :MASTER_META_VERSION,
-        EncryptedMasterCommand  :encryptedCommand,
-        EncryptedSlaveStatus    :encryptedSlaveName, //encryptedStatus,
-        EncryptedAESKey         :encryptedAES,
-        RsaCryptoSignature      :AESsignature,
+    sn, err := context.SharedHostContext().MasterAgentName()
+    if err != nil {
+        return nil, errors.WithStack(err)
     }
-    return
+    return &PocketMasterAgentMeta {
+        MetaVersion:               MASTER_META_VERSION,
+        MasterBoundAgent:          sn,
+        EncryptedMasterCommand:    encryptedCommand,
+        EncryptedSlaveStatus:      eslid,
+        EncryptedAESKey:           encryptedAES,
+        RsaCryptoSignature:        AESsignature,
+    }, nil
 }
 
-func MasterBindReadyMeta(command *PocketMasterCommand, aescrypto pcrypto.AESCryptor) (meta *PocketMasterAgentMeta, err error) {
+func MasterBindReadyMeta(command *PocketMasterCommand, aescrypto pcrypto.AESCryptor) (*PocketMasterAgentMeta, error) {
     // marshal command
     mc, err := PackedMasterCommand(command)
     if err != nil {
-        return
+        return nil, errors.WithStack(err)
     }
     // encrypt the marshaled command with AES
     encryptedCommand, err := aescrypto.EncryptByAES(mc)
     if err != nil {
-        return
+        return nil, errors.WithStack(err)
     }
-    meta = &PocketMasterAgentMeta {
-        MetaVersion             :MASTER_META_VERSION,
-        EncryptedMasterCommand  :encryptedCommand,
+    sn, err := context.SharedHostContext().MasterAgentName()
+    if err != nil {
+        return nil, errors.WithStack(err)
     }
-    return
+    return &PocketMasterAgentMeta {
+        MetaVersion:               MASTER_META_VERSION,
+        MasterBoundAgent:          sn,
+        EncryptedMasterCommand:    encryptedCommand,
+    }, nil
 }
 
-func BoundedSlaveAckMeta(command *PocketMasterCommand, aescrypto pcrypto.AESCryptor) (meta *PocketMasterAgentMeta, err error) {
+func BoundedSlaveAckMeta(command *PocketMasterCommand, aescrypto pcrypto.AESCryptor) (*PocketMasterAgentMeta, error) {
     // marshal command
     mc, err := PackedMasterCommand(command)
     if err != nil {
-        return
+        return nil, errors.WithStack(err)
     }
     // encrypt the marshaled command with AES
     encryptedCommand, err := aescrypto.EncryptByAES(mc)
     if err != nil {
-        return
+        return nil, errors.WithStack(err)
     }
-    meta = &PocketMasterAgentMeta {
-        MetaVersion             :MASTER_META_VERSION,
-        EncryptedMasterCommand  :encryptedCommand,
+    sn, err := context.SharedHostContext().MasterAgentName()
+    if err != nil {
+        return nil, errors.WithStack(err)
     }
-    return
+    return &PocketMasterAgentMeta {
+        MetaVersion:               MASTER_META_VERSION,
+        MasterBoundAgent:          sn,
+        EncryptedMasterCommand:    encryptedCommand,
+    }, nil
 }
 
-func BrokenBindRecoverMeta(respond *PocketMasterRespond, aeskey []byte, aescrypto pcrypto.AESCryptor, rsacrypto pcrypto.RsaEncryptor) (meta *PocketMasterAgentMeta, err error) {
+func BrokenBindRecoverMeta(respond *PocketMasterRespond, aeskey []byte, aescrypto pcrypto.AESCryptor, rsacrypto pcrypto.RsaEncryptor) (*PocketMasterAgentMeta, error) {
     // marshal command
     mr, err := PackedMasterRespond(respond)
     if err != nil {
-        return
+        return nil, errors.WithStack(err)
     }
     // encrypt the marshaled command with AES
     er, err := aescrypto.EncryptByAES(mr)
     if err != nil {
-        return
+        return nil, errors.WithStack(err)
     }
     // encrypt the AES key with RSA
     ea, as, err := rsacrypto.EncryptByRSA(aeskey)
     if err != nil {
-        return
+        return nil, errors.WithStack(err)
     }
-    meta = &PocketMasterAgentMeta {
-        MetaVersion             :MASTER_META_VERSION,
-        EncryptedMasterRespond  :er,
-        EncryptedAESKey         :ea,
-        RsaCryptoSignature      :as,
+    sn, err := context.SharedHostContext().MasterAgentName()
+    if err != nil {
+        return nil, errors.WithStack(err)
     }
-    return
+    return &PocketMasterAgentMeta {
+        MetaVersion:               MASTER_META_VERSION,
+        MasterBoundAgent:          sn,
+        EncryptedMasterRespond:    er,
+        EncryptedAESKey:           ea,
+        RsaCryptoSignature:        as,
+    }, nil
 }

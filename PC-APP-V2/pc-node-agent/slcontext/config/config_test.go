@@ -194,7 +194,8 @@ dns-nameserver pc-master:53535
     return nil
 }
 
-func TestFixateNetworkInterfaces(t *testing.T) {
+// (2017-05-15) This test is skipped as DHCP support is implemented
+func SkipTestFixateNetworkInterfaces(t *testing.T) {
     for i := 0; i < 3; i++ {
         ifacedata := testUnfixedNetworkInterface(i)
         slaveConfig := ConfigSlaveSection{
@@ -202,7 +203,6 @@ func TestFixateNetworkInterfaces(t *testing.T) {
             SlaveMacAddr    : "FACEMACADDRESS",
             SlaveIP4Addr    : "192.168.1.240",
             SlaveGateway    : "192.168.1.1",
-            SlaveNetMask    : "255.255.255.0",
             SlaveNameServ   : "pc-master:53535",
         }
 
@@ -217,7 +217,8 @@ func TestFixateNetworkInterfaces(t *testing.T) {
     }
 }
 
-func TestFixedNetworkInterfaceFile(t *testing.T) {
+// (2017-05-15) This test is skipped as DHCP support is implemented
+func SkipTestFixedNetworkInterfaceFile(t *testing.T) {
     cfg, err := DebugConfigPrepare()
     if err != nil {
         t.Errorf(err.Error())
@@ -230,7 +231,6 @@ func TestFixedNetworkInterfaceFile(t *testing.T) {
         SlaveMacAddr    : "FACEMACADDRESS",
         SlaveIP4Addr    : "192.168.1.240",
         SlaveGateway    : "192.168.1.1",
-        SlaveNetMask    : "255.255.255.0",
         SlaveNameServ   : "pc-master:53535",
     }
 

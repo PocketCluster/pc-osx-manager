@@ -5,6 +5,7 @@ import (
     "time"
 
     "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/pc-core/model"
 )
 
 func Test_Init_Unbounded_Transition_TimeoutFail(t *testing.T) {
@@ -14,7 +15,7 @@ func Test_Init_Unbounded_Transition_TimeoutFail(t *testing.T) {
     debugComm := &DebugCommChannel{}
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -32,7 +33,7 @@ func Test_Init_Unbounded_Transition_TimeoutFail(t *testing.T) {
 
     // 1st fail
     masterTS := time.Now()
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err == nil {
         t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
         return
@@ -50,7 +51,7 @@ func Test_Init_Unbounded_Transition_TimeoutFail(t *testing.T) {
 
     // 2nd fail
     masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout * time.Duration(TxActionLimit))
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err != nil {
         t.Log(err.Error())
     }
@@ -71,7 +72,7 @@ func Test_Init_Unbounded_Transition_TooManyMetaFail(t *testing.T) {
     debugComm := &DebugCommChannel{}
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -90,7 +91,7 @@ func Test_Init_Unbounded_Transition_TooManyMetaFail(t *testing.T) {
     // four more times of failure with incorrect slave meta
     for i := 0; i < int(TransitionFailureLimit); i++ {
         masterTS = masterTS.Add(time.Second)
-        err = mb.TransitionWithSlaveMeta(sa, masterTS)
+        err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
         if err == nil {
             t.Errorf("[ERR] incorrect slave state should generate error when fed to freshly spwaned beacon")
             return
@@ -118,7 +119,7 @@ func Test_BeaconInit_Unbounded_TxActionFail(t *testing.T) {
     )
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return

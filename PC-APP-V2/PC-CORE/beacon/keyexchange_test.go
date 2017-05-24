@@ -6,6 +6,7 @@ import (
 
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pcrypto"
+    "github.com/stkim1/pc-core/model"
 )
 
 func Test_KeyExchange_CryptoCheck_TimeoutFail(t *testing.T) {
@@ -16,7 +17,7 @@ func Test_KeyExchange_CryptoCheck_TimeoutFail(t *testing.T) {
     debugComm := &DebugCommChannel{}
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -31,7 +32,7 @@ func Test_KeyExchange_CryptoCheck_TimeoutFail(t *testing.T) {
         return
     }
     masterTS := time.Now()
-    mb.TransitionWithSlaveMeta(sa, masterTS)
+    mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if mb.CurrentState() != MasterUnbounded {
         t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
         return
@@ -43,7 +44,7 @@ func Test_KeyExchange_CryptoCheck_TimeoutFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -54,19 +55,19 @@ func Test_KeyExchange_CryptoCheck_TimeoutFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
     // --- test
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.SlaveNode().SlaveUUID, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
     }
     masterTS = end.Add(time.Second)
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err == nil {
         t.Errorf("[ERR] Incorrect slave name should fail master beacon to transition")
         return
@@ -84,7 +85,7 @@ func Test_KeyExchange_CryptoCheck_TimeoutFail(t *testing.T) {
     // 2nd trial
     masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout * time.Duration(TxActionLimit))
     t.Logf("[INFO] masterTS - MasterBeacon.lastSuccessTimestmap : " + masterTS.Sub(mb.(*masterBeacon).state.(DebugState).TransitionSuccessTS()).String())
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err != nil {
         t.Log(err.Error())
     }
@@ -106,7 +107,7 @@ func Test_KeyExchange_CryptoCheck_TooManyMetaFail(t *testing.T) {
     debugComm := &DebugCommChannel{}
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -121,7 +122,7 @@ func Test_KeyExchange_CryptoCheck_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS := time.Now()
-    mb.TransitionWithSlaveMeta(sa, masterTS)
+    mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if mb.CurrentState() != MasterUnbounded {
         t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
         return
@@ -133,7 +134,7 @@ func Test_KeyExchange_CryptoCheck_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -144,7 +145,7 @@ func Test_KeyExchange_CryptoCheck_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -157,13 +158,13 @@ func Test_KeyExchange_CryptoCheck_TooManyMetaFail(t *testing.T) {
         }
         slaveTS = masterTS.Add(time.Second)
         t.Logf("[INFO] slaveTS - MasterBeacon.lastSuccessTimestmap : " + slaveTS.Sub(mb.(*masterBeacon).state.(DebugState).TransitionSuccessTS()).String())
-        sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
+        sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.SlaveNode().SlaveUUID, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
         if err != nil {
             t.Error(err.Error())
             return
         }
         masterTS = end.Add(time.Second)
-        if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+        if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err == nil {
             t.Errorf("[ERR] Incorrect slave name should fail master beacon to transition")
             return
         } else {
@@ -190,7 +191,7 @@ func Test_KeyExchange_CryptoCheck_TxActionFail(t *testing.T) {
     )
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -205,7 +206,7 @@ func Test_KeyExchange_CryptoCheck_TxActionFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    mb.TransitionWithSlaveMeta(sa, masterTS)
+    mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if mb.CurrentState() != MasterUnbounded {
         t.Error("[ERR] Master state is expected to be " + MasterUnbounded.String() + ". Current : " + mb.CurrentState().String())
         return
@@ -217,7 +218,7 @@ func Test_KeyExchange_CryptoCheck_TxActionFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -232,7 +233,7 @@ func Test_KeyExchange_CryptoCheck_TxActionFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -257,7 +258,12 @@ func Test_KeyExchange_CryptoCheck_TxActionFail(t *testing.T) {
         t.Error("[ERR] CommChannel Ucast Message should contain proper messages")
         return
     }
-    if mb.SlaveNode().IP4Address != debugComm.(*DebugCommChannel).LastUcastHost {
+    addr, err := mb.SlaveNode().IP4AddrString()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if addr != debugComm.(*DebugCommChannel).LastUcastHost {
         t.Error("[ERR] CommChannel Ucast Message should match slave node address")
         return
     }

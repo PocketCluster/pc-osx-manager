@@ -33,7 +33,7 @@ func Test_BindBroken_BindRecovery_Transition(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    err = mb.TransitionWithSlaveMeta(meta, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, meta, masterTS)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -71,13 +71,13 @@ func Test_BindBroken_BindRecovery_TimeoutFail(t *testing.T) {
     }
     // 1st trial
     masterTS = masterTS.Add(time.Second)
-    err = mb.TransitionWithSlaveMeta(meta, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, meta, masterTS)
     if err != nil {
         t.Log(err.Error())
     }
     // 2nd trial
     masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout * time.Duration(TxActionLimit))
-    err = mb.TransitionWithSlaveMeta(meta, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, meta, masterTS)
     if err != nil {
         t.Log(err.Error())
     }
@@ -112,7 +112,7 @@ func Test_BindBroken_BindRecovery_TooManyMetaFail(t *testing.T) {
     }
     for i := 0; i <= int(TransitionFailureLimit); i++ {
         masterTS = masterTS.Add(time.Second)
-        err = mb.TransitionWithSlaveMeta(meta, masterTS)
+        err = mb.TransitionWithSlaveMeta(slaveAddr, meta, masterTS)
         if err != nil {
             t.Log(err.Error())
         }

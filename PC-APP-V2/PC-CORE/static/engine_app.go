@@ -38,20 +38,11 @@ type App interface {
     RegisterFilter(f func(interface{}) interface{})
 }
 
-var theApp = &app{
-    eventsOut:      make(chan interface{}),
-    lifecycleStage: lifecycle.StageDead,
-}
-
-func init() {
-    theApp.eventsIn = pump(theApp.eventsOut)
-}
-
 type app struct {
-    filters []func(interface{}) interface{}
-    eventsOut      chan interface{}
-    eventsIn       chan interface{}
-    lifecycleStage lifecycle.Stage
+    filters           []func(interface{}) interface{}
+    eventsOut         chan interface{}
+    eventsIn          chan interface{}
+    lifecycleStage    lifecycle.Stage
 }
 
 func (a *app) Events() <-chan interface{} {

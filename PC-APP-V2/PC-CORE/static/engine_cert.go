@@ -6,12 +6,12 @@ import (
 
     "github.com/stkim1/pc-core/context"
     pcdefaults "github.com/stkim1/pc-core/defaults"
-    "github.com/stkim1/pc-core/record"
+    "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pcrypto"
 )
 
 //certificate authority generation
-func certAuthSigner(certRec certdb.Accessor, meta *record.ClusterMeta, country string) (*context.CertAuthBundle, error) {
+func certAuthSigner(certRec certdb.Accessor, meta *model.ClusterMeta, country string) (*context.CertAuthBundle, error) {
     var (
         signer *pcrypto.CaSigner = nil
         prvKey []byte  = nil

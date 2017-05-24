@@ -61,3 +61,31 @@ func OpsCmdStorageStop() {
         Command:    operation.CmdStorageStop,
     }
 }
+
+//export OpsCmdBeaconStart
+func OpsCmdBeaconStart() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdBeaconStart,
+    }
+}
+
+//export OpsCmdBeaconStop
+func OpsCmdBeaconStop() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdBeaconStop,
+    }
+}
+
+//export OpsCmdServiceBundleStart
+func OpsCmdServiceBundleStart() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdServiceBundleStart,
+    }
+}
+
+//export OpsCmdServiceBundleStop
+func OpsCmdServiceBundleStop() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdServiceBundleStop,
+    }
+}

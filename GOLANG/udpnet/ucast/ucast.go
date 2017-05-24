@@ -2,11 +2,12 @@ package ucast
 
 import (
     "net"
+    "time"
 )
 
 const (
-    PAGENT_SEND_PORT    = 10060
-    PAGENT_RECV_PORT    = 10061
+    POCKET_LOCATOR_PORT = 10060
+    POCKET_AGENT_PORT   = 10061
 
     //http://stackoverflow.com/questions/1098897/what-is-the-largest-safe-udp-packet-size-on-the-internet
     PC_SAFE_UDP_PKT_SIZE = 508
@@ -20,9 +21,16 @@ const (
 
     // locator channel capacitor doesn't need to be big. just big enough to hold communication with beacon
     PC_UCAST_LOCATOR_CHAN_CAP = 4
+
+    readTimeout = time.Second * 3
 )
 
-type ChanPkg struct {
-    Message     []byte
-    Address     *net.UDPAddr
+type BeaconPack struct {
+    Address    net.UDPAddr
+    Message    []byte
+}
+
+type BeaconSend struct {
+    Host       string
+    Payload    []byte
 }

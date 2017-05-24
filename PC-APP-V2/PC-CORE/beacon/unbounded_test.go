@@ -5,6 +5,7 @@ import (
     "time"
 
     "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/pc-core/model"
 )
 
 func Test_Unbounded_Inquired_Transition_TimeoutFail(t *testing.T) {
@@ -14,7 +15,7 @@ func Test_Unbounded_Inquired_Transition_TimeoutFail(t *testing.T) {
     // --- VARIABLE PREP ---
     debugComm := &DebugCommChannel{}
     masterTS := time.Now()
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -29,7 +30,7 @@ func Test_Unbounded_Inquired_Transition_TimeoutFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -47,7 +48,7 @@ func Test_Unbounded_Inquired_Transition_TimeoutFail(t *testing.T) {
     }
     // this is an error injection
     sa.StatusAgent.Version = ""
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err == nil {
         t.Errorf("[ERR] incorrect slave status version should generate error")
         return
@@ -65,7 +66,7 @@ func Test_Unbounded_Inquired_Transition_TimeoutFail(t *testing.T) {
     // update with timestamp
     masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout * time.Duration(TxActionLimit))
     t.Logf("[INFO] slaveTS - MasterBeacon.lastSuccessTimestmap : " + masterTS.Sub(mb.(*masterBeacon).state.(DebugState).TransitionSuccessTS()).String())
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err != nil {
         t.Log(err.Error())
     }
@@ -87,7 +88,7 @@ func Test_Unbounded_Inquired_Transition_TooManyMetaFail(t *testing.T) {
     debugComm := &DebugCommChannel{}
     masterTS := time.Now()
     slaveTS := time.Now()
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -102,7 +103,7 @@ func Test_Unbounded_Inquired_Transition_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -124,7 +125,7 @@ func Test_Unbounded_Inquired_Transition_TooManyMetaFail(t *testing.T) {
         // this is an error injection
         sa.StatusAgent.Version = ""
         masterTS = end.Add(time.Second)
-        err = mb.TransitionWithSlaveMeta(sa, masterTS)
+        err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
         if err == nil {
             t.Errorf("[ERR] incorrect slave status version should generate error")
             return
@@ -151,7 +152,7 @@ func Test_Unbounded_Inquired_TxActionFail(t *testing.T) {
         masterTS time.Time = time.Now()
     )
 
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -166,7 +167,7 @@ func Test_Unbounded_Inquired_TxActionFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -192,7 +193,12 @@ func Test_Unbounded_Inquired_TxActionFail(t *testing.T) {
         t.Error("[ERR] CommChannel Ucast Message should contain proper messages")
         return
     }
-    if mb.SlaveNode().IP4Address != debugComm.(*DebugCommChannel).LastUcastHost {
+    addr, err := mb.SlaveNode().IP4AddrString()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    if addr != debugComm.(*DebugCommChannel).LastUcastHost {
         t.Error("[ERR] CommChannel Ucast Message should match slave node address")
         return
     }

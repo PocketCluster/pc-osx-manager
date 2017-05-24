@@ -1,20 +1,20 @@
 package msagent
 
 import (
+    "bytes"
     "fmt"
     "time"
     "testing"
-    "bytes"
 
+    "github.com/davecgh/go-spew/spew"
+    "github.com/pborman/uuid"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pcrypto"
-    "github.com/davecgh/go-spew/spew"
 )
 
 var (
-    masterAgentName string
-    slaveNodeName = "pc-node1"
+    masterAgentName, slaveNodeName, slaveUUID string
     initTime time.Time
 )
 
@@ -23,6 +23,8 @@ func setUp() {
     slcontext.DebugSlcontextPrepare()
 
     masterAgentName, _ = context.SharedHostContext().MasterAgentName()
+    slaveNodeName = "pc-node1"
+    slaveUUID = uuid.New()
     initTime, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 }
 
@@ -57,7 +59,7 @@ func TestUnboundedInqueryMeta(t *testing.T) {
         t.Error("[ERR] Incorrect command type. " + COMMAND_SLAVE_IDINQUERY + " is expected")
         return
     }
-    if meta.DiscoveryRespond.MasterBoundAgent != masterAgentName {
+    if meta.MasterBoundAgent != masterAgentName {
         t.Errorf("[ERR] Incorrect master bound name")
         return
     }
@@ -88,17 +90,16 @@ func TestUnboundedInqueryMeta(t *testing.T) {
         fmt.Printf(err.Error())
         return
     }
-
+    if meta.MasterBoundAgent != umeta.MasterBoundAgent {
+        t.Errorf("[ERR] Incorrectly unpacked master bound agent")
+        return
+    }
     if meta.MetaVersion != umeta.MetaVersion {
         t.Errorf("[ERR] Incorrectly unpacked meta version")
         return
     }
     if meta.DiscoveryRespond.Version != umeta.DiscoveryRespond.Version {
         t.Errorf("[ERR] Incorrectly unpacked respond version")
-        return
-    }
-    if meta.DiscoveryRespond.MasterBoundAgent != umeta.DiscoveryRespond.MasterBoundAgent {
-        t.Errorf("[ERR] Incorrectly unpacked master bound agent")
         return
     }
     if meta.DiscoveryRespond.MasterCommandType != umeta.DiscoveryRespond.MasterCommandType {
@@ -133,7 +134,7 @@ func TestMasterDeclarationMeta(t *testing.T) {
         t.Error(fmt.Errorf("[ERR] wrong master command version").Error())
         return
     }
-    if meta.StatusCommand.MasterBoundAgent != masterAgentName {
+    if meta.MasterBoundAgent != masterAgentName {
         t.Error(fmt.Errorf("[ERR] wrong master agent name").Error())
         return
     }
@@ -168,16 +169,16 @@ func TestMasterDeclarationMeta(t *testing.T) {
         fmt.Printf(err.Error())
         return
     }
+    if meta.MasterBoundAgent != umeta.MasterBoundAgent {
+        t.Error(fmt.Errorf("[ERR] incorrectly unpacked master bound agent").Error())
+        return
+    }
     if meta.MetaVersion != umeta.MetaVersion {
         t.Error(fmt.Errorf("[ERR] incorrectly unpacked master meta version").Error())
         return
     }
     if meta.StatusCommand.Version != umeta.StatusCommand.Version {
         t.Error(fmt.Errorf("[ERR] incorrectly unpacked master command version").Error())
-        return
-    }
-    if meta.StatusCommand.MasterBoundAgent != umeta.StatusCommand.MasterBoundAgent {
-        t.Error(fmt.Errorf("[ERR] incorrectly unpacked master bound agent").Error())
         return
     }
     if meta.StatusCommand.MasterCommandType != umeta.StatusCommand.MasterCommandType {
@@ -199,7 +200,7 @@ func TestExecKeyExchangeMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, initTime)
+    meta, _, err := TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -251,7 +252,7 @@ func TestSendCryptoCheckMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initTime)
+    meta, _, err := TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -285,7 +286,7 @@ func TestBoundedStatusMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, pcrypto.TestAESCryptor, initTime)
+    meta, _, err := TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return

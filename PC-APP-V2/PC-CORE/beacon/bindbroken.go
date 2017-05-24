@@ -1,9 +1,10 @@
 package beacon
 
 import (
-    "fmt"
+    "net"
     "time"
 
+    "github.com/pkg/errors"
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/model"
@@ -38,25 +39,25 @@ func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (BeaconState,
     aesCryptor, err := pcrypto.NewAESCrypto(aesKey)
     if err != nil {
         b.Close()
-        return nil, fmt.Errorf("[ERR] cannot create AES cyprtor " + err.Error())
+        return nil, errors.Errorf("[ERR] cannot create AES cyprtor " + err.Error())
     }
     b.aesKey = aesKey
     b.aesCryptor = aesCryptor
 
     // set RSA encryptor
-    masterPrvKey, err := context.SharedHostContext().MasterPrivateKey()
+    masterPrvKey, err := context.SharedHostContext().MasterHostPrivateKey()
     if err != nil {
         b.Close()
-        return nil, err
+        return nil, errors.WithStack(err)
     }
     if len(slaveNode.PublicKey) == 0 {
         b.Close()
-        return nil, fmt.Errorf("[ERR] Cannot bind a slave without its public key. This only happens when user has deleted master database")
+        return nil, errors.Errorf("[ERR] Cannot bind a slave without its public key. This only happens when user has deleted master database")
     }
     encryptor, err := pcrypto.NewRsaEncryptorFromKeyData(slaveNode.PublicKey, masterPrvKey)
     if err != nil {
         b.Close()
-        return nil, err
+        return nil, errors.WithStack(err)
     }
     b.rsaEncryptor = encryptor
 
@@ -74,9 +75,12 @@ func (b *bindbroken) transitionActionWithTimestamp(masterTimestamp time.Time) er
     return nil
 }
 
-func (b *bindbroken) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+func (b *bindbroken) bindBroken(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+    if sender == nil {
+        return MasterTransitionIdle, errors.Errorf("[ERR] incorrect slave input. slave address should not be nil when receiving multicast in broken bind.")
+    }
     if meta.DiscoveryAgent == nil || meta.DiscoveryAgent.Version != slagent.SLAVE_DISCOVER_VERSION {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave status")
+        return MasterTransitionFail, errors.Errorf("[ERR] Null or incorrect version of slave status")
     }
     // if slave isn't looking for agent, then just return. this is not for this state.
     if meta.DiscoveryAgent.SlaveResponse != slagent.SLAVE_LOOKUP_AGENT {
@@ -84,34 +88,35 @@ func (b *bindbroken) bindBroken(meta *slagent.PocketSlaveAgentMeta, timestamp ti
     }
     masterAgentName, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
-        return MasterTransitionFail, err
+        return MasterTransitionFail, errors.WithStack(err)
     }
     // since this node isn't looking for us, sliently ignore this request
-    if masterAgentName != meta.DiscoveryAgent.MasterBoundAgent {
+    if masterAgentName != meta.MasterBoundAgent {
         return MasterTransitionIdle, nil
     }
-    if b.slaveNode.IP4Address != meta.DiscoveryAgent.SlaveAddress {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave ip address")
-    }
-    if b.slaveNode.IP4Gateway != meta.DiscoveryAgent.SlaveGateway {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave gateway address")
-    }
-    if b.slaveNode.IP4Netmask != meta.DiscoveryAgent.SlaveNetmask {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave netmask address")
-    }
-    if meta.SlaveID != meta.DiscoveryAgent.SlaveNodeMacAddr {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave ID")
-    }
-    if b.slaveNode.MacAddress != meta.DiscoveryAgent.SlaveNodeMacAddr {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave MAC address")
-    }
 
-    // save discovery agent for respond generation
-    discovery, err := slagent.ConvertBindAttemptDiscoveryAgent(meta.DiscoveryAgent, b.slaveNode.NodeName, b.slaveNode.Arch)
-    if err != nil {
-        return MasterTransitionFail, err
+    // check mac address
+    if b.slaveNode.MacAddress != meta.SlaveID {
+        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
-    b.slaveStatus = discovery
+    // slave ip address
+    // TODO : (2015-05-16) we're not checking ip + subnet eligivility for now
+    addr, err := model.IP4AddrToString(meta.DiscoveryAgent.SlaveAddress)
+    if err != nil {
+        return MasterTransitionFail, errors.WithStack(err)
+    }
+    if addr != sender.IP.String() {
+        return MasterTransitionFail, errors.Errorf("[ERR] malicious slave ip address.")
+    }
+    b.slaveNode.IP4Address = meta.DiscoveryAgent.SlaveAddress
+    // slave ip gateway
+    if len(meta.DiscoveryAgent.SlaveGateway) == 0 {
+        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave node gateway")
+    }
+    b.slaveNode.IP4Gateway = meta.DiscoveryAgent.SlaveGateway
+
+    // save slave discovery agent
+    b.slaveLocation = meta.DiscoveryAgent
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil

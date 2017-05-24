@@ -28,7 +28,26 @@ import (
     "github.com/stkim1/pc-core/event/crash"
 )
 
-var initThreadID uint64
+type mainLife struct {
+    *app
+    *srvSupervisor
+}
+
+var (
+    initThreadID uint64
+
+    theApp = &mainLife{
+        app:&app{
+            eventsOut:      make(chan interface{}),
+            lifecycleStage: lifecycle.StageDead,
+        },
+        srvSupervisor: newServiceSupervisor(),
+    }
+)
+
+func init() {
+    theApp.eventsIn = pump(theApp.eventsOut)
+}
 
 func init() {
     // Lock the goroutine responsible for initialization to an OS thread.
@@ -43,7 +62,7 @@ func init() {
 }
 
 // this was app package of main()
-func mainLifeCycle(f func(App)) int {
+func mainLifeCycle(f func(*mainLife)) int {
     if tid := uint64(C.PCNativeThreadID()); tid != initThreadID {
         log.Fatalf("[CRITICAL] engine main called on thread %d, but inititaed from %d", tid, initThreadID)
     }

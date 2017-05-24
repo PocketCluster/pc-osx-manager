@@ -4,12 +4,15 @@ import (
     "log"
     "time"
     "strconv"
+    "sync"
 
     "github.com/stkim1/udpnet/mcast"
 )
 
-func mcasterTest() {
-    caster, err := mcast.NewMultiCaster(nil); if err != nil {
+func main() {
+    var wg sync.WaitGroup
+    caster, err := mcast.NewSearchCaster(&wg)
+    if err != nil {
         log.Fatal("[ERR] cannot initate Multi-cast client")
     }
     for i := 0; i < 5; i++ {
@@ -17,8 +20,4 @@ func mcasterTest() {
     }
     time.After(time.Millisecond)
     caster.Close()
-}
-
-func main() {
-    mcasterTest()
 }

@@ -1,9 +1,10 @@
 package beacon
 
 import (
+    "net"
     "time"
-    "fmt"
 
+    "github.com/pkg/errors"
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-core/msagent"
     "github.com/stkim1/pc-core/context"
@@ -34,9 +35,9 @@ func bindrecoveryState(oldState *beaconState) BeaconState {
     b.slaveNode                     = oldState.slaveNode
     b.commChan                      = oldState.commChan
 
-    b.slaveLocation                 = nil
+    b.slaveLocation                 = oldState.slaveLocation
     // this status is generated from bindbroken
-    b.slaveStatus                   = oldState.slaveStatus
+    b.slaveStatus                   = nil
 
     return b
 }
@@ -48,47 +49,54 @@ type bindrecovery struct {
 func (b *bindrecovery) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     // master preperation
     if b.slaveLocation == nil {
-        return fmt.Errorf("[ERR] SlaveDiscoveryAgent is nil. We cannot form a proper response")
+        return errors.Errorf("[ERR] [%s | %s] SlaveDiscoveryAgent is nil. We cannot form a proper response %s", b.constState.String(), b.slaveNode.MacAddress)
     }
     cmd, err := msagent.BrokenBindRecoverRespond(b.slaveLocation)
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     // meta
     meta, err := msagent.BrokenBindRecoverMeta(cmd, b.aesKey, b.aesCryptor, b.rsaEncryptor)
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
     pm, err := msagent.PackedMasterMeta(meta)
     if err != nil {
-        return err
+        return errors.WithStack(err)
+    }
+    addr, err := b.slaveNode.IP4AddrString()
+    if err != nil {
+        return errors.WithStack(err)
     }
     if b.commChan == nil {
-        fmt.Errorf("[ERR] Communication channel is null. This should never happen")
+        errors.Errorf("[ERR] Communication channel is null. This should never happen")
     }
-    return b.commChan.UcastSend(pm, b.slaveNode.IP4Address)
+    return b.commChan.UcastSend(addr, pm)
 }
 
-func (b *bindrecovery) transitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (MasterBeaconTransition, error) {
+func (b *bindrecovery) transitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (MasterBeaconTransition, error) {
+    if sender == nil {
+        return MasterTransitionIdle, errors.Errorf("[ERR] incorrect slave input. slave address should not be nil when receiving unicast in recovery.")
+    }
     if len(meta.EncryptedStatus) == 0 {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Null encrypted slave status")
+        return MasterTransitionFail, errors.Errorf("[ERR] Null encrypted slave status")
     }
     if b.aesCryptor == nil {
-        return MasterTransitionFail, fmt.Errorf("[ERR] AES Cryptor is null. This should not happen")
+        return MasterTransitionFail, errors.Errorf("[ERR] AES Cryptor is null. This should not happen")
     }
     if b.aesKey == nil {
-        return MasterTransitionFail, fmt.Errorf("[ERR] AES Key is null. This should not happen")
+        return MasterTransitionFail, errors.Errorf("[ERR] AES Key is null. This should not happen")
     }
     plain, err := b.aesCryptor.DecryptByAES(meta.EncryptedStatus)
     if err != nil {
-        return MasterTransitionFail, err
+        return MasterTransitionFail, errors.WithStack(err)
     }
     usm, err := slagent.UnpackedSlaveStatus(plain)
     if err != nil {
-        return MasterTransitionFail, err
+        return MasterTransitionFail, errors.WithStack(err)
     }
     if usm == nil || usm.Version != slagent.SLAVE_STATUS_VERSION {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave status")
+        return MasterTransitionFail, errors.Errorf("[ERR] Null or incorrect version of slave status")
     }
     // check if slave response is what we look for
     if usm.SlaveResponse != slagent.SLAVE_REPORT_STATUS {
@@ -96,25 +104,30 @@ func (b *bindrecovery) transitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMet
     }
     masterAgentName, err := context.SharedHostContext().MasterAgentName()
     if err != nil {
-        return MasterTransitionFail, err
+        return MasterTransitionFail, errors.WithStack(err)
     }
-    if masterAgentName != usm.MasterBoundAgent {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect master agent name from slave")
+    if masterAgentName != meta.MasterBoundAgent {
+        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect master agent name from slave")
     }
     if b.slaveNode.NodeName != usm.SlaveNodeName {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave master agent")
+        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave node name")
     }
-    if b.slaveNode.IP4Address != usm.SlaveAddress {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave ip address")
+    if b.slaveNode.SlaveUUID != usm.SlaveUUID {
+        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave UUID")
     }
-    if meta.SlaveID != usm.SlaveNodeMacAddr {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave ID")
+    // check address
+    addr, err := b.slaveNode.IP4AddrString()
+    if err != nil {
+        return MasterTransitionFail, errors.WithStack(err)
     }
-    if b.slaveNode.MacAddress != usm.SlaveNodeMacAddr {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave MAC address")
+    if addr != sender.IP.String() {
+        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
+    }
+    if b.slaveNode.MacAddress != meta.SlaveID {
+        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
     if b.slaveNode.Arch != usm.SlaveHardware {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Incorrect slave architecture")
+        return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave architecture")
     }
 
     // this status comes from slavenode. Save status for response generation
@@ -125,7 +138,8 @@ func (b *bindrecovery) transitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMet
 }
 
 func (b *bindrecovery) onStateTranstionSuccess(masterTimestamp time.Time) error {
-    return nil
+    err := b.slaveNode.Update()
+    return errors.WithStack(err)
 }
 
 func (b *bindrecovery) onStateTranstionFailure(masterTimestamp time.Time) error {

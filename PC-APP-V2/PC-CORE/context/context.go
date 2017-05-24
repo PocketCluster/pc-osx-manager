@@ -27,7 +27,6 @@ type HostContext interface {
     ApplicationExecutableDirectory() (string, error)
     ApplicationUserDataDirectory() (string, error)
 
-    HostDeviceSerial() (string, error)
     HostPrimaryAddress() (string, error)
     HostDefaultGatewayAddress() (string, error)
 
@@ -39,11 +38,13 @@ type HostContext interface {
     CurrentCountryCode() (string, error)
     CurrentLanguageCode() (string, error)
     MasterAgentName() (string, error)
+    SetMasterAgentName(man string)
 
     // cert authority
     CertAuthSigner() (*pcrypto.CaSigner, error)
     CertAuthPublicKey() ([]byte, error)
     // host certificate
+    MasterHostPublicKey() ([]byte, error)
     MasterHostPrivateKey() ([]byte, error)
     MasterHostCertificate() ([]byte, error)
 }
@@ -74,7 +75,7 @@ type hostContext struct {
     processorCount               uint
     activeProcessorCount         uint
     physicalMemorySize           uint64
-    hostDeviceSerial             string
+    clusterPublicName            string
 
     currentCountryCode           string
     currentLanguageCode          string
@@ -297,13 +298,6 @@ func (ctx *hostContext) ApplicationUserDataDirectory() (string, error) {
     return dataPath, nil
 }
 
-func (ctx *hostContext) HostDeviceSerial() (string, error) {
-    if len(ctx.hostDeviceSerial) == 0 {
-        return "", errors.Errorf("[ERR] Invalid host device serial")
-    }
-    return ctx.hostDeviceSerial, nil
-}
-
 func (ctx *hostContext) HostPrimaryAddress() (string, error) {
     addr := ctx.primaryAddress
     if addr != nil {
@@ -354,10 +348,14 @@ func (ctx *hostContext) HostStorageSpaceStatus() (total uint64, available uint64
 
 //TODO : master specific identifier is necessary
 func (ctx *hostContext) MasterAgentName() (string, error) {
-    if len(ctx.hostDeviceSerial) == 0 {
+    if len(ctx.clusterPublicName) == 0 {
         return "", errors.Errorf("[ERR] Invalid host device serial")
     }
-    return ctx.hostDeviceSerial, nil
+    return ctx.clusterPublicName, nil
+}
+
+func (ctx *hostContext) SetMasterAgentName(man string) {
+    ctx.clusterPublicName = man
 }
 
 func (ctx *hostContext) CurrentCountryCode() (string, error) {
@@ -388,9 +386,16 @@ func (ctx *hostContext) CertAuthPublicKey() ([]byte, error) {
     return ctx.caPublicKey, nil
 }
 
+func (ctx *hostContext) MasterHostPublicKey() ([]byte, error) {
+    if len(ctx.hostPublicKey) == 0 {
+        return nil, errors.Errorf("[ERR] Invalid master public key")
+    }
+    return ctx.hostPublicKey, nil
+}
+
 func (ctx *hostContext) MasterHostPrivateKey() ([]byte, error) {
     if len(ctx.hostPrivateKey) == 0 {
-        return nil, errors.Errorf("[ERR] Invalid master private key data")
+        return nil, errors.Errorf("[ERR] Invalid master private key")
     }
     return ctx.hostPrivateKey, nil
 }

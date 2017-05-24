@@ -1,4 +1,4 @@
-package record
+package model
 
 import (
     "database/sql"
@@ -14,6 +14,40 @@ import (
     "github.com/stkim1/pcrypto"
 )
 
+var (
+    // ItemNotFound
+    NoItemFound       = &ngError{"[ERR] NotFound: No items are found"}
+
+    gate *dbGate      = nil
+    gateLock          = sync.Mutex{}
+)
+
+type ngError struct {
+    s string
+}
+
+func (n *ngError) Error() string {
+    return n.s
+}
+
+type dbGate struct {
+    database    *sql.DB
+    certsess    certdb.Accessor
+    ormsess     *gorm.DB
+}
+
+func (d *dbGate) DataBase() *sql.DB {
+    return d.database
+}
+
+func (d *dbGate) Certdb() certdb.Accessor {
+    return d.certsess
+}
+
+func (d *dbGate) Session() *gorm.DB {
+    return d.ormsess
+}
+
 type RecordGate interface {
     // the database engine
     DataBase() (*sql.DB)
@@ -25,31 +59,20 @@ type RecordGate interface {
     Session() (*gorm.DB)
 }
 
-type ngError struct {
-    s string
-}
-
-func (n *ngError) Error() string {
-    return n.s
-}
-
-var (
-    // ItemNotFound
-    NoItemFound       = &ngError{"[ERR] NotFound: No items are found"}
-
-    gate *dbGate      = nil
-    once sync.Once    = sync.Once{}
-)
-
 func SharedRecordGate() (RecordGate) {
+    gateLock.Lock()
+    defer gateLock.Unlock()
+
     return gate
 }
 
 // This is where database instances are initiated
 func OpenRecordGate(dataDir, recordFile string) (RecordGate, error) {
-    var (
-        err error = nil
-    )
+    gateLock.Lock()
+    defer gateLock.Unlock()
+
+    var err error = nil
+
     // TODO : This is a good place to migrate & load encryption plugin
 
     // Once a gate is open, it should remain alive until closed
@@ -97,59 +120,26 @@ func OpenRecordGate(dataDir, recordFile string) (RecordGate, error) {
         sess.AutoMigrate(&SlaveNode{}, &ClusterMeta{});
     }
 
-    return openStorageGate(database, cert, sess), nil
+    gate = &dbGate{
+        database:    database,
+        certsess:    cert,
+        ormsess:     sess,
+    }
+    return gate, nil
 }
 
 func CloseRecordGate() error {
-    var err error = gate.close()
+    gateLock.Lock()
+    defer gateLock.Unlock()
+
+    var db *sql.DB = gate.database
+
     // now, it's time to reset everything. You should not set once to a new instance as only one gate instance should
     // persist throughout the lifecycle of an application
+    gate.database = nil
+    gate.ormsess = nil
+    gate.certsess = nil
     gate = nil
-    //once = sync.Once{}
-    return err
-}
 
-type dbGate struct {
-    database    *sql.DB
-    certsess    certdb.Accessor
-    ormsess     *gorm.DB
-}
-
-func openStorageGate(database *sql.DB, cert certdb.Accessor, sess *gorm.DB) (*dbGate) {
-    once.Do(func() {
-        gate = &dbGate{
-            database:    database,
-            certsess:    cert,
-            ormsess:     sess,
-        }
-    })
-    return gate
-}
-
-// Close closes the currently active connection to the database and clears caches.
-func (d *dbGate) close() (error) {
-    var (
-        err error = nil
-        db *sql.DB = nil
-    )
-    db = d.database
-
-    d.database = nil
-    d.ormsess = nil
-    d.certsess = nil
-
-    err = db.Close()
-    return errors.WithStack(err)
-}
-
-func (d *dbGate) DataBase() (*sql.DB) {
-    return d.database
-}
-
-func (d *dbGate) Certdb() (certdb.Accessor) {
-    return d.certsess
-}
-
-func (d *dbGate) Session() (*gorm.DB) {
-    return d.ormsess
+    return errors.WithStack(db.Close())
 }

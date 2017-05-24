@@ -1,9 +1,10 @@
-package record
+package model
 
 import (
     "testing"
     "time"
 
+    log "github.com/Sirupsen/logrus"
     "github.com/stkim1/pcrypto"
     . "gopkg.in/check.v1"
 )
@@ -37,6 +38,13 @@ func (s *RecordSuite) expectChanges(c *C, expected ...interface{}) {
     }
 }
 
+func (s *RecordSuite) SetUpSuite(c *C) {
+    log.SetLevel(log.DebugLevel)
+}
+
+func (s *RecordSuite) TearDownSuite(c *C) {
+}
+
 func (s *RecordSuite) SetUpTest(c *C) {
     var err error
 
@@ -49,6 +57,7 @@ func (s *RecordSuite) SetUpTest(c *C) {
 
 func (s *RecordSuite) TearDownTest(c *C) {
     c.Assert(DebugRecordGateDestroy(s.dataDir), IsNil)
+    close(s.ChangesC)
 }
 
 func (s *RecordSuite) TestSlaveNodeCRUD(c *C) {
@@ -82,7 +91,7 @@ func (s *RecordSuite) TestSlaveNodeCRUD(c *C) {
 
     // 2nd node
     ts2 := ts1.Add(time.Second)
-    slave3 := NewSlaveNode()
+    slave3 := NewSlaveNode(nil)
     slave3.Joined       = ts2
     slave3.Departed     = ts2
     slave3.LastAlive    = ts2
@@ -97,10 +106,6 @@ func (s *RecordSuite) TestSlaveNodeCRUD(c *C) {
     nodes, err = FindAllSlaveNode()
     c.Assert(err, IsNil)
     c.Assert(len(nodes), Equals, 2)
-
-    nodeName, err := FindSlaveNameCandiate()
-    c.Assert(err, IsNil)
-    c.Assert(nodeName, Equals, availableSlave)
 
     for _, n := range nodes {
         if n.NodeName == firstSlave {

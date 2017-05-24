@@ -1,14 +1,15 @@
 package beacon
 
 import (
-    "fmt"
+    "net"
     "time"
 
+    "github.com/pkg/errors"
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-core/model"
 )
 
-func beaconinitState(comm CommChannel) BeaconState {
+func beaconinitState(slaveNode *model.SlaveNode, comm CommChannel) BeaconState {
     b := &beaconinit{}
 
     b.constState                    = MasterInit
@@ -25,7 +26,7 @@ func beaconinitState(comm CommChannel) BeaconState {
     b.onTransitionSuccess           = b.onStateTranstionSuccess
     b.onTransitionFailure           = b.onStateTranstionFailure
 
-    b.slaveNode                     = model.NewSlaveNode()
+    b.slaveNode                     = slaveNode
     b.commChan                      = comm
 
     b.slaveLocation                 = nil
@@ -42,46 +43,44 @@ func (b *beaconinit) transitionActionWithTimestamp(masterTimestamp time.Time) er
     return nil
 }
 
-func (b *beaconinit) beaconInit(meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+func (b *beaconinit) beaconInit(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) (MasterBeaconTransition, error) {
+    if sender == nil {
+        return MasterTransitionIdle, errors.Errorf("[ERR] incorrect slave input. slave address should not be nil when receiving multicast while initializing bind.")
+    }
     if meta.DiscoveryAgent == nil || meta.DiscoveryAgent.Version != slagent.SLAVE_DISCOVER_VERSION {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Null or incorrect version of slave discovery")
+        return MasterTransitionFail, errors.Errorf("[ERR] Null or incorrect version of slave discovery")
     }
     // if slave isn't looking for agent, then just return. this is not for this state.
     if meta.DiscoveryAgent.SlaveResponse != slagent.SLAVE_LOOKUP_AGENT {
         return MasterTransitionIdle, nil
     }
-    if len(meta.DiscoveryAgent.MasterBoundAgent) != 0 {
-        return MasterTransitionIdle, fmt.Errorf("[ERR] Incorrect slave bind. Slave should not be bound to a master when it looks for joining")
+    if len(meta.MasterBoundAgent) != 0 {
+        return MasterTransitionIdle, errors.Errorf("[ERR] Incorrect slave bind. Slave should not be bound to a master when it looks for joining")
     }
+
+    // TODO : (2015-05-16) we're not checking ip + subnet eligivility for now
     // slave ip address
-    if len(meta.DiscoveryAgent.SlaveAddress) == 0 {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave node address")
+    addr, err := model.IP4AddrToString(meta.DiscoveryAgent.SlaveAddress)
+    if err != nil {
+        return MasterTransitionFail, errors.WithStack(err)
+    }
+    if addr != sender.IP.String() {
+        return MasterTransitionFail, errors.Errorf("[ERR] malicious slave ip address.")
     }
     b.slaveNode.IP4Address = meta.DiscoveryAgent.SlaveAddress
-
     // slave ip gateway
     if len(meta.DiscoveryAgent.SlaveGateway) == 0 {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave node gateway")
+        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave node gateway")
     }
     b.slaveNode.IP4Gateway = meta.DiscoveryAgent.SlaveGateway
-
-    // slave ip netmask
-    if len(meta.DiscoveryAgent.SlaveNetmask) == 0 {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave node netmask")
-    }
-    b.slaveNode.IP4Netmask = meta.DiscoveryAgent.SlaveNetmask
-
     // slave mac address
-    if meta.SlaveID != meta.DiscoveryAgent.SlaveNodeMacAddr {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave ID")
+    if len(meta.SlaveID) == 0 {
+        return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave MAC address")
     }
-    if len(meta.DiscoveryAgent.SlaveNodeMacAddr) == 0 {
-        return MasterTransitionFail, fmt.Errorf("[ERR] Inappropriate slave MAC address")
-    }
-    b.slaveNode.MacAddress = meta.DiscoveryAgent.SlaveNodeMacAddr
+    b.slaveNode.MacAddress = meta.SlaveID
 
     // save slave discovery to send responsed
-    b.slaveLocation  = meta.DiscoveryAgent
+    b.slaveLocation = meta.DiscoveryAgent
 
     return MasterTransitionOk, nil
 }

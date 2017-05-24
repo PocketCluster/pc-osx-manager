@@ -2,236 +2,47 @@ package main
 
 import "C"
 import (
-    "net/http"
-    "fmt"
     "time"
     "sync"
 
     log "github.com/Sirupsen/logrus"
-    teledefaults "github.com/gravitational/teleport/lib/defaults"
-    "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/process"
-    "github.com/gravitational/teleport/lib/utils"
-
     "github.com/coreos/etcd/embed"
-    "github.com/pkg/errors"
+    "gopkg.in/tylerb/graceful.v1"
 
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
-    "github.com/stkim1/pc-core/record"
     telesrv "github.com/stkim1/pc-core/extsrv/teleport"
     regisrv "github.com/stkim1/pc-core/extsrv/registry"
     swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
 )
-import (
-    "github.com/tylerb/graceful"
-    "github.com/davecgh/go-spew/spew"
-
-)
-
-func RunWebServer(wg *sync.WaitGroup) *graceful.Server {
-    mux := http.NewServeMux()
-    mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-        fmt.Fprintf(w, "Welcome to the home page!")
-    })
-    srv := &graceful.Server{
-        Timeout: 10 * time.Second,
-        NoSignalHandling: true,
-        Server: &http.Server{
-            Addr: ":3001",
-            Handler: mux,
-        },
-    }
-
-    go func() {
-        defer wg.Done()
-        srv.ListenAndServe()
-    }()
-    return srv
-}
-
-func setLogger(debug bool) {
-    // debug setup
-    if debug {
-        utils.InitLoggerDebug()
-        log.Info("DEBUG mode logger output configured")
-    } else {
-        utils.InitLoggerCLI()
-        log.Info("NORMAL mode logger configured")
-    }
-}
-
-func main_old() {
-    setLogger(true)
-
-    var wg sync.WaitGroup
-    srv := RunWebServer(&wg)
-
-    go func() {
-        wg.Wait()
-    }()
-
-    // setup context
-    ctx := context.SharedHostContext()
-    context.SetupBasePath()
-
-    // open database
-    dataDir, err := ctx.ApplicationUserDataDirectory()
-    if err != nil {
-        log.Info(err)
-    }
-    rec, err := record.OpenRecordGate(dataDir, teledefaults.CoreKeysSqliteFile)
-    if err != nil {
-        log.Info(err)
-    }
-
-    cfg := service.MakeCoreConfig(dataDir, true)
-    cfg.AssignCertStorage(rec.Certdb())
-
-    log.Info(spew.Sdump(ctx))
-
-    // Perhaps the first thing main() function needs to do is initiate OSX main
-    //C.osxmain(0, nil)
-
-    srv.Stop(time.Second)
-    record.CloseRecordGate()
-    fmt.Println("pc-core terminated!")
-}
-
-type serviceConfig struct {
-    etcdConfig     *embed.PocketConfig
-    teleConfig     *service.PocketConfig
-    regConfig      *regisrv.PocketRegistryConfig
-    swarmConfig    *swarmsrv.SwarmContext
-}
-
-func openContext() (*serviceConfig, error) {
-    // setup context
-    ctx := context.SharedHostContext()
-    context.SetupBasePath()
-
-    // open database
-    dataDir, err := ctx.ApplicationUserDataDirectory()
-    if err != nil {
-        log.Info(err)
-        return nil, errors.WithStack(err)
-    }
-    rec, err := record.OpenRecordGate(dataDir, teledefaults.CoreKeysSqliteFile)
-    if err != nil {
-        log.Info(err)
-        return nil, errors.WithStack(err)
-    }
-
-    // new cluster id
-    var meta *record.ClusterMeta = nil
-    cluster, err := record.FindClusterMeta()
-    if err != nil {
-        if err == record.NoItemFound {
-            meta = record.NewClusterMeta()
-            record.UpsertClusterMeta(meta)
-        } else {
-            // This is critical error. report it to UI and ask them to clean & re-install
-            return nil, errors.WithStack(err)
-        }
-    } else {
-        meta = cluster[0]
-    }
-    log.Debugf("Cluster ID %v | UUID %v", meta.ClusterID, meta.ClusterUUID)
-
-    country, err := ctx.CurrentCountryCode()
-    if err != nil {
-        // (03/26/2017) skip coutry code error and defaults it to US
-        country = "US"
-    }
-
-    // certificate authority
-    caBundle, err := certAuthSigner(rec.Certdb(), meta, country)
-    if err != nil {
-        // this is critical
-        log.Debugf(err.Error())
-        return nil, errors.WithStack(err)
-    }
-    context.UpdateCertAuth(caBundle)
-
-    // host certificate
-    hostBundle, err := hostCertificate(rec.Certdb(), caBundle.CASigner, teledefaults.CoreHostName, meta.ClusterUUID)
-    if err != nil {
-        // this is critical
-        log.Debugf(err.Error())
-        return nil, errors.WithStack(err)
-    }
-    context.UpdateHostCert(hostBundle)
-
-    // make teleport core config
-    teleCfg := service.MakeCoreConfig(dataDir, true)
-    teleCfg.AssignHostUUID(meta.ClusterUUID)
-    teleCfg.AssignDatabaseEngine(rec.DataBase())
-    teleCfg.AssignCertStorage(rec.Certdb())
-    teleCfg.AssignCASigner(caBundle.CASigner)
-    teleCfg.AssignHostCertAuth(caBundle.CAPrvKey, caBundle.CASSHChk, meta.ClusterDomain)
-    err = service.ValidateCoreConfig(teleCfg)
-    if err != nil {
-        log.Debugf(err.Error())
-        return nil, errors.WithStack(err)
-    }
-
-    // registry configuration
-    // TODO : fix datadir. Plus, is it ok not to pass CA pub key? we need to unify TLS configuration
-    regCfg, err := regisrv.NewPocketRegistryConfig(false, dataDir, hostBundle.Certificate, hostBundle.PrivateKey)
-    if err != nil {
-        log.Debugf(err.Error())
-        return nil, errors.WithStack(err)
-    }
-
-    // swarm configuration
-    swarmCfg, err := swarmsrv.NewContextWithCertAndKey(
-        "0.0.0.0:3376",
-        "192.168.1.150:2375,192.168.1.151:2375,192.168.1.152:2375,192.168.1.153:2375,192.168.1.161:2375,192.168.1.162:2375,192.168.1.163:2375,192.168.1.164:2375,192.168.1.165:2375,192.168.1.166:2375",
-        caBundle.CACrtPem,
-        hostBundle.Certificate,
-        hostBundle.PrivateKey,
-    )
-    if err != nil {
-        // this is critical
-        log.Debugf(err.Error())
-        return nil, errors.WithStack(err)
-    }
-
-    //etcd configuration
-    // TODO fix datadir
-    etcdCfg, err := embed.NewPocketConfig(dataDir, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey)
-    if err != nil {
-        // this is critical
-        log.Debugf(err.Error())
-        return nil, errors.WithStack(err)
-    }
-    //log.Info(spew.Sdump(ctx))
-    return &serviceConfig {
-        etcdConfig: etcdCfg,
-        teleConfig: teleCfg,
-        regConfig: regCfg,
-        swarmConfig: swarmCfg,
-    }, nil
-}
 
 func main() {
 
-    mainLifeCycle(func(a App) {
+    mainLifeCycle(func(a *mainLife) {
 
         var (
             serviceConfig *serviceConfig = nil
             teleProc *process.PocketCoreProcess = nil
             regiProc *regisrv.PocketRegistry = nil
             swarmProc *swarmsrv.Server
-//            etcdProc *embed.PocketEtcd
+            swarmSrv *graceful.Server
             err error = nil
+
+            srvWaiter sync.WaitGroup
         )
+
+        go func(wg *sync.WaitGroup) {
+            wg.Wait()
+        }(&srvWaiter)
 
         for e := range a.Events() {
             switch e := a.Filter(e).(type) {
+
+                // APPLICATION LIFECYCLE //
 
                 case lifecycle.Event: {
                     switch e.Crosses(lifecycle.StageDead) {
@@ -242,12 +53,11 @@ func main() {
                             log.Debugf("[LIFE] app is not dead %v", e.String())
                         }
                     }
-
                     switch e.Crosses(lifecycle.StageAlive) {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is now alive %v", e.String())
                             log.Debugf("[PREP] PREPARING GOLANG CONTEXT")
-                            serviceConfig, err = openContext()
+                            serviceConfig, err = setupServiceConfig()
                             if err != nil {
                                 // TODO send error report
                             }
@@ -257,7 +67,6 @@ func main() {
                             log.Debugf("[LIFE] app is inactive %v", e.String())
                         }
                     }
-
                     switch e.Crosses(lifecycle.StageVisible) {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is visible %v", e.String())
@@ -266,7 +75,6 @@ func main() {
                             log.Debugf("[LIFE] app is invisible %v", e.String())
                         }
                     }
-
                     switch e.Crosses(lifecycle.StageFocused) {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is focused %v", e.String())
@@ -276,6 +84,8 @@ func main() {
                         }
                     }
                 }
+
+                // NETWORK EVENT //
 
                 case network.Event: {
                     switch e.NetworkEvent {
@@ -292,7 +102,8 @@ func main() {
                     }
                 }
 
-                // artificial crash
+                // [DEBUG] ARTIFICIAL CRASH //
+
                 case crash.Crash: {
                     switch e.Reason {
                     case crash.CrashEmergentExit: {
@@ -303,9 +114,45 @@ func main() {
                     }
                 }
 
-                // operational Command
+                // OPERATIONAL COMMAND //
+
                 case operation.Operation: {
                     switch e.Command {
+
+                    /// BEACON ///
+
+                    case operation.CmdBeaconStart: {
+                        cid, err := context.SharedHostContext().MasterAgentName()
+                        if err != nil {
+                            log.Debug(err)
+                        }
+
+                        err = initSearchCatcher(a)
+                        if err != nil {
+                            log.Debug(err)
+                        }
+
+                        err = initBeaconLoator(a)
+                        if err != nil {
+                            log.Debug(err)
+                        }
+
+                        err = initMasterAgentService(cid, a)
+                        if err != nil {
+                            log.Debug(err)
+                        }
+
+                        a.StartServices()
+                        log.Debugf("[OP] %v", e.String())
+                    }
+
+                    case operation.CmdBeaconStop: {
+                        a.StopServices()
+                        log.Debugf("[OP] %v", e.String())
+                    }
+
+                    /// TELEPORT ///
+
                     case operation.CmdTeleportStart: {
                         log.Debugf("[OP] %v", e.String())
 
@@ -330,31 +177,40 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
 
+                    /// REGISTRY ///
+
                     case operation.CmdRegistryStart: {
                         log.Debugf("[OP] %v", e.String())
                         regiProc, err = regisrv.NewPocketRegistry(serviceConfig.regConfig)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
-                        err = regiProc.Start()
+                        srvWaiter.Add(1)
+                        err = regiProc.StartOnWaitGroup(&srvWaiter)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
                     }
                     case operation.CmdRegistryStop: {
+/*
                         err = regiProc.Close()
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
+*/
+                        regiProc.Stop(time.Second)
                         log.Debugf("[OP] %v", e.String())
                     }
+
+                    /// ORCHESTRATION ///
 
                     case operation.CmdCntrOrchStart: {
                         swarmProc, err = swarmsrv.NewSwarmServer(serviceConfig.swarmConfig)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
-                        err = swarmProc.ListenAndServe()
+                        srvWaiter.Add(1)
+                        swarmSrv, err = swarmProc.ListenAndServeOnWaitGroup(&srvWaiter)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
@@ -362,7 +218,13 @@ func main() {
                     }
                     case operation.CmdCntrOrchStop: {
                         log.Debugf("[OP] %v", e.String())
+                        go func() {
+                            srvWaiter.Wait()
+                        }()
+                        swarmSrv.Stop(time.Second)
                     }
+
+                    /// STORAGE ///
 
                     case operation.CmdStorageStart: {
                         log.Debugf("[OP] %v", e.String())
@@ -373,7 +235,9 @@ func main() {
                         }
                         etcdProc.Server.Start()
 */
+                        srvWaiter.Add(1)
                         go func() {
+                            defer srvWaiter.Done()
                             e, err := embed.StartPocketEtcd(serviceConfig.etcdConfig)
                             if err != nil {
                                 log.Debugf(err.Error())
@@ -394,8 +258,56 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
 //                        etcdProc.Server.Stop()
                     }
+
+
+                    case operation.CmdServiceBundleStart: {
+                        eventC := make(chan Event)
+                        a.WaitForEvent("TEST_EVENT", eventC, make(chan struct{}))
+
+                        a.RegisterServiceFunc(func() error {
+                            defer log.Debugf("[TEST SERV 1] -- SERVICE 1 ENDED --")
+                            log.Debugf("[TEST SERV 1] test for-select loop started...")
+
+                            for {
+                                select {
+                                    case <- a.StopChannel():
+                                        log.Debugf("[TEST SERV 1] [TEST 1 STOPPING]")
+                                        return nil
+                                    case <- eventC:
+                                        log.Debugf("[TEST SERV 1] new Event received...")
+                                }
+                            }
+
+                            return nil
+                        })
+
+                        a.RegisterServiceFunc(func() error {
+                            defer log.Debugf("[TEST SERV 2] -- SERVICE 2 ENDED --")
+                            log.Debugf("[TEST SERV 2] test started")
+
+                            for {
+                                if a.IsStopped() {
+                                    log.Debugf("[TEST SERV 2] [TEST 2 STOPPING]")
+                                    return nil
+                                }
+
+                                a.BroadcastEvent(Event{Name:"TEST_EVENT"})
+
+                                time.Sleep(time.Second)
+                            }
+
+                            return nil
+                        })
+                        a.StartServices()
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdServiceBundleStop: {
+                        a.StopServices()
+                        log.Debugf("[OP] %v", e.String())
+                    }
+
                     default:
-                        log.Print("[OP] %v", e.String())
+                        log.Debug("[OP-ERROR] THIS SHOULD NOT HAPPEN %v", e.String())
                     }
                 }
             }

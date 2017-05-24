@@ -1,11 +1,12 @@
 package beacon
 
 import (
+    "net"
     "time"
-    "fmt"
     "log"
     "bytes"
 
+    "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-core/model"
@@ -21,7 +22,7 @@ const (
     BoundedTimeout              time.Duration = time.Second * 10
 )
 
-type transitionWithSlaveMeta          func (meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (MasterBeaconTransition, error)
+type transitionWithSlaveMeta          func (sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (MasterBeaconTransition, error)
 
 type transitionActionWithTimestamp    func (masterTimestamp time.Time) error
 
@@ -31,9 +32,10 @@ type onStateTranstionFailure          func (masterTimestamp time.Time) error
 
 type BeaconState interface {
     CurrentState() MasterBeaconState
-    TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (BeaconState, error)
+    TransitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (BeaconState, error)
     TransitionWithTimestamp(masterTimestamp time.Time) (BeaconState, error)
     SlaveNode() *model.SlaveNode
+    Close()
 }
 
 type beaconState struct {
@@ -110,17 +112,30 @@ func (b *beaconState) SlaveNode() (*model.SlaveNode) {
 }
 
 /* ------------------------------------------------ Helper Functions ------------------------------------------------ */
-// close func pointers and delegates to help GC
+// Since this disconnects relation to slavenode sanitizer, be extremely careful when you call this.
+//
+// Close should only be called when
+// 1) Disruptive event happens
+// 2) Completely abandon after MasterDiscarded state.
+// 3) BeaconManger shuts down
 func (b *beaconState) Close() {
-    b.slaveMetaTransition    = nil
+    if b.slaveNode != nil {
+        b.slaveNode.RemoveSanitizer()
+    }
+    b.gcHelper()
+}
+
+// gcHelper nullify pointers and delegates to help GC
+func (b *beaconState) gcHelper() {
     b.timestampTransition    = nil
+    b.slaveMetaTransition    = nil
     b.onTransitionSuccess    = nil
     b.onTransitionFailure    = nil
 
+    b.slaveNode              = nil
     b.aesKey                 = nil
     b.aesCryptor             = nil
     b.rsaEncryptor           = nil
-    b.slaveNode              = nil
     b.commChan               = nil
 
     b.slaveLocation          = nil
@@ -250,7 +265,7 @@ func newBeaconForState(b* beaconState, newState, oldState MasterBeaconState) Bea
     var err error = nil
     switch newState {
         case MasterInit:
-            newBeaconState = beaconinitState(b.commChan)
+            newBeaconState = beaconinitState(b.slaveNode, b.commChan)
 
         case MasterUnbounded:
             newBeaconState = unboundedState(b)
@@ -280,10 +295,11 @@ func newBeaconForState(b* beaconState, newState, oldState MasterBeaconState) Bea
         case MasterDiscarded:
             newBeaconState = discardedState(b)
     }
+    // TODO : need to help GC on old beaconState look how slave node has done it
     return newBeaconState
 }
 
-func (b *beaconState) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (BeaconState, error) {
+func (b *beaconState) TransitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, masterTimestamp time.Time) (BeaconState, error) {
     var (
         newState, oldState MasterBeaconState = b.CurrentState(), b.CurrentState()
         transitionCandidate, finalTransition MasterBeaconTransition
@@ -294,13 +310,13 @@ func (b *beaconState) TransitionWithSlaveMeta(meta *slagent.PocketSlaveAgentMeta
     }
 
     if meta == nil || meta.MetaVersion != slagent.SLAVE_META_VERSION {
-        return nil, fmt.Errorf("[ERR] Null or incorrect version of slave meta")
+        return nil, errors.Errorf("[ERR] Null or incorrect version of slave meta")
     }
     if len(meta.SlaveID) == 0 {
-        return nil, fmt.Errorf("[ERR] Null or incorrect slave ID")
+        return nil, errors.Errorf("[ERR] Null or incorrect slave ID")
     }
 
-    transitionCandidate, transErr = b.slaveMetaTransition(meta, masterTimestamp)
+    transitionCandidate, transErr = b.slaveMetaTransition(sender, meta, masterTimestamp)
 
     // this is to apply failed time count and timeout window
     finalTransition = b.translateStateWithTimeout(transitionCandidate, masterTimestamp)
@@ -343,7 +359,7 @@ func (b *beaconState) TransitionWithTimestamp(masterTimestamp time.Time) (Beacon
             return MasterTransitionIdle, transErr
         }
         // this is failure. the fact that this is called indicate that we're ready to move to failure state
-        return MasterTransitionFail, fmt.Errorf("[ERR] Transmission count has exceeded a given limit")
+        return MasterTransitionFail, errors.Errorf("[ERR] Transmission count has exceeded a given limit")
     }(b, masterTimestamp)
 
     if transition == MasterTransitionFail {

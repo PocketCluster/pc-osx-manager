@@ -3,10 +3,12 @@ package registry
 import (
     "crypto/tls"
     "fmt"
+    "io"
+    "net"
     "net/http"
     "os"
+    "sync"
     "time"
-    "io"
 
     log "github.com/Sirupsen/logrus"
     //logstash "github.com/bshuster-repo/logrus-logstash-hook"
@@ -18,6 +20,8 @@ import (
     "github.com/docker/distribution/registry/listener"
     "github.com/docker/distribution/uuid"
     "github.com/docker/distribution/version"
+
+    "gopkg.in/tylerb/graceful.v1"
 )
 
 // NewRegistry creates a new registry from a context and configuration struct.
@@ -60,14 +64,18 @@ func NewPocketRegistry(config *PocketRegistryConfig) (*PocketRegistry, error) {
         handler = gorhandlers.CombinedLoggingHandler(os.Stdout, handler)
     }
 */
-    server := &http.Server{
-        Handler: handler,
-    }
 
     return &PocketRegistry{
         app:    app,
         config: config,
-        server: server,
+        server: &graceful.Server{
+            Timeout: 10 * time.Second,
+            NoSignalHandling: true,
+            Server: &http.Server{
+//                Addr: config.regConfig.HTTP.Addr,
+                Handler: handler,
+            },
+        },
     }, nil
 }
 
@@ -76,7 +84,7 @@ func NewPocketRegistry(config *PocketRegistryConfig) (*PocketRegistry, error) {
 type PocketRegistry struct {
     config        *PocketRegistryConfig
     app           *handlers.App
-    server 		  *http.Server
+    server 		  *graceful.Server
     listener      io.Closer
 }
 
@@ -116,6 +124,31 @@ func (r *PocketRegistry) Start() (error) {
     return nil
 }
 
+// ListenAndServe runs the registry's HTTP server.
+func (r *PocketRegistry) StartOnWaitGroup(wg *sync.WaitGroup) (error) {
+    config := r.config
+
+    ln, err := listener.NewListener(config.regConfig.HTTP.Net, config.regConfig.HTTP.Addr)
+    if err != nil {
+        return err
+    }
+
+    // TODO : No HTTP secret provided - generated random secret. This may cause problems with uploads if multiple registries are behind a load-balancer. To provide a shared secret, fill in http.secret in the configuration file or set the REGISTRY_HTTP_SECRET environment variable.
+    ln = tls.NewListener(ln, config.tlsConfig)
+    context.GetLogger(r.app).Infof("listening on %v, tls", ln.Addr())
+    go func(w *sync.WaitGroup, srv *graceful.Server, l net.Listener) {
+        defer w.Done()
+
+        var err = srv.Serve(l)
+        if err != nil {
+            log.Println("HTTP Server Error - ", err)
+        }
+    }(wg, r.server, ln)
+
+    r.listener = ln
+    return nil
+}
+
 func (r *PocketRegistry) Close() error {
     if r.listener == nil {
         return nil
@@ -123,6 +156,14 @@ func (r *PocketRegistry) Close() error {
     ln := r.listener
     r.listener = nil
     return ln.Close()
+}
+
+func (r *PocketRegistry) Stop(timeout time.Duration) {
+    if r.listener == nil {
+        return
+    }
+    r.listener = nil
+    r.server.Stop(timeout)
 }
 
 func configureReporting(app *handlers.App) http.Handler {

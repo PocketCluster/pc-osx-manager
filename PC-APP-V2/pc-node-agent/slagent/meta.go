@@ -1,8 +1,7 @@
 package slagent
 
 import (
-    "fmt"
-
+    "github.com/pkg/errors"
     "gopkg.in/vmihailenco/msgpack.v2"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-node-agent/slcontext"
@@ -10,6 +9,7 @@ import (
 
 type PocketSlaveAgentMeta struct {
     MetaVersion        MetaProtocol                `msgpack:"s_pm"`
+    MasterBoundAgent   string                      `msgpack:"m_ba, omitempty"`
     SlaveID            string                      `msgpack:"s_id"`
     DiscoveryAgent     *PocketSlaveDiscovery       `msgpack:"s_ad, inline, omitempty"`
     StatusAgent        *PocketSlaveStatus          `msgpack:"s_as, inline, omitempty"`
@@ -18,105 +18,119 @@ type PocketSlaveAgentMeta struct {
 }
 
 func PackedSlaveMeta(meta *PocketSlaveAgentMeta) ([]byte, error) {
-    return msgpack.Marshal(meta)
+    pm, err := msgpack.Marshal(meta)
+    return pm, errors.WithStack(err)
 }
 
 func UnpackedSlaveMeta(message []byte) (meta *PocketSlaveAgentMeta, err error) {
-    err = msgpack.Unmarshal(message, &meta)
+    err = errors.WithStack(msgpack.Unmarshal(message, &meta))
     return
 }
 
 // --- per-state meta funcs
 
-func UnboundedMasterDiscoveryMeta(agent *PocketSlaveDiscovery) (*PocketSlaveAgentMeta, error) {
-    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+func UnboundedMasterDiscoveryMeta() (*PocketSlaveAgentMeta, error) {
+    piface, err := slcontext.PrimaryNetworkInterface()
     if err != nil {
-        return nil, err
+        return nil, errors.WithStack(err)
     }
     return &PocketSlaveAgentMeta{
-        MetaVersion     : SLAVE_META_VERSION,
-        SlaveID         : piface.HardwareAddr.String(),
-        DiscoveryAgent  : agent,
+        MetaVersion:       SLAVE_META_VERSION,
+        SlaveID:           piface.HardwareAddr,
+        DiscoveryAgent:    &PocketSlaveDiscovery {
+            Version:             SLAVE_DISCOVER_VERSION,
+            SlaveResponse:       SLAVE_LOOKUP_AGENT,
+            SlaveAddress:        piface.PrimaryIP4Addr(),
+            SlaveGateway:        piface.GatewayAddr,
+        },
     }, nil
 }
 
 func AnswerMasterInquiryMeta(agent *PocketSlaveStatus) (*PocketSlaveAgentMeta, error) {
-    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    piface, err := slcontext.PrimaryNetworkInterface()
     if err != nil {
-        return nil, err
+        return nil, errors.WithStack(err)
     }
     return &PocketSlaveAgentMeta{
-        MetaVersion     : SLAVE_META_VERSION,
-        SlaveID         : piface.HardwareAddr.String(),
-        StatusAgent     : agent,
+        MetaVersion:         SLAVE_META_VERSION,
+        SlaveID:             piface.HardwareAddr,
+        StatusAgent:         agent,
     }, nil
 }
 
-func KeyExchangeMeta(agent *PocketSlaveStatus, pubkey []byte) (*PocketSlaveAgentMeta, error) {
+func KeyExchangeMeta(master string, agent *PocketSlaveStatus, pubkey []byte) (*PocketSlaveAgentMeta, error) {
     if pubkey == nil {
-        return nil, fmt.Errorf("[ERR] You cannot pass an empty pubkey")
+        return nil, errors.Errorf("[ERR] You cannot pass an empty pubkey")
     }
-    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    piface, err := slcontext.PrimaryNetworkInterface()
     if err != nil {
-        return nil, err
+        return nil, errors.WithStack(err)
     }
     return &PocketSlaveAgentMeta{
-        MetaVersion     : SLAVE_META_VERSION,
-        SlaveID         : piface.HardwareAddr.String(),
-        StatusAgent     : agent,
-        SlavePubKey     : pubkey,
+        MetaVersion:         SLAVE_META_VERSION,
+        MasterBoundAgent:    master,
+        SlaveID:             piface.HardwareAddr,
+        StatusAgent:         agent,
+        SlavePubKey:         pubkey,
     }, nil
 }
 
-
-func CheckSlaveCryptoMeta(agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor) (*PocketSlaveAgentMeta, error) {
+func CheckSlaveCryptoMeta(master string, agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor) (*PocketSlaveAgentMeta, error) {
     mp, err := PackedSlaveStatus(agent)
     if err != nil {
-        return nil, err
+        return nil, errors.WithStack(err)
     }
-    crypted, err := aescrypto.EncryptByAES(mp)
+    encrypted, err := aescrypto.EncryptByAES(mp)
     if err != nil {
-        return nil, err
+        return nil, errors.WithStack(err)
     }
-    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    piface, err := slcontext.PrimaryNetworkInterface()
     if err != nil {
-        return nil, err
+        return nil, errors.WithStack(err)
     }
     return &PocketSlaveAgentMeta{
-        MetaVersion     : SLAVE_META_VERSION,
-        SlaveID         : piface.HardwareAddr.String(),
-        EncryptedStatus : crypted,
+        MetaVersion:         SLAVE_META_VERSION,
+        MasterBoundAgent:    master,
+        SlaveID:             piface.HardwareAddr,
+        EncryptedStatus:     encrypted,
     }, nil
 }
 
-func SlaveBoundedMeta(agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor) (*PocketSlaveAgentMeta, error) {
+func SlaveBoundedMeta(master string, agent *PocketSlaveStatus, aescrypto pcrypto.AESCryptor) (*PocketSlaveAgentMeta, error) {
     mp, err := PackedSlaveStatus(agent)
     if err != nil {
-        return nil, err
+        return nil, errors.WithStack(err)
     }
-    crypted, err := aescrypto.EncryptByAES(mp)
+    encrypted, err := aescrypto.EncryptByAES(mp)
     if err != nil {
-        return nil, err
+        return nil, errors.WithStack(err)
     }
-    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+    piface, err := slcontext.PrimaryNetworkInterface()
     if err != nil {
-        return nil, err
+        return nil, errors.WithStack(err)
     }
     return &PocketSlaveAgentMeta{
-        MetaVersion     : SLAVE_META_VERSION,
-        SlaveID         : piface.HardwareAddr.String(),
-        EncryptedStatus : crypted,
+        MetaVersion:         SLAVE_META_VERSION,
+        MasterBoundAgent:    master,
+        SlaveID:             piface.HardwareAddr,
+        EncryptedStatus:     encrypted,
     }, nil
 }
 
-func BrokenBindMeta(agent *PocketSlaveDiscovery) (*PocketSlaveAgentMeta, error) {
-    piface, err := slcontext.SharedSlaveContext().PrimaryNetworkInterface()
+func BrokenBindMeta(master string) (*PocketSlaveAgentMeta, error) {
+    piface, err := slcontext.PrimaryNetworkInterface()
     if err != nil {
-        return nil, err
+        return nil, errors.WithStack(err)
     }
     return &PocketSlaveAgentMeta{
-        MetaVersion     : SLAVE_META_VERSION,
-        SlaveID         : piface.HardwareAddr.String(),
-        DiscoveryAgent  : agent,
+        MetaVersion:         SLAVE_META_VERSION,
+        MasterBoundAgent:    master,
+        SlaveID:             piface.HardwareAddr,
+        DiscoveryAgent:      &PocketSlaveDiscovery {
+            Version:             SLAVE_DISCOVER_VERSION,
+            SlaveResponse:       SLAVE_LOOKUP_AGENT,
+            SlaveAddress:        piface.PrimaryIP4Addr(),
+            SlaveGateway:        piface.GatewayAddr,
+        },
     }, nil
 }

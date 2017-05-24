@@ -102,6 +102,14 @@ extern void OpsCmdStorageStart();
 
 extern void OpsCmdStorageStop();
 
+extern void OpsCmdBeaconStart();
+
+extern void OpsCmdBeaconStop();
+
+extern void OpsCmdServiceBundleStart();
+
+extern void OpsCmdServiceBundleStop();
+
 extern void FeedStart();
 
 extern void FeedStop();

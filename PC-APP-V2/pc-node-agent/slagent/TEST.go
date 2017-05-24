@@ -7,11 +7,7 @@ import (
 )
 
 func TestSlaveUnboundedMasterSearchDiscovery() (*PocketSlaveAgentMeta, error) {
-    ua, err := UnboundedMasterDiscovery()
-    if err != nil {
-        return nil, err
-    }
-    sm, err := UnboundedMasterDiscoveryMeta(ua)
+    sm, err := UnboundedMasterDiscoveryMeta()
     if err != nil {
         return nil, err
     }
@@ -31,36 +27,36 @@ func TestSlaveAnswerMasterInquiry(begin time.Time) (*PocketSlaveAgentMeta, time.
 }
 
 func TestSlaveKeyExchangeStatus(masterAgentName string, pubKey []byte, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
-    agent, err := KeyExchangeStatus(masterAgentName, begin)
+    agent, err := KeyExchangeStatus(begin)
     if err != nil {
         return nil, begin, err
     }
 
-    ma, err := KeyExchangeMeta(agent, pubKey)
+    ma, err := KeyExchangeMeta(masterAgentName, agent, pubKey)
     if err != nil {
         return nil, begin, err
     }
     return ma, begin, err
 }
 
-func TestSlaveCheckCryptoStatus(masterAgentName, slaveAgentName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
-    sa, err := CheckSlaveCryptoStatus(masterAgentName, slaveAgentName, begin)
+func TestSlaveCheckCryptoStatus(masterAgentName, slaveAgentName, slaveUUID string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
+    sa, err := CheckSlaveCryptoStatus(slaveAgentName, slaveUUID, begin)
     if err != nil {
         return nil, begin, err
     }
-    ma, err := CheckSlaveCryptoMeta(sa, aesCryptor)
+    ma, err := CheckSlaveCryptoMeta(masterAgentName, sa, aesCryptor)
     if err != nil {
         return nil, begin, err
     }
     return ma, begin, nil
 }
 
-func TestSlaveBoundedStatus(masterAgentName, slaveNodeName string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
-    sa, err := SlaveBoundedStatus(masterAgentName, slaveNodeName, begin)
+func TestSlaveBoundedStatus(masterAgentName, slaveNodeName, slaveUUID string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
+    sa, err := SlaveBoundedStatus(slaveNodeName, slaveUUID, begin)
     if err != nil {
         return nil, begin, err
     }
-    ma, err := SlaveBoundedMeta(sa, aesCryptor)
+    ma, err := SlaveBoundedMeta(masterAgentName, sa, aesCryptor)
     if err != nil {
         return nil, begin, err
     }
@@ -68,11 +64,7 @@ func TestSlaveBoundedStatus(masterAgentName, slaveNodeName string, aesCryptor pc
 }
 
 func TestSlaveBindBroken(masterAgentName string) (*PocketSlaveAgentMeta, error) {
-    ba, err := BrokenBindDiscovery(masterAgentName)
-    if err != nil {
-        return nil, err
-    }
-    bm, err := BrokenBindMeta(ba)
+    bm, err := BrokenBindMeta(masterAgentName)
     if err != nil {
         return nil, err
     }

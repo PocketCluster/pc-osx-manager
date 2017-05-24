@@ -1,8 +1,9 @@
 package beacon
 
 import (
-    "github.com/stkim1/pcrypto"
     "time"
+
+    "github.com/stkim1/pcrypto"
 )
 
 type DebugCommChannel struct {
@@ -11,7 +12,7 @@ type DebugCommChannel struct {
     UCommCount       uint
 }
 
-func (dc *DebugCommChannel) UcastSend(data []byte, target string) error {
+func (dc *DebugCommChannel) UcastSend(target string, data []byte) error {
     dc.LastUcastMessage = data
     dc.LastUcastHost = target
     dc.UCommCount++

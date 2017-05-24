@@ -19,6 +19,8 @@ const (
 
     // locator channel capacitor doesn't need to be big. just big enough to hold communication with beacon
     PC_MCAST_CASTER_CHAN_CAP int = 16
+
+    readTimeout = time.Second * 3
 )
 
 var (
@@ -33,9 +35,9 @@ var (
 )
 
 type (
-    CastPkg struct {
+    CastPack struct {
         Message     []byte
-        Address     *net.UDPAddr
+        Address     net.UDPAddr
         Timeout     time.Duration
     }
 )

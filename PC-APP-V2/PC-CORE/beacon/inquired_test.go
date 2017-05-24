@@ -6,6 +6,7 @@ import (
 
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pcrypto"
+    "github.com/stkim1/pc-core/model"
 )
 
 func Test_Inquired_KeyExchange_TimeoutFail(t *testing.T) {
@@ -15,7 +16,7 @@ func Test_Inquired_KeyExchange_TimeoutFail(t *testing.T) {
     debugComm := &DebugCommChannel{}
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -30,7 +31,7 @@ func Test_Inquired_KeyExchange_TimeoutFail(t *testing.T) {
         return
     }
     masterTS := time.Now()
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -41,7 +42,7 @@ func Test_Inquired_KeyExchange_TimeoutFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -55,7 +56,7 @@ func Test_Inquired_KeyExchange_TimeoutFail(t *testing.T) {
     }
     // first trial
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err == nil {
         t.Error("[ERR] Master beacon should have failed if wrong master name is fed!")
         return
     } else {
@@ -72,7 +73,7 @@ func Test_Inquired_KeyExchange_TimeoutFail(t *testing.T) {
 
     // 2nd try
     masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout * time.Duration(TxActionLimit))
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err != nil {
         t.Log(err.Error())
     }
@@ -93,7 +94,7 @@ func Test_Inquired_KeyExchange_TooManyMetaFail(t *testing.T) {
     debugComm := &DebugCommChannel{}
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -108,7 +109,7 @@ func Test_Inquired_KeyExchange_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS := time.Now()
-    err = mb.TransitionWithSlaveMeta(sa, masterTS)
+    err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -120,7 +121,7 @@ func Test_Inquired_KeyExchange_TooManyMetaFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -139,7 +140,7 @@ func Test_Inquired_KeyExchange_TooManyMetaFail(t *testing.T) {
             return
         }
         masterTS = end.Add(time.Second)
-        if err := mb.TransitionWithSlaveMeta(sa, masterTS); err == nil {
+        if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err == nil {
             t.Error("[ERR] Master beacon should have failed if wrong master name is fed!")
             return
         } else {
@@ -172,7 +173,7 @@ func Test_Inquired_KeyExchange_TxActionFail(t *testing.T) {
     )
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, nil, debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -187,7 +188,7 @@ func Test_Inquired_KeyExchange_TxActionFail(t *testing.T) {
         return
     }
     masterTS = time.Now()
-    if err := mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err := mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
@@ -202,7 +203,7 @@ func Test_Inquired_KeyExchange_TxActionFail(t *testing.T) {
         return
     }
     masterTS = end.Add(time.Second)
-    if err = mb.TransitionWithSlaveMeta(sa, masterTS); err != nil {
+    if err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS); err != nil {
         t.Error(err.Error())
         return
     }
