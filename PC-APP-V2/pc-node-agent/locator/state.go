@@ -255,24 +255,31 @@ func finalizeTransitionWithTimeout(ls *locatorState, nextStateCandiate SlaveLoca
 }
 
 func executeOnTransitionEvents(ls *locatorState, newState, oldState SlaveLocatingState, transition SlaveLocatingTransition, slaveTimestamp time.Time) error {
+    var (
+        ierr, oerr error = nil, nil
+    )
     if newState != oldState {
         switch transition {
             case SlaveTransitionOk: {
                 if ls.onTransitionSuccess != nil {
-                    ls.onTransitionSuccess(slaveTimestamp)
+                    ierr = ls.onTransitionSuccess(slaveTimestamp)
                 }
                 if ls.LocatorOnTransitionEvent != nil {
-                    ls.OnStateTranstionSuccess(ls.CurrentState(), slaveTimestamp)
+                    oerr = ls.OnStateTranstionSuccess(ls.CurrentState(), slaveTimestamp)
                 }
+                // TODO : we need to a way to formalize this
+                return summarizeErrors(ierr, oerr)
             }
 
             case SlaveTransitionFail: {
                 if ls.onTransitionFailure != nil {
-                    ls.onTransitionFailure(slaveTimestamp)
+                    ierr = ls.onTransitionFailure(slaveTimestamp)
                 }
                 if ls.LocatorOnTransitionEvent != nil {
-                    ls.OnStateTranstionFailure(ls.CurrentState(), slaveTimestamp)
+                    oerr = ls.OnStateTranstionFailure(ls.CurrentState(), slaveTimestamp)
                 }
+                // TODO : we need to a way to formalize this
+                return summarizeErrors(ierr, oerr)
             }
         }
     }

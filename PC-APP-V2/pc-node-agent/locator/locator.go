@@ -122,11 +122,15 @@ func (sl *slaveLocator) CurrentState() (SlaveLocatingState, error) {
 }
 
 func (sl *slaveLocator) TranstionWithMasterBeacon(bp ucast.BeaconPack, slaveTimestamp time.Time) error {
+    var (
+        meta *msagent.PocketMasterAgentMeta = nil
+        err error = nil
+    )
     if sl.state == nil {
         return errors.Errorf("[ERR] LocatorState is nil. Cannot make transition with master meta")
     }
     // (2017-05-21) we're not looking into ucast.BeaconPack.Address for now as Master's interface address might vary
-    meta, err := msagent.UnpackedMasterMeta(bp.Message)
+    meta, err = msagent.UnpackedMasterMeta(bp.Message)
     if err != nil {
         return errors.WithStack(err)
     }
@@ -136,16 +140,25 @@ func (sl *slaveLocator) TranstionWithMasterBeacon(bp ucast.BeaconPack, slaveTime
     log.Debugf("[AGENT-BEACON] RECEIVED\n %v \n %v", spew.Sdump(bp.Address), spew.Sdump(meta))
 
     sl.state, err = sl.state.MasterMetaTransition(meta, slaveTimestamp)
-    return err
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    return nil
 }
 
 func (sl *slaveLocator) TranstionWithTimestamp(slaveTimestamp time.Time) error {
+    var (
+        err error = nil
+    )
     if sl.state == nil {
         return errors.Errorf("[ERR] LocatorState is nil. Cannot make transition with master meta")
     }
-    var err error
+
     sl.state, err = sl.state.TimestampTransition(slaveTimestamp)
-    return err
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    return nil
 }
 
 func (sl *slaveLocator) Shutdown() error {
