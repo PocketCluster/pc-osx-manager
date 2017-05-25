@@ -129,9 +129,15 @@ func (b *bounded) bounded(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMet
     // save status for response generation
     b.slaveStatus = usm
 
-    // We'll reset TX action count to 0 and now so successful tx action can happen infinitely
+    // (2016-11-16) We'll reset TX action count to 0 and now so successful tx action can happen infinitely
     // We need to reset the counter here when correct slave meta comes in
     // It is b/c when succeeded in confirming with slave, we should be able to keep receiving slave meta
+
+    // (2017-05-25) This change in counting txActionCount comes with type change from `uint` -> `int`
+    // We'll decrease counter so total count will be accurate regardless of
+    // time-delay or time difference between platforms. It increases a window of opportunity to stack up prev failure
+    // but that's offset by counting packets accurately
+
     b.txActionCount = 0
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.

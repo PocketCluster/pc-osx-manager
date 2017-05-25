@@ -28,7 +28,7 @@ func Test_Discard_Shutdown(t *testing.T) {
     }
 
     // --- TX ACTION FAIL ---
-    for i := 0; i <= int(TxActionLimit); i++ {
+    for i := 0; i <= TxActionLimit; i++ {
         masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout)
         err = mb.TransitionWithTimestamp(masterTS)
         if err != nil {

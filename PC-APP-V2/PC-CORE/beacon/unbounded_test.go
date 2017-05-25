@@ -121,7 +121,7 @@ func Test_Unbounded_Inquired_Transition_TooManyMetaFail(t *testing.T) {
     }
 
     // --- test
-    for i := 0; i < int(TransitionFailureLimit); i ++ {
+    for i := 0; i < TransitionFailureLimit; i ++ {
         slaveTS = masterTS.Add(time.Second)
         sa, end, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
         if err != nil {
@@ -186,7 +186,7 @@ func Test_Unbounded_Inquired_TxActionFail(t *testing.T) {
     }
 
     // --- TX ACTION FAIL ---
-    for i := 0; i <= int(TxActionLimit); i++ {
+    for i := 0; i <= TxActionLimit; i++ {
         masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout)
         err = mb.TransitionWithTimestamp(masterTS)
         if err != nil {

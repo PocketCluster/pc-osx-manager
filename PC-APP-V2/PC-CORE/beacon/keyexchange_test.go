@@ -157,7 +157,7 @@ func Test_KeyExchange_CryptoCheck_TooManyMetaFail(t *testing.T) {
     }
 
     // --- test
-    for i := 0; i < int(TransitionFailureLimit); i++ {
+    for i := 0; i < TransitionFailureLimit; i++ {
         if mb.CurrentState() != MasterKeyExchange {
             t.Error("[ERR] Master state is expected to be " + MasterKeyExchange.String() + ". Current : " + mb.CurrentState().String())
             return
@@ -250,7 +250,7 @@ func Test_KeyExchange_CryptoCheck_TxActionFail(t *testing.T) {
     }
 
     // --- TX ACTION FAIL ---
-    for i := 0; i <= int(TxActionLimit); i++ {
+    for i := 0; i <= TxActionLimit; i++ {
         masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout)
         err = mb.TransitionWithTimestamp(masterTS)
         if err != nil {

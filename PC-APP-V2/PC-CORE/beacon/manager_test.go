@@ -153,7 +153,7 @@ func (s *ManagerSuite) TestBindBrokenAndTooManyTrialDiscard(c *C) {
     c.Assert(man.(*beaconManger).beaconList[0].SlaveNode(), NotNil)
     c.Assert(len(man.(*beaconManger).beaconList[0].SlaveNode().SlaveUUID), Equals, 36)
 
-    for i := 0; i < int(TransitionFailureLimit); i ++ {
+    for i := 0; i < TransitionFailureLimit; i ++ {
         slaveTS = masterTS.Add(time.Second)
         sa, end, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
         c.Assert(err, IsNil)
@@ -197,7 +197,7 @@ func (s *ManagerSuite) TestBindInitAndTooManyTrialDiscard(c *C) {
     c.Assert(len(man.(*beaconManger).beaconList[0].SlaveNode().SlaveUUID), Equals, 36)
 
     // slave answering inquery
-    for i := 0; i < int(TransitionFailureLimit); i ++ {
+    for i := 0; i < TransitionFailureLimit; i ++ {
         slaveTS = masterTS.Add(time.Second)
         sa, end, err := slagent.TestSlaveAnswerMasterInquiry(slaveTS)
         c.Assert(err, IsNil)

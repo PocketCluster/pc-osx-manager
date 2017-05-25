@@ -95,7 +95,7 @@ func Test_Init_Unbounded_Transition_TooManyMetaFail(t *testing.T) {
     }
     masterTS := time.Now()
     // four more times of failure with incorrect slave meta
-    for i := 0; i < int(TransitionFailureLimit); i++ {
+    for i := 0; i < TransitionFailureLimit; i++ {
         masterTS = masterTS.Add(time.Second)
         err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
         if err == nil {
@@ -137,7 +137,7 @@ func Test_BeaconInit_Unbounded_TxActionFail(t *testing.T) {
     }
 
     // --- TX ACTION FAIL ---
-    for i := 0; i <= int(TxActionLimit); i++ {
+    for i := 0; i <= TxActionLimit; i++ {
         masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout)
         err = mb.TransitionWithTimestamp(masterTS)
         if err != nil {

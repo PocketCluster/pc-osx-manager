@@ -10,7 +10,7 @@ import (
 type DebugCommChannel struct {
     LastUcastMessage []byte
     LastUcastHost    string
-    UCommCount       uint
+    UCommCount       int
 }
 
 func (dc *DebugCommChannel) UcastSend(target string, data []byte) error {
@@ -24,9 +24,9 @@ type DebugState interface {
     AESKey() []byte
     AESCryptor() pcrypto.AESCryptor
     TransitionSuccessTS() time.Time
-    TransitionFailed() uint
+    TransitionFailed() int
     TxActionTS() time.Time
-    TxActionFailed() uint
+    TxActionFailed() int
 }
 
 func (b *beaconState) AESKey() []byte {
@@ -41,7 +41,7 @@ func (b *beaconState) TransitionSuccessTS() time.Time {
     return b.lastTransitionTS
 }
 
-func (b *beaconState) TransitionFailed() uint {
+func (b *beaconState) TransitionFailed() int {
     return b.transitionFailureCount
 }
 
@@ -49,7 +49,7 @@ func (b *beaconState) TxActionTS() time.Time {
     return b.lastTransmissionTS
 }
 
-func (b *beaconState) TxActionFailed() uint {
+func (b *beaconState) TxActionFailed() int {
     return b.txActionCount
 }
 

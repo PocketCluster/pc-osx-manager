@@ -598,7 +598,7 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
     }
 
     // --- TX ACTION FAIL ---
-    for i := 0; i <= int(TxActionLimit); i++ {
+    for i := 0; i <= TxActionLimit; i++ {
         masterTS = masterTS.Add(time.Millisecond + BoundedTimeout)
         err = mb.TransitionWithTimestamp(masterTS)
         if err != nil {

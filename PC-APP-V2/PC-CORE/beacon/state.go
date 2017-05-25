@@ -13,11 +13,11 @@ import (
 )
 
 const (
-    TransitionFailureLimit      uint          = 5
+    TransitionFailureLimit      int           = 6
     // TODO : timeout mechanism for receiving slave meta
     // TransitionTimeout           time.Duration = time.Second * 10
 
-    TxActionLimit               uint          = 5
+    TxActionLimit               int           = 6
     UnboundedTimeout            time.Duration = time.Second * 3
     BoundedTimeout              time.Duration = time.Second * 10
 )
@@ -47,22 +47,22 @@ type beaconState struct {
     /* -------------------------------------- given, constant field ------------------------------------------------- */
     constState                  MasterBeaconState
 
-    constTransitionFailureLimit uint
+    constTransitionFailureLimit int
 
     constTransitionTimeout      time.Duration
 
-    constTxActionLimit          uint
+    constTxActionLimit          int
 
     constTxTimeWindow           time.Duration
 
     /* ---------------------------------- changing properties to record transaction --------------------------------- */
     // each time we try to make transtion and fail, count goes up.
-    transitionFailureCount      uint
+    transitionFailureCount      int
 
     // last time successfully transitioned state
     lastTransitionTS            time.Time
 
-    txActionCount               uint
+    txActionCount               int
 
     // DO NOT SET ANY TIME ON THIS FIELD SO THE FIRST TX ACTION CAN BE DONE WITHIN THE CYCLE
     lastTransmissionTS          time.Time
@@ -98,7 +98,7 @@ func (b *beaconState) CurrentState() MasterBeaconState {
     return b.constState
 }
 
-func (b *beaconState) transitionFailureLimit() uint {
+func (b *beaconState) transitionFailureLimit() int {
     return b.constTransitionFailureLimit
 }
 
@@ -106,7 +106,7 @@ func (b *beaconState) transitionTimeout() time.Duration {
     return b.constTransitionTimeout
 }
 
-func (b *beaconState) txActionLimit() uint {
+func (b *beaconState) txActionLimit() int {
     return b.constTxActionLimit
 }
 

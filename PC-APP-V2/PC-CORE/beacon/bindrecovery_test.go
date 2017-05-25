@@ -171,7 +171,7 @@ func Test_BindRecovery_Bounded_TooManyMetaFail(t *testing.T) {
     }
     aescryptor := mb.(*masterBeacon).state.(DebugState).AESCryptor()
 
-    for i := 0; i <= int(TransitionFailureLimit); i++ {
+    for i := 0; i <= TransitionFailureLimit; i++ {
         // first trial with error
         slaveTS = masterTS.Add(time.Second)
         sa, end, err := slagent.TestSlaveBoundedStatus("WRONG_MASTER_NAME", slaveNodeName, slave.SlaveUUID, aescryptor, slaveTS)
@@ -226,7 +226,7 @@ func Test_BindRecovery_Bounded_TxActionFail(t *testing.T) {
         return
     }
 
-    for i := 0; i <= int(TxActionLimit); i++ {
+    for i := 0; i <= TxActionLimit; i++ {
         masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout)
         err = mb.TransitionWithTimestamp(masterTS)
         if err != nil {
