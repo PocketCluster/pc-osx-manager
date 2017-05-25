@@ -117,10 +117,7 @@ func (ls *bounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta,
     // We need to reset the counter here when correct master meta comes in
     // It is b/c when succeeded in confirming with master, we should be able to keep receiving master meta
 
-    // (2017-05-25) This change in counting txActionCount comes with type change from `uint` -> `int`
-    // We'll decrease counter so total count will be accurate regardless of
-    // time-delay or time difference between platforms
-    ls.txActionCount--
+    ls.txActionCount = 0
 
     // we do not reply here so there will not be an endless master <-> slave loop across network.
     // In fact, one second delayed respose might increase a window of opportunity to get unbounded,
