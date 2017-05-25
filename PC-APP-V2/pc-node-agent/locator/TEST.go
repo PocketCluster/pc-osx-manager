@@ -12,8 +12,8 @@ type DebugCommChannel struct {
     LastMcastMessage []byte
     LastUcastMessage []byte
     LastUcastHost    string
-    MCommCount       uint
-    UCommCount       uint
+    MCommCount       int
+    UCommCount       int
 }
 
 func (dc *DebugCommChannel) McastSend(data []byte) error {

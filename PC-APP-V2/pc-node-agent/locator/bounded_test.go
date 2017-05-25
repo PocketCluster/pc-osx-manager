@@ -391,7 +391,7 @@ func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
     }
 
     /* ---------------------------------------------- make transition failed ---------------------------------------- */
-    for i := 0; i <= int(TransitionFailureLimit); i++ {
+    for i := 0; i <= TransitionFailureLimit; i++ {
         // cryptocheck -> bounded
         masterTS = slaveTS.Add(time.Second)
         meta, masterTS, err = msagent.TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, masterTS)
@@ -404,7 +404,7 @@ func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
 
         slaveTS = masterTS.Add(time.Second)
         err = sd.TranstionWithMasterMeta(meta, slaveTS)
-        if i < int(TransitionFailureLimit - 1) {
+        if i < (TransitionFailureLimit - 1) {
             if err != nil {
                 t.Log(err.Error())
             }
@@ -495,8 +495,7 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
     /* ---------------------------------------------- make transition failed ---------------------------------------- */
     //FIXME : get the exact count. We are now running 7
     slaveTS = time.Now()
-    var i uint = 0
-    for ; i <= TxActionLimit + 1; i++ {
+    for i := 0; i <= TxActionLimit + 1; i++ {
         slaveTS = slaveTS.Add(time.Second + BoundedTimeout)
         err = sd.TranstionWithTimestamp(slaveTS)
         if i < TxActionLimit {

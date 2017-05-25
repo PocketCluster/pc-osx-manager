@@ -157,7 +157,7 @@ func Test_Keyexchange_Cryptocheck_MasterMetaFail(t *testing.T) {
     }
 
     /* ---------------------------------------------- make transition failed ---------------------------------------- */
-    for i := 0; i <= int(TransitionFailureLimit); i++ {
+    for i := 0; i <= TransitionFailureLimit; i++ {
         // keyexchange -> cryptocheck
         masterTS = slaveTS.Add(time.Millisecond * 100)
         meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
@@ -170,7 +170,7 @@ func Test_Keyexchange_Cryptocheck_MasterMetaFail(t *testing.T) {
 
         slaveTS = masterTS.Add(time.Millisecond * 100)
         err = sd.TranstionWithMasterMeta(meta, slaveTS)
-        if i < int(TransitionFailureLimit - 1) {
+        if i < (TransitionFailureLimit - 1) {
             if err != nil {
                 t.Log(err.Error())
             }
@@ -293,10 +293,10 @@ func Test_keyexchange_Cryptocheck_TxActionFail(t *testing.T) {
     }
 
     /* ---------------------------------------------- make transition failed ---------------------------------------- */
-    for i := 0; i <= int(TxActionLimit); i++ {
+    for i := 0; i <= TxActionLimit; i++ {
         slaveTS = slaveTS.Add(time.Millisecond + UnboundedTimeout)
         err = sd.TranstionWithTimestamp(slaveTS)
-        if i < int(TxActionLimit) {
+        if i < TxActionLimit {
             if err != nil {
                 t.Error(err.Error())
                 return

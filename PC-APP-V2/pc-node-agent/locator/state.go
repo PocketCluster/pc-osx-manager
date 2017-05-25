@@ -10,7 +10,7 @@ import (
 )
 
 const (
-    TransitionFailureLimit uint          = 5
+    TransitionFailureLimit int           = 6
 
     // TODO : timeout mechanism for receiving master meta
     // Currently (v0.1.4), there is no timeout mechanism implemented for receiving master meta (i.e. if not master
@@ -18,7 +18,7 @@ const (
     // times out the crrent state. When TxAction does not work, state will stall. We'll reinvestigate in the future
     //TransitionTimeout      time.Duration = time.Second * 10
 
-    TxActionLimit          uint          = 5
+    TxActionLimit          int           = 6
     UnboundedTimeout       time.Duration = time.Second * 3
     BoundedTimeout         time.Duration = time.Second * 10
 )
@@ -49,26 +49,26 @@ type locatorState struct {
     constState                  SlaveLocatingState
 
     // transition failure
-    constTransitionFailureLimit uint
+    constTransitionFailureLimit int
 
     // transition timeout
     constTransitionTimout       time.Duration
 
     // transmission limit
-    constTxActionLimit          uint
+    constTxActionLimit          int
 
     // unbounded timeout
     constTxTimeWindow           time.Duration
 
     /* ---------------------------------- changing properties to record transaction --------------------------------- */
     // each time we try to make transtion and fail, count goes up.
-    transitionActionCount       uint
+    transitionActionCount       int
 
     // last time successfully transitioned state.
     lastTransitionTS            time.Time
 
     // each time we try to send something, count goes up. This include success/fail altogether.
-    txActionCount               uint
+    txActionCount               int
 
     // last time transmission takes place. This is to control the frequnecy of transmission
     // !!!IMPORTANT!!! BY NOT SETTING A PARTICULAR VALUE, BY NOT SETTING ANYTHING, WE WILL AUTOMATICALLY EXECUTE
@@ -103,7 +103,7 @@ func (ls *locatorState) CurrentState() SlaveLocatingState {
     return ls.constState
 }
 
-func (ls *locatorState) transitionFailureLimit() uint {
+func (ls *locatorState) transitionFailureLimit() int {
     return ls.constTransitionFailureLimit
 }
 
@@ -111,7 +111,7 @@ func (ls *locatorState) transitionTimeout() time.Duration {
     return ls.constTransitionTimout
 }
 
-func (ls *locatorState) txActionLimit() uint {
+func (ls *locatorState) txActionLimit() int {
     return ls.constTxActionLimit
 }
 

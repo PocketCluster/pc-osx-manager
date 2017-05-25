@@ -93,8 +93,7 @@ func Test_BindBroken_BindBroken_TxActionFail(t *testing.T) {
     /* ---------------------------------------------- make transition failed ---------------------------------------- */
     slaveTS := time.Now()
     TxCountTarget := TxActionLimit * TxActionLimit
-    var i uint = 0
-    for ;i < TxCountTarget; i++ {
+    for i := 0; i < TxCountTarget; i++ {
         slaveTS = slaveTS.Add(time.Millisecond + UnboundedTimeout)
         err = sd.TranstionWithTimestamp(slaveTS);
         if err != nil {

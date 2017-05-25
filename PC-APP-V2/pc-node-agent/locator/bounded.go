@@ -113,10 +113,14 @@ func (ls *bounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta,
         return SlaveTransitionFail, errors.Errorf("[ERR] invalid master command type")
     }
 
-    // We'll reset TX action count to 0 and now so successful tx action can happen infinitely
+    // (2016-11-13) We'll reset TX action count to 0 and now so successful tx action can happen infinitely
     // We need to reset the counter here when correct master meta comes in
     // It is b/c when succeeded in confirming with master, we should be able to keep receiving master meta
-    ls.txActionCount = 0
+
+    // (2017-05-25) This change in counting txActionCount comes with type change from `uint` -> `int`
+    // We'll decrease counter so total count will be accurate regardless of
+    // time-delay or time difference between platforms
+    ls.txActionCount--
 
     // we do not reply here so there will not be an endless master <-> slave loop across network.
     // In fact, one second delayed respose might increase a window of opportunity to get unbounded,
