@@ -138,7 +138,7 @@ func (b *bounded) bounded(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMet
     // time-delay or time difference between platforms. It increases a window of opportunity to stack up prev failure
     // but that's offset by counting packets accurately
 
-    b.txActionCount = 0
+    b.txActionCount--
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil
