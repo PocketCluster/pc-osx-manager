@@ -23,6 +23,8 @@ func newKeyexchangeState(searchComm SearchTx, beaconComm BeaconTx, event Locator
 
     ks.timestampTransition          = ks.transitionActionWithTimestamp
     ks.masterMetaTransition         = ks.transitionWithMasterMeta
+    ks.onTransitionSuccess          = ks.onStateTranstionSuccess
+    ks.onTransitionFailure          = ks.onStateTranstionFailure
 
     ks.LocatorOnTransitionEvent     = event
     ks.searchComm                   = searchComm
@@ -137,4 +139,12 @@ func (ls *keyexchange) transitionWithMasterMeta(meta *msagent.PocketMasterAgentM
     }
 
     return SlaveTransitionOk, nil
+}
+
+func (ls *keyexchange) onStateTranstionSuccess(slaveTimestamp time.Time) error {
+    return nil
+}
+
+func (ls *keyexchange) onStateTranstionFailure(slaveTimestamp time.Time) error {
+    return slcontext.SharedSlaveContext().DiscardAll()
 }

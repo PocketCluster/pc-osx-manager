@@ -27,6 +27,10 @@ type transitionWithMasterMeta       func (meta *msagent.PocketMasterAgentMeta, s
 
 type transitionActionWithTimestamp  func (slaveTimestamp time.Time) error
 
+type onStateTranstionSuccess        func (slaveTimestamp time.Time) error
+
+type onStateTranstionFailure        func (slaveTimestamp time.Time) error
+
 type LocatorOnTransitionEvent interface {
     OnStateTranstionSuccess(state SlaveLocatingState, ts time.Time) error
     OnStateTranstionFailure(state SlaveLocatingState, ts time.Time) error
@@ -78,7 +82,13 @@ type locatorState struct {
     // timestamp transition func
     timestampTransition  transitionActionWithTimestamp
 
-    // onSuccess && onFailure
+    // onSuccess
+    onTransitionSuccess  onStateTranstionSuccess
+
+    // onFailure
+    onTransitionFailure  onStateTranstionFailure
+
+    // onSuccess && onFailure external event notifier
     LocatorOnTransitionEvent
 
     /* ---------------------------------------- Communication Channel ----------------------------------------------- */
@@ -248,11 +258,21 @@ func executeOnTransitionEvents(ls *locatorState, newState, oldState SlaveLocatin
     if newState != oldState {
         switch transition {
             case SlaveTransitionOk: {
-                return ls.OnStateTranstionSuccess(ls.CurrentState(), slaveTimestamp)
+                if ls.onTransitionSuccess != nil {
+                    ls.onTransitionSuccess(slaveTimestamp)
+                }
+                if ls.LocatorOnTransitionEvent != nil {
+                    ls.OnStateTranstionSuccess(ls.CurrentState(), slaveTimestamp)
+                }
             }
 
             case SlaveTransitionFail: {
-                return ls.OnStateTranstionFailure(ls.CurrentState(), slaveTimestamp)
+                if ls.onTransitionFailure != nil {
+                    ls.onTransitionFailure(slaveTimestamp)
+                }
+                if ls.LocatorOnTransitionEvent != nil {
+                    ls.OnStateTranstionFailure(ls.CurrentState(), slaveTimestamp)
+                }
             }
         }
     }

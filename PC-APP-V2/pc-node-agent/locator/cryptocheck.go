@@ -23,6 +23,8 @@ func newCryptocheckState(searchComm SearchTx, beaconComm BeaconTx, event Locator
 
     cc.timestampTransition          = cc.transitionActionWithTimestamp
     cc.masterMetaTransition         = cc.transitionWithMasterMeta
+    cc.onTransitionSuccess          = cc.onStateTranstionSuccess
+    cc.onTransitionFailure          = cc.onStateTranstionFailure
 
     cc.LocatorOnTransitionEvent     = event
     cc.searchComm                   = searchComm
@@ -108,4 +110,18 @@ func (ls *cryptocheck) transitionWithMasterMeta(meta *msagent.PocketMasterAgentM
     }
 
     return SlaveTransitionOk, nil
+}
+
+func (ls *cryptocheck) onStateTranstionSuccess(slaveTimestamp time.Time) error {
+    // here we'll save all the detail and save it to disk
+    err := slcontext.SharedSlaveContext().SyncAll()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    err = slcontext.SharedSlaveContext().SaveConfiguration()
+    return errors.WithStack(err)
+}
+
+func (ls *cryptocheck) onStateTranstionFailure(slaveTimestamp time.Time) error {
+    return slcontext.SharedSlaveContext().DiscardAll()
 }

@@ -23,6 +23,8 @@ func newUnboundedState(searchComm SearchTx, beaconComm BeaconTx, event LocatorOn
 
     us.timestampTransition          = us.transitionActionWithTimestamp
     us.masterMetaTransition         = us.transitionWithMasterMeta
+    us.onTransitionSuccess          = us.onStateTranstionSuccess
+    us.onTransitionFailure          = us.onStateTranstionFailure
 
     us.LocatorOnTransitionEvent     = event
     us.searchComm                   = searchComm
@@ -72,4 +74,13 @@ func (ls *unbounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMet
     slcontext.SharedSlaveContext().SetMasterIP4Address(meta.DiscoveryRespond.MasterAddress)
 
     return SlaveTransitionOk, nil
+}
+
+func (ls *unbounded) onStateTranstionSuccess(slaveTimestamp time.Time) error {
+    // nothing to do for unbounded -> inquired state failure
+    return nil
+}
+
+func (ls *unbounded) onStateTranstionFailure(slaveTimestamp time.Time) error {
+    return slcontext.SharedSlaveContext().DiscardAll()
 }

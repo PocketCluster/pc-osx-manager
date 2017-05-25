@@ -6,7 +6,6 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/msagent"
-    "github.com/stkim1/pc-node-agent/slcontext"
 )
 
 type DebugCommChannel struct {
@@ -41,35 +40,30 @@ func (d *DebugEventReceiver) OnStateTranstionSuccess(state SlaveLocatingState, t
     d.LastSlaveTS = ts
     d.IsSuccess = true
 
-    log.Infof("DebugEventReceiver.OnStateTranstionSuccess %v", state.String())
-
     switch state {
-
         case SlaveUnbounded: {
-            // nothing to do for unbounded -> inquired state failure
+            log.Infof("DebugEventReceiver.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
             return nil
         }
         case SlaveInquired: {
+            log.Infof("DebugEventReceiver.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
             return nil
         }
         case SlaveKeyExchange: {
+            log.Infof("DebugEventReceiver.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
             return nil
         }
         case SlaveCryptoCheck: {
-            // here we'll save all the detail and save it to disk
-            err := slcontext.SharedSlaveContext().SyncAll()
-            if err != nil {
-                return errors.WithStack(err)
-            }
-            err = slcontext.SharedSlaveContext().SaveConfiguration()
-            return errors.WithStack(err)
-        }
-        case SlaveBounded: {
+            log.Infof("DebugEventReceiver.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
             return nil
         }
-
+        case SlaveBounded: {
+            log.Infof("DebugEventReceiver.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
+            return nil
+        }
         case SlaveBindBroken: {
-            return slcontext.SharedSlaveContext().SyncAll()
+            log.Infof("DebugEventReceiver.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
+            return nil
         }
     }
 
@@ -81,31 +75,33 @@ func (d *DebugEventReceiver) OnStateTranstionFailure(state SlaveLocatingState, t
     d.LastSlaveTS = ts
     d.IsSuccess = false
 
-    log.Infof("DebugEventReceiver.OnStateTranstionFailure %v", state.String())
-
     switch state {
-
         case SlaveUnbounded: {
-            return slcontext.SharedSlaveContext().DiscardAll()
+            log.Infof("DebugEventReceiver.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
+            return nil
         }
         case SlaveInquired: {
-            return slcontext.SharedSlaveContext().DiscardAll()
+            log.Infof("DebugEventReceiver.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
+            return nil
         }
         case SlaveKeyExchange: {
-            return slcontext.SharedSlaveContext().DiscardAll()
+            log.Infof("DebugEventReceiver.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
+            return nil
         }
         case SlaveCryptoCheck: {
-            return slcontext.SharedSlaveContext().DiscardAll()
+            log.Infof("DebugEventReceiver.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
+            return nil
         }
         case SlaveBounded: {
-            slcontext.SharedSlaveContext().DiscardAESKey()
+            log.Infof("DebugEventReceiver.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
             return nil
         }
         case SlaveBindBroken: {
-            slcontext.SharedSlaveContext().DiscardAESKey()
+            log.Infof("DebugEventReceiver.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
             return nil
         }
     }
+
     return nil
 }
 

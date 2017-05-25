@@ -204,7 +204,6 @@ func initAgentService(app *PocketApplication) error {
                 if isSuccess {
                     switch state {
                         case locator.SlaveUnbounded: {
-                            // nothing to do for unbounded -> inquired state failure
                             return nil
                         }
                         case locator.SlaveInquired: {
@@ -214,42 +213,34 @@ func initAgentService(app *PocketApplication) error {
                             return nil
                         }
                         case locator.SlaveCryptoCheck: {
-                            // here we'll save all the detail and save it to disk
-                            err := slcontext.SharedSlaveContext().SyncAll()
-                            if err != nil {
-                                return errors.WithStack(err)
-                            }
-                            err = slcontext.SharedSlaveContext().SaveConfiguration()
-                            return errors.WithStack(err)
+                            return nil
                         }
                         case locator.SlaveBounded: {
                             return nil
                         }
                         case locator.SlaveBindBroken: {
-                            return slcontext.SharedSlaveContext().SyncAll()
+                            return nil
                         }
                     }
 
                 } else {
                     switch state {
                         case locator.SlaveUnbounded: {
-                            return slcontext.SharedSlaveContext().DiscardAll()
+                            return nil
                         }
                         case locator.SlaveInquired: {
-                            return slcontext.SharedSlaveContext().DiscardAll()
+                            return nil
                         }
                         case locator.SlaveKeyExchange: {
-                            return slcontext.SharedSlaveContext().DiscardAll()
+                            return nil
                         }
                         case locator.SlaveCryptoCheck: {
-                            return slcontext.SharedSlaveContext().DiscardAll()
+                            return nil
                         }
                         case locator.SlaveBounded: {
-                            slcontext.SharedSlaveContext().DiscardAESKey()
                             return nil
                         }
                         case locator.SlaveBindBroken: {
-                            slcontext.SharedSlaveContext().DiscardAESKey()
                             return nil
                         }
                     }
