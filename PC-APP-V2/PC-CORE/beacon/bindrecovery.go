@@ -26,6 +26,8 @@ func bindrecoveryState(oldState *beaconState) BeaconState {
 
     b.timestampTransition           = b.transitionActionWithTimestamp
     b.slaveMetaTransition           = b.transitionWithSlaveMeta
+    b.onTransitionSuccess           = b.onStateTranstionSuccess
+    b.onTransitionFailure           = b.onStateTranstionFailure
 
     b.BeaconOnTransitionEvent       = oldState.BeaconOnTransitionEvent
     b.aesKey                        = oldState.aesKey
@@ -134,4 +136,13 @@ func (b *bindrecovery) transitionWithSlaveMeta(sender *net.UDPAddr, meta *slagen
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil
+}
+
+func (b *bindrecovery) onStateTranstionSuccess(masterTimestamp time.Time) error {
+    err := b.slaveNode.Update()
+    return errors.WithStack(err)
+}
+
+func (b *bindrecovery) onStateTranstionFailure(masterTimestamp time.Time) error {
+    return nil
 }

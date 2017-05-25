@@ -26,6 +26,10 @@ type transitionWithSlaveMeta          func (sender *net.UDPAddr, meta *slagent.P
 
 type transitionActionWithTimestamp    func (masterTimestamp time.Time) error
 
+type onStateTranstionSuccess          func (masterTimestamp time.Time) error
+
+type onStateTranstionFailure          func (masterTimestamp time.Time) error
+
 type BeaconOnTransitionEvent interface {
     OnStateTranstionSuccess(state MasterBeaconState, slave *model.SlaveNode, ts time.Time) error
     OnStateTranstionFailure(state MasterBeaconState, slave *model.SlaveNode, ts time.Time) error
@@ -69,7 +73,13 @@ type beaconState struct {
     // timestamp transition func
     timestampTransition         transitionActionWithTimestamp
 
-    // onSuccess && onFailure
+    // onSuccess
+    onTransitionSuccess         onStateTranstionSuccess
+
+    // onFailure
+    onTransitionFailure         onStateTranstionFailure
+
+    // onSuccess && onFailure external event
     BeaconOnTransitionEvent
 
     /* ---------------------------------------- all-states properties ----------------------------------------------- */
@@ -127,6 +137,8 @@ func (b *beaconState) Close() {
 func (b *beaconState) gcHelper() {
     b.timestampTransition        = nil
     b.slaveMetaTransition        = nil
+    b.onTransitionSuccess        = nil
+    b.onTransitionFailure        = nil
 
     b.BeaconOnTransitionEvent    = nil
     b.slaveNode                  = nil
@@ -239,14 +251,31 @@ func translateStateWithTimeout(b *beaconState, nextStateCandiate MasterBeaconTra
 }
 
 func runOnTransitionEvents(b *beaconState, newState, oldState MasterBeaconState, transition MasterBeaconTransition, masterTimestamp time.Time) error {
+    var (
+        ierr, oerr error = nil, nil
+    )
     if newState != oldState {
         switch transition {
             case MasterTransitionOk: {
-                return b.OnStateTranstionSuccess(b.CurrentState(), b.SlaveNode(), masterTimestamp)
+                if b.onTransitionSuccess != nil {
+                    ierr = b.onTransitionSuccess(masterTimestamp)
+                }
+                if b.BeaconOnTransitionEvent != nil {
+                    oerr = b.OnStateTranstionSuccess(b.CurrentState(), b.SlaveNode(), masterTimestamp)
+                }
+                // TODO : we need to a way to formalize this
+                return summarizeErrors(ierr, oerr)
             }
 
             case MasterTransitionFail: {
-                return b.OnStateTranstionFailure(b.CurrentState(), b.SlaveNode(), masterTimestamp)
+                if b.onTransitionFailure != nil {
+                    ierr = b.onTransitionFailure(masterTimestamp)
+                }
+                if b.BeaconOnTransitionEvent != nil {
+                    oerr = b.OnStateTranstionFailure(b.CurrentState(), b.SlaveNode(), masterTimestamp)
+                }
+                // TODO : we need to a way to formalize this
+                return summarizeErrors(ierr, oerr)
             }
         }
     }

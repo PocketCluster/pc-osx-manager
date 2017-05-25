@@ -25,6 +25,8 @@ func inquiredState(oldState *beaconState) BeaconState {
 
     b.timestampTransition           = b.transitionActionWithTimestamp
     b.slaveMetaTransition           = b.inquired
+    b.onTransitionSuccess           = b.onStateTranstionSuccess
+    b.onTransitionFailure           = b.onStateTranstionFailure
 
     b.BeaconOnTransitionEvent       = oldState.BeaconOnTransitionEvent
     b.slaveNode                     = oldState.slaveNode
@@ -138,4 +140,12 @@ func (b *inquired) inquired(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentM
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil
+}
+
+func (b *inquired) onStateTranstionSuccess(masterTimestamp time.Time) error {
+    return nil
+}
+
+func (b *inquired) onStateTranstionFailure(masterTimestamp time.Time) error {
+    return nil
 }

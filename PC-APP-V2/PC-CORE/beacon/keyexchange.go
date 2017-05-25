@@ -24,6 +24,8 @@ func keyexchangeState(oldState *beaconState) BeaconState {
 
     b.timestampTransition           = b.transitionActionWithTimestamp
     b.slaveMetaTransition           = b.keyExchange
+    b.onTransitionSuccess           = b.onStateTranstionSuccess
+    b.onTransitionFailure           = b.onStateTranstionFailure
 
     b.BeaconOnTransitionEvent       = oldState.BeaconOnTransitionEvent
     b.aesKey                        = oldState.aesKey
@@ -129,4 +131,12 @@ func (b *keyexchange) keyExchange(sender *net.UDPAddr, meta *slagent.PocketSlave
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil
+}
+
+func (b *keyexchange) onStateTranstionSuccess(masterTimestamp time.Time) error {
+    return nil
+}
+
+func (b *keyexchange) onStateTranstionFailure(masterTimestamp time.Time) error {
+    return nil
 }

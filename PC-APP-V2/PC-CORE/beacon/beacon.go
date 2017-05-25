@@ -111,36 +111,26 @@ func (mb *masterBeacon) CurrentState() MasterBeaconState {
 func (mb *masterBeacon) TransitionWithTimestamp(timestamp time.Time) error {
     var (
         err error = nil
-        state BeaconState = nil
     )
 
     if mb.state == nil {
         return errors.Errorf("[ERR] BeaconState is nil. Cannot make transition with master timestamp")
     }
 
-    state, err = mb.state.TransitionWithTimestamp(timestamp)
-    if state != nil && mb.state != state {
-        mb.state = state
-    }
-
+    mb.state, err = mb.state.TransitionWithTimestamp(timestamp)
     return errors.WithStack(err)
 }
 
 func (mb *masterBeacon) TransitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
     var (
         err error = nil
-        state BeaconState = nil
     )
 
     if mb.state == nil {
         return errors.Errorf("[ERR] BeaconState is nil. Cannot make transition with master meta")
     }
 
-    state, err = mb.state.TransitionWithSlaveMeta(sender, meta, timestamp)
-    if state != nil && mb.state != state {
-        mb.state = state
-    }
-
+    mb.state, err = mb.state.TransitionWithSlaveMeta(sender, meta, timestamp)
     return errors.WithStack(err)
 }
 

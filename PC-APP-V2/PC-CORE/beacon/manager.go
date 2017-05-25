@@ -214,23 +214,13 @@ func (b *beaconManger) Shutdown() error {
 
 // state transition success from
 func (b *beaconManger) OnStateTranstionSuccess(state MasterBeaconState, slave *model.SlaveNode, ts time.Time) error {
-
-    switch state {
-        case MasterCryptoCheck: {
-            err := slave.JoinSlave()
-            return errors.WithStack(err)
-        }
-        case MasterBindRecovery: {
-            err := slave.Update()
-            return errors.WithStack(err)
-        }
-    }
-
+    log.Infof("beaconManager.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
     return nil
 }
 
 // state transition failure from
 func (b *beaconManger) OnStateTranstionFailure(state MasterBeaconState, slave *model.SlaveNode, ts time.Time) error {
+    log.Infof("beaconManager.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
     return nil
 }
 

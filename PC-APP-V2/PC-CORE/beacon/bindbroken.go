@@ -25,6 +25,8 @@ func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel, event BeaconO
 
     b.timestampTransition           = b.transitionActionWithTimestamp
     b.slaveMetaTransition           = b.bindBroken
+    b.onTransitionSuccess           = b.onStateTranstionSuccess
+    b.onTransitionFailure           = b.onStateTranstionFailure
 
     b.BeaconOnTransitionEvent       = event
     b.slaveNode                     = slaveNode
@@ -119,4 +121,12 @@ func (b *bindbroken) bindBroken(sender *net.UDPAddr, meta *slagent.PocketSlaveAg
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.
     return MasterTransitionOk, nil
+}
+
+func (b *bindbroken) onStateTranstionSuccess(masterTimestamp time.Time) error {
+    return nil
+}
+
+func (b *bindbroken) onStateTranstionFailure(masterTimestamp time.Time) error {
+    return nil
 }

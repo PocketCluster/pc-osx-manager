@@ -18,7 +18,9 @@ func Test_BindRecovery_Bounded_Transition(t *testing.T) {
         masterTS, slaveTS time.Time = time.Now(), time.Now()
     )
 
+    // slave model has to be exclusively in 'joined' state
     slave := model.DebugTestSlaveNode()
+    slave.State = model.SNMStateJoined
     mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())

@@ -124,6 +124,8 @@ func (ls *locatorState) txTimeWindow() time.Duration {
 func (ls *locatorState) Close() error {
     ls.masterMetaTransition        = nil
     ls.timestampTransition         = nil
+    ls.onTransitionSuccess         = nil
+    ls.onTransitionFailure         = nil
     ls.LocatorOnTransitionEvent    = nil
     ls.searchComm                  = nil
     ls.beaconComm                  = nil
