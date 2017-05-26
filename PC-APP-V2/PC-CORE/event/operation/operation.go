@@ -34,6 +34,11 @@ const (
     // debug bundle start & stop
     CmdServiceBundleStart
     CmdServiceBundleStop
+
+    // debug add node, root, & user
+    CmdTeleportNodeAdd
+    CmdTeleportRootAdd
+    CmdTeleportUserAdd
 )
 
 func (c CommandType) String() string {
@@ -66,6 +71,13 @@ func (c CommandType) String() string {
             return "CmdServiceBundleStart"
         case CmdServiceBundleStop:
             return "CmdServiceBundleStop"
+        case CmdTeleportNodeAdd:
+            return "CmdTeleportNodeAdd"
+        case CmdTeleportRootAdd:
+            return "CmdTeleportRootAdd"
+        case CmdTeleportUserAdd:
+            return "CmdTeleportUserAdd"
+
     default:
             return fmt.Sprintf("CommandType(%d)", c)
     }

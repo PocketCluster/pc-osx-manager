@@ -29,6 +29,19 @@
     OpsCmdTeleportStop();
 }
 
+- (IBAction)opsCmdTeleportNodeAdd:(id)sender {
+    OpsCmdTeleportNodeAdd();
+}
+
+- (IBAction)opsCmdTeleportRootAdd:(id)sender {
+    OpsCmdTeleportRootAdd();
+}
+
+- (IBAction)opsCmdTeleportUserAdd:(id)sender {
+    OpsCmdTeleportUserAdd();
+}
+
+
 - (IBAction)opsCmdRegistryStart:(id)sender {
     OpsCmdRegistryStart();
 }
@@ -68,6 +81,4 @@
 - (IBAction)opsCmdServiceBundleStop:(id)sender {
     OpsCmdServiceBundleStop();
 }
-
-
 @end

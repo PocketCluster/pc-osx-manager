@@ -89,3 +89,24 @@ func OpsCmdServiceBundleStop() {
         Command:    operation.CmdServiceBundleStop,
     }
 }
+
+//export OpsCmdTeleportNodeAdd
+func OpsCmdTeleportNodeAdd() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdTeleportNodeAdd,
+    }
+}
+
+//export OpsCmdTeleportRootAdd
+func OpsCmdTeleportRootAdd() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdTeleportRootAdd,
+    }
+}
+
+//export OpsCmdTeleportUserAdd
+func OpsCmdTeleportUserAdd() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdTeleportUserAdd,
+    }
+}

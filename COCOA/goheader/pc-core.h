@@ -110,6 +110,12 @@ extern void OpsCmdServiceBundleStart();
 
 extern void OpsCmdServiceBundleStop();
 
+extern void OpsCmdTeleportNodeAdd();
+
+extern void OpsCmdTeleportRootAdd();
+
+extern void OpsCmdTeleportUserAdd();
+
 extern void FeedStart();
 
 extern void FeedStop();

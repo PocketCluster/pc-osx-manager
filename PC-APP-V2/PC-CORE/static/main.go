@@ -8,6 +8,7 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/gravitational/teleport/lib/process"
     "github.com/coreos/etcd/embed"
+    tembed "github.com/gravitational/teleport/embed"
     "gopkg.in/tylerb/graceful.v1"
 
     "github.com/stkim1/pc-core/context"
@@ -15,7 +16,6 @@ import (
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
-    telesrv "github.com/stkim1/pc-core/extsrv/teleport"
     regisrv "github.com/stkim1/pc-core/extsrv/registry"
     swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
 )
@@ -156,7 +156,7 @@ func main() {
                     case operation.CmdTeleportStart: {
                         log.Debugf("[OP] %v", e.String())
 
-                        teleProc, err = telesrv.NewTeleportCore(serviceConfig.teleConfig)
+                        teleProc, err = process.NewCoreProcess(serviceConfig.teleConfig)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
@@ -305,6 +305,31 @@ func main() {
                         a.StopServices()
                         log.Debugf("[OP] %v", e.String())
                     }
+
+                    case operation.CmdTeleportNodeAdd: {
+                        clt, err := tembed.OpenAdminClientWithAuthService(serviceConfig.teleConfig)
+                        if err != nil {
+                            log.Error(err.Error())
+                        }
+                        token, err := tembed.GenerateNodeInviationWithTTL(clt, tembed.MaxInvitationTLL)
+                        if err != nil {
+                            log.Error(err.Error())
+                        }
+                        err = clt.Close()
+                        if err != nil {
+                            log.Error(err.Error())
+                        }
+                        log.Debugf("TELEPORT NODE ADDED FOR TOKEN : %s", token)
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdTeleportRootAdd: {
+
+                    }
+                    case operation.CmdTeleportUserAdd: {
+
+                    }
+
+
 
                     default:
                         log.Debug("[OP-ERROR] THIS SHOULD NOT HAPPEN %v", e.String())
