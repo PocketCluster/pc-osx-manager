@@ -29,6 +29,7 @@ func bindrecoveryState(oldState *beaconState) BeaconState {
     b.onTransitionSuccess           = b.onStateTranstionSuccess
     b.onTransitionFailure           = b.onStateTranstionFailure
 
+    b.BeaconOnTransitionEvent       = oldState.BeaconOnTransitionEvent
     b.aesKey                        = oldState.aesKey
     b.aesCryptor                    = oldState.aesCryptor
     b.rsaEncryptor                  = oldState.rsaEncryptor
@@ -145,4 +146,3 @@ func (b *bindrecovery) onStateTranstionSuccess(masterTimestamp time.Time) error 
 func (b *bindrecovery) onStateTranstionFailure(masterTimestamp time.Time) error {
     return nil
 }
-

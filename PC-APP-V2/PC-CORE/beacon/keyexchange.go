@@ -27,6 +27,7 @@ func keyexchangeState(oldState *beaconState) BeaconState {
     b.onTransitionSuccess           = b.onStateTranstionSuccess
     b.onTransitionFailure           = b.onStateTranstionFailure
 
+    b.BeaconOnTransitionEvent       = oldState.BeaconOnTransitionEvent
     b.aesKey                        = oldState.aesKey
     b.aesCryptor                    = oldState.aesCryptor
     b.rsaEncryptor                  = oldState.rsaEncryptor

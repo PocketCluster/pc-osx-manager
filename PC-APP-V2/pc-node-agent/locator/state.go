@@ -10,7 +10,7 @@ import (
 )
 
 const (
-    TransitionFailureLimit uint          = 5
+    TransitionFailureLimit int           = 6
 
     // TODO : timeout mechanism for receiving master meta
     // Currently (v0.1.4), there is no timeout mechanism implemented for receiving master meta (i.e. if not master
@@ -18,7 +18,7 @@ const (
     // times out the crrent state. When TxAction does not work, state will stall. We'll reinvestigate in the future
     //TransitionTimeout      time.Duration = time.Second * 10
 
-    TxActionLimit          uint          = 5
+    TxActionLimit          int           = 6
     UnboundedTimeout       time.Duration = time.Second * 3
     BoundedTimeout         time.Duration = time.Second * 10
 )
@@ -30,6 +30,11 @@ type transitionActionWithTimestamp  func (slaveTimestamp time.Time) error
 type onStateTranstionSuccess        func (slaveTimestamp time.Time) error
 
 type onStateTranstionFailure        func (slaveTimestamp time.Time) error
+
+type LocatorOnTransitionEvent interface {
+    OnStateTranstionSuccess(state SlaveLocatingState, ts time.Time) error
+    OnStateTranstionFailure(state SlaveLocatingState, ts time.Time) error
+}
 
 type LocatorState interface {
     CurrentState() SlaveLocatingState
@@ -44,26 +49,26 @@ type locatorState struct {
     constState                  SlaveLocatingState
 
     // transition failure
-    constTransitionFailureLimit uint
+    constTransitionFailureLimit int
 
     // transition timeout
     constTransitionTimout       time.Duration
 
     // transmission limit
-    constTxActionLimit          uint
+    constTxActionLimit          int
 
     // unbounded timeout
     constTxTimeWindow           time.Duration
 
     /* ---------------------------------- changing properties to record transaction --------------------------------- */
     // each time we try to make transtion and fail, count goes up.
-    transitionActionCount       uint
+    transitionActionCount       int
 
     // last time successfully transitioned state.
     lastTransitionTS            time.Time
 
     // each time we try to send something, count goes up. This include success/fail altogether.
-    txActionCount               uint
+    txActionCount               int
 
     // last time transmission takes place. This is to control the frequnecy of transmission
     // !!!IMPORTANT!!! BY NOT SETTING A PARTICULAR VALUE, BY NOT SETTING ANYTHING, WE WILL AUTOMATICALLY EXECUTE
@@ -83,6 +88,9 @@ type locatorState struct {
     // onFailure
     onTransitionFailure  onStateTranstionFailure
 
+    // onSuccess && onFailure external event notifier
+    LocatorOnTransitionEvent
+
     /* ---------------------------------------- Communication Channel ----------------------------------------------- */
     // master search caster
     searchComm           SearchTx
@@ -95,7 +103,7 @@ func (ls *locatorState) CurrentState() SlaveLocatingState {
     return ls.constState
 }
 
-func (ls *locatorState) transitionFailureLimit() uint {
+func (ls *locatorState) transitionFailureLimit() int {
     return ls.constTransitionFailureLimit
 }
 
@@ -103,7 +111,7 @@ func (ls *locatorState) transitionTimeout() time.Duration {
     return ls.constTransitionTimout
 }
 
-func (ls *locatorState) txActionLimit() uint {
+func (ls *locatorState) txActionLimit() int {
     return ls.constTxActionLimit
 }
 
@@ -114,12 +122,13 @@ func (ls *locatorState) txTimeWindow() time.Duration {
 /* ------------------------------------------------ Helper Functions ------------------------------------------------ */
 // close func pointers and delegates to help GC
 func (ls *locatorState) Close() error {
-    ls.masterMetaTransition  = nil
-    ls.timestampTransition   = nil
-    ls.onTransitionSuccess   = nil
-    ls.onTransitionFailure   = nil
-    ls.searchComm            = nil
-    ls.beaconComm            = nil
+    ls.masterMetaTransition        = nil
+    ls.timestampTransition         = nil
+    ls.onTransitionSuccess         = nil
+    ls.onTransitionFailure         = nil
+    ls.LocatorOnTransitionEvent    = nil
+    ls.searchComm                  = nil
+    ls.beaconComm                  = nil
     return nil
 }
 
@@ -131,36 +140,40 @@ func newLocatorStateForState(ls *locatorState, newState, oldState SlaveLocatingS
 
     var search SearchTx = ls.searchComm
     var beacon BeaconTx = ls.beaconComm
+    var event LocatorOnTransitionEvent = ls.LocatorOnTransitionEvent
     var newLocatorState LocatorState = nil
     switch newState {
         case SlaveUnbounded:
-            newLocatorState = newUnboundedState(search, beacon)
+            newLocatorState = newUnboundedState(search, beacon, event)
 
         case SlaveInquired:
-            newLocatorState = newInquiredState(search, beacon)
+            newLocatorState = newInquiredState(search, beacon, event)
 
         case SlaveKeyExchange:
-            newLocatorState = newKeyexchangeState(search, beacon)
+            newLocatorState = newKeyexchangeState(search, beacon, event)
 
         case SlaveCryptoCheck:
-            newLocatorState = newCryptocheckState(search, beacon)
+            newLocatorState = newCryptocheckState(search, beacon, event)
 
         case SlaveBounded:
-            newLocatorState = newBoundedState(search, beacon)
+            newLocatorState = newBoundedState(search, beacon, event)
 
         case SlaveBindBroken:
-            newLocatorState = newBindbrokenState(search, beacon)
+            newLocatorState = newBindbrokenState(search, beacon, event)
 
         default:
-            newLocatorState = newUnboundedState(search, beacon)
+            newLocatorState = newUnboundedState(search, beacon, event)
     }
     // invalidate old LocatorState CommChannel for GC
-    ls.Close()
+    if newLocatorState != nil {
+        ls.Close()
+    }
     return newLocatorState
 }
 
 func stateTransition(currState SlaveLocatingState, nextCondition SlaveLocatingTransition) SlaveLocatingState {
     var nextState SlaveLocatingState
+
     // Succeed to transition to the next
     if  nextCondition == SlaveTransitionOk {
         switch currState {
@@ -182,7 +195,8 @@ func stateTransition(currState SlaveLocatingState, nextCondition SlaveLocatingTr
             default:
                 nextState = SlaveUnbounded
         }
-        // Fail to transition to the next
+
+    // Fail to transition to the next
     } else if nextCondition == SlaveTransitionFail {
         switch currState {
             case SlaveUnbounded:
@@ -204,7 +218,8 @@ func stateTransition(currState SlaveLocatingState, nextCondition SlaveLocatingTr
             default:
                 nextState = SlaveUnbounded
         }
-        // Idle
+
+    // Idle
     } else {
         nextState = currState
     }
@@ -242,16 +257,31 @@ func finalizeTransitionWithTimeout(ls *locatorState, nextStateCandiate SlaveLoca
 }
 
 func executeOnTransitionEvents(ls *locatorState, newState, oldState SlaveLocatingState, transition SlaveLocatingTransition, slaveTimestamp time.Time) error {
+    var (
+        ierr, oerr error = nil, nil
+    )
     if newState != oldState {
         switch transition {
-            case SlaveTransitionOk:
+            case SlaveTransitionOk: {
                 if ls.onTransitionSuccess != nil {
-                    return ls.onTransitionSuccess(slaveTimestamp)
+                    ierr = ls.onTransitionSuccess(slaveTimestamp)
                 }
+                if ls.LocatorOnTransitionEvent != nil {
+                    oerr = ls.OnStateTranstionSuccess(ls.CurrentState(), slaveTimestamp)
+                }
+                // TODO : we need to a way to formalize this
+                return summarizeErrors(ierr, oerr)
+            }
+
             case SlaveTransitionFail: {
                 if ls.onTransitionFailure != nil {
-                    return ls.onTransitionFailure(slaveTimestamp)
+                    ierr = ls.onTransitionFailure(slaveTimestamp)
                 }
+                if ls.LocatorOnTransitionEvent != nil {
+                    oerr = ls.OnStateTranstionFailure(ls.CurrentState(), slaveTimestamp)
+                }
+                // TODO : we need to a way to formalize this
+                return summarizeErrors(ierr, oerr)
             }
         }
     }

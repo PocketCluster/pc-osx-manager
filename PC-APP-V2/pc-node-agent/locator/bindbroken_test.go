@@ -15,14 +15,17 @@ func Test_BindBroken_Bounded_Transition(t *testing.T) {
     setUp()
     defer tearDown()
 
-    debugComm := &DebugCommChannel{}
-    // by the time bind broken state is revived, previous master public key should have been available.
-    context := slcontext.SharedSlaveContext()
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        // by the time bind broken state is revived, previous master public key should have been available.
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+    )
     context.SetMasterPublicKey(pcrypto.TestMasterPublicKey())
     context.SetMasterAgent(masterAgentName)
     context.SetSlaveNodeName(slaveNodeName)
 
-    sd, err := NewSlaveLocator(SlaveBindBroken, debugComm, debugComm)
+    sd, err := NewSlaveLocator(SlaveBindBroken, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -71,14 +74,17 @@ func Test_BindBroken_BindBroken_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    // by the time bind broken state is revived, previous master public key should have been available.
-    debugComm := &DebugCommChannel{}
-    context := slcontext.SharedSlaveContext()
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        // by the time bind broken state is revived, previous master public key should have been available.
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+    )
     context.SetMasterPublicKey(pcrypto.TestMasterPublicKey())
     context.SetMasterAgent(masterAgentName)
     context.SetSlaveNodeName(slaveNodeName)
 
-    sd, err := NewSlaveLocator(SlaveBindBroken, debugComm, debugComm)
+    sd, err := NewSlaveLocator(SlaveBindBroken, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -87,8 +93,7 @@ func Test_BindBroken_BindBroken_TxActionFail(t *testing.T) {
     /* ---------------------------------------------- make transition failed ---------------------------------------- */
     slaveTS := time.Now()
     TxCountTarget := TxActionLimit * TxActionLimit
-    var i uint = 0
-    for ;i < TxCountTarget; i++ {
+    for i := 0; i < TxCountTarget; i++ {
         slaveTS = slaveTS.Add(time.Millisecond + UnboundedTimeout)
         err = sd.TranstionWithTimestamp(slaveTS);
         if err != nil {

@@ -14,11 +14,12 @@ func Test_BindBroken_BindRecovery_Transition(t *testing.T) {
 
     var (
         debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
         masterTS time.Time = time.Now()
     )
 
     slave := model.DebugTestSlaveNode()
-    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm)
+    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -51,11 +52,12 @@ func Test_BindBroken_BindRecovery_TimeoutFail(t *testing.T) {
 
     var (
         debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
         masterTS time.Time = time.Now()
     )
 
     slave := model.DebugTestSlaveNode()
-    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm)
+    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -92,11 +94,12 @@ func Test_BindBroken_BindRecovery_TooManyMetaFail(t *testing.T) {
 
     var (
         debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
         masterTS time.Time = time.Now()
     )
 
     slave := model.DebugTestSlaveNode()
-    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm)
+    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -110,7 +113,7 @@ func Test_BindBroken_BindRecovery_TooManyMetaFail(t *testing.T) {
         t.Errorf(err.Error())
         return
     }
-    for i := 0; i <= int(TransitionFailureLimit); i++ {
+    for i := 0; i <= TransitionFailureLimit; i++ {
         masterTS = masterTS.Add(time.Second)
         err = mb.TransitionWithSlaveMeta(slaveAddr, meta, masterTS)
         if err != nil {
@@ -128,11 +131,12 @@ func Test_BindBroken_BindRecovery_TxActionFail(t *testing.T) {
 
     var (
         debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
         masterTS time.Time = time.Now()
     )
 
     slave := model.DebugTestSlaveNode()
-    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm)
+    mb, err := NewMasterBeacon(MasterBindBroken, slave, debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -142,7 +146,7 @@ func Test_BindBroken_BindRecovery_TxActionFail(t *testing.T) {
         return
     }
 
-    for i := 0; i <= int(TxActionLimit); i++ {
+    for i := 0; i <= TxActionLimit; i++ {
         masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout)
         err = mb.TransitionWithTimestamp(masterTS)
         if err != nil {

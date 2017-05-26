@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-core/model"
 )
 
-func beaconinitState(slaveNode *model.SlaveNode, comm CommChannel) BeaconState {
+func beaconinitState(slaveNode *model.SlaveNode, comm CommChannel, event BeaconOnTransitionEvent) BeaconState {
     b := &beaconinit{}
 
     b.constState                    = MasterInit
@@ -26,6 +26,7 @@ func beaconinitState(slaveNode *model.SlaveNode, comm CommChannel) BeaconState {
     b.onTransitionSuccess           = b.onStateTranstionSuccess
     b.onTransitionFailure           = b.onStateTranstionFailure
 
+    b.BeaconOnTransitionEvent       = event
     b.slaveNode                     = slaveNode
     b.commChan                      = comm
 

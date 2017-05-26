@@ -14,20 +14,24 @@ func TestInquired_KeyExchangeTransition(t *testing.T) {
     setUp()
     defer tearDown()
 
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+    )
+
     meta, endTime, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
     }
 
-    debugComm := &DebugCommChannel{}
     // set to slave discovery state to "Inquired"
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    sd.(*slaveLocator).state = newInquiredState(debugComm, debugComm)
+    sd.(*slaveLocator).state = newInquiredState(debugComm, debugComm, debugEvent)
 
     // execute state transition
     if err = sd.TranstionWithMasterMeta(meta, endTime.Add(time.Second)); err != nil {
@@ -51,12 +55,15 @@ func Test_Inquired_Keyexchange_MasterMetaFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    // unbounded -> inquired
-    context := slcontext.SharedSlaveContext()
-    debugComm := &DebugCommChannel{}
-    slaveTS := time.Now()
-    masterTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        // unbounded -> inquired
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+        masterTS, slaveTS time.Time = time.Now(), time.Now()
+    )
+
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -83,7 +90,7 @@ func Test_Inquired_Keyexchange_MasterMetaFail(t *testing.T) {
     }
 
     /* ---------------------------------------------- make transition failed ---------------------------------------- */
-    for i := 0; i < int(TransitionFailureLimit); i++ {
+    for i := 0; i < TransitionFailureLimit; i++ {
         // inquired -> keyexchange
         masterTS = slaveTS.Add(time.Second)
         meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), masterTS)
@@ -96,7 +103,7 @@ func Test_Inquired_Keyexchange_MasterMetaFail(t *testing.T) {
 
         slaveTS = masterTS.Add(time.Second)
         err = sd.TranstionWithMasterMeta(meta, slaveTS)
-        if i < int(TransitionFailureLimit) - 1 {
+        if i < (TransitionFailureLimit - 1) {
             if err != nil {
                 t.Log(err.Error())
             }
@@ -160,12 +167,15 @@ func Test_Inquired_Keyexchange_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    // unbounded -> inquired
-    context := slcontext.SharedSlaveContext()
-    debugComm := &DebugCommChannel{}
-    slaveTS := time.Now()
-    //masterTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        // unbounded -> inquired
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+        slaveTS time.Time = time.Now()
+    )
+
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -192,10 +202,10 @@ func Test_Inquired_Keyexchange_TxActionFail(t *testing.T) {
     }
 
     /* ---------------------------------------------- make transition failed ---------------------------------------- */
-    for i := 0; i <= int(TxActionLimit); i++ {
+    for i := 0; i <= TxActionLimit; i++ {
         slaveTS = slaveTS.Add(time.Millisecond + UnboundedTimeout)
         err = sd.TranstionWithTimestamp(slaveTS)
-        if i < int(TxActionLimit) {
+        if i < TxActionLimit {
             if err != nil {
                 t.Error(err.Error())
                 return

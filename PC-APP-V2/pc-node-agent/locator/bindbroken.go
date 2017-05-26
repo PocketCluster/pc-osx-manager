@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
-func newBindbrokenState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
+func newBindbrokenState(searchComm SearchTx, beaconComm BeaconTx, event LocatorOnTransitionEvent) LocatorState {
     bs := &bindbroken{}
 
     bs.constState                   = SlaveBindBroken
@@ -26,6 +26,7 @@ func newBindbrokenState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
     bs.onTransitionSuccess          = bs.onStateTranstionSuccess
     bs.onTransitionFailure          = bs.onStateTranstionFailure
 
+    bs.LocatorOnTransitionEvent     = event
     bs.searchComm                   = searchComm
     bs.beaconComm                   = beaconComm
     return bs

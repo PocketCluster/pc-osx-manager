@@ -66,6 +66,15 @@ func (b BeaconTxFunc) UcastSend(target string, data []byte) error {
     return b(target, data)
 }
 
+type LocatorOnTransitionEventFunc func(isSuccess bool, state SlaveLocatingState, ts time.Time) error
+func (l LocatorOnTransitionEventFunc) OnStateTranstionSuccess(state SlaveLocatingState, ts time.Time) error {
+    return l(true, state, ts)
+}
+
+func (l LocatorOnTransitionEventFunc) OnStateTranstionFailure(state SlaveLocatingState, ts time.Time) error {
+    return l(false, state, ts)
+}
+
 type SlaveLocator interface {
     CurrentState() (SlaveLocatingState, error)
     TranstionWithMasterBeacon(bp ucast.BeaconPack, slaveTimestamp time.Time) error
@@ -80,24 +89,27 @@ type slaveLocator struct {
     state       LocatorState
 }
 
-func NewSlaveLocatorWithFunc(state SlaveLocatingState, searchComm SearchTxFunc, beaconComm BeaconTxFunc) (SlaveLocator, error) {
-    return NewSlaveLocator(state, searchComm, beaconComm)
+func NewSlaveLocatorWithFunc(state SlaveLocatingState, searchComm SearchTxFunc, beaconComm BeaconTxFunc, event LocatorOnTransitionEventFunc) (SlaveLocator, error) {
+    return NewSlaveLocator(state, searchComm, beaconComm, event)
 }
 
 // New slaveLocator starts only from unbounded or bindbroken
-func NewSlaveLocator(state SlaveLocatingState, searchComm SearchTx, beaconComm BeaconTx) (SlaveLocator, error) {
+func NewSlaveLocator(state SlaveLocatingState, searchComm SearchTx, beaconComm BeaconTx, event LocatorOnTransitionEvent) (SlaveLocator, error) {
     if searchComm == nil {
-        return nil, errors.Errorf("[ERR] MasterSearch cannot be void")
+        return nil, errors.Errorf("[ERR] MasterSearch cannot be null")
     }
     if beaconComm == nil {
-        return nil, errors.Errorf("[ERR] BeaconAgent cannot be void")
+        return nil, errors.Errorf("[ERR] BeaconAgent cannot be null")
+    }
+    if event == nil {
+        return nil, errors.Errorf("[ERR] LocatorOnTransitionEvent cannot be null")
     }
 
     switch state {
         case SlaveUnbounded:
-            return &slaveLocator{state: newUnboundedState(searchComm, beaconComm)}, nil
+            return &slaveLocator{state: newUnboundedState(searchComm, beaconComm, event)}, nil
         case SlaveBindBroken:
-            return &slaveLocator{state: newBindbrokenState(searchComm, beaconComm)}, nil
+            return &slaveLocator{state: newBindbrokenState(searchComm, beaconComm, event)}, nil
     }
     return nil, errors.Errorf("[ERR] SlaveLocator can initiated from SlaveUnbounded or SlaveBindBroken only")
 }
@@ -110,11 +122,15 @@ func (sl *slaveLocator) CurrentState() (SlaveLocatingState, error) {
 }
 
 func (sl *slaveLocator) TranstionWithMasterBeacon(bp ucast.BeaconPack, slaveTimestamp time.Time) error {
+    var (
+        meta *msagent.PocketMasterAgentMeta = nil
+        err error = nil
+    )
     if sl.state == nil {
         return errors.Errorf("[ERR] LocatorState is nil. Cannot make transition with master meta")
     }
     // (2017-05-21) we're not looking into ucast.BeaconPack.Address for now as Master's interface address might vary
-    meta, err := msagent.UnpackedMasterMeta(bp.Message)
+    meta, err = msagent.UnpackedMasterMeta(bp.Message)
     if err != nil {
         return errors.WithStack(err)
     }
@@ -124,16 +140,25 @@ func (sl *slaveLocator) TranstionWithMasterBeacon(bp ucast.BeaconPack, slaveTime
     log.Debugf("[AGENT-BEACON] RECEIVED\n %v \n %v", spew.Sdump(bp.Address), spew.Sdump(meta))
 
     sl.state, err = sl.state.MasterMetaTransition(meta, slaveTimestamp)
-    return err
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    return nil
 }
 
 func (sl *slaveLocator) TranstionWithTimestamp(slaveTimestamp time.Time) error {
+    var (
+        err error = nil
+    )
     if sl.state == nil {
         return errors.Errorf("[ERR] LocatorState is nil. Cannot make transition with master meta")
     }
-    var err error
+
     sl.state, err = sl.state.TimestampTransition(slaveTimestamp)
-    return err
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    return nil
 }
 
 func (sl *slaveLocator) Shutdown() error {

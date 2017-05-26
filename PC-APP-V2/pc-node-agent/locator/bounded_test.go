@@ -15,10 +15,13 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
     setUp()
     defer tearDown()
 
-    context := slcontext.SharedSlaveContext()
-    debugComm := &DebugCommChannel{}
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+    )
 
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -128,10 +131,13 @@ func Test_Bounded_Unbroken_Loop(t *testing.T) {
     setUp()
     defer tearDown()
 
-    context := slcontext.SharedSlaveContext()
-    debugComm := &DebugCommChannel{}
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+    )
 
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -285,10 +291,14 @@ func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    context := slcontext.SharedSlaveContext()
-    debugComm := &DebugCommChannel{}
-    slaveTS := time.Now()
-    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm)
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+        slaveTS = time.Now()
+    )
+
+    sd, err := NewSlaveLocator(SlaveUnbounded, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
@@ -381,7 +391,7 @@ func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
     }
 
     /* ---------------------------------------------- make transition failed ---------------------------------------- */
-    for i := 0; i <= int(TransitionFailureLimit); i++ {
+    for i := 0; i <= TransitionFailureLimit; i++ {
         // cryptocheck -> bounded
         masterTS = slaveTS.Add(time.Second)
         meta, masterTS, err = msagent.TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, masterTS)
@@ -394,7 +404,7 @@ func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
 
         slaveTS = masterTS.Add(time.Second)
         err = sd.TranstionWithMasterMeta(meta, slaveTS)
-        if i < int(TransitionFailureLimit - 1) {
+        if i < (TransitionFailureLimit - 1) {
             if err != nil {
                 t.Log(err.Error())
             }
@@ -442,27 +452,31 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    // Let's have a bounded state
-    debugComm := &DebugCommChannel{}
-    context := slcontext.SharedSlaveContext()
+    var (
+        debugComm *DebugCommChannel = &DebugCommChannel{}
+        debugEvent *DebugEventReceiver = &DebugEventReceiver{}
+        context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
+        masterTS, slaveTS = time.Now(), time.Now()
+    )
+
     context.SetMasterPublicKey(pcrypto.TestMasterPublicKey())
     context.SetMasterAgent(masterAgentName)
     context.SetSlaveNodeName(slaveNodeName)
     context.SetSlaveNodeUUID(slaveUUID)
 
     // have a slave locator
-    sd, err := NewSlaveLocator(SlaveBindBroken, debugComm, debugComm)
+    sd, err := NewSlaveLocator(SlaveBindBroken, debugComm, debugComm, debugEvent)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    masterTS := time.Now()
+    masterTS = time.Now()
     meta, err := msagent.TestMasterBrokenBindRecoveryCommand(masterAgentName, pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    slaveTS := masterTS.Add(time.Second)
+    slaveTS = masterTS.Add(time.Second)
     err = sd.TranstionWithMasterMeta(meta, slaveTS);
     if err != nil {
         t.Error(err.Error())
@@ -481,8 +495,7 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
     /* ---------------------------------------------- make transition failed ---------------------------------------- */
     //FIXME : get the exact count. We are now running 7
     slaveTS = time.Now()
-    var i uint = 0
-    for ; i <= TxActionLimit + 1; i++ {
+    for i := 0; i <= TxActionLimit + 1; i++ {
         slaveTS = slaveTS.Add(time.Second + BoundedTimeout)
         err = sd.TranstionWithTimestamp(slaveTS)
         if i < TxActionLimit {

@@ -3,6 +3,7 @@ package locator
 import (
     "time"
 
+    log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/msagent"
 )
@@ -11,8 +12,8 @@ type DebugCommChannel struct {
     LastMcastMessage []byte
     LastUcastMessage []byte
     LastUcastHost    string
-    MCommCount       uint
-    UCommCount       uint
+    MCommCount       int
+    UCommCount       int
 }
 
 func (dc *DebugCommChannel) McastSend(data []byte) error {
@@ -25,6 +26,82 @@ func (dc *DebugCommChannel) UcastSend(target string, data []byte) error {
     dc.LastUcastMessage = data
     dc.LastUcastHost = target
     dc.UCommCount++
+    return nil
+}
+
+type DebugEventReceiver struct {
+    LastLocatorState    SlaveLocatingState
+    LastSlaveTS         time.Time
+    IsSuccess           bool
+}
+
+func (d *DebugEventReceiver) OnStateTranstionSuccess(state SlaveLocatingState, ts time.Time) error {
+    d.LastLocatorState = state
+    d.LastSlaveTS = ts
+    d.IsSuccess = true
+
+    switch state {
+        case SlaveUnbounded: {
+            log.Infof("DebugEventReceiver.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
+            return nil
+        }
+        case SlaveInquired: {
+            log.Infof("DebugEventReceiver.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
+            return nil
+        }
+        case SlaveKeyExchange: {
+            log.Infof("DebugEventReceiver.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
+            return nil
+        }
+        case SlaveCryptoCheck: {
+            log.Infof("DebugEventReceiver.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
+            return nil
+        }
+        case SlaveBounded: {
+            log.Infof("DebugEventReceiver.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
+            return nil
+        }
+        case SlaveBindBroken: {
+            log.Infof("DebugEventReceiver.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
+            return nil
+        }
+    }
+
+    return nil
+}
+
+func (d *DebugEventReceiver) OnStateTranstionFailure(state SlaveLocatingState, ts time.Time) error {
+    d.LastLocatorState = state
+    d.LastSlaveTS = ts
+    d.IsSuccess = false
+
+    switch state {
+        case SlaveUnbounded: {
+            log.Infof("DebugEventReceiver.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
+            return nil
+        }
+        case SlaveInquired: {
+            log.Infof("DebugEventReceiver.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
+            return nil
+        }
+        case SlaveKeyExchange: {
+            log.Infof("DebugEventReceiver.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
+            return nil
+        }
+        case SlaveCryptoCheck: {
+            log.Infof("DebugEventReceiver.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
+            return nil
+        }
+        case SlaveBounded: {
+            log.Infof("DebugEventReceiver.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
+            return nil
+        }
+        case SlaveBindBroken: {
+            log.Infof("DebugEventReceiver.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
+            return nil
+        }
+    }
+
     return nil
 }
 

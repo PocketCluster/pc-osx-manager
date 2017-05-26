@@ -13,9 +13,10 @@ func Test_Discard_Shutdown(t *testing.T) {
 
     // --- VARIABLE PREP ---
     var (
-        debugComm = &DebugCommChannel{}
+        debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
         masterTS  = time.Now()
-        mb, err   = NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
+        mb, err   = NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm, debugEvent)
     )
     if err != nil {
         t.Errorf(err.Error())
@@ -27,7 +28,7 @@ func Test_Discard_Shutdown(t *testing.T) {
     }
 
     // --- TX ACTION FAIL ---
-    for i := 0; i <= int(TxActionLimit); i++ {
+    for i := 0; i <= TxActionLimit; i++ {
         masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout)
         err = mb.TransitionWithTimestamp(masterTS)
         if err != nil {

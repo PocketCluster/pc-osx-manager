@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
-func newInquiredState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
+func newInquiredState(searchComm SearchTx, beaconComm BeaconTx, event LocatorOnTransitionEvent) LocatorState {
     is := &inquired{}
 
     is.constState                   = SlaveInquired
@@ -26,6 +26,7 @@ func newInquiredState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
     is.onTransitionSuccess          = is.onStateTranstionSuccess
     is.onTransitionFailure          = is.onStateTranstionFailure
 
+    is.LocatorOnTransitionEvent     = event
     is.searchComm                   = searchComm
     is.beaconComm                   = beaconComm
     return is

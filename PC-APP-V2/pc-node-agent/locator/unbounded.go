@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slcontext"
 )
 
-func newUnboundedState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
+func newUnboundedState(searchComm SearchTx, beaconComm BeaconTx, event LocatorOnTransitionEvent) LocatorState {
     us := &unbounded{}
 
     us.constState                   = SlaveUnbounded
@@ -26,6 +26,7 @@ func newUnboundedState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
     us.onTransitionSuccess          = us.onStateTranstionSuccess
     us.onTransitionFailure          = us.onStateTranstionFailure
 
+    us.LocatorOnTransitionEvent     = event
     us.searchComm                   = searchComm
     us.beaconComm                   = beaconComm
     return us

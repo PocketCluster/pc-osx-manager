@@ -11,7 +11,7 @@ import (
     "github.com/stkim1/pcrypto"
 )
 
-func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (BeaconState, error) {
+func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel, event BeaconOnTransitionEvent) (BeaconState, error) {
     b := &bindbroken{}
 
     b.constState                    = MasterBindBroken
@@ -28,6 +28,7 @@ func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel) (BeaconState,
     b.onTransitionSuccess           = b.onStateTranstionSuccess
     b.onTransitionFailure           = b.onStateTranstionFailure
 
+    b.BeaconOnTransitionEvent       = event
     b.slaveNode                     = slaveNode
     b.commChan                      = comm
 

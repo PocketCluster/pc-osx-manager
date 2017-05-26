@@ -12,10 +12,13 @@ func Test_Init_Unbounded_Transition_TimeoutFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    debugComm := &DebugCommChannel{}
+    var (
+        debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
+    )
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -69,10 +72,13 @@ func Test_Init_Unbounded_Transition_TooManyMetaFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    debugComm := &DebugCommChannel{}
+    var (
+        debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
+    )
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -89,7 +95,7 @@ func Test_Init_Unbounded_Transition_TooManyMetaFail(t *testing.T) {
     }
     masterTS := time.Now()
     // four more times of failure with incorrect slave meta
-    for i := 0; i < int(TransitionFailureLimit); i++ {
+    for i := 0; i < TransitionFailureLimit; i++ {
         masterTS = masterTS.Add(time.Second)
         err = mb.TransitionWithSlaveMeta(slaveAddr, sa, masterTS)
         if err == nil {
@@ -115,11 +121,12 @@ func Test_BeaconInit_Unbounded_TxActionFail(t *testing.T) {
 
     var (
         debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
         masterTS time.Time = time.Now()
     )
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -130,7 +137,7 @@ func Test_BeaconInit_Unbounded_TxActionFail(t *testing.T) {
     }
 
     // --- TX ACTION FAIL ---
-    for i := 0; i <= int(TxActionLimit); i++ {
+    for i := 0; i <= TxActionLimit; i++ {
         masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout)
         err = mb.TransitionWithTimestamp(masterTS)
         if err != nil {

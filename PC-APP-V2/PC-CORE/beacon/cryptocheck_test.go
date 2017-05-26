@@ -13,10 +13,13 @@ func Test_CryptoCheck_Bounded_TimeoutFail(t *testing.T) {
     defer tearDown()
 
     // --- TIMEOUT FAILURE ---
-    debugComm := &DebugCommChannel{}
+    var (
+        debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
+    )
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -118,10 +121,13 @@ func Test_CryptoCheck_Bounded_TooManyMetaFail(t *testing.T) {
     setUp()
     defer tearDown()
 
-    debugComm := &DebugCommChannel{}
+    var (
+        debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
+    )
 
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -181,7 +187,7 @@ func Test_CryptoCheck_Bounded_TooManyMetaFail(t *testing.T) {
     // --- test
     aesCrypto := mb.(*masterBeacon).state.(DebugState).AESCryptor()
     slaveTS = masterTS.Add(time.Second)
-    for i := 0; i < int(TransitionFailureLimit); i++ {
+    for i := 0; i < TransitionFailureLimit; i++ {
         slaveTS = masterTS.Add(time.Second)
         // error injection
         sa, end, err = slagent.TestSlaveBoundedStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.SlaveNode().SlaveUUID, aesCrypto, slaveTS)
@@ -214,10 +220,11 @@ func Test_CryptoCheck_Bounded_TxActionFail(t *testing.T) {
 
     var (
         debugComm CommChannel = &DebugCommChannel{}
+        debugEvent BeaconOnTransitionEvent = &DebugTransitionEventReceiver{}
         masterTS, slaveTS time.Time = time.Now(), time.Now()
     )
     // test var preperations
-    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm)
+    mb, err := NewMasterBeacon(MasterInit, model.NewSlaveNode(slaveSanitizer), debugComm, debugEvent)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -275,7 +282,7 @@ func Test_CryptoCheck_Bounded_TxActionFail(t *testing.T) {
     }
 
     // --- TX ACTION FAIL ---
-    for i := 0; i <= int(TxActionLimit); i++ {
+    for i := 0; i <= TxActionLimit; i++ {
         masterTS = masterTS.Add(time.Millisecond + UnboundedTimeout)
         err = mb.TransitionWithTimestamp(masterTS)
         if err != nil {

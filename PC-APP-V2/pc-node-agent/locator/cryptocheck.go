@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 )
 
-func newCryptocheckState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
+func newCryptocheckState(searchComm SearchTx, beaconComm BeaconTx, event LocatorOnTransitionEvent) LocatorState {
     cc := &cryptocheck{}
 
     cc.constState                   = SlaveCryptoCheck
@@ -26,6 +26,7 @@ func newCryptocheckState(searchComm SearchTx, beaconComm BeaconTx) LocatorState 
     cc.onTransitionSuccess          = cc.onStateTranstionSuccess
     cc.onTransitionFailure          = cc.onStateTranstionFailure
 
+    cc.LocatorOnTransitionEvent     = event
     cc.searchComm                   = searchComm
     cc.beaconComm                   = beaconComm
     return cc

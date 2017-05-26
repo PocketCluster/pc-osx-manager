@@ -27,6 +27,7 @@ func boundedState(oldState *beaconState) BeaconState {
     b.onTransitionSuccess           = b.onStateTranstionSuccess
     b.onTransitionFailure           = b.onStateTranstionFailure
 
+    b.BeaconOnTransitionEvent       = oldState.BeaconOnTransitionEvent
     b.aesKey                        = oldState.aesKey
     b.aesCryptor                    = oldState.aesCryptor
     b.rsaEncryptor                  = oldState.rsaEncryptor
@@ -128,9 +129,10 @@ func (b *bounded) bounded(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMet
     // save status for response generation
     b.slaveStatus = usm
 
-    // We'll reset TX action count to 0 and now so successful tx action can happen infinitely
+    // (2016-11-16) We'll reset TX action count to 0 and now so successful tx action can happen infinitely
     // We need to reset the counter here when correct slave meta comes in
     // It is b/c when succeeded in confirming with slave, we should be able to keep receiving slave meta
+
     b.txActionCount = 0
 
     // TODO : for now (v0.1.4), we'll not check slave timestamp. the validity (freshness) will be looked into.

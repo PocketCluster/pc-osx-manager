@@ -26,6 +26,7 @@ func unboundedState(oldState *beaconState) BeaconState {
     b.onTransitionSuccess           = b.onStateTranstionSuccess
     b.onTransitionFailure           = b.onStateTranstionFailure
 
+    b.BeaconOnTransitionEvent       = oldState.BeaconOnTransitionEvent
     b.slaveNode                     = oldState.slaveNode
     b.commChan                      = oldState.commChan
 

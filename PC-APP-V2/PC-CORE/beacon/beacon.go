@@ -73,27 +73,25 @@ type MasterBeacon interface {
     SlaveNode() *model.SlaveNode
 }
 
-func NewMasterBeaconWithFunc(state MasterBeaconState, slaveNode *model.SlaveNode, comm CommChannelFunc) (MasterBeacon, error) {
-    return NewMasterBeacon(state, slaveNode, comm)
-}
-
-func NewMasterBeacon(state MasterBeaconState, slaveNode *model.SlaveNode, comm CommChannel) (MasterBeacon, error) {
+func NewMasterBeacon(state MasterBeaconState, slaveNode *model.SlaveNode, comm CommChannel, event BeaconOnTransitionEvent) (MasterBeacon, error) {
     if slaveNode == nil {
         return nil, errors.Errorf("[ERR] slavenode cannot be nil")
     }
     if comm == nil {
         return nil, errors.Errorf("[ERR] communication channel cannot be nil")
     }
+    if event == nil {
+        return nil, errors.Errorf("[ERR] event receiver cannot be nil")
+    }
 
     switch state {
         case MasterInit:
-            return &masterBeacon{state:beaconinitState(slaveNode, comm)}, nil
+            return &masterBeacon{
+                state:    beaconinitState(slaveNode, comm, event),
+            }, nil
 
         case MasterBindBroken:
-            if slaveNode == nil {
-                return nil, errors.Errorf("[ERR] Slavenode cannot be nil")
-            }
-            bstate, err := bindbrokenState(slaveNode, comm)
+            bstate, err := bindbrokenState(slaveNode, comm, event)
             if err != nil {
                 return nil, errors.WithStack(err)
             }
@@ -111,19 +109,27 @@ func (mb *masterBeacon) CurrentState() MasterBeaconState {
 }
 
 func (mb *masterBeacon) TransitionWithTimestamp(timestamp time.Time) error {
+    var (
+        err error = nil
+    )
+
     if mb.state == nil {
         return errors.Errorf("[ERR] BeaconState is nil. Cannot make transition with master timestamp")
     }
-    var err error = nil
+
     mb.state, err = mb.state.TransitionWithTimestamp(timestamp)
-    return err
+    return errors.WithStack(err)
 }
 
 func (mb *masterBeacon) TransitionWithSlaveMeta(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMeta, timestamp time.Time) error {
+    var (
+        err error = nil
+    )
+
     if mb.state == nil {
         return errors.Errorf("[ERR] BeaconState is nil. Cannot make transition with master meta")
     }
-    var err error = nil
+
     mb.state, err = mb.state.TransitionWithSlaveMeta(sender, meta, timestamp)
     return errors.WithStack(err)
 }

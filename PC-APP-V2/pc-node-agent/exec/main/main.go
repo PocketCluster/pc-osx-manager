@@ -199,6 +199,55 @@ func initAgentService(app *PocketApplication) error {
                 })
                 return nil
             }
+            transitEvent = func (isSuccess bool, state locator.SlaveLocatingState, ts time.Time) error {
+
+                if isSuccess {
+                    switch state {
+                        case locator.SlaveUnbounded: {
+                            return nil
+                        }
+                        case locator.SlaveInquired: {
+                            return nil
+                        }
+                        case locator.SlaveKeyExchange: {
+                            return nil
+                        }
+                        case locator.SlaveCryptoCheck: {
+                            return nil
+                        }
+                        case locator.SlaveBounded: {
+                            return nil
+                        }
+                        case locator.SlaveBindBroken: {
+                            return nil
+                        }
+                    }
+
+                } else {
+                    switch state {
+                        case locator.SlaveUnbounded: {
+                            return nil
+                        }
+                        case locator.SlaveInquired: {
+                            return nil
+                        }
+                        case locator.SlaveKeyExchange: {
+                            return nil
+                        }
+                        case locator.SlaveCryptoCheck: {
+                            return nil
+                        }
+                        case locator.SlaveBounded: {
+                            return nil
+                        }
+                        case locator.SlaveBindBroken: {
+                            return nil
+                        }
+                    }
+                }
+
+                return nil
+            }
         )
 
         // setup slave locator
@@ -208,7 +257,7 @@ func initAgentService(app *PocketApplication) error {
         } else {
             locState = locator.SlaveUnbounded
         }
-        loc, err = locator.NewSlaveLocatorWithFunc(locState, searchTx, beaconTx)
+        loc, err = locator.NewSlaveLocatorWithFunc(locState, searchTx, beaconTx, transitEvent)
         if err != nil {
             return errors.WithStack(err)
         }

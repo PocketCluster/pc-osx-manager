@@ -9,7 +9,7 @@ import (
     "github.com/stkim1/pc-node-agent/slcontext"
 )
 
-func newBoundedState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
+func newBoundedState(searchComm SearchTx, beaconComm BeaconTx, event LocatorOnTransitionEvent) LocatorState {
     bs := &bounded{}
 
     bs.constState                   = SlaveBounded
@@ -26,6 +26,7 @@ func newBoundedState(searchComm SearchTx, beaconComm BeaconTx) LocatorState {
     bs.onTransitionSuccess          = bs.onStateTranstionSuccess
     bs.onTransitionFailure          = bs.onStateTranstionFailure
 
+    bs.LocatorOnTransitionEvent     = event
     bs.searchComm                   = searchComm
     bs.beaconComm                   = beaconComm
     return bs
@@ -112,9 +113,10 @@ func (ls *bounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta,
         return SlaveTransitionFail, errors.Errorf("[ERR] invalid master command type")
     }
 
-    // We'll reset TX action count to 0 and now so successful tx action can happen infinitely
+    // (2016-11-13) We'll reset TX action count to 0 and now so successful tx action can happen infinitely
     // We need to reset the counter here when correct master meta comes in
     // It is b/c when succeeded in confirming with master, we should be able to keep receiving master meta
+
     ls.txActionCount = 0
 
     // we do not reply here so there will not be an endless master <-> slave loop across network.
