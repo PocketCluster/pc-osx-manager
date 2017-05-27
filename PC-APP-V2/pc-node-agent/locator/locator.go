@@ -66,13 +66,13 @@ func (b BeaconTxFunc) UcastSend(target string, data []byte) error {
     return b(target, data)
 }
 
-type LocatorOnTransitionEventFunc func(isSuccess bool, state SlaveLocatingState, ts time.Time) error
+type LocatorOnTransitionEventFunc func(state SlaveLocatingState, ts time.Time, transOk bool) error
 func (l LocatorOnTransitionEventFunc) OnStateTranstionSuccess(state SlaveLocatingState, ts time.Time) error {
-    return l(true, state, ts)
+    return l(state, ts, true)
 }
 
 func (l LocatorOnTransitionEventFunc) OnStateTranstionFailure(state SlaveLocatingState, ts time.Time) error {
-    return l(false, state, ts)
+    return l(state, ts, false)
 }
 
 type SlaveLocator interface {
