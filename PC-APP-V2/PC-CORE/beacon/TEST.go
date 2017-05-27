@@ -73,3 +73,31 @@ func (d *DebugTransitionEventReceiver) OnStateTranstionFailure(state MasterBeaco
     d.TransitionTS = ts
     return nil
 }
+
+
+type DebugBeaconNotiReceiver struct {
+    LastStateSuccessFrom     MasterBeaconState
+    LastStateFailureFrom     MasterBeaconState
+    Slave                    *model.SlaveNode
+    TransitionTS             time.Time
+}
+
+func (d *DebugBeaconNotiReceiver) BeaconEventPrepareJoin(slave *model.SlaveNode) error {
+    return nil
+}
+
+func (d *DebugBeaconNotiReceiver) BeaconEventResurrect(slaves []model.SlaveNode) error {
+    return nil
+}
+
+func (d *DebugBeaconNotiReceiver) BeaconEventTranstion(state MasterBeaconState, slave *model.SlaveNode, ts time.Time, transOk bool) error {
+    return nil
+}
+
+func (d *DebugBeaconNotiReceiver) BeaconEventDiscard(slave *model.SlaveNode) error {
+    return nil
+}
+
+func (d *DebugBeaconNotiReceiver) BeaconEventShutdown() error {
+    return nil
+}

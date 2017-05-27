@@ -63,8 +63,9 @@ func (s *ManagerSuite) TestLoadingNodes(c *C) {
     var (
         nodeFound = false
         comm = &DebugCommChannel{}
+        noti = &DebugBeaconNotiReceiver{}
         uuidList = insertTestNodes(allNodeCount, c)
-        man, err = NewBeaconManager(masterAgentName, comm)
+        man, err = NewBeaconManager(masterAgentName, noti, comm)
     )
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, allNodeCount)
@@ -86,8 +87,9 @@ func (s *ManagerSuite) TestNameGeneration(c *C) {
         _ = insertTestNodes(allNodeCount, c)
         comm = &DebugCommChannel{}
         event = &DebugTransitionEventReceiver{}
+        noti = &DebugBeaconNotiReceiver{}
         sa *model.SlaveNode
-        man, err = NewBeaconManager(masterAgentName, comm)
+        man, err = NewBeaconManager(masterAgentName, noti, comm)
     )
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, allNodeCount)
@@ -108,7 +110,8 @@ func (s *ManagerSuite) TestShutdown(c *C) {
     var (
         _ = insertTestNodes(allNodeCount, c)
         comm = &DebugCommChannel{}
-        man, err = NewBeaconManager(masterAgentName, comm)
+        noti = &DebugBeaconNotiReceiver{}
+        man, err = NewBeaconManager(masterAgentName, noti, comm)
     )
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, allNodeCount)
@@ -120,6 +123,7 @@ func (s *ManagerSuite) TestShutdown(c *C) {
 func (s *ManagerSuite) TestBindBrokenAndTooManyTrialDiscard(c *C) {
     var (
         comm = &DebugCommChannel{}
+        noti = &DebugBeaconNotiReceiver{}
         masterTS, slaveTS = time.Now(), time.Now()
     )
 
@@ -138,7 +142,7 @@ func (s *ManagerSuite) TestBindBrokenAndTooManyTrialDiscard(c *C) {
     err = sl.JoinSlave()
     c.Assert(err, IsNil)
 
-    man, err := NewBeaconManager(masterAgentName, comm)
+    man, err := NewBeaconManager(masterAgentName, noti, comm)
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 1)
     c.Assert(man.(*beaconManger).beaconList[0].CurrentState(), Equals, MasterBindBroken)
@@ -174,6 +178,7 @@ func (s *ManagerSuite) TestBindBrokenAndTooManyTrialDiscard(c *C) {
 func (s *ManagerSuite) TestBindInitAndTooManyTrialDiscard(c *C) {
     var (
         comm = &DebugCommChannel{}
+        noti = &DebugBeaconNotiReceiver{}
         masterTS, slaveTS = time.Now(), time.Now()
     )
 
@@ -184,7 +189,7 @@ func (s *ManagerSuite) TestBindInitAndTooManyTrialDiscard(c *C) {
     c.Assert(err, IsNil)
 
     // new beacon master
-    man, err := NewBeaconManager(masterAgentName, comm)
+    man, err := NewBeaconManager(masterAgentName, noti, comm)
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 0)
 
@@ -223,8 +228,9 @@ func (s *ManagerSuite) TestBindBroken_To_Bounded(c *C) {
     var (
         _ = insertTestNodes(1, c)
         comm = &DebugCommChannel{}
+        noti = &DebugBeaconNotiReceiver{}
         masterTS, slaveTS time.Time = time.Now(), time.Now()
-        man, err = NewBeaconManager(masterAgentName, comm)
+        man, err = NewBeaconManager(masterAgentName, noti, comm)
     )
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 1)

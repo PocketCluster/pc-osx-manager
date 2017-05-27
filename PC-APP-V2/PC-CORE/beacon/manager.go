@@ -17,11 +17,19 @@ import (
     "github.com/davecgh/go-spew/spew"
 )
 
-func NewBeaconManagerWithFunc(cid string, comm CommChannelFunc) (BeaconManger, error) {
-    return NewBeaconManager(cid, comm)
+type BeaconEventNotification interface {
+    BeaconEventPrepareJoin(slave *model.SlaveNode) error
+    BeaconEventResurrect(slaves []model.SlaveNode) error
+    BeaconEventTranstion(state MasterBeaconState, slave *model.SlaveNode, ts time.Time, transOk bool) error
+    BeaconEventDiscard(slave *model.SlaveNode) error
+    BeaconEventShutdown() error
 }
 
-func NewBeaconManager(cid string, comm CommChannel) (BeaconManger, error) {
+func NewBeaconManagerWithFunc(cid string, noti BeaconEventNotification, comm CommChannelFunc) (BeaconManger, error) {
+    return NewBeaconManager(cid, noti, comm)
+}
+
+func NewBeaconManager(cid string, noti BeaconEventNotification, comm CommChannel) (BeaconManger, error) {
     var (
         beacons []MasterBeacon = []MasterBeacon{}
         bm *beaconManger = nil
@@ -32,10 +40,14 @@ func NewBeaconManager(cid string, comm CommChannel) (BeaconManger, error) {
     if comm == nil {
         return nil, errors.Errorf("[ERR] comm channel cannot be nil")
     }
+    if noti == nil {
+        return nil, errors.Errorf("[ERR] notification receiver cannot be nil")
+    }
 
     bm = &beaconManger {
-        clusterID:      cid,
-        commChannel:    comm,
+        clusterID:       cid,
+        notiReceiver:    noti,
+        commChannel:     comm,
     }
 
     // respawn nodes
@@ -59,6 +71,9 @@ func NewBeaconManager(cid string, comm CommChannel) (BeaconManger, error) {
     }
     bm.beaconList = beacons
 
+    // we'll ignore error message for now
+    noti.BeaconEventResurrect(nodes)
+
     return bm, nil
 }
 
@@ -73,6 +88,7 @@ type BeaconManger interface {
 type beaconManger struct {
     sync.Mutex
     clusterID      string
+    notiReceiver   BeaconEventNotification
     commChannel    CommChannel
     beaconList     []MasterBeacon
 }
@@ -133,6 +149,7 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
         bcFound bool            = false
         mc MasterBeacon         = nil
         err error               = nil
+        slave *model.SlaveNode  = nil
         usm *slagent.PocketSlaveAgentMeta = nil
         state MasterBeaconState = MasterBounded
     )
@@ -174,7 +191,10 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
 
     // since we've not found, create new beacon
     if !bcFound {
-        mc, err = NewMasterBeacon(MasterInit, model.NewSlaveNode(b), b.commChannel, b)
+        slave = model.NewSlaveNode(b)
+        // we'll ignore message for now
+        b.notiReceiver.BeaconEventPrepareJoin(slave)
+        mc, err = NewMasterBeacon(MasterInit, slave, b.commChannel, b)
         if err != nil {
             return errors.WithStack(err)
         }
@@ -214,13 +234,15 @@ func (b *beaconManger) Shutdown() error {
 
 // state transition success from
 func (b *beaconManger) OnStateTranstionSuccess(state MasterBeaconState, slave *model.SlaveNode, ts time.Time) error {
-    log.Infof("beaconManager.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
+    // we'll ignore error message for now
+    b.notiReceiver.BeaconEventTranstion(state, slave, ts, true)
     return nil
 }
 
 // state transition failure from
 func (b *beaconManger) OnStateTranstionFailure(state MasterBeaconState, slave *model.SlaveNode, ts time.Time) error {
-    log.Infof("beaconManager.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
+    // we'll ignore error message for now
+    b.notiReceiver.BeaconEventTranstion(state, slave, ts, false)
     return nil
 }
 
@@ -238,6 +260,7 @@ func pruneBeaconList(b *beaconManger) {
     for i := 0; i < bLen; i++ {
         bc := b.beaconList[i]
         if bc.CurrentState() == MasterDiscarded {
+            b.notiReceiver.BeaconEventDiscard(bc.SlaveNode())
             bc.Shutdown()
         } else {
             activeBC = append(activeBC, bc)
@@ -306,4 +329,7 @@ func shutdownMasterBeacons(b *beaconManger) {
     // assign new slice to prevent nil crash
     b.beaconList = []MasterBeacon{}
     b.commChannel = nil
+    // ignore error for now
+    b.notiReceiver.BeaconEventShutdown()
+    b.notiReceiver = nil
 }
