@@ -2,8 +2,8 @@ package main
 
 import (
     log "github.com/Sirupsen/logrus"
-    teledefaults "github.com/gravitational/teleport/lib/defaults"
-    teleservice "github.com/gravitational/teleport/lib/service"
+    tefaults "github.com/gravitational/teleport/lib/defaults"
+    tervice "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/utils"
 
     "github.com/coreos/etcd/embed"
@@ -28,7 +28,7 @@ func setLogger(debug bool) {
 
 type serviceConfig struct {
     etcdConfig     *embed.PocketConfig
-    teleConfig     *teleservice.PocketConfig
+    teleConfig     *tervice.PocketConfig
     regConfig      *regisrv.PocketRegistryConfig
     swarmConfig    *swarmsrv.SwarmContext
 }
@@ -44,7 +44,7 @@ func setupServiceConfig() (*serviceConfig, error) {
         log.Info(err)
         return nil, errors.WithStack(err)
     }
-    rec, err := model.OpenRecordGate(dataDir, teledefaults.CoreKeysSqliteFile)
+    rec, err := model.OpenRecordGate(dataDir, tefaults.CoreKeysSqliteFile)
     if err != nil {
         log.Info(err)
         return nil, errors.WithStack(err)
@@ -83,7 +83,7 @@ func setupServiceConfig() (*serviceConfig, error) {
     context.UpdateCertAuth(caBundle)
 
     // host certificate
-    hostBundle, err := hostCertificate(rec.Certdb(), caBundle.CASigner, teledefaults.CoreHostName, meta.ClusterUUID)
+    hostBundle, err := hostCertificate(rec.Certdb(), caBundle.CASigner, tefaults.CoreHostName, meta.ClusterUUID)
     if err != nil {
         // this is critical
         log.Debugf(err.Error())
@@ -92,13 +92,13 @@ func setupServiceConfig() (*serviceConfig, error) {
     context.UpdateHostCert(hostBundle)
 
     // make teleport core config
-    teleCfg := teleservice.MakeCoreConfig(dataDir, true)
+    teleCfg := tervice.MakeCoreConfig(dataDir, true)
     teleCfg.AssignHostUUID(meta.ClusterUUID)
     teleCfg.AssignDatabaseEngine(rec.DataBase())
     teleCfg.AssignCertStorage(rec.Certdb())
     teleCfg.AssignCASigner(caBundle.CASigner)
     teleCfg.AssignHostCertAuth(caBundle.CAPrvKey, caBundle.CASSHChk, meta.ClusterDomain)
-    err = teleservice.ValidateCoreConfig(teleCfg)
+    err = tervice.ValidateCoreConfig(teleCfg)
     if err != nil {
         log.Debugf(err.Error())
         return nil, errors.WithStack(err)

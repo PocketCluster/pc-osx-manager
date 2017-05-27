@@ -16,6 +16,7 @@ import (
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
+    "github.com/stkim1/pc-core/service"
     regisrv "github.com/stkim1/pc-core/extsrv/registry"
     swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
 )
@@ -137,7 +138,7 @@ func main() {
                             log.Debug(err)
                         }
 
-                        err = initMasterAgentService(cid, a)
+                        err = initMasterAgentService(a, cid, serviceConfig.teleConfig)
                         if err != nil {
                             log.Debug(err)
                         }
@@ -261,7 +262,7 @@ func main() {
 
 
                     case operation.CmdServiceBundleStart: {
-                        eventC := make(chan Event)
+                        eventC := make(chan service.Event)
                         a.WaitForEvent("TEST_EVENT", eventC, make(chan struct{}))
 
                         a.RegisterServiceFunc(func() error {
@@ -291,7 +292,7 @@ func main() {
                                     return nil
                                 }
 
-                                a.BroadcastEvent(Event{Name:"TEST_EVENT"})
+                                a.BroadcastEvent(service.Event{Name:"TEST_EVENT"})
 
                                 time.Sleep(time.Second)
                             }

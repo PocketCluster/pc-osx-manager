@@ -24,13 +24,14 @@ import (
     "runtime"
 
     log "github.com/Sirupsen/logrus"
+    "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/crash"
 )
 
 type mainLife struct {
     *app
-    *srvSupervisor
+    service.ServiceSupervisor
 }
 
 var (
@@ -41,7 +42,7 @@ var (
             eventsOut:      make(chan interface{}),
             lifecycleStage: lifecycle.StageDead,
         },
-        srvSupervisor: newServiceSupervisor(),
+        ServiceSupervisor: service.NewServiceSupervisor(),
     }
 )
 

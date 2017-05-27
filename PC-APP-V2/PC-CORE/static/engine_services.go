@@ -1,14 +1,13 @@
 package main
 
 import (
-    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
-    "github.com/stkim1/pc-core/beacon"
+    "github.com/stkim1/pc-core/service"
 )
 
 const (
@@ -34,7 +33,7 @@ func initSearchCatcher(a *mainLife) error {
                     return nil
                 }
                 case cp := <-catcher.ChRead: {
-                    a.BroadcastEvent(Event{Name:coreFeedbackSearch, Payload:cp})
+                    a.BroadcastEvent(service.Event{Name:coreFeedbackSearch, Payload:cp})
                 }
             }
         }
@@ -61,7 +60,7 @@ func initBeaconLoator(a *mainLife) error {
                     return nil
                 }
                 case bp := <- belocat.ChRead: {
-                    a.BroadcastEvent(Event{Name:coreFeedbackBeacon, Payload:bp})
+                    a.BroadcastEvent(service.Event{Name:coreFeedbackBeacon, Payload:bp})
                 }
             }
         }
@@ -69,7 +68,7 @@ func initBeaconLoator(a *mainLife) error {
     })
 
     // beacon locator write
-    beaconC := make(chan Event)
+    beaconC := make(chan service.Event)
     a.WaitForEvent(coreServiceBeacon, beaconC, make(chan struct{}))
     a.RegisterServiceFunc(func() error {
         log.Debugf("NewBeaconLocator WRITE :: MAIN BEGIN")
@@ -84,81 +83,6 @@ func initBeaconLoator(a *mainLife) error {
                     if ok {
                         belocat.Send(bs.Host, bs.Payload)
                     }
-                }
-            }
-        }
-        return nil
-    })
-
-    return nil
-}
-
-func initMasterAgentService(clusterID string, a *mainLife) error {
-    var (
-        beaconC = make(chan Event)
-        searchC = make(chan Event)
-    )
-    a.WaitForEvent(coreFeedbackBeacon, beaconC, make(chan struct{}))
-    a.WaitForEvent(coreFeedbackSearch, searchC, make(chan struct{}))
-
-    a.RegisterServiceFunc(func() error {
-        var (
-            beaconMan beacon.BeaconManger = nil
-            err error = nil
-            timer = time.NewTicker(time.Second)
-        )
-        beaconMan, err = beacon.NewBeaconManagerWithFunc(clusterID, func(host string, payload []byte) error {
-            log.Debugf("[BEACON-SEND-SLAVE] Host %v", host)
-            a.BroadcastEvent(Event{
-                Name: coreServiceBeacon,
-                Payload:ucast.BeaconSend{
-                    Host:       host,
-                    Payload:    payload,
-                },
-            })
-            return nil
-        })
-        if err != nil {
-            return errors.WithStack(err)
-        }
-        defer timer.Stop()
-
-        log.Debugf("[AGENT] starting agent service...")
-
-        for {
-            select {
-                case <-a.StopChannel(): {
-                    err = beaconMan.Shutdown()
-                    if err != nil {
-                        log.Debug(err.Error())
-                    }
-                    log.Debugf("[AGENT] stopping agent service...")
-                    return nil
-                }
-                case b := <-beaconC: {
-                    bp, ok := b.Payload.(ucast.BeaconPack)
-                    if ok {
-                        err = beaconMan.TransitionWithBeaconData(bp, time.Now())
-                        if err != nil {
-                            log.Debugf("[BEACON-TRANSITION] %v", err)
-                        }
-                    }
-                }
-                case s := <-searchC: {
-                    cp, ok := s.Payload.(mcast.CastPack)
-                    if ok {
-                        err = beaconMan.TransitionWithSearchData(cp, time.Now())
-                        if err != nil {
-                            log.Debugf("[SEARCH-TRANSITION] %v", err)
-                        }
-                    }
-                }
-                case <-timer.C: {
-                    err = beaconMan.TransitionWithTimestamp(time.Now())
-                    if err != nil {
-                        log.Debug(err.Error())
-                    }
-                    continue
                 }
             }
         }
