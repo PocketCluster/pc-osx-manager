@@ -44,7 +44,12 @@ func (b *beaconEventRoute) BeaconEventResurrect(slaves []model.SlaveNode) error 
 }
 
 func (b *beaconEventRoute) BeaconEventTranstion(state beacon.MasterBeaconState, slave *model.SlaveNode, ts time.Time, transOk bool) error {
-    log.Debugf("(INFO) BeaconEventTranstion [%v] %v | %v", ts, state, slave.SlaveUUID)
+    if transOk {
+        log.Debugf("(INFO) [%v | %v] BeaconEventTranstion -> %v | SUCCESS ", ts, slave.SlaveUUID, state.String())
+    } else {
+        log.Debugf("(INFO) [%v | %v] BeaconEventTranstion -> %v | FAILED ", ts, slave.SlaveUUID, state.String())
+    }
+
     return nil
 }
 
@@ -56,7 +61,7 @@ func (b *beaconEventRoute) BeaconEventShutdown() error {
     return nil
 }
 
-func initMasterAgentService(a *mainLife, clusterID string, tcfg *tservice.PocketConfig) error {
+func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tservice.PocketConfig) error {
     var (
         beaconC = make(chan service.Event)
         searchC = make(chan service.Event)
@@ -64,30 +69,29 @@ func initMasterAgentService(a *mainLife, clusterID string, tcfg *tservice.Pocket
             ServiceSupervisor:a.ServiceSupervisor,
             PocketConfig: tcfg,
         }
+        beaconMan, err = beacon.NewBeaconManagerWithFunc(
+            clusterID,
+            beaconRoute,
+            func(host string, payload []byte) error {
+                log.Debugf("[BEACON-SEND-SLAVE] [%v] Host %v", time.Now(), host)
+                a.BroadcastEvent(service.Event{
+                    Name: coreServiceBeacon,
+                    Payload:ucast.BeaconSend{
+                        Host:       host,
+                        Payload:    payload,
+                    },
+                })
+                return nil
+            })
     )
+    if err != nil {
+        return errors.WithStack(err)
+    }
     a.WaitForEvent(coreFeedbackBeacon, beaconC, make(chan struct{}))
     a.WaitForEvent(coreFeedbackSearch, searchC, make(chan struct{}))
 
     a.RegisterServiceFunc(func() error {
-        var (
-            beaconMan beacon.BeaconManger = nil
-            err error = nil
-            timer = time.NewTicker(time.Second)
-        )
-        beaconMan, err = beacon.NewBeaconManagerWithFunc(clusterID, beaconRoute, func(host string, payload []byte) error {
-            log.Debugf("[BEACON-SEND-SLAVE] Host %v", host)
-            a.BroadcastEvent(service.Event{
-                Name: coreServiceBeacon,
-                Payload:ucast.BeaconSend{
-                    Host:       host,
-                    Payload:    payload,
-                },
-            })
-            return nil
-        })
-        if err != nil {
-            return errors.WithStack(err)
-        }
+        var timer = time.NewTicker(time.Second)
 
         log.Debugf("[AGENT] starting agent service...")
 

@@ -138,7 +138,7 @@ func main() {
                             log.Debug(err)
                         }
 
-                        err = initMasterAgentService(a, cid, serviceConfig.teleConfig)
+                        err = initMasterBeaconService(a, cid, serviceConfig.teleConfig)
                         if err != nil {
                             log.Debug(err)
                         }
