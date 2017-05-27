@@ -3,8 +3,10 @@ package beacon
 import (
     "time"
 
+    log "github.com/Sirupsen/logrus"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/model"
+    "github.com/stkim1/pc-core/utils"
 )
 
 type DebugCommChannel struct {
@@ -74,23 +76,40 @@ func (d *DebugTransitionEventReceiver) OnStateTranstionFailure(state MasterBeaco
     return nil
 }
 
+const (
+    maxRandomSlaveIdLenth = 30
+)
 
 type DebugBeaconNotiReceiver struct {
     LastStateSuccessFrom     MasterBeaconState
     LastStateFailureFrom     MasterBeaconState
     Slave                    *model.SlaveNode
+    SlaveNodes               []model.SlaveNode
     TransitionTS             time.Time
+    IsShutdown               bool
 }
 
 func (d *DebugBeaconNotiReceiver) BeaconEventPrepareJoin(slave *model.SlaveNode) error {
-    return nil
+    err := slave.SetSlaveID(utils.NewRandomString(maxRandomSlaveIdLenth))
+    if err != nil {
+        log.Debugf(err.Error())
+    }
+    return err
 }
 
 func (d *DebugBeaconNotiReceiver) BeaconEventResurrect(slaves []model.SlaveNode) error {
+    d.SlaveNodes = slaves
     return nil
 }
 
 func (d *DebugBeaconNotiReceiver) BeaconEventTranstion(state MasterBeaconState, slave *model.SlaveNode, ts time.Time, transOk bool) error {
+    if transOk {
+        d.LastStateSuccessFrom = state
+    } else {
+        d.LastStateFailureFrom = state
+    }
+    d.Slave = slave
+    d.TransitionTS = ts
     return nil
 }
 
@@ -99,5 +118,6 @@ func (d *DebugBeaconNotiReceiver) BeaconEventDiscard(slave *model.SlaveNode) err
 }
 
 func (d *DebugBeaconNotiReceiver) BeaconEventShutdown() error {
+    d.IsShutdown = true
     return nil
 }

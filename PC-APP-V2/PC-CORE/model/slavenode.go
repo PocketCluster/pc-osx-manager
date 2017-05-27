@@ -162,12 +162,29 @@ func (s *SlaveNode) SanitizeSlave() error {
     return s.sanitizer.Sanitize(s)
 }
 
+// when a slavenode is spawn, an UUID is given, but it could be changed for other joiner (e.g. teleport)
+// when the slavenode has not been persisted.
+func (s *SlaveNode) SetSlaveID(id string) error {
+    if len(id) == 0 {
+        return errors.Errorf("[ERR] slave id should be in appropriate lengh")
+    }
+    if s.State != SNMStateInit {
+        return errors.Errorf("[ERR] cannot modify slave id when slave is not in SNMStateInit")
+    }
+    s.SlaveUUID = id
+    return nil
+}
+
+func (s *SlaveNode) GetSlaveID() string {
+    return s.SlaveUUID
+}
+
 func (s *SlaveNode) JoinSlave() error {
     if s.ModelVersion != SlaveNodeModelVersion {
         return errors.Errorf("[ERR] incorrect slave model version")
     }
     // TODO : check UUID format
-    if len(s.SlaveUUID) != 36 {
+    if len(s.SlaveUUID) == 0 {
         return errors.Errorf("[ERR] incorrect uuid length")
     }
     // TODO : check node name formet
@@ -194,7 +211,7 @@ func (s *SlaveNode) Update() error {
         return errors.Errorf("[ERR] incorrect slave model version")
     }
     // TODO : check UUID format
-    if len(s.SlaveUUID) != 36 {
+    if len(s.SlaveUUID) == 0 {
         return errors.Errorf("[ERR] incorrect uuid length")
     }
     // TODO : check node name formet

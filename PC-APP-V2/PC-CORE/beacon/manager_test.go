@@ -69,6 +69,7 @@ func (s *ManagerSuite) TestLoadingNodes(c *C) {
     )
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, allNodeCount)
+    c.Assert(len(noti.SlaveNodes), Equals, allNodeCount)
 
     for _, b := range man.(*beaconManger).beaconList {
         nodeFound = false
@@ -118,6 +119,7 @@ func (s *ManagerSuite) TestShutdown(c *C) {
 
     man.Shutdown()
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 0)
+    c.Assert(noti.IsShutdown, Equals, true)
 }
 
 func (s *ManagerSuite) TestBindBrokenAndTooManyTrialDiscard(c *C) {
@@ -199,7 +201,8 @@ func (s *ManagerSuite) TestBindInitAndTooManyTrialDiscard(c *C) {
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 1)
     c.Assert(man.(*beaconManger).beaconList[0].CurrentState(), Equals, MasterUnbounded)
     c.Assert(man.(*beaconManger).beaconList[0].SlaveNode(), NotNil)
-    c.Assert(len(man.(*beaconManger).beaconList[0].SlaveNode().SlaveUUID), Equals, 36)
+    slaveID := man.(*beaconManger).beaconList[0].SlaveNode().SlaveUUID
+    c.Assert(len(slaveID), Equals, maxRandomSlaveIdLenth)
 
     // slave answering inquery
     for i := 0; i < TransitionFailureLimit; i ++ {
@@ -222,6 +225,7 @@ func (s *ManagerSuite) TestBindInitAndTooManyTrialDiscard(c *C) {
     err = man.TransitionWithTimestamp(masterTS.Add(time.Second))
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 0)
+    c.Assert(noti.Slave.SlaveUUID, Equals, slaveID)
 }
 
 func (s *ManagerSuite) TestBindBroken_To_Bounded(c *C) {
