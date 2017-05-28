@@ -6,7 +6,6 @@ import (
     "sync"
 
     log "github.com/Sirupsen/logrus"
-    "github.com/gravitational/teleport/lib/process"
     "github.com/coreos/etcd/embed"
     tembed "github.com/gravitational/teleport/embed"
     "gopkg.in/tylerb/graceful.v1"
@@ -27,7 +26,7 @@ func main() {
 
         var (
             serviceConfig *serviceConfig = nil
-            teleProc *process.PocketCoreProcess = nil
+            teleProc *tembed.EmbeddedCoreProcess = nil
             regiProc *regisrv.PocketRegistry = nil
             swarmProc *swarmsrv.Server
             swarmSrv *graceful.Server
@@ -157,11 +156,11 @@ func main() {
                     case operation.CmdTeleportStart: {
                         log.Debugf("[OP] %v", e.String())
 
-                        teleProc, err = process.NewCoreProcess(serviceConfig.teleConfig)
+                        teleProc, err = tembed.NewEmbeddedCoreProcess(a.ServiceSupervisor, serviceConfig.teleConfig)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
-                        err = teleProc.Start()
+                        err = teleProc.StartServices()
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
@@ -171,7 +170,7 @@ func main() {
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
-                        err = teleProc.Wait()
+                        //err = teleProc.Wait()
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }

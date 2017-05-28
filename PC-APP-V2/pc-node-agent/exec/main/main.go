@@ -5,9 +5,11 @@ import (
     "os"
     "time"
 
+    "gopkg.in/vmihailenco/msgpack.v2"
+    "github.com/gravitational/teleport/embed"
+    tervice "github.com/gravitational/teleport/lib/service"
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
-    "gopkg.in/vmihailenco/msgpack.v2"
 
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/udpnet/ucast"
@@ -170,6 +172,8 @@ func initBeaconService(app service.AppSupervisor) error {
 
 func initAgentService(app service.AppSupervisor) error {
     var (
+        nodeProc *embed.EmbeddedNodeProcess = nil
+
         beaconC = make(chan service.Event)
         dhcpC   = make(chan service.Event)
 
@@ -191,6 +195,33 @@ func initAgentService(app service.AppSupervisor) error {
             return nil
         }
 
+        startTele = func () error {
+            maddr, err := slcontext.SharedSlaveContext().GetMasterIP4Address()
+            if err != nil {
+                log.Errorf(err.Error())
+                return errors.WithStack(err)
+            }
+            slid, err := slcontext.SharedSlaveContext().GetSlaveNodeUUID()
+            if err != nil {
+                log.Errorf(err.Error())
+                return errors.WithStack(err)
+            }
+            cfg, err := tervice.MakeNodeConfig(maddr, slid, true)
+            if err != nil {
+                log.Errorf(err.Error())
+                return errors.WithStack(err)
+            }
+            nodeProc, err = embed.NewEmbeddedNodeProcess(app, cfg)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            err = nodeProc.StartNodeSSH()
+            if err != nil {
+                log.Errorf(err.Error())
+            }
+            return errors.WithStack(err)
+        }
+
         transitEvent = func (state locator.SlaveLocatingState, ts time.Time, transOk bool) error {
             if transOk {
                 log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | SUCCESS ", ts, state.String())
@@ -210,13 +241,13 @@ func initAgentService(app service.AppSupervisor) error {
                         return nil
                     }
                     case locator.SlaveCryptoCheck: {
-                        return nil
+                        return startTele()
                     }
                     case locator.SlaveBounded: {
                         return nil
                     }
                     case locator.SlaveBindBroken: {
-                        return nil
+                        return startTele()
                     }
                 }
 
