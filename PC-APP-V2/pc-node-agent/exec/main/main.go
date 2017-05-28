@@ -28,6 +28,8 @@ const (
     nodeServiceBeacon  = "service_beacon"
     nodeFeedbackBeacon = "feedback_beacon"
     nodeFeedbackDHCP   = "feedback_dhcp"
+    nodeTeleportStart  = "teleport_start"
+    nodeTeleportStop   = "teleport_stop"
 )
 
 func initDhcpListner(app service.AppSupervisor) error {
@@ -170,32 +172,12 @@ func initBeaconService(app service.AppSupervisor) error {
     return nil
 }
 
-func initAgentService(app service.AppSupervisor) error {
+func initTeleportNodeService(app service.AppSupervisor) error {
     var (
         nodeProc *embed.EmbeddedNodeProcess = nil
-
-        beaconC = make(chan service.Event)
-        dhcpC   = make(chan service.Event)
-
-        searchTx = func(data []byte) error {
-            log.Debugf("[SEARCH-TX] %v", time.Now())
-            app.BroadcastEvent(service.Event{Name: nodeServiceSearch, Payload:data})
-            return nil
-        }
-
-        beaconTx = func(target string, data []byte) error {
-            log.Debugf("[BEACON-TX] %v TO : %v", time.Now(), target)
-            app.BroadcastEvent(service.Event{
-                Name: nodeServiceBeacon,
-                Payload: ucast.BeaconSend{
-                    Host:target,
-                    Payload:data,
-                },
-            })
-            return nil
-        }
-
-        startTele = func () error {
+        startC = make(chan service.Event)
+        stopC = make(chan service.Event)
+        startTeleport = func () error {
             maddr, err := slcontext.SharedSlaveContext().GetMasterIP4Address()
             if err != nil {
                 log.Errorf(err.Error())
@@ -218,8 +200,57 @@ func initAgentService(app service.AppSupervisor) error {
             err = nodeProc.StartNodeSSH()
             if err != nil {
                 log.Errorf(err.Error())
+                errors.WithStack(err)
             }
-            return errors.WithStack(err)
+
+            log.Debugf("\n\n(INFO) teleport node started success!\n")
+            return nil
+        }
+    )
+    app.WaitForEvent(nodeTeleportStart, startC, make(chan struct{}))
+    app.WaitForEvent(nodeTeleportStop,   stopC, make(chan struct{}))
+
+    app.RegisterFunc(func() error{
+
+        for {
+            select {
+                case <-startC: {
+                    return startTeleport()
+                }
+                case <-stopC: {
+                    return startTeleport()
+                }
+            }
+        }
+
+        return nil
+    })
+
+    return nil
+}
+
+func initAgentService(app service.AppSupervisor) error {
+    var (
+
+        beaconC = make(chan service.Event)
+        dhcpC   = make(chan service.Event)
+
+        searchTx = func(data []byte) error {
+            log.Debugf("[SEARCH-TX] %v", time.Now())
+            app.BroadcastEvent(service.Event{Name: nodeServiceSearch, Payload:data})
+            return nil
+        }
+
+        beaconTx = func(target string, data []byte) error {
+            log.Debugf("[BEACON-TX] %v TO : %v", time.Now(), target)
+            app.BroadcastEvent(service.Event{
+                Name: nodeServiceBeacon,
+                Payload: ucast.BeaconSend{
+                    Host:target,
+                    Payload:data,
+                },
+            })
+            return nil
         }
 
         transitEvent = func (state locator.SlaveLocatingState, ts time.Time, transOk bool) error {
@@ -241,13 +272,15 @@ func initAgentService(app service.AppSupervisor) error {
                         return nil
                     }
                     case locator.SlaveCryptoCheck: {
-                        return startTele()
+                        app.BroadcastEvent(service.Event{Name:nodeTeleportStart})
+                        return nil
                     }
                     case locator.SlaveBounded: {
                         return nil
                     }
                     case locator.SlaveBindBroken: {
-                        return startTele()
+                        app.BroadcastEvent(service.Event{Name:nodeTeleportStart})
+                        return nil
                     }
                 }
 
@@ -304,26 +337,26 @@ func initAgentService(app service.AppSupervisor) error {
 
             for {
                 select {
-                case <- app.StopChannel():
-                    return nil
-                case b := <- beaconC: {
-                    mp, ok := b.Payload.(ucast.BeaconPack)
-                    if ok {
-                        err = loc.TranstionWithMasterBeacon(mp, time.Now())
-                        if err != nil {
-                            log.Debug(err.Error())
+                    case <- app.StopChannel():
+                        return nil
+                    case b := <- beaconC: {
+                        mp, ok := b.Payload.(ucast.BeaconPack)
+                        if ok {
+                            err = loc.TranstionWithMasterBeacon(mp, time.Now())
+                            if err != nil {
+                                log.Debug(err.Error())
+                            }
                         }
                     }
-                }
-                case d := <- dhcpC: {
-                    log.Debugf("[DHCP] RECEIVED\n %v", spew.Sdump(d.Payload))
-                }
-                case <- timer.C: {
-                    err = loc.TranstionWithTimestamp(time.Now())
-                    if err != nil {
-                        log.Debugf(err.Error())
+                    case d := <- dhcpC: {
+                        log.Debugf("[DHCP] RECEIVED\n %v", spew.Sdump(d.Payload))
                     }
-                }
+                    case <- timer.C: {
+                        err = loc.TranstionWithTimestamp(time.Now())
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                    }
                 }
             }
             return nil
@@ -374,6 +407,12 @@ func main() {
 
     // agent service
     err = initAgentService(app)
+    if err != nil {
+        log.Panic(errors.WithStack(err))
+    }
+
+    // teleport management
+    err = initTeleportNodeService(app)
     if err != nil {
         log.Panic(errors.WithStack(err))
     }
