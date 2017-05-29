@@ -43,7 +43,7 @@ func initDhcpListner(app service.AppSupervisor) error {
     app.RegisterFunc(func () error {
         log.Debugf("[DHCP] starting dhcp listner...")
         buf := make([]byte, 20480)
-        dhcpEvent := &dhcp.DhcpEvent{}
+        dhcpEvent := dhcp.DhcpEvent{}
 
         // TODO : how do we stop this?
         for {
@@ -57,7 +57,7 @@ func initDhcpListner(app service.AppSupervisor) error {
                 log.Error(errors.WithStack(err))
                 continue
             }
-            err = msgpack.Unmarshal(buf[0:count], dhcpEvent)
+            err = msgpack.Unmarshal(buf[0:count], &dhcpEvent)
             if err != nil {
                 log.Error(errors.WithStack(err))
                 continue
@@ -247,8 +247,7 @@ func initTeleportNodeService(app service.AppSupervisor) error {
 func initAgentService(app service.AppSupervisor) error {
     var (
 
-        beaconC = make(chan service.Event)
-        dhcpC   = make(chan service.Event)
+        eventC = make(chan service.Event)
 
         searchTx = func(data []byte) error {
             log.Debugf("[SEARCH-TX] %v", time.Now())
@@ -329,34 +328,35 @@ func initAgentService(app service.AppSupervisor) error {
 
             for {
                 select {
-                    case <- app.StopChannel():
-                        return nil
-                    case b := <- beaconC: {
-                        mp, ok := b.Payload.(ucast.BeaconPack)
-                        if ok {
-                            err = loc.TranstionWithMasterBeacon(mp, time.Now())
-                            if err != nil {
-                                log.Debug(err.Error())
-                            }
-                        }
-                    }
-                    case d := <- dhcpC: {
-                        log.Debugf("[DHCP] RECEIVED\n %v", spew.Sdump(d.Payload))
-                    }
                     case <- timer.C: {
                         err = loc.TranstionWithTimestamp(time.Now())
                         if err != nil {
                             log.Debugf(err.Error())
                         }
                     }
+                    case evt := <-eventC: {
+                        mp, mk := evt.Payload.(ucast.BeaconPack)
+                        if mk {
+                            err = loc.TranstionWithMasterBeacon(mp, time.Now())
+                            if err != nil {
+                                log.Debug(err.Error())
+                            }
+                        }
+                        dp, dk := evt.Payload.(dhcp.DhcpEvent)
+                        if dk {
+                            log.Debugf("[DHCP] RECEIVED\n %v", spew.Sdump(dp))
+                        }
+                    }
+                    case <- app.StopChannel():
+                        return nil
                 }
             }
             return nil
         }
     )
 
-    app.WaitForEvent(nodeFeedbackBeacon, beaconC, make(chan struct{}))
-    app.WaitForEvent(nodeFeedbackDHCP, dhcpC, make(chan struct{}))
+    app.WaitForEvent(nodeFeedbackBeacon, eventC, make(chan struct{}))
+    app.WaitForEvent(nodeFeedbackDHCP,   eventC, make(chan struct{}))
     app.RegisterFunc(serviceFunc)
 
     app.OnExit(func(payload interface{}) {
