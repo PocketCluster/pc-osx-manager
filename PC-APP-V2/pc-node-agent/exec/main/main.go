@@ -177,35 +177,6 @@ func initTeleportNodeService(app service.AppSupervisor) error {
         nodeProc *embed.EmbeddedNodeProcess = nil
         startC = make(chan service.Event)
         stopC = make(chan service.Event)
-        startTeleport = func () error {
-            maddr, err := slcontext.SharedSlaveContext().GetMasterIP4Address()
-            if err != nil {
-                log.Errorf(err.Error())
-                return errors.WithStack(err)
-            }
-            slid, err := slcontext.SharedSlaveContext().GetSlaveNodeUUID()
-            if err != nil {
-                log.Errorf(err.Error())
-                return errors.WithStack(err)
-            }
-            cfg, err := tervice.MakeNodeConfig(maddr, slid, true)
-            if err != nil {
-                log.Errorf(err.Error())
-                return errors.WithStack(err)
-            }
-            nodeProc, err = embed.NewEmbeddedNodeProcess(app, cfg)
-            if err != nil {
-                return errors.WithStack(err)
-            }
-            err = nodeProc.StartNodeSSH()
-            if err != nil {
-                log.Errorf(err.Error())
-                errors.WithStack(err)
-            }
-
-            log.Debugf("\n\n(INFO) teleport node started success!\n")
-            return nil
-        }
     )
     app.WaitForEvent(nodeTeleportStart, startC, make(chan struct{}))
     app.WaitForEvent(nodeTeleportStop,   stopC, make(chan struct{}))
@@ -214,11 +185,55 @@ func initTeleportNodeService(app service.AppSupervisor) error {
 
         for {
             select {
-                case <-startC: {
-                    return startTeleport()
+                case <- app.StopChannel():
+                    return nil
+
+                case noti := <-startC: {
+                    maddr, err := slcontext.SharedSlaveContext().GetMasterIP4Address()
+                    if err != nil {
+                        log.Errorf(err.Error())
+                        return errors.WithStack(err)
+                    }
+                    slid, err := slcontext.SharedSlaveContext().GetSlaveNodeUUID()
+                    if err != nil {
+                        log.Errorf(err.Error())
+                        return errors.WithStack(err)
+                    }
+                    cfg, err := tervice.MakeNodeConfig(maddr, slid, true)
+                    if err != nil {
+                        log.Errorf(err.Error())
+                        return errors.WithStack(err)
+                    }
+                    nodeProc, err = embed.NewEmbeddedNodeProcess(app, cfg)
+                    if err != nil {
+                        log.Errorf(err.Error())
+                        return errors.WithStack(err)
+                    }
+                    err = nodeProc.StartNodeSSH()
+                    if err != nil {
+                        log.Errorf(err.Error())
+                        return errors.WithStack(err)
+                    }
+                    state, ok := noti.Payload.(locator.SlaveLocatingState)
+                    if ok && state == locator.SlaveCryptoCheck {
+                        err = nodeProc.AcquireEngineCertificate()
+                        if err != nil {
+                            log.Errorf(err.Error())
+                        }
+                    }
+                    log.Debugf("\n\n(INFO) teleport node started success!\n")
+                    return nil
                 }
+
                 case <-stopC: {
-                    return startTeleport()
+                    err := nodeProc.Close()
+                    if err != nil {
+                        log.Errorf(err.Error())
+                        return errors.WithStack(err)
+                    }
+                    nodeProc = nil
+                    log.Debugf("\n\n(INFO) teleport node stop success!\n")
+                    return nil
                 }
             }
         }
@@ -256,52 +271,29 @@ func initAgentService(app service.AppSupervisor) error {
         transitEvent = func (state locator.SlaveLocatingState, ts time.Time, transOk bool) error {
             if transOk {
                 log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | SUCCESS ", ts, state.String())
-            } else {
-                log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | FAILED ", ts, state.String())
-            }
-
-            if transOk {
                 switch state {
-                    case locator.SlaveUnbounded: {
-                        return nil
-                    }
-                    case locator.SlaveInquired: {
-                        return nil
-                    }
-                    case locator.SlaveKeyExchange: {
-                        return nil
-                    }
-                    case locator.SlaveCryptoCheck: {
-                        app.BroadcastEvent(service.Event{Name:nodeTeleportStart})
+                    case locator.SlaveCryptoCheck:
+                        fallthrough
+                    case locator.SlaveBindBroken: {
+                        app.BroadcastEvent(service.Event{Name:nodeTeleportStart, Payload:state})
                         return nil
                     }
                     case locator.SlaveBounded: {
                         return nil
                     }
-                    case locator.SlaveBindBroken: {
-                        app.BroadcastEvent(service.Event{Name:nodeTeleportStart})
+                    default: {
                         return nil
                     }
                 }
 
             } else {
+                log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | FAILED ", ts, state.String())
                 switch state {
-                    case locator.SlaveUnbounded: {
-                        return nil
-                    }
-                    case locator.SlaveInquired: {
-                        return nil
-                    }
-                    case locator.SlaveKeyExchange: {
-                        return nil
-                    }
-                    case locator.SlaveCryptoCheck: {
-                        return nil
-                    }
                     case locator.SlaveBounded: {
+                        app.BroadcastEvent(service.Event{Name:nodeTeleportStop, Payload:state})
                         return nil
                     }
-                    case locator.SlaveBindBroken: {
+                    default: {
                         return nil
                     }
                 }
