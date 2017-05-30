@@ -2,7 +2,7 @@ package beacon
 
 import (
     "time"
-    
+
     "github.com/docker/docker/pkg/discovery"
     . "gopkg.in/check.v1"
 
