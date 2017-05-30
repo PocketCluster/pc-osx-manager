@@ -7,6 +7,7 @@ import (
 
     "gopkg.in/vmihailenco/msgpack.v2"
     "github.com/gravitational/teleport/embed"
+    sysd "github.com/coreos/go-systemd/dbus"
     tervice "github.com/gravitational/teleport/lib/service"
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -30,6 +31,7 @@ const (
     nodeFeedbackDHCP   = "feedback_dhcp"
     nodeTeleportStart  = "teleport_start"
     nodeTeleportStop   = "teleport_stop"
+    dockerServiceUnit  = "docker.service"
 )
 
 func initDhcpListner(app service.AppSupervisor) error {
@@ -189,51 +191,68 @@ func initTeleportNodeService(app service.AppSupervisor) error {
                     return nil
 
                 case noti := <-startC: {
+                    // restart teleport
                     maddr, err := slcontext.SharedSlaveContext().GetMasterIP4Address()
                     if err != nil {
                         log.Errorf(err.Error())
-                        return errors.WithStack(err)
+                        continue
                     }
                     slid, err := slcontext.SharedSlaveContext().GetSlaveNodeUUID()
                     if err != nil {
                         log.Errorf(err.Error())
-                        return errors.WithStack(err)
+                        continue
                     }
                     cfg, err := tervice.MakeNodeConfig(maddr, slid, true)
                     if err != nil {
                         log.Errorf(err.Error())
-                        return errors.WithStack(err)
+                        continue
                     }
                     nodeProc, err = embed.NewEmbeddedNodeProcess(app, cfg)
                     if err != nil {
                         log.Errorf(err.Error())
-                        return errors.WithStack(err)
+                        continue
                     }
                     err = nodeProc.StartNodeSSH()
                     if err != nil {
                         log.Errorf(err.Error())
-                        return errors.WithStack(err)
+                        continue
                     }
                     state, ok := noti.Payload.(locator.SlaveLocatingState)
                     if ok && state == locator.SlaveCryptoCheck {
+                        // TODO : create a waitforevent channel and restart docker engine accordingly
                         err = nodeProc.AcquireEngineCertificate()
                         if err != nil {
                             log.Errorf(err.Error())
                         }
                     }
                     log.Debugf("\n\n(INFO) teleport node started success!\n")
-                    return nil
+
+                    continue
+
+                    // restart docker engine
+                    // TODO : FIX /opt/gopkg/src/github.com/godbus/dbus/conn.go:345 send on closed channel
+                    conn, err := sysd.NewSystemdConnection()
+                    if err != nil {
+                        log.Errorf(err.Error())
+                    } else {
+                        did, err := conn.RestartUnit(dockerServiceUnit, "replace", nil)
+                        if err != nil {
+                            log.Errorf(err.Error())
+                        } else {
+                            conn.Close()
+                            log.Debugf("\n\n(INFO) docker engin restart success! ID %d\n", did)
+                        }
+                    }
                 }
 
                 case <-stopC: {
                     err := nodeProc.Close()
                     if err != nil {
                         log.Errorf(err.Error())
-                        return errors.WithStack(err)
+                        continue
                     }
                     nodeProc = nil
                     log.Debugf("\n\n(INFO) teleport node stop success!\n")
-                    return nil
                 }
             }
         }
