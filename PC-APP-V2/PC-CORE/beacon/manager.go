@@ -5,6 +5,7 @@ import (
     "sync"
     "time"
 
+    "github.com/docker/docker/pkg/discovery"
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
 
@@ -82,15 +83,19 @@ type BeaconManger interface {
     TransitionWithSearchData(searchD mcast.CastPack, ts time.Time) error
     TransitionWithTimestamp(ts time.Time) error
     Shutdown() error
+    // swarm discovery backend
+    discovery.Backend
 }
 
 // We might not need a locking mechanism as "select" statement will choose only "one input" at a time.
 type beaconManger struct {
     sync.Mutex
-    clusterID      string
-    notiReceiver   BeaconEventNotification
-    commChannel    CommChannel
-    beaconList     []MasterBeacon
+    clusterID         string
+    notiReceiver      BeaconEventNotification
+    commChannel       CommChannel
+    beaconList        []MasterBeacon
+    // swarm heartbeat
+    swarmHeartbeat    time.Duration
 }
 
 func (b *beaconManger) Sanitize(s *model.SlaveNode) error {
@@ -230,6 +235,78 @@ func (b *beaconManger) Shutdown() error {
     return nil
 }
 
+// --- Swarm Discovery Methods --- //
+
+// Initialize the discovery with URIs, a heartbeat, a ttl and optional settings.
+func (b *beaconManger) Initialize(_ string, hb time.Duration, _ time.Duration, _ map[string]string) error {
+    b.swarmHeartbeat = hb
+    return nil
+}
+
+// Watch the discovery for entry changes.
+// Returns a channel that will receive changes or an error.
+// Providing a non-nil stopCh can be used to stop watching.
+func (b *beaconManger) Watch(stopCh <-chan struct{}) (<-chan discovery.Entries, <-chan error) {
+    var (
+        ch = make(chan discovery.Entries)
+        errCh = make(chan error)
+        ticker = time.NewTicker(b.swarmHeartbeat)
+    )
+
+    go func(bm *beaconManger) {
+        defer close(errCh)
+        defer close(ch)
+
+        // Send the initial entries if available.
+        var (
+            values []string = findBoundedNodesForSwarm(bm)
+            currentEntries, newEntries discovery.Entries
+            err error = nil
+        )
+
+        if len(values) > 0 {
+            currentEntries, err = discovery.CreateEntries(values)
+        }
+        if err != nil {
+            errCh <- err
+        } else if currentEntries != nil {
+            ch <- currentEntries
+        }
+
+        // Periodically send updates.
+        for {
+            select {
+                case <-ticker.C: {
+                    values = findBoundedNodesForSwarm(bm)
+                    newEntries, err = discovery.CreateEntries(values)
+                    if err != nil {
+                        errCh <- err
+                        continue
+                    }
+                    // Check if the file has really changed.
+                    if !newEntries.Equals(currentEntries) {
+                        ch <- newEntries
+                    }
+                    currentEntries = newEntries
+                }
+
+                case <-stopCh: {
+                    ticker.Stop()
+                    return
+                }
+            }
+        }
+    }(b)
+
+    return ch, errCh
+}
+
+// Register to the discovery.
+func (b *beaconManger) Register(string) error {
+    log.Debugf("(INFO) this should not work as registration of new address is not done by swarm")
+    return nil
+}
+
 // --- BeaconOnTransitionEvent methods --- //
 
 // state transition success from
@@ -311,6 +388,34 @@ func assignSlaveNodeName(b *beaconManger, s *model.SlaveNode) {
         }
         ci++
     }
+}
+
+func findBoundedNodesForSwarm(b *beaconManger) []string {
+    b.Lock()
+    defer b.Unlock()
+
+    const (
+        dockerPort string = "2375"
+    )
+
+    var (
+        addr string = ""
+        err error = nil
+        nodeList []string = []string{}
+        bLen int = len(b.beaconList)
+    )
+
+    for i := 0; i < bLen; i++ {
+        bc := b.beaconList[i]
+        if bc.CurrentState() == MasterBounded {
+            addr, err = bc.SlaveNode().IP4AddrString()
+            if err != nil {
+                continue
+            }
+            nodeList = append(nodeList, fmt.Sprintf("%s:%s", addr, dockerPort))
+        }
+    }
+    return nodeList
 }
 
 func shutdownMasterBeacons(b *beaconManger) {
