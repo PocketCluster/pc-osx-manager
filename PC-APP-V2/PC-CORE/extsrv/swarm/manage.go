@@ -81,11 +81,6 @@ func (context *SwarmContext) Manage() error {
         FailureRetry:       failureRetry,
     }
 
-    // FIXME : this should check the validity of node list (form, # of items, etc)
-    uri := context.nodeList
-    if uri == "" {
-        return errors.Errorf("discovery required to manage a cluster.")
-    }
     discovery := createNodeDiscovery(context)
     s, err := strategy.New(context.strategy)
     if err != nil {
@@ -139,11 +134,6 @@ func NewSwarmServer(context *SwarmContext) (*Server, error) {
         FailureRetry:       failureRetry,
     }
 
-    // FIXME : this should check the validity of node list (form, # of items, etc)
-    uri := context.nodeList
-    if uri == "" {
-        return nil, errors.Errorf("discovery required to manage a cluster.")
-    }
     discovery := createNodeDiscovery(context)
     s, err := strategy.New(context.strategy)
     if err != nil {
