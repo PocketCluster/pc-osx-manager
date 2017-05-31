@@ -29,10 +29,6 @@
     OpsCmdTeleportStop();
 }
 
-- (IBAction)opsCmdTeleportNodeAdd:(id)sender {
-    OpsCmdTeleportNodeAdd();
-}
-
 - (IBAction)opsCmdTeleportRootAdd:(id)sender {
     OpsCmdTeleportRootAdd();
 }

@@ -14,16 +14,16 @@
         <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" animationBehavior="default" id="F0z-JX-Cv5">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="196" y="240" width="210" height="516"/>
+            <rect key="contentRect" x="196" y="240" width="210" height="619"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
             <value key="minSize" type="size" width="210" height="500"/>
             <value key="maxSize" type="size" width="210" height="500"/>
             <view key="contentView" id="se5-gp-TjO">
-                <rect key="frame" x="0.0" y="0.0" width="210" height="516"/>
+                <rect key="frame" x="0.0" y="0.0" width="210" height="619"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nZt-MV-5wa">
-                        <rect key="frame" x="14" y="409" width="182" height="32"/>
+                        <rect key="frame" x="14" y="571" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Teleport Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="V6Q-kX-P1r">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -33,7 +33,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Iwq-7r-GZW">
-                        <rect key="frame" x="14" y="376" width="182" height="32"/>
+                        <rect key="frame" x="14" y="538" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Teleport Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5iN-O7-TXw">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -42,18 +42,8 @@
                             <action selector="opsCmdTeleportStop:" target="-2" id="lbj-jJ-Aqw"/>
                         </connections>
                     </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Pq9-6t-stv">
-                        <rect key="frame" x="14" y="343" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="Teleport Node Add" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="FmK-Ss-L0G">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="opsCmdTeleportNodeAdd:" target="-2" id="32s-0E-eMs"/>
-                        </connections>
-                    </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="y1g-2c-4bl">
-                        <rect key="frame" x="14" y="310" width="182" height="32"/>
+                        <rect key="frame" x="14" y="397" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Teleport Root Add" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5hd-3j-KqJ">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -63,7 +53,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Zrf-TX-MDf">
-                        <rect key="frame" x="14" y="277" width="182" height="32"/>
+                        <rect key="frame" x="14" y="364" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Teleport User Add" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="CqG-Z6-HnV">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -73,7 +63,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="amv-4J-aSh">
-                        <rect key="frame" x="14" y="475" width="182" height="32"/>
+                        <rect key="frame" x="14" y="489" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Beacon Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="WxM-LY-85v">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -83,7 +73,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rnD-Xf-JGU">
-                        <rect key="frame" x="14" y="442" width="182" height="32"/>
+                        <rect key="frame" x="14" y="456" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Beacon Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="W7C-Jx-WSH">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -93,7 +83,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lOe-An-aD8">
-                        <rect key="frame" x="14" y="244" width="182" height="32"/>
+                        <rect key="frame" x="14" y="306" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Registry Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="8Tk-t9-kvl">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -103,7 +93,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="s57-yG-QMq">
-                        <rect key="frame" x="14" y="211" width="182" height="32"/>
+                        <rect key="frame" x="14" y="273" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Registry Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="02s-Yb-hZe">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -113,7 +103,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IZm-4D-r1b">
-                        <rect key="frame" x="14" y="178" width="182" height="32"/>
+                        <rect key="frame" x="14" y="216" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Swarm Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ahB-73-4pz">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -123,7 +113,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IUE-Nl-gA0">
-                        <rect key="frame" x="14" y="145" width="182" height="32"/>
+                        <rect key="frame" x="14" y="183" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Swarm Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xtO-bm-buX">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -133,7 +123,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SYO-pc-xrj">
-                        <rect key="frame" x="14" y="112" width="182" height="32"/>
+                        <rect key="frame" x="14" y="135" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Etcd Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="WZ8-V6-Vcm">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -143,7 +133,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BAh-uq-aNT">
-                        <rect key="frame" x="14" y="79" width="182" height="32"/>
+                        <rect key="frame" x="14" y="102" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Etcd Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="f4g-z6-9oD">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -177,7 +167,7 @@
             <connections>
                 <outlet property="delegate" destination="-2" id="0bl-1N-AYu"/>
             </connections>
-            <point key="canvasLocation" x="512" y="324"/>
+            <point key="canvasLocation" x="512" y="375.5"/>
         </window>
     </objects>
 </document>
