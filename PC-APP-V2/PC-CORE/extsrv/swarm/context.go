@@ -13,6 +13,10 @@ import (
     "github.com/pkg/errors"
 )
 
+const (
+    swarmServingHost string = "0.0.0.0:3376"
+)
+
 // Context is the global cluster setup context
 type SwarmContext struct {
     // discovery option
@@ -36,7 +40,7 @@ type SwarmContext struct {
     tlsConfig          *tls.Config
 }
 
-func NewContextWithCertAndKey(host string, tlsCa, tlsCert, tlsKey []byte, discoveryBackend discovery.Backend) (*SwarmContext, error) {
+func NewContextWithCertAndKey(tlsCa, tlsCert, tlsKey []byte, discoveryBackend discovery.Backend) (*SwarmContext, error) {
     var (
         discoveryOpt = make(map[string]string)
         clusterOpt   = cluster.DriverOpts{}
@@ -60,7 +64,7 @@ func NewContextWithCertAndKey(host string, tlsCa, tlsCert, tlsKey []byte, discov
         // TODO : this will be removed.
         refreshRetry:       time.Duration(3),
 
-        managerHost:        []string{host},
+        managerHost:        []string{swarmServingHost},
         debug:              true,
 
         clusterOpt:         clusterOpt,

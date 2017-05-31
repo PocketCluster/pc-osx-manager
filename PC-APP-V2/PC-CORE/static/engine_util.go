@@ -80,7 +80,7 @@ func setupServiceConfig() (*serviceConfig, error) {
         log.Debugf(err.Error())
         return nil, errors.WithStack(err)
     }
-    context.UpdateCertAuth(caBundle)
+    ctx.UpdateCertAuth(caBundle)
 
     // host certificate
     hostBundle, err := hostCertificate(rec.Certdb(), caBundle.CASigner, tefaults.CoreHostName, meta.ClusterUUID)
@@ -89,7 +89,7 @@ func setupServiceConfig() (*serviceConfig, error) {
         log.Debugf(err.Error())
         return nil, errors.WithStack(err)
     }
-    context.UpdateHostCert(hostBundle)
+    ctx.UpdateHostCert(hostBundle)
 
     // make teleport core config
     teleCfg := tervice.MakeCoreConfig(dataDir, true)
@@ -112,20 +112,6 @@ func setupServiceConfig() (*serviceConfig, error) {
         return nil, errors.WithStack(err)
     }
 
-    // swarm configuration
-    swarmCfg, err := swarmsrv.NewContextWithCertAndKey(
-        "0.0.0.0:3376",
-        "192.168.1.150:2375,192.168.1.151:2375,192.168.1.152:2375,192.168.1.153:2375,192.168.1.161:2375,192.168.1.162:2375,192.168.1.163:2375,192.168.1.164:2375,192.168.1.165:2375,192.168.1.166:2375",
-        caBundle.CACrtPem,
-        hostBundle.Certificate,
-        hostBundle.PrivateKey,
-    )
-    if err != nil {
-        // this is critical
-        log.Debugf(err.Error())
-        return nil, errors.WithStack(err)
-    }
-
     //etcd configuration
     // TODO fix datadir
     etcdCfg, err := embed.NewPocketConfig(dataDir, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey)
@@ -139,6 +125,5 @@ func setupServiceConfig() (*serviceConfig, error) {
         etcdConfig: etcdCfg,
         teleConfig: teleCfg,
         regConfig: regCfg,
-        swarmConfig: swarmCfg,
     }, nil
 }
