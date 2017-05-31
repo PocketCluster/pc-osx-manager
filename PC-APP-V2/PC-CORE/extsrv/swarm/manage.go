@@ -102,15 +102,15 @@ func (context *SwarmContext) Manage() error {
     }
 
     hosts := context.managerHost
-    server := NewServer(hosts, context.tlsConfig)
+    server := newService(hosts, context.tlsConfig)
     primary := api.NewPrimary(cl, context.tlsConfig, &statusHandler{cl, nil, nil}, context.debug, context.cors)
     server.SetHandler(primary)
     cluster.NewWatchdog(cl)
 
-    return errors.WithStack(server.ListenAndServe())
+    return errors.WithStack(server.ListenAndServeMultiHosts())
 }
 
-func NewSwarmServer(context *SwarmContext) (*Server, error) {
+func NewSwarmServer(context *SwarmContext) (*Service, error) {
     refreshMinInterval := context.refreshMinInterval
     refreshMaxInterval := context.refreshMaxInterval
     if refreshMinInterval <= time.Duration(0) * time.Second {
@@ -155,7 +155,10 @@ func NewSwarmServer(context *SwarmContext) (*Server, error) {
     }
 
     hosts := context.managerHost
-    server := NewServer(hosts, context.tlsConfig)
+    server, err := newStoppableServiceForSingleHost(hosts, context.tlsConfig)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
     primary := api.NewPrimary(cl, context.tlsConfig, &statusHandler{cl, nil, nil}, context.debug, context.cors)
     server.SetHandler(primary)
     cluster.NewWatchdog(cl)

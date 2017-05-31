@@ -2,17 +2,82 @@ package swarm
 
 import (
     "crypto/tls"
-    "fmt"
     "net"
     "net/http"
     "strings"
-    "time"
     "sync"
+    "time"
 
     log "github.com/Sirupsen/logrus"
+    "github.com/pkg/errors"
     "github.com/docker/swarm/api"
     "gopkg.in/tylerb/graceful.v1"
 )
+
+func newListener(proto, addr string, tlsConfig *tls.Config) (net.Listener, error) {
+    l, err := net.Listen(proto, addr)
+    if err != nil {
+        if strings.Contains(err.Error(), "address already in use") && strings.Contains(addr, api.DefaultDockerPort) {
+            return nil, errors.Errorf("%s: is Docker already running on this machine? Try using a different port", err)
+        }
+        return nil, err
+    }
+    if tlsConfig != nil {
+        tlsConfig.NextProtos = []string{"http/1.1"}
+        l = tls.NewListener(l, tlsConfig)
+    }
+    return l, nil
+}
+
+// NewServer creates an api.Server.
+func newService(hosts []string, tlsConfig *tls.Config) *Service {
+    return &Service{
+        hosts:      hosts,
+        tlsConfig:  tlsConfig,
+        dispatcher: &dispatcher{},
+    }
+}
+
+// NewServer creates an api.Server.
+func newStoppableServiceForSingleHost(hosts []string, tlsConfig *tls.Config) (*Service, error) {
+    var (
+        dispatcher *dispatcher = &dispatcher{}
+        listener net.Listener = nil
+        err error = nil
+    )
+
+    protoAddrParts := strings.SplitN(hosts[0], "://", 2)
+    if len(protoAddrParts) == 1 {
+        protoAddrParts = append([]string{"tcp"}, protoAddrParts...)
+    }
+
+    log.WithFields(log.Fields{"proto": protoAddrParts[0], "addr": protoAddrParts[1]}).Info("Listening for HTTP")
+
+    switch protoAddrParts[0] {
+        //case "unix":
+        //    l, err = newUnixListener(protoAddrParts[1], tlsConfig)
+        case "tcp":
+            listener, err = newListener("tcp", protoAddrParts[1], tlsConfig)
+        default:
+            err = errors.Errorf("unsupported protocol: %q", protoAddrParts[0])
+    }
+    if err != nil {
+        return nil, err
+    }
+
+    return &Service{
+        listener:      listener,
+        dispatcher:    dispatcher,
+        server:        &graceful.Server{
+            Timeout:            10 * time.Second,
+            NoSignalHandling:   true,
+            Server: &http.Server{
+                Addr:           protoAddrParts[1],
+                Handler:        dispatcher,
+            },
+        },
+    }, nil
+}
 
 // Dispatcher is a meta http.Handler. It acts as an http.Handler and forwards
 // requests to another http.Handler that can be changed at runtime.
@@ -38,40 +103,28 @@ func (d *dispatcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // Server is a Docker API server.
-type Server struct {
-    hosts      []string
-    tlsConfig  *tls.Config
-    dispatcher *dispatcher
-}
+type Service struct {
+    hosts         []string
+    tlsConfig     *tls.Config
+    dispatcher    *dispatcher
 
-// NewServer creates an api.Server.
-func NewServer(hosts []string, tlsConfig *tls.Config) *Server {
-    return &Server{
-        hosts:      hosts,
-        tlsConfig:  tlsConfig,
-        dispatcher: &dispatcher{},
-    }
+    listener      net.Listener
+    server        *graceful.Server
 }
 
 // SetHandler is used to overwrite the HTTP handler for the API.
 // This can be the api router or a reverse proxy.
-func (s *Server) SetHandler(handler http.Handler) {
+func (s *Service) SetHandler(handler http.Handler) {
     s.dispatcher.SetHandler(handler)
 }
 
-func newListener(proto, addr string, tlsConfig *tls.Config) (net.Listener, error) {
-    l, err := net.Listen(proto, addr)
-    if err != nil {
-        if strings.Contains(err.Error(), "address already in use") && strings.Contains(addr, api.DefaultDockerPort) {
-            return nil, fmt.Errorf("%s: is Docker already running on this machine? Try using a different port", err)
-        }
-        return nil, err
-    }
-    if tlsConfig != nil {
-        tlsConfig.NextProtos = []string{"http/1.1"}
-        l = tls.NewListener(l, tlsConfig)
-    }
-    return l, nil
+func (s *Service) ListenAndServeSingleHost() error {
+    return errors.WithStack(s.server.Serve(s.listener))
+}
+
+func (s *Service) Close() error {
+    s.server.Stop(time.Second)
+    return nil
 }
 
 // ListenAndServe starts an HTTP server on each host to listen on its
@@ -80,7 +133,7 @@ func newListener(proto, addr string, tlsConfig *tls.Config) (net.Listener, error
 //
 // The expected format for a host string is [protocol://]address. The protocol
 // must be either "tcp" or "unix", with "tcp" used by default if not specified.
-func (s *Server) ListenAndServe() error {
+func (s *Service) ListenAndServeMultiHosts() error {
     chErrors := make(chan error, len(s.hosts))
 
     for _, host := range s.hosts {
@@ -102,12 +155,12 @@ func (s *Server) ListenAndServe() error {
             )
 
             switch protoAddrParts[0] {
-            //case "unix":
-            //    l, err = newUnixListener(protoAddrParts[1], s.tlsConfig)
-            case "tcp":
-                l, err = newListener("tcp", protoAddrParts[1], s.tlsConfig)
-            default:
-                err = fmt.Errorf("unsupported protocol: %q", protoAddrParts[0])
+                //case "unix":
+                //    l, err = newUnixListener(protoAddrParts[1], s.tlsConfig)
+                case "tcp":
+                    l, err = newListener("tcp", protoAddrParts[1], s.tlsConfig)
+                default:
+                    err = errors.Errorf("unsupported protocol: %q", protoAddrParts[0])
             }
 
             if err != nil {
@@ -127,7 +180,7 @@ func (s *Server) ListenAndServe() error {
     return nil
 }
 
-func (s *Server) ListenAndServeMultiHostsOnWaitGroup(wg *sync.WaitGroup) ([]*graceful.Server, []error) {
+func (s *Service) ListenAndServeMultiHostsOnWaitGroup(wg *sync.WaitGroup) ([]*graceful.Server, []error) {
     var (
         chErrors    = make(chan error, len(s.hosts))
         chServers   = make(chan *graceful.Server, len(s.hosts))
@@ -165,7 +218,7 @@ func (s *Server) ListenAndServeMultiHostsOnWaitGroup(wg *sync.WaitGroup) ([]*gra
             case "tcp":
                 l, err = newListener("tcp", protoAddrParts[1], s.tlsConfig)
             default:
-                err = fmt.Errorf("unsupported protocol: %q", protoAddrParts[0])
+                err = errors.Errorf("unsupported protocol: %q", protoAddrParts[0])
             }
 
             if err != nil {
@@ -198,7 +251,7 @@ func (s *Server) ListenAndServeMultiHostsOnWaitGroup(wg *sync.WaitGroup) ([]*gra
 //
 // The expected format for a host string is [protocol://]address. The protocol
 // must be either "tcp" or "unix", with "tcp" used by default if not specified.
-func (s *Server) ListenAndServeOnWaitGroup(wg *sync.WaitGroup) (*graceful.Server, error) {
+func (s *Service) ListenAndServeOnWaitGroup(wg *sync.WaitGroup) (*graceful.Server, error) {
     var (
         chErrors    = make(chan error)
         chServers   = make(chan *graceful.Server)
@@ -233,7 +286,7 @@ func (s *Server) ListenAndServeOnWaitGroup(wg *sync.WaitGroup) (*graceful.Server
         case "tcp":
             l, err = newListener("tcp", protoAddrParts[1], s.tlsConfig)
         default:
-            err = fmt.Errorf("unsupported protocol: %q", protoAddrParts[0])
+            err = errors.Errorf("unsupported protocol: %q", protoAddrParts[0])
         }
 
         chServers <- server

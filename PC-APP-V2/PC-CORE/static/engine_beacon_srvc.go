@@ -110,6 +110,11 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tservice.Pocke
     if err != nil {
         return errors.WithStack(err)
     }
+    swarmsrv, err := swarmemb.NewSwarmServer(swarmctx)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
 
     a.WaitForEvent(coreFeedbackBeacon, beaconC, make(chan struct{}))
     a.WaitForEvent(coreFeedbackSearch, searchC, make(chan struct{}))
@@ -122,6 +127,10 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tservice.Pocke
         for {
             select {
                 case <-a.StopChannel(): {
+                    err = swarmsrv.Close()
+                    if err != nil {
+                        log.Debug(err.Error())
+                    }
                     err = beaconMan.Shutdown()
                     if err != nil {
                         log.Debug(err.Error())
@@ -165,12 +174,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tservice.Pocke
     })
 
     a.RegisterServiceFunc(func () error {
-        srv, err := swarmemb.NewSwarmServer(swarmctx)
-        if err != nil {
-            return errors.WithStack(err)
-        }
-
-        return errors.WithStack(srv.ListenAndServe())
+        return errors.WithStack(swarmsrv.ListenAndServeSingleHost())
     })
 
 

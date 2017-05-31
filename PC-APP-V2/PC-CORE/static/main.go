@@ -28,7 +28,7 @@ func main() {
             serviceConfig *serviceConfig = nil
             teleProc *tembed.EmbeddedCoreProcess = nil
             regiProc *regisrv.PocketRegistry = nil
-            swarmProc *swarmsrv.Server
+            swarmProc *swarmsrv.Service
             swarmSrv *graceful.Server
             err error = nil
 
