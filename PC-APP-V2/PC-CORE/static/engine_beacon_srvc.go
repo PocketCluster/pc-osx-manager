@@ -4,7 +4,7 @@ import (
     "time"
 
     "github.com/gravitational/teleport/embed"
-    tservice "github.com/gravitational/teleport/lib/service"
+    tervice "github.com/gravitational/teleport/lib/service"
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
 
@@ -19,7 +19,7 @@ import (
 
 type beaconEventRoute struct {
     service.ServiceSupervisor
-    *tservice.PocketConfig
+    *tervice.PocketConfig
 }
 
 func (b *beaconEventRoute) close() error {
@@ -63,7 +63,7 @@ func (b *beaconEventRoute) BeaconEventShutdown() error {
     return nil
 }
 
-func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tservice.PocketConfig) error {
+func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.PocketConfig) error {
     var (
         ctx = context.SharedHostContext()
 
