@@ -3,7 +3,7 @@ package main
 import (
     // implicit loading and initialization
     _ "github.com/docker/docker/pkg/discovery/nodes"
-    "github.com/stkim1/pc-core/extsrv/swarm"
+    "github.com/stkim1/pc-core/extlib/swarm"
 )
 
 /*

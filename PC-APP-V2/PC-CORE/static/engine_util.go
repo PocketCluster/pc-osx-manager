@@ -11,7 +11,7 @@ import (
 
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/model"
-    regisrv "github.com/stkim1/pc-core/extsrv/registry"
+    regisrv "github.com/stkim1/pc-core/extlib/registry"
 )
 
 func setLogger(debug bool) {

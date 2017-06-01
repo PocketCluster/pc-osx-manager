@@ -14,7 +14,7 @@ import (
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/model"
-    swarmemb "github.com/stkim1/pc-core/extsrv/swarm"
+    swarmemb "github.com/stkim1/pc-core/extlib/swarm"
 )
 
 type beaconEventRoute struct {

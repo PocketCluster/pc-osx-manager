@@ -15,7 +15,7 @@ import (
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/service"
-    regisrv "github.com/stkim1/pc-core/extsrv/registry"
+    regisrv "github.com/stkim1/pc-core/extlib/registry"
 )
 
 func main() {
