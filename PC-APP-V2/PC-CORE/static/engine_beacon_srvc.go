@@ -127,6 +127,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tservice.Pocke
         for {
             select {
                 case <-a.StopChannel(): {
+                    timer.Stop()
                     err = swarmsrv.Close()
                     if err != nil {
                         log.Debug(err.Error())
@@ -139,7 +140,6 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tservice.Pocke
                     if err != nil {
                         log.Debug(err.Error())
                     }
-                    timer.Stop()
                     log.Debugf("[AGENT] stopping agent service...")
                     return nil
                 }
