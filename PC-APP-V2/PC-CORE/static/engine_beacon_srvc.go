@@ -110,7 +110,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tservice.Pocke
     if err != nil {
         return errors.WithStack(err)
     }
-    swarmsrv, err := swarmemb.NewSwarmServer(swarmctx)
+    swarmsrv, err := swarmemb.NewSwarmService(swarmctx)
     if err != nil {
         return errors.WithStack(err)
     }

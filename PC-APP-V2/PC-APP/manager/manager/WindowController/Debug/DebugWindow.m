@@ -46,14 +46,6 @@
     OpsCmdRegistryStop();
 }
 
-- (IBAction)opsCmdCntrOrchStart:(id)sender {
-    OpsCmdCntrOrchStart();
-}
-
-- (IBAction)opsCmdCntrOrchStop:(id)sender {
-    OpsCmdCntrOrchStop();
-}
-
 - (IBAction)opsCmdStorageStart:(id)sender {
     OpsCmdStorageStart();
 }

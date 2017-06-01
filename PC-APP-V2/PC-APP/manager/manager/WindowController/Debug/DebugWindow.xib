@@ -102,46 +102,6 @@
                             <action selector="opsCmdRegistryStop:" target="-2" id="K8Z-bR-psy"/>
                         </connections>
                     </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IZm-4D-r1b">
-                        <rect key="frame" x="14" y="216" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="Swarm Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ahB-73-4pz">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="opsCmdCntrOrchStart:" target="-2" id="1Aw-WP-YRY"/>
-                        </connections>
-                    </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IUE-Nl-gA0">
-                        <rect key="frame" x="14" y="183" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="Swarm Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xtO-bm-buX">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="opsCmdCntrOrchStop:" target="-2" id="H2F-oj-eIc"/>
-                        </connections>
-                    </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SYO-pc-xrj">
-                        <rect key="frame" x="14" y="135" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="Etcd Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="WZ8-V6-Vcm">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="opsCmdStorageStart:" target="-2" id="NGZ-Pq-h5I"/>
-                        </connections>
-                    </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BAh-uq-aNT">
-                        <rect key="frame" x="14" y="102" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="Etcd Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="f4g-z6-9oD">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="opsCmdStorageStop:" target="-2" id="7bT-hl-WxB"/>
-                        </connections>
-                    </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cBU-OD-CkW">
                         <rect key="frame" x="14" y="46" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Service Bundle Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sYh-uy-ENa">
@@ -160,6 +120,26 @@
                         </buttonCell>
                         <connections>
                             <action selector="opsCmdServiceBundleStop:" target="-2" id="l0g-Mv-RVx"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SYO-pc-xrj">
+                        <rect key="frame" x="14" y="212" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Etcd Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="WZ8-V6-Vcm">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="opsCmdStorageStart:" target="-2" id="NGZ-Pq-h5I"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BAh-uq-aNT">
+                        <rect key="frame" x="14" y="179" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Etcd Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="f4g-z6-9oD">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="opsCmdStorageStop:" target="-2" id="7bT-hl-WxB"/>
                         </connections>
                     </button>
                 </subviews>

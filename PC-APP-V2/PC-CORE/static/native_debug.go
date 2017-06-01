@@ -34,20 +34,6 @@ func OpsCmdRegistryStop() {
     }
 }
 
-//export OpsCmdCntrOrchStart
-func OpsCmdCntrOrchStart() {
-    theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdCntrOrchStart,
-    }
-}
-
-//export OpsCmdCntrOrchStop
-func OpsCmdCntrOrchStop() {
-    theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdCntrOrchStop,
-    }
-}
-
 //export OpsCmdStorageStart
 func OpsCmdStorageStart() {
     theApp.eventsIn <- operation.Operation{

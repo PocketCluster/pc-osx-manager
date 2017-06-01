@@ -8,7 +8,6 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/coreos/etcd/embed"
     tembed "github.com/gravitational/teleport/embed"
-    "gopkg.in/tylerb/graceful.v1"
 
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/event/lifecycle"
@@ -17,7 +16,6 @@ import (
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/service"
     regisrv "github.com/stkim1/pc-core/extsrv/registry"
-    swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
 )
 
 func main() {
@@ -28,8 +26,6 @@ func main() {
             serviceConfig *serviceConfig = nil
             teleProc *tembed.EmbeddedCoreProcess = nil
             regiProc *regisrv.PocketRegistry = nil
-            swarmProc *swarmsrv.Service
-            swarmSrv *graceful.Server
             err error = nil
 
             srvWaiter sync.WaitGroup
@@ -200,28 +196,6 @@ func main() {
 */
                         regiProc.Stop(time.Second)
                         log.Debugf("[OP] %v", e.String())
-                    }
-
-                    /// ORCHESTRATION ///
-
-                    case operation.CmdCntrOrchStart: {
-                        swarmProc, err = swarmsrv.NewSwarmServer(serviceConfig.swarmConfig)
-                        if err != nil {
-                            log.Debugf("[ERR] " + err.Error())
-                        }
-                        srvWaiter.Add(1)
-                        swarmSrv, err = swarmProc.ListenAndServeOnWaitGroup(&srvWaiter)
-                        if err != nil {
-                            log.Debugf("[ERR] " + err.Error())
-                        }
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdCntrOrchStop: {
-                        log.Debugf("[OP] %v", e.String())
-                        go func() {
-                            srvWaiter.Wait()
-                        }()
-                        swarmSrv.Stop(time.Second)
                     }
 
                     /// STORAGE ///

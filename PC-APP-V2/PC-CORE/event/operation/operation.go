@@ -23,10 +23,6 @@ const (
     CmdStorageStart
     CmdStorageStop
 
-    // swarm control
-    CmdCntrOrchStart
-    CmdCntrOrchStop
-
     // Registry control
     CmdRegistryStart
     CmdRegistryStop
@@ -59,10 +55,6 @@ func (c CommandType) String() string {
             return "CmdStorageStart"
         case CmdStorageStop:
             return "CmdStroageStop"
-        case CmdCntrOrchStart:
-            return "CmdCntrOrchStart"
-        case CmdCntrOrchStop:
-            return "CmdCntrOrchStop"
         case CmdRegistryStart:
             return "CmdImageRegistryStart"
         case CmdRegistryStop:

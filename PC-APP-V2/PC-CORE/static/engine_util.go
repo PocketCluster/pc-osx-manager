@@ -12,7 +12,6 @@ import (
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/model"
     regisrv "github.com/stkim1/pc-core/extsrv/registry"
-    swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
 )
 
 func setLogger(debug bool) {
@@ -30,7 +29,6 @@ type serviceConfig struct {
     etcdConfig     *embed.PocketConfig
     teleConfig     *tervice.PocketConfig
     regConfig      *regisrv.PocketRegistryConfig
-    swarmConfig    *swarmsrv.SwarmContext
 }
 
 func setupServiceConfig() (*serviceConfig, error) {

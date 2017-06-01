@@ -3,8 +3,6 @@ package swarm
 import (
     "crypto/tls"
     "crypto/x509"
-    "fmt"
-    "io/ioutil"
     "time"
 
     log "github.com/Sirupsen/logrus"
@@ -121,63 +119,4 @@ func getDiscoveryOpt(c *SwarmContext) map[string]string {
         options["kv.path"] = "docker/swarm/nodes"
     }
     return options
-}
-
-// following methods will be deprecated //
-
-func NewContext(host, nodeList string, tlsCa, tlsCert, tlsKey string) *SwarmContext {
-    discoveryOpt := make(map[string]string)
-    clusterOpt := cluster.DriverOpts{}
-    tlsConfig, err := loadTLSConfigFromFiles(tlsCa, tlsCert, tlsKey, true)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    return &SwarmContext {
-        discoveryOpt:       discoveryOpt,
-
-        heartbeat:          time.Duration(10 * time.Second),
-        refreshMinInterval: time.Duration(5 * time.Second),
-        refreshMaxInterval: time.Duration(30 * time.Second),
-        refreshRetry:       time.Duration(3),
-        failureRetry:       6,
-
-        managerHost:        []string{host},
-        debug:              true,
-
-        clusterOpt:         clusterOpt,
-        strategy:           "spread",
-        tlsConfig:          tlsConfig,
-    }
-}
-
-// Load the TLS certificates/keys and, if verify is true, the CA.
-func loadTLSConfigFromFiles(ca, cert, key string, verify bool) (*tls.Config, error) {
-    c, err := tls.LoadX509KeyPair(cert, key)
-    if err != nil {
-        return nil, fmt.Errorf("Couldn't load X509 key pair (%s, %s): %s. Key encrypted?",
-            cert, key, err)
-    }
-
-    config := &tls.Config{
-        Certificates: []tls.Certificate{c},
-        MinVersion:   tls.VersionTLS10,
-    }
-
-    if verify {
-        certPool := x509.NewCertPool()
-        file, err := ioutil.ReadFile(ca)
-        if err != nil {
-            return nil, fmt.Errorf("Couldn't read CA certificate: %s", err)
-        }
-        certPool.AppendCertsFromPEM(file)
-        config.RootCAs = certPool
-        config.ClientAuth = tls.RequireAndVerifyClientCert
-        config.ClientCAs = certPool
-    } else {
-        // If --tlsverify is not supplied, disable CA validation.
-        config.InsecureSkipVerify = true
-    }
-
-    return config, nil
 }
