@@ -429,6 +429,12 @@ func main() {
         log.Panic(errors.WithStack(err))
     }
 
+    // DNS service
+    err = initDNSService(app)
+    if err != nil {
+        log.Panic(errors.WithStack(err))
+    }
+
     // application
     err = app.Start()
     if err != nil {
