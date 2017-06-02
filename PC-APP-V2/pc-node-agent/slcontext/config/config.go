@@ -39,13 +39,22 @@ const SLAVE_NAMESRV_VALUE = "pc-master:53535"
 const (
     // POCKET SPECIFIC CONFIG
     slave_config_dir        = "/etc/pocket/"
-    slave_config_file       = "/etc/pocket/slave-conf.yaml"
+    slave_config_file       = slave_config_dir + "slave-conf.yaml"
 
-    slave_keys_dir          = "/etc/pocket/pki/"
+    slave_keys_dir          = slave_config_dir + "pki/"
     // these files are 1024 RSA crypto files used to join network
-    slave_public_Key_file   = "/etc/pocket/pki/pcslave.pub"
-    slave_prvate_Key_file   = "/etc/pocket/pki/pcslave.pem"
-    master_public_Key_file  = "/etc/pocket/pki/pcmaster.pub"
+    slave_public_Key_file   = slave_keys_dir + "pc-slave"  + pcrypto.FileExtPublicKey
+    slave_prvate_Key_file   = slave_keys_dir + "pc-slave"  + pcrypto.FileExtPrivateKey
+    master_public_Key_file  = slave_keys_dir + "pc-master" + pcrypto.FileExtPublicKey
+
+    // these files are 2048 RSA crypto files used for Docker & Registry. This should be acquired from Teleport Auth server
+    SlaveDockerAuthFileName = "docker.auth"
+    SlaveDockerKeyFileName  = "docker.key"
+    SlaveDockerCertFileName = "docker.cert"
+
+    slave_docker_auth_file  = slave_keys_dir + SlaveDockerAuthFileName
+    slave_docker_key_file   = slave_keys_dir + SlaveDockerKeyFileName
+    slave_docker_cert_file  = slave_keys_dir + SlaveDockerCertFileName
 
     // these files are 2048 RSA crypto files used for SSH.
     // 1) This should be acquired from Teleport Auth server
@@ -59,16 +68,6 @@ const (
     //hostaddr_file           = "/etc/hosts"
     host_timezone_file      = "/etc/timezone"
     //resolve_conf_file       = "/etc/resolv.conf"
-
-    // these files are 2048 RSA crypto files used for Docker & Registry. This should be acquired from Teleport Auth server
-    SlaveDockerAuthFileName = "docker.auth"
-    SlaveDockerKeyFileName  = "docker.key"
-    SlaveDockerCertFileName = "docker.cert"
-
-    slave_docker_auth_file  = slave_keys_dir + SlaveDockerAuthFileName
-    slave_docker_key_file   = slave_keys_dir + SlaveDockerKeyFileName
-    slave_docker_cert_file  = slave_keys_dir + SlaveDockerCertFileName
-
 )
 
 // ------ SALT DEFAULT ------

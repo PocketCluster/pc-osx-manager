@@ -9,15 +9,31 @@ import (
     "errors"
     "fmt"
     "io/ioutil"
-    "golang.org/x/crypto/ssh"
     "os"
+
+    "golang.org/x/crypto/ssh"
 )
 
 type Signature []byte
 
-
 const (
-    //------------------------------------------------ RSA PRIVATE KEY -----------------------------------------------------
+    //------------------------------------------------ Domain Registration ---------------------------------------------
+    // domain fqdn form
+    FormFQDNClusterID  string = "%s.cluster.pocketcluster.io"
+
+    //------------------------------------------------ File Extentions -------------------------------------------------
+    // private key
+    FileExtPrivateKey  string = ".pem"
+    // certificate sign request
+    FileExtCertRequest string = ".csr"
+    // signed certificate
+    FileExtCertificate string = ".crt"
+    // public key
+    FileExtPublicKey   string = ".pub"
+    // ssh key file
+    FileExtSSHKey      string = ".ssh"
+
+    //------------------------------------------------ RSA PRIVATE KEY -------------------------------------------------
     // As of now (10/13/2016), 1024-bit keysize is ineffective to defend from malicious attack.
     // But, this is required due to 1) slow slave node processing power (2048-bit key take 19.sec to pass tests on Odroid C2
     // and 2) bloated CryptoKeyExchange packet sent to slave (up to 620 bytes).

@@ -1,11 +1,14 @@
 package model
 
 import (
+    "fmt"
+
     "github.com/jinzhu/gorm"
     "github.com/pborman/uuid"
     "github.com/pkg/errors"
+
+    "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/utils"
-    "fmt"
 )
 
 type ClusterMeta struct {
@@ -21,7 +24,7 @@ type ClusterMeta struct {
 func NewClusterMeta() (*ClusterMeta) {
     var (
         cid string = utils.NewRandomString(16)
-        domain string = fmt.Sprintf("%s.cluster.pocketcluster.io", cid)
+        domain string = fmt.Sprintf(pcrypto.FormFQDNClusterID, cid)
     )
     return &ClusterMeta{
         // (03/25/2017)
