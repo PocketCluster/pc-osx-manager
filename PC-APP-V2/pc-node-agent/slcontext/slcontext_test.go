@@ -138,8 +138,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
     }
 }
 
-
-func TestDiscardSaveLoadSlaveContext(t *testing.T) {
+func Test_Save_Load_DiscardAll_SlaveContext(t *testing.T) {
     setUp()
     defer tearDown()
 
@@ -237,6 +236,88 @@ func TestDiscardSaveLoadSlaveContext(t *testing.T) {
     }
     if config.SLAVE_NAMESRV_VALUE != cfg.SlaveSection.SlaveNameServ {
         t.Error("[ERR] Incorrect slave name server")
+        return
+    }
+}
+
+func Test_Save_Load_DiscardSession_SlaveContext(t *testing.T) {
+    setUp()
+    defer tearDown()
+
+    const (
+        MASTER_AGENT_NAME = "master-yoda"
+        MASTER_IP4_ADDR = "192.168.1.4"
+        SLAVE_NODE_NAME = "pc-node1"
+    )
+
+    err := SharedSlaveContext().SetMasterPublicKey(pcrypto.TestMasterPublicKey());
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    err = SharedSlaveContext().SetMasterAgent(MASTER_AGENT_NAME)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    err = SharedSlaveContext().SetMasterIP4Address(MASTER_IP4_ADDR)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    err = SharedSlaveContext().SetSlaveNodeName(SLAVE_NODE_NAME)
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    err = SharedSlaveContext().SyncAll()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+    err = SharedSlaveContext().SaveConfiguration()
+    if err != nil {
+        t.Error(err.Error())
+        return
+    }
+
+    // we're to destroy context w/o deleting the config file
+    oldRoot := singletonContext.config.DebugGetRootPath()
+    singletonContext.config = nil
+    singletonContext = nil
+    DebugSlcontextPrepareWithRoot(oldRoot)
+
+    SharedSlaveContext().DiscardMasterSession()
+
+
+    mpk, err := SharedSlaveContext().GetMasterPublicKey()
+    if len(mpk) == 0 {
+        t.Error("[ERR] master public key should not be null")
+        return
+    }
+    if err != nil {
+        t.Error("[ERR] accessing master public key should not generate error")
+        return
+    }
+
+    ma, err := SharedSlaveContext().GetMasterAgent()
+    if len(ma) == 0 {
+        t.Error("[ERR] master agent name should not be void")
+        return
+    }
+    if err != nil {
+        t.Error("[ERR] accessing master agent name should not generate error")
+        return
+    }
+
+    maddr, err := SharedSlaveContext().GetMasterIP4Address()
+    if len(maddr) != 0 {
+        t.Error("[ERR] master ip address should be empty")
+        return
+    }
+    if err == nil {
+        t.Error("[ERR] accessing master ip address should generate error")
         return
     }
 }

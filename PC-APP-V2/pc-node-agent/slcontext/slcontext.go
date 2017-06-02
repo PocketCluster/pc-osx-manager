@@ -35,7 +35,6 @@ type PocketSlaveContext interface {
     SetAESKey(aesKey []byte) error
     // TODO : should this be removed? this is only used in testing. Plus, it does not handle error properlty
     GetAESKey() (aeskey []byte)
-    DiscardAESKey()
     AESCryptor() (pcrypto.AESCryptor, error)
     pcrypto.AESCryptor
 
@@ -44,6 +43,9 @@ type PocketSlaveContext interface {
 
     SetMasterIP4Address(ip4Address string) error
     GetMasterIP4Address() (string, error)
+
+    // Discard master aes key, ip address, and other session related data
+    DiscardMasterSession()
 
     SetSlaveNodeName(nodeName string) error
     GetSlaveNodeName() (string, error)
@@ -166,7 +168,7 @@ func (sc *slaveContext) SyncAll() error {
 // This should executed on failure from joining states (unbounded, inquired, keyexchange, checkcrypto)
 func (sc *slaveContext) DiscardAll() error {
     // discard aeskey
-    sc.DiscardAESKey()
+    sc.DiscardMasterSession()
 
     // remove decryptor
     sc.masterPubkey = nil
@@ -272,9 +274,10 @@ func (sc *slaveContext) GetAESKey() ([]byte) {
     return sc.aeskey
 }
 
-func (sc *slaveContext) DiscardAESKey() {
+func (sc *slaveContext) DiscardMasterSession() {
     sc.aesCryptor = nil
     sc.aeskey = nil
+    sc.config.MasterSection.MasterIP4Address = ""
     return
 }
 

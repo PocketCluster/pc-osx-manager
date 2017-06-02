@@ -131,6 +131,6 @@ func (ls *bounded) onStateTranstionSuccess(slaveTimestamp time.Time) error {
 }
 
 func (ls *bounded) onStateTranstionFailure(slaveTimestamp time.Time) error {
-    slcontext.SharedSlaveContext().DiscardAESKey()
+    slcontext.SharedSlaveContext().DiscardMasterSession()
     return nil
 }

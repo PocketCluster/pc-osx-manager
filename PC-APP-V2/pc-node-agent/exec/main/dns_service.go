@@ -1,13 +1,18 @@
 package main
 
 import (
+    "fmt"
     "net"
 
-    log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/miekg/dns"
     "github.com/stkim1/pc-node-agent/service"
     "github.com/stkim1/pc-node-agent/slcontext"
+)
+
+const (
+    localPocketMasterName string = "pc-master."
+    fqdnPocketMasterName  string = "pc-master.%s.cluster.pocketcluster.io."
 )
 
 func failWithRcode(w dns.ResponseWriter, r *dns.Msg, rCode int) {
@@ -21,28 +26,31 @@ func locaNameServe(w dns.ResponseWriter, req *dns.Msg) {
         failWithRcode(w, req, dns.RcodeRefused)
         return
     }
+
     question := req.Question[0]
     qtype := question.Qtype
     if question.Qclass != dns.ClassINET {
         failWithRcode(w, req, dns.RcodeRefused)
         return
     }
+
     remoteIP := w.RemoteAddr().(*net.UDPAddr).IP
     m := new(dns.Msg)
     m.Id = req.Id
+
     switch qtype {
-    case dns.TypeA:
-        remoteIP4 := remoteIP.To4();
-        if remoteIP4 != nil {
 
-            // TODO : fix full FQDN name service
-            if question.Name == "pc-master." {
+        case dns.TypeA: {
 
-                // TODO : fix address for unbounded state
+            remoteIP4 := remoteIP.To4();
+            ma, err := slcontext.SharedSlaveContext().GetMasterAgent()
+
+            if err == nil && remoteIP4 != nil {
+
+                fqdn := fmt.Sprintf(fqdnPocketMasterName, ma)
                 maddr, err := slcontext.SharedSlaveContext().GetMasterIP4Address()
-                if err != nil {
-                    log.Debugf("[ERR] local dns serve %v", errors.WithStack(err))
-                } else {
+
+                if err == nil && (question.Name == localPocketMasterName || question.Name == fqdn) {
                     rr := new(dns.A)
                     rr.Hdr = dns.RR_Header{
                         Name:      question.Name,
@@ -53,9 +61,11 @@ func locaNameServe(w dns.ResponseWriter, req *dns.Msg) {
                     rr.A = net.ParseIP(maddr)
                     m.Answer = []dns.RR{rr}
                 }
+
             }
         }
     }
+
     m.Question = req.Question
     m.Response = true
     m.Authoritative = true
