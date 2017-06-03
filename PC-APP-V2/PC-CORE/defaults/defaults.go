@@ -11,7 +11,7 @@ const (
 
     ClusterCertAuthCertificate string = "pc_cert_auth"   + pcrypto.FileExtCertificate
 
-    ClusterCertAuthSshCheck string    = "pc_cert_auth"   + pcrypto.FileExtSSHKey
+    ClusterCertAuthSshCheck string    = "pc_cert_auth"   + pcrypto.FileExtSSHCertificate
 
     MasterHostPrivateKey string       = "pc_master_host" + pcrypto.FileExtPrivateKey
 
@@ -19,5 +19,5 @@ const (
 
     MasterHostCertificate string      = "pc_master_host" + pcrypto.FileExtCertificate
 
-    MasterHostSshKey string           = "pc_master_host" + pcrypto.FileExtSSHKey
+    MasterHostSshKey string           = "pc_master_host" + pcrypto.FileExtSSHCertificate
 )

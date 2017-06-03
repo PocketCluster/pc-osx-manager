@@ -53,7 +53,7 @@ const (
     SlaveEngineCertFileName = slave_keys_dir + "pc_node_engine" + pcrypto.FileExtCertificate
 
     // these are files used for teleport certificate
-    SlaveSSHCertificateFileName = slave_keys_dir + "pc_node_ssh" + pcrypto.FileExtSSHKey
+    SlaveSSHCertificateFileName = slave_keys_dir + "pc_node_ssh" + pcrypto.FileExtSSHCertificate
     SlaveSSHPrivateKeyFileName  = slave_keys_dir + "pc_node_ssh" + pcrypto.FileExtPrivateKey
 
     // these files are 2048 RSA crypto files used for SSH.

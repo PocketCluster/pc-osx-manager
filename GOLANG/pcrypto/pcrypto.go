@@ -23,15 +23,15 @@ const (
 
     //------------------------------------------------ File Extentions -------------------------------------------------
     // private key
-    FileExtPrivateKey  string = ".pem"
+    FileExtPrivateKey        string = ".pem"
     // certificate sign request
-    FileExtCertRequest string = ".csr"
+    FileExtCertRequest       string = ".csr"
     // signed certificate
-    FileExtCertificate string = ".crt"
+    FileExtCertificate       string = ".crt"
     // public key
-    FileExtPublicKey   string = ".pub"
+    FileExtPublicKey         string = ".pub"
     // ssh key file
-    FileExtSSHKey      string = ".ssh"
+    FileExtSSHCertificate    string = ".ssh"
 
     //------------------------------------------------ RSA PRIVATE KEY -------------------------------------------------
     // As of now (10/13/2016), 1024-bit keysize is ineffective to defend from malicious attack.
