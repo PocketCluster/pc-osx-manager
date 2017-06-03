@@ -43,18 +43,18 @@ const (
 
     slave_keys_dir          = slave_config_dir + "pki/"
     // these files are 1024 RSA crypto files used to join network
-    slave_public_Key_file   = slave_keys_dir + "pc-slave"  + pcrypto.FileExtPublicKey
-    slave_prvate_Key_file   = slave_keys_dir + "pc-slave"  + pcrypto.FileExtPrivateKey
-    master_public_Key_file  = slave_keys_dir + "pc-master" + pcrypto.FileExtPublicKey
+    slave_public_Key_file   = slave_keys_dir + "pc_node_beacon"   + pcrypto.FileExtPublicKey
+    slave_prvate_Key_file   = slave_keys_dir + "pc_node_beacon"   + pcrypto.FileExtPrivateKey
+    master_public_Key_file  = slave_keys_dir + "pc_master_beacon" + pcrypto.FileExtPublicKey
 
     // these files are 2048 RSA crypto files used for Docker & Registry. This should be acquired from Teleport Auth server
-    SlaveAuthCertFileName   = "cert-auth" + pcrypto.FileExtCertificate
-    SlaveEngineKeyFileName  = "engine"    + pcrypto.FileExtPrivateKey
-    SlaveEngineCertFileName = "engine"    + pcrypto.FileExtCertificate
+    SlaveAuthCertFileName   = slave_keys_dir + "pc_cert_auth"   + pcrypto.FileExtCertificate
+    SlaveEngineKeyFileName  = slave_keys_dir + "pc_node_engine" + pcrypto.FileExtPrivateKey
+    SlaveEngineCertFileName = slave_keys_dir + "pc_node_engine" + pcrypto.FileExtCertificate
 
-    slave_docker_auth_file  = slave_keys_dir + SlaveAuthCertFileName
-    slave_docker_key_file   = slave_keys_dir + SlaveEngineKeyFileName
-    slave_docker_cert_file  = slave_keys_dir + SlaveEngineCertFileName
+    // these are files used for teleport certificate
+    SlaveSSHCertificateFileName = slave_keys_dir + "pc_node_ssh" + pcrypto.FileExtSSHKey
+    SlaveSSHPrivateKeyFileName  = slave_keys_dir + "pc_node_ssh" + pcrypto.FileExtPrivateKey
 
     // these files are 2048 RSA crypto files used for SSH.
     // 1) This should be acquired from Teleport Auth server
