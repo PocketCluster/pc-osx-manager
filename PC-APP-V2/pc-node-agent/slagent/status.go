@@ -8,15 +8,15 @@ import (
 )
 
 type PocketSlaveStatus struct {
-    Version             StatusProtocol  `msgpack:"s_ps"`
+    Version          StatusProtocol    `msgpack:"s_ps"`
     // slave response
-    SlaveResponse       ResponseType    `msgpack:"s_rt,omitempty`
+    SlaveResponse    ResponseType      `msgpack:"s_rt, omitempty"`
     // slave nodename
-    SlaveNodeName       string          `msgpack:"s_nm,omitempty"`
+    SlaveNodeName    string            `msgpack:"s_nm, omitempty"`
     // slave UUID
-    SlaveUUID           string          `msgpack:"s_uu,omitempty"`
-    SlaveHardware       string          `msgpack:"s_hw"`
-    SlaveTimestamp      time.Time       `msgpack:"s_ts"`
+    SlaveUUID        string            `msgpack:"s_uu, omitempty"`
+    SlaveHardware    string            `msgpack:"s_hw"`
+    SlaveTimestamp   time.Time         `msgpack:"s_ts"`
 }
 
 func (ssa *PocketSlaveStatus) IsAppropriateSlaveInfo() bool {

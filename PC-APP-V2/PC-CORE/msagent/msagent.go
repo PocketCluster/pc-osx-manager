@@ -24,14 +24,14 @@ const (
 
 // Discovery & Status tag for meta
 const (
-    MASTER_ENCRYPTED_COMMAND    = "m_ec"
-    MASTER_DISCOVER_RESPOND     = "m_dr"
-    MASTER_STATUS_COMMANDER     = "m_sc"
-    MASTER_PUBLIC_KEY           = "m_pk"
-    MASTER_ENCRYPTED_AESKEY     = "m_ak"
-    MASTER_RSA_SIGNATURE        = "m_sg"
-    MASTER_ENCRYPTED_SLAVE      = "m_es"
-    MASTER_ENCRYPTED_RESPOND    = "m_er"
+    MASTER_ENCRYPTED_COMMAND    string = "m_ec"
+    MASTER_DISCOVER_RESPOND     string = "m_dr"
+    MASTER_STATUS_COMMANDER     string = "m_sc"
+    MASTER_PUBLIC_KEY           string = "m_pk"
+    MASTER_ENCRYPTED_AESKEY     string = "m_ak"
+    MASTER_RSA_SIGNATURE        string = "m_sg"
+    MASTER_ENCRYPTED_SLAVE      string = "m_es"
+    MASTER_ENCRYPTED_RESPOND    string = "m_er"
 )
 
 // ------ COMMAND DEFINITIONS ------
@@ -49,16 +49,16 @@ const (
 
 // ------ MASTER SECTION ------
 const (
-    //MASTER_SECTION              = "master"
+    //MASTER_SECTION              string = "master"
 
     // bound-id
-    MASTER_BOUND_AGENT          = "m_ba"
+    MASTER_BOUND_AGENT          string = "m_ba"
     // master ip4 / ip6
-    MASTER_IP4_ADDRESS          = "m_i4"
-    MASTER_IP6_ADDRESS          = "m_i6"
+    MASTER_IP4_ADDRESS          string = "m_i4"
+    MASTER_IP6_ADDRESS          string = "m_i6"
     // master datetime
-    MASTER_TIMESTAMP            = "m_ts"
+    MASTER_TIMESTAMP            string = "m_ts"
 
     // TODO : Do we need this?
-    //MASTER_HOSTNAME        = "m_hn"
+    //MASTER_HOSTNAME             string = "m_hn"
 )

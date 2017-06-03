@@ -8,11 +8,11 @@ import (
 type PocketSlaveDiscovery struct {
     Version             DiscoveryProtocol    `msgpack:"s_pd"`
     // slave response
-    SlaveResponse       ResponseType         `msgpack:"s_rt,omitempty`
+    SlaveResponse       ResponseType         `msgpack:"s_rt, omitempty"`
 
     // slave
-    SlaveAddress        string               `msgpack:"s_i4,omitempty"`
-    SlaveGateway        string               `msgpack:"s_g4,omitempty"`
+    SlaveAddress        string               `msgpack:"s_i4, omitempty"`
+    SlaveGateway        string               `msgpack:"s_g4, omitempty"`
 
     // TODO : check if nameserver & node name is really necessary for discovery
     //SlaveNameServer     string     `bson:"pc_sl_ns,omitempty"
