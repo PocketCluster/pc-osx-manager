@@ -72,7 +72,7 @@ func setupServiceConfig() (*serviceConfig, error) {
     }
 
     // certificate authority
-    caBundle, err := certAuthSigner(rec.Certdb(), meta, country)
+    caBundle, err := buildCertAuthSigner(rec.Certdb(), meta, country)
     if err != nil {
         // this is critical
         log.Debugf(err.Error())
@@ -81,13 +81,22 @@ func setupServiceConfig() (*serviceConfig, error) {
     ctx.UpdateCertAuth(caBundle)
 
     // host certificate
-    hostBundle, err := hostCertificate(rec.Certdb(), caBundle.CASigner, tefaults.CoreHostName, meta.ClusterUUID)
+    hostBundle, err := buildHostCertificate(rec.Certdb(), caBundle.CASigner, tefaults.CoreHostName, meta.ClusterUUID)
     if err != nil {
         // this is critical
         log.Debugf(err.Error())
         return nil, errors.WithStack(err)
     }
     ctx.UpdateHostCert(hostBundle)
+
+    // beacon certificate
+    beaconBundle, err := buildBeaconCertificate(rec.Certdb(), meta.ClusterUUID)
+    if err != nil {
+        // this is critical
+        log.Debugf(err.Error())
+        return nil, errors.WithStack(err)
+    }
+    ctx.UpdateBeaconCert(beaconBundle)
 
     // make teleport core config
     teleCfg := tervice.MakeCoreConfig(dataDir, true)

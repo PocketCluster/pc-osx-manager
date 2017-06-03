@@ -20,4 +20,8 @@ const (
     MasterHostCertificate string      = "pc_master_host" + pcrypto.FileExtCertificate
 
     MasterHostSshKey string           = "pc_master_host" + pcrypto.FileExtSSHCertificate
+
+    MasterBeaconPrivateKey string     = "pc_master_beacon" + pcrypto.FileExtPrivateKey
+
+    MasterBeaconPublicKey string      = "pc_master_beacon" + pcrypto.FileExtPublicKey
 )

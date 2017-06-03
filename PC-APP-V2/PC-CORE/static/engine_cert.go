@@ -11,7 +11,7 @@ import (
 )
 
 //certificate authority generation
-func certAuthSigner(certRec certdb.Accessor, meta *model.ClusterMeta, country string) (*context.CertAuthBundle, error) {
+func buildCertAuthSigner(certRec certdb.Accessor, meta *model.ClusterMeta, country string) (*context.CertAuthBundle, error) {
     var (
         signer *pcrypto.CaSigner = nil
         prvKey []byte  = nil
@@ -93,7 +93,7 @@ func certAuthSigner(certRec certdb.Accessor, meta *model.ClusterMeta, country st
 }
 
 // host certificate
-func hostCertificate(certRec certdb.Accessor, caSigner *pcrypto.CaSigner, hostname, clusterUUID string) (*context.HostCertBundle, error) {
+func buildHostCertificate(certRec certdb.Accessor, caSigner *pcrypto.CaSigner, hostname, clusterUUID string) (*context.HostCertBundle, error) {
     var (
         prvKey []byte  = nil
         pubKey []byte  = nil
@@ -172,5 +172,53 @@ func hostCertificate(certRec certdb.Accessor, caSigner *pcrypto.CaSigner, hostna
         PublicKey:      pubKey,
         SshKey:         sshPem,
         Certificate:    crtPem,
+    }, nil
+}
+
+// beacon certificate for slaves
+func buildBeaconCertificate(certRec certdb.Accessor, clusterUUID string) (*context.BeaconCertBundle, error) {
+    var (
+        prvKey []byte  = nil
+        pubKey []byte  = nil
+        err error      = nil
+
+        prvRec, rerr = certRec.GetCertificate(pcdefaults.MasterBeaconPrivateKey,  clusterUUID)
+        pubRec, uerr = certRec.GetCertificate(pcdefaults.MasterBeaconPublicKey,   clusterUUID)
+    )
+
+    if (rerr != nil || uerr != nil) || (len(prvRec) == 0 || len(pubRec) == 0) {
+        pubKey, prvKey, _, err = pcrypto.GenerateWeakKeyPair()
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+        // save private key
+        err = certRec.InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(prvKey),
+            Serial:     pcdefaults.MasterBeaconPrivateKey,
+            AKI:        clusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+        // save public key
+        err = certRec.InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(pubKey),
+            Serial:     pcdefaults.MasterBeaconPublicKey,
+            AKI:        clusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+    } else {
+        prvKey = []byte(prvRec[0].PEM)
+        pubKey = []byte(pubRec[0].PEM)
+    }
+    return &context.BeaconCertBundle{
+        PrivateKey:     prvKey,
+        PublicKey:      pubKey,
     }, nil
 }
