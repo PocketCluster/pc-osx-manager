@@ -54,8 +54,8 @@ type HostContext interface {
 
     // beacon certificate
     UpdateBeaconCert(bundle *BeaconCertBundle)
-    BeaconPublicKey() ([]byte, error)
-    BeaconPrivateKey() ([]byte, error)
+    MasterBeaconPublicKey() ([]byte, error)
+    MasterBeaconPrivateKey() ([]byte, error)
 }
 
 type hostContext struct {
@@ -443,7 +443,7 @@ func (ctx *hostContext) UpdateBeaconCert(bundle *BeaconCertBundle) {
     ctx.beaconBundle = bundle
 }
 
-func (ctx *hostContext) BeaconPublicKey() ([]byte, error) {
+func (ctx *hostContext) MasterBeaconPublicKey() ([]byte, error) {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -453,7 +453,7 @@ func (ctx *hostContext) BeaconPublicKey() ([]byte, error) {
     return ctx.beaconBundle.PublicKey, nil
 }
 
-func (ctx *hostContext) BeaconPrivateKey() ([]byte, error) {
+func (ctx *hostContext) MasterBeaconPrivateKey() ([]byte, error) {
     ctx.Lock()
     defer ctx.Unlock()
 

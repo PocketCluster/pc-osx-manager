@@ -34,7 +34,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         SLAVE_NODE_NAME = "pc-node1"
     )
 
-    err := SharedSlaveContext().SetMasterPublicKey(pcrypto.TestMasterPublicKey());
+    err := SharedSlaveContext().SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey());
     if err != nil {
         t.Error(err.Error())
         return
@@ -78,7 +78,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if !reflect.DeepEqual(mpk, pcrypto.TestMasterPublicKey()) {
+    if !reflect.DeepEqual(mpk, pcrypto.TestMasterWeakPublicKey()) {
         t.Error("[ERR] Master Public key is not properly loaded")
         return
     }
@@ -148,7 +148,7 @@ func Test_Save_Load_DiscardAll_SlaveContext(t *testing.T) {
         SLAVE_NODE_NAME = "pc-node1"
     )
 
-    err := SharedSlaveContext().SetMasterPublicKey(pcrypto.TestMasterPublicKey());
+    err := SharedSlaveContext().SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey());
     if err != nil {
         t.Error(err.Error())
         return
@@ -250,7 +250,7 @@ func Test_Save_Load_DiscardSession_SlaveContext(t *testing.T) {
         SLAVE_NODE_NAME = "pc-node1"
     )
 
-    err := SharedSlaveContext().SetMasterPublicKey(pcrypto.TestMasterPublicKey());
+    err := SharedSlaveContext().SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey());
     if err != nil {
         t.Error(err.Error())
         return

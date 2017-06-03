@@ -23,7 +23,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
         context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
     )
 
-    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), initSendTimestmap)
+    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterWeakPublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -134,7 +134,7 @@ func Test_Keyexchange_Cryptocheck_MasterMetaFail(t *testing.T) {
     }
     // inquired -> keyexchange
     masterTS := slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), masterTS)
+    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterWeakPublicKey(), masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -270,7 +270,7 @@ func Test_keyexchange_Cryptocheck_TxActionFail(t *testing.T) {
     }
     // inquired -> keyexchange
     masterTS := slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), masterTS)
+    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterWeakPublicKey(), masterTS)
     if err != nil {
         t.Error(err.Error())
         return

@@ -79,8 +79,8 @@ func (s *RecordSuite) TestSlaveNodeCRUD(c *C) {
         LastAlive:      ts1,
         NodeName:       firstSlave,
         State:          SNMStateJoined,
-        PublicKey:      pcrypto.TestMasterPublicKey(),
-        PrivateKey:     pcrypto.TestMasterPrivateKey(),
+        PublicKey:      pcrypto.TestMasterWeakPublicKey(),
+        PrivateKey:     pcrypto.TestMasterWeakPrivateKey(),
     }
     err = InsertSlaveNode(slave2)
     c.Assert(err, IsNil)
@@ -109,8 +109,8 @@ func (s *RecordSuite) TestSlaveNodeCRUD(c *C) {
 
     for _, n := range nodes {
         if n.NodeName == firstSlave {
-            c.Assert(n.PublicKey, DeepEquals, pcrypto.TestMasterPublicKey())
-            c.Assert(n.PrivateKey, DeepEquals, pcrypto.TestMasterPrivateKey())
+            c.Assert(n.PublicKey, DeepEquals, pcrypto.TestMasterWeakPublicKey())
+            c.Assert(n.PrivateKey, DeepEquals, pcrypto.TestMasterWeakPrivateKey())
         }
 
         if n.NodeName == secondSlave {

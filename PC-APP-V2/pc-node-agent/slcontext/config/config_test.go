@@ -271,7 +271,7 @@ func TestConfigSaveReloadPublicMasterKey(t *testing.T) {
     }
     defer DebugConfigDestory(cfg)
 
-    err = cfg.SaveMasterPublicKey(pcrypto.TestMasterPublicKey())
+    err = cfg.SaveMasterPublicKey(pcrypto.TestMasterWeakPublicKey())
     if err != nil {
         t.Error(err.Error())
         return
@@ -283,7 +283,7 @@ func TestConfigSaveReloadPublicMasterKey(t *testing.T) {
         return
     }
 
-    if !reflect.DeepEqual(master, pcrypto.TestMasterPublicKey()) {
+    if !reflect.DeepEqual(master, pcrypto.TestMasterWeakPublicKey()) {
         t.Error("[ERR] Master Publickey is different!")
         return
     }

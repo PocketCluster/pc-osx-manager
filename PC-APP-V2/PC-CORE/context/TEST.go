@@ -85,8 +85,12 @@ func DebugContextPrepare() (HostContext) {
         CAPrvKey:      pcrypto.TestCertPrivateKey(),
     }
     hostBundle  := &HostCertBundle{
-        PublicKey:     pcrypto.TestMasterPublicKey(),
-        PrivateKey:    pcrypto.TestMasterPrivateKey(),
+        PublicKey:     pcrypto.TestMasterStrongPublicKey(),
+        PrivateKey:    pcrypto.TestMasterStrongPrivateKey(),
+    }
+    beaconBundle := &BeaconCertBundle{
+        PublicKey:     pcrypto.TestMasterWeakPublicKey(),
+        PrivateKey:    pcrypto.TestMasterWeakPrivateKey(),
     }
 
     _context = &hostContext{
@@ -117,6 +121,9 @@ func DebugContextPrepare() (HostContext) {
 
         // host certificate
         hostBundle:                  hostBundle,
+
+        // beacon certificate
+        beaconBundle:                beaconBundle,
     }
 
     _context.refreshNetworkGateways(test_gateways)

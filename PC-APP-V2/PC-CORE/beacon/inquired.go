@@ -43,7 +43,7 @@ type inquired struct {
 }
 
 func (b *inquired) transitionActionWithTimestamp(masterTimestamp time.Time) error {
-    masterPubKey, err := context.SharedHostContext().MasterHostPublicKey()
+    masterPubKey, err := context.SharedHostContext().MasterBeaconPublicKey()
     if err != nil {
         return errors.WithStack(err)
     }
@@ -109,7 +109,7 @@ func (b *inquired) inquired(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentM
     }
 
     // master public key
-    masterPrvKey, err := context.SharedHostContext().MasterHostPrivateKey()
+    masterPrvKey, err := context.SharedHostContext().MasterBeaconPrivateKey()
     if err != nil {
         return MasterTransitionFail, errors.WithStack(err)
     }

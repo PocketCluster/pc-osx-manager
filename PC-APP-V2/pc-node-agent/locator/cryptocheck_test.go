@@ -52,7 +52,7 @@ func Test_Cryptocheck_Bounded_MasterMetaFail(t *testing.T) {
     }
     // inquired -> keyexchange
     masterTS := slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), masterTS)
+    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterWeakPublicKey(), masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -213,7 +213,7 @@ func Test_Cryptocheck_Bounded_TxActionFail(t *testing.T) {
     }
     // inquired -> keyexchange
     masterTS := slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), masterTS)
+    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterWeakPublicKey(), masterTS)
     if err != nil {
         t.Error(err.Error())
         return

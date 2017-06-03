@@ -19,7 +19,7 @@ func TestInquired_KeyExchangeTransition(t *testing.T) {
         debugEvent *DebugEventReceiver = &DebugEventReceiver{}
     )
 
-    meta, endTime, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), initSendTimestmap)
+    meta, endTime, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterWeakPublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -93,7 +93,7 @@ func Test_Inquired_Keyexchange_MasterMetaFail(t *testing.T) {
     for i := 0; i < TransitionFailureLimit; i++ {
         // inquired -> keyexchange
         masterTS = slaveTS.Add(time.Second)
-        meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), masterTS)
+        meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterWeakPublicKey(), masterTS)
         if err != nil {
             t.Error(err.Error())
             return

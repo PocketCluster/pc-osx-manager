@@ -121,7 +121,7 @@ func TestMasterDeclarationMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    meta, end, err := TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), initTime)
+    meta, end, err := TestMasterAgentDeclarationCommand(pcrypto.TestMasterWeakPublicKey(), initTime)
     if err != nil {
         t.Error(err.Error())
         return

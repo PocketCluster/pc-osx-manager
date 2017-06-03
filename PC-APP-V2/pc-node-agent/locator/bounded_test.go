@@ -48,7 +48,7 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
     }
 
     // inquired -> keyexchange
-    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), initSendTimestmap)
+    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterWeakPublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -164,7 +164,7 @@ func Test_Bounded_Unbroken_Loop(t *testing.T) {
     }
 
     // inquired -> keyexchange
-    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), initSendTimestmap)
+    meta, masterTS, err := msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterWeakPublicKey(), initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -326,7 +326,7 @@ func Test_Bounded_BindBroken_MasterMeta_Fail(t *testing.T) {
     }
     // inquired -> keyexchange
     masterTS := slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), masterTS)
+    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterWeakPublicKey(), masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -459,7 +459,7 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
         masterTS, slaveTS = time.Now(), time.Now()
     )
 
-    context.SetMasterPublicKey(pcrypto.TestMasterPublicKey())
+    context.SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey())
     context.SetMasterAgent(masterAgentName)
     context.SetSlaveNodeName(slaveNodeName)
     context.SetSlaveNodeUUID(slaveUUID)
