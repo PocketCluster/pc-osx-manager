@@ -416,9 +416,12 @@ func (s *CaSigner) GenerateSignedCertificate(hostname, ipAddress string, private
         Request:    string(nodereq),
         Subject:    subject,
     }
+/*
+    // TODO : (2017-06-03) we'll look into introducing another unique id (e.g. CPU ID) instead of IP address as it fixates a certificate to an ip
     if len(ipAddress) != 0 {
         creq.ipAddress = []string{ipAddress}
     }
+*/
     if !s.policy.Valid() {
         return nil, &certError{"[ERR] Invalid Certificate Authority Policy"}
     }

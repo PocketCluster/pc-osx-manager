@@ -101,10 +101,10 @@ func hostCertificate(certRec certdb.Accessor, caSigner *pcrypto.CaSigner, hostna
         sshPem []byte  = nil
         err error      = nil
 
-        prvRec, rerr = certRec.GetCertificate(pcdefaults.MasterHostPrivateKey, clusterUUID)
-        pubRec, uerr = certRec.GetCertificate(pcdefaults.MasterHostPublicKey, clusterUUID)
+        prvRec, rerr = certRec.GetCertificate(pcdefaults.MasterHostPrivateKey,  clusterUUID)
+        pubRec, uerr = certRec.GetCertificate(pcdefaults.MasterHostPublicKey,   clusterUUID)
         crtRec, cerr = certRec.GetCertificate(pcdefaults.MasterHostCertificate, clusterUUID)
-        sshRec, serr = certRec.GetCertificate(pcdefaults.MasterHostSshKey, clusterUUID)
+        sshRec, serr = certRec.GetCertificate(pcdefaults.MasterHostSshKey,      clusterUUID)
     )
 
     if (rerr != nil || uerr != nil || cerr != nil || serr != nil) || (len(prvRec) == 0 || len(pubRec) == 0 || len(crtRec) == 0 || len(sshRec) == 0) {
