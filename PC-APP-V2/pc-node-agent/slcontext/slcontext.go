@@ -1,9 +1,9 @@
 package slcontext
 
 import (
-    "log"
     "sync"
 
+    log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-node-agent/slcontext/config"
@@ -49,8 +49,11 @@ type PocketSlaveContext interface {
 
     SetSlaveNodeName(nodeName string) error
     GetSlaveNodeName() (string, error)
-    SetSlaveNodeUUID(uuid string) error
     GetSlaveNodeUUID() (string, error)
+
+    // authtoken
+    SetSlaveAuthToken(authToken string) error
+    GetSlaveAuthToken() (string, error)
 
     SlaveKeyAndCertPath() string
     SlaveConfigPath() string
@@ -179,13 +182,13 @@ func (sc *slaveContext) DiscardAll() error {
     }
 
     // master agent name
-    sc.config.MasterSection.MasterBoundAgent = ""
+    sc.config.MasterSection.MasterBoundAgent    = ""
     // master ip4 address
-    sc.config.MasterSection.MasterIP4Address = ""
+    sc.config.MasterSection.MasterIP4Address    = ""
     // slave node name
-    sc.config.SlaveSection.SlaveNodeName = ""
-    // slave node uuid
-    sc.config.SlaveSection.SlaveNodeUUID = ""
+    sc.config.SlaveSection.SlaveNodeName        = ""
+    // slave auth token
+    sc.config.SlaveSection.SlaveAuthToken       = ""
     return nil
 }
 
@@ -351,19 +354,26 @@ func (sc *slaveContext) GetSlaveNodeName() (string, error) {
 }
 
 // --- Slave Node UUID ---
-func (sc *slaveContext) SetSlaveNodeUUID(uuid string) error {
-    if len(uuid) == 0 {
-        return errors.Errorf("[ERR] Cannot set empty slave UUID")
+func (sc *slaveContext) GetSlaveNodeUUID() (string, error) {
+    if len(sc.config.SlaveSection.SlaveNodeUUID) == 0 {
+        return "", errors.Errorf("[ERR] invalid slave node UUID")
     }
-    sc.config.SlaveSection.SlaveNodeUUID = uuid
+    return sc.config.SlaveSection.SlaveNodeUUID, nil
+}
+
+func (sc *slaveContext) SetSlaveAuthToken(authToken string) error {
+    if len(authToken) == 0 {
+        return errors.Errorf("[ERR] cannot assign invalid slave auth token")
+    }
+    sc.config.SlaveSection.SlaveAuthToken = authToken
     return nil
 }
 
-func (sc *slaveContext) GetSlaveNodeUUID() (string, error) {
-    if len(sc.config.SlaveSection.SlaveNodeUUID) == 0 {
-        return "", errors.Errorf("[ERR] Empty slave node UUID")
+func (sc *slaveContext) GetSlaveAuthToken() (string, error) {
+    if len(sc.config.SlaveSection.SlaveAuthToken) == 0 {
+        return "", errors.Errorf("[ERR] invalid slave auth token")
     }
-    return sc.config.SlaveSection.SlaveNodeUUID, nil
+    return sc.config.SlaveSection.SlaveAuthToken, nil
 }
 
 // TODO : add tests

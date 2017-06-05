@@ -133,7 +133,7 @@ func (ls *keyexchange) transitionWithMasterMeta(meta *msagent.PocketMasterAgentM
     if err != nil {
         return SlaveTransitionFail, errors.WithStack(err)
     }
-    err = slcontext.SharedSlaveContext().SetSlaveNodeUUID(nodeIdentity.SlaveUUID)
+    err = slcontext.SharedSlaveContext().SetSlaveAuthToken(nodeIdentity.SlaveUUID)
     if err != nil {
         return SlaveTransitionFail, errors.WithStack(err)
     }

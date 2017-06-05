@@ -8,6 +8,7 @@ import (
 
     "github.com/pkg/errors"
     "gopkg.in/yaml.v2"
+    "github.com/pborman/uuid"
     "github.com/stkim1/pcrypto"
 )
 
@@ -95,6 +96,7 @@ type ConfigMasterSection struct {
 type ConfigSlaveSection struct {
     SlaveNodeName       string                   `yaml:"slave-node-name"`
     SlaveNodeUUID       string                   `yaml:"slave-node-uuid"`
+    SlaveAuthToken      string                   `yaml:"slave-auth-token"`
     SlaveMacAddr        string                   `yaml:"slave-mac-addr"`
     //SlaveIP6Addr        string
     SlaveIP4Addr        string                   `yaml:"slave-net-ip4"`
@@ -125,7 +127,9 @@ func _brandNewSlaveConfig(rootPath string) (*PocketSlaveConfig) {
         // TODO : we need to avoid cyclic import but need to fix this
         BindingStatus:    "SlaveUnbounded", //locator.SlaveUnbounded.String(),
         MasterSection:    &ConfigMasterSection{},
-        SlaveSection:     &ConfigSlaveSection{},
+        SlaveSection:     &ConfigSlaveSection{
+            SlaveNodeUUID:    uuid.New(),
+        },
     }
 }
 
@@ -142,6 +146,8 @@ func _loadSlaveConfig(rootPath string) (*PocketSlaveConfig) {
 
         // config file path
         configFilePath string   = rootPath + slave_config_file
+
+        makeKeys bool           = false
     )
 
     // check if config dir exists, and creat if DNE
@@ -155,14 +161,13 @@ func _loadSlaveConfig(rootPath string) (*PocketSlaveConfig) {
     }
 
     // create pocketcluster join key sets
-    var makePcJoinKeys bool = false
     if _, err := os.Stat(pcPubKeyPath); os.IsNotExist(err) {
-        makePcJoinKeys = true
+        makeKeys = true
     }
     if _, err := os.Stat(pcPrvKeyPath); os.IsNotExist(err) {
-        makePcJoinKeys = true
+        makeKeys = true
     }
-    if makePcJoinKeys {
+    if makeKeys {
         pcrypto.GenerateWeakKeyPairFiles(pcPubKeyPath, pcPrvKeyPath, "")
     }
 
