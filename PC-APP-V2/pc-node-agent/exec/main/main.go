@@ -212,18 +212,19 @@ func initTeleportNodeService(app service.AppSupervisor) error {
                         log.Errorf(err.Error())
                         continue
                     }
+                    // execute docker engine cert acquisition before SSH node start
+                    state, ok := noti.Payload.(locator.SlaveLocatingState)
+                    if ok && state == locator.SlaveCryptoCheck {
+                        // TODO : create a waitforevent channel and restart docker engine accordingly
+                        err = nodeProc.AcquireEngineCertificate(slcontext.DockerEnvironemtPostProcess)
+                        if err != nil {
+                            log.Errorf(err.Error())
+                        }
+                    }
                     err = nodeProc.StartNodeSSH()
                     if err != nil {
                         log.Errorf(err.Error())
                         continue
-                    }
-                    state, ok := noti.Payload.(locator.SlaveLocatingState)
-                    if ok && state == locator.SlaveCryptoCheck {
-                        // TODO : create a waitforevent channel and restart docker engine accordingly
-                        err = nodeProc.AcquireEngineCertificate()
-                        if err != nil {
-                            log.Errorf(err.Error())
-                        }
                     }
                     log.Debugf("\n\n(INFO) teleport node started success!\n")
 
