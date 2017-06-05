@@ -97,7 +97,7 @@ func MasterDeclarationCommand(uss *slagent.PocketSlaveStatus, timestamp time.Tim
 }
 
 // Since this is the first time data gets encrypted, we're to send slave node name, AES key and signature.
-func ExchangeCryptoKeyAndNameCommand(uss *slagent.PocketSlaveStatus, slavename, slaveUUID string, timestamp time.Time) (*PocketMasterCommand, *slagent.PocketSlaveIdentity, error) {
+func ExchangeCryptoKeyAndNameCommand(uss *slagent.PocketSlaveStatus, slavename, slaveAuthToken string, timestamp time.Time) (*PocketMasterCommand, *slagent.PocketSlaveIdentity, error) {
     if string(uss.Version) != string(MASTER_RESPOND_VERSION) {
         return nil, nil, errors.Errorf("[ERR] Master <-> Slave Discovery version mismatch")
     }
@@ -117,7 +117,7 @@ func ExchangeCryptoKeyAndNameCommand(uss *slagent.PocketSlaveStatus, slavename, 
         return nil, nil, errors.Errorf("[ERR] Cannot find out Master ip address %v", err.Error())
     }
     // make copy of slave status agent & set slave node name
-    slaveId := slagent.NewPocketSlaveIdentity(slavename, slaveUUID)
+    slaveId := slagent.NewPocketSlaveIdentity(slavename, slaveAuthToken)
     command := &PocketMasterCommand{
         Version:              MASTER_COMMAND_VERSION,
         MasterCommandType:    COMMAND_EXCHANGE_CRPTKEY,
