@@ -14,14 +14,17 @@ import (
 )
 
 var (
-    masterAgentName string
-    slaveNodeName string = "pc-node1"
+    masterAgentName, slaveNodeName, authToken string
     initSendTimestmap time.Time
+    piface slcontext.NetworkInterface
 )
 
 func setUp() {
     initSendTimestmap, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
-    masterAgentName, _ = context.DebugContextPrepare().MasterAgentName()
+    masterAgentName, _   = context.DebugContextPrepare().MasterAgentName()
+    slaveNodeName        = "pc-node1"
+    authToken            = uuid.New()
+    piface, _            = slcontext.PrimaryNetworkInterface()
     slcontext.DebugSlcontextPrepare()
 }
 
@@ -33,8 +36,6 @@ func tearDown() {
 func TestUnboundedBroadcastMeta(t *testing.T) {
     setUp()
     defer tearDown()
-
-    piface, _ := slcontext.PrimaryNetworkInterface()
 
     //--- testing body ---
     ma, err := TestSlaveUnboundedMasterSearchDiscovery()
@@ -263,8 +264,7 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
     setUp()
     defer tearDown()
 
-    slaveUUID := uuid.New()
-    ma, _, err := TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, initSendTimestmap)
+    ma, _, err := TestSlaveCheckCryptoStatus(masterAgentName, slaveNodeName, authToken, pcrypto.TestAESCryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -308,8 +308,8 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave agent name %s\n", slaveNodeName)
         return
     }
-    if sd.SlaveUUID != slaveUUID  {
-        t.Errorf("[ERR] Incorrect slave uuid %s\n", slaveUUID)
+    if sd.SlaveAuthToken != authToken  {
+        t.Errorf("[ERR] Incorrect slave auth token %s\n", authToken)
         return
     }
     if sd.SlaveHardware != runtime.GOARCH {
@@ -375,8 +375,8 @@ func TestSlaveCheckCryptoAgent(t *testing.T) {
         t.Error("[ERR] Unidentical StatusAgent.SlaveNodeName")
         return
     }
-    if sd.SlaveUUID != usd.SlaveUUID{
-        t.Error("[ERR] Unidentical StatusAgent.SlaveUUID")
+    if sd.SlaveAuthToken != usd.SlaveAuthToken {
+        t.Error("[ERR] Unidentical StatusAgent.SlaveAuthToken")
         return
     }
     if sd.SlaveHardware != usd.SlaveHardware {
@@ -399,8 +399,7 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
     setUp()
     defer tearDown()
 
-    slaveUUID := uuid.New()
-    ma, _, err := TestSlaveBoundedStatus(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, initSendTimestmap)
+    ma, _, err := TestSlaveBoundedStatus(masterAgentName, slaveNodeName, authToken, pcrypto.TestAESCryptor, initSendTimestmap)
     if err != nil {
         t.Error(err.Error())
         return
@@ -439,8 +438,8 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Errorf("[ERR] Incorrect slave agent name %s\n", slaveNodeName)
         return
     }
-    if sd.SlaveUUID != slaveUUID  {
-        t.Errorf("[ERR] Incorrect slave uuid %s\n", slaveUUID)
+    if sd.SlaveAuthToken != authToken {
+        t.Errorf("[ERR] Incorrect slave auth token %s\n", authToken)
         return
     }
     if sd.SlaveHardware != runtime.GOARCH {
@@ -506,8 +505,8 @@ func TestBoundedStatusMetaAgent(t *testing.T) {
         t.Error("[ERR] Unidentical StatusAgent.SlaveNodeName")
         return
     }
-    if sd.SlaveUUID != usd.SlaveUUID{
-        t.Error("[ERR] Unidentical StatusAgent.SlaveUUID")
+    if sd.SlaveAuthToken != usd.SlaveAuthToken {
+        t.Error("[ERR] Unidentical StatusAgent.SlaveAuthToken")
         return
     }
     if sd.SlaveHardware != usd.SlaveHardware {

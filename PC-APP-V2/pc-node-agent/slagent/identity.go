@@ -6,18 +6,18 @@ import (
 )
 
 type PocketSlaveIdentity struct {
-    Version          StatusProtocol    `msgpack:"s_ps"`
+    Version           StatusProtocol    `msgpack:"s_ps"`
     // slave nodename
-    SlaveNodeName    string            `msgpack:"s_nm, omitempty"`
+    SlaveNodeName     string            `msgpack:"s_nm, omitempty"`
     // slave UUID
-    SlaveUUID        string            `msgpack:"s_uu, omitempty"`
+    SlaveAuthToken    string            `msgpack:"s_at, omitempty"`
 }
 
-func NewPocketSlaveIdentity(nodename, uuid string) *PocketSlaveIdentity {
+func NewPocketSlaveIdentity(nodename, autoToken string) *PocketSlaveIdentity {
     return &PocketSlaveIdentity {
-        Version:          SLAVE_STATUS_VERSION,
-        SlaveNodeName:    nodename,
-        SlaveUUID:        uuid,
+        Version:           SLAVE_STATUS_VERSION,
+        SlaveNodeName:     nodename,
+        SlaveAuthToken:    autoToken,
     }
 }
 

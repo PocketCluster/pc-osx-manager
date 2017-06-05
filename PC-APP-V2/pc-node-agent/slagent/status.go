@@ -8,15 +8,15 @@ import (
 )
 
 type PocketSlaveStatus struct {
-    Version          StatusProtocol    `msgpack:"s_ps"`
+    Version           StatusProtocol    `msgpack:"s_ps"`
     // slave response
-    SlaveResponse    ResponseType      `msgpack:"s_rt, omitempty"`
+    SlaveResponse     ResponseType      `msgpack:"s_rt, omitempty"`
     // slave nodename
-    SlaveNodeName    string            `msgpack:"s_nm, omitempty"`
+    SlaveNodeName     string            `msgpack:"s_nm, omitempty"`
     // slave UUID
-    SlaveUUID        string            `msgpack:"s_uu, omitempty"`
-    SlaveHardware    string            `msgpack:"s_hw"`
-    SlaveTimestamp   time.Time         `msgpack:"s_ts"`
+    SlaveAuthToken    string            `msgpack:"s_at, omitempty"`
+    SlaveHardware     string            `msgpack:"s_hw"`
+    SlaveTimestamp    time.Time         `msgpack:"s_ts"`
 }
 
 func (ssa *PocketSlaveStatus) IsAppropriateSlaveInfo() bool {
@@ -54,23 +54,23 @@ func KeyExchangeStatus(timestamp time.Time) (*PocketSlaveStatus, error) {
     }, nil
 }
 
-func CheckSlaveCryptoStatus(nodename, uuid string, timestamp time.Time) (*PocketSlaveStatus, error) {
+func CheckSlaveCryptoStatus(nodename, authToken string, timestamp time.Time) (*PocketSlaveStatus, error) {
     return &PocketSlaveStatus {
         Version:           SLAVE_STATUS_VERSION,
         SlaveResponse:     SLAVE_CHECK_CRYPTO,
         SlaveNodeName:     nodename,
-        SlaveUUID:         uuid,
+        SlaveAuthToken:    authToken,
         SlaveHardware:     runtime.GOARCH,
         SlaveTimestamp:    timestamp,
     }, nil
 }
 
-func SlaveBoundedStatus(nodename, uuid string, timestamp time.Time) (*PocketSlaveStatus, error) {
+func SlaveBoundedStatus(nodename, authToken string, timestamp time.Time) (*PocketSlaveStatus, error) {
     return &PocketSlaveStatus {
         Version:           SLAVE_STATUS_VERSION,
         SlaveResponse:     SLAVE_REPORT_STATUS,
         SlaveNodeName:     nodename,
-        SlaveUUID:         uuid,
+        SlaveAuthToken:    authToken,
         SlaveHardware:     runtime.GOARCH,
         SlaveTimestamp:    timestamp,
     }, nil

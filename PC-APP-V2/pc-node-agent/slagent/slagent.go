@@ -30,7 +30,7 @@ const (
     SLAVE_ENCRYPTED_STATUS  string = "s_es"
     SLAVE_PUBLIC_KEY        string = "s_pk"
     SLAVE_SSH_KEY           string = "s_sh"
-    SLAVE_UUID              string = "s_uu"
+    SLAVE_AUTH_TOKEN        string = "s_at"
 )
 
 // Report types (respond to command)

@@ -126,14 +126,14 @@ func (ls *keyexchange) transitionWithMasterMeta(meta *msagent.PocketMasterAgentM
     if len(nodeIdentity.SlaveNodeName) == 0 {
         return SlaveTransitionFail, errors.Errorf("[ERR] invalid slave node name")
     }
-    if len(nodeIdentity.SlaveUUID) == 0 {
-        return SlaveTransitionFail, errors.Errorf("[ERR] invalid slave node UUID")
+    if len(nodeIdentity.SlaveAuthToken) == 0 {
+        return SlaveTransitionFail, errors.Errorf("[ERR] invalid slave auth token")
     }
     err = slcontext.SharedSlaveContext().SetSlaveNodeName(nodeIdentity.SlaveNodeName)
     if err != nil {
         return SlaveTransitionFail, errors.WithStack(err)
     }
-    err = slcontext.SharedSlaveContext().SetSlaveAuthToken(nodeIdentity.SlaveUUID)
+    err = slcontext.SharedSlaveContext().SetSlaveAuthToken(nodeIdentity.SlaveAuthToken)
     if err != nil {
         return SlaveTransitionFail, errors.WithStack(err)
     }
