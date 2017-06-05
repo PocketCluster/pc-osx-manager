@@ -18,7 +18,7 @@ const (
     DOCKER_ENV_FILE string              = DOCKER_ENV_PATH + "docker"
 
     DOCKER_AUTH_CERT_PATH string        = "/etc/docker/certs.d/pc-master/"
-    DOCKER_AUTH_CERT_FILE string        = DOCKER_AUTH_CERT_PATH + "pc_cert_auth" + pcrypto.FileExtCertificate
+    DOCKER_AUTH_CERT_FILE string        = DOCKER_AUTH_CERT_PATH + "ca" + pcrypto.FileExtCertificate
 
     SYSTEM_AUTH_CERT_NATIVE_FILE string = "/etc/ssl/certs/ca-certificates.crt"
     SYSTEM_AUTH_CERT_BACKUP_PATH string = slave_config_dir + "backup/"
@@ -79,14 +79,14 @@ func SetupDockerEnvironement(rootPath string) error {
             return errors.WithStack(err)
         }
     }
+/*
+    TODO : this isn't necessary unless you want to make sure there only is one problem, DNE.
     _, err = os.Stat(dockerEnvFile)
-    if err != nil {
-        if os.IsExist(err) {
-            os.Remove(dockerEnvFile)
-        } else {
-            return errors.WithStack(err)
-        }
+    if err != nil && !os.IsNotExist(err) {
+        return errors.WithStack(err)
     }
+*/
+    os.Remove(dockerEnvFile)
 
     err = ioutil.WriteFile(dockerEnvFile, dockerEnvContent(), cert_file_permission)
     return errors.WithStack(err)
@@ -94,12 +94,17 @@ func SetupDockerEnvironement(rootPath string) error {
 
 func SetupDockerAuthorityCert(rootPath string) error {
     var (
+        slaveAuthCertFile string  = path.Join(rootPath, SlaveAuthCertFileName)
         dockerAuthCertPath string = path.Join(rootPath, DOCKER_AUTH_CERT_PATH)
         dockerAuthCertFile string = path.Join(rootPath, DOCKER_AUTH_CERT_FILE)
         err error = nil
     )
     if !path.IsAbs(dockerAuthCertPath) {
         return errors.Errorf("[ERR] invalid root path")
+    }
+    _, err = os.Stat(slaveAuthCertFile)
+    if err != nil {
+        return errors.WithStack(err)
     }
     _, err = os.Stat(dockerAuthCertPath)
     if err != nil {
@@ -109,16 +114,16 @@ func SetupDockerAuthorityCert(rootPath string) error {
             return errors.WithStack(err)
         }
     }
+/*
+    TODO : this isn't necessary unless you want to make sure there only is one problem, DNE.
     _, err = os.Stat(dockerAuthCertFile)
-    if err != nil {
-        if os.IsExist(err) {
-            os.Remove(dockerAuthCertFile)
-        } else {
-            return errors.WithStack(err)
-        }
+    if err != nil && !os.IsNotExist(err) {
+        return errors.WithStack(err)
     }
+*/
+    os.Remove(dockerAuthCertFile)
 
-    return copyFile(SlaveAuthCertFileName, dockerAuthCertFile)
+    return copyFile(slaveAuthCertFile, dockerAuthCertFile)
 }
 
 // Setup system cert for docker to connect registry

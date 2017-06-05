@@ -54,7 +54,7 @@ const (
 
     // these are files used for teleport certificate
     SlaveSSHCertificateFileName string = slave_keys_dir + "pc_node_ssh" + pcrypto.FileExtSSHCertificate
-    SlaveSSHPrivateKeyFileName  string = slave_keys_dir + "pc_node_ssh" + pcrypto.FileExtPrivateKey
+    SlaveSSHPrivateKeyFileName string  = slave_keys_dir + "pc_node_ssh" + pcrypto.FileExtPrivateKey
 
     // these files are 2048 RSA crypto files used for SSH.
     // 1) This should be acquired from Teleport Auth server
@@ -64,8 +64,8 @@ const (
 
     // HOST GENERAL CONFIG
     network_iface_file string          = "/etc/network/interfaces"
-    hostname_file  string              = "/etc/hostname"
-    //hostaddr_file  string              = "/etc/hosts"
+    hostname_file string               = "/etc/hostname"
+    //hostaddr_file string               = "/etc/hosts"
     host_timezone_file string          = "/etc/timezone"
     //resolve_conf_file string           = "/etc/resolv.conf"
 )
