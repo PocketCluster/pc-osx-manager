@@ -22,7 +22,7 @@ const (
 
     SYSTEM_AUTH_CERT_NATIVE_FILE string = "/etc/ssl/certs/ca-certificates.crt"
     SYSTEM_AUTH_CERT_BACKUP_PATH string = slave_config_dir + "backup/"
-    SYSTEM_AUTH_CERT_BACKUP_FILE string = slave_config_dir + "ca-certificates" + pcrypto.FileExtCertificate
+    SYSTEM_AUTH_CERT_BACKUP_FILE string = SYSTEM_AUTH_CERT_BACKUP_PATH + "ca-certificates" + pcrypto.FileExtCertificate
 )
 
 func dockerEnvContent() []byte {
