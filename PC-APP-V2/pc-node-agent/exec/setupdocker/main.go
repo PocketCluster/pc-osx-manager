@@ -15,4 +15,9 @@ func main() {
     if err != nil {
         log.Info(err.Error())
     }
+
+    err = config.AppendAuthCertFowardSystemCertAuthority("")
+    if err != nil {
+        log.Info(err.Error())
+    }
 }
