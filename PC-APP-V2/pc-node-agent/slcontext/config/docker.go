@@ -97,6 +97,7 @@ func SetupDockerAuthorityCert(rootPath string) error {
         slaveAuthCertFile string  = path.Join(rootPath, SlaveAuthCertFileName)
         dockerAuthCertPath string = path.Join(rootPath, DOCKER_AUTH_CERT_PATH)
         dockerAuthCertFile string = path.Join(rootPath, DOCKER_AUTH_CERT_FILE)
+
         err error = nil
     )
     if !path.IsAbs(dockerAuthCertPath) {
@@ -130,10 +131,10 @@ func SetupDockerAuthorityCert(rootPath string) error {
 // This function assumes that docker auth certificate exists, and we just need to append it to system certs collection
 func AppendAuthCertFowardSystemCertAuthority(rootPath string) error {
     var (
+        slaveAuthCertFile string        = path.Join(rootPath, SlaveAuthCertFileName)
         systemAuthCertNativeFile string = path.Join(rootPath, SYSTEM_AUTH_CERT_NATIVE_FILE)
         systemAuthCertBackupPath string = path.Join(rootPath, SYSTEM_AUTH_CERT_BACKUP_PATH)
         systemAuthCertBackupFile string = path.Join(rootPath, SYSTEM_AUTH_CERT_BACKUP_FILE)
-        dockerAuthCertFile       string = path.Join(rootPath, DOCKER_AUTH_CERT_FILE)
 
         systemCert, dockerAuthCert, updatedCert []byte
         err error = nil
@@ -142,7 +143,7 @@ func AppendAuthCertFowardSystemCertAuthority(rootPath string) error {
         return errors.Errorf("[ERR] invalid root path")
     }
     // following two files should exist
-    _, err = os.Stat(dockerAuthCertFile)
+    _, err = os.Stat(slaveAuthCertFile)
     if err != nil {
         return errors.WithStack(err)
     }
@@ -178,7 +179,7 @@ func AppendAuthCertFowardSystemCertAuthority(rootPath string) error {
         return errors.WithStack(err)
     }
     // read downloaded docker certificate
-    dockerAuthCert, err = ioutil.ReadFile(dockerAuthCertFile)
+    dockerAuthCert, err = ioutil.ReadFile(slaveAuthCertFile)
     if err != nil {
         return errors.WithStack(err)
     }

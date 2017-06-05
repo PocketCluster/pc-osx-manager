@@ -1,6 +1,7 @@
 package config
 
 import (
+    "os"
     "path"
     "testing"
     "reflect"
@@ -65,6 +66,12 @@ func TestDockerAuthorityCert(t *testing.T) {
     }
     defer DebugConfigDestory(cfg)
 
+    // make slave pki path
+    err = os.MkdirAll(path.Join(cfg.rootPath, slave_keys_dir), cert_path_permission);
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
     // first save some file to pki place
     err = ioutil.WriteFile(path.Join(cfg.rootPath, SlaveAuthCertFileName), pcrypto.TestCertPublicAuth(), cert_file_permission)
     if err != nil {
@@ -120,4 +127,74 @@ func TestAppendAuthCertFowardSystemCertAuthority(t *testing.T) {
     }
     defer DebugConfigDestory(cfg)
 
+    // *** This run assumes that we don't have backup *** //
+    // prepare final cert
+    var updatedCert []byte = append(pcrypto.TestCertPublicAuth(), pcrypto.TestCertPublicAuth()...)
+    // make system native cert dir
+    err = os.MkdirAll(path.Join(cfg.rootPath, "/etc/ssl/certs/"), cert_path_permission);
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+    // system native cert
+    err = ioutil.WriteFile(path.Join(cfg.rootPath, SYSTEM_AUTH_CERT_NATIVE_FILE), pcrypto.TestCertPublicAuth(), cert_file_permission)
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+    // make slave pki path
+    err = os.MkdirAll(path.Join(cfg.rootPath, slave_keys_dir), cert_path_permission);
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+    // slave cert
+    err = ioutil.WriteFile(path.Join(cfg.rootPath, SlaveAuthCertFileName), pcrypto.TestCertPublicAuth(), cert_file_permission)
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+
+    // append new docker cert to system native
+    err = AppendAuthCertFowardSystemCertAuthority(cfg.rootPath)
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+    sca, err := ioutil.ReadFile(path.Join(cfg.rootPath, SYSTEM_AUTH_CERT_NATIVE_FILE))
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+    if !reflect.DeepEqual(sca, updatedCert) {
+        t.Errorf(err.Error())
+        return
+    }
+
+    // *** This run assumes that we "HAVE" backup *** //
+    // firstly make sure backup is what we are looking for
+    sbc, err := ioutil.ReadFile(path.Join(cfg.rootPath, SYSTEM_AUTH_CERT_BACKUP_FILE))
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+    if !reflect.DeepEqual(sbc, pcrypto.TestCertPublicAuth()) {
+        t.Errorf(err.Error())
+        return
+    }
+    // then append cert to make sure everything goes as expected
+    err = AppendAuthCertFowardSystemCertAuthority(cfg.rootPath)
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+    sca, err = ioutil.ReadFile(path.Join(cfg.rootPath, SYSTEM_AUTH_CERT_NATIVE_FILE))
+    if err != nil {
+        t.Errorf(err.Error())
+        return
+    }
+    if !reflect.DeepEqual(sca, updatedCert) {
+        t.Errorf(err.Error())
+        return
+    }
 }
