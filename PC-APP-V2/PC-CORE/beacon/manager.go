@@ -360,11 +360,11 @@ func assignSlaveNodeName(b *beaconManger, s *model.SlaveNode) {
     var (
         ci int = 0
         cname string = ""
-        findName = func(mbl []MasterBeacon, nUUID, nName string) bool {
+        findName = func(mbl []MasterBeacon, authToken, nName string) bool {
             var bLen = len(mbl)
             for i := 0; i < bLen; i++ {
                 mb := mbl[i]
-                if mb.SlaveNode().SlaveUUID == nUUID {
+                if mb.SlaveNode().AuthToken == authToken {
                     continue
                 }
                 switch mb.CurrentState() {
@@ -382,7 +382,7 @@ func assignSlaveNodeName(b *beaconManger, s *model.SlaveNode) {
 
     for {
         cname = fmt.Sprintf("pc-node%d", ci + 1)
-        if !findName(b.beaconList, s.SlaveUUID, cname) {
+        if !findName(b.beaconList, s.AuthToken, cname) {
             s.NodeName = cname
             return
         }

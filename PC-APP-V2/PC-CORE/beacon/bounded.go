@@ -108,7 +108,7 @@ func (b *bounded) bounded(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentMet
     if b.slaveNode.NodeName != usm.SlaveNodeName {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave node name")
     }
-    if b.slaveNode.SlaveUUID != usm.SlaveUUID {
+    if b.slaveNode.AuthToken != usm.SlaveAuthToken {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave UUID")
     }
     // check address

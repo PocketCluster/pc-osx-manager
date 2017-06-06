@@ -56,7 +56,7 @@ func (s *ManagerSuite) TestWatch(c *C) {
     aescryptor := mb.(*masterBeacon).state.(DebugState).AESCryptor()
 
     // create slave meta
-    sa, err := slagent.SlaveBoundedStatus("pc-node1", mb.SlaveNode().SlaveUUID, slaveTS)
+    sa, err := slagent.SlaveBoundedStatus("pc-node1", mb.SlaveNode().AuthToken, slaveTS)
     c.Assert(err, IsNil)
     mp, err := slagent.PackedSlaveStatus(sa)
     c.Assert(err, IsNil)
