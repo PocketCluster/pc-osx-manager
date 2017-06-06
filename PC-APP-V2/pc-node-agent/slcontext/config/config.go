@@ -109,7 +109,8 @@ type PocketSlaveConfig struct {
     // this field exists to create files at a specific location for testing so ignore
     rootPath            string                   `yaml:"-"`
     ConfigVersion       string                   `yaml:"config-version"`
-    BindingStatus       string                   `yaml:"binding-status"`
+    // TODO : we need to avoid cyclic import but need to fix this
+    //BindingStatus       string                   `yaml:"binding-status"`
     MasterSection       *ConfigMasterSection     `yaml:"master-section",inline,flow`
     SlaveSection        *ConfigSlaveSection      `yaml:"slave-section",inline,flow`
 }
@@ -125,7 +126,7 @@ func _brandNewSlaveConfig(rootPath string) (*PocketSlaveConfig) {
         rootPath:         rootPath,
         ConfigVersion:    SLAVE_CONFIG_VAL,
         // TODO : we need to avoid cyclic import but need to fix this
-        BindingStatus:    "SlaveUnbounded", //locator.SlaveUnbounded.String(),
+        //BindingStatus:    "SlaveUnbounded", //locator.SlaveUnbounded.String(),
         MasterSection:    &ConfigMasterSection{},
         SlaveSection:     &ConfigSlaveSection{
             SlaveNodeUUID:    uuid.New(),

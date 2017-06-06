@@ -322,8 +322,8 @@ func initAgentService(app service.AppSupervisor) error {
             )
 
             // setup slave locator
-            uuid, err := context.GetSlaveNodeUUID()
-            if err == nil && len(uuid) != 0 {
+            authToken, err := context.GetSlaveAuthToken()
+            if err == nil && len(authToken) != 0 {
                 locState = locator.SlaveBindBroken
             } else {
                 locState = locator.SlaveUnbounded
