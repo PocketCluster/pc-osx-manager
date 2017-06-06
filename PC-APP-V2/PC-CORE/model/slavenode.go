@@ -164,15 +164,22 @@ func (s *SlaveNode) SanitizeSlave() error {
 
 // when a slavenode is spawn, an UUID is given, but it could be changed for other joiner (e.g. teleport)
 // when the slavenode has not been persisted.
-func (s *SlaveNode) SetSlaveID(id string) error {
-    if len(id) == 0 {
-        return errors.Errorf("[ERR] slave id should be in appropriate lengh")
+func (s *SlaveNode) SetAuthToken(authToken string) error {
+    if len(authToken) == 0 {
+        return errors.Errorf("[ERR] slave auth token should be in appropriate lengh")
     }
     if s.State != SNMStateInit {
-        return errors.Errorf("[ERR] cannot modify slave id when slave is not in SNMStateInit")
+        return errors.Errorf("[ERR] cannot modify slave auth token when slave is not in SNMStateInit")
     }
-    s.AuthToken = id
+    s.AuthToken = authToken
     return nil
+}
+
+func (s *SlaveNode) GetAuthToken() (string, error) {
+    if len(s.AuthToken) == 0 {
+        return "", errors.Errorf("[ERR] invalid slave auth token")
+    }
+    return s.AuthToken, nil
 }
 
 func (s *SlaveNode) JoinSlave() error {

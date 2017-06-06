@@ -90,7 +90,7 @@ type DebugBeaconNotiReceiver struct {
 }
 
 func (d *DebugBeaconNotiReceiver) BeaconEventPrepareJoin(slave *model.SlaveNode) error {
-    err := slave.SetSlaveID(utils.NewRandomString(maxRandomSlaveIdLenth))
+    err := slave.SetAuthToken(utils.NewRandomString(maxRandomSlaveIdLenth))
     if err != nil {
         log.Debugf(err.Error())
     }
