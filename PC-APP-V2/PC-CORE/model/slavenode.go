@@ -23,7 +23,7 @@ const (
     SNMFieldArch            = "arch"
     SNMFieldNodeName        = "node_name"
     SNMFieldState           = "state"
-    SNMFieldUUID            = "slave_uuid"
+    SNMFieldAuthToken       = "auth_token"
     SNMFieldIP4Address      = "ip4_address"
     SNMFieldIP4Gateway      = "ip4_gateway"
     SNMFieldIP4Netmask      = "ip4_netmask"
@@ -61,7 +61,7 @@ type SlaveNode struct {
     MacAddress      string       `gorm:"column:mac_address;type:VARCHAR(32)"`
     Arch            string       `gorm:"column:arch;type:VARCHAR(32)"`
     NodeName        string       `gorm:"column:node_name;type:VARCHAR(64)"`
-    SlaveUUID       string       `gorm:"column:slave_uuid;type:VARCHAR(64)"`
+    AuthToken       string       `gorm:"column:auth_token;type:VARCHAR(64)"`
 
     // slave node       s tate : joined/ departed/ more in the future
     State           string       `gorm:"column:state;type:VARCHAR(32)"`
@@ -92,7 +92,7 @@ func NewSlaveNode(ns NodeSanitizer) *SlaveNode {
     return &SlaveNode {
         ModelVersion:    SlaveNodeModelVersion,
         // whenever slave is generated, new UUID should be assigned to it.
-        SlaveUUID:       uuid.New(),
+        AuthToken:       uuid.New(),
         State:           SNMStateInit,
         sanitizer:       ns,
     }
@@ -171,20 +171,20 @@ func (s *SlaveNode) SetSlaveID(id string) error {
     if s.State != SNMStateInit {
         return errors.Errorf("[ERR] cannot modify slave id when slave is not in SNMStateInit")
     }
-    s.SlaveUUID = id
+    s.AuthToken = id
     return nil
 }
 
-func (s *SlaveNode) GetSlaveID() string {
-    return s.SlaveUUID
+func (s *SlaveNode) GetAuthToken() string {
+    return s.AuthToken
 }
 
 func (s *SlaveNode) JoinSlave() error {
     if s.ModelVersion != SlaveNodeModelVersion {
         return errors.Errorf("[ERR] incorrect slave model version")
     }
-    // TODO : check UUID format
-    if len(s.SlaveUUID) == 0 {
+    // TODO : check token format
+    if len(s.AuthToken) == 0 {
         return errors.Errorf("[ERR] incorrect uuid length")
     }
     // TODO : check node name formet
@@ -210,8 +210,8 @@ func (s *SlaveNode) Update() error {
     if s.ModelVersion != SlaveNodeModelVersion {
         return errors.Errorf("[ERR] incorrect slave model version")
     }
-    // TODO : check UUID format
-    if len(s.SlaveUUID) == 0 {
+    // TODO : check token format
+    if len(s.AuthToken) == 0 {
         return errors.Errorf("[ERR] incorrect uuid length")
     }
     // TODO : check node name formet

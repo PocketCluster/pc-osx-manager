@@ -39,7 +39,7 @@ func DebugTestSlaveNode() *SlaveNode {
     s.MacAddress      = piface.HardwareAddr
     s.Arch            = runtime.GOARCH
     s.NodeName        = DEBUG_SLAVE_NODE_NAME
-    s.SlaveUUID       = uuid.New()
+    s.AuthToken       = uuid.New()
 
     s.IP4Address      = piface.PrimaryIP4Addr()
     s.IP4Gateway      = piface.GatewayAddr

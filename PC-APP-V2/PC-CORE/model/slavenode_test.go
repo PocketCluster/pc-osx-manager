@@ -19,7 +19,7 @@ func (s *RecordSuite) TestAllNodeCount(c *C) {
         sl := NewSlaveNode(nil)
         sl.NodeName = "pc-node1"
         sl.MacAddress = fmt.Sprintf("%d", i)
-        sl.SlaveUUID = uuid.New()
+        sl.AuthToken = uuid.New()
         sl.PublicKey = pcrypto.TestSlavePublicKey()
         c.Assert(sl.JoinSlave(), IsNil)
     }
@@ -32,20 +32,20 @@ func (s *RecordSuite) TestAllNodeCount(c *C) {
 
 func (s *RecordSuite) TestFindSingleNode(c *C) {
     var (
-        uuidList []string = []string{}
+        authTokenList []string = []string{}
     )
     for i := 0; i < allNodeCount; i++ {
         ui := uuid.New()
         sl := NewSlaveNode(nil)
         sl.MacAddress = fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i)
-        sl.SlaveUUID = ui
+        sl.AuthToken = ui
         sl.NodeName = "pc-node1"
         sl.PublicKey = pcrypto.TestSlavePublicKey()
-        uuidList = append(uuidList, ui)
+        authTokenList = append(authTokenList, ui)
         c.Assert(sl.JoinSlave(), IsNil)
     }
     for i := 0; i < allNodeCount; i++ {
-        nodes, err := FindSlaveNode(string(SNMFieldUUID + " = ?"), uuidList[i])
+        nodes, err := FindSlaveNode(string(SNMFieldAuthToken + " = ?"), authTokenList[i])
         c.Assert(err, IsNil)
         c.Assert(len(nodes), Equals, 1)
         c.Assert(nodes[0].MacAddress, Equals, fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i))
