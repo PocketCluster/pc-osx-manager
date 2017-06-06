@@ -38,7 +38,7 @@ func (b *beaconEventRoute) BeaconEventPrepareJoin(slave *model.SlaveNode) error 
     if err != nil {
         return errors.WithStack(err)
     }
-    return errors.WithStack(slave.SetSlaveID(token))
+    return errors.WithStack(slave.SetAuthToken(token))
 }
 
 func (b *beaconEventRoute) BeaconEventResurrect(slaves []model.SlaveNode) error {
@@ -47,9 +47,9 @@ func (b *beaconEventRoute) BeaconEventResurrect(slaves []model.SlaveNode) error 
 
 func (b *beaconEventRoute) BeaconEventTranstion(state beacon.MasterBeaconState, slave *model.SlaveNode, ts time.Time, transOk bool) error {
     if transOk {
-        log.Debugf("(INFO) [%v | %v] BeaconEventTranstion -> %v | SUCCESS ", ts, slave.SlaveUUID, state.String())
+        log.Debugf("(INFO) [%v | %v] BeaconEventTranstion -> %v | SUCCESS ", ts, slave.AuthToken, state.String())
     } else {
-        log.Debugf("(INFO) [%v | %v] BeaconEventTranstion -> %v | FAILED ", ts, slave.SlaveUUID, state.String())
+        log.Debugf("(INFO) [%v | %v] BeaconEventTranstion -> %v | FAILED ", ts, slave.AuthToken, state.String())
     }
 
     return nil

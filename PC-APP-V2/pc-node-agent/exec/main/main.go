@@ -192,17 +192,7 @@ func initTeleportNodeService(app service.AppSupervisor) error {
 
                 case noti := <-startC: {
                     // restart teleport
-                    maddr, err := slcontext.SharedSlaveContext().GetMasterIP4Address()
-                    if err != nil {
-                        log.Errorf(err.Error())
-                        continue
-                    }
-                    slid, err := slcontext.SharedSlaveContext().GetSlaveNodeUUID()
-                    if err != nil {
-                        log.Errorf(err.Error())
-                        continue
-                    }
-                    cfg, err := tervice.MakeNodeConfig(maddr, slid, true)
+                    cfg, err := tervice.MakeNodeConfig(slcontext.SharedSlaveContext(), true)
                     if err != nil {
                         log.Errorf(err.Error())
                         continue
