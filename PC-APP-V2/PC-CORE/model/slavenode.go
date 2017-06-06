@@ -19,11 +19,11 @@ const (
     SNMFieldJoined          = "joined"
     SNMFieldDeparted        = "departed"
     SNMFieldLastAlive       = "last_alive"
-    SNMFieldMacAddress      = "mac_address"
-    SNMFieldArch            = "arch"
+    SNMFieldSlaveID         = "slave_id"
+    SNMFieldHardware        = "hardware"
     SNMFieldNodeName        = "node_name"
     SNMFieldState           = "state"
-    SNMFieldUUID            = "slave_uuid"
+    SNMFieldAuthToken       = "auth_token"
     SNMFieldIP4Address      = "ip4_address"
     SNMFieldIP4Gateway      = "ip4_gateway"
     SNMFieldIP4Netmask      = "ip4_netmask"
@@ -58,10 +58,10 @@ type SlaveNode struct {
     LastAlive       time.Time    `gorm:"column:last_alive;type:DATETIME"`
 
     ModelVersion    string       `gorm:"column:model_version;type:VARCHAR(8)"`
-    MacAddress      string       `gorm:"column:mac_address;type:VARCHAR(32)"`
-    Arch            string       `gorm:"column:arch;type:VARCHAR(32)"`
+    SlaveID         string       `gorm:"column:slave_id;type:VARCHAR(32)"`
+    Hardware        string       `gorm:"column:hardware;type:VARCHAR(32)"`
     NodeName        string       `gorm:"column:node_name;type:VARCHAR(64)"`
-    SlaveUUID       string       `gorm:"column:slave_uuid;type:VARCHAR(64)"`
+    AuthToken       string       `gorm:"column:auth_token;type:VARCHAR(64)"`
 
     // slave node       s tate : joined/ departed/ more in the future
     State           string       `gorm:"column:state;type:VARCHAR(32)"`
@@ -92,7 +92,7 @@ func NewSlaveNode(ns NodeSanitizer) *SlaveNode {
     return &SlaveNode {
         ModelVersion:    SlaveNodeModelVersion,
         // whenever slave is generated, new UUID should be assigned to it.
-        SlaveUUID:       uuid.New(),
+        AuthToken:       uuid.New(),
         State:           SNMStateInit,
         sanitizer:       ns,
     }
@@ -162,12 +162,32 @@ func (s *SlaveNode) SanitizeSlave() error {
     return s.sanitizer.Sanitize(s)
 }
 
+// when a slavenode is spawn, an UUID is given, but it could be changed for other joiner (e.g. teleport)
+// when the slavenode has not been persisted.
+func (s *SlaveNode) SetAuthToken(authToken string) error {
+    if len(authToken) == 0 {
+        return errors.Errorf("[ERR] slave auth token should be in appropriate lengh")
+    }
+    if s.State != SNMStateInit {
+        return errors.Errorf("[ERR] cannot modify slave auth token when slave is not in SNMStateInit")
+    }
+    s.AuthToken = authToken
+    return nil
+}
+
+func (s *SlaveNode) GetAuthToken() (string, error) {
+    if len(s.AuthToken) == 0 {
+        return "", errors.Errorf("[ERR] invalid slave auth token")
+    }
+    return s.AuthToken, nil
+}
+
 func (s *SlaveNode) JoinSlave() error {
     if s.ModelVersion != SlaveNodeModelVersion {
         return errors.Errorf("[ERR] incorrect slave model version")
     }
-    // TODO : check UUID format
-    if len(s.SlaveUUID) != 36 {
+    // TODO : check token format
+    if len(s.AuthToken) == 0 {
         return errors.Errorf("[ERR] incorrect uuid length")
     }
     // TODO : check node name formet
@@ -193,8 +213,8 @@ func (s *SlaveNode) Update() error {
     if s.ModelVersion != SlaveNodeModelVersion {
         return errors.Errorf("[ERR] incorrect slave model version")
     }
-    // TODO : check UUID format
-    if len(s.SlaveUUID) != 36 {
+    // TODO : check token format
+    if len(s.AuthToken) == 0 {
         return errors.Errorf("[ERR] incorrect uuid length")
     }
     // TODO : check node name formet

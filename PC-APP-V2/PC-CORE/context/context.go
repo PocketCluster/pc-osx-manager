@@ -41,12 +41,21 @@ type HostContext interface {
     SetMasterAgentName(man string)
 
     // cert authority
+    UpdateCertAuth(bundle *CertAuthBundle)
     CertAuthSigner() (*pcrypto.CaSigner, error)
     CertAuthPublicKey() ([]byte, error)
+    CertAuthCertificate() ([]byte, error)
+
     // host certificate
+    UpdateHostCert(bundle *HostCertBundle)
     MasterHostPublicKey() ([]byte, error)
     MasterHostPrivateKey() ([]byte, error)
     MasterHostCertificate() ([]byte, error)
+
+    // beacon certificate
+    UpdateBeaconCert(bundle *BeaconCertBundle)
+    MasterBeaconPublicKey() ([]byte, error)
+    MasterBeaconPrivateKey() ([]byte, error)
 }
 
 type hostContext struct {
@@ -81,17 +90,13 @@ type hostContext struct {
     currentLanguageCode          string
 
     // certificate authority
-    *pcrypto.CaSigner
-    caPrivateKey                 []byte
-    caPublicKey                  []byte
-    caCertificate                []byte
-    caSSHChecker                 []byte
+    caBundle                     *CertAuthBundle
 
     // host certificate
-    hostPrivateKey               []byte
-    hostPublicKey                []byte
-    hostSshKey                   []byte
-    hostCertifcate               []byte
+    hostBundle                   *HostCertBundle
+
+    // beacon certificate
+    beaconBundle                 *BeaconCertBundle
 }
 
 // singleton initialization
@@ -162,44 +167,6 @@ func (ctx *hostContext) refreshNetworkGateways(gateways []*HostNetworkGateway) {
         }
     }
     return
-}
-
-type CertAuthBundle struct {
-    CASigner *pcrypto.CaSigner
-    CAPrvKey []byte
-    CAPubKey []byte
-    CACrtPem []byte
-    CASSHChk []byte
-}
-
-func UpdateCertAuth(bundle *CertAuthBundle) {
-    ctx := singletonContextInstance()
-    ctx.Lock()
-    defer ctx.Unlock()
-
-    ctx.CaSigner        = bundle.CASigner
-    ctx.caPrivateKey    = bundle.CAPrvKey
-    ctx.caPublicKey     = bundle.CAPubKey
-    ctx.caCertificate   = bundle.CACrtPem
-    ctx.caSSHChecker    = bundle.CASSHChk
-}
-
-type HostCertBundle struct {
-    PrivateKey     []byte
-    PublicKey      []byte
-    SshKey         []byte
-    Certificate    []byte
-}
-
-func UpdateHostCert(bundle *HostCertBundle) {
-    ctx := singletonContextInstance()
-    ctx.Lock()
-    defer ctx.Unlock()
-
-    ctx.hostPrivateKey  = bundle.PrivateKey
-    ctx.hostPublicKey   = bundle.PublicKey
-    ctx.hostSshKey      = bundle.SshKey
-    ctx.hostCertifcate  = bundle.Certificate
 }
 
 func (ctx *hostContext) CocoaHomeDirectory() (string, error) {
@@ -372,37 +339,126 @@ func (ctx *hostContext) CurrentLanguageCode() (string, error) {
     return ctx.currentLanguageCode, nil
 }
 
+// --- Certificate Authority Handling --- //
+type CertAuthBundle struct {
+    CASigner *pcrypto.CaSigner
+    CAPrvKey []byte
+    CAPubKey []byte
+    CACrtPem []byte
+    CASSHChk []byte
+}
+
+func (ctx *hostContext) UpdateCertAuth(bundle *CertAuthBundle) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    ctx.caBundle = bundle
+}
+
 func (ctx *hostContext) CertAuthSigner() (*pcrypto.CaSigner, error) {
-    if ctx.CaSigner == nil {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    if ctx.caBundle == nil || ctx.caBundle.CASigner == nil {
         return nil, errors.Errorf("[ERR] invalid cert authority signer")
     }
-    return ctx.CaSigner, nil
+    return ctx.caBundle.CASigner, nil
 }
 
 func (ctx *hostContext) CertAuthPublicKey() ([]byte, error) {
-    if ctx.caPublicKey == nil {
-        return nil, errors.Errorf("[ERR] invalid cert public key")
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    if ctx.caBundle == nil || ctx.caBundle.CAPubKey == nil {
+        return nil, errors.Errorf("[ERR] invalid cert authority public key")
     }
-    return ctx.caPublicKey, nil
+    return ctx.caBundle.CAPubKey, nil
+}
+
+func (ctx *hostContext) CertAuthCertificate() ([]byte, error) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    if ctx.caBundle == nil || ctx.caBundle.CACrtPem == nil {
+        return nil, errors.Errorf("[ERR] invalid cert authority certificate")
+    }
+    return ctx.caBundle.CACrtPem, nil
+}
+
+// --- Host Certificate Handling --- //
+type HostCertBundle struct {
+    PrivateKey     []byte
+    PublicKey      []byte
+    SshKey         []byte
+    Certificate    []byte
+}
+
+func (ctx *hostContext) UpdateHostCert(bundle *HostCertBundle) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    ctx.hostBundle = bundle
 }
 
 func (ctx *hostContext) MasterHostPublicKey() ([]byte, error) {
-    if len(ctx.hostPublicKey) == 0 {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    if ctx.hostBundle == nil || ctx.hostBundle.PublicKey == nil {
         return nil, errors.Errorf("[ERR] Invalid master public key")
     }
-    return ctx.hostPublicKey, nil
+    return ctx.hostBundle.PublicKey, nil
 }
 
 func (ctx *hostContext) MasterHostPrivateKey() ([]byte, error) {
-    if len(ctx.hostPrivateKey) == 0 {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    if ctx.hostBundle == nil || ctx.hostBundle.PrivateKey == nil {
         return nil, errors.Errorf("[ERR] Invalid master private key")
     }
-    return ctx.hostPrivateKey, nil
+    return ctx.hostBundle.PrivateKey, nil
 }
 
 func (ctx *hostContext) MasterHostCertificate() ([]byte, error) {
-    if len(ctx.hostCertifcate) == 0 {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    if ctx.hostBundle == nil || ctx.hostBundle.Certificate == nil {
         return nil, errors.Errorf("[ERR] Invalid master certificate data")
     }
-    return ctx.hostCertifcate, nil
+    return ctx.hostBundle.Certificate, nil
+}
+
+// --- Beacon Certificate Handling --- //
+type BeaconCertBundle struct {
+    PrivateKey     []byte
+    PublicKey      []byte
+}
+
+func (ctx *hostContext) UpdateBeaconCert(bundle *BeaconCertBundle) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    ctx.beaconBundle = bundle
+}
+
+func (ctx *hostContext) MasterBeaconPublicKey() ([]byte, error) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    if ctx.beaconBundle == nil || ctx.beaconBundle.PublicKey == nil {
+        return nil, errors.Errorf("[ERR] invalid public beacon key")
+    }
+    return ctx.beaconBundle.PublicKey, nil
+}
+
+func (ctx *hostContext) MasterBeaconPrivateKey() ([]byte, error) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    if ctx.beaconBundle == nil || ctx.beaconBundle.PrivateKey == nil {
+        return nil, errors.Errorf("[ERR] invalid private beacon key")
+    }
+    return ctx.beaconBundle.PrivateKey, nil
 }

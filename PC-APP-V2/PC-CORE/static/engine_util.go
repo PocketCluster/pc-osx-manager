@@ -2,8 +2,8 @@ package main
 
 import (
     log "github.com/Sirupsen/logrus"
-    teledefaults "github.com/gravitational/teleport/lib/defaults"
-    teleservice "github.com/gravitational/teleport/lib/service"
+    tefaults "github.com/gravitational/teleport/lib/defaults"
+    tervice "github.com/gravitational/teleport/lib/service"
     "github.com/gravitational/teleport/lib/utils"
 
     "github.com/coreos/etcd/embed"
@@ -11,8 +11,7 @@ import (
 
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/model"
-    regisrv "github.com/stkim1/pc-core/extsrv/registry"
-    swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
+    regisrv "github.com/stkim1/pc-core/extlib/registry"
 )
 
 func setLogger(debug bool) {
@@ -28,9 +27,8 @@ func setLogger(debug bool) {
 
 type serviceConfig struct {
     etcdConfig     *embed.PocketConfig
-    teleConfig     *teleservice.PocketConfig
+    teleConfig     *tervice.PocketConfig
     regConfig      *regisrv.PocketRegistryConfig
-    swarmConfig    *swarmsrv.SwarmContext
 }
 
 func setupServiceConfig() (*serviceConfig, error) {
@@ -44,7 +42,7 @@ func setupServiceConfig() (*serviceConfig, error) {
         log.Info(err)
         return nil, errors.WithStack(err)
     }
-    rec, err := model.OpenRecordGate(dataDir, teledefaults.CoreKeysSqliteFile)
+    rec, err := model.OpenRecordGate(dataDir, tefaults.CoreKeysSqliteFile)
     if err != nil {
         log.Info(err)
         return nil, errors.WithStack(err)
@@ -74,31 +72,40 @@ func setupServiceConfig() (*serviceConfig, error) {
     }
 
     // certificate authority
-    caBundle, err := certAuthSigner(rec.Certdb(), meta, country)
+    caBundle, err := buildCertAuthSigner(rec.Certdb(), meta, country)
     if err != nil {
         // this is critical
         log.Debugf(err.Error())
         return nil, errors.WithStack(err)
     }
-    context.UpdateCertAuth(caBundle)
+    ctx.UpdateCertAuth(caBundle)
 
     // host certificate
-    hostBundle, err := hostCertificate(rec.Certdb(), caBundle.CASigner, teledefaults.CoreHostName, meta.ClusterUUID)
+    hostBundle, err := buildHostCertificate(rec.Certdb(), caBundle.CASigner, tefaults.CoreHostName, meta.ClusterUUID)
     if err != nil {
         // this is critical
         log.Debugf(err.Error())
         return nil, errors.WithStack(err)
     }
-    context.UpdateHostCert(hostBundle)
+    ctx.UpdateHostCert(hostBundle)
+
+    // beacon certificate
+    beaconBundle, err := buildBeaconCertificate(rec.Certdb(), meta.ClusterUUID)
+    if err != nil {
+        // this is critical
+        log.Debugf(err.Error())
+        return nil, errors.WithStack(err)
+    }
+    ctx.UpdateBeaconCert(beaconBundle)
 
     // make teleport core config
-    teleCfg := teleservice.MakeCoreConfig(dataDir, true)
+    teleCfg := tervice.MakeCoreConfig(dataDir, true)
     teleCfg.AssignHostUUID(meta.ClusterUUID)
     teleCfg.AssignDatabaseEngine(rec.DataBase())
     teleCfg.AssignCertStorage(rec.Certdb())
     teleCfg.AssignCASigner(caBundle.CASigner)
     teleCfg.AssignHostCertAuth(caBundle.CAPrvKey, caBundle.CASSHChk, meta.ClusterDomain)
-    err = teleservice.ValidateCoreConfig(teleCfg)
+    err = tervice.ValidateCoreConfig(teleCfg)
     if err != nil {
         log.Debugf(err.Error())
         return nil, errors.WithStack(err)
@@ -108,20 +115,6 @@ func setupServiceConfig() (*serviceConfig, error) {
     // TODO : fix datadir. Plus, is it ok not to pass CA pub key? we need to unify TLS configuration
     regCfg, err := regisrv.NewPocketRegistryConfig(false, dataDir, hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
-        log.Debugf(err.Error())
-        return nil, errors.WithStack(err)
-    }
-
-    // swarm configuration
-    swarmCfg, err := swarmsrv.NewContextWithCertAndKey(
-        "0.0.0.0:3376",
-        "192.168.1.150:2375,192.168.1.151:2375,192.168.1.152:2375,192.168.1.153:2375,192.168.1.161:2375,192.168.1.162:2375,192.168.1.163:2375,192.168.1.164:2375,192.168.1.165:2375,192.168.1.166:2375",
-        caBundle.CACrtPem,
-        hostBundle.Certificate,
-        hostBundle.PrivateKey,
-    )
-    if err != nil {
-        // this is critical
         log.Debugf(err.Error())
         return nil, errors.WithStack(err)
     }
@@ -139,6 +132,5 @@ func setupServiceConfig() (*serviceConfig, error) {
         etcdConfig: etcdCfg,
         teleConfig: teleCfg,
         regConfig: regCfg,
-        swarmConfig: swarmCfg,
     }, nil
 }

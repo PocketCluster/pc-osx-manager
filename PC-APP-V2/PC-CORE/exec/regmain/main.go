@@ -2,7 +2,7 @@ package main
 
 import (
     "github.com/docker/distribution/configuration"
-    "github.com/stkim1/pc-core/extsrv/registry"
+    "github.com/stkim1/pc-core/extlib/registry"
     log "github.com/Sirupsen/logrus"
     "github.com/davecgh/go-spew/spew"
 )

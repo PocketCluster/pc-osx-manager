@@ -8,13 +8,13 @@ import (
 )
 
 type PocketSlaveAgentMeta struct {
-    MetaVersion        MetaProtocol                `msgpack:"s_pm"`
-    MasterBoundAgent   string                      `msgpack:"m_ba, omitempty"`
-    SlaveID            string                      `msgpack:"s_id"`
-    DiscoveryAgent     *PocketSlaveDiscovery       `msgpack:"s_ad, inline, omitempty"`
-    StatusAgent        *PocketSlaveStatus          `msgpack:"s_as, inline, omitempty"`
-    EncryptedStatus    []byte                      `msgpack:"s_es, omitempty"`
-    SlavePubKey        []byte                      `msgpack:"s_pk, omitempty"`
+    MetaVersion         MetaProtocol             `msgpack:"s_pm"`
+    MasterBoundAgent    string                   `msgpack:"m_ba, omitempty"`
+    SlaveID             string                   `msgpack:"s_id"`
+    DiscoveryAgent      *PocketSlaveDiscovery    `msgpack:"s_ad, inline, omitempty"`
+    StatusAgent         *PocketSlaveStatus       `msgpack:"s_as, inline, omitempty"`
+    EncryptedStatus     []byte                   `msgpack:"s_es, omitempty"`
+    SlavePubKey         []byte                   `msgpack:"s_pk, omitempty"`
 }
 
 func PackedSlaveMeta(meta *PocketSlaveAgentMeta) ([]byte, error) {

@@ -9,15 +9,15 @@ import (
 )
 
 var (
-    masterAgentName, slaveNodeName, slaveUUID string
+    masterAgentName, slaveNodeName, authToken string
     initSendTimestmap time.Time
 )
 
 func setUp() {
     masterAgentName, _ = context.DebugContextPrepare().MasterAgentName()
-    slaveNodeName = "pc-node1"
-    slaveUUID = uuid.New()
-    initSendTimestmap = time.Now()
+    slaveNodeName      = "pc-node1"
+    authToken          = uuid.New()
+    initSendTimestmap  = time.Now()
     slcontext.DebugSlcontextPrepare()
 }
 

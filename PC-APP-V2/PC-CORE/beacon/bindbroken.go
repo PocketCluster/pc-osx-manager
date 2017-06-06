@@ -46,7 +46,7 @@ func bindbrokenState(slaveNode *model.SlaveNode, comm CommChannel, event BeaconO
     b.aesCryptor = aesCryptor
 
     // set RSA encryptor
-    masterPrvKey, err := context.SharedHostContext().MasterHostPrivateKey()
+    masterPrvKey, err := context.SharedHostContext().MasterBeaconPrivateKey()
     if err != nil {
         b.Close()
         return nil, errors.WithStack(err)
@@ -97,7 +97,7 @@ func (b *bindbroken) bindBroken(sender *net.UDPAddr, meta *slagent.PocketSlaveAg
     }
 
     // check mac address
-    if b.slaveNode.MacAddress != meta.SlaveID {
+    if b.slaveNode.SlaveID != meta.SlaveID {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
     // slave ip address

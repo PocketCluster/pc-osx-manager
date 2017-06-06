@@ -2,7 +2,49 @@ package pcrypto
 
 const TestKeySignature string = "natR922oRMExBFdXFAu9wYT6m0mufe15D5hLLT+K3JIjsc8UM4gn3luBSdqzH0UJJ3ysSztea7eiBlkFM6+PV845iKxACl8LlHg5Fhm4GxIljXCcQQOypMZyqnYG9Iyhggc3lYMAqZHFivM0QuVkK1Ti3SN6341HM+FEcWpR37A="
 
-func TestMasterPublicKey() []byte {
+func TestMasterStrongPublicKey() []byte {
+    return []byte(`-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4xXU3Rl9BseGFaQf5oB3
+59BSdMkfziacgo7zqRGXpookQAmRuXMW0ghgGj/Ej93J+SkYnxx07sTXOdhOeEdi
+bZk6zH/OYZpUgiIdvqdfsovnpEUo14ecw6HCeYYrB0ZQ3PscGzUT88amF3C031E7
+/RmPfb81Gtn5f0/SpUm4oYBCJbiMTJ92kMI0kiaLg9Mf7RFa7aZ6kdv/k95LgXby
+DT/I0J0f0i93ejIPxmvf0SlqkvV60DKraTDYvQa4E5BIKps8NG6T2SttayJPciBC
+LG6ZwUpkStdn8XkziQR8T+YqMKzkqo9AKEd/ANVRO16iEiPscRn/POr4JskPjllX
+nQIDAQAB
+-----END PUBLIC KEY-----`)
+}
+
+func TestMasterStrongPrivateKey() []byte {
+    return []byte(`-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEA4xXU3Rl9BseGFaQf5oB359BSdMkfziacgo7zqRGXpookQAmR
+uXMW0ghgGj/Ej93J+SkYnxx07sTXOdhOeEdibZk6zH/OYZpUgiIdvqdfsovnpEUo
+14ecw6HCeYYrB0ZQ3PscGzUT88amF3C031E7/RmPfb81Gtn5f0/SpUm4oYBCJbiM
+TJ92kMI0kiaLg9Mf7RFa7aZ6kdv/k95LgXbyDT/I0J0f0i93ejIPxmvf0SlqkvV6
+0DKraTDYvQa4E5BIKps8NG6T2SttayJPciBCLG6ZwUpkStdn8XkziQR8T+YqMKzk
+qo9AKEd/ANVRO16iEiPscRn/POr4JskPjllXnQIDAQABAoIBAQDRLoEhEqObJRyc
+vs0r9dd+UOZD8ik8K1Es6yYE7dG2dbYizy3PmPbCjziHtYoJxJKS1Ip7tyj38ZcZ
+D+po3ckLkIUbb/fa7OE/5tFjmKaMwFeneJXAxIlhpJaSf0cPsnQ2u5IOdfxlKO5C
+1W2n8RrDcVI+0W3HyFcOMaem3pwXF2RdaSSE2ICDHgfZAt9qvu15sUgodqbxGKMi
+1He4l8JqPTyItS9t5KlUTzEmeY3zRwa/vTLZ5hCIFMCWKhxu3DsOize+iJGbaWiK
+iQy0soddl2wNC78ZDvmieQjgUAL8LntV1t+16mVmY1YaBdr7Ott74e5X/ewxuoyu
+Vz+uCY/BAoGBAOjaz66W13iIHaDBBYxSF8y7aU+UIZ8keu+YWqyhTO26qI0cyKLj
+JX7iGvCeFTYedST3bulgZg0v9BP1ZA9EL3qAvXP0fuuiqKpX3pICjL7JYoBJGBc5
+SjxAHeGHbQfsSO6dmD6qFuNdgw8D0mHXWT+y80GtQxwo0UGPo840L4aFAoGBAPmo
+NimZMiBvN/tvCu1pQW9DeMwQtt9QCVvshXeWRWXawVaYlxOG4guwdEEVR1X6bsC0
+29V731V5ADYVIdJNu/djDpkLnYayKx6Em1xawi8gmFOQB2/ymGngyc42toplhlGq
+kFIe/jIybYnouZqVkWLaJGKztRSxrMXLCpC82hQ5AoGAELaj8YQiMySR+9fe7hN2
+YduR04RuZV3Y9RmaaImrW+Tp9Db8r7ReHJ1eEadHHntRLTYVX+rraEbo3gXfCLl8
+Lu7OqmQCOCeUs6Va9F/6ejc6OrsEX6ZdDbYMbwOpb8gl8/qb0uOigO9VWN6NWzh5
+z3iovS4SgxLq8im9OC/GuYECgYEAjCvBnUGCP2uyht0lyX5bWtkLLagExQTu/Emj
+9izM8g8Mlk4+JJyKtf1wiEomL0PYgyIIe6h9EERLthHPV4CFlLRtMcivvTyzsQLL
+J+NdO5CVdfVb96LBqFCpfbqCatntvFSDi1gTaKOflNqxuvVXF6Va4H/9n4zScIs7
+d2BRISECgYBn4Fg9mdIeUVMvh6d3OeqHMyGTJpAXak9Y2HlwutybGcNk6t2r2vPg
+J8/k97dYULk2bYf88LiSfITxB2boMJBy13WcgogXmL8HDOqiFq2xkcUlkDuMRO0P
+ag2e5n4gYqo6/+GnzlxVK26QzBphTouTI4YNMGzV9kaCM4mDszVcEg==
+-----END RSA PRIVATE KEY-----`)
+}
+
+func TestMasterWeakPublicKey() []byte {
     return []byte(`-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCFENGw33yGihy92pDjZQhl0C3
 6rPJj+CvfSC8+q28hxA161QFNUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6
@@ -11,7 +53,7 @@ oYi+1hqp1fIekaxsyQIDAQAB
 -----END PUBLIC KEY-----`)
 }
 
-func TestMasterPrivateKey() []byte {
+func TestMasterWeakPrivateKey() []byte {
     return []byte(`-----BEGIN RSA PRIVATE KEY-----
 MIICXgIBAAKBgQDCFENGw33yGihy92pDjZQhl0C36rPJj+CvfSC8+q28hxA161QF
 NUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6Z4UMR7EOcpfdUE9Hf3m/hs+F
@@ -157,8 +199,8 @@ FTxsLUtiXAWz/Egjkxc/FRhFZ3ZY/wehRnmJc8PS/x/3IfE4k/jF305cx29RzWSa
 var TestAESKey []byte = []byte("longer means more possible keys ")
 var TestAESCryptor, _ = NewAESCrypto(TestAESKey)
 
-var TestMasterRSAEncryptor, _ = NewRsaEncryptorFromKeyData(TestSlavePublicKey(), TestMasterPrivateKey())
-var TestMasterRSADecryptor, _ = NewRsaDecryptorFromKeyData(TestSlavePublicKey(), TestMasterPrivateKey())
+var TestMasterRSAEncryptor, _ = NewRsaEncryptorFromKeyData(TestSlavePublicKey(), TestMasterWeakPrivateKey())
+var TestMasterRSADecryptor, _ = NewRsaDecryptorFromKeyData(TestSlavePublicKey(), TestMasterWeakPrivateKey())
 
-var TestSlaveRSAEncryptor, _ = NewRsaEncryptorFromKeyData(TestMasterPublicKey(), TestSlavePrivateKey())
-var TestSlaveRSADecryptor, _ = NewRsaEncryptorFromKeyData(TestMasterPublicKey(), TestSlavePrivateKey())
+var TestSlaveRSAEncryptor, _ = NewRsaEncryptorFromKeyData(TestMasterWeakPublicKey(), TestSlavePrivateKey())
+var TestSlaveRSADecryptor, _ = NewRsaEncryptorFromKeyData(TestMasterWeakPublicKey(), TestSlavePrivateKey())

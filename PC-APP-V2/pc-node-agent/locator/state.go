@@ -226,9 +226,9 @@ func stateTransition(currState SlaveLocatingState, nextCondition SlaveLocatingTr
     return nextState
 }
 
-// --- STATE TRANSITION ---
+// --- STATE TRANSITION WITH MASTER META --- //
 
-func finalizeTransitionWithTimeout(ls *locatorState, nextStateCandiate SlaveLocatingTransition, slaveTimestamp time.Time) SlaveLocatingTransition {
+func finalizeTransitionWithMeta(ls *locatorState, nextStateCandiate SlaveLocatingTransition, slaveTimestamp time.Time) SlaveLocatingTransition {
     var nextConfirmedState SlaveLocatingTransition
     switch nextStateCandiate {
         case SlaveTransitionOk: {
@@ -236,10 +236,12 @@ func finalizeTransitionWithTimeout(ls *locatorState, nextStateCandiate SlaveLoca
             ls.lastTransitionTS = slaveTimestamp
             ls.transitionActionCount = 0
 
-            // since
-            ls.lastTxTS = slaveTimestamp
             ls.txActionCount = 0
             nextConfirmedState = SlaveTransitionOk
+
+            // (2017-05-30) This single line causes an issue with Beacon-TX in Bounded State, We'll comment out.
+            // This should only be handled in Timestmap related transition methods
+            //ls.lastTxTS = slaveTimestamp
         }
         default: {
             if ls.transitionActionCount < ls.transitionFailureLimit() {
@@ -301,7 +303,7 @@ func (ls *locatorState) MasterMetaTransition(meta *msagent.PocketMasterAgentMeta
     transitionCandidate, transErr = ls.masterMetaTransition(meta, slaveTimestamp)
 
     // filter out the intermediate transition value with failed count + timestamp
-    finalTransition = finalizeTransitionWithTimeout(ls, transitionCandidate, slaveTimestamp)
+    finalTransition = finalizeTransitionWithMeta(ls, transitionCandidate, slaveTimestamp)
 
     // finalize slave locator state
     newState = stateTransition(oldState, finalTransition)
@@ -312,7 +314,8 @@ func (ls *locatorState) MasterMetaTransition(meta *msagent.PocketMasterAgentMeta
     return newLocatorStateForState(ls, newState, oldState), summarizeErrors(transErr, eventErr)
 }
 
-// --- TRANSMISSION CONTROL
+// --- (TRANSMISSION CONTROL) STATE TRANSITION CONTROL WITH TIMESTAMP --- //
+
 func runTxStateActionWithTimestamp(ls *locatorState, slaveTimestamp time.Time) (SlaveLocatingTransition, error) {
     var transErr error = nil
 

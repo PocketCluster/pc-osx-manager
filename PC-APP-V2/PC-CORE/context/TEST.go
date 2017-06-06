@@ -79,6 +79,19 @@ func DebugContextPrepare() (HostContext) {
     _once.Do(func(){})
 
     caSigner, _ := pcrypto.NewCertAuthoritySigner(pcrypto.TestCertPrivateKey(), pcrypto.TestCertPublicAuth(), DEBUG_CLUSTER_ID, "KR")
+    caBundle    := &CertAuthBundle{
+        CASigner:      caSigner,
+        CAPubKey:      pcrypto.TestCertPublicAuth(),
+        CAPrvKey:      pcrypto.TestCertPrivateKey(),
+    }
+    hostBundle  := &HostCertBundle{
+        PublicKey:     pcrypto.TestMasterStrongPublicKey(),
+        PrivateKey:    pcrypto.TestMasterStrongPrivateKey(),
+    }
+    beaconBundle := &BeaconCertBundle{
+        PublicKey:     pcrypto.TestMasterWeakPublicKey(),
+        PrivateKey:    pcrypto.TestMasterWeakPrivateKey(),
+    }
 
     _context = &hostContext{
         cocoaHomePath:               "/Users/almightykim",
@@ -104,11 +117,13 @@ func DebugContextPrepare() (HostContext) {
         currentCountryCode:          "KR",
 
         // cert authority
-        CaSigner:                    caSigner,
+        caBundle:                    caBundle,
 
         // host certificate
-        hostPublicKey:               pcrypto.TestMasterPublicKey(),
-        hostPrivateKey:              pcrypto.TestMasterPrivateKey(),
+        hostBundle:                  hostBundle,
+
+        // beacon certificate
+        beaconBundle:                beaconBundle,
     }
 
     _context.refreshNetworkGateways(test_gateways)

@@ -94,10 +94,6 @@ extern void OpsCmdRegistryStart();
 
 extern void OpsCmdRegistryStop();
 
-extern void OpsCmdCntrOrchStart();
-
-extern void OpsCmdCntrOrchStop();
-
 extern void OpsCmdStorageStart();
 
 extern void OpsCmdStorageStop();
@@ -109,6 +105,12 @@ extern void OpsCmdBeaconStop();
 extern void OpsCmdServiceBundleStart();
 
 extern void OpsCmdServiceBundleStop();
+
+extern void OpsCmdTeleportNodeAdd();
+
+extern void OpsCmdTeleportRootAdd();
+
+extern void OpsCmdTeleportUserAdd();
 
 extern void FeedStart();
 

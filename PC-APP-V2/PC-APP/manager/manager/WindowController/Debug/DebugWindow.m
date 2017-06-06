@@ -29,20 +29,21 @@
     OpsCmdTeleportStop();
 }
 
+- (IBAction)opsCmdTeleportRootAdd:(id)sender {
+    OpsCmdTeleportRootAdd();
+}
+
+- (IBAction)opsCmdTeleportUserAdd:(id)sender {
+    OpsCmdTeleportUserAdd();
+}
+
+
 - (IBAction)opsCmdRegistryStart:(id)sender {
     OpsCmdRegistryStart();
 }
 
 - (IBAction)opsCmdRegistryStop:(id)sender {
     OpsCmdRegistryStop();
-}
-
-- (IBAction)opsCmdCntrOrchStart:(id)sender {
-    OpsCmdCntrOrchStart();
-}
-
-- (IBAction)opsCmdCntrOrchStop:(id)sender {
-    OpsCmdCntrOrchStop();
 }
 
 - (IBAction)opsCmdStorageStart:(id)sender {
@@ -68,6 +69,4 @@
 - (IBAction)opsCmdServiceBundleStop:(id)sender {
     OpsCmdServiceBundleStop();
 }
-
-
 @end

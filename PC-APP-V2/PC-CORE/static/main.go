@@ -6,18 +6,16 @@ import (
     "sync"
 
     log "github.com/Sirupsen/logrus"
-    "github.com/gravitational/teleport/lib/process"
     "github.com/coreos/etcd/embed"
-    "gopkg.in/tylerb/graceful.v1"
+    tembed "github.com/gravitational/teleport/embed"
 
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
-    telesrv "github.com/stkim1/pc-core/extsrv/teleport"
-    regisrv "github.com/stkim1/pc-core/extsrv/registry"
-    swarmsrv "github.com/stkim1/pc-core/extsrv/swarm"
+    "github.com/stkim1/pc-core/service"
+    regisrv "github.com/stkim1/pc-core/extlib/registry"
 )
 
 func main() {
@@ -26,10 +24,8 @@ func main() {
 
         var (
             serviceConfig *serviceConfig = nil
-            teleProc *process.PocketCoreProcess = nil
+            teleProc *tembed.EmbeddedCoreProcess = nil
             regiProc *regisrv.PocketRegistry = nil
-            swarmProc *swarmsrv.Server
-            swarmSrv *graceful.Server
             err error = nil
 
             srvWaiter sync.WaitGroup
@@ -137,7 +133,7 @@ func main() {
                             log.Debug(err)
                         }
 
-                        err = initMasterAgentService(cid, a)
+                        err = initMasterBeaconService(a, cid, serviceConfig.teleConfig)
                         if err != nil {
                             log.Debug(err)
                         }
@@ -156,11 +152,11 @@ func main() {
                     case operation.CmdTeleportStart: {
                         log.Debugf("[OP] %v", e.String())
 
-                        teleProc, err = telesrv.NewTeleportCore(serviceConfig.teleConfig)
+                        teleProc, err = tembed.NewEmbeddedCoreProcess(a.ServiceSupervisor, serviceConfig.teleConfig)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
-                        err = teleProc.Start()
+                        err = teleProc.StartServices()
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
@@ -170,7 +166,7 @@ func main() {
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
-                        err = teleProc.Wait()
+                        //err = teleProc.Wait()
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
@@ -200,28 +196,6 @@ func main() {
 */
                         regiProc.Stop(time.Second)
                         log.Debugf("[OP] %v", e.String())
-                    }
-
-                    /// ORCHESTRATION ///
-
-                    case operation.CmdCntrOrchStart: {
-                        swarmProc, err = swarmsrv.NewSwarmServer(serviceConfig.swarmConfig)
-                        if err != nil {
-                            log.Debugf("[ERR] " + err.Error())
-                        }
-                        srvWaiter.Add(1)
-                        swarmSrv, err = swarmProc.ListenAndServeOnWaitGroup(&srvWaiter)
-                        if err != nil {
-                            log.Debugf("[ERR] " + err.Error())
-                        }
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdCntrOrchStop: {
-                        log.Debugf("[OP] %v", e.String())
-                        go func() {
-                            srvWaiter.Wait()
-                        }()
-                        swarmSrv.Stop(time.Second)
                     }
 
                     /// STORAGE ///
@@ -261,7 +235,7 @@ func main() {
 
 
                     case operation.CmdServiceBundleStart: {
-                        eventC := make(chan Event)
+                        eventC := make(chan service.Event)
                         a.WaitForEvent("TEST_EVENT", eventC, make(chan struct{}))
 
                         a.RegisterServiceFunc(func() error {
@@ -291,7 +265,7 @@ func main() {
                                     return nil
                                 }
 
-                                a.BroadcastEvent(Event{Name:"TEST_EVENT"})
+                                a.BroadcastEvent(service.Event{Name:"TEST_EVENT"})
 
                                 time.Sleep(time.Second)
                             }
@@ -305,6 +279,31 @@ func main() {
                         a.StopServices()
                         log.Debugf("[OP] %v", e.String())
                     }
+
+                    case operation.CmdTeleportNodeAdd: {
+                        clt, err := tembed.OpenAdminClientWithAuthService(serviceConfig.teleConfig)
+                        if err != nil {
+                            log.Error(err.Error())
+                        }
+                        token, err := tembed.GenerateNodeInviationWithTTL(clt, tembed.MaxInvitationTLL)
+                        if err != nil {
+                            log.Error(err.Error())
+                        }
+                        err = clt.Close()
+                        if err != nil {
+                            log.Error(err.Error())
+                        }
+                        log.Debugf("TELEPORT NODE ADDED FOR TOKEN : %s", token)
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdTeleportRootAdd: {
+
+                    }
+                    case operation.CmdTeleportUserAdd: {
+
+                    }
+
+
 
                     default:
                         log.Debug("[OP-ERROR] THIS SHOULD NOT HAPPEN %v", e.String())

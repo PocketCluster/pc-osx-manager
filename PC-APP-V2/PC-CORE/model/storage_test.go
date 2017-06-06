@@ -79,8 +79,8 @@ func (s *RecordSuite) TestSlaveNodeCRUD(c *C) {
         LastAlive:      ts1,
         NodeName:       firstSlave,
         State:          SNMStateJoined,
-        PublicKey:      pcrypto.TestMasterPublicKey(),
-        PrivateKey:     pcrypto.TestMasterPrivateKey(),
+        PublicKey:      pcrypto.TestMasterWeakPublicKey(),
+        PrivateKey:     pcrypto.TestMasterWeakPrivateKey(),
     }
     err = InsertSlaveNode(slave2)
     c.Assert(err, IsNil)
@@ -109,8 +109,8 @@ func (s *RecordSuite) TestSlaveNodeCRUD(c *C) {
 
     for _, n := range nodes {
         if n.NodeName == firstSlave {
-            c.Assert(n.PublicKey, DeepEquals, pcrypto.TestMasterPublicKey())
-            c.Assert(n.PrivateKey, DeepEquals, pcrypto.TestMasterPrivateKey())
+            c.Assert(n.PublicKey, DeepEquals, pcrypto.TestMasterWeakPublicKey())
+            c.Assert(n.PrivateKey, DeepEquals, pcrypto.TestMasterWeakPrivateKey())
         }
 
         if n.NodeName == secondSlave {
@@ -121,7 +121,7 @@ func (s *RecordSuite) TestSlaveNodeCRUD(c *C) {
 
     // update #1
     slave2.NodeName = updatedName
-    slave2.Arch     = "AARM64"
+    slave2.Hardware = "AARM64"
 
     err = UpdateSlaveNode(slave2)
     c.Assert(err, IsNil)
@@ -129,7 +129,7 @@ func (s *RecordSuite) TestSlaveNodeCRUD(c *C) {
     nodes, err = FindSlaveNode(string(SNMFieldNodeName + " = ?"), updatedName)
     c.Assert(err, IsNil)
     c.Assert(len(nodes), Equals, 1)
-    c.Assert(nodes[0].Arch, Equals, "AARM64")
+    c.Assert(nodes[0].Hardware, Equals, "AARM64")
 
     // delete all
     err = DeleteAllSlaveNode()

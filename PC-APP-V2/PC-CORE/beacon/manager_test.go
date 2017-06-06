@@ -45,34 +45,36 @@ func (s *ManagerSuite) TearDownTest(c *C) {
 // --- test ---
 
 func insertTestNodes(nodeCount int, c *C) []string {
-    var uuidList []string = []string{}
+    var AuthTokenList []string = []string{}
     for i := 0; i < nodeCount; i++ {
         sl := model.NewSlaveNode(nil)
         sl.NodeName = fmt.Sprintf("pc-node%d", (i * 2) + 1)
-        sl.MacAddress = fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i)
+        sl.SlaveID = fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i)
         sl.PublicKey = pcrypto.TestSlaveNodePublicKey()
-        sl.Arch = runtime.GOARCH
+        sl.Hardware = runtime.GOARCH
         err := sl.JoinSlave()
         c.Assert(err, IsNil)
-        uuidList = append(uuidList, sl.SlaveUUID)
+        AuthTokenList = append(AuthTokenList, sl.AuthToken)
     }
-    return uuidList
+    return AuthTokenList
 }
 
 func (s *ManagerSuite) TestLoadingNodes(c *C) {
     var (
         nodeFound = false
         comm = &DebugCommChannel{}
+        noti = &DebugBeaconNotiReceiver{}
         uuidList = insertTestNodes(allNodeCount, c)
-        man, err = NewBeaconManager(masterAgentName, comm)
+        man, err = NewBeaconManager(masterAgentName, noti, comm)
     )
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, allNodeCount)
+    c.Assert(len(noti.SlaveNodes), Equals, allNodeCount)
 
     for _, b := range man.(*beaconManger).beaconList {
         nodeFound = false
         for _, u := range uuidList {
-            if b.SlaveNode().SlaveUUID == u {
+            if b.SlaveNode().AuthToken == u {
                 nodeFound = true
                 break
             }
@@ -86,8 +88,9 @@ func (s *ManagerSuite) TestNameGeneration(c *C) {
         _ = insertTestNodes(allNodeCount, c)
         comm = &DebugCommChannel{}
         event = &DebugTransitionEventReceiver{}
+        noti = &DebugBeaconNotiReceiver{}
         sa *model.SlaveNode
-        man, err = NewBeaconManager(masterAgentName, comm)
+        man, err = NewBeaconManager(masterAgentName, noti, comm)
     )
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, allNodeCount)
@@ -108,18 +111,21 @@ func (s *ManagerSuite) TestShutdown(c *C) {
     var (
         _ = insertTestNodes(allNodeCount, c)
         comm = &DebugCommChannel{}
-        man, err = NewBeaconManager(masterAgentName, comm)
+        noti = &DebugBeaconNotiReceiver{}
+        man, err = NewBeaconManager(masterAgentName, noti, comm)
     )
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, allNodeCount)
 
     man.Shutdown()
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 0)
+    c.Assert(noti.IsShutdown, Equals, true)
 }
 
 func (s *ManagerSuite) TestBindBrokenAndTooManyTrialDiscard(c *C) {
     var (
         comm = &DebugCommChannel{}
+        noti = &DebugBeaconNotiReceiver{}
         masterTS, slaveTS = time.Now(), time.Now()
     )
 
@@ -131,19 +137,19 @@ func (s *ManagerSuite) TestBindBrokenAndTooManyTrialDiscard(c *C) {
 
     // create new slave node
     sl := model.NewSlaveNode(nil)
-    sl.MacAddress = sa.SlaveID
+    sl.SlaveID = sa.SlaveID
     sl.NodeName = slaveNodeName
     sl.PublicKey = pcrypto.TestSlaveNodePublicKey()
-    sl.Arch = runtime.GOARCH
+    sl.Hardware = runtime.GOARCH
     err = sl.JoinSlave()
     c.Assert(err, IsNil)
 
-    man, err := NewBeaconManager(masterAgentName, comm)
+    man, err := NewBeaconManager(masterAgentName, noti, comm)
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 1)
     c.Assert(man.(*beaconManger).beaconList[0].CurrentState(), Equals, MasterBindBroken)
     c.Assert(man.(*beaconManger).beaconList[0].SlaveNode(), NotNil)
-    c.Assert(len(man.(*beaconManger).beaconList[0].SlaveNode().SlaveUUID), Equals, 36)
+    c.Assert(len(man.(*beaconManger).beaconList[0].SlaveNode().AuthToken), Equals, 36)
 
     // check if this successfully generate new beacon and move the transition
     err = man.TransitionWithSearchData(mcast.CastPack{Address:*slaveAddr, Message:psm}, masterTS)
@@ -151,7 +157,7 @@ func (s *ManagerSuite) TestBindBrokenAndTooManyTrialDiscard(c *C) {
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 1)
     c.Assert(man.(*beaconManger).beaconList[0].CurrentState(), Equals, MasterBindRecovery)
     c.Assert(man.(*beaconManger).beaconList[0].SlaveNode(), NotNil)
-    c.Assert(len(man.(*beaconManger).beaconList[0].SlaveNode().SlaveUUID), Equals, 36)
+    c.Assert(len(man.(*beaconManger).beaconList[0].SlaveNode().AuthToken), Equals, 36)
 
     for i := 0; i < TransitionFailureLimit; i ++ {
         slaveTS = masterTS.Add(time.Second)
@@ -174,6 +180,7 @@ func (s *ManagerSuite) TestBindBrokenAndTooManyTrialDiscard(c *C) {
 func (s *ManagerSuite) TestBindInitAndTooManyTrialDiscard(c *C) {
     var (
         comm = &DebugCommChannel{}
+        noti = &DebugBeaconNotiReceiver{}
         masterTS, slaveTS = time.Now(), time.Now()
     )
 
@@ -184,7 +191,7 @@ func (s *ManagerSuite) TestBindInitAndTooManyTrialDiscard(c *C) {
     c.Assert(err, IsNil)
 
     // new beacon master
-    man, err := NewBeaconManager(masterAgentName, comm)
+    man, err := NewBeaconManager(masterAgentName, noti, comm)
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 0)
 
@@ -194,7 +201,8 @@ func (s *ManagerSuite) TestBindInitAndTooManyTrialDiscard(c *C) {
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 1)
     c.Assert(man.(*beaconManger).beaconList[0].CurrentState(), Equals, MasterUnbounded)
     c.Assert(man.(*beaconManger).beaconList[0].SlaveNode(), NotNil)
-    c.Assert(len(man.(*beaconManger).beaconList[0].SlaveNode().SlaveUUID), Equals, 36)
+    authToken := man.(*beaconManger).beaconList[0].SlaveNode().AuthToken
+    c.Assert(len(authToken), Equals, maxRandomSlaveIdLenth)
 
     // slave answering inquery
     for i := 0; i < TransitionFailureLimit; i ++ {
@@ -217,14 +225,16 @@ func (s *ManagerSuite) TestBindInitAndTooManyTrialDiscard(c *C) {
     err = man.TransitionWithTimestamp(masterTS.Add(time.Second))
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 0)
+    c.Assert(noti.Slave.AuthToken, Equals, authToken)
 }
 
 func (s *ManagerSuite) TestBindBroken_To_Bounded(c *C) {
     var (
         _ = insertTestNodes(1, c)
         comm = &DebugCommChannel{}
+        noti = &DebugBeaconNotiReceiver{}
         masterTS, slaveTS time.Time = time.Now(), time.Now()
-        man, err = NewBeaconManager(masterAgentName, comm)
+        man, err = NewBeaconManager(masterAgentName, noti, comm)
     )
     c.Assert(err, IsNil)
     c.Assert(len(man.(*beaconManger).beaconList), Equals, 1)
@@ -261,7 +271,7 @@ func (s *ManagerSuite) TestBindBroken_To_Bounded(c *C) {
     aescryptor := mb.(*masterBeacon).state.(DebugState).AESCryptor()
 
     // create slave meta
-    sa, err := slagent.SlaveBoundedStatus("pc-node1", mb.SlaveNode().SlaveUUID, slaveTS)
+    sa, err := slagent.SlaveBoundedStatus("pc-node1", mb.SlaveNode().AuthToken, slaveTS)
     c.Assert(err, IsNil)
     mp, err := slagent.PackedSlaveStatus(sa)
     c.Assert(err, IsNil)

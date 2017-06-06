@@ -108,7 +108,7 @@ func (b *cryptocheck) cryptoCheck(sender *net.UDPAddr, meta *slagent.PocketSlave
     if b.slaveNode.NodeName != usm.SlaveNodeName {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave node name")
     }
-    if b.slaveNode.SlaveUUID != usm.SlaveUUID {
+    if b.slaveNode.AuthToken != usm.SlaveAuthToken {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave UUID")
     }
     // check address
@@ -119,10 +119,10 @@ func (b *cryptocheck) cryptoCheck(sender *net.UDPAddr, meta *slagent.PocketSlave
     if addr != sender.IP.String() {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
     }
-    if b.slaveNode.MacAddress != meta.SlaveID {
+    if b.slaveNode.SlaveID != meta.SlaveID {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
-    if b.slaveNode.Arch != usm.SlaveHardware {
+    if b.slaveNode.Hardware != usm.SlaveHardware {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave architecture")
     }
 

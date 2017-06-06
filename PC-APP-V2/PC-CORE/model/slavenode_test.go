@@ -17,9 +17,9 @@ const (
 func (s *RecordSuite) TestAllNodeCount(c *C) {
     for i := 0; i < allNodeCount; i++ {
         sl := NewSlaveNode(nil)
-        sl.NodeName = "pc-node1"
-        sl.MacAddress = fmt.Sprintf("%d", i)
-        sl.SlaveUUID = uuid.New()
+        sl.NodeName  = "pc-node1"
+        sl.SlaveID   = fmt.Sprintf("%d", i)
+        sl.AuthToken = uuid.New()
         sl.PublicKey = pcrypto.TestSlavePublicKey()
         c.Assert(sl.JoinSlave(), IsNil)
     }
@@ -32,23 +32,23 @@ func (s *RecordSuite) TestAllNodeCount(c *C) {
 
 func (s *RecordSuite) TestFindSingleNode(c *C) {
     var (
-        uuidList []string = []string{}
+        authTokenList []string = []string{}
     )
     for i := 0; i < allNodeCount; i++ {
         ui := uuid.New()
         sl := NewSlaveNode(nil)
-        sl.MacAddress = fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i)
-        sl.SlaveUUID = ui
-        sl.NodeName = "pc-node1"
+        sl.SlaveID   = fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i)
+        sl.AuthToken = ui
+        sl.NodeName  = "pc-node1"
         sl.PublicKey = pcrypto.TestSlavePublicKey()
-        uuidList = append(uuidList, ui)
+        authTokenList = append(authTokenList, ui)
         c.Assert(sl.JoinSlave(), IsNil)
     }
     for i := 0; i < allNodeCount; i++ {
-        nodes, err := FindSlaveNode(string(SNMFieldUUID + " = ?"), uuidList[i])
+        nodes, err := FindSlaveNode(string(SNMFieldAuthToken + " = ?"), authTokenList[i])
         c.Assert(err, IsNil)
         c.Assert(len(nodes), Equals, 1)
-        c.Assert(nodes[0].MacAddress, Equals, fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i))
+        c.Assert(nodes[0].SlaveID, Equals, fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i))
     }
 }
 
@@ -60,7 +60,7 @@ func (s *RecordSuite) skipNodeNameCandiate(c *C) {
         c.Assert(sn, Equals, fmt.Sprintf("pc-node%d", i + 1))
 
         sl := NewSlaveNode(nil)
-        sl.MacAddress = fmt.Sprintf("%d", i)
+        sl.SlaveID = fmt.Sprintf("%d", i)
         InsertSlaveNode(sl)
     }
 }

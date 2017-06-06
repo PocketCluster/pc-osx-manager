@@ -1,85 +1,85 @@
 package config
 
 import (
-    "os"
     "fmt"
     "io/ioutil"
+    "os"
     "strings"
 
     "github.com/pkg/errors"
     "gopkg.in/yaml.v2"
+    "github.com/pborman/uuid"
     "github.com/stkim1/pcrypto"
 )
 
 // ------ CONFIG VERSION -------
 const (
-    SLAVE_CONFIG_KEY    = "config-version"
-    SLAVE_CONFIG_VAL    = "1.0.1"
+    SLAVE_CONFIG_KEY string            = "config-version"
+    SLAVE_CONFIG_VAL string            = "1.0.1"
 )
 
 const (
-    SLAVE_STATUS_KEY    = "binding-status"
+    SLAVE_STATUS_KEY string            = "binding-status"
 )
 
 // ------ NETWORK INTERFACES ------
 const (
-    SLAVE_ADDRESS_KEY = "address"
-    SLAVE_GATEWAY_KEY = "gateway"
-    SLAVE_NETMASK_KEY = "netmask"
-    SLAVE_NAMESRV_KEY = "dns-nameserver"
-    SLAVE_BROADCS_KEY = "broadcast"
+    SLAVE_ADDRESS_KEY string           = "address"
+    SLAVE_GATEWAY_KEY string           = "gateway"
+    SLAVE_NETMASK_KEY string           = "netmask"
+    SLAVE_NAMESRV_KEY string           = "dns-nameserver"
+    SLAVE_BROADCS_KEY string           = "broadcast"
 )
 
-var SLAVE_NETIFACE_KEYS []string = []string{SLAVE_ADDRESS_KEY, SLAVE_GATEWAY_KEY, SLAVE_NETMASK_KEY, SLAVE_NAMESRV_KEY, SLAVE_BROADCS_KEY}
+var SLAVE_NETIFACE_KEYS []string       = []string{SLAVE_ADDRESS_KEY, SLAVE_GATEWAY_KEY, SLAVE_NETMASK_KEY, SLAVE_NAMESRV_KEY, SLAVE_BROADCS_KEY}
 
 // Master name server is fixed for now (v.0.1.4)
-const SLAVE_NAMESRV_VALUE = "pc-master:53535"
+const SLAVE_NAMESRV_VALUE string       = "pc-master:53535"
 
 // ------ CONFIGURATION FILES ------
 const (
     // POCKET SPECIFIC CONFIG
-    slave_config_dir        = "/etc/pocket/"
-    slave_config_file       = "/etc/pocket/slave-conf.yaml"
+    slave_config_dir string            = "/etc/pocket/"
+    slave_config_file string           = slave_config_dir + "slave-conf.yaml"
 
-    slave_keys_dir          = "/etc/pocket/pki/"
+    slave_keys_dir string              = slave_config_dir + "pki/"
     // these files are 1024 RSA crypto files used to join network
-    slave_public_Key_file   = "/etc/pocket/pki/pcslave.pub"
-    slave_prvate_Key_file   = "/etc/pocket/pki/pcslave.pem"
-    master_public_Key_file  = "/etc/pocket/pki/pcmaster.pub"
+    slave_public_Key_file string       = slave_keys_dir + "pc_node_beacon"   + pcrypto.FileExtPublicKey
+    slave_prvate_Key_file string       = slave_keys_dir + "pc_node_beacon"   + pcrypto.FileExtPrivateKey
+    master_public_Key_file string      = slave_keys_dir + "pc_master_beacon" + pcrypto.FileExtPublicKey
+
+    // these files are 2048 RSA crypto files used for Docker & Registry. This should be acquired from Teleport Auth server
+    SlaveAuthCertFileName string       = slave_keys_dir + "pc_cert_auth"   + pcrypto.FileExtCertificate
+    SlaveEngineKeyFileName string      = slave_keys_dir + "pc_node_engine" + pcrypto.FileExtPrivateKey
+    SlaveEngineCertFileName string     = slave_keys_dir + "pc_node_engine" + pcrypto.FileExtCertificate
+
+    // these are files used for teleport certificate
+    SlaveSSHCertificateFileName string = slave_keys_dir + "pc_node_ssh" + pcrypto.FileExtSSHCertificate
+    SlaveSSHPrivateKeyFileName string  = slave_keys_dir + "pc_node_ssh" + pcrypto.FileExtPrivateKey
 
     // these files are 2048 RSA crypto files used for SSH.
     // 1) This should be acquired from Teleport Auth server
     // 2) This should be handled by teleport process
-    //node_private_Key_file   = "/etc/pocket/pki/node.key"
-    //node_certificate_file   = "/etc/pocket/pki/node.cert"
+    //node_private_Key_file string       = "/etc/pocket/pki/node.key"
+    //node_certificate_file string       = "/etc/pocket/pki/node.cert"
 
     // HOST GENERAL CONFIG
-    network_iface_file      = "/etc/network/interfaces"
-    hostname_file           = "/etc/hostname"
-    //hostaddr_file           = "/etc/hosts"
-    host_timezone_file      = "/etc/timezone"
-    //resolve_conf_file       = "/etc/resolv.conf"
-
-    // these files are 2048 RSA crypto files used for Docker & Registry. This should be acquired from Teleport Auth server
-    SlaveDockerAuthFileName = "docker.auth"
-    SlaveDockerKeyFileName  = "docker.key"
-    SlaveDockerCertFileName = "docker.cert"
-
-    slave_docker_auth_file  = slave_keys_dir + SlaveDockerAuthFileName
-    slave_docker_key_file   = slave_keys_dir + SlaveDockerKeyFileName
-    slave_docker_cert_file  = slave_keys_dir + SlaveDockerCertFileName
-
+    network_iface_file string          = "/etc/network/interfaces"
+    hostname_file string               = "/etc/hostname"
+    //hostaddr_file string               = "/etc/hosts"
+    host_timezone_file string          = "/etc/timezone"
+    //resolve_conf_file string           = "/etc/resolv.conf"
 )
 
 // ------ SALT DEFAULT ------
 const (
-    PC_MASTER           = "pc-master"
+    PC_MASTER string                  = "pc-master"
 )
 
 // ------- POCKET EDITOR MARKER ------
 const (
-    POCKET_START        = "# --------------- POCKETCLUSTER START ---------------"
-    POCKET_END          = "# ---------------  POCKETCLUSTER END  ---------------"
+    POCKET_START string               = "# --------------- POCKETCLUSTER START ---------------"
+    POCKET_END string                 = "# ---------------  POCKETCLUSTER END  ---------------"
 )
 
 // --- struct
@@ -88,14 +88,15 @@ type ConfigMasterSection struct {
     MasterBoundAgent    string                   `yaml:"master-binder-agent"`
     // Last Known IP4
     MasterIP4Address    string                   `yaml:"-"`
-    //MasterIP6Address    string
-    //MasterHostName      string
+    //MasterIP6Address    string                   `yaml:"-"`
+    //MasterHostName      string                   `yaml:"-"`
     MasterTimeZone      string                   `yaml:"master-timezone"`
 }
 
 type ConfigSlaveSection struct {
     SlaveNodeName       string                   `yaml:"slave-node-name"`
     SlaveNodeUUID       string                   `yaml:"slave-node-uuid"`
+    SlaveAuthToken      string                   `yaml:"slave-auth-token"`
     SlaveMacAddr        string                   `yaml:"slave-mac-addr"`
     //SlaveIP6Addr        string
     SlaveIP4Addr        string                   `yaml:"slave-net-ip4"`
@@ -108,7 +109,8 @@ type PocketSlaveConfig struct {
     // this field exists to create files at a specific location for testing so ignore
     rootPath            string                   `yaml:"-"`
     ConfigVersion       string                   `yaml:"config-version"`
-    BindingStatus       string                   `yaml:"binding-status"`
+    // TODO : we need to avoid cyclic import but need to fix this
+    //BindingStatus       string                   `yaml:"binding-status"`
     MasterSection       *ConfigMasterSection     `yaml:"master-section",inline,flow`
     SlaveSection        *ConfigSlaveSection      `yaml:"slave-section",inline,flow`
 }
@@ -124,9 +126,11 @@ func _brandNewSlaveConfig(rootPath string) (*PocketSlaveConfig) {
         rootPath:         rootPath,
         ConfigVersion:    SLAVE_CONFIG_VAL,
         // TODO : we need to avoid cyclic import but need to fix this
-        BindingStatus:    "SlaveUnbounded", //locator.SlaveUnbounded.String(),
+        //BindingStatus:    "SlaveUnbounded", //locator.SlaveUnbounded.String(),
         MasterSection:    &ConfigMasterSection{},
-        SlaveSection:     &ConfigSlaveSection{},
+        SlaveSection:     &ConfigSlaveSection{
+            SlaveNodeUUID:    uuid.New(),
+        },
     }
 }
 
@@ -143,6 +147,8 @@ func _loadSlaveConfig(rootPath string) (*PocketSlaveConfig) {
 
         // config file path
         configFilePath string   = rootPath + slave_config_file
+
+        makeKeys bool           = false
     )
 
     // check if config dir exists, and creat if DNE
@@ -156,14 +162,13 @@ func _loadSlaveConfig(rootPath string) (*PocketSlaveConfig) {
     }
 
     // create pocketcluster join key sets
-    var makePcJoinKeys bool = false
     if _, err := os.Stat(pcPubKeyPath); os.IsNotExist(err) {
-        makePcJoinKeys = true
+        makeKeys = true
     }
     if _, err := os.Stat(pcPrvKeyPath); os.IsNotExist(err) {
-        makePcJoinKeys = true
+        makeKeys = true
     }
-    if makePcJoinKeys {
+    if makeKeys {
         pcrypto.GenerateWeakKeyPairFiles(pcPubKeyPath, pcPrvKeyPath, "")
     }
 

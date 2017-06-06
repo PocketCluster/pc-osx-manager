@@ -24,13 +24,13 @@ const (
 
 // Meta Agent field
 const (
-    SLAVE_MAC_ADDR          = "s_id"
-    SLAVE_DISCOVER_AGENT    = "s_ad"
-    SLAVE_STATUS_AGENT      = "s_as"
-    SLAVE_ENCRYPTED_STATUS  = "s_es"
-    SLAVE_PUBLIC_KEY        = "s_pk"
-    SLAVE_SSH_KEY           = "s_sh"
-    SLAVE_UUID              = "s_uu"
+    SLAVE_MAC_ADDR          string = "s_id"
+    SLAVE_DISCOVER_AGENT    string = "s_ad"
+    SLAVE_STATUS_AGENT      string = "s_as"
+    SLAVE_ENCRYPTED_STATUS  string = "s_es"
+    SLAVE_PUBLIC_KEY        string = "s_pk"
+    SLAVE_SSH_KEY           string = "s_sh"
+    SLAVE_AUTH_TOKEN        string = "s_at"
 )
 
 // Report types (respond to command)
@@ -51,23 +51,23 @@ const (
 
 // ------ SLAVE SECTION ------
 const (
-    //SLAVE_SECTION           = "slave"
+    //SLAVE_SECTION          string = "slave"
 
     // slave info
-    SLAVE_HARDWARE          = "s_hw"
+    SLAVE_HARDWARE          string = "s_hw"
 
-    SLAVE_NODE_MACADDR      = "s_ma"
-    SLAVE_NODE_NAME         = "s_nm"
-    SLAVE_TIMESTAMP         = "s_ts"
-    SLAVE_NAMESERVER        = "s_ns"
+    SLAVE_NODE_MACADDR      string = "s_ma"
+    SLAVE_NODE_NAME         string = "s_nm"
+    SLAVE_TIMESTAMP         string = "s_ts"
+    SLAVE_NAMESERVER        string = "s_ns"
 
-    SLAVE_IP4_GATEWAY       = "s_g4"
-    SLAVE_IP4_ADDRESS       = "s_i4"
-    SLAVE_IP4_NETMASK       = "s_n4"
+    SLAVE_IP4_GATEWAY       string = "s_g4"
+    SLAVE_IP4_ADDRESS       string = "s_i4"
+    SLAVE_IP4_NETMASK       string = "s_n4"
 
-    //SLAVE_IP6_GATEWAY       = "s_g6"
-    //SLAVE_IP6_ADDRESS       = "s_i6"
-    //SLAVE_IP6_NETMASK       = "s_n6"
+    //SLAVE_IP6_GATEWAY      string = "s_g6"
+    //SLAVE_IP6_ADDRESS      string = "s_i6"
+    //SLAVE_IP6_NETMASK      string = "s_n6"
 
     //TODO check if this is really necessary. If we're to manage SSH sessions with a centralized server, this is not needed
     //SLAVE_CLUSTER_MEMBERS = "s_cl"

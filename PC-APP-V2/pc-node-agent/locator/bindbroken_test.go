@@ -21,7 +21,7 @@ func Test_BindBroken_Bounded_Transition(t *testing.T) {
         // by the time bind broken state is revived, previous master public key should have been available.
         context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
     )
-    context.SetMasterPublicKey(pcrypto.TestMasterPublicKey())
+    context.SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey())
     context.SetMasterAgent(masterAgentName)
     context.SetSlaveNodeName(slaveNodeName)
 
@@ -80,7 +80,7 @@ func Test_BindBroken_BindBroken_TxActionFail(t *testing.T) {
         // by the time bind broken state is revived, previous master public key should have been available.
         context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
     )
-    context.SetMasterPublicKey(pcrypto.TestMasterPublicKey())
+    context.SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey())
     context.SetMasterAgent(masterAgentName)
     context.SetSlaveNodeName(slaveNodeName)
 

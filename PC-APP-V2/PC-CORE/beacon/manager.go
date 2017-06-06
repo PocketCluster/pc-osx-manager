@@ -5,6 +5,7 @@ import (
     "sync"
     "time"
 
+    "github.com/docker/docker/pkg/discovery"
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
 
@@ -17,11 +18,19 @@ import (
     "github.com/davecgh/go-spew/spew"
 )
 
-func NewBeaconManagerWithFunc(cid string, comm CommChannelFunc) (BeaconManger, error) {
-    return NewBeaconManager(cid, comm)
+type BeaconEventNotification interface {
+    BeaconEventPrepareJoin(slave *model.SlaveNode) error
+    BeaconEventResurrect(slaves []model.SlaveNode) error
+    BeaconEventTranstion(state MasterBeaconState, slave *model.SlaveNode, ts time.Time, transOk bool) error
+    BeaconEventDiscard(slave *model.SlaveNode) error
+    BeaconEventShutdown() error
 }
 
-func NewBeaconManager(cid string, comm CommChannel) (BeaconManger, error) {
+func NewBeaconManagerWithFunc(cid string, noti BeaconEventNotification, comm CommChannelFunc) (BeaconManger, error) {
+    return NewBeaconManager(cid, noti, comm)
+}
+
+func NewBeaconManager(cid string, noti BeaconEventNotification, comm CommChannel) (BeaconManger, error) {
     var (
         beacons []MasterBeacon = []MasterBeacon{}
         bm *beaconManger = nil
@@ -32,10 +41,14 @@ func NewBeaconManager(cid string, comm CommChannel) (BeaconManger, error) {
     if comm == nil {
         return nil, errors.Errorf("[ERR] comm channel cannot be nil")
     }
+    if noti == nil {
+        return nil, errors.Errorf("[ERR] notification receiver cannot be nil")
+    }
 
     bm = &beaconManger {
-        clusterID:      cid,
-        commChannel:    comm,
+        clusterID:       cid,
+        notiReceiver:    noti,
+        commChannel:     comm,
     }
 
     // respawn nodes
@@ -59,6 +72,9 @@ func NewBeaconManager(cid string, comm CommChannel) (BeaconManger, error) {
     }
     bm.beaconList = beacons
 
+    // we'll ignore error message for now
+    noti.BeaconEventResurrect(nodes)
+
     return bm, nil
 }
 
@@ -67,14 +83,19 @@ type BeaconManger interface {
     TransitionWithSearchData(searchD mcast.CastPack, ts time.Time) error
     TransitionWithTimestamp(ts time.Time) error
     Shutdown() error
+    // swarm discovery backend
+    discovery.Backend
 }
 
 // We might not need a locking mechanism as "select" statement will choose only "one input" at a time.
 type beaconManger struct {
     sync.Mutex
-    clusterID      string
-    commChannel    CommChannel
-    beaconList     []MasterBeacon
+    clusterID         string
+    notiReceiver      BeaconEventNotification
+    commChannel       CommChannel
+    beaconList        []MasterBeacon
+    // swarm heartbeat
+    swarmHeartbeat    time.Duration
 }
 
 func (b *beaconManger) Sanitize(s *model.SlaveNode) error {
@@ -108,14 +129,14 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts tim
     var bLen int = len(b.beaconList)
     for i := 0; i < bLen; i++  {
         bc := b.beaconList[i]
-        if bc.SlaveNode().MacAddress == usm.SlaveID {
+        if bc.SlaveNode().SlaveID == usm.SlaveID {
             switch bc.CurrentState() {
                 case MasterInit:
                     fallthrough
                 case MasterBindBroken:
                     fallthrough
                 case MasterDiscarded: {
-                    log.Debugf("[BEACON-ERR] (%s):[%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().MacAddress)
+                    log.Debugf("[BEACON-ERR] (%s):[%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().SlaveID)
                     return nil
                 }
                 default: {
@@ -133,6 +154,7 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
         bcFound bool            = false
         mc MasterBeacon         = nil
         err error               = nil
+        slave *model.SlaveNode  = nil
         usm *slagent.PocketSlaveAgentMeta = nil
         state MasterBeaconState = MasterBounded
     )
@@ -157,12 +179,12 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
     var bLen int = len(b.beaconList)
     for i := 0; i < bLen; i++  {
         bc := b.beaconList[i]
-        if bc.SlaveNode().MacAddress == usm.SlaveID {
+        if bc.SlaveNode().SlaveID == usm.SlaveID {
 
             // this beacons are created and waiting for an input
             state = bc.CurrentState()
             if state == MasterInit || state == MasterBindBroken {
-                log.Debugf("[SEARCH-NODE-FOUND] (%s | %s) ", bc.SlaveNode().MacAddress, bc.CurrentState().String())
+                log.Debugf("[SEARCH-NODE-FOUND] (%s | %s) ", bc.SlaveNode().SlaveID, bc.CurrentState().String())
                 return bc.TransitionWithSlaveMeta(&searchD.Address, usm, ts)
             }
 
@@ -174,7 +196,10 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
 
     // since we've not found, create new beacon
     if !bcFound {
-        mc, err = NewMasterBeacon(MasterInit, model.NewSlaveNode(b), b.commChannel, b)
+        slave = model.NewSlaveNode(b)
+        // we'll ignore message for now
+        b.notiReceiver.BeaconEventPrepareJoin(slave)
+        mc, err = NewMasterBeacon(MasterInit, slave, b.commChannel, b)
         if err != nil {
             return errors.WithStack(err)
         }
@@ -210,17 +235,91 @@ func (b *beaconManger) Shutdown() error {
     return nil
 }
 
+// --- Swarm Discovery Methods --- //
+
+// Initialize the discovery with URIs, a heartbeat, a ttl and optional settings.
+func (b *beaconManger) Initialize(_ string, hb time.Duration, _ time.Duration, _ map[string]string) error {
+    b.swarmHeartbeat = hb
+    return nil
+}
+
+// Watch the discovery for entry changes.
+// Returns a channel that will receive changes or an error.
+// Providing a non-nil stopCh can be used to stop watching.
+func (b *beaconManger) Watch(stopCh <-chan struct{}) (<-chan discovery.Entries, <-chan error) {
+    var (
+        ch = make(chan discovery.Entries)
+        errCh = make(chan error)
+        ticker = time.NewTicker(b.swarmHeartbeat)
+    )
+
+    go func(bm *beaconManger) {
+        defer close(errCh)
+        defer close(ch)
+
+        // Send the initial entries if available.
+        var (
+            values []string = findBoundedNodesForSwarm(bm)
+            currentEntries, newEntries discovery.Entries
+            err error = nil
+        )
+
+        if len(values) > 0 {
+            currentEntries, err = discovery.CreateEntries(values)
+        }
+        if err != nil {
+            errCh <- err
+        } else if currentEntries != nil {
+            ch <- currentEntries
+        }
+
+        // Periodically send updates.
+        for {
+            select {
+                case <-ticker.C: {
+                    values = findBoundedNodesForSwarm(bm)
+                    newEntries, err = discovery.CreateEntries(values)
+                    if err != nil {
+                        errCh <- err
+                        continue
+                    }
+                    // Check if the file has really changed.
+                    if !newEntries.Equals(currentEntries) {
+                        ch <- newEntries
+                    }
+                    currentEntries = newEntries
+                }
+
+                case <-stopCh: {
+                    ticker.Stop()
+                    return
+                }
+            }
+        }
+    }(b)
+
+    return ch, errCh
+}
+
+// Register to the discovery.
+func (b *beaconManger) Register(string) error {
+    log.Debugf("(INFO) this should not work as registration of new address is not done by swarm")
+    return nil
+}
+
 // --- BeaconOnTransitionEvent methods --- //
 
 // state transition success from
 func (b *beaconManger) OnStateTranstionSuccess(state MasterBeaconState, slave *model.SlaveNode, ts time.Time) error {
-    log.Infof("beaconManager.OnStateTranstionSuccess (%v) | [%v]", ts, state.String())
+    // we'll ignore error message for now
+    b.notiReceiver.BeaconEventTranstion(state, slave, ts, true)
     return nil
 }
 
 // state transition failure from
 func (b *beaconManger) OnStateTranstionFailure(state MasterBeaconState, slave *model.SlaveNode, ts time.Time) error {
-    log.Infof("beaconManager.OnStateTranstionFailure (%v) | [%v]", ts, state.String())
+    // we'll ignore error message for now
+    b.notiReceiver.BeaconEventTranstion(state, slave, ts, false)
     return nil
 }
 
@@ -238,6 +337,7 @@ func pruneBeaconList(b *beaconManger) {
     for i := 0; i < bLen; i++ {
         bc := b.beaconList[i]
         if bc.CurrentState() == MasterDiscarded {
+            b.notiReceiver.BeaconEventDiscard(bc.SlaveNode())
             bc.Shutdown()
         } else {
             activeBC = append(activeBC, bc)
@@ -260,11 +360,11 @@ func assignSlaveNodeName(b *beaconManger, s *model.SlaveNode) {
     var (
         ci int = 0
         cname string = ""
-        findName = func(mbl []MasterBeacon, nUUID, nName string) bool {
+        findName = func(mbl []MasterBeacon, authToken, nName string) bool {
             var bLen = len(mbl)
             for i := 0; i < bLen; i++ {
                 mb := mbl[i]
-                if mb.SlaveNode().SlaveUUID == nUUID {
+                if mb.SlaveNode().AuthToken == authToken {
                     continue
                 }
                 switch mb.CurrentState() {
@@ -282,12 +382,40 @@ func assignSlaveNodeName(b *beaconManger, s *model.SlaveNode) {
 
     for {
         cname = fmt.Sprintf("pc-node%d", ci + 1)
-        if !findName(b.beaconList, s.SlaveUUID, cname) {
+        if !findName(b.beaconList, s.AuthToken, cname) {
             s.NodeName = cname
             return
         }
         ci++
     }
+}
+
+func findBoundedNodesForSwarm(b *beaconManger) []string {
+    b.Lock()
+    defer b.Unlock()
+
+    const (
+        dockerPort string = "2375"
+    )
+
+    var (
+        addr string = ""
+        err error = nil
+        nodeList []string = []string{}
+        bLen int = len(b.beaconList)
+    )
+
+    for i := 0; i < bLen; i++ {
+        bc := b.beaconList[i]
+        if bc.CurrentState() == MasterBounded {
+            addr, err = bc.SlaveNode().IP4AddrString()
+            if err != nil {
+                continue
+            }
+            nodeList = append(nodeList, fmt.Sprintf("%s:%s", addr, dockerPort))
+        }
+    }
+    return nodeList
 }
 
 func shutdownMasterBeacons(b *beaconManger) {
@@ -306,4 +434,7 @@ func shutdownMasterBeacons(b *beaconManger) {
     // assign new slice to prevent nil crash
     b.beaconList = []MasterBeacon{}
     b.commChannel = nil
+    // ignore error for now
+    b.notiReceiver.BeaconEventShutdown()
+    b.notiReceiver = nil
 }

@@ -52,7 +52,7 @@ func Test_Cryptocheck_Bounded_MasterMetaFail(t *testing.T) {
     }
     // inquired -> keyexchange
     masterTS := slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), masterTS)
+    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterWeakPublicKey(), masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -75,7 +75,7 @@ func Test_Cryptocheck_Bounded_MasterMetaFail(t *testing.T) {
     }
     // keyexchange -> cryptocheck
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, authToken, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -99,7 +99,7 @@ func Test_Cryptocheck_Bounded_MasterMetaFail(t *testing.T) {
     for i := 0; i <= TransitionFailureLimit; i++ {
         // cryptocheck -> bounded
         masterTS = slaveTS.Add(time.Millisecond * 100)
-        meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, masterTS)
+        meta, masterTS, err = msagent.TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, authToken, pcrypto.TestAESCryptor, masterTS)
         if err != nil {
             t.Error(err.Error())
             return
@@ -213,7 +213,7 @@ func Test_Cryptocheck_Bounded_TxActionFail(t *testing.T) {
     }
     // inquired -> keyexchange
     masterTS := slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), masterTS)
+    meta, masterTS, err = msagent.TestMasterAgentDeclarationCommand(pcrypto.TestMasterWeakPublicKey(), masterTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -236,7 +236,7 @@ func Test_Cryptocheck_Bounded_TxActionFail(t *testing.T) {
     }
     // keyexchange -> cryptocheck
     masterTS = slaveTS.Add(time.Second)
-    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
+    meta, masterTS, err = msagent.TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, authToken, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, masterTS)
     if err != nil {
         t.Error(err.Error())
         return

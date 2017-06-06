@@ -39,8 +39,8 @@ func TestSlaveKeyExchangeStatus(masterAgentName string, pubKey []byte, begin tim
     return ma, begin, err
 }
 
-func TestSlaveCheckCryptoStatus(masterAgentName, slaveAgentName, slaveUUID string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
-    sa, err := CheckSlaveCryptoStatus(slaveAgentName, slaveUUID, begin)
+func TestSlaveCheckCryptoStatus(masterAgentName, slaveAgentName, authToken string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
+    sa, err := CheckSlaveCryptoStatus(slaveAgentName, authToken, begin)
     if err != nil {
         return nil, begin, err
     }
@@ -51,8 +51,8 @@ func TestSlaveCheckCryptoStatus(masterAgentName, slaveAgentName, slaveUUID strin
     return ma, begin, nil
 }
 
-func TestSlaveBoundedStatus(masterAgentName, slaveNodeName, slaveUUID string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
-    sa, err := SlaveBoundedStatus(slaveNodeName, slaveUUID, begin)
+func TestSlaveBoundedStatus(masterAgentName, slaveNodeName, authToken string, aesCryptor pcrypto.AESCryptor, begin time.Time) (*PocketSlaveAgentMeta, time.Time, error) {
+    sa, err := SlaveBoundedStatus(slaveNodeName, authToken, begin)
     if err != nil {
         return nil, begin, err
     }

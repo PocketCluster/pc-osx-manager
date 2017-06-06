@@ -1,9 +1,9 @@
 package slcontext
 
 import (
-    "log"
     "sync"
 
+    log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-node-agent/slcontext/config"
@@ -35,7 +35,6 @@ type PocketSlaveContext interface {
     SetAESKey(aesKey []byte) error
     // TODO : should this be removed? this is only used in testing. Plus, it does not handle error properlty
     GetAESKey() (aeskey []byte)
-    DiscardAESKey()
     AESCryptor() (pcrypto.AESCryptor, error)
     pcrypto.AESCryptor
 
@@ -45,10 +44,16 @@ type PocketSlaveContext interface {
     SetMasterIP4Address(ip4Address string) error
     GetMasterIP4Address() (string, error)
 
+    // Discard master aes key, ip address, and other session related data
+    DiscardMasterSession()
+
     SetSlaveNodeName(nodeName string) error
     GetSlaveNodeName() (string, error)
-    SetSlaveNodeUUID(uuid string) error
     GetSlaveNodeUUID() (string, error)
+
+    // authtoken
+    SetSlaveAuthToken(authToken string) error
+    GetSlaveAuthToken() (string, error)
 
     SlaveKeyAndCertPath() string
     SlaveConfigPath() string
@@ -166,7 +171,7 @@ func (sc *slaveContext) SyncAll() error {
 // This should executed on failure from joining states (unbounded, inquired, keyexchange, checkcrypto)
 func (sc *slaveContext) DiscardAll() error {
     // discard aeskey
-    sc.DiscardAESKey()
+    sc.DiscardMasterSession()
 
     // remove decryptor
     sc.masterPubkey = nil
@@ -177,13 +182,13 @@ func (sc *slaveContext) DiscardAll() error {
     }
 
     // master agent name
-    sc.config.MasterSection.MasterBoundAgent = ""
+    sc.config.MasterSection.MasterBoundAgent    = ""
     // master ip4 address
-    sc.config.MasterSection.MasterIP4Address = ""
+    sc.config.MasterSection.MasterIP4Address    = ""
     // slave node name
-    sc.config.SlaveSection.SlaveNodeName = ""
-    // slave node uuid
-    sc.config.SlaveSection.SlaveNodeUUID = ""
+    sc.config.SlaveSection.SlaveNodeName        = ""
+    // slave auth token
+    sc.config.SlaveSection.SlaveAuthToken       = ""
     return nil
 }
 
@@ -272,9 +277,10 @@ func (sc *slaveContext) GetAESKey() ([]byte) {
     return sc.aeskey
 }
 
-func (sc *slaveContext) DiscardAESKey() {
+func (sc *slaveContext) DiscardMasterSession() {
     sc.aesCryptor = nil
     sc.aeskey = nil
+    sc.config.MasterSection.MasterIP4Address = ""
     return
 }
 
@@ -348,19 +354,26 @@ func (sc *slaveContext) GetSlaveNodeName() (string, error) {
 }
 
 // --- Slave Node UUID ---
-func (sc *slaveContext) SetSlaveNodeUUID(uuid string) error {
-    if len(uuid) == 0 {
-        return errors.Errorf("[ERR] Cannot set empty slave UUID")
+func (sc *slaveContext) GetSlaveNodeUUID() (string, error) {
+    if len(sc.config.SlaveSection.SlaveNodeUUID) == 0 {
+        return "", errors.Errorf("[ERR] invalid slave node UUID")
     }
-    sc.config.SlaveSection.SlaveNodeUUID = uuid
+    return sc.config.SlaveSection.SlaveNodeUUID, nil
+}
+
+func (sc *slaveContext) SetSlaveAuthToken(authToken string) error {
+    if len(authToken) == 0 {
+        return errors.Errorf("[ERR] cannot assign invalid slave auth token")
+    }
+    sc.config.SlaveSection.SlaveAuthToken = authToken
     return nil
 }
 
-func (sc *slaveContext) GetSlaveNodeUUID() (string, error) {
-    if len(sc.config.SlaveSection.SlaveNodeUUID) == 0 {
-        return "", errors.Errorf("[ERR] Empty slave node UUID")
+func (sc *slaveContext) GetSlaveAuthToken() (string, error) {
+    if len(sc.config.SlaveSection.SlaveAuthToken) == 0 {
+        return "", errors.Errorf("[ERR] invalid slave auth token")
     }
-    return sc.config.SlaveSection.SlaveNodeUUID, nil
+    return sc.config.SlaveSection.SlaveAuthToken, nil
 }
 
 // TODO : add tests

@@ -23,10 +23,6 @@ const (
     CmdStorageStart
     CmdStorageStop
 
-    // swarm control
-    CmdCntrOrchStart
-    CmdCntrOrchStop
-
     // Registry control
     CmdRegistryStart
     CmdRegistryStop
@@ -34,6 +30,11 @@ const (
     // debug bundle start & stop
     CmdServiceBundleStart
     CmdServiceBundleStop
+
+    // debug add node, root, & user
+    CmdTeleportNodeAdd
+    CmdTeleportRootAdd
+    CmdTeleportUserAdd
 )
 
 func (c CommandType) String() string {
@@ -54,10 +55,6 @@ func (c CommandType) String() string {
             return "CmdStorageStart"
         case CmdStorageStop:
             return "CmdStroageStop"
-        case CmdCntrOrchStart:
-            return "CmdCntrOrchStart"
-        case CmdCntrOrchStop:
-            return "CmdCntrOrchStop"
         case CmdRegistryStart:
             return "CmdImageRegistryStart"
         case CmdRegistryStop:
@@ -66,6 +63,13 @@ func (c CommandType) String() string {
             return "CmdServiceBundleStart"
         case CmdServiceBundleStop:
             return "CmdServiceBundleStop"
+        case CmdTeleportNodeAdd:
+            return "CmdTeleportNodeAdd"
+        case CmdTeleportRootAdd:
+            return "CmdTeleportRootAdd"
+        case CmdTeleportUserAdd:
+            return "CmdTeleportUserAdd"
+
     default:
             return fmt.Sprintf("CommandType(%d)", c)
     }

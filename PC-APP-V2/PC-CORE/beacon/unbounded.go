@@ -85,14 +85,14 @@ func (b *unbounded) unbounded(sender *net.UDPAddr, meta *slagent.PocketSlaveAgen
     if addr != sender.IP.String() {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
     }
-    if b.slaveNode  .MacAddress != meta.SlaveID {
+    if b.slaveNode.SlaveID != meta.SlaveID {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
     // slave hardware architecture
     if len(meta.StatusAgent.SlaveHardware) == 0 {
         return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave architecture")
     }
-    b.slaveNode.Arch = meta.StatusAgent.SlaveHardware
+    b.slaveNode.Hardware = meta.StatusAgent.SlaveHardware
 
     // save status for response generation
     b.slaveStatus = meta.StatusAgent

@@ -1,4 +1,4 @@
-package main
+package service
 
 import (
     "sync"
@@ -12,23 +12,9 @@ const (
     stateStarted
 )
 
-type PocketApplication struct {
-    state           int
-    sync.Mutex
-
-    serviceWG       *sync.WaitGroup
-    services        []*Service
-
-    events          map[string]Event
-    eventsC         chan Event
-    eventWaiters    map[string][]*waiter
-
-    stoppedC        chan struct{}
-}
-
 // NewSupervisor returns new instance of initialized supervisor
-func NewPocketApplication() *PocketApplication {
-    srv := &PocketApplication{
+func NewAppSupervisor() AppSupervisor {
+    srv := &appSupervisor{
         state:           stateStopped,
         services:        []*Service{},
         serviceWG:       &sync.WaitGroup{},
@@ -46,7 +32,57 @@ func NewPocketApplication() *PocketApplication {
     return srv
 }
 
-func (p *PocketApplication) getWaiters(name string) []*waiter {
+// Event is a special service event that can be generated
+// by various goroutines in the application
+type Event struct {
+    Name    string
+    Payload interface{}
+}
+
+type waiter struct {
+    eventC  chan Event
+    cancelC chan struct{}
+}
+
+type Service interface {
+    Serve() error
+}
+
+type ServiceFunc func() error
+
+func (s ServiceFunc) Serve() error {
+    return s()
+}
+
+type AppSupervisor interface {
+    Register(srv Service)
+    RegisterFunc(fn ServiceFunc)
+    BroadcastEvent(event Event)
+    WaitForEvent(name string, eventC chan Event, cancelC chan struct{})
+    ServiceCount() int
+    IsStopped() bool
+    StopChannel() <- chan struct{}
+    Start() error
+    Stop() error
+    Wait() error
+    OnExit(callback func(interface{}))
+}
+
+type appSupervisor struct {
+    state           int
+    sync.Mutex
+
+    serviceWG       *sync.WaitGroup
+    services        []*Service
+
+    events          map[string]Event
+    eventsC         chan Event
+    eventWaiters    map[string][]*waiter
+
+    stoppedC        chan struct{}
+}
+
+func (p *appSupervisor) getWaiters(name string) []*waiter {
     p.Lock()
     defer p.Unlock()
 
@@ -58,14 +94,14 @@ func (p *PocketApplication) getWaiters(name string) []*waiter {
     return out
 }
 
-func (p *PocketApplication) notifyWaiter(w *waiter, event Event) {
+func (p *appSupervisor) notifyWaiter(w *waiter, event Event) {
     select {
         case w.eventC <- event:
         case <-w.cancelC:
     }
 }
 
-func (p *PocketApplication) fanOut() {
+func (p *appSupervisor) fanOut() {
     defer p.serviceWG.Done()
 
     for {
@@ -81,7 +117,7 @@ func (p *PocketApplication) fanOut() {
     }
 }
 
-func (p *PocketApplication) serve(service *Service) {
+func (p *appSupervisor) serve(service *Service) {
     // this func will be called _after_ a service stops running:
     removeService := func(srv *Service) {
         p.Lock()
@@ -108,8 +144,7 @@ func (p *PocketApplication) serve(service *Service) {
     }(service)
 }
 
-
-func (p *PocketApplication) Register(srv Service) {
+func (p *appSupervisor) Register(srv Service) {
     p.Lock()
     defer p.Unlock()
     p.services = append(p.services, &srv)
@@ -121,11 +156,11 @@ func (p *PocketApplication) Register(srv Service) {
     }
 }
 
-func (p *PocketApplication) RegisterFunc(fn ServiceFunc) {
+func (p *appSupervisor) RegisterFunc(fn ServiceFunc) {
     p.Register(fn)
 }
 
-func (p *PocketApplication) BroadcastEvent(event Event) {
+func (p *appSupervisor) BroadcastEvent(event Event) {
     p.Lock()
     defer p.Unlock()
 
@@ -137,7 +172,7 @@ func (p *PocketApplication) BroadcastEvent(event Event) {
     }()
 }
 
-func (p *PocketApplication) WaitForEvent(name string, eventC chan Event, cancelC chan struct{}) {
+func (p *appSupervisor) WaitForEvent(name string, eventC chan Event, cancelC chan struct{}) {
     p.Lock()
     defer p.Unlock()
 
@@ -151,13 +186,13 @@ func (p *PocketApplication) WaitForEvent(name string, eventC chan Event, cancelC
 }
 
 // ServiceCount returns the number of registered and actively running services
-func (p *PocketApplication) ServiceCount() int {
+func (p *appSupervisor) ServiceCount() int {
     p.Lock()
     defer p.Unlock()
     return len(p.services)
 }
 
-func (p *PocketApplication) IsStopped() bool {
+func (p *appSupervisor) IsStopped() bool {
     p.Lock()
     defer p.Unlock()
 
@@ -168,7 +203,11 @@ func (p *PocketApplication) IsStopped() bool {
     }
 }
 
-func (p *PocketApplication) Start() error {
+func (p *appSupervisor) StopChannel() <- chan struct{} {
+    return p.stoppedC
+}
+
+func (p *appSupervisor) Start() error {
     p.Lock()
     defer p.Unlock()
     p.state = stateStarted
@@ -185,7 +224,7 @@ func (p *PocketApplication) Start() error {
     return nil
 }
 
-func (s *PocketApplication) Stop() error {
+func (s *appSupervisor) Stop() error {
     // this double locking to to prevent ServiceFunc from deadlocked, but enable other variables to be reset
     s.Lock()
     if s.state == stateStopped {
@@ -201,7 +240,7 @@ func (s *PocketApplication) Stop() error {
     return nil
 }
 
-func (p *PocketApplication) Wait() error {
+func (p *appSupervisor) Wait() error {
     var (
         waiters []*waiter
         w *waiter
@@ -223,33 +262,11 @@ func (p *PocketApplication) Wait() error {
 // onExit allows individual services to register a callback function which will be
 // called when Teleport Process is asked to exit. Usually services terminate themselves
 // when the callback is called
-func (p *PocketApplication) OnExit(callback func(interface{})) {
+func (p *appSupervisor) OnExit(callback func(interface{})) {
     go func() {
         select {
             case <- p.stoppedC:
                 callback(nil)
         }
     }()
-}
-
-// Event is a special service event that can be generated
-// by various goroutines in the application
-type Event struct {
-    Name    string
-    Payload interface{}
-}
-
-type waiter struct {
-    eventC  chan Event
-    cancelC chan struct{}
-}
-
-type Service interface {
-    Serve() error
-}
-
-type ServiceFunc func() error
-
-func (s ServiceFunc) Serve() error {
-    return s()
 }

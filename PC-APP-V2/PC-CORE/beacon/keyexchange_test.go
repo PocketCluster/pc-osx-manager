@@ -64,7 +64,7 @@ func Test_KeyExchange_CryptoCheck_TimeoutFail(t *testing.T) {
     }
     // --- test
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.SlaveNode().SlaveUUID, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
+    sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.SlaveNode().AuthToken, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -164,7 +164,7 @@ func Test_KeyExchange_CryptoCheck_TooManyMetaFail(t *testing.T) {
         }
         slaveTS = masterTS.Add(time.Second)
         t.Logf("[INFO] slaveTS - MasterBeacon.lastSuccessTimestmap : " + slaveTS.Sub(mb.(*masterBeacon).state.(DebugState).TransitionSuccessTS()).String())
-        sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.SlaveNode().SlaveUUID, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
+        sa, end, err = slagent.TestSlaveCheckCryptoStatus(masterAgentName, "INCORRECT-SLAVE-NAME", mb.SlaveNode().AuthToken, mb.(*masterBeacon).state.(DebugState).AESCryptor(), slaveTS)
         if err != nil {
             t.Error(err.Error())
             return

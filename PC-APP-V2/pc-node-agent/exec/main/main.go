@@ -5,15 +5,19 @@ import (
     "os"
     "time"
 
+    "gopkg.in/vmihailenco/msgpack.v2"
+    "github.com/gravitational/teleport/embed"
+    sysd "github.com/coreos/go-systemd/dbus"
+    tervice "github.com/gravitational/teleport/lib/service"
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
-    "gopkg.in/vmihailenco/msgpack.v2"
 
+    "github.com/stkim1/udpnet/mcast"
+    "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/pc-node-agent/dhcp"
     "github.com/stkim1/pc-node-agent/locator"
     "github.com/stkim1/pc-node-agent/slcontext"
-    "github.com/stkim1/udpnet/mcast"
-    "github.com/stkim1/udpnet/ucast"
+    "github.com/stkim1/pc-node-agent/service"
 )
 
 import (
@@ -25,9 +29,12 @@ const (
     nodeServiceBeacon  = "service_beacon"
     nodeFeedbackBeacon = "feedback_beacon"
     nodeFeedbackDHCP   = "feedback_dhcp"
+    nodeTeleportStart  = "teleport_start"
+    nodeTeleportStop   = "teleport_stop"
+    dockerServiceUnit  = "docker.service"
 )
 
-func initDhcpListner(app *PocketApplication) error {
+func initDhcpListner(app service.AppSupervisor) error {
     // firstly clear off previous socket
     os.Remove(dhcp.DHCPEventSocketPath)
     dhcpListener, err := net.ListenUnix("unix", &net.UnixAddr{dhcp.DHCPEventSocketPath, "unix"})
@@ -58,7 +65,7 @@ func initDhcpListner(app *PocketApplication) error {
                 continue
             }
 
-            app.BroadcastEvent(Event{Name:nodeFeedbackDHCP, Payload:dhcpEvent})
+            app.BroadcastEvent(service.Event{Name:nodeFeedbackDHCP, Payload:dhcpEvent})
 
             err = conn.Close()
             if err != nil {
@@ -79,12 +86,12 @@ func initDhcpListner(app *PocketApplication) error {
     return nil
 }
 
-func initSearchService(app *PocketApplication) error {
+func initSearchService(app service.AppSupervisor) error {
     caster, err := mcast.NewSearchCaster()
     if err != nil {
         return err
     }
-    eventsC := make(chan Event)
+    eventsC := make(chan service.Event)
     app.WaitForEvent(nodeServiceSearch, eventsC, make(chan struct{}))
 
     app.RegisterFunc(func() error {
@@ -92,7 +99,7 @@ func initSearchService(app *PocketApplication) error {
 
         for {
             select {
-                case <- app.stoppedC:
+                case <- app.StopChannel():
                     return nil
                 case e := <-eventsC: {
                     cm, ok := e.Payload.([]byte)
@@ -118,21 +125,21 @@ func initSearchService(app *PocketApplication) error {
     return nil
 }
 
-func initBeaconService(app *PocketApplication) error {
+func initBeaconService(app service.AppSupervisor) error {
     beacon, err := ucast.NewBeaconAgent()
     if err != nil {
         return err
     }
-    eventsC := make(chan Event)
+    eventsC := make(chan service.Event)
     app.WaitForEvent(nodeServiceBeacon, eventsC, make(chan struct{}))
 
     app.RegisterFunc(func() error {
         for {
             select {
-                case <- app.stoppedC:
+                case <- app.StopChannel():
                     return nil
                 case v := <- beacon.ChRead: {
-                    app.BroadcastEvent(Event{Name:nodeFeedbackBeacon, Payload:v})
+                    app.BroadcastEvent(service.Event{Name:nodeFeedbackBeacon, Payload:v})
                 }
             }
         }
@@ -144,7 +151,7 @@ func initBeaconService(app *PocketApplication) error {
 
         for {
             select {
-                case <-app.stoppedC:
+                case <-app.StopChannel():
                     return nil
                 case e := <- eventsC: {
                     bs, ok := e.Payload.(ucast.BeaconSend)
@@ -167,131 +174,201 @@ func initBeaconService(app *PocketApplication) error {
     return nil
 }
 
-func initAgentService(app *PocketApplication) error {
+func initTeleportNodeService(app service.AppSupervisor) error {
     var (
-        beaconC = make(chan Event)
-        dhcpC   = make(chan Event)
+        nodeProc *embed.EmbeddedNodeProcess = nil
+        startC = make(chan service.Event)
+        stopC = make(chan service.Event)
     )
-    app.WaitForEvent(nodeFeedbackBeacon, beaconC, make(chan struct{}))
-    app.WaitForEvent(nodeFeedbackDHCP, dhcpC, make(chan struct{}))
+    app.WaitForEvent(nodeTeleportStart, startC, make(chan struct{}))
+    app.WaitForEvent(nodeTeleportStop,   stopC, make(chan struct{}))
 
-    app.RegisterFunc(func() error {
-        var (
-            timer = time.NewTicker(time.Second)
-            context = slcontext.SharedSlaveContext()
-            loc locator.SlaveLocator = nil
-            locState locator.SlaveLocatingState = locator.SlaveUnbounded
-            err error = nil
-
-            searchTx = func(data []byte) error {
-                log.Debugf("[SEARCH-TX] %v", time.Now())
-                app.BroadcastEvent(Event{Name: nodeServiceSearch, Payload:data})
-                return nil
-            }
-            beaconTx = func(target string, data []byte) error {
-                log.Debugf("[BEACON-TX] %v TO : %v", time.Now(), target)
-                app.BroadcastEvent(Event{
-                    Name: nodeServiceBeacon,
-                    Payload: ucast.BeaconSend{
-                        Host:target,
-                        Payload:data,
-                    },
-                })
-                return nil
-            }
-            transitEvent = func (isSuccess bool, state locator.SlaveLocatingState, ts time.Time) error {
-
-                if isSuccess {
-                    switch state {
-                        case locator.SlaveUnbounded: {
-                            return nil
-                        }
-                        case locator.SlaveInquired: {
-                            return nil
-                        }
-                        case locator.SlaveKeyExchange: {
-                            return nil
-                        }
-                        case locator.SlaveCryptoCheck: {
-                            return nil
-                        }
-                        case locator.SlaveBounded: {
-                            return nil
-                        }
-                        case locator.SlaveBindBroken: {
-                            return nil
-                        }
-                    }
-
-                } else {
-                    switch state {
-                        case locator.SlaveUnbounded: {
-                            return nil
-                        }
-                        case locator.SlaveInquired: {
-                            return nil
-                        }
-                        case locator.SlaveKeyExchange: {
-                            return nil
-                        }
-                        case locator.SlaveCryptoCheck: {
-                            return nil
-                        }
-                        case locator.SlaveBounded: {
-                            return nil
-                        }
-                        case locator.SlaveBindBroken: {
-                            return nil
-                        }
-                    }
-                }
-
-                return nil
-            }
-        )
-
-        // setup slave locator
-        uuid, err := context.GetSlaveNodeUUID()
-        if err == nil && len(uuid) != 0 {
-            locState = locator.SlaveBindBroken
-        } else {
-            locState = locator.SlaveUnbounded
-        }
-        loc, err = locator.NewSlaveLocatorWithFunc(locState, searchTx, beaconTx, transitEvent)
-        if err != nil {
-            return errors.WithStack(err)
-        }
-        defer loc.Shutdown()
-        defer timer.Stop()
-
-        log.Debugf("[AGENT] starting agent service...")
+    app.RegisterFunc(func() error{
 
         for {
             select {
-                case <- app.stoppedC:
+                case <- app.StopChannel():
                     return nil
-                case b := <- beaconC: {
-                    mp, ok := b.Payload.(ucast.BeaconPack)
-                    if ok {
-                        err = loc.TranstionWithMasterBeacon(mp, time.Now())
+
+                case noti := <-startC: {
+                    // restart teleport
+                    cfg, err := tervice.MakeNodeConfig(slcontext.SharedSlaveContext(), true)
+                    if err != nil {
+                        log.Errorf(err.Error())
+                        continue
+                    }
+                    nodeProc, err = embed.NewEmbeddedNodeProcess(app, cfg)
+                    if err != nil {
+                        log.Errorf(err.Error())
+                        continue
+                    }
+                    // execute docker engine cert acquisition before SSH node start
+                    state, ok := noti.Payload.(locator.SlaveLocatingState)
+                    if ok && state == locator.SlaveCryptoCheck {
+                        // TODO : create a waitforevent channel and restart docker engine accordingly
+                        err = nodeProc.AcquireEngineCertificate(slcontext.DockerEnvironemtPostProcess)
                         if err != nil {
-                            log.Debug(err.Error())
+                            log.Errorf(err.Error())
+                        }
+                    }
+                    err = nodeProc.StartNodeSSH()
+                    if err != nil {
+                        log.Errorf(err.Error())
+                        continue
+                    }
+                    log.Debugf("\n\n(INFO) teleport node started success!\n")
+
+                    continue
+
+                    // restart docker engine
+                    // TODO : FIX /opt/gopkg/src/github.com/godbus/dbus/conn.go:345 send on closed channel
+                    conn, err := sysd.NewSystemdConnection()
+                    if err != nil {
+                        log.Errorf(err.Error())
+                    } else {
+                        did, err := conn.RestartUnit(dockerServiceUnit, "replace", nil)
+                        if err != nil {
+                            log.Errorf(err.Error())
+                        } else {
+                            conn.Close()
+                            log.Debugf("\n\n(INFO) docker engin restart success! ID %d\n", did)
                         }
                     }
                 }
-                case d := <- dhcpC: {
-                    log.Debugf("[DHCP] RECEIVED\n %v", spew.Sdump(d.Payload))
-                }
-                case <- timer.C: {
-                    err = loc.TranstionWithTimestamp(time.Now())
+
+                case <-stopC: {
+                    err := nodeProc.Close()
                     if err != nil {
-                        log.Debugf(err.Error())
+                        log.Errorf(err.Error())
+                        continue
                     }
+                    nodeProc = nil
+                    log.Debugf("\n\n(INFO) teleport node stop success!\n")
                 }
             }
         }
+
         return nil
     })
+
+    return nil
+}
+
+func initAgentService(app service.AppSupervisor) error {
+    var (
+
+        beaconC = make(chan service.Event)
+        dhcpC   = make(chan service.Event)
+
+        searchTx = func(data []byte) error {
+            log.Debugf("[SEARCH-TX] %v", time.Now())
+            app.BroadcastEvent(service.Event{Name: nodeServiceSearch, Payload:data})
+            return nil
+        }
+
+        beaconTx = func(target string, data []byte) error {
+            log.Debugf("[BEACON-TX] %v TO : %v", time.Now(), target)
+            app.BroadcastEvent(service.Event{
+                Name: nodeServiceBeacon,
+                Payload: ucast.BeaconSend{
+                    Host:target,
+                    Payload:data,
+                },
+            })
+            return nil
+        }
+
+        transitEvent = func (state locator.SlaveLocatingState, ts time.Time, transOk bool) error {
+            if transOk {
+                log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | SUCCESS ", ts, state.String())
+                switch state {
+                    case locator.SlaveCryptoCheck:
+                        fallthrough
+                    case locator.SlaveBindBroken: {
+                        app.BroadcastEvent(service.Event{Name:nodeTeleportStart, Payload:state})
+                        return nil
+                    }
+                    case locator.SlaveBounded: {
+                        return nil
+                    }
+                    default: {
+                        return nil
+                    }
+                }
+
+            } else {
+                log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | FAILED ", ts, state.String())
+                switch state {
+                    case locator.SlaveBounded: {
+                        app.BroadcastEvent(service.Event{Name:nodeTeleportStop, Payload:state})
+                        return nil
+                    }
+                    default: {
+                        return nil
+                    }
+                }
+            }
+
+            return nil
+        }
+
+        serviceFunc = func() error {
+            var (
+                timer = time.NewTicker(time.Second)
+                context = slcontext.SharedSlaveContext()
+                loc locator.SlaveLocator = nil
+                locState locator.SlaveLocatingState = locator.SlaveUnbounded
+                err error = nil
+            )
+
+            // setup slave locator
+            authToken, err := context.GetSlaveAuthToken()
+            if err == nil && len(authToken) != 0 {
+                locState = locator.SlaveBindBroken
+            } else {
+                locState = locator.SlaveUnbounded
+            }
+            loc, err = locator.NewSlaveLocatorWithFunc(locState, searchTx, beaconTx, transitEvent)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            defer loc.Shutdown()
+            defer timer.Stop()
+
+            log.Debugf("[AGENT] starting agent service...")
+
+            for {
+                select {
+                    case <- app.StopChannel(): {
+                        return nil
+                    }
+                    case <- timer.C: {
+                        err = loc.TranstionWithTimestamp(time.Now())
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                    }
+                    case evt := <-beaconC: {
+                        mp, mk := evt.Payload.(ucast.BeaconPack)
+                        if mk {
+                            err = loc.TranstionWithMasterBeacon(mp, time.Now())
+                            if err != nil {
+                                log.Debug(err.Error())
+                            }
+                        }
+                    }
+                    case dvt := <- dhcpC: {
+                        log.Debugf("[DHCP] RECEIVED\n %v", spew.Sdump(dvt.Payload))
+                    }
+                }
+            }
+            return nil
+        }
+    )
+
+    app.WaitForEvent(nodeFeedbackBeacon, beaconC, make(chan struct{}))
+    app.WaitForEvent(nodeFeedbackDHCP,     dhcpC, make(chan struct{}))
+    app.RegisterFunc(serviceFunc)
 
     app.OnExit(func(payload interface{}) {
         log.Debugf("[AGENT] close agent service...")
@@ -303,7 +380,7 @@ func initAgentService(app *PocketApplication) error {
 func main() {
     var (
         err error = nil
-        app *PocketApplication
+        app service.AppSupervisor
     )
     log.SetLevel(log.DebugLevel)
 
@@ -311,7 +388,7 @@ func main() {
 
     // initialize slave context
     slcontext.SharedSlaveContext()
-    app = NewPocketApplication()
+    app = service.NewAppSupervisor()
 
     // dhcp listner
     err = initDhcpListner(app)
@@ -333,6 +410,18 @@ func main() {
 
     // agent service
     err = initAgentService(app)
+    if err != nil {
+        log.Panic(errors.WithStack(err))
+    }
+
+    // teleport management
+    err = initTeleportNodeService(app)
+    if err != nil {
+        log.Panic(errors.WithStack(err))
+    }
+
+    // DNS service
+    err = initDNSService(app)
     if err != nil {
         log.Panic(errors.WithStack(err))
     }

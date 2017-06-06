@@ -47,7 +47,7 @@ func Test_BindRecovery_Bounded_Transition(t *testing.T) {
     }
     slaveTS = masterTS.Add(time.Second)
     aescryptor := mb.(*masterBeacon).state.(DebugState).AESCryptor()
-    sa, end, err := slagent.TestSlaveBoundedStatus(masterAgentName, slaveNodeName, mb.SlaveNode().SlaveUUID, aescryptor, slaveTS)
+    sa, end, err := slagent.TestSlaveBoundedStatus(masterAgentName, slaveNodeName, mb.SlaveNode().AuthToken, aescryptor, slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -103,7 +103,7 @@ func Test_BindRecovery_Bounded_TimeoutFail(t *testing.T) {
 
     // first trial with error
     slaveTS = masterTS.Add(time.Second)
-    sa, end, err := slagent.TestSlaveBoundedStatus("WRONG_MASTER_NAME", slaveNodeName, slave.SlaveUUID, aescryptor, slaveTS)
+    sa, end, err := slagent.TestSlaveBoundedStatus("WRONG_MASTER_NAME", slaveNodeName, slave.AuthToken, aescryptor, slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -119,7 +119,7 @@ func Test_BindRecovery_Bounded_TimeoutFail(t *testing.T) {
 
     // 2nd trial
     slaveTS = masterTS.Add(time.Millisecond + BoundedTimeout * time.Duration(TxActionLimit))
-    sa, end, err = slagent.TestSlaveBoundedStatus("WRONG_MASTER_NAME", slaveNodeName, slave.SlaveUUID, aescryptor, slaveTS)
+    sa, end, err = slagent.TestSlaveBoundedStatus("WRONG_MASTER_NAME", slaveNodeName, slave.AuthToken, aescryptor, slaveTS)
     if err != nil {
         t.Error(err.Error())
         return
@@ -174,7 +174,7 @@ func Test_BindRecovery_Bounded_TooManyMetaFail(t *testing.T) {
     for i := 0; i <= TransitionFailureLimit; i++ {
         // first trial with error
         slaveTS = masterTS.Add(time.Second)
-        sa, end, err := slagent.TestSlaveBoundedStatus("WRONG_MASTER_NAME", slaveNodeName, slave.SlaveUUID, aescryptor, slaveTS)
+        sa, end, err := slagent.TestSlaveBoundedStatus("WRONG_MASTER_NAME", slaveNodeName, slave.AuthToken, aescryptor, slaveTS)
         if err != nil {
             t.Error(err.Error())
             return

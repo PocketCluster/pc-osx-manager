@@ -43,7 +43,7 @@ type inquired struct {
 }
 
 func (b *inquired) transitionActionWithTimestamp(masterTimestamp time.Time) error {
-    masterPubKey, err := context.SharedHostContext().MasterHostPublicKey()
+    masterPubKey, err := context.SharedHostContext().MasterBeaconPublicKey()
     if err != nil {
         return errors.WithStack(err)
     }
@@ -98,10 +98,10 @@ func (b *inquired) inquired(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentM
     if addr != sender.IP.String() {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
     }
-    if b.slaveNode.MacAddress != meta.SlaveID {
+    if b.slaveNode.SlaveID != meta.SlaveID {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
-    if b.slaveNode.Arch != meta.StatusAgent.SlaveHardware {
+    if b.slaveNode.Hardware != meta.StatusAgent.SlaveHardware {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave architecture")
     }
     if len(meta.SlavePubKey) == 0 {
@@ -109,7 +109,7 @@ func (b *inquired) inquired(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentM
     }
 
     // master public key
-    masterPrvKey, err := context.SharedHostContext().MasterHostPrivateKey()
+    masterPrvKey, err := context.SharedHostContext().MasterBeaconPrivateKey()
     if err != nil {
         return MasterTransitionFail, errors.WithStack(err)
     }

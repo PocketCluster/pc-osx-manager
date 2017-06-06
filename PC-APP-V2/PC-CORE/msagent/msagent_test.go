@@ -14,7 +14,7 @@ import (
 )
 
 var (
-    masterAgentName, slaveNodeName, slaveUUID string
+    masterAgentName, slaveNodeName, slaveAuthToken string
     initTime time.Time
 )
 
@@ -23,8 +23,8 @@ func setUp() {
     slcontext.DebugSlcontextPrepare()
 
     masterAgentName, _ = context.SharedHostContext().MasterAgentName()
-    slaveNodeName = "pc-node1"
-    slaveUUID = uuid.New()
+    slaveNodeName      = "pc-node1"
+    slaveAuthToken     = uuid.New()
     initTime, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 }
 
@@ -121,7 +121,7 @@ func TestMasterDeclarationMeta(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    meta, end, err := TestMasterAgentDeclarationCommand(pcrypto.TestMasterPublicKey(), initTime)
+    meta, end, err := TestMasterAgentDeclarationCommand(pcrypto.TestMasterWeakPublicKey(), initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -200,7 +200,7 @@ func TestExecKeyExchangeMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, initTime)
+    meta, _, err := TestMasterKeyExchangeCommand(masterAgentName, slaveNodeName, slaveAuthToken, pcrypto.TestSlavePublicKey(), pcrypto.TestAESKey, pcrypto.TestAESCryptor, pcrypto.TestMasterRSAEncryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -252,7 +252,7 @@ func TestSendCryptoCheckMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, initTime)
+    meta, _, err := TestMasterCheckCryptoCommand(masterAgentName, slaveNodeName, slaveAuthToken, pcrypto.TestAESCryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return
@@ -286,7 +286,7 @@ func TestBoundedStatusMeta(t *testing.T) {
     setUp()
     defer tearDown()
 
-    meta, _, err := TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, slaveUUID, pcrypto.TestAESCryptor, initTime)
+    meta, _, err := TestMasterBoundedStatusCommand(masterAgentName, slaveNodeName, slaveAuthToken, pcrypto.TestAESCryptor, initTime)
     if err != nil {
         t.Error(err.Error())
         return

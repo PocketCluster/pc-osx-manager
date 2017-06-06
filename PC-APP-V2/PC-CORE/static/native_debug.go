@@ -34,20 +34,6 @@ func OpsCmdRegistryStop() {
     }
 }
 
-//export OpsCmdCntrOrchStart
-func OpsCmdCntrOrchStart() {
-    theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdCntrOrchStart,
-    }
-}
-
-//export OpsCmdCntrOrchStop
-func OpsCmdCntrOrchStop() {
-    theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdCntrOrchStop,
-    }
-}
-
 //export OpsCmdStorageStart
 func OpsCmdStorageStart() {
     theApp.eventsIn <- operation.Operation{
@@ -87,5 +73,26 @@ func OpsCmdServiceBundleStart() {
 func OpsCmdServiceBundleStop() {
     theApp.eventsIn <- operation.Operation{
         Command:    operation.CmdServiceBundleStop,
+    }
+}
+
+//export OpsCmdTeleportNodeAdd
+func OpsCmdTeleportNodeAdd() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdTeleportNodeAdd,
+    }
+}
+
+//export OpsCmdTeleportRootAdd
+func OpsCmdTeleportRootAdd() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdTeleportRootAdd,
+    }
+}
+
+//export OpsCmdTeleportUserAdd
+func OpsCmdTeleportUserAdd() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdTeleportUserAdd,
     }
 }
