@@ -101,7 +101,7 @@ func (b *inquired) inquired(sender *net.UDPAddr, meta *slagent.PocketSlaveAgentM
     if b.slaveNode.MacAddress != meta.SlaveID {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
-    if b.slaveNode.Arch != meta.StatusAgent.SlaveHardware {
+    if b.slaveNode.Hardware != meta.StatusAgent.SlaveHardware {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave architecture")
     }
     if len(meta.SlavePubKey) == 0 {

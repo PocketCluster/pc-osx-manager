@@ -51,7 +51,7 @@ func insertTestNodes(nodeCount int, c *C) []string {
         sl.NodeName = fmt.Sprintf("pc-node%d", (i * 2) + 1)
         sl.MacAddress = fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i)
         sl.PublicKey = pcrypto.TestSlaveNodePublicKey()
-        sl.Arch = runtime.GOARCH
+        sl.Hardware = runtime.GOARCH
         err := sl.JoinSlave()
         c.Assert(err, IsNil)
         AuthTokenList = append(AuthTokenList, sl.AuthToken)
@@ -140,7 +140,7 @@ func (s *ManagerSuite) TestBindBrokenAndTooManyTrialDiscard(c *C) {
     sl.MacAddress = sa.SlaveID
     sl.NodeName = slaveNodeName
     sl.PublicKey = pcrypto.TestSlaveNodePublicKey()
-    sl.Arch = runtime.GOARCH
+    sl.Hardware = runtime.GOARCH
     err = sl.JoinSlave()
     c.Assert(err, IsNil)
 

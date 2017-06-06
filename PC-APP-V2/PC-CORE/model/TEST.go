@@ -37,7 +37,7 @@ func DebugTestSlaveNode() *SlaveNode {
     s.Departed        = initTime
     s.LastAlive       = initTime
     s.MacAddress      = piface.HardwareAddr
-    s.Arch            = runtime.GOARCH
+    s.Hardware        = runtime.GOARCH
     s.NodeName        = DEBUG_SLAVE_NODE_NAME
     s.AuthToken       = uuid.New()
 

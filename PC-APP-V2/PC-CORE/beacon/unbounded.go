@@ -92,7 +92,7 @@ func (b *unbounded) unbounded(sender *net.UDPAddr, meta *slagent.PocketSlaveAgen
     if len(meta.StatusAgent.SlaveHardware) == 0 {
         return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave architecture")
     }
-    b.slaveNode.Arch = meta.StatusAgent.SlaveHardware
+    b.slaveNode.Hardware = meta.StatusAgent.SlaveHardware
 
     // save status for response generation
     b.slaveStatus = meta.StatusAgent

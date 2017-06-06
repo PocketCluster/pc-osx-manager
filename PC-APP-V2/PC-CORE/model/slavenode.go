@@ -20,7 +20,7 @@ const (
     SNMFieldDeparted        = "departed"
     SNMFieldLastAlive       = "last_alive"
     SNMFieldMacAddress      = "mac_address"
-    SNMFieldArch            = "arch"
+    SNMFieldHardware        = "hardware"
     SNMFieldNodeName        = "node_name"
     SNMFieldState           = "state"
     SNMFieldAuthToken       = "auth_token"
@@ -59,7 +59,7 @@ type SlaveNode struct {
 
     ModelVersion    string       `gorm:"column:model_version;type:VARCHAR(8)"`
     MacAddress      string       `gorm:"column:mac_address;type:VARCHAR(32)"`
-    Arch            string       `gorm:"column:arch;type:VARCHAR(32)"`
+    Hardware        string       `gorm:"column:hardware;type:VARCHAR(32)"`
     NodeName        string       `gorm:"column:node_name;type:VARCHAR(64)"`
     AuthToken       string       `gorm:"column:auth_token;type:VARCHAR(64)"`
 
@@ -173,10 +173,6 @@ func (s *SlaveNode) SetSlaveID(id string) error {
     }
     s.AuthToken = id
     return nil
-}
-
-func (s *SlaveNode) GetAuthToken() string {
-    return s.AuthToken
 }
 
 func (s *SlaveNode) JoinSlave() error {

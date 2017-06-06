@@ -122,7 +122,7 @@ func (b *cryptocheck) cryptoCheck(sender *net.UDPAddr, meta *slagent.PocketSlave
     if b.slaveNode.MacAddress != meta.SlaveID {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
-    if b.slaveNode.Arch != usm.SlaveHardware {
+    if b.slaveNode.Hardware != usm.SlaveHardware {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave architecture")
     }
 
