@@ -97,7 +97,7 @@ func (b *bindbroken) bindBroken(sender *net.UDPAddr, meta *slagent.PocketSlaveAg
     }
 
     // check mac address
-    if b.slaveNode.MacAddress != meta.SlaveID {
+    if b.slaveNode.SlaveID != meta.SlaveID {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
     // slave ip address

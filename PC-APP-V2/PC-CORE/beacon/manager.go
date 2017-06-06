@@ -129,14 +129,14 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts tim
     var bLen int = len(b.beaconList)
     for i := 0; i < bLen; i++  {
         bc := b.beaconList[i]
-        if bc.SlaveNode().MacAddress == usm.SlaveID {
+        if bc.SlaveNode().SlaveID == usm.SlaveID {
             switch bc.CurrentState() {
                 case MasterInit:
                     fallthrough
                 case MasterBindBroken:
                     fallthrough
                 case MasterDiscarded: {
-                    log.Debugf("[BEACON-ERR] (%s):[%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().MacAddress)
+                    log.Debugf("[BEACON-ERR] (%s):[%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().SlaveID)
                     return nil
                 }
                 default: {
@@ -179,12 +179,12 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
     var bLen int = len(b.beaconList)
     for i := 0; i < bLen; i++  {
         bc := b.beaconList[i]
-        if bc.SlaveNode().MacAddress == usm.SlaveID {
+        if bc.SlaveNode().SlaveID == usm.SlaveID {
 
             // this beacons are created and waiting for an input
             state = bc.CurrentState()
             if state == MasterInit || state == MasterBindBroken {
-                log.Debugf("[SEARCH-NODE-FOUND] (%s | %s) ", bc.SlaveNode().MacAddress, bc.CurrentState().String())
+                log.Debugf("[SEARCH-NODE-FOUND] (%s | %s) ", bc.SlaveNode().SlaveID, bc.CurrentState().String())
                 return bc.TransitionWithSlaveMeta(&searchD.Address, usm, ts)
             }
 

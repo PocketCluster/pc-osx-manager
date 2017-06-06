@@ -49,7 +49,7 @@ func insertTestNodes(nodeCount int, c *C) []string {
     for i := 0; i < nodeCount; i++ {
         sl := model.NewSlaveNode(nil)
         sl.NodeName = fmt.Sprintf("pc-node%d", (i * 2) + 1)
-        sl.MacAddress = fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i)
+        sl.SlaveID = fmt.Sprintf("%d%d:%d%d:%d%d:%d%d:%d%d:%d%d", i, i, i, i, i, i, i, i, i, i, i, i)
         sl.PublicKey = pcrypto.TestSlaveNodePublicKey()
         sl.Hardware = runtime.GOARCH
         err := sl.JoinSlave()
@@ -137,7 +137,7 @@ func (s *ManagerSuite) TestBindBrokenAndTooManyTrialDiscard(c *C) {
 
     // create new slave node
     sl := model.NewSlaveNode(nil)
-    sl.MacAddress = sa.SlaveID
+    sl.SlaveID = sa.SlaveID
     sl.NodeName = slaveNodeName
     sl.PublicKey = pcrypto.TestSlaveNodePublicKey()
     sl.Hardware = runtime.GOARCH

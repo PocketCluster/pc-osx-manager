@@ -50,7 +50,7 @@ type bindrecovery struct {
 func (b *bindrecovery) transitionActionWithTimestamp(masterTimestamp time.Time) error {
     // master preperation
     if b.slaveLocation == nil {
-        return errors.Errorf("[ERR] [%s | %s] SlaveDiscoveryAgent is nil. We cannot form a proper response %s", b.constState.String(), b.slaveNode.MacAddress)
+        return errors.Errorf("[ERR] [%s | %s] SlaveDiscoveryAgent is nil. We cannot form a proper response %s", b.constState.String(), b.slaveNode.SlaveID)
     }
     cmd, err := msagent.BrokenBindRecoverRespond(b.slaveLocation)
     if err != nil {
@@ -124,7 +124,7 @@ func (b *bindrecovery) transitionWithSlaveMeta(sender *net.UDPAddr, meta *slagen
     if addr != sender.IP.String() {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
     }
-    if b.slaveNode.MacAddress != meta.SlaveID {
+    if b.slaveNode.SlaveID != meta.SlaveID {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
     if b.slaveNode.Hardware != usm.SlaveHardware {

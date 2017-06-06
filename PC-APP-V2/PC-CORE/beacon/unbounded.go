@@ -85,7 +85,7 @@ func (b *unbounded) unbounded(sender *net.UDPAddr, meta *slagent.PocketSlaveAgen
     if addr != sender.IP.String() {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave ip address")
     }
-    if b.slaveNode  .MacAddress != meta.SlaveID {
+    if b.slaveNode.SlaveID != meta.SlaveID {
         return MasterTransitionFail, errors.Errorf("[ERR] Incorrect slave MAC address")
     }
     // slave hardware architecture

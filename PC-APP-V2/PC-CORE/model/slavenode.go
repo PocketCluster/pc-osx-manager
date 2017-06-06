@@ -19,7 +19,7 @@ const (
     SNMFieldJoined          = "joined"
     SNMFieldDeparted        = "departed"
     SNMFieldLastAlive       = "last_alive"
-    SNMFieldMacAddress      = "mac_address"
+    SNMFieldSlaveID         = "slave_id"
     SNMFieldHardware        = "hardware"
     SNMFieldNodeName        = "node_name"
     SNMFieldState           = "state"
@@ -58,7 +58,7 @@ type SlaveNode struct {
     LastAlive       time.Time    `gorm:"column:last_alive;type:DATETIME"`
 
     ModelVersion    string       `gorm:"column:model_version;type:VARCHAR(8)"`
-    MacAddress      string       `gorm:"column:mac_address;type:VARCHAR(32)"`
+    SlaveID         string       `gorm:"column:slave_id;type:VARCHAR(32)"`
     Hardware        string       `gorm:"column:hardware;type:VARCHAR(32)"`
     NodeName        string       `gorm:"column:node_name;type:VARCHAR(64)"`
     AuthToken       string       `gorm:"column:auth_token;type:VARCHAR(64)"`

@@ -78,7 +78,7 @@ func (b *beaconinit) beaconInit(sender *net.UDPAddr, meta *slagent.PocketSlaveAg
     if len(meta.SlaveID) == 0 {
         return MasterTransitionFail, errors.Errorf("[ERR] Inappropriate slave MAC address")
     }
-    b.slaveNode.MacAddress = meta.SlaveID
+    b.slaveNode.SlaveID = meta.SlaveID
 
     // save slave discovery to send responsed
     b.slaveLocation = meta.DiscoveryAgent
