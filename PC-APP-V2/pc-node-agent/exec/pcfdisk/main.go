@@ -11,7 +11,6 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
-    "github.com/davecgh/go-spew/spew"
 )
 
 /*
@@ -127,16 +126,62 @@ func totalDiskSectorCount(diskName string) (int64, error) {
     return sectorTotalCount, nil
 }
 
+/*
+--- disk.img ---
+label: dos
+label-id: 0xc5fdba97
+device: ./disk.img
+unit: sectors
+
+./disk.img1 : start= 2048, size= 30720, type=c, bootable
+./disk.img2 : start= 32768, size= 32768, type=83
+
+--- /dev/mmcblk0 ---
+label: dos
+label-id: 0xa33a6d6f
+device: /dev/mmcblk0
+unit: sectors
+
+/dev/mmcblk0p1 : start= 2048, size= 262144, type=c, bootable
+/dev/mmcblk0p2 : start= 264192, size= 53682176, type=83
+/dev/mmcblk0p3 : start= 53946368, size= 8387584, type=82
+*/
+
+func reformatDiskLayout(layout *DiskLayout, sectorTotalCount, sectorUnitSize, phymemsize int64) string {
+    var (
+        layer []string = []string{}
+        par Partition
+        // these are size and start in sectors
+        swapSize int64 = int64((phymemsize * 2) / sectorUnitSize)
+        swapStart int64 = sectorTotalCount - swapSize
+        // these are main disk body in sectors
+        bodySize int64 = 0
+    )
+    layer = append(layer, fmt.Sprintf("label: %s",      layout.Table.Label))
+    layer = append(layer, fmt.Sprintf("label-id: %s",   layout.Table.Id))
+    layer = append(layer, fmt.Sprintf("device: %s",     layout.Table.Device))
+    layer = append(layer, "unit: sectors")
+    layer = append(layer, "")
+
+    // first partition
+    par = layout.Table.Partitions[0]
+    layer = append(layer, fmt.Sprintf("%s : start= %d, size= %d, type=%s, bootable",  par.Node, par.Start, par.Size, par.Type))
+
+    // 2nd partition
+    par = layout.Table.Partitions[1]
+    bodySize = swapStart - par.Start
+    layer = append(layer, fmt.Sprintf("%s : start= %d, size= %d, type=%s",            par.Node, par.Start, bodySize, par.Type))
+
+    // 3rd partition
+    layer = append(layer, fmt.Sprintf("%sp3 : start= %d, size= %d, type=82",          layout.Table.Device, swapStart, swapSize))
+
+    return strings.Join(layer, "\n")
+}
+
 func main() {
     log.SetLevel(log.DebugLevel)
 
-    layout, err := dumpDiskLayout("./disk.img")
-    if err != nil {
-        log.Debug(err)
-    }
-
-    // Hardware Disk Sector Size
-    sectorUnitSize, err := diskSectorSizeInByte("mmcblk0")
+    layout, err := dumpDiskLayout("/dev/mmcblk0")
     if err != nil {
         log.Debug(err)
     }
@@ -147,8 +192,23 @@ func main() {
         log.Debug(err)
     }
 
-    log.Debugf(spew.Sdump(layout))
-    log.Debugf("Layout Title %s %s \n", layout.Table.Label, layout.Table.Device)
+    // Hardware Disk Sector Size
+    sectorUnitSize, err := diskSectorSizeInByte("mmcblk0")
+    if err != nil {
+        log.Debug(err)
+    }
+
+    // physical memory size
+    phymem, err := totalPhyMemSizeInByte()
+    if err != nil {
+        log.Debug(err)
+    }
+
+    newLayout := reformatDiskLayout(layout, sectorTotalCount, sectorUnitSize, phymem)
+    log.Debugf("\n%s", newLayout)
+
+    return
+    log.Debugf("\nLayout Title %s %s \n", layout.Table.Label, layout.Table.Device)
     for _, p := range layout.Table.Partitions {
         log.Printf("%s %d %d %s %t", p.Node, p.Start, p.Size, p.Type, p.Bootable)
     }
