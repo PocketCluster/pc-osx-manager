@@ -183,6 +183,42 @@ func reformatDiskLayout(layout *DiskLayout, sectorTotalCount, sectorUnitSize, ph
     return strings.Join(layer, "\n")
 }
 
+func repartitionDisk(diskName, newLayout string) error {
+    var (
+        wg sync.WaitGroup
+        cmd = exec.Command("/sbin/sfdisk", diskName)
+        pin, err = cmd.StdinPipe()
+    )
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    // start command
+    err = cmd.Start()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    // pipe the layout data
+    wg.Add(1)
+    go func(in io.WriteCloser, layout string) {
+        _, err := io.Copy(in, bytes.NewBufferString(layout))
+        if err != nil {
+            log.Debug(err)
+        }
+        in.Close()
+        wg.Done()
+    }(pin, newLayout)
+    wg.Wait()
+
+    // wait command to finish
+    err = cmd.Wait()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    return nil
+}
+
 func main_old() {
     log.SetLevel(log.DebugLevel)
 
@@ -220,7 +256,7 @@ func main_old() {
     log.Printf("sector size of mmcblk0 %d | total count %d", sectorUnitSize, sectorTotalCount)
 }
 
-func main() {
+func main_disk_output() {
 
     var (
         wg sync.WaitGroup
@@ -279,5 +315,27 @@ unit: sectors
     if err != nil {
         log.Debug(err)
         return
+    }
+}
+
+func main() {
+
+    var (
+        newLayout string = `label: dos
+label-id: 0xc5fdba97
+device: ./disk.img
+unit: sectors
+
+./disk.img1 : start= 2048, size= 30720, type=c, bootable
+./disk.img2 : start= 32768, size= 20480, type=83
+./disk.img3 : start= 53248, size= 12288, type=82`
+    )
+
+    log.SetLevel(log.DebugLevel)
+    log.Debugf("\n%s", newLayout)
+
+    err := repartitionDisk("./disk.img", newLayout)
+    if err != nil {
+        log.Debug(err)
     }
 }
