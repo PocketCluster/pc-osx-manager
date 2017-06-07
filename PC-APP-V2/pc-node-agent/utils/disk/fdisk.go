@@ -273,3 +273,11 @@ func RepartitionSDCard() error {
 
     return nil
 }
+
+func ResizeFileSystem() error {
+/*
+partprobe or reboot
+resize2fs /dev/mmcblk0p2
+*/
+    return nil
+}
