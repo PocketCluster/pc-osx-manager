@@ -7,7 +7,7 @@ import (
     "os"
     "time"
 
-    "github.com/stkim1/pc-node-agent/dhcp"
+    "github.com/stkim1/pc-node-agent/utils/dhcp"
     "gopkg.in/vmihailenco/msgpack.v2"
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"

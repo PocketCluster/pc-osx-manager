@@ -14,7 +14,7 @@ import (
 
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/udpnet/ucast"
-    "github.com/stkim1/pc-node-agent/dhcp"
+    "github.com/stkim1/pc-node-agent/utils/dhcp"
     "github.com/stkim1/pc-node-agent/locator"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-node-agent/service"
