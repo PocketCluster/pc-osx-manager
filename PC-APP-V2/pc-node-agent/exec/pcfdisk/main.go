@@ -187,8 +187,12 @@ func repartitionDisk(diskName, newLayout string) error {
     var (
         wg sync.WaitGroup
         cmd = exec.Command("/sbin/sfdisk", diskName)
-        pin, err = cmd.StdinPipe()
     )
+    pin, err := cmd.StdinPipe()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    pout, err := cmd.StdoutPipe()
     if err != nil {
         return errors.WithStack(err)
     }
@@ -200,15 +204,30 @@ func repartitionDisk(diskName, newLayout string) error {
     }
 
     // pipe the layout data
-    wg.Add(1)
-    go func(in io.WriteCloser, layout string) {
+    wg.Add(2)
+    go func(waiter *sync.WaitGroup, in io.WriteCloser, layout string) {
         _, err := io.Copy(in, bytes.NewBufferString(layout))
         if err != nil {
             log.Debug(err)
         }
-        in.Close()
-        wg.Done()
-    }(pin, newLayout)
+        err = in.Close()
+        if err != nil {
+            log.Debug(err)
+        }
+        waiter.Done()
+    }(&wg, pin, newLayout)
+    go func(waiter *sync.WaitGroup, out io.ReadCloser) {
+        time.Sleep(time.Second * 5)
+        _, err := io.Copy(os.Stdout, out)
+        if err != nil {
+            log.Debug(err)
+        }
+        err = out.Close()
+        if err != nil {
+            log.Debug(err)
+        }
+        waiter.Done()
+    }(&wg, pout)
     wg.Wait()
 
     // wait command to finish
@@ -248,78 +267,14 @@ func main_old() {
     newLayout := reformatDiskLayout(layout, sectorTotalCount, sectorUnitSize, phymem)
     log.Debugf("\n%s", newLayout)
 
-    return
-    log.Debugf("\nLayout Title %s %s \n", layout.Table.Label, layout.Table.Device)
-    for _, p := range layout.Table.Partitions {
-        log.Printf("%s %d %d %s %t", p.Node, p.Start, p.Size, p.Type, p.Bootable)
-    }
-    log.Printf("sector size of mmcblk0 %d | total count %d", sectorUnitSize, sectorTotalCount)
-}
-
-func main_disk_output() {
-
-    var (
-        wg sync.WaitGroup
-        newLayout string = `label: dos
-label-id: 0xc5fdba97
-device: ./disk.img
-unit: sectors
-
-./disk.img1 : start= 2048, size= 30720, type=c, bootable
-./disk.img2 : start= 32768, size= 20480, type=83
-./disk.img3 : start= 53248, size= 12288, type=82`
-    )
-
-    log.SetLevel(log.DebugLevel)
-    log.Debugf("\n%s", newLayout)
-
-    cmd := exec.Command("/sbin/sfdisk", "./disk.img")
-    pin, err := cmd.StdinPipe()
+    err = repartitionDisk("/dev/mmcblk0", newLayout)
     if err != nil {
         log.Debug(err)
-        return
-    }
-    pout, err := cmd.StdoutPipe()
-    if err != nil {
-        log.Debug(err)
-        return
-    }
-
-    // start command
-    err = cmd.Start()
-    if err != nil {
-        log.Debug(err)
-        return
-    }
-
-    // route messages
-    wg.Add(2)
-    go func() {
-        _, err = io.Copy(pin, bytes.NewBufferString(newLayout))
-        if err != nil {
-            log.Debug(err)
-        }
-        pin.Close()
-        wg.Done()
-    }()
-    go func() {
-        time.Sleep(time.Second)
-        io.Copy(os.Stdout, pout)
-        pout.Close()
-        wg.Done()
-    }()
-    wg.Wait()
-
-    // wait command to finish
-    err = cmd.Wait()
-    if err != nil {
-        log.Debug(err)
-        return
     }
 }
 
+// this is to test on disk image
 func main() {
-
     var (
         newLayout string = `label: dos
 label-id: 0xc5fdba97
