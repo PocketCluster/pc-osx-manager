@@ -3,28 +3,34 @@ package disk
 import (
     "io/ioutil"
     "os"
+    "os/exec"
     "path"
     "strings"
 
     "github.com/pkg/errors"
 )
 
-func ActivateSwapPartition() error {
-/*
-# make swap space
-mkswap /dev/mmcblk0p3
+func activateSwap(partition string) error {
+    cmd := exec.Command("/sbin/mkswap", partition)
+    err := cmd.Start()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    err = cmd.Wait()
+    if err != nil {
+        return errors.WithStack(err)
+    }
 
-# turn swap space
-swapon /dev/mmcblk0p3
+    cmd = exec.Command("/sbin/swapon", partition)
+    err = cmd.Start()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    return cmd.Wait()
+}
 
-# you can use UUID
-blkid /dev/mmcblk0p3
-
-vi /etc/fstab
-# add the following line
-/dev/mmcblk0p3  none    swap    sw                  0       0
- */
-    return nil
+func ActivateSystemSwapParition() error {
+    return activateSwap("/dev/mmcblk0p3")
 }
 
 func AppendSwapPartitionToTable(rootPath string) error {

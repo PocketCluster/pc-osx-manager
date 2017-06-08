@@ -42,6 +42,13 @@ func main_root() {
     }
 }
 
+func main_fstab() {
+    err := disk.AppendSwapPartitionToTable("/tmp")
+    if err != nil {
+        log.Debug(err)
+    }
+}
+
 // this is to test on disk image
 func main_disk_img() {
     var (
@@ -65,7 +72,7 @@ unit: sectors
 }
 
 func main() {
-    err := disk.AppendSwapPartitionToTable("/tmp")
+    err := disk.ActivateSystemSwapParition()
     if err != nil {
         log.Debug(err)
     }
