@@ -54,11 +54,15 @@ type DiskLayout struct {
     Table       PartitionTable     `json:"partitiontable"`
 }
 
+const (
+    SwapSizeFactor int64 = 2
+)
+
 var (
     deltail = regexp.MustCompile(`\r?\n`)
 )
 
-func dumpDiskLayout(diskName string) (*DiskLayout, error) {
+func DumpDiskLayout(diskName string) (*DiskLayout, error) {
     var (
         lable = &DiskLayout{}
         cmd = exec.Command("/sbin/sfdisk", "--json", diskName)
@@ -82,12 +86,18 @@ func dumpDiskLayout(diskName string) (*DiskLayout, error) {
     return lable, nil
 }
 
-func totalPhyMemSizeInByte() (int64, error) {
+func TotalPhysicalMemSizeInByte() (int64, error) {
     bmif, err := ioutil.ReadFile("/proc/meminfo")
     if err != nil {
         return 0, errors.WithStack(err)
     }
-    memtotal := strings.Split(string(bmif), "\n")[0]
+    var memtotal string = ""
+    for _, l := range strings.Split(string(bmif), "\n") {
+        if strings.HasPrefix(l, "MemTotal:") {
+            memtotal = l
+            break
+        }
+    }
     memtotal = deltail.ReplaceAllString(memtotal, "")
     memtotal = strings.Replace(memtotal, "MemTotal:", "", -1)
     memtotal = strings.Replace(memtotal, "kB", "", -1)
@@ -100,7 +110,7 @@ func totalPhyMemSizeInByte() (int64, error) {
     return phyMemsize * 1024, nil
 }
 
-func diskSectorSizeInByte(diskName string) (int64, error) {
+func DiskSectorSizeInByte(diskName string) (int64, error) {
     // Hardware Disk Sector Size : mmcblk0 can be hardcoded for now 2017-02-17
     var diskPath = fmt.Sprintf("/sys/block/%s/queue/hw_sector_size", diskName)
     secUnit, err := ioutil.ReadFile(diskPath)
@@ -116,7 +126,7 @@ func diskSectorSizeInByte(diskName string) (int64, error) {
     return sectorUnitSize, nil
 }
 
-func totalDiskSectorCount(diskName string) (int64, error) {
+func TotalDiskSectorCount(diskName string) (int64, error) {
     // Total Disk Sector Count : mmcblk0 can be hardcoded for now 2017-02-17
     var diskPath = fmt.Sprintf("/sys/block/%s/size", diskName)
     secCount, err := ioutil.ReadFile(diskPath)
@@ -152,12 +162,12 @@ unit: sectors
 /dev/mmcblk0p3 : start= 53946368, size= 8387584, type=82
 */
 
-func reformatDiskLayout(layout *DiskLayout, sectorTotalCount, sectorUnitSize, phymemsize int64) string {
+func ReformatDiskLayout(layout *DiskLayout, sectorTotalCount, sectorUnitSize, phymemsize, swapSizeMultiplier int64) string {
     var (
         layer []string = []string{}
         par Partition
         // these are size and start in sectors
-        swapSize int64 = int64((phymemsize * 2) / sectorUnitSize)
+        swapSize int64 = int64((phymemsize * swapSizeMultiplier) / sectorUnitSize)
         swapStart int64 = sectorTotalCount - swapSize
         // these are main disk body in sectors
         bodySize int64 = 0
@@ -183,7 +193,7 @@ func reformatDiskLayout(layout *DiskLayout, sectorTotalCount, sectorUnitSize, ph
     return strings.Join(layer, "\n")
 }
 
-func repartitionDisk(diskName, newLayout string) error {
+func RepartitionDisk(diskName, newLayout string) error {
     var (
         wg sync.WaitGroup
         cmd = exec.Command("/sbin/sfdisk", diskName)
@@ -239,34 +249,34 @@ func repartitionDisk(diskName, newLayout string) error {
 }
 
 func RepartitionSDCard() error {
-    layout, err := dumpDiskLayout("/dev/mmcblk0")
+    layout, err := DumpDiskLayout("/dev/mmcblk0")
     if err != nil {
         return errors.WithStack(err)
     }
 
     // Total Disk Sector Count
-    sectorTotalCount, err := totalDiskSectorCount("mmcblk0")
+    sectorTotalCount, err := TotalDiskSectorCount("mmcblk0")
     if err != nil {
         return errors.WithStack(err)
     }
 
     // Hardware Disk Sector Size
-    sectorUnitSize, err := diskSectorSizeInByte("mmcblk0")
+    sectorUnitSize, err := DiskSectorSizeInByte("mmcblk0")
     if err != nil {
         return errors.WithStack(err)
     }
 
     // physical memory size
-    phymem, err := totalPhyMemSizeInByte()
+    phymem, err := TotalPhysicalMemSizeInByte()
     if err != nil {
         return errors.WithStack(err)
     }
 
     // get the total physical memory
-    newLayout := reformatDiskLayout(layout, sectorTotalCount, sectorUnitSize, phymem)
+    newLayout := ReformatDiskLayout(layout, sectorTotalCount, sectorUnitSize, phymem, SwapSizeFactor)
 
     // repartition
-    err = repartitionDisk("/dev/mmcblk0", newLayout)
+    err = RepartitionDisk("/dev/mmcblk0", newLayout)
     if err != nil {
         return errors.WithStack(err)
     }
