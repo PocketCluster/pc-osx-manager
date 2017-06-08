@@ -284,10 +284,14 @@ func RepartitionSDCard() error {
     return nil
 }
 
-func ResizeFileSystem() error {
-/*
-partprobe or reboot
-resize2fs /dev/mmcblk0p2
-*/
+func resizeFileSystem(deviceName string) error {
+    cmd := exec.Command("/sbin/resize2fs", deviceName)
+    cmd.Start()
+    cmd.Wait()
+
     return nil
+}
+
+func ResizeRootFilesystem() error {
+    return resizeFileSystem("/dev/mmcblk0p2")
 }

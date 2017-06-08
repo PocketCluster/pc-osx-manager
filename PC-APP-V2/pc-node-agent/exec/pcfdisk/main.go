@@ -5,7 +5,7 @@ import (
     "github.com/stkim1/pc-node-agent/utils/disk"
 )
 
-func main() {
+func main_root() {
     log.SetLevel(log.DebugLevel)
 
     layout, err := disk.DumpDiskLayout("/dev/mmcblk0")
@@ -43,7 +43,7 @@ func main() {
 }
 
 // this is to test on disk image
-func main_disk() {
+func main_disk_img() {
     var (
         newLayout string = `label: dos
 label-id: 0xc5fdba97
@@ -59,6 +59,13 @@ unit: sectors
     log.Debugf("\n%s", newLayout)
 
     err := disk.RepartitionDisk("./disk.img", newLayout)
+    if err != nil {
+        log.Debug(err)
+    }
+}
+
+func main() {
+    err := disk.AppendSwapPartitionToTable("/tmp")
     if err != nil {
         log.Debug(err)
     }
