@@ -57,6 +57,7 @@ type AppSupervisor interface {
     IsStopped() bool
     StopChannel() <- chan struct{}
     Start() error
+    RunNamedService(name string) error
     Stop() error
     Wait() error
     OnExit(callback func(interface{}))
@@ -292,11 +293,32 @@ func (p *appSupervisor) Start() error {
     }
 
     for _, srv := range p.services {
-        p.serve(srv)
+        if !srv.IsNamedCycle() {
+            p.serve(srv)
+        }
     }
 
     return nil
 }
+
+func (p *appSupervisor) RunNamedService(name string) error {
+    p.Lock()
+    if p.state != stateStarted {
+        defer p.Unlock()
+        return nil
+    }
+    defer p.Unlock()
+
+    for _, srv := range p.services {
+        if srv.IsNamedCycle() && srv.Name() == name {
+            p.serve(srv)
+            return nil
+        }
+    }
+
+    return errors.Errorf("[ERR] cannot find a service named %s", name)
+}
+
 
 func (s *appSupervisor) Stop() error {
     // this double locking to to prevent ServiceFunc from deadlocked, but enable other variables to be reset

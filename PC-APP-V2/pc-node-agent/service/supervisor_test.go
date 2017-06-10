@@ -148,6 +148,9 @@ func (s *SupervisorSuite) Test_NamedService_Unsycned_Stop(c *C) {
     err = s.app.Start()
     c.Assert(err, IsNil)
 
+    err = s.app.RunNamedService(testService1)
+    c.Assert(err, IsNil)
+
     exitSignal <- true
     <-exitLatch
 
@@ -183,6 +186,9 @@ func (s *SupervisorSuite) Test_NamedService_Sycned_Stop(c *C) {
     c.Assert(s.app.ServiceCount(), Equals, 1)
 
     err = s.app.Start()
+    c.Assert(err, IsNil)
+
+    err = s.app.RunNamedService(testService2)
     c.Assert(err, IsNil)
 
     err = s.app.Stop()
