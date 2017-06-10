@@ -49,7 +49,7 @@ func (s *SupervisorSuite) TestStartStop(c *C) {
     c.Assert(err, IsNil)
 }
 
-func (s *SupervisorSuite) TestReigster_Irrepeatable_Service_AfterServiceStart(c *C) {
+func (s *SupervisorSuite) Test_UnamedService_Run_After_Start(c *C) {
     var(
         exitLatch = make(chan bool)
         exitChecker = ""
@@ -73,6 +73,7 @@ func (s *SupervisorSuite) TestReigster_Irrepeatable_Service_AfterServiceStart(c 
             return nil
         })
     c.Assert(err, IsNil)
+    c.Assert(s.app.ServiceCount(), Equals, 1)
 
     err = s.app.Stop()
     c.Assert(err, IsNil)
@@ -83,7 +84,7 @@ func (s *SupervisorSuite) TestReigster_Irrepeatable_Service_AfterServiceStart(c 
     close(exitLatch)
 }
 
-func (s *SupervisorSuite) Test_UnnamedService(c *C) {
+func (s *SupervisorSuite) Test_UnnamedService_Register_Before_Start(c *C) {
     var(
         exitLatch = make(chan bool)
         exitChecker = ""
