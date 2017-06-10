@@ -161,6 +161,54 @@ func (s *SupervisorSuite) Test_NamedService_Unsycned_Stop(c *C) {
     close(exitLatch)
 }
 
+func (s *SupervisorSuite) Test_NamedService_MultiCycle(c *C) {
+    var(
+        exitSignal = make(chan bool)
+        exitLatch = make(chan bool)
+        exitChecker = ""
+    )
+    // start service
+    err := s.app.Start()
+    c.Assert(err, IsNil)
+
+    // add a service
+    err = s.app.RegisterServiceWithFuncs(
+        func() error {
+            for {
+                select {
+                case <- exitSignal:
+                    return nil
+                default:
+                }
+            }
+        },
+        func(_ func(interface{})) error {
+            exitChecker = exitValue
+            exitLatch <- true
+            return nil
+        },
+        MakeServiceNamed(testService1),
+    )
+    c.Assert(err, IsNil)
+    c.Assert(s.app.serviceCount(), Equals, 1)
+
+    // run multiple times
+    for i := 0; i < 5; i++ {
+        // start service
+        err = s.app.RunNamedService(testService1)
+        c.Assert(err, IsNil)
+
+        // stop service
+        exitSignal <- true
+        <-exitLatch
+
+        c.Check(exitChecker, Equals, exitValue)
+        c.Assert(s.app.serviceCount(), Equals, 1)
+    }
+    // close everything
+    close(exitLatch)
+}
+
 func (s *SupervisorSuite) Test_NamedService_Sycned_Stop(c *C) {
     var(
         exitLatch = make(chan bool)

@@ -12,6 +12,11 @@ const (
     stateStarted
 )
 
+const (
+    serviceRunning = iota
+    serviceStopped
+)
+
 // Event is a special service event that can be generated
 // by various goroutines in the application
 type Event struct {
@@ -33,6 +38,11 @@ type Service interface {
 
     Serve() error
     OnExit(callback func(interface{})) error
+
+    IsRunning() bool
+    // this is for internal handling
+    setRunning()
+    setStopped()
 }
 
 // ServerOption is a functional option passed to the server
@@ -49,27 +59,31 @@ func (o OnExitFunc) OnExit(callback func(interface{})) error {
 }
 
 type AppSupervisor interface {
-    Register(srv Service)
-    RegisterFunc(fn ServeFunc)
+    Register(srv Service) error
+    RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, options...ServiceOption) error
+
     BroadcastEvent(event Event)
     WaitForEvent(name string, eventC chan Event, cancelC chan struct{})
+
     IsStopped() bool
     StopChannel() <- chan struct{}
+
     Start() error
     RunNamedService(name string) error
     Stop() error
     Wait() error
     OnExit(callback func(interface{}))
 
-    RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, options...ServiceOption) error
-
-    // debugging
+    // internal
     serviceCount() int
 }
 
 // --- private unexpose methods --- //
 
 type srvcFuncs struct {
+    sync.Mutex
+    state      int
+
     name       string
     ServeFunc
     OnExitFunc
@@ -83,8 +97,29 @@ func (s *srvcFuncs) IsNamedCycle() bool {
     return (len(s.name) != 0)
 }
 
-func (s *ServeFunc) Rebuild() error {
+func (s *srvcFuncs) Rebuild() error {
     return nil
+}
+
+func (s *srvcFuncs) IsRunning() bool {
+    s.Lock()
+    defer s.Unlock()
+
+    return (s.state == serviceRunning)
+}
+
+func (s *srvcFuncs) setRunning() {
+    s.Lock()
+    defer s.Unlock()
+
+    s.state = serviceRunning
+}
+
+func (s *srvcFuncs) setStopped() {
+    s.Lock()
+    defer s.Unlock()
+
+    s.state = serviceStopped
 }
 
 func MakeServiceNamed(name string) ServiceOption {
@@ -179,14 +214,15 @@ func (p *appSupervisor) serve(service Service) {
                 break
             }
         }
-        log.Debugf("[SUPERVISOR] service '%s' is removed", srv.Name())
+        log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] removed", srv.Name(), srv)
     }
 
     p.serviceWG.Add(1)
     go func(srv Service, delSrv func(srv Service), wg *sync.WaitGroup) {
         defer wg.Done()
 
-        log.Debugf("[SUPERVISOR] Service %v started", srv)
+        log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] started", srv.Name(), srv)
+        srv.setRunning()
         err := srv.Serve()
         if err != nil {
             log.Debug(errors.WithStack(err))
@@ -195,27 +231,34 @@ func (p *appSupervisor) serve(service Service) {
         if err != nil {
             log.Debug(errors.WithStack(err))
         }
+        srv.setStopped()
         if !srv.IsNamedCycle() {
             delSrv(srv)
         }
-        log.Debugf("[SUPERVISOR] service %s (%v) exits\n", srv.Name(), srv)
+        log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] exited", srv.Name(), srv)
     }(service, removeService, p.serviceWG)
 }
 
-func (p *appSupervisor) Register(srv Service) {
+func (p *appSupervisor) Register(srv Service) error {
     p.Lock()
     defer p.Unlock()
+
+    // when a service is named, check if there is a service with the same name
+    if len(srv.Name()) != 0 {
+        for _, es := range p.services {
+            if srv.Name() == es.Name() {
+                return errors.Errorf("[ERR] a service with the same name '%s' exists", srv.Name())
+            }
+        }
+    }
     p.services = append(p.services, srv)
 
-    log.Debugf("[SUPERVISOR] Service %v added (%v)", srv, len(p.services))
+    log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] added", srv.Name(), srv)
 
     if p.state == stateStarted && !srv.IsNamedCycle() {
         p.serve(srv)
     }
-}
-
-// FIXME : this is to be deprecated
-func (p *appSupervisor) RegisterFunc(fn ServeFunc) {
+    return nil
 }
 
 func (p *appSupervisor) RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, options...ServiceOption) error {
@@ -230,8 +273,7 @@ func (p *appSupervisor) RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, 
         }
     }
 
-    p.Register(srv)
-    return nil
+    return p.Register(srv)
 }
 
 func (p *appSupervisor) BroadcastEvent(event Event) {
@@ -290,7 +332,7 @@ func (p *appSupervisor) Start() error {
     p.state = stateStarted
 
     if len(p.services) == 0 {
-        log.Warning("PocketApplication.Start(): nothing to run")
+        log.Debugf("\n\n[SUPERVISOR-SERVICE] starting services...")
         return nil
     }
 
@@ -332,7 +374,7 @@ func (s *appSupervisor) Stop() error {
     defer s.Unlock()
     s.state = stateStopped
 
-    log.Warning("[SUPERVISOR] stopping services...")
+    log.Debugf("[SUPERVISOR-SERVICE] stopping all services...\n")
     // we broadcast stopping and wait for all goroutines closed with event channels intact to give grace period
     close(s.stoppedC)
     return nil
