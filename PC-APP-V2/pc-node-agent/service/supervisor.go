@@ -170,20 +170,20 @@ func (p *appSupervisor) serve(service Service) {
         p.Lock()
         defer p.Unlock()
         for i, el := range p.services {
+            // TODO : MAKE 100% SURE THIS COMPARISON WORKS PROPERLY
             if el == srv {
                 p.services = append(p.services[:i], p.services[i+1:]...)
                 break
             }
         }
         log.Debugf("[SUPERVISOR] service '%s' is removed", srv.Name())
-        log.Debugf("             total %d remained", len(p.services))
     }
 
     p.serviceWG.Add(1)
     go func(srv Service, delSrv func(srv Service), wg *sync.WaitGroup) {
         defer wg.Done()
 
-        log.Debugf("[SUPERVISOR] Service %v started (%v)", srv, p.ServiceCount())
+        log.Debugf("[SUPERVISOR] Service %v started", srv)
         err := srv.Serve()
         if err != nil {
             log.Debug(errors.WithStack(err))
