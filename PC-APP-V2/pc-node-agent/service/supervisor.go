@@ -53,7 +53,6 @@ type AppSupervisor interface {
     RegisterFunc(fn ServeFunc)
     BroadcastEvent(event Event)
     WaitForEvent(name string, eventC chan Event, cancelC chan struct{})
-    ServiceCount() int
     IsStopped() bool
     StopChannel() <- chan struct{}
     Start() error
@@ -63,6 +62,9 @@ type AppSupervisor interface {
     OnExit(callback func(interface{}))
 
     RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, options...ServiceOption) error
+
+    // debugging
+    serviceCount() int
 }
 
 // --- private unexpose methods --- //
@@ -257,7 +259,7 @@ func (p *appSupervisor) WaitForEvent(name string, eventC chan Event, cancelC cha
 }
 
 // ServiceCount returns the number of registered and actively running services
-func (p *appSupervisor) ServiceCount() int {
+func (p *appSupervisor) serviceCount() int {
     p.Lock()
     defer p.Unlock()
     return len(p.services)

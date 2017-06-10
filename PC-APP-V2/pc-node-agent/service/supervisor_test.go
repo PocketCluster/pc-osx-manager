@@ -73,14 +73,14 @@ func (s *SupervisorSuite) Test_UnamedService_Run_After_Start(c *C) {
             return nil
         })
     c.Assert(err, IsNil)
-    c.Assert(s.app.ServiceCount(), Equals, 1)
+    c.Assert(s.app.serviceCount(), Equals, 1)
 
     err = s.app.Stop()
     c.Assert(err, IsNil)
     <-exitLatch
 
     c.Check(exitChecker, Equals, exitValue)
-    c.Assert(s.app.ServiceCount(), Equals, 0)
+    c.Assert(s.app.serviceCount(), Equals, 0)
     close(exitLatch)
 }
 
@@ -105,7 +105,7 @@ func (s *SupervisorSuite) Test_UnnamedService_Register_Before_Start(c *C) {
             return nil
         })
     c.Assert(err, IsNil)
-    c.Assert(s.app.ServiceCount(), Equals, 1)
+    c.Assert(s.app.serviceCount(), Equals, 1)
 
     err = s.app.Start()
     c.Assert(err, IsNil)
@@ -115,7 +115,7 @@ func (s *SupervisorSuite) Test_UnnamedService_Register_Before_Start(c *C) {
     <-exitLatch
 
     c.Check(exitChecker, Equals, exitValue)
-    c.Assert(s.app.ServiceCount(), Equals, 0)
+    c.Assert(s.app.serviceCount(), Equals, 0)
     close(exitLatch)
 }
 
@@ -144,7 +144,7 @@ func (s *SupervisorSuite) Test_NamedService_Unsycned_Stop(c *C) {
         MakeServiceNamed(testService1),
     )
     c.Assert(err, IsNil)
-    c.Assert(s.app.ServiceCount(), Equals, 1)
+    c.Assert(s.app.serviceCount(), Equals, 1)
 
     err = s.app.Start()
     c.Assert(err, IsNil)
@@ -156,7 +156,7 @@ func (s *SupervisorSuite) Test_NamedService_Unsycned_Stop(c *C) {
     <-exitLatch
 
     c.Check(exitChecker, Equals, exitValue)
-    c.Assert(s.app.ServiceCount(), Equals, 1)
+    c.Assert(s.app.serviceCount(), Equals, 1)
     close(exitLatch)
 }
 
@@ -184,7 +184,7 @@ func (s *SupervisorSuite) Test_NamedService_Sycned_Stop(c *C) {
         MakeServiceNamed(testService2),
     )
     c.Assert(err, IsNil)
-    c.Assert(s.app.ServiceCount(), Equals, 1)
+    c.Assert(s.app.serviceCount(), Equals, 1)
 
     err = s.app.Start()
     c.Assert(err, IsNil)
@@ -197,6 +197,6 @@ func (s *SupervisorSuite) Test_NamedService_Sycned_Stop(c *C) {
     <-exitLatch
 
     c.Check(exitChecker, Equals, exitValue)
-    c.Assert(s.app.ServiceCount(), Equals, 1)
+    c.Assert(s.app.serviceCount(), Equals, 1)
     close(exitLatch)
 }
