@@ -13,9 +13,22 @@ const (
 )
 
 const (
-    serviceRunning = iota
-    serviceStopped
+    serviceStopped = iota
+    serviceRunning
 )
+
+var (
+    // Service Running error
+    ServiceRunning = &supError{"[ERR] service already running"}
+)
+
+type supError struct {
+    s string
+}
+
+func (n *supError) Error() string {
+    return n.s
+}
 
 // Event is a special service event that can be generated
 // by various goroutines in the application
@@ -263,6 +276,7 @@ func (p *appSupervisor) Register(srv Service) error {
 
 func (p *appSupervisor) RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, options...ServiceOption) error {
     srv := &srvcFuncs {
+        state:         serviceStopped,
         ServeFunc:     sfn,
         OnExitFunc:    efn,
     }
@@ -353,10 +367,18 @@ func (p *appSupervisor) RunNamedService(name string) error {
     }
     defer p.Unlock()
 
+    if len(name) == 0 {
+        return errors.Errorf("[ERR] cannot find a service without name")
+    }
+
     for _, srv := range p.services {
         if srv.IsNamedCycle() && srv.Name() == name {
-            p.serve(srv)
-            return nil
+            if !srv.IsRunning() {
+                p.serve(srv)
+                return nil
+            } else {
+                return ServiceRunning
+            }
         }
     }
 

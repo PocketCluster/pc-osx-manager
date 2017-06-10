@@ -204,6 +204,7 @@ func (s *SupervisorSuite) Test_NamedService_MultiCycle(c *C) {
 
         c.Check(exitChecker, Equals, exitValue)
         c.Assert(s.app.serviceCount(), Equals, 1)
+        time.Sleep(time.Second)
     }
     // close everything
     close(exitLatch)
