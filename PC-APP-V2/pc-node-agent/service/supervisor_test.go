@@ -2,6 +2,7 @@ package service
 
 import (
     "testing"
+    "time"
 
     . "gopkg.in/check.v1"
     log "github.com/Sirupsen/logrus"
@@ -199,4 +200,154 @@ func (s *SupervisorSuite) Test_NamedService_Sycned_Stop(c *C) {
     c.Check(exitChecker, Equals, exitValue)
     c.Assert(s.app.serviceCount(), Equals, 1)
     close(exitLatch)
+}
+
+
+func (s *SupervisorSuite) Test_NamedServices_Sycned_Stop(c *C) {
+    var(
+        exitLatch1   = make(chan bool)
+        exitChecker1 = ""
+        exitLatch2   = make(chan bool)
+        exitChecker2 = ""
+    )
+    // start services
+    err := s.app.Start()
+    c.Assert(err, IsNil)
+
+    //register named service1
+    err = s.app.RegisterServiceWithFuncs(
+        func() error {
+            for {
+                select {
+                    case <- s.app.StopChannel():
+                        return nil
+                    default:
+                }
+            }
+        },
+        func(_ func(interface{})) error {
+            exitChecker1 = exitValue
+            exitLatch1 <- true
+            return nil
+        },
+        MakeServiceNamed(testService1),
+    )
+    c.Assert(err, IsNil)
+    c.Assert(s.app.serviceCount(), Equals, 1)
+
+    //register named service2
+    err = s.app.RegisterServiceWithFuncs(
+        func() error {
+            for {
+                select {
+                    case <- s.app.StopChannel():
+                        return nil
+                    default:
+                }
+            }
+        },
+        func(_ func(interface{})) error {
+            exitChecker2 = exitValue
+            exitLatch2 <- true
+            return nil
+        },
+        MakeServiceNamed(testService2),
+    )
+    c.Assert(err, IsNil)
+    c.Assert(s.app.serviceCount(), Equals, 2)
+
+    // run services
+    err = s.app.RunNamedService(testService1)
+    c.Assert(err, IsNil)
+    err = s.app.RunNamedService(testService2)
+    c.Assert(err, IsNil)
+
+    // wait...
+    time.Sleep(time.Second)
+
+    // stop service
+    err = s.app.Stop()
+    c.Assert(err, IsNil)
+
+    // stop service 1
+    <-exitLatch1
+    c.Check(exitChecker1, Equals, exitValue)
+    c.Assert(s.app.serviceCount(), Equals, 2)
+    close(exitLatch1)
+
+    // stop service 2
+    <-exitLatch2
+    c.Check(exitChecker2, Equals, exitValue)
+    c.Assert(s.app.serviceCount(), Equals, 2)
+    close(exitLatch2)
+}
+
+func (s *SupervisorSuite) Test_NamedAndUnnamed_Services_Unsycned_Stop(c *C) {
+    var(
+        exitSignal   = make(chan bool)
+        exitLatch1   = make(chan bool)
+        exitChecker1 = ""
+        exitLatch2   = make(chan bool)
+        exitChecker2 = ""
+    )
+    //register named service
+    err := s.app.RegisterServiceWithFuncs(
+        func() error {
+            for {
+                select {
+                    case <- exitSignal:
+                        return nil
+                    default:
+                }
+            }
+        },
+        func(_ func(interface{})) error {
+            exitChecker1 = exitValue
+            exitLatch1 <- true
+            return nil
+        },
+        MakeServiceNamed(testService3),
+    )
+    c.Assert(err, IsNil)
+    c.Assert(s.app.serviceCount(), Equals, 1)
+
+    //register unnamed service
+    err = s.app.RegisterServiceWithFuncs(
+        func() error {
+            for {
+                select {
+                    case <- s.app.StopChannel():
+                        return nil
+                    default:
+                }
+            }
+        },
+        func(_ func(interface{})) error {
+            exitChecker2 = exitValue
+            exitLatch2 <- true
+            return nil
+        })
+    c.Assert(err, IsNil)
+    c.Assert(s.app.serviceCount(), Equals, 2)
+
+    // start services
+    err = s.app.Start()
+    c.Assert(err, IsNil)
+    err = s.app.RunNamedService(testService3)
+    c.Assert(err, IsNil)
+
+    // stop service 1
+    exitSignal <- true
+    <-exitLatch1
+    c.Check(exitChecker1, Equals, exitValue)
+    c.Assert(s.app.serviceCount(), Equals, 2)
+    close(exitLatch1)
+
+    // stop service 2
+    err = s.app.Stop()
+    c.Assert(err, IsNil)
+    <-exitLatch2
+    c.Check(exitChecker2, Equals, exitValue)
+    c.Assert(s.app.serviceCount(), Equals, 1)
+    close(exitLatch2)
 }
