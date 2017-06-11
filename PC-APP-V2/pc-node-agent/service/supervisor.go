@@ -326,12 +326,12 @@ func (p *appSupervisor) runService(service Service) {
             log.Debug(errors.WithStack(err))
         }
         cleanup(as, srv)
-        srv.SetStopped()
-
         err = srv.OnExit(nil)
         if err != nil {
             log.Debug(errors.WithStack(err))
         }
+        srv.SetStopped()
+
         log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] exited", srv.Name(), srv)
     }(p, p.serviceWG, service, serviceCleanup)
 }

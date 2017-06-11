@@ -81,4 +81,8 @@ func (s *SupervisorSuite) Test_UnamedService_Receive_Event(c *C) {
     c.Assert(s.app.ServiceCount(), Equals, 0)
     close(exitLatch)
     close(eventLatch)
+
+    c.Assert(len(s.app.(*appSupervisor).eventWaiters[testEvent1]), Equals, 0)
+    c.Assert(len(s.app.(*appSupervisor).eventWaiters[testEvent2]), Equals, 0)
+    c.Assert(len(s.app.(*appSupervisor).eventWaiters[testEvent3]), Equals, 0)
 }
