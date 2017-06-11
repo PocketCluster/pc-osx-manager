@@ -39,7 +39,7 @@ type Event struct {
 
 type waiter struct {
     eventC  chan Event
-    cancelC chan struct{}
+    service Service
 }
 
 type Service interface {
@@ -58,10 +58,12 @@ type Service interface {
     setStopped()
 
     rebuild() error
+
+    getWaiters() []*waiter
 }
 
 // ServerOption is a functional option passed to the server
-type ServiceOption func(s Service) error
+type ServiceOption func(app AppSupervisor, s Service) error
 
 type ServeFunc func() error
 func (s ServeFunc) serve() error {
@@ -71,26 +73,6 @@ func (s ServeFunc) serve() error {
 type OnExitFunc func(callback func(interface{})) error
 func (o OnExitFunc) onExit(callback func(interface{})) error {
     return o(callback)
-}
-
-type AppSupervisor interface {
-    Register(srv Service) error
-    RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, options... ServiceOption) error
-
-    BroadcastEvent(event Event)
-    WaitForEvent(name string, eventC chan Event)
-
-    IsStopped() bool
-    StopChannel() <- chan struct{}
-
-    Start() error
-    RunNamedService(name string) error
-    Stop() error
-    Wait() error
-    OnExit(callback func(interface{}))
-
-    // internal
-    serviceCount() int
 }
 
 // --- private unexpose methods --- //
@@ -109,19 +91,15 @@ func (s *srvcFuncs) Name() string {
     return s.name
 }
 
-func (s *srvcFuncs) isNamedService() bool {
-    return (len(s.name) != 0)
-}
-
-func (s *srvcFuncs) rebuild() error {
-    return nil
-}
-
 func (s *srvcFuncs) IsRunning() bool {
     s.Lock()
     defer s.Unlock()
 
     return (s.state == serviceRunning)
+}
+
+func (s *srvcFuncs) isNamedService() bool {
+    return (len(s.name) != 0)
 }
 
 func (s *srvcFuncs) setRunning() {
@@ -138,28 +116,77 @@ func (s *srvcFuncs) setStopped() {
     s.state = serviceStopped
 }
 
+func (s *srvcFuncs) rebuild() error {
+    return nil
+}
+
+func (s *srvcFuncs) getWaiters() []*waiter {
+    return s.waiters
+}
+
 func MakeServiceNamed(name string) ServiceOption {
-    return func(s Service) error {
+    return func(_ AppSupervisor, s Service) error {
         srv, ok := s.(*srvcFuncs)
         if ok {
             srv.name = name
             return nil
         }
+        if srv == nil {
+            return errors.Errorf("[ERR] null service instance to bind event")
+        }
         return errors.Errorf("[ERR] invalid type to make cycle async")
     }
 }
 
-func BindEventWithService(events... chan Event) ServiceOption {
-    return func(s Service) error {
+func BindEventWithService(eventName string, eventC chan Event) ServiceOption {
+    return func(app AppSupervisor, s Service) error {
         srv, ok := s.(*srvcFuncs)
-        if ok {
-            for _, e := range events {
-                srv.waiters = append(srv.waiters, &waiter{eventC:e})
-            }
-            return nil
+        if !ok {
+            return errors.Errorf("[ERR] invalid service type to bind event")
         }
-        return errors.Errorf("[ERR] invalid service type to bind event")
+        if srv == nil {
+            return errors.Errorf("[ERR] null service instance to bind event")
+        }
+        sup, ok := app.(*appSupervisor)
+        if !ok {
+            return errors.Errorf("[ERR] invalid supervisor type to bind event")
+        }
+        if sup == nil {
+            return errors.Errorf("[ERR] null supervisor instance to bind event")
+        }
+        sup.Lock()
+        defer sup.Unlock()
+
+        w := &waiter{
+            eventC:     eventC,
+            service:    srv,
+        }
+
+        sup.eventWaiters[eventName] = append(sup.eventWaiters[eventName], w)
+        srv.waiters = append(srv.waiters, w)
+        return nil
     }
+}
+
+// --- AppSupervisor --- //
+
+type AppSupervisor interface {
+    Register(srv Service) error
+    RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, options... ServiceOption) error
+    BroadcastEvent(event Event)
+
+    IsStopped() bool
+    StopChannel() <- chan struct{}
+
+    Start() error
+    RunNamedService(name string) error
+    Stop() error
+
+    Wait() error
+    OnExit(callback func(interface{}))
+
+    // internal
+    serviceCount() int
 }
 
 // NewSupervisor returns new instance of initialized supervisor
@@ -169,10 +196,8 @@ func NewAppSupervisor() AppSupervisor {
         services:        []Service{},
         serviceWG:       &sync.WaitGroup{},
 
-        events:          map[string]Event{},
-        eventsC:         make(chan Event, 100),
         eventWaiters:    make(map[string][]*waiter),
-
+        eventsC:         make(chan Event, 100),
         stoppedC:        make(chan struct{}),
     }
 
@@ -183,16 +208,14 @@ func NewAppSupervisor() AppSupervisor {
 }
 
 type appSupervisor struct {
-    state           int
     sync.Mutex
+    state           int
 
     serviceWG       *sync.WaitGroup
     services        []Service
 
-    events          map[string]Event
-    eventsC         chan Event
     eventWaiters    map[string][]*waiter
-
+    eventsC         chan Event
     stoppedC        chan struct{}
 }
 
@@ -211,7 +234,6 @@ func (p *appSupervisor) getWaiters(name string) []*waiter {
 func (p *appSupervisor) notifyWaiter(w *waiter, event Event) {
     select {
         case w.eventC <- event:
-        case <-w.cancelC:
     }
 }
 
@@ -304,7 +326,7 @@ func (p *appSupervisor) RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, 
     }
 
     for _, opt := range options {
-        if err := opt(srv); err != nil {
+        if err := opt(p, srv); err != nil {
             return errors.WithStack(err)
         }
     }
@@ -316,8 +338,6 @@ func (p *appSupervisor) BroadcastEvent(event Event) {
     p.Lock()
     defer p.Unlock()
 
-    p.events[event.Name] = event
-
     go func() {
         p.eventsC <- event
     }()
@@ -327,13 +347,7 @@ func (p *appSupervisor) WaitForEvent(name string, eventC chan Event) {
     p.Lock()
     defer p.Unlock()
 
-    waiter := &waiter{eventC: eventC}
-    event, ok := p.events[name]
-    if ok {
-        go p.notifyWaiter(waiter, event)
-        return
-    }
-    p.eventWaiters[name] = append(p.eventWaiters[name], waiter)
+    p.eventWaiters[name] = append(p.eventWaiters[name], &waiter{eventC: eventC})
 }
 
 // ServiceCount returns the number of registered and actively running services
@@ -436,7 +450,6 @@ func (p *appSupervisor) Wait() error {
     for _, waiters = range p.eventWaiters {
         for _, w = range waiters {
             close(w.eventC)
-            close(w.cancelC)
         }
     }
 

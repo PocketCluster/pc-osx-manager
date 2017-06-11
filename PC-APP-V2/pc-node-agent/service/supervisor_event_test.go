@@ -32,10 +32,6 @@ func (s *SupervisorSuite) Test_UnamedService_Receive_Event(c *C) {
     err := s.app.Start()
     c.Assert(err, IsNil)
 
-    s.app.WaitForEvent(testEvent1, eventC1)
-    s.app.WaitForEvent(testEvent2, eventC2)
-    s.app.WaitForEvent(testEvent3, eventC3)
-
     err = s.app.RegisterServiceWithFuncs(
         func() error {
             for {
@@ -60,7 +56,9 @@ func (s *SupervisorSuite) Test_UnamedService_Receive_Event(c *C) {
             exitLatch <- exitValue
             return nil
         },
-        BindEventWithService(eventC1, eventC2, eventC3),
+        BindEventWithService(testEvent1, eventC1),
+        BindEventWithService(testEvent2, eventC2),
+        BindEventWithService(testEvent3, eventC3),
     )
     c.Assert(err, IsNil)
     c.Assert(s.app.serviceCount(), Equals, 1)
