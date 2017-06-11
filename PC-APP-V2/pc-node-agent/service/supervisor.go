@@ -48,7 +48,6 @@ type Service interface {
     Name() string
     IsRunning() bool
 
-    // --- internal methods ---
     IsNamedService() bool
 
     Serve() error
