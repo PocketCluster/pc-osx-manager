@@ -72,13 +72,13 @@ func (s *SupervisorSuite) Test_UnamedService_Run_After_Start(c *C) {
             return nil
         })
     c.Assert(err, IsNil)
-    c.Assert(s.app.serviceCount(), Equals, 1)
+    c.Assert(s.app.ServiceCount(), Equals, 1)
 
     err = s.app.Stop()
     c.Assert(err, IsNil)
     c.Check(<-exitLatch, Equals, exitValue)
 
-    c.Assert(s.app.serviceCount(), Equals, 0)
+    c.Assert(s.app.ServiceCount(), Equals, 0)
     close(exitLatch)
 }
 
@@ -101,7 +101,7 @@ func (s *SupervisorSuite) Test_UnnamedService_Register_Before_Start(c *C) {
             return nil
         })
     c.Assert(err, IsNil)
-    c.Assert(s.app.serviceCount(), Equals, 1)
+    c.Assert(s.app.ServiceCount(), Equals, 1)
 
     err = s.app.Start()
     c.Assert(err, IsNil)
@@ -110,7 +110,7 @@ func (s *SupervisorSuite) Test_UnnamedService_Register_Before_Start(c *C) {
     c.Assert(err, IsNil)
     c.Check(<-exitLatch, Equals, exitValue)
 
-    c.Assert(s.app.serviceCount(), Equals, 0)
+    c.Assert(s.app.ServiceCount(), Equals, 0)
     close(exitLatch)
 }
 
@@ -137,7 +137,7 @@ func (s *SupervisorSuite) Test_NamedService_Unsycned_Stop(c *C) {
         MakeServiceNamed(testService1),
     )
     c.Assert(err, IsNil)
-    c.Assert(s.app.serviceCount(), Equals, 1)
+    c.Assert(s.app.ServiceCount(), Equals, 1)
 
     err = s.app.Start()
     c.Assert(err, IsNil)
@@ -148,7 +148,7 @@ func (s *SupervisorSuite) Test_NamedService_Unsycned_Stop(c *C) {
     exitSignal <- true
     c.Check(<-exitLatch, Equals, exitValue)
 
-    c.Assert(s.app.serviceCount(), Equals, 1)
+    c.Assert(s.app.ServiceCount(), Equals, 1)
     close(exitLatch)
 }
 
@@ -179,7 +179,7 @@ func (s *SupervisorSuite) Test_NamedService_MultiCycle(c *C) {
         MakeServiceNamed(testService1),
     )
     c.Assert(err, IsNil)
-    c.Assert(s.app.serviceCount(), Equals, 1)
+    c.Assert(s.app.ServiceCount(), Equals, 1)
 
     // run multiple times
     for i := 0; i < 5; i++ {
@@ -191,7 +191,7 @@ func (s *SupervisorSuite) Test_NamedService_MultiCycle(c *C) {
         exitSignal <- true
         c.Check(<-exitLatch, Equals, exitValue)
 
-        c.Assert(s.app.serviceCount(), Equals, 1)
+        c.Assert(s.app.ServiceCount(), Equals, 1)
         time.Sleep(time.Second)
     }
     // close everything
@@ -220,7 +220,7 @@ func (s *SupervisorSuite) Test_NamedService_Sycned_Stop(c *C) {
         MakeServiceNamed(testService2),
     )
     c.Assert(err, IsNil)
-    c.Assert(s.app.serviceCount(), Equals, 1)
+    c.Assert(s.app.ServiceCount(), Equals, 1)
 
     err = s.app.Start()
     c.Assert(err, IsNil)
@@ -232,7 +232,7 @@ func (s *SupervisorSuite) Test_NamedService_Sycned_Stop(c *C) {
     c.Assert(err, IsNil)
     c.Check(<-exitLatch, Equals, exitValue)
 
-    c.Assert(s.app.serviceCount(), Equals, 1)
+    c.Assert(s.app.ServiceCount(), Equals, 1)
     close(exitLatch)
 }
 
@@ -264,7 +264,7 @@ func (s *SupervisorSuite) Test_NamedServices_Sycned_Stop(c *C) {
         MakeServiceNamed(testService1),
     )
     c.Assert(err, IsNil)
-    c.Assert(s.app.serviceCount(), Equals, 1)
+    c.Assert(s.app.ServiceCount(), Equals, 1)
 
     //register named service2
     err = s.app.RegisterServiceWithFuncs(
@@ -284,7 +284,7 @@ func (s *SupervisorSuite) Test_NamedServices_Sycned_Stop(c *C) {
         MakeServiceNamed(testService2),
     )
     c.Assert(err, IsNil)
-    c.Assert(s.app.serviceCount(), Equals, 2)
+    c.Assert(s.app.ServiceCount(), Equals, 2)
 
     // run services
     err = s.app.RunNamedService(testService1)
@@ -301,12 +301,12 @@ func (s *SupervisorSuite) Test_NamedServices_Sycned_Stop(c *C) {
 
     // stop service 1
     c.Check(<-exitLatch1, Equals, exitValue)
-    c.Assert(s.app.serviceCount(), Equals, 2)
+    c.Assert(s.app.ServiceCount(), Equals, 2)
     close(exitLatch1)
 
     // stop service 2
     c.Check(<-exitLatch2, Equals, exitValue)
-    c.Assert(s.app.serviceCount(), Equals, 2)
+    c.Assert(s.app.ServiceCount(), Equals, 2)
     close(exitLatch2)
 }
 
@@ -334,7 +334,7 @@ func (s *SupervisorSuite) Test_NamedAndUnnamed_Services_Unsycned_Stop(c *C) {
         MakeServiceNamed(testService3),
     )
     c.Assert(err, IsNil)
-    c.Assert(s.app.serviceCount(), Equals, 1)
+    c.Assert(s.app.ServiceCount(), Equals, 1)
 
     //register unnamed service
     err = s.app.RegisterServiceWithFuncs(
@@ -352,7 +352,7 @@ func (s *SupervisorSuite) Test_NamedAndUnnamed_Services_Unsycned_Stop(c *C) {
             return nil
         })
     c.Assert(err, IsNil)
-    c.Assert(s.app.serviceCount(), Equals, 2)
+    c.Assert(s.app.ServiceCount(), Equals, 2)
 
     // start services
     err = s.app.Start()
@@ -363,7 +363,7 @@ func (s *SupervisorSuite) Test_NamedAndUnnamed_Services_Unsycned_Stop(c *C) {
     // stop service 1
     exitSignal <- true
     c.Check(<-exitLatch1, Equals, exitValue)
-    c.Assert(s.app.serviceCount(), Equals, 2)
+    c.Assert(s.app.ServiceCount(), Equals, 2)
     close(exitLatch1)
 
     // stop service 2
@@ -372,6 +372,6 @@ func (s *SupervisorSuite) Test_NamedAndUnnamed_Services_Unsycned_Stop(c *C) {
     c.Check(<-exitLatch2, Equals, exitValue)
 
     time.Sleep(time.Second)
-    c.Assert(s.app.serviceCount(), Equals, 1)
+    c.Assert(s.app.ServiceCount(), Equals, 1)
     close(exitLatch2)
 }

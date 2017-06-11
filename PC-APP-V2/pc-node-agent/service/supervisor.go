@@ -49,29 +49,29 @@ type Service interface {
     IsRunning() bool
 
     // --- internal methods ---
-    isNamedService() bool
+    IsNamedService() bool
 
-    serve() error
-    onExit(callback func(interface{})) error
+    Serve() error
+    OnExit(callback func(interface{})) error
 
-    setRunning()
-    setStopped()
+    SetRunning()
+    SetStopped()
 
-    rebuild() error
+    Rebuild() error
 
-    getWaiters() []*waiter
+    GetWaiters() []*waiter
 }
 
 // ServerOption is a functional option passed to the server
 type ServiceOption func(app AppSupervisor, s Service) error
 
 type ServeFunc func() error
-func (s ServeFunc) serve() error {
+func (s ServeFunc) Serve() error {
     return s()
 }
 
 type OnExitFunc func(callback func(interface{})) error
-func (o OnExitFunc) onExit(callback func(interface{})) error {
+func (o OnExitFunc) OnExit(callback func(interface{})) error {
     return o(callback)
 }
 
@@ -98,29 +98,29 @@ func (s *srvcFuncs) IsRunning() bool {
     return (s.state == serviceRunning)
 }
 
-func (s *srvcFuncs) isNamedService() bool {
+func (s *srvcFuncs) IsNamedService() bool {
     return (len(s.name) != 0)
 }
 
-func (s *srvcFuncs) setRunning() {
+func (s *srvcFuncs) SetRunning() {
     s.Lock()
     defer s.Unlock()
 
     s.state = serviceRunning
 }
 
-func (s *srvcFuncs) setStopped() {
+func (s *srvcFuncs) SetStopped() {
     s.Lock()
     defer s.Unlock()
 
     s.state = serviceStopped
 }
 
-func (s *srvcFuncs) rebuild() error {
+func (s *srvcFuncs) Rebuild() error {
     return nil
 }
 
-func (s *srvcFuncs) getWaiters() []*waiter {
+func (s *srvcFuncs) GetWaiters() []*waiter {
     return s.waiters
 }
 
@@ -186,7 +186,7 @@ type AppSupervisor interface {
     OnExit(callback func(interface{}))
 
     // internal
-    serviceCount() int
+    ServiceCount() int
 }
 
 // NewSupervisor returns new instance of initialized supervisor
@@ -219,7 +219,7 @@ type appSupervisor struct {
     stoppedC        chan struct{}
 }
 
-func (p *appSupervisor) getWaiters(name string) []*waiter {
+func (p *appSupervisor) GetWaiters(name string) []*waiter {
     p.Lock()
     defer p.Unlock()
 
@@ -245,7 +245,7 @@ func (p *appSupervisor) fanOut() {
             case <-p.stoppedC:
                 return
             case event := <-p.eventsC:
-                waiters := p.getWaiters(event.Name)
+                waiters := p.GetWaiters(event.Name)
                 for _, waiter := range waiters {
                     p.notifyWaiter(waiter, event)
                 }
@@ -275,20 +275,20 @@ func (p *appSupervisor) runService(service Service) {
     p.serviceWG.Add(1)
     go func(srv Service, delSrv func(srv Service), delEvent func(srv Service), wg *sync.WaitGroup) {
         defer wg.Done()
-        defer srv.setStopped()
-        srv.setRunning()
+        defer srv.SetStopped()
+        srv.SetRunning()
 
         log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] started", srv.Name(), srv)
-        err := srv.serve()
+        err := srv.Serve()
         if err != nil {
             log.Debug(errors.WithStack(err))
         }
         delEvent(srv)
-        err = srv.onExit(nil)
+        err = srv.OnExit(nil)
         if err != nil {
             log.Debug(errors.WithStack(err))
         }
-        if !srv.isNamedService() {
+        if !srv.IsNamedService() {
             delSrv(srv)
         }
         log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] exited", srv.Name(), srv)
@@ -300,7 +300,7 @@ func (p *appSupervisor) Register(srv Service) error {
     defer p.Unlock()
 
     // when a service is named, check if there is a service with the same name
-    if srv.isNamedService() {
+    if srv.IsNamedService() {
         for _, es := range p.services {
             if srv.Name() == es.Name() {
                 return errors.Errorf("[ERR] a service with the same name '%s' exists", srv.Name())
@@ -311,7 +311,7 @@ func (p *appSupervisor) Register(srv Service) error {
 
     log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] added", srv.Name(), srv)
 
-    if p.state == stateStarted && !srv.isNamedService() {
+    if p.state == stateStarted && !srv.IsNamedService() {
         p.runService(srv)
     }
     return nil
@@ -351,7 +351,7 @@ func (p *appSupervisor) WaitForEvent(name string, eventC chan Event) {
 }
 
 // ServiceCount returns the number of registered and actively running services
-func (p *appSupervisor) serviceCount() int {
+func (p *appSupervisor) ServiceCount() int {
     p.Lock()
     defer p.Unlock()
     return len(p.services)
@@ -387,7 +387,7 @@ func (p *appSupervisor) Start() error {
     }
 
     for _, srv := range p.services {
-        if !srv.isNamedService() {
+        if !srv.IsNamedService() {
             p.runService(srv)
         }
     }
@@ -408,7 +408,7 @@ func (p *appSupervisor) RunNamedService(name string) error {
     }
 
     for _, srv := range p.services {
-        if srv.isNamedService() && srv.Name() == name {
+        if srv.IsNamedService() && srv.Name() == name {
             if !srv.IsRunning() {
                 p.runService(srv)
                 return nil

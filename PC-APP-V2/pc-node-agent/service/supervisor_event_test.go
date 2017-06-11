@@ -61,7 +61,7 @@ func (s *SupervisorSuite) Test_UnamedService_Receive_Event(c *C) {
         BindEventWithService(testEvent3, eventC3),
     )
     c.Assert(err, IsNil)
-    c.Assert(s.app.serviceCount(), Equals, 1)
+    c.Assert(s.app.ServiceCount(), Equals, 1)
 
     s.app.BroadcastEvent(Event{Name:testEvent1, Payload:testValue1})
     c.Assert(<-eventLatch, Equals, testValue1)
@@ -78,7 +78,7 @@ func (s *SupervisorSuite) Test_UnamedService_Receive_Event(c *C) {
 
     // it takes abit to
     time.Sleep(time.Second)
-    c.Assert(s.app.serviceCount(), Equals, 0)
+    c.Assert(s.app.ServiceCount(), Equals, 0)
     close(exitLatch)
     close(eventLatch)
 }
