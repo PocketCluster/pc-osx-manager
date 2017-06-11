@@ -38,8 +38,8 @@ type Event struct {
 }
 
 type waiter struct {
+    name    string
     eventC  chan Event
-    service Service
 }
 
 type Service interface {
@@ -158,8 +158,8 @@ func BindEventWithService(eventName string, eventC chan Event) ServiceOption {
         defer sup.Unlock()
 
         w := &waiter{
+            name:       eventName,
             eventC:     eventC,
-            service:    srv,
         }
 
         sup.eventWaiters[eventName] = append(sup.eventWaiters[eventName], w)
@@ -232,9 +232,7 @@ func (p *appSupervisor) GetWaiters(name string) []*waiter {
 }
 
 func (p *appSupervisor) notifyWaiter(w *waiter, event Event) {
-    select {
-        case w.eventC <- event:
-    }
+    w.eventC <- event
 }
 
 func (p *appSupervisor) fanOut() {
@@ -255,9 +253,30 @@ func (p *appSupervisor) fanOut() {
 
 func (p *appSupervisor) runService(service Service) {
     // this func will be called _after_ a service stops running:
-    removeService := func(srv Service) {
-        p.Lock()
-        defer p.Unlock()
+    serviceCleanup := func(as *appSupervisor, srv Service) {
+        as.Lock()
+        defer as.Unlock()
+
+        swaiters := srv.GetWaiters()
+        for o := range swaiters {
+            sw := swaiters[o]
+            awaiters := as.eventWaiters[sw.name]
+            if len(awaiters) != 0 {
+                var nwaiters []*waiter = []*waiter{}
+                for i := range awaiters {
+                    aw := awaiters[i]
+                    if aw != sw {
+                        nwaiters = append(nwaiters, aw)
+                    }
+                }
+                as.eventWaiters[sw.name] = nwaiters
+            }
+            log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] waiter [%s] cleaned", srv.Name(), srv, sw.name)
+        }
+
+        if srv.IsNamedService() {
+            return
+        }
         for i, el := range p.services {
             // TODO : MAKE 100% SURE THIS COMPARISON WORKS PROPERLY
             if el == srv {
@@ -267,32 +286,25 @@ func (p *appSupervisor) runService(service Service) {
         }
         log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] removed", srv.Name(), srv)
     }
-    removeEvents := func(srv Service) {
-        p.Lock()
-        defer p.Unlock()
-    }
 
     p.serviceWG.Add(1)
-    go func(srv Service, delSrv func(srv Service), delEvent func(srv Service), wg *sync.WaitGroup) {
+    go func(as *appSupervisor, wg *sync.WaitGroup, srv Service, cleanup func(as *appSupervisor, srv Service)) {
         defer wg.Done()
-        defer srv.SetStopped()
-        srv.SetRunning()
 
         log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] started", srv.Name(), srv)
+        srv.SetRunning()
         err := srv.Serve()
         if err != nil {
             log.Debug(errors.WithStack(err))
         }
-        delEvent(srv)
+        cleanup(as, srv)
+        srv.SetStopped()
         err = srv.OnExit(nil)
         if err != nil {
             log.Debug(errors.WithStack(err))
         }
-        if !srv.IsNamedService() {
-            delSrv(srv)
-        }
         log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] exited", srv.Name(), srv)
-    }(service, removeService, removeEvents, p.serviceWG)
+    }(p, p.serviceWG, service, serviceCleanup)
 }
 
 func (p *appSupervisor) Register(srv Service) error {
