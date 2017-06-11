@@ -48,7 +48,7 @@ type Service interface {
     Name() string
     IsRunning() bool
 
-    IsNamedService() bool
+    IsNamedCycle() bool
 
     Serve() error
 
@@ -62,7 +62,7 @@ type Service interface {
     GetWaiters() []*waiter
 
     // this is only allowed for named services
-    Rebuild() error
+    //Rebuild() error
     // cleanup is only allowed for unnamed services
     Cleanup() error
 }
@@ -103,7 +103,7 @@ func (s *srvcFuncs) IsRunning() bool {
     return (s.state == serviceRunning)
 }
 
-func (s *srvcFuncs) IsNamedService() bool {
+func (s *srvcFuncs) IsNamedCycle() bool {
     return (len(s.name) != 0)
 }
 
@@ -125,15 +125,17 @@ func (s *srvcFuncs) GetWaiters() []*waiter {
     return s.waiters
 }
 
+/*
 func (s *srvcFuncs) Rebuild() error {
-    if !s.IsNamedService() {
+    if !s.IsNamedCycle() {
         return errors.Errorf("[ERR] only named service is allowed to rebuild")
     }
     return nil
 }
+*/
 
 func (s *srvcFuncs) Cleanup() error {
-    if s.IsNamedService() {
+    if s.IsNamedCycle() {
         return errors.Errorf("[ERR] only unnamed service is allowed to clean up")
     }
 
@@ -183,9 +185,11 @@ func BindEventWithService(eventName string, eventC chan Event) ServiceOption {
             name:       eventName,
             eventC:     eventC,
         }
-
-        sup.eventWaiters[eventName] = append(sup.eventWaiters[eventName], w)
         srv.waiters = append(srv.waiters, w)
+
+        if !s.IsNamedCycle() {
+            sup.eventWaiters[eventName] = append(sup.eventWaiters[eventName], w)
+        }
         return nil
     }
 }
@@ -300,7 +304,7 @@ func (p *appSupervisor) runService(service Service) {
         }
 
         // cleanup service itself
-        if srv.IsNamedService() {
+        if srv.IsNamedCycle() {
             return
         }
         for i := range p.services {
@@ -344,7 +348,7 @@ func (p *appSupervisor) Register(srv Service) error {
     defer p.Unlock()
 
     // when a service is named, check if there is a service with the same name
-    if srv.IsNamedService() {
+    if srv.IsNamedCycle() {
         for _, es := range p.services {
             if srv.Name() == es.Name() {
                 return errors.Errorf("[ERR] a service with the same name '%s' exists", srv.Name())
@@ -355,7 +359,7 @@ func (p *appSupervisor) Register(srv Service) error {
 
     log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] added", srv.Name(), srv)
 
-    if p.state == stateStarted && !srv.IsNamedService() {
+    if p.state == stateStarted && !srv.IsNamedCycle() {
         p.runService(srv)
     }
     return nil
@@ -449,7 +453,7 @@ func (p *appSupervisor) Start() error {
     }
 
     for _, srv := range p.services {
-        if !srv.IsNamedService() {
+        if !srv.IsNamedCycle() {
             p.runService(srv)
         }
     }
@@ -470,9 +474,16 @@ func (p *appSupervisor) RunNamedService(name string) error {
     }
 
     for _, srv := range p.services {
-        if srv.IsNamedService() && srv.Name() == name {
+        if srv.IsNamedCycle() && srv.Name() == name {
             if !srv.IsRunning() {
+                swaiters := srv.GetWaiters()
+                for i := range swaiters {
+                    w := swaiters[i]
+                    p.eventWaiters[w.name] = append(p.eventWaiters[w.name], w)
+                }
+
                 p.runService(srv)
+
                 return nil
             } else {
                 return ServiceRunning
