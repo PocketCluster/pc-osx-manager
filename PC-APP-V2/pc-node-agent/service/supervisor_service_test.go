@@ -396,6 +396,8 @@ func (s *SupervisorSuite) Test_NamedAndUnnamed_Services_Unsycned_Stop(c *C) {
     err = s.app.Stop()
     c.Assert(err, IsNil)
     <-exitLatch2
+
+    time.Sleep(time.Second)
     c.Check(exitChecker2, Equals, exitValue)
     c.Assert(s.app.serviceCount(), Equals, 1)
     close(exitLatch2)

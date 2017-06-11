@@ -46,11 +46,11 @@ func (s *SupervisorSuite) Test_UnamedService_Receive_Event(c *C) {
                         eventChecker = e.Payload.(string)
                         eventLatch <- true
                     }
-                    case e := <-eventC1: {
+                    case e := <-eventC2: {
                         eventChecker = e.Payload.(string)
                         eventLatch <- true
                     }
-                    case e := <-eventC1: {
+                    case e := <-eventC3: {
                         eventChecker = e.Payload.(string)
                         eventLatch <- true
                     }
@@ -75,13 +75,13 @@ func (s *SupervisorSuite) Test_UnamedService_Receive_Event(c *C) {
     <-eventLatch
     c.Assert(eventChecker, Equals, testValue1)
 
-    s.app.BroadcastEvent(Event{Name:testEvent1, Payload:testValue1})
+    s.app.BroadcastEvent(Event{Name:testEvent2, Payload:testValue2})
     <-eventLatch
-    c.Assert(eventChecker, Equals, testValue1)
+    c.Assert(eventChecker, Equals, testValue2)
 
-    s.app.BroadcastEvent(Event{Name:testEvent1, Payload:testValue1})
+    s.app.BroadcastEvent(Event{Name:testEvent3, Payload:testValue3})
     <-eventLatch
-    c.Assert(eventChecker, Equals, testValue1)
+    c.Assert(eventChecker, Equals, testValue3)
 
     err = s.app.Stop()
     c.Assert(err, IsNil)
