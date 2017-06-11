@@ -46,37 +46,39 @@ type Service interface {
     // These indicate that the service is named and should be individually managed to start.
     // Plus, only named service can be rebuild
     Name() string
-    Rebuild() error
-    IsNamedCycle() bool
-
-    Serve() error
-    OnExit(callback func(interface{})) error
-
     IsRunning() bool
-    // this is for internal handling
+
+    // --- internal methods ---
+    isNamedService() bool
+
+    serve() error
+    onExit(callback func(interface{})) error
+
     setRunning()
     setStopped()
+
+    rebuild() error
 }
 
 // ServerOption is a functional option passed to the server
 type ServiceOption func(s Service) error
 
 type ServeFunc func() error
-func (s ServeFunc) Serve() error {
+func (s ServeFunc) serve() error {
     return s()
 }
 
 type OnExitFunc func(callback func(interface{})) error
-func (o OnExitFunc) OnExit(callback func(interface{})) error {
+func (o OnExitFunc) onExit(callback func(interface{})) error {
     return o(callback)
 }
 
 type AppSupervisor interface {
     Register(srv Service) error
-    RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, options...ServiceOption) error
+    RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, options... ServiceOption) error
 
     BroadcastEvent(event Event)
-    WaitForEvent(name string, eventC chan Event, cancelC chan struct{})
+    WaitForEvent(name string, eventC chan Event)
 
     IsStopped() bool
     StopChannel() <- chan struct{}
@@ -98,6 +100,7 @@ type srvcFuncs struct {
     state      int
 
     name       string
+    waiters    []*waiter
     ServeFunc
     OnExitFunc
 }
@@ -106,11 +109,11 @@ func (s *srvcFuncs) Name() string {
     return s.name
 }
 
-func (s *srvcFuncs) IsNamedCycle() bool {
+func (s *srvcFuncs) isNamedService() bool {
     return (len(s.name) != 0)
 }
 
-func (s *srvcFuncs) Rebuild() error {
+func (s *srvcFuncs) rebuild() error {
     return nil
 }
 
@@ -143,6 +146,19 @@ func MakeServiceNamed(name string) ServiceOption {
             return nil
         }
         return errors.Errorf("[ERR] invalid type to make cycle async")
+    }
+}
+
+func BindEventWithService(events... chan Event) ServiceOption {
+    return func(s Service) error {
+        srv, ok := s.(*srvcFuncs)
+        if ok {
+            for _, e := range events {
+                srv.waiters = append(srv.waiters, &waiter{eventC:e})
+            }
+            return nil
+        }
+        return errors.Errorf("[ERR] invalid service type to bind event")
     }
 }
 
@@ -215,7 +231,7 @@ func (p *appSupervisor) fanOut() {
     }
 }
 
-func (p *appSupervisor) serve(service Service) {
+func (p *appSupervisor) runService(service Service) {
     // this func will be called _after_ a service stops running:
     removeService := func(srv Service) {
         p.Lock()
@@ -229,27 +245,32 @@ func (p *appSupervisor) serve(service Service) {
         }
         log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] removed", srv.Name(), srv)
     }
+    removeEvents := func(srv Service) {
+        p.Lock()
+        defer p.Unlock()
+    }
 
     p.serviceWG.Add(1)
-    go func(srv Service, delSrv func(srv Service), wg *sync.WaitGroup) {
+    go func(srv Service, delSrv func(srv Service), delEvent func(srv Service), wg *sync.WaitGroup) {
         defer wg.Done()
+        defer srv.setStopped()
+        srv.setRunning()
 
         log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] started", srv.Name(), srv)
-        srv.setRunning()
-        err := srv.Serve()
+        err := srv.serve()
         if err != nil {
             log.Debug(errors.WithStack(err))
         }
-        err = srv.OnExit(nil)
+        delEvent(srv)
+        err = srv.onExit(nil)
         if err != nil {
             log.Debug(errors.WithStack(err))
         }
-        srv.setStopped()
-        if !srv.IsNamedCycle() {
+        if !srv.isNamedService() {
             delSrv(srv)
         }
         log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] exited", srv.Name(), srv)
-    }(service, removeService, p.serviceWG)
+    }(service, removeService, removeEvents, p.serviceWG)
 }
 
 func (p *appSupervisor) Register(srv Service) error {
@@ -257,7 +278,7 @@ func (p *appSupervisor) Register(srv Service) error {
     defer p.Unlock()
 
     // when a service is named, check if there is a service with the same name
-    if len(srv.Name()) != 0 {
+    if srv.isNamedService() {
         for _, es := range p.services {
             if srv.Name() == es.Name() {
                 return errors.Errorf("[ERR] a service with the same name '%s' exists", srv.Name())
@@ -268,15 +289,16 @@ func (p *appSupervisor) Register(srv Service) error {
 
     log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] added", srv.Name(), srv)
 
-    if p.state == stateStarted && !srv.IsNamedCycle() {
-        p.serve(srv)
+    if p.state == stateStarted && !srv.isNamedService() {
+        p.runService(srv)
     }
     return nil
 }
 
-func (p *appSupervisor) RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, options...ServiceOption) error {
+func (p *appSupervisor) RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, options... ServiceOption) error {
     srv := &srvcFuncs {
         state:         serviceStopped,
+        waiters:       []*waiter{},
         ServeFunc:     sfn,
         OnExitFunc:    efn,
     }
@@ -301,11 +323,11 @@ func (p *appSupervisor) BroadcastEvent(event Event) {
     }()
 }
 
-func (p *appSupervisor) WaitForEvent(name string, eventC chan Event, cancelC chan struct{}) {
+func (p *appSupervisor) WaitForEvent(name string, eventC chan Event) {
     p.Lock()
     defer p.Unlock()
 
-    waiter := &waiter{eventC: eventC, cancelC: cancelC}
+    waiter := &waiter{eventC: eventC}
     event, ok := p.events[name]
     if ok {
         go p.notifyWaiter(waiter, event)
@@ -351,8 +373,8 @@ func (p *appSupervisor) Start() error {
     }
 
     for _, srv := range p.services {
-        if !srv.IsNamedCycle() {
-            p.serve(srv)
+        if !srv.isNamedService() {
+            p.runService(srv)
         }
     }
 
@@ -372,9 +394,9 @@ func (p *appSupervisor) RunNamedService(name string) error {
     }
 
     for _, srv := range p.services {
-        if srv.IsNamedCycle() && srv.Name() == name {
+        if srv.isNamedService() && srv.Name() == name {
             if !srv.IsRunning() {
-                p.serve(srv)
+                p.runService(srv)
                 return nil
             } else {
                 return ServiceRunning
