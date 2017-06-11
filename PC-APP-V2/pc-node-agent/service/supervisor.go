@@ -144,6 +144,7 @@ func (s *srvcFuncs) Cleanup() error {
     return nil
 }
 
+/*
 func MakeServiceNamed(name string) ServiceOption {
     return func(_ AppSupervisor, s Service) error {
         srv, ok := s.(*srvcFuncs)
@@ -157,6 +158,7 @@ func MakeServiceNamed(name string) ServiceOption {
         return errors.Errorf("[ERR] invalid type to make cycle async")
     }
 }
+*/
 
 func BindEventWithService(eventName string, eventC chan Event) ServiceOption {
     return func(app AppSupervisor, s Service) error {
@@ -193,6 +195,7 @@ func BindEventWithService(eventName string, eventC chan Event) ServiceOption {
 type AppSupervisor interface {
     Register(srv Service) error
     RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, options... ServiceOption) error
+    RegisterNamedServiceWithFuncs(name string, sfn ServeFunc, efn OnExitFunc, options... ServiceOption) error
     BroadcastEvent(event Event)
 
     IsStopped() bool
@@ -360,6 +363,24 @@ func (p *appSupervisor) Register(srv Service) error {
 
 func (p *appSupervisor) RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, options... ServiceOption) error {
     srv := &srvcFuncs {
+        state:         serviceStopped,
+        waiters:       []*waiter{},
+        ServeFunc:     sfn,
+        OnExitFunc:    efn,
+    }
+
+    for _, opt := range options {
+        if err := opt(p, srv); err != nil {
+            return errors.WithStack(err)
+        }
+    }
+
+    return p.Register(srv)
+}
+
+func (p *appSupervisor) RegisterNamedServiceWithFuncs(name string, sfn ServeFunc, efn OnExitFunc, options... ServiceOption) error {
+    srv := &srvcFuncs {
+        name:          name,
         state:         serviceStopped,
         waiters:       []*waiter{},
         ServeFunc:     sfn,

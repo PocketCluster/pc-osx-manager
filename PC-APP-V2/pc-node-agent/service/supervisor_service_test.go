@@ -119,7 +119,8 @@ func (s *SupervisorSuite) Test_NamedService_Unsycned_Stop(c *C) {
         exitSignal = make(chan bool)
         exitLatch = make(chan string)
     )
-    err := s.app.RegisterServiceWithFuncs(
+    err := s.app.RegisterNamedServiceWithFuncs(
+        testService1,
         func() error {
             for {
                 select {
@@ -134,7 +135,6 @@ func (s *SupervisorSuite) Test_NamedService_Unsycned_Stop(c *C) {
             exitLatch <- exitValue
             return nil
         },
-        MakeServiceNamed(testService1),
     )
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 1)
@@ -162,7 +162,8 @@ func (s *SupervisorSuite) Test_NamedService_MultiCycle(c *C) {
     c.Assert(err, IsNil)
 
     // add a service
-    err = s.app.RegisterServiceWithFuncs(
+    err = s.app.RegisterNamedServiceWithFuncs(
+        testService1,
         func() error {
             for {
                 select {
@@ -176,7 +177,6 @@ func (s *SupervisorSuite) Test_NamedService_MultiCycle(c *C) {
             exitLatch <- exitValue
             return nil
         },
-        MakeServiceNamed(testService1),
     )
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 1)
@@ -202,7 +202,8 @@ func (s *SupervisorSuite) Test_NamedService_Sycned_Stop(c *C) {
     var(
         exitLatch = make(chan string)
     )
-    err := s.app.RegisterServiceWithFuncs(
+    err := s.app.RegisterNamedServiceWithFuncs(
+        testService2,
         func() error {
             for {
                 select {
@@ -217,7 +218,6 @@ func (s *SupervisorSuite) Test_NamedService_Sycned_Stop(c *C) {
             exitLatch <- exitValue
             return nil
         },
-        MakeServiceNamed(testService2),
     )
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 1)
@@ -247,7 +247,8 @@ func (s *SupervisorSuite) Test_NamedServices_Sycned_Stop(c *C) {
     c.Assert(err, IsNil)
 
     //register named service1
-    err = s.app.RegisterServiceWithFuncs(
+    err = s.app.RegisterNamedServiceWithFuncs(
+        testService1,
         func() error {
             for {
                 select {
@@ -261,13 +262,13 @@ func (s *SupervisorSuite) Test_NamedServices_Sycned_Stop(c *C) {
             exitLatch1 <- exitValue
             return nil
         },
-        MakeServiceNamed(testService1),
     )
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 1)
 
     //register named service2
-    err = s.app.RegisterServiceWithFuncs(
+    err = s.app.RegisterNamedServiceWithFuncs(
+        testService2,
         func() error {
             for {
                 select {
@@ -281,7 +282,6 @@ func (s *SupervisorSuite) Test_NamedServices_Sycned_Stop(c *C) {
             exitLatch2 <- exitValue
             return nil
         },
-        MakeServiceNamed(testService2),
     )
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 2)
@@ -317,7 +317,8 @@ func (s *SupervisorSuite) Test_NamedAndUnnamed_Services_Unsycned_Stop(c *C) {
         exitLatch2   = make(chan string)
     )
     //register named service
-    err := s.app.RegisterServiceWithFuncs(
+    err := s.app.RegisterNamedServiceWithFuncs(
+        testService3,
         func() error {
             for {
                 select {
@@ -331,7 +332,6 @@ func (s *SupervisorSuite) Test_NamedAndUnnamed_Services_Unsycned_Stop(c *C) {
             exitLatch1 <- exitValue
             return nil
         },
-        MakeServiceNamed(testService3),
     )
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 1)
