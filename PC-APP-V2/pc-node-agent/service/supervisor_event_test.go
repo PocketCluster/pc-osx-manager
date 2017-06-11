@@ -22,12 +22,12 @@ const (
 
 func (s *SupervisorSuite) Test_UnnamedService_Receive_MultiEvent(c *C) {
     var(
-        exitLatch = make(chan string)
+        exitLatch  = make(chan string)
         eventLatch = make(chan string)
 
-        eventC1 = make(chan Event)
-        eventC2 = make(chan Event)
-        eventC3 = make(chan Event)
+        eventC1    = make(chan Event)
+        eventC2    = make(chan Event)
+        eventC3    = make(chan Event)
     )
     err := s.app.Start()
     c.Assert(err, IsNil)
@@ -79,24 +79,26 @@ func (s *SupervisorSuite) Test_UnnamedService_Receive_MultiEvent(c *C) {
     // it takes abit to
     time.Sleep(time.Second)
     c.Assert(s.app.ServiceCount(), Equals, 0)
-    close(exitLatch)
-    close(eventLatch)
 
     // check if water queue is empty
     c.Assert(len(s.app.(*appSupervisor).eventWaiters), Equals, 3)
     c.Assert(len(s.app.(*appSupervisor).eventWaiters[testEvent1]), Equals, 0)
     c.Assert(len(s.app.(*appSupervisor).eventWaiters[testEvent2]), Equals, 0)
     c.Assert(len(s.app.(*appSupervisor).eventWaiters[testEvent3]), Equals, 0)
+
+    // close everything
+    close(exitLatch)
+    close(eventLatch)
 }
 
 func (s *SupervisorSuite) Test_Multiple_UnnamedService_Receive_Event(c *C) {
     var(
-        exitLatch = make(chan string)
+        exitLatch  = make(chan string)
         eventLatch = make(chan string)
 
-        eventC1 = make(chan Event)
-        eventC2 = make(chan Event)
-        eventC3 = make(chan Event)
+        eventC1    = make(chan Event)
+        eventC2    = make(chan Event)
+        eventC3    = make(chan Event)
     )
     err := s.app.Start()
     c.Assert(err, IsNil)
@@ -123,7 +125,6 @@ func (s *SupervisorSuite) Test_Multiple_UnnamedService_Receive_Event(c *C) {
     )
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 1)
-
 
     err = s.app.RegisterServiceWithFuncs(
         func() error {
@@ -171,7 +172,6 @@ func (s *SupervisorSuite) Test_Multiple_UnnamedService_Receive_Event(c *C) {
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 3)
 
-
     s.app.BroadcastEvent(Event{Name:testEvent1, Payload:testValue1})
     c.Assert(<-eventLatch, Equals, testValue1)
     c.Assert(<-eventLatch, Equals, testValue1)
@@ -186,22 +186,24 @@ func (s *SupervisorSuite) Test_Multiple_UnnamedService_Receive_Event(c *C) {
     // it takes abit to
     time.Sleep(time.Second)
     c.Assert(s.app.ServiceCount(), Equals, 0)
-    close(exitLatch)
-    close(eventLatch)
 
     // check if water queue is empty
     c.Assert(len(s.app.(*appSupervisor).eventWaiters), Equals, 1)
     c.Assert(len(s.app.(*appSupervisor).eventWaiters[testEvent1]), Equals, 0)
+
+    // close everything
+    close(exitLatch)
+    close(eventLatch)
 }
 
 func (s *SupervisorSuite) Test_NamedService_Receive_MultiEvent(c *C) {
     var(
-        exitLatch = make(chan string)
+        exitLatch  = make(chan string)
         eventLatch = make(chan string)
 
-        eventC1 = make(chan Event)
-        eventC2 = make(chan Event)
-        eventC3 = make(chan Event)
+        eventC1    = make(chan Event)
+        eventC2    = make(chan Event)
+        eventC3    = make(chan Event)
     )
     err := s.app.Start()
     c.Assert(err, IsNil)
@@ -257,24 +259,26 @@ func (s *SupervisorSuite) Test_NamedService_Receive_MultiEvent(c *C) {
     // it takes abit to
     time.Sleep(time.Second)
     c.Assert(s.app.ServiceCount(), Equals, 1)
-    close(exitLatch)
-    close(eventLatch)
 
     // check if water queue is empty
     c.Assert(len(s.app.(*appSupervisor).eventWaiters), Equals, 3)
     c.Assert(len(s.app.(*appSupervisor).eventWaiters[testEvent1]), Equals, 0)
     c.Assert(len(s.app.(*appSupervisor).eventWaiters[testEvent2]), Equals, 0)
     c.Assert(len(s.app.(*appSupervisor).eventWaiters[testEvent3]), Equals, 0)
+
+    // close everything
+    close(exitLatch)
+    close(eventLatch)
 }
 
 func (s *SupervisorSuite) Test_Multiple_NamedService_Receive_Event(c *C) {
     var(
-        exitLatch = make(chan string)
+        exitLatch  = make(chan string)
         eventLatch = make(chan string)
 
-        eventC1 = make(chan Event)
-        eventC2 = make(chan Event)
-        eventC3 = make(chan Event)
+        eventC1    = make(chan Event)
+        eventC2    = make(chan Event)
+        eventC3    = make(chan Event)
     )
     err := s.app.Start()
     c.Assert(err, IsNil)
@@ -284,13 +288,13 @@ func (s *SupervisorSuite) Test_Multiple_NamedService_Receive_Event(c *C) {
         func() error {
             for {
                 select {
-                case e := <-eventC1: {
-                    eventLatch <- e.Payload.(string)
-                }
-                case <- s.app.StopChannel(): {
-                    return nil
-                }
-                default:
+                    case e := <-eventC1: {
+                        eventLatch <- e.Payload.(string)
+                    }
+                    case <- s.app.StopChannel(): {
+                        return nil
+                    }
+                    default:
                 }
             }
         },
@@ -302,7 +306,6 @@ func (s *SupervisorSuite) Test_Multiple_NamedService_Receive_Event(c *C) {
     )
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 1)
-
 
     err = s.app.RegisterNamedServiceWithFuncs(
         testService2,
@@ -373,21 +376,23 @@ func (s *SupervisorSuite) Test_Multiple_NamedService_Receive_Event(c *C) {
     // it takes abit to
     time.Sleep(time.Second)
     c.Assert(s.app.ServiceCount(), Equals, 3)
-    close(exitLatch)
-    close(eventLatch)
-
     // check if water queue is empty
     c.Assert(len(s.app.(*appSupervisor).eventWaiters), Equals, 1)
     c.Assert(len(s.app.(*appSupervisor).eventWaiters[testEvent1]), Equals, 0)
+
+    // close everything
+    close(exitLatch)
+    close(eventLatch)
 }
 
 func (s *SupervisorSuite) Test_NamedService_MultiCycle_With_Event(c *C) {
     var(
         exitSignal = make(chan bool)
-        exitLatch = make(chan string)
-        eventLatch = make(chan string)
-        eventC1 = make(chan Event)
+        exitLatch  = make(chan string)
 
+        eventLatch = make(chan string)
+        eventC1    = make(chan Event)
+        eventC2    = make(chan Event)
     )
     // start service
     err := s.app.Start()
@@ -402,6 +407,9 @@ func (s *SupervisorSuite) Test_NamedService_MultiCycle_With_Event(c *C) {
                     case e := <-eventC1: {
                         eventLatch <- e.Payload.(string)
                     }
+                    case e := <-eventC2: {
+                        eventLatch <- e.Payload.(string)
+                    }
                     case <- exitSignal: {
                         return nil
                     }
@@ -414,9 +422,13 @@ func (s *SupervisorSuite) Test_NamedService_MultiCycle_With_Event(c *C) {
             return nil
         },
         BindEventWithService(testEvent1, eventC1),
+        BindEventWithService(testEvent2, eventC2),
     )
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 1)
+    // check if water queue is empty
+    c.Assert(len(s.app.(*appSupervisor).eventWaiters), Equals, 0)
+    c.Assert(len(s.app.(*appSupervisor).eventWaiters[testEvent1]), Equals, 0)
 
     // run multiple times
     for i := 0; i < 5; i++ {
@@ -434,6 +446,9 @@ func (s *SupervisorSuite) Test_NamedService_MultiCycle_With_Event(c *C) {
         c.Assert(s.app.ServiceCount(), Equals, 1)
         time.Sleep(time.Second)
     }
+
     // close everything
+    close(exitSignal)
     close(exitLatch)
+    close(eventLatch)
 }

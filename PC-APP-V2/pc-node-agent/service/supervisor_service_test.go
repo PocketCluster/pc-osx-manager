@@ -195,6 +195,7 @@ func (s *SupervisorSuite) Test_NamedService_MultiCycle(c *C) {
         time.Sleep(time.Second)
     }
     // close everything
+    close(exitSignal)
     close(exitLatch)
 }
 
@@ -374,4 +375,6 @@ func (s *SupervisorSuite) Test_NamedAndUnnamed_Services_Unsycned_Stop(c *C) {
     time.Sleep(time.Second)
     c.Assert(s.app.ServiceCount(), Equals, 1)
     close(exitLatch2)
+    // close exit signal
+    close(exitSignal)
 }
