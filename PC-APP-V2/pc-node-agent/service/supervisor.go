@@ -51,14 +51,20 @@ type Service interface {
     IsNamedService() bool
 
     Serve() error
+
+    // onExit allows individual services to register a callback function which will be called when a service is asked to
+    // exit. Usually services terminate themselves when the callback is called
     OnExit(callback func(interface{})) error
 
     SetRunning()
     SetStopped()
 
-    Rebuild() error
-
     GetWaiters() []*waiter
+
+    // this is only allowed for named services
+    Rebuild() error
+    // cleanup is only allowed for unnamed services
+    Cleanup() error
 }
 
 // ServerOption is a functional option passed to the server
@@ -115,12 +121,27 @@ func (s *srvcFuncs) SetStopped() {
     s.state = serviceStopped
 }
 
+func (s *srvcFuncs) GetWaiters() []*waiter {
+    return s.waiters
+}
+
 func (s *srvcFuncs) Rebuild() error {
+    if !s.IsNamedService() {
+        return errors.Errorf("[ERR] only named service is allowed to rebuild")
+    }
     return nil
 }
 
-func (s *srvcFuncs) GetWaiters() []*waiter {
-    return s.waiters
+func (s *srvcFuncs) Cleanup() error {
+    if s.IsNamedService() {
+        return errors.Errorf("[ERR] only unnamed service is allowed to clean up")
+    }
+
+    for i := range s.waiters {
+        w := s.waiters[i]
+        close(w.eventC)
+    }
+    return nil
 }
 
 func MakeServiceNamed(name string) ServiceOption {
@@ -182,7 +203,6 @@ type AppSupervisor interface {
     Stop() error
 
     Wait() error
-    OnExit(callback func(interface{}))
 
     // internal
     ServiceCount() int
@@ -231,7 +251,9 @@ func (p *appSupervisor) GetWaiters(name string) []*waiter {
 }
 
 func (p *appSupervisor) notifyWaiter(w *waiter, event Event) {
-    w.eventC <- event
+    select {
+        case w.eventC <- event:
+    }
 }
 
 func (p *appSupervisor) fanOut() {
@@ -284,6 +306,10 @@ func (p *appSupervisor) runService(service Service) {
                 p.services = append(p.services[:i], p.services[i+1:]...)
                 break
             }
+        }
+        err := srv.Cleanup()
+        if err != nil {
+            log.Debug(errors.WithStack(err))
         }
         log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] removed", srv.Name(), srv)
     }
@@ -462,6 +488,8 @@ func (p *appSupervisor) Wait() error {
 
     // we close event channel after stopping all go routines and fanOut function that we can safely close
     close(p.eventsC)
+    return nil
+
     for _, waiters = range p.eventWaiters {
         for _, w = range waiters {
             close(w.eventC)
@@ -469,16 +497,4 @@ func (p *appSupervisor) Wait() error {
     }
 
     return nil
-}
-
-// onExit allows individual services to register a callback function which will be
-// called when Teleport Process is asked to exit. Usually services terminate themselves
-// when the callback is called
-func (p *appSupervisor) OnExit(callback func(interface{})) {
-    go func() {
-        select {
-            case <- p.stoppedC:
-                callback(nil)
-        }
-    }()
 }
