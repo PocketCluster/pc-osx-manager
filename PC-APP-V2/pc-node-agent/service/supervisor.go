@@ -257,6 +257,7 @@ func (p *appSupervisor) runService(service Service) {
         as.Lock()
         defer as.Unlock()
 
+        // cleanup events first
         swaiters := srv.GetWaiters()
         for o := range swaiters {
             sw := swaiters[o]
@@ -274,11 +275,12 @@ func (p *appSupervisor) runService(service Service) {
             log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] waiter [%s] cleaned", srv.Name(), srv, sw.name)
         }
 
+        // cleanup service itself
         if srv.IsNamedService() {
             return
         }
-        for i, el := range p.services {
-            // TODO : MAKE 100% SURE THIS COMPARISON WORKS PROPERLY
+        for i := range p.services {
+            el := p.services[i]
             if el == srv {
                 p.services = append(p.services[:i], p.services[i+1:]...)
                 break
@@ -292,6 +294,7 @@ func (p *appSupervisor) runService(service Service) {
         defer wg.Done()
 
         log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] started", srv.Name(), srv)
+
         srv.SetRunning()
         err := srv.Serve()
         if err != nil {
@@ -299,6 +302,7 @@ func (p *appSupervisor) runService(service Service) {
         }
         cleanup(as, srv)
         srv.SetStopped()
+
         err = srv.OnExit(nil)
         if err != nil {
             log.Debug(errors.WithStack(err))
