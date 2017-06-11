@@ -22,11 +22,9 @@ const (
 
 func (s *SupervisorSuite) Test_UnamedService_Receive_Event(c *C) {
     var(
-        exitLatch = make(chan bool)
-        exitChecker = ""
+        exitLatch = make(chan string)
+        eventLatch = make(chan string)
 
-        eventLatch = make(chan bool)
-        eventChecker = ""
         eventC1 = make(chan Event)
         eventC2 = make(chan Event)
         eventC3 = make(chan Event)
@@ -43,16 +41,13 @@ func (s *SupervisorSuite) Test_UnamedService_Receive_Event(c *C) {
             for {
                 select {
                     case e := <-eventC1: {
-                        eventChecker = e.Payload.(string)
-                        eventLatch <- true
+                        eventLatch <- e.Payload.(string)
                     }
                     case e := <-eventC2: {
-                        eventChecker = e.Payload.(string)
-                        eventLatch <- true
+                        eventLatch <- e.Payload.(string)
                     }
                     case e := <-eventC3: {
-                        eventChecker = e.Payload.(string)
-                        eventLatch <- true
+                        eventLatch <- e.Payload.(string)
                     }
                     case <- s.app.StopChannel(): {
                         return nil
@@ -62,8 +57,7 @@ func (s *SupervisorSuite) Test_UnamedService_Receive_Event(c *C) {
             }
         },
         func(_ func(interface{})) error {
-            exitChecker = exitValue
-            exitLatch <- true
+            exitLatch <- exitValue
             return nil
         },
         BindEventWithService(eventC1, eventC2, eventC3),
@@ -72,24 +66,21 @@ func (s *SupervisorSuite) Test_UnamedService_Receive_Event(c *C) {
     c.Assert(s.app.serviceCount(), Equals, 1)
 
     s.app.BroadcastEvent(Event{Name:testEvent1, Payload:testValue1})
-    <-eventLatch
-    c.Assert(eventChecker, Equals, testValue1)
+    c.Assert(<-eventLatch, Equals, testValue1)
 
     s.app.BroadcastEvent(Event{Name:testEvent2, Payload:testValue2})
-    <-eventLatch
-    c.Assert(eventChecker, Equals, testValue2)
+    c.Assert(<-eventLatch, Equals, testValue2)
 
     s.app.BroadcastEvent(Event{Name:testEvent3, Payload:testValue3})
-    <-eventLatch
-    c.Assert(eventChecker, Equals, testValue3)
+    c.Assert(<-eventLatch, Equals, testValue3)
 
     err = s.app.Stop()
     c.Assert(err, IsNil)
-    <-exitLatch
+    c.Check(<-exitLatch, Equals, exitValue)
 
     // it takes abit to
     time.Sleep(time.Second)
-    c.Check(exitChecker, Equals, exitValue)
     c.Assert(s.app.serviceCount(), Equals, 0)
     close(exitLatch)
+    close(eventLatch)
 }

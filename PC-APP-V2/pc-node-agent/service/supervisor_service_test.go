@@ -52,8 +52,7 @@ func (s *SupervisorSuite) TestStartStop(c *C) {
 
 func (s *SupervisorSuite) Test_UnamedService_Run_After_Start(c *C) {
     var(
-        exitLatch = make(chan bool)
-        exitChecker = ""
+        exitLatch = make(chan string)
     )
     err := s.app.Start()
     c.Assert(err, IsNil)
@@ -69,8 +68,7 @@ func (s *SupervisorSuite) Test_UnamedService_Run_After_Start(c *C) {
             }
         },
         func(_ func(interface{})) error {
-            exitChecker = exitValue
-            exitLatch <- true
+            exitLatch <- exitValue
             return nil
         })
     c.Assert(err, IsNil)
@@ -78,17 +76,15 @@ func (s *SupervisorSuite) Test_UnamedService_Run_After_Start(c *C) {
 
     err = s.app.Stop()
     c.Assert(err, IsNil)
-    <-exitLatch
+    c.Check(<-exitLatch, Equals, exitValue)
 
-    c.Check(exitChecker, Equals, exitValue)
     c.Assert(s.app.serviceCount(), Equals, 0)
     close(exitLatch)
 }
 
 func (s *SupervisorSuite) Test_UnnamedService_Register_Before_Start(c *C) {
     var(
-        exitLatch = make(chan bool)
-        exitChecker = ""
+        exitLatch = make(chan string)
     )
     err := s.app.RegisterServiceWithFuncs(
         func() error {
@@ -101,8 +97,7 @@ func (s *SupervisorSuite) Test_UnnamedService_Register_Before_Start(c *C) {
             }
         },
         func(_ func(interface{})) error {
-            exitChecker = exitValue
-            exitLatch <- true
+            exitLatch <- exitValue
             return nil
         })
     c.Assert(err, IsNil)
@@ -113,9 +108,8 @@ func (s *SupervisorSuite) Test_UnnamedService_Register_Before_Start(c *C) {
 
     err = s.app.Stop()
     c.Assert(err, IsNil)
-    <-exitLatch
+    c.Check(<-exitLatch, Equals, exitValue)
 
-    c.Check(exitChecker, Equals, exitValue)
     c.Assert(s.app.serviceCount(), Equals, 0)
     close(exitLatch)
 }
@@ -123,8 +117,7 @@ func (s *SupervisorSuite) Test_UnnamedService_Register_Before_Start(c *C) {
 func (s *SupervisorSuite) Test_NamedService_Unsycned_Stop(c *C) {
     var(
         exitSignal = make(chan bool)
-        exitLatch = make(chan bool)
-        exitChecker = ""
+        exitLatch = make(chan string)
     )
     err := s.app.RegisterServiceWithFuncs(
         func() error {
@@ -138,8 +131,7 @@ func (s *SupervisorSuite) Test_NamedService_Unsycned_Stop(c *C) {
             }
         },
         func(_ func(interface{})) error {
-            exitChecker = exitValue
-            exitLatch <- true
+            exitLatch <- exitValue
             return nil
         },
         MakeServiceNamed(testService1),
@@ -154,9 +146,8 @@ func (s *SupervisorSuite) Test_NamedService_Unsycned_Stop(c *C) {
     c.Assert(err, IsNil)
 
     exitSignal <- true
-    <-exitLatch
+    c.Check(<-exitLatch, Equals, exitValue)
 
-    c.Check(exitChecker, Equals, exitValue)
     c.Assert(s.app.serviceCount(), Equals, 1)
     close(exitLatch)
 }
@@ -164,8 +155,7 @@ func (s *SupervisorSuite) Test_NamedService_Unsycned_Stop(c *C) {
 func (s *SupervisorSuite) Test_NamedService_MultiCycle(c *C) {
     var(
         exitSignal = make(chan bool)
-        exitLatch = make(chan bool)
-        exitChecker = ""
+        exitLatch = make(chan string)
     )
     // start service
     err := s.app.Start()
@@ -183,8 +173,7 @@ func (s *SupervisorSuite) Test_NamedService_MultiCycle(c *C) {
             }
         },
         func(_ func(interface{})) error {
-            exitChecker = exitValue
-            exitLatch <- true
+            exitLatch <- exitValue
             return nil
         },
         MakeServiceNamed(testService1),
@@ -200,9 +189,8 @@ func (s *SupervisorSuite) Test_NamedService_MultiCycle(c *C) {
 
         // stop service
         exitSignal <- true
-        <-exitLatch
+        c.Check(<-exitLatch, Equals, exitValue)
 
-        c.Check(exitChecker, Equals, exitValue)
         c.Assert(s.app.serviceCount(), Equals, 1)
         time.Sleep(time.Second)
     }
@@ -212,8 +200,7 @@ func (s *SupervisorSuite) Test_NamedService_MultiCycle(c *C) {
 
 func (s *SupervisorSuite) Test_NamedService_Sycned_Stop(c *C) {
     var(
-        exitLatch = make(chan bool)
-        exitChecker = ""
+        exitLatch = make(chan string)
     )
     err := s.app.RegisterServiceWithFuncs(
         func() error {
@@ -227,8 +214,7 @@ func (s *SupervisorSuite) Test_NamedService_Sycned_Stop(c *C) {
             }
         },
         func(_ func(interface{})) error {
-            exitChecker = exitValue
-            exitLatch <- true
+            exitLatch <- exitValue
             return nil
         },
         MakeServiceNamed(testService2),
@@ -244,9 +230,8 @@ func (s *SupervisorSuite) Test_NamedService_Sycned_Stop(c *C) {
 
     err = s.app.Stop()
     c.Assert(err, IsNil)
-    <-exitLatch
+    c.Check(<-exitLatch, Equals, exitValue)
 
-    c.Check(exitChecker, Equals, exitValue)
     c.Assert(s.app.serviceCount(), Equals, 1)
     close(exitLatch)
 }
@@ -254,10 +239,8 @@ func (s *SupervisorSuite) Test_NamedService_Sycned_Stop(c *C) {
 
 func (s *SupervisorSuite) Test_NamedServices_Sycned_Stop(c *C) {
     var(
-        exitLatch1   = make(chan bool)
-        exitChecker1 = ""
-        exitLatch2   = make(chan bool)
-        exitChecker2 = ""
+        exitLatch1   = make(chan string)
+        exitLatch2   = make(chan string)
     )
     // start services
     err := s.app.Start()
@@ -275,8 +258,7 @@ func (s *SupervisorSuite) Test_NamedServices_Sycned_Stop(c *C) {
             }
         },
         func(_ func(interface{})) error {
-            exitChecker1 = exitValue
-            exitLatch1 <- true
+            exitLatch1 <- exitValue
             return nil
         },
         MakeServiceNamed(testService1),
@@ -296,8 +278,7 @@ func (s *SupervisorSuite) Test_NamedServices_Sycned_Stop(c *C) {
             }
         },
         func(_ func(interface{})) error {
-            exitChecker2 = exitValue
-            exitLatch2 <- true
+            exitLatch2 <- exitValue
             return nil
         },
         MakeServiceNamed(testService2),
@@ -319,14 +300,12 @@ func (s *SupervisorSuite) Test_NamedServices_Sycned_Stop(c *C) {
     c.Assert(err, IsNil)
 
     // stop service 1
-    <-exitLatch1
-    c.Check(exitChecker1, Equals, exitValue)
+    c.Check(<-exitLatch1, Equals, exitValue)
     c.Assert(s.app.serviceCount(), Equals, 2)
     close(exitLatch1)
 
     // stop service 2
-    <-exitLatch2
-    c.Check(exitChecker2, Equals, exitValue)
+    c.Check(<-exitLatch2, Equals, exitValue)
     c.Assert(s.app.serviceCount(), Equals, 2)
     close(exitLatch2)
 }
@@ -334,10 +313,8 @@ func (s *SupervisorSuite) Test_NamedServices_Sycned_Stop(c *C) {
 func (s *SupervisorSuite) Test_NamedAndUnnamed_Services_Unsycned_Stop(c *C) {
     var(
         exitSignal   = make(chan bool)
-        exitLatch1   = make(chan bool)
-        exitChecker1 = ""
-        exitLatch2   = make(chan bool)
-        exitChecker2 = ""
+        exitLatch1   = make(chan string)
+        exitLatch2   = make(chan string)
     )
     //register named service
     err := s.app.RegisterServiceWithFuncs(
@@ -351,8 +328,7 @@ func (s *SupervisorSuite) Test_NamedAndUnnamed_Services_Unsycned_Stop(c *C) {
             }
         },
         func(_ func(interface{})) error {
-            exitChecker1 = exitValue
-            exitLatch1 <- true
+            exitLatch1 <- exitValue
             return nil
         },
         MakeServiceNamed(testService3),
@@ -372,8 +348,7 @@ func (s *SupervisorSuite) Test_NamedAndUnnamed_Services_Unsycned_Stop(c *C) {
             }
         },
         func(_ func(interface{})) error {
-            exitChecker2 = exitValue
-            exitLatch2 <- true
+            exitLatch2 <- exitValue
             return nil
         })
     c.Assert(err, IsNil)
@@ -387,18 +362,16 @@ func (s *SupervisorSuite) Test_NamedAndUnnamed_Services_Unsycned_Stop(c *C) {
 
     // stop service 1
     exitSignal <- true
-    <-exitLatch1
-    c.Check(exitChecker1, Equals, exitValue)
+    c.Check(<-exitLatch1, Equals, exitValue)
     c.Assert(s.app.serviceCount(), Equals, 2)
     close(exitLatch1)
 
     // stop service 2
     err = s.app.Stop()
     c.Assert(err, IsNil)
-    <-exitLatch2
+    c.Check(<-exitLatch2, Equals, exitValue)
 
     time.Sleep(time.Second)
-    c.Check(exitChecker2, Equals, exitValue)
     c.Assert(s.app.serviceCount(), Equals, 1)
     close(exitLatch2)
 }
