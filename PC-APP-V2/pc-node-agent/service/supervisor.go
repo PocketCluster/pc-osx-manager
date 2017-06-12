@@ -171,6 +171,9 @@ func BindEventWithService(eventName string, eventC chan Event) ServiceOption {
         if srv == nil {
             return errors.Errorf("[ERR] null service instance to bind event")
         }
+        if srv.IsNamedCycle() {
+            return errors.Errorf("[ERR] named service instance cannot be bound with event")
+        }
         sup, ok := app.(*appSupervisor)
         if !ok {
             return errors.Errorf("[ERR] invalid supervisor type to bind event")
@@ -199,7 +202,7 @@ func BindEventWithService(eventName string, eventC chan Event) ServiceOption {
 type AppSupervisor interface {
     Register(srv Service) error
     RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, options... ServiceOption) error
-    RegisterNamedServiceWithFuncs(name string, sfn ServeFunc, efn OnExitFunc, options... ServiceOption) error
+    RegisterNamedServiceWithFuncs(name string, sfn ServeFunc, efn OnExitFunc) error
     BroadcastEvent(event Event)
 
     IsStopped() bool
@@ -285,6 +288,11 @@ func (p *appSupervisor) runService(service Service) {
         as.Lock()
         defer as.Unlock()
 
+        // since named cycles don't have events associated, we don't need to clean up
+        if srv.IsNamedCycle() {
+            return
+        }
+
         // cleanup events first
         swaiters := srv.GetWaiters()
         for o := range swaiters {
@@ -304,9 +312,6 @@ func (p *appSupervisor) runService(service Service) {
         }
 
         // cleanup service itself
-        if srv.IsNamedCycle() {
-            return
-        }
         for i := range p.services {
             el := p.services[i]
             if el == srv {
@@ -382,22 +387,14 @@ func (p *appSupervisor) RegisterServiceWithFuncs(sfn ServeFunc, efn OnExitFunc, 
     return p.Register(srv)
 }
 
-func (p *appSupervisor) RegisterNamedServiceWithFuncs(name string, sfn ServeFunc, efn OnExitFunc, options... ServiceOption) error {
-    srv := &srvcFuncs {
+func (p *appSupervisor) RegisterNamedServiceWithFuncs(name string, sfn ServeFunc, efn OnExitFunc) error {
+    return p.Register(&srvcFuncs {
         name:          name,
         state:         serviceStopped,
-        waiters:       []*waiter{},
+//        waiters:       []*waiter{},
         ServeFunc:     sfn,
         OnExitFunc:    efn,
-    }
-
-    for _, opt := range options {
-        if err := opt(p, srv); err != nil {
-            return errors.WithStack(err)
-        }
-    }
-
-    return p.Register(srv)
+    })
 }
 
 func (p *appSupervisor) BroadcastEvent(event Event) {
@@ -476,12 +473,13 @@ func (p *appSupervisor) RunNamedService(name string) error {
     for _, srv := range p.services {
         if srv.IsNamedCycle() && srv.Name() == name {
             if !srv.IsRunning() {
+/*
                 swaiters := srv.GetWaiters()
                 for i := range swaiters {
                     w := swaiters[i]
                     p.eventWaiters[w.name] = append(p.eventWaiters[w.name], w)
                 }
-
+*/
                 p.runService(srv)
 
                 return nil

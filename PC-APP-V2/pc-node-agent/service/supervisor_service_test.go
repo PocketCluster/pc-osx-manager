@@ -134,8 +134,7 @@ func (s *SupervisorSuite) Test_NamedService_Unsycned_Stop(c *C) {
         func(_ func(interface{})) error {
             exitLatch <- exitValue
             return nil
-        },
-    )
+        })
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 1)
 
@@ -176,8 +175,7 @@ func (s *SupervisorSuite) Test_NamedService_MultiCycle(c *C) {
         func(_ func(interface{})) error {
             exitLatch <- exitValue
             return nil
-        },
-    )
+        })
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 1)
 
@@ -218,8 +216,7 @@ func (s *SupervisorSuite) Test_NamedService_Sycned_Stop(c *C) {
         func(_ func(interface{})) error {
             exitLatch <- exitValue
             return nil
-        },
-    )
+        })
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 1)
 
@@ -262,8 +259,7 @@ func (s *SupervisorSuite) Test_NamedServices_Sycned_Stop(c *C) {
         func(_ func(interface{})) error {
             exitLatch1 <- exitValue
             return nil
-        },
-    )
+        })
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 1)
 
@@ -282,8 +278,7 @@ func (s *SupervisorSuite) Test_NamedServices_Sycned_Stop(c *C) {
         func(_ func(interface{})) error {
             exitLatch2 <- exitValue
             return nil
-        },
-    )
+        })
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 2)
 
@@ -332,8 +327,7 @@ func (s *SupervisorSuite) Test_NamedAndUnnamed_Services_Unsycned_Stop(c *C) {
         func(_ func(interface{})) error {
             exitLatch1 <- exitValue
             return nil
-        },
-    )
+        })
     c.Assert(err, IsNil)
     c.Assert(s.app.ServiceCount(), Equals, 1)
 
