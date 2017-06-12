@@ -118,7 +118,7 @@ func initSearchService(app service.AppSupervisor) error {
             }
             return nil
         },
-        func(_ interface{}) error {
+        func(_ func(interface{})) error {
             caster.Close()
             log.Debugf("[SEARCH] close master serach service...")
             return nil
