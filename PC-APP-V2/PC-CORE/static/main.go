@@ -236,42 +236,48 @@ func main() {
 
                     case operation.CmdServiceBundleStart: {
                         eventC := make(chan service.Event)
-                        a.WaitForEvent("TEST_EVENT", eventC, make(chan struct{}))
+                        a.RegisterServiceWithFuncs(
+                            func() (interface{}, error) {
+                                defer log.Debugf("[TEST SERV 1] -- SERVICE 1 ENDED --")
+                                log.Debugf("[TEST SERV 1] test for-select loop started...")
 
-                        a.RegisterServiceFunc(func() error {
-                            defer log.Debugf("[TEST SERV 1] -- SERVICE 1 ENDED --")
-                            log.Debugf("[TEST SERV 1] test for-select loop started...")
-
-                            for {
-                                select {
-                                    case <- a.StopChannel():
-                                        log.Debugf("[TEST SERV 1] [TEST 1 STOPPING]")
-                                        return nil
-                                    case <- eventC:
-                                        log.Debugf("[TEST SERV 1] new Event received...")
+                                for {
+                                    select {
+                                        case <- a.StopChannel():
+                                            log.Debugf("[TEST SERV 1] [TEST 1 STOPPING]")
+                                            return nil, nil
+                                        case <- eventC:
+                                            log.Debugf("[TEST SERV 1] new Event received...")
+                                    }
                                 }
-                            }
+                                return nil, nil
+                            },
+                            func(_ interface{}, _ error) error {
+                                return nil
+                            },
+                            service.BindEventWithService("TEST_EVENT", eventC))
 
-                            return nil
-                        })
+                        a.RegisterServiceWithFuncs(
+                            func() (interface{}, error) {
+                                defer log.Debugf("[TEST SERV 2] -- SERVICE 2 ENDED --")
+                                log.Debugf("[TEST SERV 2] test started")
 
-                        a.RegisterServiceFunc(func() error {
-                            defer log.Debugf("[TEST SERV 2] -- SERVICE 2 ENDED --")
-                            log.Debugf("[TEST SERV 2] test started")
+                                for {
+                                    if a.IsStopped() {
+                                        log.Debugf("[TEST SERV 2] [TEST 2 STOPPING]")
+                                        return nil, nil
+                                    }
 
-                            for {
-                                if a.IsStopped() {
-                                    log.Debugf("[TEST SERV 2] [TEST 2 STOPPING]")
-                                    return nil
+                                    a.BroadcastEvent(service.Event{Name:"TEST_EVENT"})
+
+                                    time.Sleep(time.Second)
                                 }
 
-                                a.BroadcastEvent(service.Event{Name:"TEST_EVENT"})
-
-                                time.Sleep(time.Second)
-                            }
-
-                            return nil
-                        })
+                                return nil, nil
+                            },
+                            func(_ interface{}, _ error) error {
+                                return nil
+                            })
                         a.StartServices()
                         log.Debugf("[OP] %v", e.String())
                     }

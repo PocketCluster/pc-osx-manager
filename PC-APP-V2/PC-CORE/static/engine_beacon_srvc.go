@@ -115,68 +115,73 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
         return errors.WithStack(err)
     }
 
+    a.RegisterServiceWithFuncs(
+        func() (interface{}, error) {
+            var timer = time.NewTicker(time.Second)
 
-    a.WaitForEvent(coreFeedbackBeacon, beaconC, make(chan struct{}))
-    a.WaitForEvent(coreFeedbackSearch, searchC, make(chan struct{}))
+            log.Debugf("[AGENT] starting agent service...")
 
-    a.RegisterServiceFunc(func() error {
-        var timer = time.NewTicker(time.Second)
-
-        log.Debugf("[AGENT] starting agent service...")
-
-        for {
-            select {
-                case <-a.StopChannel(): {
-                    timer.Stop()
-                    err = swarmsrv.Close()
-                    if err != nil {
-                        log.Debug(err.Error())
-                    }
-                    err = beaconMan.Shutdown()
-                    if err != nil {
-                        log.Debug(err.Error())
-                    }
-                    err = beaconRoute.close()
-                    if err != nil {
-                        log.Debug(err.Error())
-                    }
-                    log.Debugf("[AGENT] stopping agent service...")
-                    return nil
-                }
-                case b := <-beaconC: {
-                    bp, ok := b.Payload.(ucast.BeaconPack)
-                    if ok {
-                        err = beaconMan.TransitionWithBeaconData(bp, time.Now())
+            for {
+                select {
+                    case <-a.StopChannel(): {
+                        timer.Stop()
+                        err = swarmsrv.Close()
                         if err != nil {
-                            log.Debugf("[BEACON-TRANSITION] %v", err)
+                            log.Debug(err.Error())
+                        }
+                        err = beaconMan.Shutdown()
+                        if err != nil {
+                            log.Debug(err.Error())
+                        }
+                        err = beaconRoute.close()
+                        if err != nil {
+                            log.Debug(err.Error())
+                        }
+                        log.Debugf("[AGENT] stopping agent service...")
+                        return nil, nil
+                    }
+                    case b := <-beaconC: {
+                        bp, ok := b.Payload.(ucast.BeaconPack)
+                        if ok {
+                            err = beaconMan.TransitionWithBeaconData(bp, time.Now())
+                            if err != nil {
+                                log.Debugf("[BEACON-TRANSITION] %v", err)
+                            }
                         }
                     }
-                }
-                case s := <-searchC: {
-                    cp, ok := s.Payload.(mcast.CastPack)
-                    if ok {
-                        err = beaconMan.TransitionWithSearchData(cp, time.Now())
-                        if err != nil {
-                            log.Debugf("[SEARCH-TRANSITION] %v", err)
+                    case s := <-searchC: {
+                        cp, ok := s.Payload.(mcast.CastPack)
+                        if ok {
+                            err = beaconMan.TransitionWithSearchData(cp, time.Now())
+                            if err != nil {
+                                log.Debugf("[SEARCH-TRANSITION] %v", err)
+                            }
                         }
                     }
-                }
-                case <-timer.C: {
-                    err = beaconMan.TransitionWithTimestamp(time.Now())
-                    if err != nil {
-                        log.Debug(err.Error())
+                    case <-timer.C: {
+                        err = beaconMan.TransitionWithTimestamp(time.Now())
+                        if err != nil {
+                            log.Debug(err.Error())
+                        }
+                        continue
                     }
-                    continue
                 }
             }
-        }
-        return nil
-    })
+            return nil, nil
+        },
+        func(_ interface{}, _ error) error {
+            return nil
+        },
+        service.BindEventWithService(coreFeedbackBeacon, beaconC),
+        service.BindEventWithService(coreFeedbackSearch, searchC))
 
-    a.RegisterServiceFunc(func () error {
-        return errors.WithStack(swarmsrv.ListenAndServeSingleHost())
-    })
-
+    a.RegisterServiceWithFuncs(
+        func() (interface{}, error) {
+            return nil, errors.WithStack(swarmsrv.ListenAndServeSingleHost())
+        },
+        func(_ interface{}, _ error) error {
+            return nil
+        })
 
     return nil
 }
