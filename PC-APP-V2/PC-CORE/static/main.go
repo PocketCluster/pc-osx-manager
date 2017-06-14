@@ -167,7 +167,7 @@ func main() {
                         }
                     }
                     case operation.CmdTeleportStop: {
-                        err = teleProc.Close()
+                        err = teleProc.StopServices()
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
