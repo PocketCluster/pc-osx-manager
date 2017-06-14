@@ -31,6 +31,7 @@ func (s *SupervisorSuite) TearDownSuite(c *C) {
 }
 
 func (s *SupervisorSuite) SetUpTest(c *C) {
+    log.Debugf("--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---")
     s.app = NewAppSupervisor()
 }
 
@@ -38,6 +39,7 @@ func (s *SupervisorSuite) TearDownTest(c *C) {
     err := s.app.Stop()
     c.Assert(err, IsNil)
     s.app = nil
+    log.Debugf("\n\n")
 }
 
 /// ---

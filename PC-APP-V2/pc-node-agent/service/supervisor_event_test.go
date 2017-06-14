@@ -10,14 +10,12 @@ const (
     testEvent1 = "test_event1"
     testEvent2 = "test_event2"
     testEvent3 = "test_event3"
-    testEvent4 = "test_event4"
 )
 
 const (
     testValue1 = "test_value1"
     testValue2 = "test_value2"
     testValue3 = "test_value3"
-    testValue4 = "test_value4"
 )
 
 func (s *SupervisorSuite) Test_UnnamedService_Receive_MultiEvent(c *C) {
