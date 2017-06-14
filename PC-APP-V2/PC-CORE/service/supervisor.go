@@ -185,10 +185,10 @@ func BindEventWithService(eventName string, eventC chan Event) ServiceOption {
 // --- --- --- --- --- --- --- --- --- --- ServiceSupervisor Options and Functions --- --- --- --- --- --- --- --- -- //
 
 type ServiceSupervisor interface {
+    BroadcastEvent(event Event)
+
     RegisterServiceWithFuncs(sfn serveFunc, efn onExitFunc, options... ServiceOption) error
     RegisterNamedServiceWithFuncs(name string, sfn serveFunc, efn onExitFunc) error
-
-    BroadcastEvent(event Event)
 
     IsStopped() bool
     StopChannel() <- chan struct{}
@@ -275,13 +275,6 @@ func (s *srvcSupervisor) BroadcastEvent(event Event) {
 }
 
 // --- --- --- --- --- --- --- --- --- --- Service Related Methods --- --- --- --- --- --- --- --- --- --- --- --- -- //
-
-// ServiceCount returns the number of registered and actively running services
-func (s *srvcSupervisor) serviceCount() int {
-    s.Lock()
-    defer s.Unlock()
-    return len(s.services)
-}
 
 func (s *srvcSupervisor) runService(service Service) {
     // this func will be called _after_ a service stops running:
@@ -494,4 +487,12 @@ func (p *srvcSupervisor) Refresh() error {
     p.stoppedC     = make(chan struct{})
 
     return nil
+}
+
+// ServiceCount returns the number of registered and actively running services
+func (s *srvcSupervisor) serviceCount() int {
+    s.Lock()
+    defer s.Unlock()
+
+    return len(s.services)
 }
