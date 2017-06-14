@@ -11,9 +11,11 @@ import (
 )
 
 const (
-    coreFeedbackSearch = "feedback_search"
-    coreFeedbackBeacon = "feedback_beacon"
-    coreServiceBeacon  = "service_beacon"
+    eventBeaconCoreReadSearch       = "event.beacon.core.read.search"
+    eventBeaconCoreReadLocation     = "event.beacon.core.read.location"
+    eventBeaconCoreWriteLocation    = "event.beacon.core.write.location"
+    eventBeaconManagerSpawn         = "event.beacon.manager.spawn"
+    eventSwarmInstanceSpawn         = "event.swarm.instance.spawn"
 )
 
 func initSearchCatcher(a *mainLife) error {
@@ -34,7 +36,7 @@ func initSearchCatcher(a *mainLife) error {
                         return nil, nil
                     }
                     case cp := <-catcher.ChRead: {
-                        a.BroadcastEvent(service.Event{Name:coreFeedbackSearch, Payload:cp})
+                        a.BroadcastEvent(service.Event{Name:eventBeaconCoreReadSearch, Payload:cp})
                     }
                 }
             }
@@ -65,7 +67,7 @@ func initBeaconLoator(a *mainLife) error {
                         return nil, nil
                     }
                     case bp := <- belocat.ChRead: {
-                        a.BroadcastEvent(service.Event{Name:coreFeedbackBeacon, Payload:bp})
+                        a.BroadcastEvent(service.Event{Name:eventBeaconCoreReadLocation, Payload:bp})
                     }
                 }
             }
@@ -99,7 +101,7 @@ func initBeaconLoator(a *mainLife) error {
         func(_ interface{}, _ error) error {
             return nil
         },
-        service.BindEventWithService(coreServiceBeacon, beaconC))
+        service.BindEventWithService(eventBeaconCoreWriteLocation, beaconC))
 
     return nil
 }

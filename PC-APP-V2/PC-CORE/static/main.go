@@ -133,6 +133,11 @@ func main() {
                             log.Debug(err)
                         }
 
+                        err = initSwarmService(a)
+                        if err != nil {
+                            log.Debug(err)
+                        }
+
                         err = initMasterBeaconService(a, cid, serviceConfig.teleConfig)
                         if err != nil {
                             log.Debug(err)
