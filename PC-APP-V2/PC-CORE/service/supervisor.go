@@ -176,7 +176,7 @@ type ServiceSupervisor interface {
 func NewServiceSupervisor() ServiceSupervisor {
     return &srvcSupervisor{
         state:           stateStopped,
-        serviceWG:       &sync.WaitGroup{},
+        waitSync:        sync.WaitGroup{},
         services:        []Service{},
 
         eventsC:         make(chan Event, broadcastChannelSize),
@@ -188,9 +188,9 @@ func NewServiceSupervisor() ServiceSupervisor {
 
 type srvcSupervisor struct {
     sync.Mutex
-    state int
+    state           int
 
-    serviceWG       *sync.WaitGroup
+    waitSync        sync.WaitGroup
     services        []Service
 
     eventWaiters    map[string][]*waiter
@@ -219,7 +219,7 @@ func (s *srvcSupervisor) notifyWaiter(w *waiter, evt Event) {
 }
 
 func (s *srvcSupervisor) fanOut() {
-    defer s.serviceWG.Done()
+    defer s.waitSync.Done()
 
     for {
         select {
@@ -249,60 +249,64 @@ func (s *srvcSupervisor) BroadcastEvent(event Event) {
 // --- --- --- --- --- --- --- --- --- --- Service Related Methods --- --- --- --- --- --- --- --- --- --- --- --- -- //
 
 func (s *srvcSupervisor) runService(service Service) {
-    // this func will be called _after_ a service stops running:
-    serviceCleanup := func(ss *srvcSupervisor, srv Service) {
-        ss.Lock()
-        defer ss.Unlock()
+    var (
+        // this func will be called _after_ a service stops running:
+        srvcCleanup = func(ss *srvcSupervisor, srv Service) {
+            ss.Lock()
+            defer ss.Unlock()
 
-        // cleanup events first
-        swaiters := srv.getWaiters()
-        for o := range swaiters {
-            sw := swaiters[o]
-            awaiters := ss.eventWaiters[sw.eventName]
-            if len(awaiters) != 0 {
-                var nwaiters []*waiter = []*waiter{}
-                for i := range awaiters {
-                    aw := awaiters[i]
-                    if aw != sw {
-                        nwaiters = append(nwaiters, aw)
+            // cleanup events first
+            swaiters := srv.getWaiters()
+            for o := range swaiters {
+                sw := swaiters[o]
+                awaiters := ss.eventWaiters[sw.eventName]
+                if len(awaiters) != 0 {
+                    var nwaiters []*waiter = []*waiter{}
+                    for i := range awaiters {
+                        aw := awaiters[i]
+                        if aw != sw {
+                            nwaiters = append(nwaiters, aw)
+                        }
                     }
+                    ss.eventWaiters[sw.eventName] = nwaiters
                 }
-                ss.eventWaiters[sw.eventName] = nwaiters
+                log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] waiter [%s] cleaned", srv.Tag(), srv, sw.eventName)
             }
-            log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] waiter [%s] cleaned", srv.Tag(), srv, sw.eventName)
-        }
 
-        // cleanup service itself
-        for i := range ss.services {
-            el := ss.services[i]
-            if el == srv {
-                ss.services = append(ss.services[:i], ss.services[i+1:]...)
-                break
+            // cleanup service itself
+            for i := range ss.services {
+                el := ss.services[i]
+                if el == srv {
+                    ss.services = append(ss.services[:i], ss.services[i+1:]...)
+                    break
+                }
             }
+            err := srv.cleanup()
+            if err != nil {
+                log.Debug(errors.WithStack(err))
+            }
+            log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] removed", srv.Tag(), srv)
         }
-        err := srv.cleanup()
-        if err != nil {
-            log.Debug(errors.WithStack(err))
+        // this runs service
+        srvcRunner = func(ss *srvcSupervisor, srv Service, cleanup func(as *srvcSupervisor, srv Service)) {
+            defer ss.waitSync.Done()
+
+            log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] started", srv.Tag(), srv)
+
+            srv.setRunning()
+            err := srv.serve()
+            if err != nil {
+                log.Debug(errors.WithStack(err))
+            }
+            cleanup(ss, srv)
+            srv.setStopped()
+
+            log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] exited", srv.Tag(), srv)
         }
-        log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] removed", srv.Tag(), srv)
-    }
+    )
 
-    s.serviceWG.Add(1)
-    go func(ss *srvcSupervisor, wg *sync.WaitGroup, srv Service, cleanup func(as *srvcSupervisor, srv Service)) {
-        defer wg.Done()
-
-        log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] started", srv.Tag(), srv)
-
-        srv.setRunning()
-        err := srv.serve()
-        if err != nil {
-            log.Debug(errors.WithStack(err))
-        }
-        cleanup(ss, srv)
-        srv.setStopped()
-
-        log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] exited", srv.Tag(), srv)
-    }(s, s.serviceWG, service, serviceCleanup)
+    s.waitSync.Add(1)
+    go srvcRunner(s, service, srvcCleanup)
 }
 
 func (s *srvcSupervisor) registerService(srv Service) error {
@@ -360,7 +364,7 @@ func (s *srvcSupervisor) StartServices() error {
     }
     s.state = stateStarted
 
-    s.serviceWG.Add(1)
+    s.waitSync.Add(1)
     go s.fanOut()
 
     if len(s.services) == 0 {
@@ -393,12 +397,22 @@ func (s *srvcSupervisor) StopServices() error {
 }
 
 func (p *srvcSupervisor) Refresh() error {
-    p.serviceWG.Wait()
+    return nil
 
-    // we close event channel after stopping all go routines and fanOut function that we can safely close
-    close(p.eventsC)
+    log.Debugf("[SUPERVISOR] refresh supervisor services...")
+
+    p.waitSync.Add(1)
+    go func() {
+        defer p.waitSync.Done()
+        // we close event channel after stopping all go routines and fanOut function that we can safely close
+        close(p.eventsC)
+        log.Debugf("[SUPERVISOR] notifying through closed channel. %v", p.waitSync)
+    }()
+
+    p.waitSync.Wait()
+
     // reset
-    p.serviceWG    = &sync.WaitGroup{}
+    p.waitSync     = sync.WaitGroup{}
     p.eventsC      = make(chan Event, broadcastChannelSize)
     p.eventWaiters = make(map[string][]*waiter)
     p.stoppedC     = make(chan struct{})

@@ -213,3 +213,11 @@ func (s *SupervisorSuite) Test_Services_Iteration(c *C) {
     err = s.app.StopServices()
     c.Assert(err, IsNil)
 }
+
+func (s *SupervisorSuite) Test_Start_Rebuild(c *C) {
+    err := s.app.StartServices()
+    c.Assert(err, IsNil)
+
+    err = s.app.Refresh()
+    c.Assert(err, IsNil)
+}
