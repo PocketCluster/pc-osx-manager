@@ -396,27 +396,33 @@ func (s *srvcSupervisor) StopServices() error {
     return nil
 }
 
-func (p *srvcSupervisor) Refresh() error {
-    return nil
+func (s *srvcSupervisor) Refresh() error {
+    // this double locking to to prevent ServiceFunc from deadlocked, but enable other variables to be reset
+    s.Lock()
+    if s.state == stateStopped {
+        defer s.Unlock()
+        return nil
+    }
+    s.state = stateStopped
+    s.Unlock()
 
-    log.Debugf("[SUPERVISOR] refresh supervisor services...")
-
-    p.waitSync.Add(1)
+    log.Debugf("[SUPERVISOR] stopping services...")
+    var ws *sync.WaitGroup = s.waitSync
+    ws.Add(1)
     go func() {
-        defer p.waitSync.Done()
-        // we close event channel after stopping all go routines and fanOut function that we can safely close
-        close(p.eventsC)
-        log.Debugf("[SUPERVISOR] notifying through closed channel. %v", p.waitSync)
+        // we broadcast stopping and wait for all goroutines closed with event channels intact to give grace period
+        // while services are stopping, there are many races to grap supervisor lock so unlock it before call gets here
+        close(s.stoppedC)
+        ws.Done()
     }()
+    ws.Wait()
 
-    p.waitSync.Wait()
+    // we close event channel after stopping all go routines and fanOut function that we can safely close
+    close(s.eventsC)
 
     // reset
-    p.waitSync     = &sync.WaitGroup{}
-    p.eventsC      = make(chan Event, broadcastChannelSize)
-    p.eventWaiters = make(map[string][]*waiter)
-    p.stoppedC     = make(chan struct{})
-
+    s.eventsC     = make(chan Event, broadcastChannelSize)
+    s.stoppedC    = make(chan struct{})
     return nil
 }
 
