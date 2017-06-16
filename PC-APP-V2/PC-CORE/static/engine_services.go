@@ -8,6 +8,7 @@ import (
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/pc-core/service"
+    "github.com/stkim1/pc-core/event/operation"
 )
 
 const (
@@ -26,23 +27,21 @@ func initSearchCatcher(a *mainLife) error {
     }
 
     a.RegisterServiceWithFuncs(
-        func() (interface{}, error) {
+        operation.ServiceBeaconCatcher,
+        func() error {
             log.Debugf("NewSearchCatcher :: MAIN BEGIN")
             for {
                 select {
                     case <-a.StopChannel(): {
                         catcher.Close()
                         log.Debugf("NewSearchCatcher :: MAIN CLOSE")
-                        return nil, nil
+                        return nil
                     }
                     case cp := <-catcher.ChRead: {
                         a.BroadcastEvent(service.Event{Name:eventBeaconCoreReadSearch, Payload:cp})
                     }
                 }
             }
-            return nil, nil
-        },
-        func(_ interface{}, _ error) error {
             return nil
         })
 
@@ -57,36 +56,35 @@ func initBeaconLoator(a *mainLife) error {
 
     // beacon locator read
     a.RegisterServiceWithFuncs(
-        func() (interface{}, error) {
+        operation.ServiceBeaconLocationRead,
+        func() error {
             log.Debugf("NewBeaconLocator READ :: MAIN BEGIN")
             for {
                 select {
                     case <- a.StopChannel(): {
                         belocat.Close()
                         log.Debugf("NewBeaconLocator READ :: MAIN CLOSE")
-                        return nil, nil
+                        return nil
                     }
                     case bp := <- belocat.ChRead: {
                         a.BroadcastEvent(service.Event{Name:eventBeaconCoreReadLocation, Payload:bp})
                     }
                 }
             }
-            return nil, nil
-        },
-        func(_ interface{}, _ error) error {
             return nil
         })
 
     // beacon locator write
     beaconC := make(chan service.Event)
     a.RegisterServiceWithFuncs(
-        func() (interface{}, error) {
+        operation.ServiceBeaconLocationWrite,
+        func() error {
             log.Debugf("NewBeaconLocator WRITE :: MAIN BEGIN")
             for {
                 select {
                     case <- a.StopChannel(): {
                         log.Debugf("NewBeaconLocator WRITE :: MAIN CLOSE")
-                        return nil, nil
+                        return nil
                     }
                     case b := <- beaconC: {
                         bs, ok := b.Payload.(ucast.BeaconSend)
@@ -96,9 +94,6 @@ func initBeaconLoator(a *mainLife) error {
                     }
                 }
             }
-            return nil, nil
-        },
-        func(_ interface{}, _ error) error {
             return nil
         },
         service.BindEventWithService(eventBeaconCoreWriteLocation, beaconC))

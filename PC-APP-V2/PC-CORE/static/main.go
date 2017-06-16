@@ -242,7 +242,8 @@ func main() {
                     case operation.CmdServiceBundleStart: {
                         eventC := make(chan service.Event)
                         a.RegisterServiceWithFuncs(
-                            func() (interface{}, error) {
+                            "TEST SERV 1",
+                            func() error {
                                 defer log.Debugf("[TEST SERV 1] -- SERVICE 1 ENDED --")
                                 log.Debugf("[TEST SERV 1] test for-select loop started...")
 
@@ -250,37 +251,31 @@ func main() {
                                     select {
                                         case <- a.StopChannel():
                                             log.Debugf("[TEST SERV 1] [TEST 1 STOPPING]")
-                                            return nil, nil
+                                            return nil
                                         case <- eventC:
                                             log.Debugf("[TEST SERV 1] new Event received...")
                                     }
                                 }
-                                return nil, nil
-                            },
-                            func(_ interface{}, _ error) error {
                                 return nil
                             },
                             service.BindEventWithService("TEST_EVENT", eventC))
 
                         a.RegisterServiceWithFuncs(
-                            func() (interface{}, error) {
+                            "TEST SERV 2",
+                            func() error {
                                 defer log.Debugf("[TEST SERV 2] -- SERVICE 2 ENDED --")
                                 log.Debugf("[TEST SERV 2] test started")
 
                                 for {
                                     if a.IsStopped() {
                                         log.Debugf("[TEST SERV 2] [TEST 2 STOPPING]")
-                                        return nil, nil
+                                        return nil
                                     }
 
                                     a.BroadcastEvent(service.Event{Name:"TEST_EVENT"})
 
                                     time.Sleep(time.Second)
                                 }
-
-                                return nil, nil
-                            },
-                            func(_ interface{}, _ error) error {
                                 return nil
                             })
                         a.StartServices()

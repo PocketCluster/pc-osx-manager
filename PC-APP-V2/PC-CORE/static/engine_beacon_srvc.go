@@ -12,6 +12,7 @@ import (
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/pc-core/beacon"
     "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/model"
     swarmemb "github.com/stkim1/pc-core/extlib/swarm"
@@ -69,7 +70,8 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
         searchC = make(chan service.Event)
     )
     a.RegisterServiceWithFuncs(
-        func() (interface{}, error) {
+        operation.ServiceBeaconMaster,
+        func() error {
             var (
                 timer = time.NewTicker(time.Second)
 
@@ -94,7 +96,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
                     })
             )
             if err != nil {
-                return nil, errors.WithStack(err)
+                return errors.WithStack(err)
             }
 
             log.Debugf("[AGENT] starting agent service...")
@@ -112,7 +114,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
                             log.Debug(err.Error())
                         }
                         log.Debugf("[AGENT] stopping agent service...")
-                        return nil, nil
+                        return nil
                     }
                     case b := <-beaconC: {
                         bp, ok := b.Payload.(ucast.BeaconPack)
@@ -140,9 +142,6 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
                     }
                 }
             }
-            return nil, nil
-        },
-        func(_ interface{}, _ error) error {
             return nil
         },
         service.BindEventWithService(eventBeaconCoreReadLocation, beaconC),
@@ -154,7 +153,8 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
 func initSwarmService(a *mainLife) error {
     swarmSrvC := make(chan service.Event)
     a.RegisterServiceWithFuncs(
-        func() (interface{}, error) {
+        operation.ServiceSwarmEmbeddedOperation,
+        func() error {
             var (
                 swarmsrv *swarmemb.SwarmService = nil
             )
@@ -168,53 +168,48 @@ func initSwarmService(a *mainLife) error {
                 case <- a.StopChannel(): {
                     if swarmsrv != nil {
                         err := swarmsrv.Close()
-                        return nil, errors.WithStack(err)
+                        return errors.WithStack(err)
                     }
-                    return nil, errors.Errorf("[ERR] null SWARM instance")
+                    return errors.Errorf("[ERR] null SWARM instance")
                 }
             }
-            return nil, nil
-        },
-        func(_ interface{}, _ error) error {
             return nil
         },
         service.BindEventWithService(eventSwarmInstanceSpawn, swarmSrvC))
 
     beaconManC := make(chan service.Event)
     a.RegisterServiceWithFuncs(
-        func() (interface{}, error) {
+        operation.ServiceSwarmEmbeddedServer,
+        func() error {
             be := <- beaconManC
             beaconMan, ok := be.Payload.(beacon.BeaconManger)
             if !ok {
-                return nil, errors.Errorf("[ERR] invalid beacon manager type")
+                return errors.Errorf("[ERR] invalid beacon manager type")
             }
             ctx := context.SharedHostContext()
             caCert, err := ctx.CertAuthCertificate()
             if err != nil {
-                return nil, errors.WithStack(err)
+                return errors.WithStack(err)
             }
             hostCrt, err := ctx.MasterHostCertificate()
             if err != nil {
-                return nil, errors.WithStack(err)
+                return errors.WithStack(err)
             }
             hostPrv, err := ctx.MasterHostPrivateKey()
             if err != nil {
-                return nil, errors.WithStack(err)
+                return errors.WithStack(err)
             }
             swarmctx, err := swarmemb.NewContextWithCertAndKey(caCert, hostCrt, hostPrv, beaconMan)
             if err != nil {
-                return nil, errors.WithStack(err)
+                return errors.WithStack(err)
             }
             swarmsrv, err := swarmemb.NewSwarmService(swarmctx)
             if err != nil {
-                return nil, errors.WithStack(err)
+                return errors.WithStack(err)
             }
             a.BroadcastEvent(service.Event{Name:eventSwarmInstanceSpawn, Payload:swarmsrv})
             err = swarmsrv.ListenAndServeSingleHost()
-            return nil, errors.WithStack(err)
-        },
-        func(_ interface{}, _ error) error {
-            return nil
+            return errors.WithStack(err)
         },
         service.BindEventWithService(eventBeaconManagerSpawn, beaconManC))
 

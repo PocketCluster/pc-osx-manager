@@ -6,6 +6,15 @@ import (
 
 type CommandType int32
 
+const(
+    ServiceBeaconCatcher string          = "service.beacon.catcher"
+    ServiceBeaconLocationRead string     = "service.beacon.location.read"
+    ServiceBeaconLocationWrite string    = "service.beacon.location.write"
+    ServiceBeaconMaster string           = "service.beacon.master"
+    ServiceSwarmEmbeddedServer string    = "service.swarm.embedded.server"
+    ServiceSwarmEmbeddedOperation string = "service.swarm.embedded.operation"
+)
+
 const (
     // Context control : This opens/closes database
     CmdContextOpen      = iota
