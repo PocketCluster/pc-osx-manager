@@ -18,6 +18,7 @@ const (
     testValue3 = "test_value3"
 )
 
+// this test is to check the race condition shortly after supervisor is closed.
 func (s *SupervisorSuite) Test_Invalidate_Event_After_Stop(c *C) {
     var(
         exitChecker string = ""
