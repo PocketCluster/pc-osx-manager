@@ -330,7 +330,7 @@ func initAgentService(app service.AppSupervisor) error {
                 log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | FAILED ", ts, state.String())
                 switch state {
                     case locator.SlaveBounded: {
-                        app.BroadcastEvent(service.Event{Name:embed.NodeSSHServiceStop})
+                        app.BroadcastEvent(service.Event{Name:embed.EventNodeSSHServiceStop})
                         return nil
                     }
                     default: {
