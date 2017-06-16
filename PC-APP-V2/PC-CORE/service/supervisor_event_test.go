@@ -1,6 +1,8 @@
 package service
 
 import (
+    "time"
+
     . "gopkg.in/check.v1"
 )
 
@@ -15,6 +17,64 @@ const (
     testValue2 = "test_value2"
     testValue3 = "test_value3"
 )
+
+func (s *SupervisorSuite) Test_Invalidate_Event_After_Stop(c *C) {
+    var(
+        exitChecker string = ""
+        eventChecker string = ""
+        eventC = make(chan Event)
+    )
+    err := s.app.StartServices()
+    c.Assert(err, IsNil)
+
+    err = s.app.RegisterServiceWithFuncs(
+        testService1,
+        func() error {
+            for {
+                select {
+                    case e := <-eventC: {
+                        eventChecker = e.Payload.(string)
+                    }
+                    case <- s.app.StopChannel(): {
+                        exitChecker = exitValue
+                        return nil
+                    }
+                    default:
+                }
+            }
+        },
+        BindEventWithService(testEvent1, eventC))
+    c.Assert(err, IsNil)
+    c.Assert(s.app.serviceCount(), Equals, 1)
+
+    // this step is to emulate a case where an event is broadcasted while supervisor is closing down.
+    // have stopped channel closed but event channel be alive
+    close(s.app.(*srvcSupervisor).stoppedC)
+    close(s.app.(*srvcSupervisor).eventsC)
+    s.app.(*srvcSupervisor).eventsC = make(chan Event)
+
+    s.app.BroadcastEvent(Event{Name:testEvent1, Payload:testValue1})
+    s.app.BroadcastEvent(Event{Name:testEvent1, Payload:testValue1})
+    s.app.BroadcastEvent(Event{Name:testEvent1, Payload:testValue1})
+    s.app.BroadcastEvent(Event{Name:testEvent1, Payload:testValue1})
+
+    // have time for event to be broadcasted
+    time.Sleep(time.Second)
+    c.Assert(eventChecker, Equals, "")
+
+    // make stopped Channel alive so we can close supervisors
+    s.app.(*srvcSupervisor).stoppedC = make(chan struct{})
+
+    // stop services
+    err = s.app.StopServices()
+    c.Assert(err, IsNil)
+    c.Assert(exitChecker, Equals, exitValue)
+    c.Assert(s.app.serviceCount(), Equals, 0)
+
+    // check if waiter queue is empty
+    c.Assert(len(s.app.(*srvcSupervisor).eventWaiters), Equals, 1)
+    c.Assert(len(s.app.(*srvcSupervisor).eventWaiters[testEvent1]), Equals, 0)
+}
 
 func (s *SupervisorSuite) Test_Service_Receive_MultiEvent(c *C) {
     var(
