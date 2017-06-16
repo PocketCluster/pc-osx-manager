@@ -1,8 +1,6 @@
 package service
 
 import (
-    "time"
-
     . "gopkg.in/check.v1"
 )
 
@@ -20,7 +18,7 @@ const (
 
 func (s *SupervisorSuite) Test_Service_Receive_MultiEvent(c *C) {
     var(
-        exitLatch  = make(chan string)
+        exitChecker string = ""
         eventLatch = make(chan string)
 
         eventC1    = make(chan Event)
@@ -45,7 +43,7 @@ func (s *SupervisorSuite) Test_Service_Receive_MultiEvent(c *C) {
                         eventLatch <- e.Payload.(string)
                     }
                     case <- s.app.StopChannel(): {
-                        exitLatch <- exitValue
+                        exitChecker = exitValue
                         return nil
                     }
                     default:
@@ -69,10 +67,7 @@ func (s *SupervisorSuite) Test_Service_Receive_MultiEvent(c *C) {
 
     err = s.app.StopServices()
     c.Assert(err, IsNil)
-    c.Check(<-exitLatch, Equals, exitValue)
-
-    // it takes abit to cleanup
-    time.Sleep(time.Second)
+    c.Assert(exitChecker, Equals, exitValue)
     c.Assert(s.app.serviceCount(), Equals, 0)
 
     // check if waiter queue is empty
@@ -80,15 +75,15 @@ func (s *SupervisorSuite) Test_Service_Receive_MultiEvent(c *C) {
     c.Assert(len(s.app.(*srvcSupervisor).eventWaiters[testEvent1]), Equals, 0)
     c.Assert(len(s.app.(*srvcSupervisor).eventWaiters[testEvent2]), Equals, 0)
     c.Assert(len(s.app.(*srvcSupervisor).eventWaiters[testEvent3]), Equals, 0)
-
-    // close everything
-    close(exitLatch)
     close(eventLatch)
 }
 
 func (s *SupervisorSuite) Test_Multiple_Service_Receive_Event(c *C) {
     var(
-        exitLatch  = make(chan string)
+        exitChecker1 string = ""
+        exitChecker2 string = ""
+        exitChecker3 string = ""
+
         eventLatch = make(chan string)
 
         eventC1    = make(chan Event)
@@ -107,7 +102,7 @@ func (s *SupervisorSuite) Test_Multiple_Service_Receive_Event(c *C) {
                         eventLatch <- e.Payload.(string)
                     }
                     case <- s.app.StopChannel(): {
-                        exitLatch <- exitValue
+                        exitChecker1 = exitValue
                         return nil
                     }
                     default:
@@ -127,7 +122,7 @@ func (s *SupervisorSuite) Test_Multiple_Service_Receive_Event(c *C) {
                         eventLatch <- e.Payload.(string)
                     }
                     case <- s.app.StopChannel(): {
-                        exitLatch <- exitValue
+                        exitChecker2 = exitValue
                         return nil
                     }
                     default:
@@ -147,7 +142,7 @@ func (s *SupervisorSuite) Test_Multiple_Service_Receive_Event(c *C) {
                         eventLatch <- e.Payload.(string)
                     }
                     case <- s.app.StopChannel(): {
-                        exitLatch <- exitValue
+                        exitChecker3 = exitValue
                         return nil
                     }
                     default:
@@ -165,12 +160,9 @@ func (s *SupervisorSuite) Test_Multiple_Service_Receive_Event(c *C) {
 
     err = s.app.StopServices()
     c.Assert(err, IsNil)
-    c.Check(<-exitLatch, Equals, exitValue)
-    c.Check(<-exitLatch, Equals, exitValue)
-    c.Check(<-exitLatch, Equals, exitValue)
-
-    // it takes abit to
-    time.Sleep(time.Second)
+    c.Check(exitChecker1, Equals, exitValue)
+    c.Check(exitChecker2, Equals, exitValue)
+    c.Check(exitChecker3, Equals, exitValue)
     c.Assert(s.app.serviceCount(), Equals, 0)
 
     // check if water queue is empty
@@ -178,6 +170,5 @@ func (s *SupervisorSuite) Test_Multiple_Service_Receive_Event(c *C) {
     c.Assert(len(s.app.(*srvcSupervisor).eventWaiters[testEvent1]), Equals, 0)
 
     // close everything
-    close(exitLatch)
     close(eventLatch)
 }

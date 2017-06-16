@@ -166,7 +166,6 @@ type ServiceSupervisor interface {
 
     StartServices() error
     StopServices() error
-    Refresh() error
 
     // --- internal service --- //
 
@@ -242,7 +241,12 @@ func (s *srvcSupervisor) BroadcastEvent(event Event) {
     defer s.Unlock()
 
     go func() {
-        s.eventsC <- event
+        select {
+            // when the supervisor is stopped, no more event will flow
+            case <- s.stoppedC:
+            // otherwise, things would work as intended
+            case s.eventsC <- event:
+        }
     }()
 }
 
@@ -381,24 +385,6 @@ func (s *srvcSupervisor) StartServices() error {
 func (s *srvcSupervisor) StopServices() error {
     // this double locking to to prevent ServiceFunc from deadlocked, but enable other variables to be reset
     s.Lock()
-    defer s.Unlock()
-
-    if s.state == stateStopped {
-        return nil
-    }
-    s.state = stateStopped
-
-    log.Debugf("[SUPERVISOR] stopping services...")
-
-    // we broadcast stopping and wait for all goroutines closed with event channels intact to give grace period
-    // while services are stopping, there are many races to grap supervisor lock so it is unlocked before call gets here
-    close(s.stoppedC)
-    return nil
-}
-
-func (s *srvcSupervisor) Refresh() error {
-    // this double locking to to prevent ServiceFunc from deadlocked, but enable other variables to be reset
-    s.Lock()
     if s.state == stateStopped {
         defer s.Unlock()
         return nil
@@ -407,20 +393,19 @@ func (s *srvcSupervisor) Refresh() error {
     s.Unlock()
 
     log.Debugf("[SUPERVISOR] stopping services...")
-    var ws *sync.WaitGroup = s.waitSync
-    ws.Add(1)
-    go func() {
-        // we broadcast stopping and wait for all goroutines closed with event channels intact to give grace period
-        // while services are stopping, there are many races to grap supervisor lock so unlock it before call gets here
-        close(s.stoppedC)
-        ws.Done()
-    }()
-    ws.Wait()
+
+    // Broadcast stopping and wait for all goroutines to close with event channels intact.
+    // While services are stopping, there are many races to grap supervisor lock so give grace period
+    close(s.stoppedC)
+    s.waitSync.Wait()
+
+    s.Lock()
+    defer s.Unlock()
 
     // we close event channel after stopping all go routines and fanOut function that we can safely close
     close(s.eventsC)
 
-    // reset
+    // reconstruct channels. We're to reconstruct event channel as well to clean off queued events
     s.eventsC     = make(chan Event, broadcastChannelSize)
     s.stoppedC    = make(chan struct{})
     return nil

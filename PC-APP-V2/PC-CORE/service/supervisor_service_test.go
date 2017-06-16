@@ -52,7 +52,7 @@ func (s *SupervisorSuite) Test_Start_Stop(c *C) {
 
 func (s *SupervisorSuite) Test_Service_Run_After_Start(c *C) {
     var(
-        exitLatch = make(chan string)
+        exitChecker string = ""
     )
     err := s.app.StartServices()
     c.Assert(err, IsNil)
@@ -63,8 +63,8 @@ func (s *SupervisorSuite) Test_Service_Run_After_Start(c *C) {
             for {
                 select {
                     case <- s.app.StopChannel():
+                        exitChecker = exitValue
                         log.Debugf("LET THIS SERVICE STOP")
-                        exitLatch <- exitValue
                         return nil
                     default:
                 }
@@ -75,17 +75,15 @@ func (s *SupervisorSuite) Test_Service_Run_After_Start(c *C) {
 
     err = s.app.StopServices()
     c.Assert(err, IsNil)
-    c.Check(<-exitLatch, Equals, exitValue)
+    c.Check(exitChecker, Equals, exitValue)
 
     // check cleanup
-    time.Sleep(time.Second)
     c.Assert(s.app.serviceCount(), Equals, 0)
-    close(exitLatch)
 }
 
 func (s *SupervisorSuite) Test_Service_Register_Before_Start(c *C) {
     var(
-        exitLatch = make(chan string)
+        exitChecker string = ""
     )
     err := s.app.RegisterServiceWithFuncs(
         testService1,
@@ -93,7 +91,7 @@ func (s *SupervisorSuite) Test_Service_Register_Before_Start(c *C) {
             for {
                 select {
                     case <- s.app.StopChannel():
-                        exitLatch <- exitValue
+                        exitChecker = exitValue
                         return nil
                     default:
                 }
@@ -107,18 +105,16 @@ func (s *SupervisorSuite) Test_Service_Register_Before_Start(c *C) {
 
     err = s.app.StopServices()
     c.Assert(err, IsNil)
-    c.Check(<-exitLatch, Equals, exitValue)
+    c.Assert(exitChecker, Equals, exitValue)
 
     // check cleanup
-    time.Sleep(time.Second)
     c.Assert(s.app.serviceCount(), Equals, 0)
-    close(exitLatch)
 }
 
 func (s *SupervisorSuite) Test_Services_Sycned_Stop(c *C) {
     var(
-        exitLatch1   = make(chan string)
-        exitLatch2   = make(chan string)
+        exitChecker1 string = ""
+        exitChecker2 string = ""
     )
     // start services
     err := s.app.StartServices()
@@ -130,10 +126,10 @@ func (s *SupervisorSuite) Test_Services_Sycned_Stop(c *C) {
         func() error {
             for {
                 select {
-                    case <- s.app.StopChannel():
-                        exitLatch1 <- exitValue
-                        return nil
-                    default:
+                case <- s.app.StopChannel():
+                    exitChecker1 = exitValue
+                    return nil
+                default:
                 }
             }
         })
@@ -146,38 +142,29 @@ func (s *SupervisorSuite) Test_Services_Sycned_Stop(c *C) {
         func() error {
             for {
                 select {
-                    case <- s.app.StopChannel():
-                        exitLatch2 <- exitValue
-                        return nil
-                    default:
+                case <- s.app.StopChannel():
+                    exitChecker2 = exitValue
+                    return nil
+                default:
                 }
             }
         })
     c.Assert(err, IsNil)
     c.Assert(s.app.serviceCount(), Equals, 2)
 
-    // wait...
-    time.Sleep(time.Second)
-
     // stop service
     err = s.app.StopServices()
     c.Assert(err, IsNil)
 
     // stop services
-    c.Check(<-exitLatch1, Equals, exitValue)
-    c.Check(<-exitLatch2, Equals, exitValue)
-
-    // check cleanup
-    time.Sleep(time.Second)
+    c.Assert(exitChecker1, Equals, exitValue)
+    c.Assert(exitChecker2, Equals, exitValue)
     c.Assert(s.app.serviceCount(), Equals, 0)
-    close(exitLatch1)
-    close(exitLatch2)
 }
-
 
 func (s *SupervisorSuite) Test_Services_Iteration(c *C) {
     var(
-        eventLatch   = make(chan string)
+        eventLatch  = make(chan string)
         exitLatch   = make(chan string)
     )
     // start services
@@ -211,13 +198,5 @@ func (s *SupervisorSuite) Test_Services_Iteration(c *C) {
     // stop service
     c.Assert(s.app.serviceCount(), Equals, 0)
     err = s.app.StopServices()
-    c.Assert(err, IsNil)
-}
-
-func (s *SupervisorSuite) Test_Start_Rebuild(c *C) {
-    err := s.app.StartServices()
-    c.Assert(err, IsNil)
-
-    err = s.app.Refresh()
     c.Assert(err, IsNil)
 }
