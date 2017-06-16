@@ -303,6 +303,7 @@ func initTeleportNodeService(app service.AppSupervisor) error {
                         node, ok := n.Payload.(*embed.EmbeddedNodeProcess)
                         if ok {
                             pcsshNode = node
+                            log.Debugf("[SSH-NODE] instance node received : %v", node)
                         } else {
                             log.Debugf("[ERR] invalid embedded node process type")
                         }
