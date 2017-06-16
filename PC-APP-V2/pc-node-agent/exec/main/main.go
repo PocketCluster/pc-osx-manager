@@ -33,8 +33,6 @@ const (
 
     servicePcsshInit   = "service.pcssh.init"
     servicePcsshStart  = "service.pcssh.start"
-    nodeSSHServiceStop = "node.ssh.stop"
-    nodeSSHInstance    = "node.ssh.instance"
 )
 
 func initDhcpListner(app service.AppSupervisor) error {
@@ -202,8 +200,6 @@ func initTeleportNodeService(app service.AppSupervisor) error {
                 return errors.WithStack(err)
             }
 
-            app.BroadcastEvent(service.Event{Name:nodeSSHInstance, Payload:pcsshNode})
-
             // execute docker engine cert acquisition before SSH node start
             // TODO : create a waitforevent channel and restart docker engine accordingly
             err = pcsshNode.AcquireEngineCertificate(slcontext.DockerEnvironemtPostProcess)
@@ -257,8 +253,6 @@ func initTeleportNodeService(app service.AppSupervisor) error {
                 return errors.WithStack(err)
             }
 
-            app.BroadcastEvent(service.Event{Name:nodeSSHInstance, Payload:pcsshNode})
-
             err = pcsshNode.StartNodeSSH()
             if err != nil {
                 return errors.WithStack(err)
@@ -288,48 +282,6 @@ func initTeleportNodeService(app service.AppSupervisor) error {
             return nil
         })
 
-    var (
-        nodeInstanceC = make(chan service.Event)
-        nodeStopC     = make(chan service.Event)
-    )
-    app.RegisterServiceWithFuncs(
-        func() error{
-            var (
-                pcsshNode *embed.EmbeddedNodeProcess = nil
-            )
-            for {
-                select {
-                    case n := <- nodeInstanceC: {
-                        node, ok := n.Payload.(*embed.EmbeddedNodeProcess)
-                        if ok {
-                            pcsshNode = node
-                            log.Debugf("[SSH-NODE] instance node received : %v", node)
-                        } else {
-                            log.Debugf("[ERR] invalid embedded node process type")
-                        }
-                    }
-                    case <- nodeStopC: {
-                        if pcsshNode != nil {
-                            err := pcsshNode.Close()
-                            if err != nil {
-                                log.Debug(err.Error())
-                            }
-                            pcsshNode = nil
-                            log.Debugf("\n\n(INFO) teleport node stop success!\n")
-                        }
-                    }
-                    case <- app.StopChannel(): {
-                        return nil
-                    }
-                }
-            }
-        },
-        func(_ func(interface{})) error {
-            return nil
-        },
-        service.BindEventWithService(nodeSSHInstance, nodeInstanceC),
-        service.BindEventWithService(nodeSSHServiceStop, nodeStopC),
-    )
     return nil
 }
 
@@ -378,7 +330,7 @@ func initAgentService(app service.AppSupervisor) error {
                 log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | FAILED ", ts, state.String())
                 switch state {
                     case locator.SlaveBounded: {
-                        app.BroadcastEvent(service.Event{Name:nodeSSHServiceStop})
+                        app.BroadcastEvent(service.Event{Name:embed.NodeSSHServiceStop})
                         return nil
                     }
                     default: {
