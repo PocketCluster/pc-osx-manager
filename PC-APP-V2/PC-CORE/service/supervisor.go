@@ -42,7 +42,7 @@ type Event struct {
 }
 
 type waiter struct {
-    name       string
+    eventName  string
     eventC     chan Event
 }
 
@@ -50,23 +50,16 @@ type waiter struct {
 
 type Service interface {
     // These indicate that the service is named and should be individually managed to start.
-    // Plus, only named service can be rebuild
-    Name() string
+    Tag() string
 
     IsRunning() bool
 
-    // Serve() allows services to run
-    serve() (interface{}, error)
-
-    // OnExit allows individual services to register a callback function which will be called when a service is asked to
-    // exit. Usually services terminate themselves when the callback is called
-    onExit(residue interface{}, runerr error) error
-
     // --- internal methods --- //
-
-    isNamedCycle() bool
-
     setRunning()
+
+    // Serve() allows services to run
+    serve() error
+
     setStopped()
 
     getWaiters() []*waiter
@@ -77,28 +70,22 @@ type Service interface {
 
 // --- --- --- --- --- --- --- --- Service internal structure to coalesce functions --- --- --- --- --- --- --- --- - //
 
-type serveFunc func() (interface{}, error)
-func (s serveFunc) serve() (interface{}, error) {
+type serveFunc func() error
+func (s serveFunc) serve() error {
     return s()
-}
-
-type onExitFunc func(residue interface{}, err error) error
-func (o onExitFunc) onExit(residue interface{}, err error) error {
-    return o(residue, err)
 }
 
 type srvcFuncs struct {
     sync.Mutex
     state      int
 
-    name       string
+    tag        string
     waiters    []*waiter
     serveFunc
-    onExitFunc
 }
 
-func (s *srvcFuncs) Name() string {
-    return s.name
+func (s *srvcFuncs) Tag() string {
+    return s.tag
 }
 
 func (s *srvcFuncs) IsRunning() bool {
@@ -106,10 +93,6 @@ func (s *srvcFuncs) IsRunning() bool {
     defer s.Unlock()
 
     return (s.state == serviceRunning)
-}
-
-func (s *srvcFuncs) isNamedCycle() bool {
-    return (len(s.name) != 0)
 }
 
 func (s *srvcFuncs) setRunning() {
@@ -131,10 +114,6 @@ func (s *srvcFuncs) getWaiters() []*waiter {
 }
 
 func (s *srvcFuncs) cleanup() error {
-    if s.isNamedCycle() {
-        return errors.Errorf("[ERR] only unnamed service is allowed to clean up")
-    }
-
     for i := range s.waiters {
         w := s.waiters[i]
         close(w.eventC)
@@ -156,9 +135,6 @@ func BindEventWithService(eventName string, eventC chan Event) ServiceOption {
         if srv == nil {
             return errors.Errorf("[ERR] null service instance to bind event")
         }
-        if srv.isNamedCycle() {
-            return errors.Errorf("[ERR] named service instance cannot be bound with event")
-        }
         sup, ok := app.(*srvcSupervisor)
         if !ok {
             return errors.Errorf("[ERR] invalid supervisor type to bind event")
@@ -170,14 +146,11 @@ func BindEventWithService(eventName string, eventC chan Event) ServiceOption {
         defer sup.Unlock()
 
         w := &waiter{
-            name:       eventName,
+            eventName:  eventName,
             eventC:     eventC,
         }
         srv.waiters = append(srv.waiters, w)
-
-        if !s.isNamedCycle() {
-            sup.eventWaiters[eventName] = append(sup.eventWaiters[eventName], w)
-        }
+        sup.eventWaiters[eventName] = append(sup.eventWaiters[eventName], w)
         return nil
     }
 }
@@ -186,15 +159,12 @@ func BindEventWithService(eventName string, eventC chan Event) ServiceOption {
 
 type ServiceSupervisor interface {
     BroadcastEvent(event Event)
-
-    RegisterServiceWithFuncs(sfn serveFunc, efn onExitFunc, options... ServiceOption) error
-    RegisterNamedServiceWithFuncs(name string, sfn serveFunc, efn onExitFunc) error
+    RegisterServiceWithFuncs(tag string, sfn serveFunc, options... ServiceOption) error
 
     IsStopped() bool
     StopChannel() <- chan struct{}
 
     StartServices() error
-    RunNamedService(name string) error
     StopServices() error
     Refresh() error
 
@@ -230,11 +200,11 @@ type srvcSupervisor struct {
 
 // --- --- --- --- --- --- --- --- --- --- Event Related Methods --- --- --- --- --- --- --- --- --- --- --- --- ---- //
 
-func (s *srvcSupervisor) getWaiters(name string) []*waiter {
+func (s *srvcSupervisor) getWaiters(eventName string) []*waiter {
     s.Lock()
     defer s.Unlock()
 
-    waiters := s.eventWaiters[name]
+    waiters := s.eventWaiters[eventName]
     out := make([]*waiter, len(waiters))
     for i := range waiters {
         out[i] = waiters[i]
@@ -253,14 +223,16 @@ func (s *srvcSupervisor) fanOut() {
 
     for {
         select {
-            case <-s.stoppedC:
+            case <-s.stoppedC: {
                 log.Debugf("[SUPERVISOR] fanOut should stop")
                 return
-            case event := <-s.eventsC:
+            }
+            case event := <-s.eventsC: {
                 waiters := s.getWaiters(event.Name)
                 for _, waiter := range waiters {
                     s.notifyWaiter(waiter, event)
                 }
+            }
         }
     }
 }
@@ -282,16 +254,11 @@ func (s *srvcSupervisor) runService(service Service) {
         ss.Lock()
         defer ss.Unlock()
 
-        // since named cycles don't have events associated, we don't need to clean up
-        if srv.isNamedCycle() {
-            return
-        }
-
         // cleanup events first
         swaiters := srv.getWaiters()
         for o := range swaiters {
             sw := swaiters[o]
-            awaiters := ss.eventWaiters[sw.name]
+            awaiters := ss.eventWaiters[sw.eventName]
             if len(awaiters) != 0 {
                 var nwaiters []*waiter = []*waiter{}
                 for i := range awaiters {
@@ -300,9 +267,9 @@ func (s *srvcSupervisor) runService(service Service) {
                         nwaiters = append(nwaiters, aw)
                     }
                 }
-                ss.eventWaiters[sw.name] = nwaiters
+                ss.eventWaiters[sw.eventName] = nwaiters
             }
-            log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] waiter [%s] cleaned", srv.Name(), srv, sw.name)
+            log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] waiter [%s] cleaned", srv.Tag(), srv, sw.eventName)
         }
 
         // cleanup service itself
@@ -317,28 +284,24 @@ func (s *srvcSupervisor) runService(service Service) {
         if err != nil {
             log.Debug(errors.WithStack(err))
         }
-        log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] removed", srv.Name(), srv)
+        log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] removed", srv.Tag(), srv)
     }
 
     s.serviceWG.Add(1)
     go func(ss *srvcSupervisor, wg *sync.WaitGroup, srv Service, cleanup func(as *srvcSupervisor, srv Service)) {
         defer wg.Done()
 
-        log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] started", srv.Name(), srv)
+        log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] started", srv.Tag(), srv)
 
         srv.setRunning()
-        residue, rerr := srv.serve()
-        if rerr != nil {
-            log.Debug(errors.WithStack(rerr))
+        err := srv.serve()
+        if err != nil {
+            log.Debug(errors.WithStack(err))
         }
         cleanup(ss, srv)
-        oerr := srv.onExit(residue, rerr)
-        if oerr != nil {
-            log.Debug(errors.WithStack(oerr))
-        }
         srv.setStopped()
 
-        log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] exited", srv.Name(), srv)
+        log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] exited", srv.Tag(), srv)
     }(s, s.serviceWG, service, serviceCleanup)
 }
 
@@ -346,30 +309,22 @@ func (s *srvcSupervisor) registerService(srv Service) error {
     s.Lock()
     defer s.Unlock()
 
-    // when a service is named, check if there is a service with the same name
-    if srv.isNamedCycle() {
-        for _, es := range s.services {
-            if srv.Name() == es.Name() {
-                return errors.Errorf("[ERR] a service with the same name '%s' exists", srv.Name())
-            }
-        }
-    }
     s.services = append(s.services, srv)
 
-    log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] added", srv.Name(), srv)
+    log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] added", srv.Tag(), srv)
 
-    if s.state == stateStarted && !srv.isNamedCycle() {
+    if s.state == stateStarted {
         s.runService(srv)
     }
     return nil
 }
 
-func (s *srvcSupervisor) RegisterServiceWithFuncs(sfn serveFunc, efn onExitFunc, options... ServiceOption) error {
+func (s *srvcSupervisor) RegisterServiceWithFuncs(tag string, sfn serveFunc, options... ServiceOption) error {
     srv := &srvcFuncs {
-        state:         serviceStopped,
-        waiters:       []*waiter{},
-        serveFunc:     sfn,
-        onExitFunc:    efn,
+        tag:          tag,
+        state:        serviceStopped,
+        waiters:      []*waiter{},
+        serveFunc:    sfn,
     }
 
     for _, opt := range options {
@@ -379,16 +334,6 @@ func (s *srvcSupervisor) RegisterServiceWithFuncs(sfn serveFunc, efn onExitFunc,
     }
 
     return s.registerService(srv)
-}
-
-func (s *srvcSupervisor) RegisterNamedServiceWithFuncs(name string, sfn serveFunc, efn onExitFunc) error {
-    return s.registerService(&srvcFuncs {
-        name:          name,
-        state:         serviceStopped,
-//        waiters:       []*waiter{},
-        serveFunc:     sfn,
-        onExitFunc:    efn,
-    })
 }
 
 func (s *srvcSupervisor) IsStopped() bool {
@@ -424,37 +369,9 @@ func (s *srvcSupervisor) StartServices() error {
     }
 
     for _, srv := range s.services {
-        if !srv.isNamedCycle() {
-            s.runService(srv)
-        }
+        s.runService(srv)
     }
-
     return nil
-}
-
-func (s *srvcSupervisor) RunNamedService(name string) error {
-    s.Lock()
-    defer s.Unlock()
-    if s.state != stateStarted {
-        return nil
-    }
-
-    if len(name) == 0 {
-        return errors.Errorf("[ERR] cannot find a service without name")
-    }
-
-    for _, srv := range s.services {
-        if srv.isNamedCycle() && srv.Name() == name {
-            if !srv.IsRunning() {
-                s.runService(srv)
-                return nil
-            } else {
-                return ServiceRunning
-            }
-        }
-    }
-
-    return errors.Errorf("[ERR] cannot find a service named %s", name)
 }
 
 func (s *srvcSupervisor) StopServices() error {
