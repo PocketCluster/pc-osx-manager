@@ -176,7 +176,7 @@ type ServiceSupervisor interface {
 func NewServiceSupervisor() ServiceSupervisor {
     return &srvcSupervisor{
         state:           stateStopped,
-        waitSync:        sync.WaitGroup{},
+        waitSync:        &sync.WaitGroup{},
         services:        []Service{},
 
         eventsC:         make(chan Event, broadcastChannelSize),
@@ -190,7 +190,7 @@ type srvcSupervisor struct {
     sync.Mutex
     state           int
 
-    waitSync        sync.WaitGroup
+    waitSync        *sync.WaitGroup
     services        []Service
 
     eventWaiters    map[string][]*waiter
@@ -288,8 +288,7 @@ func (s *srvcSupervisor) runService(service Service) {
             log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] removed", srv.Tag(), srv)
         }
         // this runs service
-        srvcRunner = func(ss *srvcSupervisor, srv Service, cleanup func(as *srvcSupervisor, srv Service)) {
-            defer ss.waitSync.Done()
+        srvcRunner = func(ss *srvcSupervisor, waitSync *sync.WaitGroup, srv Service, cleanup func(as *srvcSupervisor, srv Service)) {
 
             log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] started", srv.Tag(), srv)
 
@@ -300,13 +299,14 @@ func (s *srvcSupervisor) runService(service Service) {
             }
             cleanup(ss, srv)
             srv.setStopped()
+            waitSync.Done()
 
             log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] exited", srv.Tag(), srv)
         }
     )
 
     s.waitSync.Add(1)
-    go srvcRunner(s, service, srvcCleanup)
+    go srvcRunner(s, s.waitSync, service, srvcCleanup)
 }
 
 func (s *srvcSupervisor) registerService(srv Service) error {
@@ -412,7 +412,7 @@ func (p *srvcSupervisor) Refresh() error {
     p.waitSync.Wait()
 
     // reset
-    p.waitSync     = sync.WaitGroup{}
+    p.waitSync     = &sync.WaitGroup{}
     p.eventsC      = make(chan Event, broadcastChannelSize)
     p.eventWaiters = make(map[string][]*waiter)
     p.stoppedC     = make(chan struct{})
