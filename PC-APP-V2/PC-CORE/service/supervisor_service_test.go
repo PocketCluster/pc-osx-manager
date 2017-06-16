@@ -173,3 +173,43 @@ func (s *SupervisorSuite) Test_Services_Sycned_Stop(c *C) {
     close(exitLatch1)
     close(exitLatch2)
 }
+
+
+func (s *SupervisorSuite) Test_Services_Iteration(c *C) {
+    var(
+        eventLatch   = make(chan string)
+        exitLatch   = make(chan string)
+    )
+    // start services
+    err := s.app.StartServices()
+    c.Assert(err, IsNil)
+
+    for i := 0; i < 5; i++ {
+        //register named service1
+        err = s.app.RegisterServiceWithFuncs(
+            testService1,
+            func() error {
+                for {
+                    select {
+                        case e := <- eventLatch:
+                            exitLatch <- e
+                            return nil
+                        default:
+                    }
+                }
+            })
+        c.Assert(err, IsNil)
+        c.Assert(s.app.serviceCount(), Equals, 1)
+
+        eventLatch <- testValue1
+        c.Check(<-exitLatch, Equals, testValue1)
+
+        time.Sleep(time.Second)
+        c.Assert(s.app.serviceCount(), Equals, 0)
+    }
+
+    // stop service
+    c.Assert(s.app.serviceCount(), Equals, 0)
+    err = s.app.StopServices()
+    c.Assert(err, IsNil)
+}
