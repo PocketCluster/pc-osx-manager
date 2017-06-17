@@ -2,9 +2,6 @@ package main
 
 import "C"
 import (
-    "time"
-    "sync"
-
     log "github.com/Sirupsen/logrus"
     tembed "github.com/gravitational/teleport/embed"
 
@@ -13,7 +10,6 @@ import (
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
-    regisrv "github.com/stkim1/pc-core/extlib/registry"
 )
 
 func main() {
@@ -22,15 +18,8 @@ func main() {
 
         var (
             config *serviceConfig = nil
-            regiProc *regisrv.PocketRegistry = nil
             err error = nil
-
-            srvWaiter sync.WaitGroup
         )
-
-        go func(wg *sync.WaitGroup) {
-            wg.Wait()
-        }(&srvWaiter)
 
         for e := range a.Events() {
             switch e := a.Filter(e).(type) {
@@ -169,28 +158,21 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
 
+
+
                     /// REGISTRY ///
 
                     case operation.CmdRegistryStart: {
+                        err = initRegistryService(a, config.regConfig)
+                        if err != nil {
+                            log.Debug(err)
+                            return
+                        }
+                        a.StartServices()
                         log.Debugf("[OP] %v", e.String())
-                        regiProc, err = regisrv.NewPocketRegistry(config.regConfig)
-                        if err != nil {
-                            log.Debugf("[ERR] " + err.Error())
-                        }
-                        srvWaiter.Add(1)
-                        err = regiProc.StartOnWaitGroup(&srvWaiter)
-                        if err != nil {
-                            log.Debugf("[ERR] " + err.Error())
-                        }
                     }
                     case operation.CmdRegistryStop: {
-/*
-                        err = regiProc.Close()
-                        if err != nil {
-                            log.Debugf("[ERR] " + err.Error())
-                        }
-*/
-                        regiProc.Stop(time.Second)
+                        a.StopServices()
                         log.Debugf("[OP] %v", e.String())
                     }
 

@@ -9,6 +9,7 @@ import (
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
+    "github.com/stkim1/pc-core/extlib/registry"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/event/operation"
 )
@@ -137,5 +138,26 @@ func initStorageServie(a *mainLife, config *embed.PocketConfig) error {
             return nil
         })
 
+    return nil
+}
+
+func initRegistryService(a *mainLife, config *registry.PocketRegistryConfig) error {
+    a.RegisterServiceWithFuncs(
+        operation.ServiceContainerRegistry,
+        func() error {
+            reg, err := registry.NewPocketRegistry(config)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            err = reg.Start()
+            if err != nil {
+                return errors.WithStack(err)
+            }
+
+            // wait for service to stop
+            <- a.StopChannel()
+            reg.Stop(time.Second)
+            return nil
+        })
     return nil
 }

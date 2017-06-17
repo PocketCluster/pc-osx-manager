@@ -113,12 +113,14 @@ func (r *PocketRegistry) Start() (error) {
 
     ln = tls.NewListener(ln, config.tlsConfig)
     context.GetLogger(r.app).Infof("listening on %v, tls", ln.Addr())
-    go func() {
-        var err = r.server.Serve(ln)
+
+    // start serving
+    go func(srv *graceful.Server, l net.Listener) {
+        var err = srv.Serve(l)
         if err != nil {
             log.Println("HTTP Server Error - ", err)
         }
-    }()
+    }(r.server, ln)
 
     r.listener = ln
     return nil

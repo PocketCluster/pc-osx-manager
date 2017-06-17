@@ -14,6 +14,7 @@ const(
     ServiceSwarmEmbeddedServer string    = "service.swarm.embedded.server"
     ServiceSwarmEmbeddedOperation string = "service.swarm.embedded.operation"
     ServiceStorageProcess string         = "service.storage.process"
+    ServiceContainerRegistry string      = "service.container.registry"
 )
 
 const (

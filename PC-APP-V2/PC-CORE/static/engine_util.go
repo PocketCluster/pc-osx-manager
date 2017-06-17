@@ -11,7 +11,7 @@ import (
 
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/model"
-    regisrv "github.com/stkim1/pc-core/extlib/registry"
+    "github.com/stkim1/pc-core/extlib/registry"
 )
 
 func setLogger(debug bool) {
@@ -28,7 +28,7 @@ func setLogger(debug bool) {
 type serviceConfig struct {
     etcdConfig     *embed.PocketConfig
     teleConfig     *tervice.PocketConfig
-    regConfig      *regisrv.PocketRegistryConfig
+    regConfig      *registry.PocketRegistryConfig
 }
 
 func setupServiceConfig() (*serviceConfig, error) {
@@ -113,7 +113,7 @@ func setupServiceConfig() (*serviceConfig, error) {
 
     // registry configuration
     // TODO : fix datadir. Plus, is it ok not to pass CA pub key? we need to unify TLS configuration
-    regCfg, err := regisrv.NewPocketRegistryConfig(false, dataDir, hostBundle.Certificate, hostBundle.PrivateKey)
+    regCfg, err := registry.NewPocketRegistryConfig(false, dataDir, hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
         log.Debugf(err.Error())
         return nil, errors.WithStack(err)
