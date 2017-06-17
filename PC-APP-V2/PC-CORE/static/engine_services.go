@@ -1,9 +1,11 @@
 package main
 
 import (
+    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+    "github.com/coreos/etcd/embed"
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
@@ -101,6 +103,39 @@ func initBeaconLoator(a *mainLife) error {
     return nil
 }
 
-func initStorageServie(a *mainLife) error {
+func initStorageServie(a *mainLife, config *embed.PocketConfig) error {
+    a.RegisterServiceWithFuncs(
+        operation.ServiceStorageProcess,
+        func() error {
+            etcd, err := embed.StartPocketEtcd(config)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            // startup preps
+            select {
+                case <-etcd.Server.ReadyNotify(): {
+                    log.Printf("[ETCD] server is ready to run")
+                }
+                case <-time.After(120 * time.Second): {
+                    etcd.Server.Stop() // trigger a shutdown
+                    return errors.Errorf("[ETCD] Server took too long to start!")
+                }
+            }
+            // until server goes down, errors and stop signal will be constantly checked
+            for {
+                select {
+                    case err = <-etcd.Err(): {
+                        log.Printf("[ETCD] error : %v", err)
+                    }
+                    case <- a.StopChannel(): {
+                        etcd.Close()
+                        log.Printf("[ETCD] server shuts down")
+                        return nil
+                    }
+                }
+            }
+            return nil
+        })
 
+    return nil
 }

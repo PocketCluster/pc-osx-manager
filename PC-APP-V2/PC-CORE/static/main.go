@@ -6,7 +6,6 @@ import (
     "sync"
 
     log "github.com/Sirupsen/logrus"
-    "github.com/coreos/etcd/embed"
     tembed "github.com/gravitational/teleport/embed"
 
     "github.com/stkim1/pc-core/context"
@@ -115,6 +114,14 @@ func main() {
                     /// BASE OPERATION ///
 
                     case operation.CmdBaseServiceStart: {
+
+                        // storage service
+                        err = initStorageServie(a, config.etcdConfig)
+                        if err != nil {
+                            log.Debug(err)
+                            return
+                        }
+
                         // teleport service added
                         _, err = tembed.NewEmbeddedCoreProcess(a.ServiceSupervisor, config.teleConfig)
                         if err != nil {
@@ -190,36 +197,17 @@ func main() {
                     /// STORAGE ///
 
                     case operation.CmdStorageStart: {
-                        log.Debugf("[OP] %v", e.String())
-/*
-                        etcdProc, err = embed.StartPocketEtcd(serviceConfig.etcdConfig)
+                        err = initStorageServie(a, config.etcdConfig)
                         if err != nil {
-                            log.Debugf("[ERR] " + err.Error())
+                            log.Debug(err)
+                            return
                         }
-                        etcdProc.Server.Start()
-*/
-                        srvWaiter.Add(1)
-                        go func() {
-                            defer srvWaiter.Done()
-                            e, err := embed.StartPocketEtcd(config.etcdConfig)
-                            if err != nil {
-                                log.Debugf(err.Error())
-                                return
-                            }
-                            defer e.Close()
-                            select {
-                            case <-e.Server.ReadyNotify():
-                                log.Printf("Server is ready!")
-                            case <-time.After(60 * time.Second):
-                                e.Server.Stop() // trigger a shutdown
-                                log.Printf("Server took too long to start!")
-                            }
-                            log.Fatal(<-e.Err())
-                        }()
+                        a.StartServices()
+                        log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdStorageStop: {
+                        a.StopServices()
                         log.Debugf("[OP] %v", e.String())
-//                        etcdProc.Server.Stop()
                     }
 
 /*
@@ -246,8 +234,6 @@ func main() {
                     case operation.CmdTeleportUserAdd: {
 
                     }
-
-
 
                     default:
                         log.Debug("[OP-ERROR] THIS SHOULD NOT HAPPEN %v", e.String())

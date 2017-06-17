@@ -13,6 +13,7 @@ const(
     ServiceBeaconMaster string           = "service.beacon.master"
     ServiceSwarmEmbeddedServer string    = "service.swarm.embedded.server"
     ServiceSwarmEmbeddedOperation string = "service.swarm.embedded.operation"
+    ServiceStorageProcess string         = "service.storage.process"
 )
 
 const (
