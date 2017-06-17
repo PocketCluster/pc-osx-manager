@@ -6,6 +6,7 @@ import (
 
     . "gopkg.in/check.v1"
     log "github.com/Sirupsen/logrus"
+    "fmt"
 )
 
 const (
@@ -199,4 +200,51 @@ func (s *SupervisorSuite) Test_Services_Iteration(c *C) {
     c.Assert(s.app.serviceCount(), Equals, 0)
     err = s.app.StopServices()
     c.Assert(err, IsNil)
+}
+
+func (s *SupervisorSuite) Test_Supervisor_Iteration(c *C) {
+    var(
+        eventLatch  = make(chan string)
+        err error   = nil
+    )
+    for i := 0; i < 5; i++ {
+        // start services
+        err = s.app.StartServices()
+        c.Assert(err, IsNil)
+
+        //register named service1
+        var (
+            eventC = make(chan Event)
+            serviceTag = fmt.Sprintf("test_service%d",i)
+        )
+        err = s.app.RegisterServiceWithFuncs(
+            serviceTag,
+            func() error {
+                for {
+                    select {
+                        case e := <- eventC:
+                            eventLatch <- e.Payload.(string)
+                        case <- s.app.StopChannel():
+                            return nil
+                        default:
+                    }
+                }
+            },
+            BindEventWithService(testEvent1, eventC))
+        c.Assert(err, IsNil)
+        c.Assert(s.app.serviceCount(), Equals, 1)
+
+        // event check
+        s.app.BroadcastEvent(Event{Name:testEvent1, Payload:testValue1})
+        c.Check(<-eventLatch, Equals, testValue1)
+
+        // stop service
+        err = s.app.StopServices()
+        c.Assert(err, IsNil)
+
+        // cleanup check
+        time.Sleep(time.Second)
+        c.Assert(s.app.serviceCount(), Equals, 0)
+    }
+    close(eventLatch)
 }
