@@ -115,7 +115,7 @@ func initStorageServie(a *mainLife, config *embed.PocketConfig) error {
             // startup preps
             select {
                 case <-etcd.Server.ReadyNotify(): {
-                    log.Printf("[ETCD] server is ready to run")
+                    log.Debugf("[ETCD] server is ready to run")
                 }
                 case <-time.After(120 * time.Second): {
                     etcd.Server.Stop() // trigger a shutdown
@@ -126,11 +126,11 @@ func initStorageServie(a *mainLife, config *embed.PocketConfig) error {
             for {
                 select {
                     case err = <-etcd.Err(): {
-                        log.Printf("[ETCD] error : %v", err)
+                        log.Debugf("[ETCD] error : %v", err)
                     }
                     case <- a.StopChannel(): {
                         etcd.Close()
-                        log.Printf("[ETCD] server shuts down")
+                        log.Debugf("[ETCD] server shuts down")
                         return nil
                     }
                 }
@@ -153,10 +153,12 @@ func initRegistryService(a *mainLife, config *registry.PocketRegistryConfig) err
             if err != nil {
                 return errors.WithStack(err)
             }
+            log.Debugf("[REGISTRY] server start successful")
 
             // wait for service to stop
             <- a.StopChannel()
             reg.Stop(time.Second)
+            log.Debugf("[REGISTRY] server exit")
             return nil
         })
     return nil

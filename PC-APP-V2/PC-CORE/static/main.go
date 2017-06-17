@@ -111,6 +111,13 @@ func main() {
                             return
                         }
 
+                        // registry
+                        err = initRegistryService(a, config.regConfig)
+                        if err != nil {
+                            log.Debug(err)
+                            return
+                        }
+
                         // teleport service added
                         _, err = tembed.NewEmbeddedCoreProcess(a.ServiceSupervisor, config.teleConfig)
                         if err != nil {
