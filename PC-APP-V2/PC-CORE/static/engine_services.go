@@ -100,3 +100,7 @@ func initBeaconLoator(a *mainLife) error {
 
     return nil
 }
+
+func initStorageServie(a *mainLife) error {
+
+}
