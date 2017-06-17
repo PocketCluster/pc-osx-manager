@@ -14,7 +14,6 @@ import (
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
-    "github.com/stkim1/pc-core/service"
     regisrv "github.com/stkim1/pc-core/extlib/registry"
 )
 
@@ -23,8 +22,7 @@ func main() {
     mainLifeCycle(func(a *mainLife) {
 
         var (
-            serviceConfig *serviceConfig = nil
-            teleProc *tembed.EmbeddedCoreProcess = nil
+            config *serviceConfig = nil
             regiProc *regisrv.PocketRegistry = nil
             err error = nil
 
@@ -52,12 +50,11 @@ func main() {
                     switch e.Crosses(lifecycle.StageAlive) {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is now alive %v", e.String())
-                            log.Debugf("[PREP] PREPARING GOLANG CONTEXT")
-                            serviceConfig, err = setupServiceConfig()
+                            config, err = setupServiceConfig()
                             if err != nil {
                                 // TODO send error report
                             }
-                            FeedSend("successfully initiated engine ..." + serviceConfig.teleConfig.HostUUID)
+                            FeedSend("successfully initiated engine ..." + config.teleConfig.HostUUID)
                         }
                         case lifecycle.CrossOff: {
                             log.Debugf("[LIFE] app is inactive %v", e.String())
@@ -102,11 +99,11 @@ func main() {
 
                 case crash.Crash: {
                     switch e.Reason {
-                    case crash.CrashEmergentExit: {
-                        log.Printf("[CRASH] COCOA SIDE RUNTIME IS DESTORYED. WE NEED TO CLOSE GOLANG SIDE AS WELL. %v", e.String())
-                    }
-                    default:
-                        log.Printf("crash! %v", e.String())
+                        case crash.CrashEmergentExit: {
+                            log.Printf("[CRASH] COCOA SIDE RUNTIME IS DESTORYED. WE NEED TO CLOSE GOLANG SIDE AS WELL. %v", e.String())
+                        }
+                        default:
+                            log.Printf("crash! %v", e.String())
                     }
                 }
 
@@ -115,66 +112,53 @@ func main() {
                 case operation.Operation: {
                     switch e.Command {
 
-                    /// BEACON ///
+                    /// BASE OPERATION ///
 
-                    case operation.CmdBeaconStart: {
+                    case operation.CmdBaseServiceStart: {
+                        // teleport service added
+                        _, err = tembed.NewEmbeddedCoreProcess(a.ServiceSupervisor, config.teleConfig)
+                        if err != nil {
+                            log.Debug(err)
+                            return
+                        }
+
+                        // beacon service added
                         cid, err := context.SharedHostContext().MasterAgentName()
                         if err != nil {
                             log.Debug(err)
+                            return
                         }
 
                         err = initSearchCatcher(a)
                         if err != nil {
                             log.Debug(err)
+                            return
                         }
 
                         err = initBeaconLoator(a)
                         if err != nil {
                             log.Debug(err)
+                            return
                         }
 
                         err = initSwarmService(a)
                         if err != nil {
                             log.Debug(err)
+                            return
                         }
 
-                        err = initMasterBeaconService(a, cid, serviceConfig.teleConfig)
+                        err = initMasterBeaconService(a, cid, config.teleConfig)
                         if err != nil {
                             log.Debug(err)
+                            return
                         }
 
                         a.StartServices()
                         log.Debugf("[OP] %v", e.String())
                     }
 
-                    case operation.CmdBeaconStop: {
+                    case operation.CmdBaseServiceStop: {
                         a.StopServices()
-                        log.Debugf("[OP] %v", e.String())
-                    }
-
-                    /// TELEPORT ///
-
-                    case operation.CmdTeleportStart: {
-                        log.Debugf("[OP] %v", e.String())
-
-                        teleProc, err = tembed.NewEmbeddedCoreProcess(a.ServiceSupervisor, serviceConfig.teleConfig)
-                        if err != nil {
-                            log.Debugf("[ERR] " + err.Error())
-                        }
-                        err = teleProc.StartServices()
-                        if err != nil {
-                            log.Debugf("[ERR] " + err.Error())
-                        }
-                    }
-                    case operation.CmdTeleportStop: {
-                        err = teleProc.StopServices()
-                        if err != nil {
-                            log.Debugf("[ERR] " + err.Error())
-                        }
-                        //err = teleProc.Wait()
-                        if err != nil {
-                            log.Debugf("[ERR] " + err.Error())
-                        }
                         log.Debugf("[OP] %v", e.String())
                     }
 
@@ -182,7 +166,7 @@ func main() {
 
                     case operation.CmdRegistryStart: {
                         log.Debugf("[OP] %v", e.String())
-                        regiProc, err = regisrv.NewPocketRegistry(serviceConfig.regConfig)
+                        regiProc, err = regisrv.NewPocketRegistry(config.regConfig)
                         if err != nil {
                             log.Debugf("[ERR] " + err.Error())
                         }
@@ -217,7 +201,7 @@ func main() {
                         srvWaiter.Add(1)
                         go func() {
                             defer srvWaiter.Done()
-                            e, err := embed.StartPocketEtcd(serviceConfig.etcdConfig)
+                            e, err := embed.StartPocketEtcd(config.etcdConfig)
                             if err != nil {
                                 log.Debugf(err.Error())
                                 return
@@ -238,56 +222,9 @@ func main() {
 //                        etcdProc.Server.Stop()
                     }
 
-
-                    case operation.CmdServiceBundleStart: {
-                        eventC := make(chan service.Event)
-                        a.RegisterServiceWithFuncs(
-                            "TEST SERV 1",
-                            func() error {
-                                defer log.Debugf("[TEST SERV 1] -- SERVICE 1 ENDED --")
-                                log.Debugf("[TEST SERV 1] test for-select loop started...")
-
-                                for {
-                                    select {
-                                        case <- a.StopChannel():
-                                            log.Debugf("[TEST SERV 1] [TEST 1 STOPPING]")
-                                            return nil
-                                        case <- eventC:
-                                            log.Debugf("[TEST SERV 1] new Event received...")
-                                    }
-                                }
-                                return nil
-                            },
-                            service.BindEventWithService("TEST_EVENT", eventC))
-
-                        a.RegisterServiceWithFuncs(
-                            "TEST SERV 2",
-                            func() error {
-                                defer log.Debugf("[TEST SERV 2] -- SERVICE 2 ENDED --")
-                                log.Debugf("[TEST SERV 2] test started")
-
-                                for {
-                                    if a.IsStopped() {
-                                        log.Debugf("[TEST SERV 2] [TEST 2 STOPPING]")
-                                        return nil
-                                    }
-
-                                    a.BroadcastEvent(service.Event{Name:"TEST_EVENT"})
-
-                                    time.Sleep(time.Second)
-                                }
-                                return nil
-                            })
-                        a.StartServices()
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdServiceBundleStop: {
-                        a.StopServices()
-                        log.Debugf("[OP] %v", e.String())
-                    }
-
+/*
                     case operation.CmdTeleportNodeAdd: {
-                        clt, err := tembed.OpenAdminClientWithAuthService(serviceConfig.teleConfig)
+                        clt, err := tembed.OpenAdminClientWithAuthService(config.teleConfig)
                         if err != nil {
                             log.Error(err.Error())
                         }
@@ -302,6 +239,7 @@ func main() {
                         log.Debugf("TELEPORT NODE ADDED FOR TOKEN : %s", token)
                         log.Debugf("[OP] %v", e.String())
                     }
+*/
                     case operation.CmdTeleportRootAdd: {
 
                     }

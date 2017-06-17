@@ -86,27 +86,17 @@ extern "C" {
 #endif
 
 
-extern void OpsCmdTeleportStart();
+extern void OpsCmdBaseServiceStart();
 
-extern void OpsCmdTeleportStop();
-
-extern void OpsCmdRegistryStart();
-
-extern void OpsCmdRegistryStop();
+extern void OpsCmdBaseServiceStop();
 
 extern void OpsCmdStorageStart();
 
 extern void OpsCmdStorageStop();
 
-extern void OpsCmdBeaconStart();
+extern void OpsCmdRegistryStart();
 
-extern void OpsCmdBeaconStop();
-
-extern void OpsCmdServiceBundleStart();
-
-extern void OpsCmdServiceBundleStop();
-
-extern void OpsCmdTeleportNodeAdd();
+extern void OpsCmdRegistryStop();
 
 extern void OpsCmdTeleportRootAdd();
 
