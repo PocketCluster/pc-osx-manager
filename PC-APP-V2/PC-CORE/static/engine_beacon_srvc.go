@@ -145,7 +145,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
             return nil
         },
         service.BindEventWithService(ucast.EventBeaconCoreReadLocation, beaconC),
-        service.BindEventWithService(eventBeaconCoreReadSearch, searchC))
+        service.BindEventWithService(mcast.EventBeaconCoreReadSearch, searchC))
 
     return nil
 }

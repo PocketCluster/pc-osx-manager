@@ -2,21 +2,26 @@ package mcast
 
 import (
     "net"
-    "sync"
+    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+
+    "github.com/stkim1/pc-core/service"
+    "github.com/stkim1/pc-core/event/operation"
+)
+
+const (
+    EventBeaconCoreReadSearch string         = "event.beacon.core.read.search"
+    iventBeaconCoreSearchCatcherClose string = "ivent.beacon.core.search.catcher.close"
 )
 
 type SearchCatcher struct {
-    isClosed     bool
-    waiter       sync.WaitGroup
-
+    service.ServiceSupervisor
     conn         *net.UDPConn
-    ChRead       chan CastPack
 }
 
-func NewSearchCatcher(niface string) (*SearchCatcher, error) {
+func NewSearchCatcher(sup service.ServiceSupervisor, niface string) (*SearchCatcher, error) {
     iface, err := net.InterfaceByName(niface)
     if err != nil {
         log.Error(err)
@@ -28,60 +33,65 @@ func NewSearchCatcher(niface string) (*SearchCatcher, error) {
     }
     conn.SetReadBuffer(PC_MAX_MCAST_UDP_BUF_SIZE)
     listener := &SearchCatcher{
-        isClosed:    false,
-        conn:        conn,
-        ChRead:      make(chan CastPack),
+        ServiceSupervisor:    sup,
+        conn:                 conn,
     }
-    listener.waiter.Add(1)
-    go listener.read()
+    listener.read()
     return listener, nil
 }
 
 // Close is used to cleanup the client
-func (sl *SearchCatcher) Close() error {
-    if sl.isClosed {
-        return nil
-    }
-    sl.isClosed = true
-    err := sl.conn.Close()
-    sl.waiter.Wait()
-    close(sl.ChRead)
-    return err
+func (s *SearchCatcher) Close() error {
+    s.BroadcastEvent(service.Event{Name:iventBeaconCoreSearchCatcherClose})
+    return nil
 }
 
-func (sl *SearchCatcher) read() {
+func (s *SearchCatcher) read() {
     var (
-        buff []byte            = make([]byte, PC_MAX_MCAST_UDP_BUF_SIZE)
-        addr *net.UDPAddr      = nil
-        err error              = nil
-        count int              = 0
+        closedC = make(chan service.Event)
     )
+    s.RegisterServiceWithFuncs(
+        operation.ServiceBeaconCatcher,
+        func() error {
+            var (
+                buff []byte          = make([]byte, PC_MAX_MCAST_UDP_BUF_SIZE)
+                addr *net.UDPAddr    = nil
+                err error            = nil
+                count int            = 0
+            )
+            for {
+                select {
+                    case <-s.StopChannel(): {
+                        err = s.conn.Close()
+                        return errors.WithStack(err)
+                    }
+                    case <- closedC: {
+                        err = s.conn.Close()
+                        return errors.WithStack(err)
+                    }
+                    default: {
+                        /*** Set a deadline for reading. Read operation will fail if no data is received after deadline. ***/
+                        err = s.conn.SetReadDeadline(time.Now().Add(readTimeout))
+                        if err != nil {
+                            continue
+                        }
 
-    copyUDPAddr := func(adr *net.UDPAddr) net.UDPAddr {
-        lenIP := len(adr.IP)
-        ip := make([]byte, lenIP)
-        copy(ip, adr.IP)
-        zone := string([]byte(adr.Zone))
+                        count, addr, err = s.conn.ReadFromUDP(buff)
+                        if err != nil {
+                            continue
+                        }
+                        if count == 0 {
+                            continue
+                        }
+                        adr := copyUDPAddr(addr)
+                        msg := make([]byte, count)
+                        copy(msg, buff[:count])
+                        s.BroadcastEvent(service.Event{Name:EventBeaconCoreReadSearch, Payload:CastPack{Address:adr, Message:msg}})
+                    }
+                }
+            }
 
-        return net.UDPAddr {
-            IP:     ip,
-            Port:   adr.Port,
-            Zone:   zone,
-        }
-    }
-
-    for !sl.isClosed {
-        /*** Set a deadline for reading. Read operation will fail if no data is received after deadline. ***/
-        //sl.conn.SetReadDeadline(time.Now().Add(readTimeout))
-
-        count, addr, err = sl.conn.ReadFromUDP(buff)
-        if err != nil {
-            continue
-        }
-        adr := copyUDPAddr(addr)
-        msg := make([]byte, count)
-        copy(msg, buff[:count])
-        sl.ChRead <- CastPack{Address:adr, Message:msg}
-    }
-    sl.waiter.Done()
+            return nil
+        },
+        service.BindEventWithService(iventBeaconCoreSearchCatcherClose, closedC))
 }

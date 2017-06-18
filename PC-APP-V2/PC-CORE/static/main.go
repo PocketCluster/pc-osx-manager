@@ -5,6 +5,7 @@ import (
     log "github.com/Sirupsen/logrus"
     tembed "github.com/gravitational/teleport/embed"
     "github.com/stkim1/udpnet/ucast"
+    "github.com/stkim1/udpnet/mcast"
 
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/event/lifecycle"
@@ -120,6 +121,7 @@ func main() {
                         }
 
                         // teleport service added
+                        // TODO : need to hold teleport instance from GC
                         _, err = tembed.NewEmbeddedCoreProcess(a.ServiceSupervisor, config.teleConfig)
                         if err != nil {
                             log.Debug(err)
@@ -133,12 +135,15 @@ func main() {
                             return
                         }
 
-                        err = initSearchCatcher(a)
+                        // TODO : use network interface
+                        // TODO : need to catcher instance from GC
+                        _, err = mcast.NewSearchCatcher(a.ServiceSupervisor, "en0")
                         if err != nil {
                             log.Debug(err)
                             return
                         }
 
+                        // TODO : need to hold beacon instance from GC
                         _, err = ucast.NewBeaconLocator(a.ServiceSupervisor)
                         if err != nil {
                             log.Debug(err)

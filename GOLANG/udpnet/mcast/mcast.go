@@ -41,3 +41,16 @@ type (
         Timeout     time.Duration
     }
 )
+
+func copyUDPAddr(adr *net.UDPAddr) net.UDPAddr {
+    lenIP := len(adr.IP)
+    ip := make([]byte, lenIP)
+    copy(ip, adr.IP)
+    zone := string([]byte(adr.Zone))
+
+    return net.UDPAddr {
+        IP:     ip,
+        Port:   adr.Port,
+        Zone:   zone,
+    }
+}

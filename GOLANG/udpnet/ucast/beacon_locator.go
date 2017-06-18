@@ -12,9 +12,9 @@ import (
 )
 
 const (
-    EventBeaconCoreReadLocation string        = "event.beacon.core.read.location"
-    EventBeaconCoreWriteLocation string       = "event.beacon.core.write.location"
-    iventBeaconCoreServiceTermination string  = "ivent.beacon.core.service.termination"
+    EventBeaconCoreReadLocation string  = "event.beacon.core.read.location"
+    EventBeaconCoreWriteLocation string = "event.beacon.core.write.location"
+    iventBeaconCoreServiceClose string  = "ivent.beacon.core.service.close"
 )
 
 type BeaconLocator struct {
@@ -41,7 +41,7 @@ func NewBeaconLocator(sup service.ServiceSupervisor) (*BeaconLocator, error) {
 
 // Close is used to cleanup the client
 func (lc *BeaconLocator) Close() error {
-    lc.BroadcastEvent(service.Event{Name:iventBeaconCoreServiceTermination})
+    lc.BroadcastEvent(service.Event{Name:iventBeaconCoreServiceClose})
     return nil
 }
 
@@ -54,10 +54,10 @@ func (b *BeaconLocator) read() {
         func() error {
 
             var (
-                buff []byte            = make([]byte, PC_MAX_UCAST_UDP_BUF_SIZE)
-                addr *net.UDPAddr      = nil
-                err error              = nil
-                count int              = 0
+                buff []byte          = make([]byte, PC_MAX_UCAST_UDP_BUF_SIZE)
+                addr *net.UDPAddr    = nil
+                err error            = nil
+                count int            = 0
             )
 
             for {
@@ -78,11 +78,9 @@ func (b *BeaconLocator) read() {
                         }
                         count, addr, err = b.conn.ReadFromUDP(buff)
                         if err != nil {
-                            //log.Debugf("[ERR] beacon locator read error : %v", errors.WithStack(err))
                             continue
                         }
                         if count == 0 {
-                            //log.Debugf("[ERR] empty Beacon locator message")
                             continue
                         }
                         adr := copyUDPAddr(addr)
@@ -93,7 +91,7 @@ func (b *BeaconLocator) read() {
                 }
             }
         },
-        service.BindEventWithService(iventBeaconCoreServiceTermination, closedC))
+        service.BindEventWithService(iventBeaconCoreServiceClose, closedC))
 }
 
 func (b *BeaconLocator) write() {
@@ -138,6 +136,6 @@ func (b *BeaconLocator) write() {
                 }
             }
         },
-        service.BindEventWithService(iventBeaconCoreServiceTermination, closedC),
+        service.BindEventWithService(iventBeaconCoreServiceClose, closedC),
         service.BindEventWithService(EventBeaconCoreWriteLocation, eventC))
 }

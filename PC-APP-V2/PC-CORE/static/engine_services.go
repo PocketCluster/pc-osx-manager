@@ -7,46 +7,14 @@ import (
     "github.com/pkg/errors"
     "github.com/coreos/etcd/embed"
 
-    "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/pc-core/extlib/registry"
-    "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/event/operation"
 )
 
 const (
-    eventBeaconCoreReadSearch       = "event.beacon.core.read.search"
     iventBeaconManagerSpawn string  = "ivent.beacon.manager.spawn"
     iventSwarmInstanceSpawn string  = "ivent.swarm.instance.spawn"
 )
-
-func initSearchCatcher(a *mainLife) error {
-    // TODO : use network interface
-    catcher, err := mcast.NewSearchCatcher("en0")
-    if err != nil {
-        return errors.WithStack(err)
-    }
-
-    a.RegisterServiceWithFuncs(
-        operation.ServiceBeaconCatcher,
-        func() error {
-            log.Debugf("NewSearchCatcher :: MAIN BEGIN")
-            for {
-                select {
-                    case <-a.StopChannel(): {
-                        catcher.Close()
-                        log.Debugf("NewSearchCatcher :: MAIN CLOSE")
-                        return nil
-                    }
-                    case cp := <-catcher.ChRead: {
-                        a.BroadcastEvent(service.Event{Name:eventBeaconCoreReadSearch, Payload:cp})
-                    }
-                }
-            }
-            return nil
-        })
-
-    return nil
-}
 
 func initStorageServie(a *mainLife, config *embed.PocketConfig) error {
     a.RegisterServiceWithFuncs(
