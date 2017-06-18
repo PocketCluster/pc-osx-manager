@@ -4,6 +4,7 @@ import "C"
 import (
     log "github.com/Sirupsen/logrus"
     tembed "github.com/gravitational/teleport/embed"
+    "github.com/stkim1/udpnet/ucast"
 
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/event/lifecycle"
@@ -138,7 +139,7 @@ func main() {
                             return
                         }
 
-                        err = initBeaconLoator(a)
+                        _, err = ucast.NewBeaconLocator(a.ServiceSupervisor)
                         if err != nil {
                             log.Debug(err)
                             return

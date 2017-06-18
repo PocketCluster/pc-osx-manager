@@ -64,19 +64,6 @@ func (bc *BeaconAgent) reader() {
         count int            = 0
     )
 
-    copyUDPAddr := func(adr *net.UDPAddr) net.UDPAddr {
-        lenIP := len(adr.IP)
-        ip := make([]byte, lenIP)
-        copy(ip, adr.IP)
-        zone := string([]byte(adr.Zone))
-
-        return net.UDPAddr {
-            IP:     ip,
-            Port:   adr.Port,
-            Zone:   zone,
-        }
-    }
-
     for !bc.isClosed {
         // Set a deadline for reading. Read operation will fail if no data
         // is received after deadline.

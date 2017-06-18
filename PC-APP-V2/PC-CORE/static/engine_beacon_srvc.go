@@ -86,7 +86,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
                     func(host string, payload []byte) error {
                         log.Debugf("[BEACON-SEND-SLAVE] [%v] Host %v", time.Now(), host)
                         a.BroadcastEvent(service.Event{
-                            Name: eventBeaconCoreWriteLocation,
+                            Name: ucast.EventBeaconCoreWriteLocation,
                             Payload:ucast.BeaconSend{
                                 Host:       host,
                                 Payload:    payload,
@@ -100,7 +100,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
             }
 
             log.Debugf("[AGENT] starting agent service...")
-            a.BroadcastEvent(service.Event{Name:eventBeaconManagerSpawn, Payload:beaconMan})
+            a.BroadcastEvent(service.Event{Name:iventBeaconManagerSpawn, Payload:beaconMan})
             for {
                 select {
                     case <-a.StopChannel(): {
@@ -144,7 +144,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
             }
             return nil
         },
-        service.BindEventWithService(eventBeaconCoreReadLocation, beaconC),
+        service.BindEventWithService(ucast.EventBeaconCoreReadLocation, beaconC),
         service.BindEventWithService(eventBeaconCoreReadSearch, searchC))
 
     return nil
@@ -175,7 +175,7 @@ func initSwarmService(a *mainLife) error {
             }
             return nil
         },
-        service.BindEventWithService(eventSwarmInstanceSpawn, swarmSrvC))
+        service.BindEventWithService(iventSwarmInstanceSpawn, swarmSrvC))
 
     beaconManC := make(chan service.Event)
     a.RegisterServiceWithFuncs(
@@ -207,11 +207,11 @@ func initSwarmService(a *mainLife) error {
             if err != nil {
                 return errors.WithStack(err)
             }
-            a.BroadcastEvent(service.Event{Name:eventSwarmInstanceSpawn, Payload:swarmsrv})
+            a.BroadcastEvent(service.Event{Name:iventSwarmInstanceSpawn, Payload:swarmsrv})
             err = swarmsrv.ListenAndServeSingleHost()
             return errors.WithStack(err)
         },
-        service.BindEventWithService(eventBeaconManagerSpawn, beaconManC))
+        service.BindEventWithService(iventBeaconManagerSpawn, beaconManC))
 
     return nil
 }
