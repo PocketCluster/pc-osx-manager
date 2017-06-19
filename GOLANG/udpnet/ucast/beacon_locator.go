@@ -12,9 +12,9 @@ import (
 )
 
 const (
-    EventBeaconCoreReadLocation string  = "event.beacon.core.read.location"
-    EventBeaconCoreWriteLocation string = "event.beacon.core.write.location"
-    iventBeaconCoreServiceClose string  = "ivent.beacon.core.service.close"
+    EventBeaconCoreLocationReceive string = "event.beacon.core.location.receive"
+    EventBeaconCoreLocationSend string    = "event.beacon.core.location.send"
+    iventBeaconCoreServiceClose string    = "ivent.beacon.core.service.close"
 )
 
 type BeaconLocator struct {
@@ -86,7 +86,7 @@ func (b *BeaconLocator) read() {
                         adr := copyUDPAddr(addr)
                         msg := make([]byte, count)
                         copy(msg, buff[:count])
-                        b.BroadcastEvent(service.Event{Name:EventBeaconCoreReadLocation, Payload:BeaconPack{Address:adr,Message:msg}})
+                        b.BroadcastEvent(service.Event{Name:EventBeaconCoreLocationReceive, Payload:BeaconPack{Address:adr,Message:msg}})
                     }
                 }
             }
@@ -96,8 +96,8 @@ func (b *BeaconLocator) read() {
 
 func (b *BeaconLocator) write() {
     var (
-        closedC chan service.Event = make(chan service.Event)
         eventC  chan service.Event = make(chan service.Event)
+        closedC chan service.Event = make(chan service.Event)
     )
     b.RegisterServiceWithFuncs(
         operation.ServiceBeaconLocationWrite,
@@ -136,6 +136,6 @@ func (b *BeaconLocator) write() {
                 }
             }
         },
-        service.BindEventWithService(iventBeaconCoreServiceClose, closedC),
-        service.BindEventWithService(EventBeaconCoreWriteLocation, eventC))
+        service.BindEventWithService(EventBeaconCoreLocationSend, eventC),
+        service.BindEventWithService(iventBeaconCoreServiceClose,  closedC))
 }

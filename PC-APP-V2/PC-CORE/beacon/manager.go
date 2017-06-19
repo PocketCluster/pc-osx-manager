@@ -115,7 +115,7 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts tim
         return errors.WithStack(err)
     }
 
-    log.Debugf("[BEACON-FROM] %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
+    log.Debugf("[BEACON-RX] %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
 
     // this packet looks for something else
     if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != b.clusterID {

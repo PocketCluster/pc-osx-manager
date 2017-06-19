@@ -26,8 +26,6 @@ import (
 
 const (
     nodeServiceSearch  = "service_search"
-    nodeServiceBeacon  = "service_beacon"
-    nodeFeedbackBeacon = "feedback_beacon"
     nodeFeedbackDHCP   = "feedback_dhcp"
     dockerServiceUnit  = "docker.service"
 
@@ -123,60 +121,6 @@ func initSearchService(app service.AppSupervisor) error {
             return nil
         },
         service.BindEventWithService(nodeServiceSearch, eventsC),
-    )
-    return nil
-}
-
-func initBeaconService(app service.AppSupervisor) error {
-    beacon, err := ucast.NewBeaconAgent()
-    if err != nil {
-        return err
-    }
-
-    app.RegisterServiceWithFuncs(
-        func() error {
-            for {
-                select {
-                    case <- app.StopChannel():
-                        return nil
-                    case v := <- beacon.ChRead: {
-                        app.BroadcastEvent(service.Event{Name:nodeFeedbackBeacon, Payload:v})
-                    }
-                }
-            }
-            return nil
-        },
-        func(_ func(interface{})) error {
-            return nil
-        },
-    )
-
-    var eventsC chan service.Event = make(chan service.Event)
-    app.RegisterServiceWithFuncs(
-        func() error {
-            log.Debugf("[BEACON] starting beacon service...")
-
-            for {
-                select {
-                    case <-app.StopChannel():
-                        return nil
-                    case e := <- eventsC: {
-                        bs, ok := e.Payload.(ucast.BeaconSend)
-                        if ok {
-                            beacon.Send(bs.Host, bs.Payload)
-                        }
-                    }
-                }
-            }
-
-            return nil
-        },
-        func(_ func(interface{})) error {
-            beacon.Close()
-            log.Debugf("[BEACON] close beacon service...")
-            return nil
-        },
-        service.BindEventWithService(nodeServiceBeacon, eventsC),
     )
     return nil
 }
@@ -300,7 +244,7 @@ func initAgentService(app service.AppSupervisor) error {
         beaconTx = func(target string, data []byte) error {
             log.Debugf("[BEACON-TX] %v TO : %v", time.Now(), target)
             app.BroadcastEvent(service.Event{
-                Name: nodeServiceBeacon,
+                Name: ucast.EventBeaconNodeLocationSend,
                 Payload: ucast.BeaconSend{
                     Host:target,
                     Payload:data,
@@ -403,7 +347,7 @@ func initAgentService(app service.AppSupervisor) error {
     app.RegisterServiceWithFuncs(
         serviceFunc,
         exitFunc,
-        service.BindEventWithService(nodeFeedbackBeacon, beaconC),
+        service.BindEventWithService(ucast.EventBeaconNodeLocationReceive, beaconC),
         service.BindEventWithService(nodeFeedbackDHCP, dhcpC),
     )
 
@@ -436,7 +380,7 @@ func main() {
     }
 
     // beacon service
-    err = initBeaconService(app)
+    _, err = ucast.NewBeaconAgent(app)
     if err != nil {
         log.Panic(errors.WithStack(err))
     }

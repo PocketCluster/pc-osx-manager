@@ -82,9 +82,9 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
                     clusterID,
                     beaconRoute,
                     func(host string, payload []byte) error {
-                        log.Debugf("[BEACON-SEND-SLAVE] [%v] Host %v", time.Now(), host)
+                        log.Debugf("[BEACON-TX] [%v] Host %v", time.Now(), host)
                         a.BroadcastEvent(service.Event{
-                            Name: ucast.EventBeaconCoreWriteLocation,
+                            Name: ucast.EventBeaconCoreLocationSend,
                             Payload:ucast.BeaconSend{
                                 Host:       host,
                                 Payload:    payload,
@@ -142,7 +142,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
             }
             return nil
         },
-        service.BindEventWithService(ucast.EventBeaconCoreReadLocation, beaconC),
+        service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
         service.BindEventWithService(mcast.EventBeaconCoreReadSearch, searchC))
 
     return nil

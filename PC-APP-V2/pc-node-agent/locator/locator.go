@@ -137,7 +137,7 @@ func (sl *slaveLocator) TranstionWithMasterBeacon(bp ucast.BeaconPack, slaveTime
 
     // TODO : should we check MasterBindAgent here?
 
-    log.Debugf("[AGENT-BEACON] RECEIVED\n %v \n %v", spew.Sdump(bp.Address), spew.Sdump(meta))
+    log.Debugf("[BEACON-RX] RECEIVED\n %v \n %v", spew.Sdump(bp.Address), spew.Sdump(meta))
 
     sl.state, err = sl.state.MasterMetaTransition(meta, slaveTimestamp)
     if err != nil {
