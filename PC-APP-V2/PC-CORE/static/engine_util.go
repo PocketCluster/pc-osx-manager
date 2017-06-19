@@ -42,7 +42,6 @@ func setupServiceConfig() (*serviceConfig, error) {
     // open database
     dataDir, err := ctx.ApplicationUserDataDirectory()
     if err != nil {
-        log.Info(err)
         return nil, errors.WithStack(err)
     }
     rec, err := model.OpenRecordGate(dataDir, tefaults.CoreKeysSqliteFile)
@@ -78,7 +77,6 @@ func setupServiceConfig() (*serviceConfig, error) {
     caBundle, err := buildCertAuthSigner(rec.Certdb(), meta, country)
     if err != nil {
         // this is critical
-        log.Debugf(err.Error())
         return nil, errors.WithStack(err)
     }
     ctx.UpdateCertAuth(caBundle)
@@ -87,7 +85,6 @@ func setupServiceConfig() (*serviceConfig, error) {
     hostBundle, err := buildHostCertificate(rec.Certdb(), caBundle.CASigner, tefaults.CoreHostName, meta.ClusterUUID)
     if err != nil {
         // this is critical
-        log.Debugf(err.Error())
         return nil, errors.WithStack(err)
     }
     ctx.UpdateHostCert(hostBundle)
@@ -96,7 +93,6 @@ func setupServiceConfig() (*serviceConfig, error) {
     beaconBundle, err := buildBeaconCertificate(rec.Certdb(), meta.ClusterUUID)
     if err != nil {
         // this is critical
-        log.Debugf(err.Error())
         return nil, errors.WithStack(err)
     }
     ctx.UpdateBeaconCert(beaconBundle)
@@ -110,7 +106,6 @@ func setupServiceConfig() (*serviceConfig, error) {
     teleCfg.AssignHostCertAuth(caBundle.CAPrvKey, caBundle.CASSHChk, meta.ClusterDomain)
     err = tervice.ValidateCoreConfig(teleCfg)
     if err != nil {
-        log.Debugf(err.Error())
         return nil, errors.WithStack(err)
     }
 
@@ -118,7 +113,6 @@ func setupServiceConfig() (*serviceConfig, error) {
     // TODO : fix datadir. Plus, is it ok not to pass CA pub key? we need to unify TLS configuration
     regCfg, err := registry.NewPocketRegistryConfig(false, dataDir, hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
-        log.Debugf(err.Error())
         return nil, errors.WithStack(err)
     }
 
@@ -127,7 +121,6 @@ func setupServiceConfig() (*serviceConfig, error) {
     etcdCfg, err := embed.NewPocketConfig(dataDir, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
         // this is critical
-        log.Debugf(err.Error())
         return nil, errors.WithStack(err)
     }
     //log.Info(spew.Sdump(ctx))
