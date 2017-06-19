@@ -23,6 +23,9 @@ func setLogger(debug bool) {
         utils.InitLoggerCLI()
         log.Info("NORMAL mode logger configured")
     }
+    log.SetFormatter(&log.TextFormatter{
+        DisableColors:    true,
+    })
 }
 
 type serviceConfig struct {
