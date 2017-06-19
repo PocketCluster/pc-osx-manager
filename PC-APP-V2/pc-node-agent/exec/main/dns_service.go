@@ -94,13 +94,18 @@ func initDNSService(app service.AppSupervisor) error {
     }
     udpServer.PacketConn = udpPacketConn
 
-    app.RegisterFunc(func() error {
-        return errors.WithStack(udpServer.ActivateAndServe())
-    })
-    app.OnExit(func(interface{}) {
-        udpServer.Shutdown()
-        dns.HandleRemove(".")
-    })
+    app.RegisterServiceWithFuncs(
+        func() error {
+            return errors.WithStack(udpServer.ActivateAndServe())
+        },
+        func(_ func(interface{})) error {
+            udpServer.Shutdown()
+            dns.HandleRemove(".")
+            udpPacketConn = nil
+            udpAddr = nil
+            return nil
+        },
+    )
 
     return nil
 }

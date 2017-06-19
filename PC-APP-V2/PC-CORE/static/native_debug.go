@@ -4,33 +4,21 @@ package main
 #cgo CFLAGS: -x objective-c
 */
 import "C"
-import "github.com/stkim1/pc-core/event/operation"
+import (
+    "github.com/stkim1/pc-core/event/operation"
+)
 
-//export OpsCmdTeleportStart
-func OpsCmdTeleportStart() {
+//export OpsCmdBaseServiceStart
+func OpsCmdBaseServiceStart() {
     theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdTeleportStart,
+        Command:    operation.CmdBaseServiceStart,
     }
 }
 
-//export OpsCmdTeleportStop
-func OpsCmdTeleportStop() {
+//export OpsCmdBaseServiceStop
+func OpsCmdBaseServiceStop() {
     theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdTeleportStop,
-    }
-}
-
-//export OpsCmdRegistryStart
-func OpsCmdRegistryStart() {
-    theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdRegistryStart,
-    }
-}
-
-//export OpsCmdRegistryStop
-func OpsCmdRegistryStop() {
-    theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdRegistryStop,
+        Command:    operation.CmdBaseServiceStop,
     }
 }
 
@@ -48,38 +36,17 @@ func OpsCmdStorageStop() {
     }
 }
 
-//export OpsCmdBeaconStart
-func OpsCmdBeaconStart() {
+//export OpsCmdRegistryStart
+func OpsCmdRegistryStart() {
     theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdBeaconStart,
+        Command:    operation.CmdRegistryStart,
     }
 }
 
-//export OpsCmdBeaconStop
-func OpsCmdBeaconStop() {
+//export OpsCmdRegistryStop
+func OpsCmdRegistryStop() {
     theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdBeaconStop,
-    }
-}
-
-//export OpsCmdServiceBundleStart
-func OpsCmdServiceBundleStart() {
-    theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdServiceBundleStart,
-    }
-}
-
-//export OpsCmdServiceBundleStop
-func OpsCmdServiceBundleStop() {
-    theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdServiceBundleStop,
-    }
-}
-
-//export OpsCmdTeleportNodeAdd
-func OpsCmdTeleportNodeAdd() {
-    theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdTeleportNodeAdd,
+        Command:    operation.CmdRegistryStop,
     }
 }
 

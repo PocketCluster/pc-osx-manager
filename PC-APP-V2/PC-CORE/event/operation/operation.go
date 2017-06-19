@@ -6,18 +6,21 @@ import (
 
 type CommandType int32
 
+const(
+    ServiceBeaconCatcher string          = "service.beacon.catcher"
+    ServiceBeaconLocationRead string     = "service.beacon.location.read"
+    ServiceBeaconLocationWrite string    = "service.beacon.location.write"
+    ServiceBeaconMaster string           = "service.beacon.master"
+    ServiceSwarmEmbeddedServer string    = "service.swarm.embedded.server"
+    ServiceSwarmEmbeddedOperation string = "service.swarm.embedded.operation"
+    ServiceStorageProcess string         = "service.storage.process"
+    ServiceContainerRegistry string      = "service.container.registry"
+)
+
 const (
-    // Context control : This opens/closes database
-    CmdContextOpen      = iota
-    CmdContextClose
-
-    // Beacon control
-    CmdBeaconStart
-    CmdBeaconStop
-
-    // Teleport control
-    CmdTeleportStart
-    CmdTeleportStop
+    // Base Service start
+    CmdBaseServiceStart     = iota
+    CmdBaseServiceStop
 
     // ETCD control
     CmdStorageStart
@@ -27,30 +30,17 @@ const (
     CmdRegistryStart
     CmdRegistryStop
 
-    // debug bundle start & stop
-    CmdServiceBundleStart
-    CmdServiceBundleStop
-
     // debug add node, root, & user
-    CmdTeleportNodeAdd
     CmdTeleportRootAdd
     CmdTeleportUserAdd
 )
 
 func (c CommandType) String() string {
     switch c {
-        case CmdContextOpen:
-            return "CmdContextOpen"
-        case CmdContextClose:
-            return "CmdContextClose"
-        case CmdBeaconStart:
-            return "CmdBeaconStart"
-        case CmdBeaconStop:
-            return "CmdBeaconStop"
-        case CmdTeleportStart:
-            return "CmdTeleportStart"
-        case CmdTeleportStop:
-            return "CmdTeleportStop"
+        case CmdBaseServiceStart:
+            return "CmdBaseServiceStart"
+        case CmdBaseServiceStop:
+            return "CmdBaseServiceStop"
         case CmdStorageStart:
             return "CmdStorageStart"
         case CmdStorageStop:
@@ -59,18 +49,12 @@ func (c CommandType) String() string {
             return "CmdImageRegistryStart"
         case CmdRegistryStop:
             return "CmdImageRegistryStop"
-        case CmdServiceBundleStart:
-            return "CmdServiceBundleStart"
-        case CmdServiceBundleStop:
-            return "CmdServiceBundleStop"
-        case CmdTeleportNodeAdd:
-            return "CmdTeleportNodeAdd"
         case CmdTeleportRootAdd:
             return "CmdTeleportRootAdd"
         case CmdTeleportUserAdd:
             return "CmdTeleportUserAdd"
 
-    default:
+        default:
             return fmt.Sprintf("CommandType(%d)", c)
     }
 }

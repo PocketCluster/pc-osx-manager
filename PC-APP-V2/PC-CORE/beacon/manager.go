@@ -115,7 +115,7 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts tim
         return errors.WithStack(err)
     }
 
-    log.Debugf("[BEACON-FROM] %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
+    log.Debugf("[BEACON-RX] %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
 
     // this packet looks for something else
     if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != b.clusterID {
@@ -164,11 +164,11 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
         return errors.WithStack(err)
     }
 
-    log.Debugf("[SEARCH-FROM] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
+    log.Debugf("[SEARCH-RX] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
 
     // this packet looks for something else
     if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != b.clusterID {
-        log.Debugf("[SEARCH-FROM] this packet belong to other master | usm.DiscoveryAgent.MasterBoundAgent %v | b.clusterID %v", usm.MasterBoundAgent, b.clusterID)
+        log.Debugf("[SEARCH-RX] this packet belong to other master | usm.DiscoveryAgent.MasterBoundAgent %v | b.clusterID %v", usm.MasterBoundAgent, b.clusterID)
         return nil
     }
 

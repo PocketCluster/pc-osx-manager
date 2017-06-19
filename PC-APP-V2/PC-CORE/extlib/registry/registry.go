@@ -111,14 +111,17 @@ func (r *PocketRegistry) Start() (error) {
         return err
     }
 
+    // TODO : No HTTP secret provided - generated random secret. This may cause problems with uploads if multiple registries are behind a load-balancer. To provide a shared secret, fill in http.secret in the configuration file or set the REGISTRY_HTTP_SECRET environment variable.
     ln = tls.NewListener(ln, config.tlsConfig)
     context.GetLogger(r.app).Infof("listening on %v, tls", ln.Addr())
-    go func() {
-        var err = r.server.Serve(ln)
+
+    // start serving
+    go func(srv *graceful.Server, l net.Listener) {
+        var err = srv.Serve(l)
         if err != nil {
             log.Println("HTTP Server Error - ", err)
         }
-    }()
+    }(r.server, ln)
 
     r.listener = ln
     return nil

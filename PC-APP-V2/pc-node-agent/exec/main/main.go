@@ -14,7 +14,7 @@ import (
 
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/udpnet/ucast"
-    "github.com/stkim1/pc-node-agent/dhcp"
+    "github.com/stkim1/pc-node-agent/utils/dhcp"
     "github.com/stkim1/pc-node-agent/locator"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-node-agent/service"
@@ -25,13 +25,11 @@ import (
 )
 
 const (
-    nodeServiceSearch  = "service_search"
-    nodeServiceBeacon  = "service_beacon"
-    nodeFeedbackBeacon = "feedback_beacon"
     nodeFeedbackDHCP   = "feedback_dhcp"
-    nodeTeleportStart  = "teleport_start"
-    nodeTeleportStop   = "teleport_stop"
     dockerServiceUnit  = "docker.service"
+
+    servicePcsshInit   = "service.pcssh.init"
+    servicePcsshStart  = "service.pcssh.start"
 )
 
 func initDhcpListner(app service.AppSupervisor) error {
@@ -42,214 +40,152 @@ func initDhcpListner(app service.AppSupervisor) error {
         return errors.WithStack(err)
     }
 
-    app.RegisterFunc(func () error {
-        log.Debugf("[DHCP] starting dhcp listner...")
-        buf := make([]byte, 20480)
-        dhcpEvent := &dhcp.DhcpEvent{}
+    app.RegisterServiceWithFuncs(
+        func () error {
+            log.Debugf("[DHCP] starting dhcp listner...")
+            buf := make([]byte, 20480)
+            dhcpEvent := &dhcp.DhcpEvent{}
 
-        // TODO : how do we stop this?
-        for {
-            conn, err := dhcpListener.AcceptUnix()
-            if err != nil {
-                log.Error(errors.WithStack(err))
-                continue
-            }
-            count, err := conn.Read(buf)
-            if err != nil {
-                log.Error(errors.WithStack(err))
-                continue
-            }
-            err = msgpack.Unmarshal(buf[0:count], dhcpEvent)
-            if err != nil {
-                log.Error(errors.WithStack(err))
-                continue
-            }
+            // TODO : how do we stop this?
+            for {
+                conn, err := dhcpListener.AcceptUnix()
+                if err != nil {
+                    log.Error(errors.WithStack(err))
+                    continue
+                }
+                count, err := conn.Read(buf)
+                if err != nil {
+                    log.Error(errors.WithStack(err))
+                    continue
+                }
+                err = msgpack.Unmarshal(buf[0:count], dhcpEvent)
+                if err != nil {
+                    log.Error(errors.WithStack(err))
+                    continue
+                }
 
-            app.BroadcastEvent(service.Event{Name:nodeFeedbackDHCP, Payload:dhcpEvent})
+                app.BroadcastEvent(service.Event{Name:nodeFeedbackDHCP, Payload:dhcpEvent})
 
-            err = conn.Close()
-            if err != nil {
-                log.Error(errors.WithStack(err))
-                continue
-            }
-        }
-
-        return nil
-    })
-
-    app.OnExit(func(payload interface{}) {
-        dhcpListener.Close()
-        os.Remove(dhcp.DHCPEventSocketPath)
-        log.Debugf("[DHCP] close dhcp listner...")
-    })
-
-    return nil
-}
-
-func initSearchService(app service.AppSupervisor) error {
-    caster, err := mcast.NewSearchCaster()
-    if err != nil {
-        return err
-    }
-    eventsC := make(chan service.Event)
-    app.WaitForEvent(nodeServiceSearch, eventsC, make(chan struct{}))
-
-    app.RegisterFunc(func() error {
-        log.Debugf("[SEARCH] starting master serach service...")
-
-        for {
-            select {
-                case <- app.StopChannel():
-                    return nil
-                case e := <-eventsC: {
-                    cm, ok := e.Payload.([]byte)
-                    if ok {
-//                        log.Debugf("[SEARCH] casting message... %v", cm)
-                        err := caster.Send(cm)
-                        if err != nil {
-                            log.Errorf("[SEARCH] casting error %v", err)
-                        }
-                    }
+                err = conn.Close()
+                if err != nil {
+                    log.Error(errors.WithStack(err))
+                    continue
                 }
             }
-        }
 
-        return nil
-    })
-
-    app.OnExit(func(payload interface{}) {
-        caster.Close()
-        log.Debugf("[SEARCH] close master serach service...")
-    })
-
-    return nil
-}
-
-func initBeaconService(app service.AppSupervisor) error {
-    beacon, err := ucast.NewBeaconAgent()
-    if err != nil {
-        return err
-    }
-    eventsC := make(chan service.Event)
-    app.WaitForEvent(nodeServiceBeacon, eventsC, make(chan struct{}))
-
-    app.RegisterFunc(func() error {
-        for {
-            select {
-                case <- app.StopChannel():
-                    return nil
-                case v := <- beacon.ChRead: {
-                    app.BroadcastEvent(service.Event{Name:nodeFeedbackBeacon, Payload:v})
-                }
-            }
-        }
-        return nil
-    })
-
-    app.RegisterFunc(func() error {
-        log.Debugf("[BEACON] starting beacon service...")
-
-        for {
-            select {
-                case <-app.StopChannel():
-                    return nil
-                case e := <- eventsC: {
-                    bs, ok := e.Payload.(ucast.BeaconSend)
-                    if ok {
-//                        log.Debugf("[BEACON] sending message %v", bs)
-                        beacon.Send(bs.Host, bs.Payload)
-                    }
-                }
-            }
-        }
-
-        return nil
-    })
-
-    app.OnExit(func(payload interface{}) {
-        beacon.Close()
-        log.Debugf("[BEACON] close beacon service...")
-    })
+            return nil
+        },
+        func(_ func(interface{})) error {
+            dhcpListener.Close()
+            os.Remove(dhcp.DHCPEventSocketPath)
+            log.Debugf("[DHCP] close dhcp listner...")
+            return nil
+        },
+    )
 
     return nil
 }
 
 func initTeleportNodeService(app service.AppSupervisor) error {
-    var (
-        nodeProc *embed.EmbeddedNodeProcess = nil
-        startC = make(chan service.Event)
-        stopC = make(chan service.Event)
-    )
-    app.WaitForEvent(nodeTeleportStart, startC, make(chan struct{}))
-    app.WaitForEvent(nodeTeleportStop,   stopC, make(chan struct{}))
+    app.RegisterNamedServiceWithFuncs(
+        servicePcsshInit,
+        func() error{
+            var (
+                pcsshNode *embed.EmbeddedNodeProcess = nil
+                err error = nil
+            )
+            // restart teleport
+            cfg, err := tervice.MakeNodeConfig(slcontext.SharedSlaveContext(), true)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            pcsshNode, err = embed.NewEmbeddedNodeProcess(app, cfg)
+            if err != nil {
+                log.Errorf(err.Error())
+                return errors.WithStack(err)
+            }
 
-    app.RegisterFunc(func() error{
+            // execute docker engine cert acquisition before SSH node start
+            // TODO : create a waitforevent channel and restart docker engine accordingly
+            err = pcsshNode.AcquireEngineCertificate(slcontext.DockerEnvironemtPostProcess)
+            if err != nil {
+                return errors.WithStack(err)
+            }
 
-        for {
-            select {
-                case <- app.StopChannel():
-                    return nil
+            err = pcsshNode.StartNodeSSH()
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            log.Debugf("\n\n(INFO) teleport node started success!\n")
 
-                case noti := <-startC: {
-                    // restart teleport
-                    cfg, err := tervice.MakeNodeConfig(slcontext.SharedSlaveContext(), true)
-                    if err != nil {
-                        log.Errorf(err.Error())
-                        continue
-                    }
-                    nodeProc, err = embed.NewEmbeddedNodeProcess(app, cfg)
-                    if err != nil {
-                        log.Errorf(err.Error())
-                        continue
-                    }
-                    // execute docker engine cert acquisition before SSH node start
-                    state, ok := noti.Payload.(locator.SlaveLocatingState)
-                    if ok && state == locator.SlaveCryptoCheck {
-                        // TODO : create a waitforevent channel and restart docker engine accordingly
-                        err = nodeProc.AcquireEngineCertificate(slcontext.DockerEnvironemtPostProcess)
-                        if err != nil {
-                            log.Errorf(err.Error())
-                        }
-                    }
-                    err = nodeProc.StartNodeSSH()
-                    if err != nil {
-                        log.Errorf(err.Error())
-                        continue
-                    }
-                    log.Debugf("\n\n(INFO) teleport node started success!\n")
+            return nil
 
-                    continue
-
-                    // restart docker engine
-                    // TODO : FIX /opt/gopkg/src/github.com/godbus/dbus/conn.go:345 send on closed channel
-                    conn, err := sysd.NewSystemdConnection()
-                    if err != nil {
-                        log.Errorf(err.Error())
-                    } else {
-                        did, err := conn.RestartUnit(dockerServiceUnit, "replace", nil)
-                        if err != nil {
-                            log.Errorf(err.Error())
-                        } else {
-                            conn.Close()
-                            log.Debugf("\n\n(INFO) docker engin restart success! ID %d\n", did)
-                        }
-                    }
-                }
-
-                case <-stopC: {
-                    err := nodeProc.Close()
-                    if err != nil {
-                        log.Errorf(err.Error())
-                        continue
-                    }
-                    nodeProc = nil
-                    log.Debugf("\n\n(INFO) teleport node stop success!\n")
+            // restart docker engine
+            // TODO : FIX /opt/gopkg/src/github.com/godbus/dbus/conn.go:345 send on closed channel
+            conn, err := sysd.NewSystemdConnection()
+            if err != nil {
+                log.Errorf(err.Error())
+            } else {
+                did, err := conn.RestartUnit(dockerServiceUnit, "replace", nil)
+                if err != nil {
+                    log.Errorf(err.Error())
+                } else {
+                    conn.Close()
+                    log.Debugf("\n\n(INFO) docker engin restart success! ID %d\n", did)
                 }
             }
-        }
 
-        return nil
-    })
+            return nil
+        },
+        func(_ func(interface{})) error {
+            return nil
+        })
+
+    app.RegisterNamedServiceWithFuncs(
+        servicePcsshStart,
+        func() error{
+            var (
+                pcsshNode *embed.EmbeddedNodeProcess = nil
+                err error = nil
+            )
+            // restart teleport
+            cfg, err := tervice.MakeNodeConfig(slcontext.SharedSlaveContext(), true)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            pcsshNode, err = embed.NewEmbeddedNodeProcess(app, cfg)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+
+            err = pcsshNode.StartNodeSSH()
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            log.Debugf("\n\n(INFO) teleport node started success!\n")
+
+            return nil
+
+            // restart docker engine
+            // TODO : FIX /opt/gopkg/src/github.com/godbus/dbus/conn.go:345 send on closed channel
+            conn, err := sysd.NewSystemdConnection()
+            if err != nil {
+                log.Errorf(err.Error())
+            } else {
+                did, err := conn.RestartUnit(dockerServiceUnit, "replace", nil)
+                if err != nil {
+                    return errors.WithStack(err)
+                } else {
+                    conn.Close()
+                    log.Debugf("\n\n(INFO) docker engin restart success! ID %d\n", did)
+                }
+            }
+
+            return nil
+        },
+        func(_ func(interface{})) error {
+            return nil
+        })
 
     return nil
 }
@@ -262,19 +198,26 @@ func initAgentService(app service.AppSupervisor) error {
 
         searchTx = func(data []byte) error {
             log.Debugf("[SEARCH-TX] %v", time.Now())
-            app.BroadcastEvent(service.Event{Name: nodeServiceSearch, Payload:data})
+            app.BroadcastEvent(
+                service.Event{
+                    Name:       mcast.EventBeaconNodeSearchSend,
+                    Payload:    mcast.CastPack{
+                        Message:    data,
+                    },
+                })
             return nil
         }
 
         beaconTx = func(target string, data []byte) error {
             log.Debugf("[BEACON-TX] %v TO : %v", time.Now(), target)
-            app.BroadcastEvent(service.Event{
-                Name: nodeServiceBeacon,
-                Payload: ucast.BeaconSend{
-                    Host:target,
-                    Payload:data,
-                },
-            })
+            app.BroadcastEvent(
+                service.Event{
+                    Name:       ucast.EventBeaconNodeLocationSend,
+                    Payload:    ucast.BeaconSend{
+                        Host:       target,
+                        Payload:    data,
+                    },
+                })
             return nil
         }
 
@@ -282,13 +225,12 @@ func initAgentService(app service.AppSupervisor) error {
             if transOk {
                 log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | SUCCESS ", ts, state.String())
                 switch state {
-                    case locator.SlaveCryptoCheck:
-                        fallthrough
-                    case locator.SlaveBindBroken: {
-                        app.BroadcastEvent(service.Event{Name:nodeTeleportStart, Payload:state})
+                    case locator.SlaveCryptoCheck: {
+                        app.RunNamedService(servicePcsshInit)
                         return nil
                     }
-                    case locator.SlaveBounded: {
+                    case locator.SlaveBindBroken: {
+                        app.RunNamedService(servicePcsshStart)
                         return nil
                     }
                     default: {
@@ -300,7 +242,7 @@ func initAgentService(app service.AppSupervisor) error {
                 log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | FAILED ", ts, state.String())
                 switch state {
                     case locator.SlaveBounded: {
-                        app.BroadcastEvent(service.Event{Name:nodeTeleportStop, Payload:state})
+                        app.BroadcastEvent(service.Event{Name:embed.EventNodeSSHServiceStop})
                         return nil
                     }
                     default: {
@@ -364,15 +306,18 @@ func initAgentService(app service.AppSupervisor) error {
             }
             return nil
         }
+        exitFunc = func(_ func(interface{})) error {
+            log.Debugf("[AGENT] close agent service...")
+            return nil
+        }
     )
 
-    app.WaitForEvent(nodeFeedbackBeacon, beaconC, make(chan struct{}))
-    app.WaitForEvent(nodeFeedbackDHCP,     dhcpC, make(chan struct{}))
-    app.RegisterFunc(serviceFunc)
-
-    app.OnExit(func(payload interface{}) {
-        log.Debugf("[AGENT] close agent service...")
-    })
+    app.RegisterServiceWithFuncs(
+        serviceFunc,
+        exitFunc,
+        service.BindEventWithService(ucast.EventBeaconNodeLocationReceive, beaconC),
+        service.BindEventWithService(nodeFeedbackDHCP, dhcpC),
+    )
 
     return nil
 }
@@ -397,13 +342,13 @@ func main() {
     }
 
     // search service
-    err = initSearchService(app)
+    _, err = mcast.NewSearchCaster(app)
     if err != nil {
         log.Panic(errors.WithStack(err))
     }
 
     // beacon service
-    err = initBeaconService(app)
+    _, err = ucast.NewBeaconAgent(app)
     if err != nil {
         log.Panic(errors.WithStack(err))
     }

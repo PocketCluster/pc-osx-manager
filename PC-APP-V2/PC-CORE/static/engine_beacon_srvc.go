@@ -11,10 +11,9 @@ import (
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/pc-core/beacon"
-    "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/model"
-    swarmemb "github.com/stkim1/pc-core/extlib/swarm"
 )
 
 type beaconEventRoute struct {
@@ -65,119 +64,87 @@ func (b *beaconEventRoute) BeaconEventShutdown() error {
 
 func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.PocketConfig) error {
     var (
-        ctx = context.SharedHostContext()
-
         beaconC = make(chan service.Event)
         searchC = make(chan service.Event)
-
-        beaconRoute *beaconEventRoute = &beaconEventRoute{
-            ServiceSupervisor:a.ServiceSupervisor,
-            PocketConfig: tcfg,
-        }
-
-        beaconMan, err = beacon.NewBeaconManagerWithFunc(
-            clusterID,
-            beaconRoute,
-            func(host string, payload []byte) error {
-                log.Debugf("[BEACON-SEND-SLAVE] [%v] Host %v", time.Now(), host)
-                a.BroadcastEvent(service.Event{
-                    Name: coreServiceBeacon,
-                    Payload:ucast.BeaconSend{
-                        Host:       host,
-                        Payload:    payload,
-                    },
-                })
-                return nil
-            })
     )
-    if err != nil {
-        return errors.WithStack(err)
-    }
+    a.RegisterServiceWithFuncs(
+        operation.ServiceBeaconMaster,
+        func() error {
+            var (
+                timer = time.NewTicker(time.Second)
 
-    caCert, err := ctx.CertAuthCertificate()
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    hostCrt, err := ctx.MasterHostCertificate()
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    hostPrv, err := ctx.MasterHostPrivateKey()
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    swarmctx, err := swarmemb.NewContextWithCertAndKey(caCert, hostCrt, hostPrv, beaconMan)
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    swarmsrv, err := swarmemb.NewSwarmService(swarmctx)
-    if err != nil {
-        return errors.WithStack(err)
-    }
-
-
-    a.WaitForEvent(coreFeedbackBeacon, beaconC, make(chan struct{}))
-    a.WaitForEvent(coreFeedbackSearch, searchC, make(chan struct{}))
-
-    a.RegisterServiceFunc(func() error {
-        var timer = time.NewTicker(time.Second)
-
-        log.Debugf("[AGENT] starting agent service...")
-
-        for {
-            select {
-                case <-a.StopChannel(): {
-                    timer.Stop()
-                    err = swarmsrv.Close()
-                    if err != nil {
-                        log.Debug(err.Error())
-                    }
-                    err = beaconMan.Shutdown()
-                    if err != nil {
-                        log.Debug(err.Error())
-                    }
-                    err = beaconRoute.close()
-                    if err != nil {
-                        log.Debug(err.Error())
-                    }
-                    log.Debugf("[AGENT] stopping agent service...")
-                    return nil
+                beaconRoute *beaconEventRoute = &beaconEventRoute{
+                    ServiceSupervisor:a.ServiceSupervisor,
+                    PocketConfig: tcfg,
                 }
-                case b := <-beaconC: {
-                    bp, ok := b.Payload.(ucast.BeaconPack)
-                    if ok {
-                        err = beaconMan.TransitionWithBeaconData(bp, time.Now())
+
+                beaconMan, err = beacon.NewBeaconManagerWithFunc(
+                    clusterID,
+                    beaconRoute,
+                    func(host string, payload []byte) error {
+                        log.Debugf("[BEACON-TX] [%v] Host %v", time.Now(), host)
+                        a.BroadcastEvent(
+                            service.Event{
+                                Name:       ucast.EventBeaconCoreLocationSend,
+                                Payload:    ucast.BeaconSend{
+                                    Host:       host,
+                                    Payload:    payload,
+                                },
+                            })
+                        return nil
+                    })
+            )
+            if err != nil {
+                return errors.WithStack(err)
+            }
+
+            log.Debugf("[AGENT] starting agent service...")
+            a.BroadcastEvent(service.Event{Name:iventBeaconManagerSpawn, Payload:beaconMan})
+            for {
+                select {
+                    case <-a.StopChannel(): {
+                        timer.Stop()
+                        err = beaconMan.Shutdown()
                         if err != nil {
-                            log.Debugf("[BEACON-TRANSITION] %v", err)
+                            log.Debug(err.Error())
+                        }
+                        err = beaconRoute.close()
+                        if err != nil {
+                            log.Debug(err.Error())
+                        }
+                        log.Debugf("[AGENT] stopping agent service...")
+                        return nil
+                    }
+                    case b := <-beaconC: {
+                        bp, ok := b.Payload.(ucast.BeaconPack)
+                        if ok {
+                            err = beaconMan.TransitionWithBeaconData(bp, time.Now())
+                            if err != nil {
+                                log.Debugf("[BEACON-RX] Error : %v", err)
+                            }
                         }
                     }
-                }
-                case s := <-searchC: {
-                    cp, ok := s.Payload.(mcast.CastPack)
-                    if ok {
-                        err = beaconMan.TransitionWithSearchData(cp, time.Now())
-                        if err != nil {
-                            log.Debugf("[SEARCH-TRANSITION] %v", err)
+                    case s := <-searchC: {
+                        cp, ok := s.Payload.(mcast.CastPack)
+                        if ok {
+                            err = beaconMan.TransitionWithSearchData(cp, time.Now())
+                            if err != nil {
+                                log.Debugf("[SEARCH-RX] Error : %v", err)
+                            }
                         }
                     }
-                }
-                case <-timer.C: {
-                    err = beaconMan.TransitionWithTimestamp(time.Now())
-                    if err != nil {
-                        log.Debug(err.Error())
+                    case <-timer.C: {
+                        err = beaconMan.TransitionWithTimestamp(time.Now())
+                        if err != nil {
+                            log.Debug(err.Error())
+                        }
                     }
-                    continue
                 }
             }
-        }
-        return nil
-    })
-
-    a.RegisterServiceFunc(func () error {
-        return errors.WithStack(swarmsrv.ListenAndServeSingleHost())
-    })
-
+            return nil
+        },
+        service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
+        service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC))
 
     return nil
 }
-

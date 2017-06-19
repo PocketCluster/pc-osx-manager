@@ -1,93 +1,151 @@
 package main
 
 import (
+    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+    "github.com/coreos/etcd/embed"
 
-    "github.com/stkim1/udpnet/ucast"
-    "github.com/stkim1/udpnet/mcast"
+    "github.com/stkim1/pc-core/beacon"
+    "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/extlib/registry"
+    "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/service"
+    swarmemb "github.com/stkim1/pc-core/extlib/swarm"
 )
 
 const (
-    coreFeedbackSearch = "feedback_search"
-    coreFeedbackBeacon = "feedback_beacon"
-    coreServiceBeacon  = "service_beacon"
+    iventBeaconManagerSpawn string  = "ivent.beacon.manager.spawn"
 )
 
-func initSearchCatcher(a *mainLife) error {
-    // TODO : use network interface
-    catcher, err := mcast.NewSearchCatcher("en0")
-    if err != nil {
-        return errors.WithStack(err)
-    }
-
-    a.RegisterServiceFunc(func() error {
-        log.Debugf("NewSearchCatcher :: MAIN BEGIN")
-        for {
+func initStorageServie(a *mainLife, config *embed.PocketConfig) error {
+    a.RegisterServiceWithFuncs(
+        operation.ServiceStorageProcess,
+        func() error {
+            etcd, err := embed.StartPocketEtcd(config)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            // startup preps
             select {
-                case <-a.StopChannel(): {
-                    catcher.Close()
-                    log.Debugf("NewSearchCatcher :: MAIN CLOSE")
-                    return nil
+                case <-etcd.Server.ReadyNotify(): {
+                    log.Debugf("[ETCD] server is ready to run")
                 }
-                case cp := <-catcher.ChRead: {
-                    a.BroadcastEvent(service.Event{Name:coreFeedbackSearch, Payload:cp})
+                case <-time.After(120 * time.Second): {
+                    etcd.Server.Stop() // trigger a shutdown
+                    return errors.Errorf("[ETCD] Server took too long to start!")
                 }
             }
-        }
-        return nil
-    })
+            // until server goes down, errors and stop signal will be constantly checked
+            for {
+                select {
+                    case err = <-etcd.Err(): {
+                        log.Debugf("[ETCD] error : %v", err)
+                    }
+                    case <- a.StopChannel(): {
+                        etcd.Close()
+                        log.Debugf("[ETCD] server shuts down")
+                        return nil
+                    }
+                }
+            }
+            return nil
+        })
 
     return nil
 }
 
-func initBeaconLoator(a *mainLife) error {
-    belocat, err := ucast.NewBeaconLocator()
-    if err != nil {
-        return errors.WithStack(err)
-    }
-
-    // beacon locator read
-    a.RegisterServiceFunc(func() error {
-        log.Debugf("NewBeaconLocator READ :: MAIN BEGIN")
-        for {
-            select {
-                case <- a.StopChannel(): {
-                    belocat.Close()
-                    log.Debugf("NewBeaconLocator READ :: MAIN CLOSE")
-                    return nil
-                }
-                case bp := <- belocat.ChRead: {
-                    a.BroadcastEvent(service.Event{Name:coreFeedbackBeacon, Payload:bp})
-                }
+func initRegistryService(a *mainLife, config *registry.PocketRegistryConfig) error {
+    a.RegisterServiceWithFuncs(
+        operation.ServiceContainerRegistry,
+        func() error {
+            reg, err := registry.NewPocketRegistry(config)
+            if err != nil {
+                return errors.WithStack(err)
             }
-        }
-        return nil
-    })
+            err = reg.Start()
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            log.Debugf("[REGISTRY] server start successful")
 
-    // beacon locator write
-    beaconC := make(chan service.Event)
-    a.WaitForEvent(coreServiceBeacon, beaconC, make(chan struct{}))
-    a.RegisterServiceFunc(func() error {
-        log.Debugf("NewBeaconLocator WRITE :: MAIN BEGIN")
-        for {
+            // wait for service to stop
+            <- a.StopChannel()
+            reg.Stop(time.Second)
+            log.Debugf("[REGISTRY] server exit")
+            return nil
+        })
+    return nil
+}
+
+func initSwarmService(a *mainLife) error {
+    const (
+        iventSwarmInstanceSpawn string  = "ivent.swarm.instance.spawn"
+    )
+    var (
+        swarmSrvC = make(chan service.Event)
+    )
+    a.RegisterServiceWithFuncs(
+        operation.ServiceSwarmEmbeddedOperation,
+        func() error {
+            var (
+                swarmsrv *swarmemb.SwarmService = nil
+            )
             select {
-                case <- a.StopChannel(): {
-                    log.Debugf("NewBeaconLocator WRITE :: MAIN CLOSE")
-                    return nil
-                }
-                case b := <- beaconC: {
-                    bs, ok := b.Payload.(ucast.BeaconSend)
+                case se := <- swarmSrvC: {
+                    srv, ok := se.Payload.(*swarmemb.SwarmService)
                     if ok {
-                        belocat.Send(bs.Host, bs.Payload)
+                        swarmsrv = srv
                     }
                 }
+                case <- a.StopChannel(): {
+                    if swarmsrv != nil {
+                        err := swarmsrv.Close()
+                        return errors.WithStack(err)
+                    }
+                    return errors.Errorf("[ERR] null SWARM instance")
+                }
             }
-        }
-        return nil
-    })
+            return nil
+        },
+        service.BindEventWithService(iventSwarmInstanceSpawn, swarmSrvC))
+
+    beaconManC := make(chan service.Event)
+    a.RegisterServiceWithFuncs(
+        operation.ServiceSwarmEmbeddedServer,
+        func() error {
+            be := <- beaconManC
+            beaconMan, ok := be.Payload.(beacon.BeaconManger)
+            if !ok {
+                return errors.Errorf("[ERR] invalid beacon manager type")
+            }
+            ctx := context.SharedHostContext()
+            caCert, err := ctx.CertAuthCertificate()
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            hostCrt, err := ctx.MasterHostCertificate()
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            hostPrv, err := ctx.MasterHostPrivateKey()
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            swarmctx, err := swarmemb.NewContextWithCertAndKey(caCert, hostCrt, hostPrv, beaconMan)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            swarmsrv, err := swarmemb.NewSwarmService(swarmctx)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            a.BroadcastEvent(service.Event{Name:iventSwarmInstanceSpawn, Payload:swarmsrv})
+            err = swarmsrv.ListenAndServeSingleHost()
+            return errors.WithStack(err)
+        },
+        service.BindEventWithService(iventBeaconManagerSpawn, beaconManC))
 
     return nil
 }

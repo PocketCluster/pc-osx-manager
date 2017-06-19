@@ -20,30 +20,12 @@
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 }
 
-
-- (IBAction)opsCmdTeleportStart:(id)sender {
-    OpsCmdTeleportStart();
+- (IBAction)opsCmdBaseServiceStart:(id)sender {
+    OpsCmdBaseServiceStart();
 }
 
-- (IBAction)opsCmdTeleportStop:(id)sender {
-    OpsCmdTeleportStop();
-}
-
-- (IBAction)opsCmdTeleportRootAdd:(id)sender {
-    OpsCmdTeleportRootAdd();
-}
-
-- (IBAction)opsCmdTeleportUserAdd:(id)sender {
-    OpsCmdTeleportUserAdd();
-}
-
-
-- (IBAction)opsCmdRegistryStart:(id)sender {
-    OpsCmdRegistryStart();
-}
-
-- (IBAction)opsCmdRegistryStop:(id)sender {
-    OpsCmdRegistryStop();
+- (IBAction)opsCmdBaseServiceStop:(id)sender {
+    OpsCmdBaseServiceStop();
 }
 
 - (IBAction)opsCmdStorageStart:(id)sender {
@@ -54,19 +36,20 @@
     OpsCmdStorageStop();
 }
 
-- (IBAction)opsCmdBeaconStart:(id)sender {
-    OpsCmdBeaconStart();
+- (IBAction)opsCmdRegistryStart:(id)sender {
+    OpsCmdRegistryStart();
 }
 
-- (IBAction)opsCmdBeaconStop:(id)sender {
-    OpsCmdBeaconStop();
+- (IBAction)opsCmdRegistryStop:(id)sender {
+    OpsCmdRegistryStop();
 }
 
-- (IBAction)opsCmdServiceBundleStart:(id)sender {
-    OpsCmdServiceBundleStart();
+- (IBAction)opsCmdTeleportRootAdd:(id)sender {
+    OpsCmdTeleportRootAdd();
 }
 
-- (IBAction)opsCmdServiceBundleStop:(id)sender {
-    OpsCmdServiceBundleStop();
+- (IBAction)opsCmdTeleportUserAdd:(id)sender {
+    OpsCmdTeleportUserAdd();
 }
+
 @end
