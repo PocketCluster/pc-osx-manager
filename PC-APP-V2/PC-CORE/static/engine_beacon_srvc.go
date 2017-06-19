@@ -83,13 +83,14 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
                     beaconRoute,
                     func(host string, payload []byte) error {
                         log.Debugf("[BEACON-TX] [%v] Host %v", time.Now(), host)
-                        a.BroadcastEvent(service.Event{
-                            Name: ucast.EventBeaconCoreLocationSend,
-                            Payload:ucast.BeaconSend{
-                                Host:       host,
-                                Payload:    payload,
-                            },
-                        })
+                        a.BroadcastEvent(
+                            service.Event{
+                                Name:       ucast.EventBeaconCoreLocationSend,
+                                Payload:    ucast.BeaconSend{
+                                    Host:       host,
+                                    Payload:    payload,
+                                },
+                            })
                         return nil
                     })
             )

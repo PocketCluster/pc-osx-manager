@@ -86,7 +86,13 @@ func (b *BeaconLocator) read() {
                         adr := copyUDPAddr(addr)
                         msg := make([]byte, count)
                         copy(msg, buff[:count])
-                        b.BroadcastEvent(service.Event{Name:EventBeaconCoreLocationReceive, Payload:BeaconPack{Address:adr,Message:msg}})
+                        b.BroadcastEvent(
+                            service.Event{
+                                Name:       EventBeaconCoreLocationReceive,
+                                Payload:    BeaconPack{
+                                    Address:    adr,
+                                    Message:    msg},
+                            })
                     }
                 }
             }

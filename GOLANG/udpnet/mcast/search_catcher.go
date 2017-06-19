@@ -92,8 +92,7 @@ func (s *SearchCatcher) read() {
                                 Payload:    CastPack{
                                     Address:    adr,
                                     Message:    msg},
-                            },
-                        )
+                            })
                     }
                 }
             }

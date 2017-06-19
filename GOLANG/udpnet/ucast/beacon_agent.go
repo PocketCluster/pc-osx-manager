@@ -90,8 +90,7 @@ func (b *BeaconAgent) read() {
                                 Payload:    BeaconPack{
                                     Address:    adr,
                                     Message:    msg},
-                            },
-                        )
+                            })
                     }
                 }
             }
