@@ -12,7 +12,7 @@ import (
 )
 
 const (
-    EventBeaconCoreReadSearch string         = "event.beacon.core.read.search"
+    EventBeaconCoreSearchReceive string      = "event.beacon.core.search.receive"
     iventBeaconCoreSearchCatcherClose string = "ivent.beacon.core.search.catcher.close"
 )
 
@@ -86,7 +86,14 @@ func (s *SearchCatcher) read() {
                         adr := copyUDPAddr(addr)
                         msg := make([]byte, count)
                         copy(msg, buff[:count])
-                        s.BroadcastEvent(service.Event{Name:EventBeaconCoreReadSearch, Payload:CastPack{Address:adr, Message:msg}})
+                        s.BroadcastEvent(
+                            service.Event{
+                                Name:       EventBeaconCoreSearchReceive,
+                                Payload:    CastPack{
+                                    Address:    adr,
+                                    Message:    msg},
+                            },
+                        )
                     }
                 }
             }

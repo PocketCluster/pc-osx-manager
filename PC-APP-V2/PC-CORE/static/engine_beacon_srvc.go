@@ -119,7 +119,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
                         if ok {
                             err = beaconMan.TransitionWithBeaconData(bp, time.Now())
                             if err != nil {
-                                log.Debugf("[BEACON-TRANSITION] %v", err)
+                                log.Debugf("[BEACON-RX] Error : %v", err)
                             }
                         }
                     }
@@ -128,7 +128,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
                         if ok {
                             err = beaconMan.TransitionWithSearchData(cp, time.Now())
                             if err != nil {
-                                log.Debugf("[SEARCH-TRANSITION] %v", err)
+                                log.Debugf("[SEARCH-RX] Error : %v", err)
                             }
                         }
                     }
@@ -143,7 +143,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
             return nil
         },
         service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
-        service.BindEventWithService(mcast.EventBeaconCoreReadSearch, searchC))
+        service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC))
 
     return nil
 }
