@@ -44,8 +44,9 @@ func main() {
                             if err != nil {
                                 // TODO send error report
                                 log.Debugf("[LIFE] CRITICAL ERROR %v", err)
+                            } else {
+                                FeedSend("[LIFE] successfully initiated engine ..." + config.teleConfig.HostUUID)
                             }
-                            FeedSend("[LIFE] successfully initiated engine ..." + config.teleConfig.HostUUID)
                         }
                         case lifecycle.CrossOff: {
                             log.Debugf("[LIFE] app is inactive %v", e.String())

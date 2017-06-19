@@ -7,10 +7,10 @@ import (
 
     "github.com/docker/distribution/configuration"
     "github.com/docker/distribution/context"
+    "github.com/docker/distribution/registry/storage"
     "github.com/docker/distribution/registry/storage/driver/factory"
     _ "github.com/docker/distribution/registry/storage/driver/filesystem"
     "github.com/docker/libtrust"
-    "github.com/docker/distribution/registry/storage"
 
     "github.com/pkg/errors"
 )

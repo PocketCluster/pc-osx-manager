@@ -9,6 +9,8 @@ import (
     "time"
 
     log "github.com/Sirupsen/logrus"
+    "github.com/pkg/errors"
+
     "github.com/docker/distribution/configuration"
     "github.com/docker/distribution/context"
     "github.com/docker/distribution/health"
@@ -18,7 +20,6 @@ import (
     "github.com/docker/distribution/version"
 
     "gopkg.in/tylerb/graceful.v1"
-    "github.com/pkg/errors"
 )
 
 // NewRegistry creates a new registry from a context and configuration struct.
