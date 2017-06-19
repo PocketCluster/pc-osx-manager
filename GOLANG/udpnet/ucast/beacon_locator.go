@@ -19,7 +19,7 @@ const (
 
 type BeaconLocator struct {
     service.ServiceSupervisor
-    conn         *net.UDPConn
+    conn *net.UDPConn
 }
 
 // New constructor of a new server

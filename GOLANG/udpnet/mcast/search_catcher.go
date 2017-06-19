@@ -18,7 +18,7 @@ const (
 
 type SearchCatcher struct {
     service.ServiceSupervisor
-    conn         *net.UDPConn
+    conn *net.UDPConn
 }
 
 func NewSearchCatcher(sup service.ServiceSupervisor, niface string) (*SearchCatcher, error) {

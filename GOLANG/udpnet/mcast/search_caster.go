@@ -2,19 +2,24 @@ package mcast
 
 import (
     "net"
-    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+
+    "github.com/stkim1/pc-node-agent/service"
+)
+
+const (
+    EventBeaconNodeSearchSend string        = "event.beacon.node.search.send"
+    iventBeaconNodeSearchCasterClose string = "ivent.beacon.node.search.caster.close"
 )
 
 type SearchCaster struct {
-    conn        *net.UDPConn
-    chWrite     chan CastPack
-    chClosed    chan bool
+    service.AppSupervisor
+    conn *net.UDPConn
 }
 
-func NewSearchCaster() (*SearchCaster, error) {
+func NewSearchCaster(aup service.AppSupervisor) (*SearchCaster, error) {
     // Create a IPv4 listener
     conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: 0})
     if err != nil {
@@ -22,43 +27,60 @@ func NewSearchCaster() (*SearchCaster, error) {
     }
     conn.SetWriteBuffer(PC_MAX_MCAST_UDP_BUF_SIZE)
     mc := &SearchCaster{
-        conn:       conn,
-        chClosed:   make(chan bool),
-        chWrite:    make(chan CastPack),//, PC_MCAST_CASTER_CHAN_CAP),
+        AppSupervisor:    aup,
+        conn:             conn,
     }
-    go mc.write()
+    mc.write()
     return mc, nil
 }
 
 // Close is used to cleanup the client
-func (mc *SearchCaster) Close() error {
-    close(mc.chClosed)
-    close(mc.chWrite)
-    return errors.WithStack(mc.conn.Close())
-}
-
-func (mc *SearchCaster) write() {
-    for cp := range mc.chWrite {
-        // TODO : we can timeout if necessary
-        _, e := mc.conn.WriteToUDP(cp.Message, ipv4McastAddr)
-        if e != nil {
-            log.Info(errors.WithStack(e))
-        }
-    }
-}
-
-// sendQuery is used to multicast a query out
-func (mc *SearchCaster) Send(message []byte) error {
-    if len(message) == 0 {
-        return errors.Errorf("[ERR] multicast message is empty")
-    }
-    select {
-        case <-mc.chClosed:
-            return nil
-        case mc.chWrite <- CastPack{
-            Message: message,
-        }:
-        time.After(time.Millisecond)
-    }
+func (s *SearchCaster) Close() error {
+    s.BroadcastEvent(service.Event{Name:iventBeaconNodeSearchCasterClose})
     return nil
+}
+
+func (s *SearchCaster) write() {
+    var(
+        eventC  chan service.Event = make(chan service.Event)
+        closedC chan service.Event = make(chan service.Event)
+    )
+    s.RegisterServiceWithFuncs(
+        func() error {
+            var (
+                err error = nil
+            )
+            for {
+                select {
+                    case <- s.StopChannel(): {
+                        err = s.conn.Close()
+                        return errors.WithStack(err)
+                    }
+                    case <- closedC: {
+                        err = s.conn.Close()
+                        return errors.WithStack(err)
+                    }
+                    case e := <- eventC: {
+                        cpkg, ok := e.Payload.(CastPack)
+                        if !ok {
+                            log.Debugf("[WARN] invalid SearchCaster type")
+                            continue
+                        }
+                        if len(cpkg.Message) == 0 {
+                            log.Debugf("[WARN] empty SearchCaster message")
+                            continue
+                        }
+                        _, err = s.conn.WriteToUDP(cpkg.Message, ipv4McastAddr)
+                        if err != nil {
+                            log.Debugf("[WARN] SearchCaster transmit. Error : %v", errors.WithStack(err))
+                        }
+                    }
+                }
+            }
+        },
+        func(_ func(interface{})) error {
+            return nil
+        },
+        service.BindEventWithService(EventBeaconNodeSearchSend,        eventC),
+        service.BindEventWithService(iventBeaconNodeSearchCasterClose, closedC))
 }

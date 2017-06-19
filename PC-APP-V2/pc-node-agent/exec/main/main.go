@@ -25,7 +25,6 @@ import (
 )
 
 const (
-    nodeServiceSearch  = "service_search"
     nodeFeedbackDHCP   = "feedback_dhcp"
     dockerServiceUnit  = "docker.service"
 
@@ -84,44 +83,6 @@ func initDhcpListner(app service.AppSupervisor) error {
         },
     )
 
-    return nil
-}
-
-func initSearchService(app service.AppSupervisor) error {
-    caster, err := mcast.NewSearchCaster()
-    if err != nil {
-        return err
-    }
-
-    var eventsC chan service.Event = make(chan service.Event)
-    app.RegisterServiceWithFuncs(
-        func() error {
-            log.Debugf("[SEARCH] starting master serach service...")
-
-            for {
-                select {
-                    case <- app.StopChannel():
-                        return nil
-                    case e := <-eventsC: {
-                        cm, ok := e.Payload.([]byte)
-                        if ok {
-                            err := caster.Send(cm)
-                            if err != nil {
-                                log.Errorf("[SEARCH] casting error %v", err)
-                            }
-                        }
-                    }
-                }
-            }
-            return nil
-        },
-        func(_ func(interface{})) error {
-            caster.Close()
-            log.Debugf("[SEARCH] close master serach service...")
-            return nil
-        },
-        service.BindEventWithService(nodeServiceSearch, eventsC),
-    )
     return nil
 }
 
@@ -237,19 +198,26 @@ func initAgentService(app service.AppSupervisor) error {
 
         searchTx = func(data []byte) error {
             log.Debugf("[SEARCH-TX] %v", time.Now())
-            app.BroadcastEvent(service.Event{Name: nodeServiceSearch, Payload:data})
+            app.BroadcastEvent(
+                service.Event{
+                    Name:       mcast.EventBeaconNodeSearchSend,
+                    Payload:    mcast.CastPack{
+                        Message:    data,
+                    },
+                })
             return nil
         }
 
         beaconTx = func(target string, data []byte) error {
             log.Debugf("[BEACON-TX] %v TO : %v", time.Now(), target)
-            app.BroadcastEvent(service.Event{
-                Name: ucast.EventBeaconNodeLocationSend,
-                Payload: ucast.BeaconSend{
-                    Host:target,
-                    Payload:data,
-                },
-            })
+            app.BroadcastEvent(
+                service.Event{
+                    Name:       ucast.EventBeaconNodeLocationSend,
+                    Payload:    ucast.BeaconSend{
+                        Host:       target,
+                        Payload:    data,
+                    },
+                })
             return nil
         }
 
@@ -374,7 +342,7 @@ func main() {
     }
 
     // search service
-    err = initSearchService(app)
+    _, err = mcast.NewSearchCaster(app)
     if err != nil {
         log.Panic(errors.WithStack(err))
     }
