@@ -52,14 +52,12 @@ func (b *BeaconLocator) read() {
     b.RegisterServiceWithFuncs(
         operation.ServiceBeaconLocationRead,
         func() error {
-
             var (
                 buff []byte          = make([]byte, PC_MAX_UCAST_UDP_BUF_SIZE)
                 addr *net.UDPAddr    = nil
                 err error            = nil
                 count int            = 0
             )
-
             for {
                 select {
                     case <-b.StopChannel(): {

@@ -1,6 +1,9 @@
 package main
 
 import (
+    "os"
+    "path"
+
     log "github.com/Sirupsen/logrus"
     tefaults "github.com/gravitational/teleport/lib/defaults"
     tervice "github.com/gravitational/teleport/lib/service"
@@ -9,24 +12,11 @@ import (
     "github.com/coreos/etcd/embed"
     "github.com/pkg/errors"
 
+    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/extlib/registry"
 )
-
-func setLogger(debug bool) {
-    // debug setup
-    if debug {
-        utils.InitLoggerDebug()
-        log.Info("DEBUG mode logger output configured")
-    } else {
-        utils.InitLoggerCLI()
-        log.Info("NORMAL mode logger configured")
-    }
-    log.SetFormatter(&log.TextFormatter{
-        DisableColors:    true,
-    })
-}
 
 type serviceConfig struct {
     etcdConfig     *embed.PocketConfig
@@ -110,23 +100,48 @@ func setupServiceConfig() (*serviceConfig, error) {
     }
 
     // registry configuration
-    // TODO : fix datadir. Plus, is it ok not to pass CA pub key? we need to unify TLS configuration
-    regCfg, err := registry.NewPocketRegistryConfig(false, dataDir, hostBundle.Certificate, hostBundle.PrivateKey)
+    var regPath = path.Join(dataDir, defaults.RepositoryPathPostfix)
+    if _, err := os.Stat(regPath); os.IsNotExist(err) {
+        os.MkdirAll(regPath, 0700);
+    }
+    regCfg, err := registry.NewPocketRegistryConfig(false, regPath, hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
         return nil, errors.WithStack(err)
     }
-
+/*
+    err = registry.GarbageCollection(regCfg)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+*/
     //etcd configuration
-    // TODO fix datadir
-    etcdCfg, err := embed.NewPocketConfig(dataDir, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey)
+    var etcdPath = path.Join(dataDir, defaults.StoragePathPostfix)
+    if _, err := os.Stat(etcdPath); os.IsNotExist(err) {
+        os.MkdirAll(etcdPath, 0700);
+    }
+    etcdCfg, err := embed.NewPocketConfig(etcdPath, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
         // this is critical
         return nil, errors.WithStack(err)
     }
-    //log.Info(spew.Sdump(ctx))
     return &serviceConfig {
         etcdConfig: etcdCfg,
         teleConfig: teleCfg,
         regConfig: regCfg,
     }, nil
+}
+
+
+func setLogger(debug bool) {
+    // debug setup
+    if debug {
+        utils.InitLoggerDebug()
+        log.Info("DEBUG mode logger output configured")
+    } else {
+        utils.InitLoggerCLI()
+        log.Info("NORMAL mode logger configured")
+    }
+    log.SetFormatter(&log.TextFormatter{
+        DisableColors:    true,
+    })
 }

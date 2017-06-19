@@ -95,8 +95,6 @@ func (s *SearchCatcher) read() {
                     }
                 }
             }
-
-            return nil
         },
         service.BindEventWithService(iventBeaconCoreSearchCatcherClose, closedC))
 }

@@ -25,3 +25,9 @@ const (
 
     MasterBeaconPublicKey string      = "pc_master_beacon" + pcrypto.FileExtPublicKey
 )
+
+const (
+    RepositoryPathPostfix string      = "repository"
+
+    StoragePathPostfix string         = "storage"
+)

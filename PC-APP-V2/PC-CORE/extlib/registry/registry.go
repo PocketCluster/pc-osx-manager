@@ -6,8 +6,6 @@ import (
     "io"
     "net"
     "net/http"
-    "os"
-    "sync"
     "time"
 
     log "github.com/Sirupsen/logrus"
@@ -80,7 +78,6 @@ func NewPocketRegistry(config *PocketRegistryConfig) (*PocketRegistry, error) {
 }
 
 // A Registry represents a complete instance of the registry.
-// TODO(aaronl): It might make sense for Registry to become an interface.
 type PocketRegistry struct {
     config        *PocketRegistryConfig
     app           *handlers.App
@@ -122,31 +119,6 @@ func (r *PocketRegistry) Start() (error) {
             log.Println("HTTP Server Error - ", err)
         }
     }(r.server, ln)
-
-    r.listener = ln
-    return nil
-}
-
-// ListenAndServe runs the registry's HTTP server.
-func (r *PocketRegistry) StartOnWaitGroup(wg *sync.WaitGroup) (error) {
-    config := r.config
-
-    ln, err := listener.NewListener(config.regConfig.HTTP.Net, config.regConfig.HTTP.Addr)
-    if err != nil {
-        return err
-    }
-
-    // TODO : No HTTP secret provided - generated random secret. This may cause problems with uploads if multiple registries are behind a load-balancer. To provide a shared secret, fill in http.secret in the configuration file or set the REGISTRY_HTTP_SECRET environment variable.
-    ln = tls.NewListener(ln, config.tlsConfig)
-    context.GetLogger(r.app).Infof("listening on %v, tls", ln.Addr())
-    go func(w *sync.WaitGroup, srv *graceful.Server, l net.Listener) {
-        defer w.Done()
-
-        var err = srv.Serve(l)
-        if err != nil {
-            log.Println("HTTP Server Error - ", err)
-        }
-    }(wg, r.server, ln)
 
     r.listener = ln
     return nil
@@ -291,34 +263,6 @@ func alive(path string, handler http.Handler) http.Handler {
 
         handler.ServeHTTP(w, r)
     })
-}
-
-func resolveConfiguration(args []string) (*configuration.Configuration, error) {
-    var configurationPath string
-
-    if len(args) > 0 {
-        configurationPath = args[0]
-    } else if os.Getenv("REGISTRY_CONFIGURATION_PATH") != "" {
-        configurationPath = os.Getenv("REGISTRY_CONFIGURATION_PATH")
-    }
-
-    if configurationPath == "" {
-        return nil, fmt.Errorf("configuration path unspecified")
-    }
-
-    fp, err := os.Open(configurationPath)
-    if err != nil {
-        return nil, err
-    }
-
-    defer fp.Close()
-
-    config, err := configuration.Parse(fp)
-    if err != nil {
-        return nil, fmt.Errorf("error parsing %s: %v", configurationPath, err)
-    }
-
-    return config, nil
 }
 
 func nextProtos(config *configuration.Configuration) []string {
