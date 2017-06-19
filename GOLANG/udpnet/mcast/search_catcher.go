@@ -75,7 +75,6 @@ func (s *SearchCatcher) read() {
                         if err != nil {
                             continue
                         }
-
                         count, addr, err = s.conn.ReadFromUDP(buff)
                         if err != nil {
                             continue

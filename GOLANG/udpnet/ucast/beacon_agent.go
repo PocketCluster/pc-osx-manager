@@ -11,8 +11,8 @@ import (
 )
 
 const (
-    EventBeaconNodeLocationSend string    = "event.beacon.node.location.send"
     EventBeaconNodeLocationReceive string = "event.beacon.node.location.receive"
+    EventBeaconNodeLocationSend string    = "event.beacon.node.location.send"
     iventBeaconNodeServiceClose string    = "ivent.beacon.node.service.close"
 )
 
@@ -80,7 +80,6 @@ func (b *BeaconAgent) read() {
                         if count == 0 {
                             continue
                         }
-
                         adr := copyUDPAddr(addr)
                         msg := make([]byte, count)
                         copy(msg, buff[:count])

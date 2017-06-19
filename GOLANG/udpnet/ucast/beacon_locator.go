@@ -143,5 +143,5 @@ func (b *BeaconLocator) write() {
             }
         },
         service.BindEventWithService(EventBeaconCoreLocationSend, eventC),
-        service.BindEventWithService(iventBeaconCoreServiceClose,  closedC))
+        service.BindEventWithService(iventBeaconCoreServiceClose, closedC))
 }
