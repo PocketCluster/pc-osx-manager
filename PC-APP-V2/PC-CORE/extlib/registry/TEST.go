@@ -10,6 +10,8 @@ import (
     "time"
 
     log "github.com/Sirupsen/logrus"
+    //logstash "github.com/bshuster-repo/logrus-logstash-hook"
+
     "github.com/docker/distribution/configuration"
     "github.com/docker/distribution/context"
     "github.com/docker/distribution/registry"
@@ -18,6 +20,73 @@ import (
 
     "gopkg.in/tylerb/graceful.v1"
 )
+
+// TODO : WE NEED UNIFIED LOGGING FACILITY
+/*
+// configureLogging prepares the context with a logger using the configuration.
+func configureLogging(ctx context.Context, config *configuration.Configuration) (context.Context, error) {
+    if config.Log.Level == "" && config.Log.Formatter == "" {
+        // If no config for logging is set, fallback to deprecated "Loglevel".
+        log.SetLevel(logLevel(config.Loglevel))
+        ctx = context.WithLogger(ctx, context.GetLogger(ctx))
+        return ctx, nil
+    }
+
+    log.SetLevel(logLevel(config.Log.Level))
+
+    formatter := config.Log.Formatter
+    if formatter == "" {
+        formatter = "text" // default formatter
+    }
+
+    switch formatter {
+    case "json":
+        log.SetFormatter(&log.JSONFormatter{
+            TimestampFormat: time.RFC3339Nano,
+        })
+    case "text":
+        log.SetFormatter(&log.TextFormatter{
+            TimestampFormat: time.RFC3339Nano,
+        })
+    case "logstash":
+        log.SetFormatter(&logstash.LogstashFormatter{
+            TimestampFormat: time.RFC3339Nano,
+        })
+    default:
+        // just let the library use default on empty string.
+        if config.Log.Formatter != "" {
+            return ctx, fmt.Errorf("unsupported logging formatter: %q", config.Log.Formatter)
+        }
+    }
+
+    if config.Log.Formatter != "" {
+        log.Debugf("using %q logging formatter", config.Log.Formatter)
+    }
+
+    if len(config.Log.Fields) > 0 {
+        // build up the static fields, if present.
+        var fields []interface{}
+        for k := range config.Log.Fields {
+            fields = append(fields, k)
+        }
+
+        ctx = context.WithValues(ctx, config.Log.Fields)
+        ctx = context.WithLogger(ctx, context.GetLogger(ctx, fields...))
+    }
+
+    return ctx, nil
+}
+
+func logLevel(level configuration.Loglevel) log.Level {
+    l, err := log.ParseLevel(string(level))
+    if err != nil {
+        l = log.InfoLevel
+        log.Warnf("error parsing level %q: %v, using %q    ", level, err, l)
+    }
+
+    return l
+}
+*/
 
 func resolveConfiguration(args []string) (*configuration.Configuration, error) {
     var configurationPath string
@@ -301,4 +370,18 @@ func (r *PocketRegistry) StartOnWaitGroup(wg *sync.WaitGroup) (error) {
 
     r.listener = ln
     return nil
+}
+
+// ListenAndServe runs the registry's HTTP server.
+func (r *PocketRegistry) ListenAndServe() error {
+    config := r.config
+
+    ln, err := listener.NewListener(config.regConfig.HTTP.Net, config.regConfig.HTTP.Addr)
+    if err != nil {
+        return err
+    }
+
+    ln = tls.NewListener(ln, config.tlsConfig)
+    context.GetLogger(r.app).Infof("listening on %v, tls", ln.Addr())
+    return r.server.Serve(ln)
 }

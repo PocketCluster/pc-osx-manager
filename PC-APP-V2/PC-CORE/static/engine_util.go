@@ -131,7 +131,7 @@ func setupServiceConfig() (*serviceConfig, error) {
     }, nil
 }
 
-
+// TODO : WE NEED UNIFIED LOGGING FACILITY (Master + Slave)
 func setLogger(debug bool) {
     // debug setup
     if debug {
@@ -142,6 +142,7 @@ func setLogger(debug bool) {
         log.Info("NORMAL mode logger configured")
     }
     log.SetFormatter(&log.TextFormatter{
-        DisableColors:    true,
+        DisableColors:      true,
+        TimestampFormat:    defaults.PocketTimeDateFormat,
     })
 }

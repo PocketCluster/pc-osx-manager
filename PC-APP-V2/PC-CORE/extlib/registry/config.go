@@ -23,11 +23,6 @@ func GarbageCollection(pcfg *PocketRegistryConfig) error {
     }
 
     ctx := context.Background()
-    ctx, err = configureLogging(ctx, config)
-    if err != nil {
-        return errors.Errorf("unable to configure logging with config: %s", err)
-    }
-
     k, err := libtrust.GenerateECP256PrivateKey()
     if err != nil {
         return errors.WithStack(err)
