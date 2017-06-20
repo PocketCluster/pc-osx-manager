@@ -6,13 +6,11 @@ import (
     "io"
     "net"
     "net/http"
-    "os"
-    "sync"
     "time"
 
     log "github.com/Sirupsen/logrus"
-    //logstash "github.com/bshuster-repo/logrus-logstash-hook"
-    //"github.com/bugsnag/bugsnag-go"
+    "github.com/pkg/errors"
+
     "github.com/docker/distribution/configuration"
     "github.com/docker/distribution/context"
     "github.com/docker/distribution/health"
@@ -27,7 +25,6 @@ import (
 // NewRegistry creates a new registry from a context and configuration struct.
 func NewPocketRegistry(config *PocketRegistryConfig) (*PocketRegistry, error) {
     var (
-        err error
         ctx = context.WithVersion(context.Background(), version.Version)
     )
 /*
@@ -40,11 +37,6 @@ func NewPocketRegistry(config *PocketRegistryConfig) (*PocketRegistry, error) {
         }(config.regConfig.HTTP.Debug.Addr)
     }
 */
-    ctx, err = configureLogging(ctx, config.regConfig)
-    if err != nil {
-        return nil, fmt.Errorf("error configuring logger: %v", err)
-    }
-
     // inject a logger into the uuid library. warns us if there is a problem
     // with uuid generation under low entropy.
     uuid.Loggerf = context.GetLogger(ctx).Warnf
@@ -72,7 +64,7 @@ func NewPocketRegistry(config *PocketRegistryConfig) (*PocketRegistry, error) {
             Timeout: 10 * time.Second,
             NoSignalHandling: true,
             Server: &http.Server{
-//                Addr: config.regConfig.HTTP.Addr,
+                Addr: config.regConfig.HTTP.Addr,
                 Handler: handler,
             },
         },
@@ -80,26 +72,11 @@ func NewPocketRegistry(config *PocketRegistryConfig) (*PocketRegistry, error) {
 }
 
 // A Registry represents a complete instance of the registry.
-// TODO(aaronl): It might make sense for Registry to become an interface.
 type PocketRegistry struct {
     config        *PocketRegistryConfig
     app           *handlers.App
     server 		  *graceful.Server
     listener      io.Closer
-}
-
-// ListenAndServe runs the registry's HTTP server.
-func (r *PocketRegistry) ListenAndServe() error {
-    config := r.config
-
-    ln, err := listener.NewListener(config.regConfig.HTTP.Net, config.regConfig.HTTP.Addr)
-    if err != nil {
-        return err
-    }
-
-	ln = tls.NewListener(ln, config.tlsConfig)
-	context.GetLogger(r.app).Infof("listening on %v, tls", ln.Addr())
-    return r.server.Serve(ln)
 }
 
 // ListenAndServe runs the registry's HTTP server.
@@ -113,7 +90,7 @@ func (r *PocketRegistry) Start() (error) {
 
     // TODO : No HTTP secret provided - generated random secret. This may cause problems with uploads if multiple registries are behind a load-balancer. To provide a shared secret, fill in http.secret in the configuration file or set the REGISTRY_HTTP_SECRET environment variable.
     ln = tls.NewListener(ln, config.tlsConfig)
-    context.GetLogger(r.app).Infof("listening on %v, tls", ln.Addr())
+    log.Debugf("[REG] listening on %v, tls", ln.Addr())
 
     // start serving
     go func(srv *graceful.Server, l net.Listener) {
@@ -127,46 +104,16 @@ func (r *PocketRegistry) Start() (error) {
     return nil
 }
 
-// ListenAndServe runs the registry's HTTP server.
-func (r *PocketRegistry) StartOnWaitGroup(wg *sync.WaitGroup) (error) {
-    config := r.config
-
-    ln, err := listener.NewListener(config.regConfig.HTTP.Net, config.regConfig.HTTP.Addr)
-    if err != nil {
-        return err
-    }
-
-    // TODO : No HTTP secret provided - generated random secret. This may cause problems with uploads if multiple registries are behind a load-balancer. To provide a shared secret, fill in http.secret in the configuration file or set the REGISTRY_HTTP_SECRET environment variable.
-    ln = tls.NewListener(ln, config.tlsConfig)
-    context.GetLogger(r.app).Infof("listening on %v, tls", ln.Addr())
-    go func(w *sync.WaitGroup, srv *graceful.Server, l net.Listener) {
-        defer w.Done()
-
-        var err = srv.Serve(l)
-        if err != nil {
-            log.Println("HTTP Server Error - ", err)
-        }
-    }(wg, r.server, ln)
-
-    r.listener = ln
-    return nil
-}
-
-func (r *PocketRegistry) Close() error {
+func (r *PocketRegistry) Stop(timeout time.Duration) error {
     if r.listener == nil {
         return nil
     }
     ln := r.listener
     r.listener = nil
-    return ln.Close()
-}
 
-func (r *PocketRegistry) Stop(timeout time.Duration) {
-    if r.listener == nil {
-        return
-    }
-    r.listener = nil
+    err := ln.Close()
     r.server.Stop(timeout)
+    return errors.WithStack(err)
 }
 
 func configureReporting(app *handlers.App) http.Handler {
@@ -192,73 +139,6 @@ func configureReporting(app *handlers.App) http.Handler {
 */
 
     return handler
-}
-
-// configureLogging prepares the context with a logger using the
-// configuration.
-func configureLogging(ctx context.Context, config *configuration.Configuration) (context.Context, error) {
-    if config.Log.Level == "" && config.Log.Formatter == "" {
-        // If no config for logging is set, fallback to deprecated "Loglevel".
-        log.SetLevel(logLevel(config.Loglevel))
-        ctx = context.WithLogger(ctx, context.GetLogger(ctx))
-        return ctx, nil
-    }
-
-    log.SetLevel(logLevel(config.Log.Level))
-
-    formatter := config.Log.Formatter
-    if formatter == "" {
-        formatter = "text" // default formatter
-    }
-
-    switch formatter {
-    case "json":
-        log.SetFormatter(&log.JSONFormatter{
-            TimestampFormat: time.RFC3339Nano,
-        })
-    case "text":
-        log.SetFormatter(&log.TextFormatter{
-            TimestampFormat: time.RFC3339Nano,
-        })
-/*
-    case "logstash":
-        log.SetFormatter(&logstash.LogstashFormatter{
-            TimestampFormat: time.RFC3339Nano,
-        })
-*/
-    default:
-        // just let the library use default on empty string.
-        if config.Log.Formatter != "" {
-            return ctx, fmt.Errorf("unsupported logging formatter: %q", config.Log.Formatter)
-        }
-    }
-
-    if config.Log.Formatter != "" {
-        log.Debugf("using %q logging formatter", config.Log.Formatter)
-    }
-
-    if len(config.Log.Fields) > 0 {
-        // build up the static fields, if present.
-        var fields []interface{}
-        for k := range config.Log.Fields {
-            fields = append(fields, k)
-        }
-
-        ctx = context.WithValues(ctx, config.Log.Fields)
-        ctx = context.WithLogger(ctx, context.GetLogger(ctx, fields...))
-    }
-
-    return ctx, nil
-}
-
-func logLevel(level configuration.Loglevel) log.Level {
-    l, err := log.ParseLevel(string(level))
-    if err != nil {
-        l = log.InfoLevel
-        log.Warnf("error parsing level %q: %v, using %q    ", level, err, l)
-    }
-
-    return l
 }
 
 // TODO : insert sentry.io here
@@ -291,34 +171,6 @@ func alive(path string, handler http.Handler) http.Handler {
 
         handler.ServeHTTP(w, r)
     })
-}
-
-func resolveConfiguration(args []string) (*configuration.Configuration, error) {
-    var configurationPath string
-
-    if len(args) > 0 {
-        configurationPath = args[0]
-    } else if os.Getenv("REGISTRY_CONFIGURATION_PATH") != "" {
-        configurationPath = os.Getenv("REGISTRY_CONFIGURATION_PATH")
-    }
-
-    if configurationPath == "" {
-        return nil, fmt.Errorf("configuration path unspecified")
-    }
-
-    fp, err := os.Open(configurationPath)
-    if err != nil {
-        return nil, err
-    }
-
-    defer fp.Close()
-
-    config, err := configuration.Parse(fp)
-    if err != nil {
-        return nil, fmt.Errorf("error parsing %s: %v", configurationPath, err)
-    }
-
-    return config, nil
 }
 
 func nextProtos(config *configuration.Configuration) []string {

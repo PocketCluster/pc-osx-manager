@@ -25,3 +25,13 @@ const (
 
     MasterBeaconPublicKey string      = "pc_master_beacon" + pcrypto.FileExtPublicKey
 )
+
+const (
+    RepositoryPathPostfix string      = "repository"
+
+    StoragePathPostfix string         = "storage"
+)
+
+const (
+    PocketTimeDateFormat string       = "2006/01/02 15:04:05 -0700"
+)

@@ -2,60 +2,127 @@ package registry
 
 import (
     "crypto/tls"
+    "fmt"
+    "net"
     "net/http"
+    "os"
+    "sync"
     "time"
 
-    "github.com/pkg/errors"
+    log "github.com/Sirupsen/logrus"
+    //logstash "github.com/bshuster-repo/logrus-logstash-hook"
+
     "github.com/docker/distribution/configuration"
     "github.com/docker/distribution/context"
-    "github.com/docker/distribution/registry/storage"
-    //_ "github.com/docker/distribution/registry/storage/cache"
-    //_ "github.com/docker/distribution/registry/storage/cache/memory"
-    "github.com/docker/distribution/registry/storage/driver/factory"
-    //_ "github.com/docker/distribution/registry/storage/driver/inmemory"
-    _ "github.com/docker/distribution/registry/storage/driver/filesystem"
-    "github.com/docker/libtrust"
+    "github.com/docker/distribution/registry"
+    "github.com/docker/distribution/registry/listener"
+    "github.com/docker/distribution/version"
 
-    "github.com/stkim1/pc-core/utils"
+    "gopkg.in/tylerb/graceful.v1"
 )
 
-func GarbageCollection(pcfg *PocketRegistryConfig) error {
-    config := pcfg.regConfig
-    driver, err := factory.Create(config.Storage.Type(), config.Storage.Parameters())
-    if err != nil {
-        return errors.Errorf("failed to construct %s driver: %v", config.Storage.Type(), err)
+// TODO : WE NEED UNIFIED LOGGING FACILITY
+/*
+// configureLogging prepares the context with a logger using the configuration.
+func configureLogging(ctx context.Context, config *configuration.Configuration) (context.Context, error) {
+    if config.Log.Level == "" && config.Log.Formatter == "" {
+        // If no config for logging is set, fallback to deprecated "Loglevel".
+        log.SetLevel(logLevel(config.Loglevel))
+        ctx = context.WithLogger(ctx, context.GetLogger(ctx))
+        return ctx, nil
     }
 
-    ctx := context.Background()
-    k, err := libtrust.GenerateECP256PrivateKey()
-    if err != nil {
-        return errors.WithStack(err)
+    log.SetLevel(logLevel(config.Log.Level))
+
+    formatter := config.Log.Formatter
+    if formatter == "" {
+        formatter = "text" // default formatter
     }
 
-    registry, err := storage.NewRegistry(ctx, driver, storage.Schema1SigningKey(k))
-    if err != nil {
-        return errors.Errorf("failed to construct registry: %v", err)
+    switch formatter {
+    case "json":
+        log.SetFormatter(&log.JSONFormatter{
+            TimestampFormat: time.RFC3339Nano,
+        })
+    case "text":
+        log.SetFormatter(&log.TextFormatter{
+            TimestampFormat: time.RFC3339Nano,
+        })
+    case "logstash":
+        log.SetFormatter(&logstash.LogstashFormatter{
+            TimestampFormat: time.RFC3339Nano,
+        })
+    default:
+        // just let the library use default on empty string.
+        if config.Log.Formatter != "" {
+            return ctx, fmt.Errorf("unsupported logging formatter: %q", config.Log.Formatter)
+        }
     }
 
-    err = storage.MarkAndSweep(ctx, driver, registry, false)
-    if err != nil {
-        return errors.Errorf("failed to garbage collect: %v", err)
+    if config.Log.Formatter != "" {
+        log.Debugf("using %q logging formatter", config.Log.Formatter)
     }
-    return nil
+
+    if len(config.Log.Fields) > 0 {
+        // build up the static fields, if present.
+        var fields []interface{}
+        for k := range config.Log.Fields {
+            fields = append(fields, k)
+        }
+
+        ctx = context.WithValues(ctx, config.Log.Fields)
+        ctx = context.WithLogger(ctx, context.GetLogger(ctx, fields...))
+    }
+
+    return ctx, nil
 }
 
-func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []byte) (*PocketRegistryConfig, error) {
-    if len(rootDir) == 0 {
-        return nil, errors.Errorf("[ERR] invalid path for root dir")
+func logLevel(level configuration.Loglevel) log.Level {
+    l, err := log.ParseLevel(string(level))
+    if err != nil {
+        l = log.InfoLevel
+        log.Warnf("error parsing level %q: %v, using %q    ", level, err, l)
     }
-    var(
-        err error = nil
 
+    return l
+}
+*/
+
+func resolveConfiguration(args []string) (*configuration.Configuration, error) {
+    var configurationPath string
+
+    if len(args) > 0 {
+        configurationPath = args[0]
+    } else if os.Getenv("REGISTRY_CONFIGURATION_PATH") != "" {
+        configurationPath = os.Getenv("REGISTRY_CONFIGURATION_PATH")
+    }
+
+    if configurationPath == "" {
+        return nil, fmt.Errorf("configuration path unspecified")
+    }
+
+    fp, err := os.Open(configurationPath)
+    if err != nil {
+        return nil, err
+    }
+
+    defer fp.Close()
+
+    config, err := configuration.Parse(fp)
+    if err != nil {
+        return nil, fmt.Errorf("error parsing %s: %v", configurationPath, err)
+    }
+
+    return config, nil
+}
+
+func NewRegistrySampleConfig() *configuration.Configuration {
+    var(
         // logging options
         accessLog = struct {
             Disabled        bool                        `yaml:"disabled,omitempty"`
         } {
-            Disabled:       enableLog,
+            Disabled:       false,
         }
         log = struct {
             AccessLog struct {
@@ -70,8 +137,8 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
             Level:          configuration.Loglevel("debug"),
             Formatter:      "text",
             Fields:         map[string]interface{} {
-                "service":        "registry",
-                "environment":    "pc-master",
+                "service": "registry",
+                "environment": "pc-master",
             },
             Hooks:          nil,
         }
@@ -82,7 +149,7 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
                 "blobdescriptor": "inmemory",
             },
             "filesystem": configuration.Parameters {
-                "rootdirectory": rootDir,
+                "rootdirectory": "/Users/almightykim/Workspace/DKIMG/REGISTRY/data",
                 "maxthreads": 32,
             },
             "maintenance": configuration.Parameters {
@@ -112,6 +179,9 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
                 Email string            `yaml:"email,omitempty"`
             }                           `yaml:"letsencrypt,omitempty"`
         } {
+            Certificate:     "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert",
+            Key:             "/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key",
+            ClientCAs:       nil,
             LetsEncrypt:     letsEncrypt,
         }
         debug = struct {
@@ -125,8 +195,8 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
             Disabled:       false,
         }
 
-        // HTTP contains configuration parameters for the registry's http interface.
-        secret = utils.NewRandomString(32)
+        // HTTP contains configuration parameters for the registry's http
+        // interface.
         http = struct {
             Addr            string      `yaml:"addr,omitempty"`
             Net             string      `yaml:"net,omitempty"`
@@ -155,7 +225,7 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
             Net:            "tcp",
             Host:           "",
             Prefix:         "",
-            Secret:         secret,
+            Secret:         "",
             RelativeURLs:   false,
             TLS:            httpTLS,
             Headers:        http.Header {
@@ -186,7 +256,7 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
             }                           `yaml:"pool,omitempty"`
         } {}
 
-        // TODO : health check
+        // health check
         health = configuration.Health {
             FileCheckers:  nil,
             HTTPCheckers:  nil,
@@ -200,7 +270,7 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
             } `yaml:"schema1,omitempty"`
         } {}
 
-        // TODO : Validation configures validation options for the registry.
+        // Validation configures validation options for the registry.
         validation = struct {
             Enabled        bool         `yaml:"enabled,omitempty"`
             Manifests struct {
@@ -211,7 +281,7 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
             }                           `yaml:"manifests,omitempty"`
         } {}
 
-        // TODO : Policy configures registry policy options.
+        // Policy configures registry policy options.
         policy = struct {
             Repository struct {
                 Classes []string        `yaml:"classes"`
@@ -219,7 +289,7 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
         } {}
     )
 
-    regConfig := &configuration.Configuration {
+    return &configuration.Configuration {
         Version:        configuration.MajorMinorVersion(0, 1),
         Log:            log,
         Loglevel:       configuration.Loglevel("info"),
@@ -236,68 +306,82 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
         Validation:     validation,
         Policy:         policy,
     }
+}
 
-
-    // (04/17/2017)
-    // TLS configuration is supposed to be setup in ListenAndServe function.
-    // Due to constraints in Pocket Context initialization, it's moved here.
-    // Further, it makes more coherent configuration function group. We need to make it condense though
-
-    tlsConf := &tls.Config{
-        ClientAuth:               tls.NoClientCert,
-        NextProtos:               nextProtos(regConfig),
-        MinVersion:               tls.VersionTLS10,
-        PreferServerCipherSuites: true,
-        CipherSuites: []uint16{
-            tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-            tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-            tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-            tls.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
-            tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-            tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-            tls.TLS_RSA_WITH_AES_128_CBC_SHA,
-            tls.TLS_RSA_WITH_AES_256_CBC_SHA,
-        },
-    }
-
-    tlsConf.Certificates = make([]tls.Certificate, 1)
-    tlsConf.Certificates[0], err = tls.X509KeyPair(tlsCert, tlsKey)
+func ParseYamlConfig(configPath string) (*configuration.Configuration, error) {
+    fp, err := os.Open(configPath)
     if err != nil {
         return nil, err
     }
 
-/*
-    // TODO : CHECK : is it ok not to pass CA pub key? we need to unify TLS configuration
-    (04/16/2017) we don't need to load CA for now.
-    if len(regConfig.HTTP.TLS.ClientCAs) != 0 {
-        pool := x509.NewCertPool()
+    defer fp.Close()
 
-        for _, ca := range regConfig.HTTP.TLS.ClientCAs {
-            caPem, err := ioutil.ReadFile(ca)
-            if err != nil {
-                return err
-            }
-
-            if ok := pool.AppendCertsFromPEM(caPem); !ok {
-                return fmt.Errorf("Could not add CA to pool")
-            }
-        }
-
-        for _, subj := range pool.Subjects() {
-            context.GetLogger(registry.app).Debugf("CA Subject: %s", string(subj))
-        }
-
-        tlsConf.ClientAuth = tls.RequireAndVerifyClientCert
-        tlsConf.ClientCAs = pool
+    config, err := configuration.Parse(fp)
+    if err != nil {
+        return nil, fmt.Errorf("error parsing %s: %v", configPath , err)
     }
-*/
-    return &PocketRegistryConfig {
-        regConfig: regConfig,
-        tlsConfig: tlsConf,
-    }, nil
+    return config, err
 }
 
-type PocketRegistryConfig struct {
-    regConfig    *configuration.Configuration
-    tlsConfig    *tls.Config
+func Serve(config *configuration.Configuration) {
+    // setup context
+    ctx := context.WithVersion(context.Background(), version.Version)
+
+    if config.HTTP.Debug.Addr != "" {
+        go func(addr string) {
+            log.Infof("debug server listening %v", addr)
+            if err := http.ListenAndServe(addr, nil); err != nil {
+                log.Fatalf("error listening on debug interface: %v", err)
+            }
+        }(config.HTTP.Debug.Addr)
+    }
+
+    registry, err := registry.NewRegistry(ctx, config)
+    if err != nil {
+        log.Fatalln(err)
+    }
+
+    if err = registry.ListenAndServe(); err != nil {
+        log.Fatalln(err)
+    }
+}
+
+
+// ListenAndServe runs the registry's HTTP server.
+func (r *PocketRegistry) StartOnWaitGroup(wg *sync.WaitGroup) (error) {
+    config := r.config
+
+    ln, err := listener.NewListener(config.regConfig.HTTP.Net, config.regConfig.HTTP.Addr)
+    if err != nil {
+        return err
+    }
+
+    // TODO : No HTTP secret provided - generated random secret. This may cause problems with uploads if multiple registries are behind a load-balancer. To provide a shared secret, fill in http.secret in the configuration file or set the REGISTRY_HTTP_SECRET environment variable.
+    ln = tls.NewListener(ln, config.tlsConfig)
+    context.GetLogger(r.app).Infof("listening on %v, tls", ln.Addr())
+    go func(w *sync.WaitGroup, srv *graceful.Server, l net.Listener) {
+        defer w.Done()
+
+        var err = srv.Serve(l)
+        if err != nil {
+            log.Println("HTTP Server Error - ", err)
+        }
+    }(wg, r.server, ln)
+
+    r.listener = ln
+    return nil
+}
+
+// ListenAndServe runs the registry's HTTP server.
+func (r *PocketRegistry) ListenAndServe() error {
+    config := r.config
+
+    ln, err := listener.NewListener(config.regConfig.HTTP.Net, config.regConfig.HTTP.Addr)
+    if err != nil {
+        return err
+    }
+
+    ln = tls.NewListener(ln, config.tlsConfig)
+    context.GetLogger(r.app).Infof("listening on %v, tls", ln.Addr())
+    return r.server.Serve(ln)
 }

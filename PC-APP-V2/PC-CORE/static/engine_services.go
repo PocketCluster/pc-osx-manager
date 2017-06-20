@@ -72,9 +72,9 @@ func initRegistryService(a *mainLife, config *registry.PocketRegistryConfig) err
 
             // wait for service to stop
             <- a.StopChannel()
-            reg.Stop(time.Second)
-            log.Debugf("[REGISTRY] server exit")
-            return nil
+            err = reg.Stop(time.Second)
+            log.Debugf("[REGISTRY] server exit. Error : %v", err)
+            return errors.WithStack(err)
         })
     return nil
 }
