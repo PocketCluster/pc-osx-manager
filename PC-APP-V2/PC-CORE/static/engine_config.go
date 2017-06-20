@@ -7,7 +7,6 @@ import (
     log "github.com/Sirupsen/logrus"
     tefaults "github.com/gravitational/teleport/lib/defaults"
     tervice "github.com/gravitational/teleport/lib/service"
-    "github.com/gravitational/teleport/lib/utils"
 
     "github.com/coreos/etcd/embed"
     "github.com/pkg/errors"
@@ -128,20 +127,4 @@ func setupServiceConfig() (*serviceConfig, error) {
         teleConfig: teleCfg,
         regConfig: regCfg,
     }, nil
-}
-
-// TODO : WE NEED UNIFIED LOGGING FACILITY (Master + Slave)
-func setLogger(debug bool) {
-    // debug setup
-    if debug {
-        utils.InitLoggerDebug()
-        log.Info("DEBUG mode logger output configured")
-    } else {
-        utils.InitLoggerCLI()
-        log.Info("NORMAL mode logger configured")
-    }
-    log.SetFormatter(&log.TextFormatter{
-        DisableColors:      true,
-        TimestampFormat:    defaults.PocketTimeDateFormat,
-    })
 }
