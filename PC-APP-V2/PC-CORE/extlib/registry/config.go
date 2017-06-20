@@ -5,6 +5,7 @@ import (
     "net/http"
     "time"
 
+    "github.com/pkg/errors"
     "github.com/docker/distribution/configuration"
     "github.com/docker/distribution/context"
     "github.com/docker/distribution/registry/storage"
@@ -15,7 +16,7 @@ import (
     _ "github.com/docker/distribution/registry/storage/driver/filesystem"
     "github.com/docker/libtrust"
 
-    "github.com/pkg/errors"
+    "github.com/stkim1/pc-core/utils"
 )
 
 func GarbageCollection(pcfg *PocketRegistryConfig) error {
@@ -124,8 +125,8 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
             Disabled:       false,
         }
 
-        // HTTP contains configuration parameters for the registry's http
-        // interface.
+        // HTTP contains configuration parameters for the registry's http interface.
+        secret = utils.NewRandomString(32)
         http = struct {
             Addr            string      `yaml:"addr,omitempty"`
             Net             string      `yaml:"net,omitempty"`
@@ -154,7 +155,7 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
             Net:            "tcp",
             Host:           "",
             Prefix:         "",
-            Secret:         "",
+            Secret:         secret,
             RelativeURLs:   false,
             TLS:            httpTLS,
             Headers:        http.Header {

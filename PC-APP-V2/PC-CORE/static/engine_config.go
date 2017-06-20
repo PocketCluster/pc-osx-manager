@@ -107,10 +107,13 @@ func setupServiceConfig() (*serviceConfig, error) {
     if err != nil {
         return nil, errors.WithStack(err)
     }
+    // TODO : GC when startup
+/*
     err = registry.GarbageCollection(regCfg)
     if err != nil {
         return nil, errors.WithStack(err)
     }
+*/
 
     //etcd configuration
     var etcdPath = path.Join(dataDir, defaults.StoragePathPostfix)
