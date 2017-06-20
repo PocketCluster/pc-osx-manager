@@ -8,7 +8,10 @@ import (
     "github.com/docker/distribution/configuration"
     "github.com/docker/distribution/context"
     "github.com/docker/distribution/registry/storage"
+    //_ "github.com/docker/distribution/registry/storage/cache"
+    //_ "github.com/docker/distribution/registry/storage/cache/memory"
     "github.com/docker/distribution/registry/storage/driver/factory"
+    //_ "github.com/docker/distribution/registry/storage/driver/inmemory"
     _ "github.com/docker/distribution/registry/storage/driver/filesystem"
     "github.com/docker/libtrust"
 
@@ -40,11 +43,6 @@ func GarbageCollection(pcfg *PocketRegistryConfig) error {
     return nil
 }
 
-type PocketRegistryConfig struct {
-    regConfig    *configuration.Configuration
-    tlsConfig    *tls.Config
-}
-
 func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []byte) (*PocketRegistryConfig, error) {
     if len(rootDir) == 0 {
         return nil, errors.Errorf("[ERR] invalid path for root dir")
@@ -71,8 +69,8 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
             Level:          configuration.Loglevel("debug"),
             Formatter:      "text",
             Fields:         map[string]interface{} {
-                "service": "registry",
-                "environment": "pc-master",
+                "service":        "registry",
+                "environment":    "pc-master",
             },
             Hooks:          nil,
         }
@@ -296,4 +294,9 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
         regConfig: regConfig,
         tlsConfig: tlsConf,
     }, nil
+}
+
+type PocketRegistryConfig struct {
+    regConfig    *configuration.Configuration
+    tlsConfig    *tls.Config
 }
