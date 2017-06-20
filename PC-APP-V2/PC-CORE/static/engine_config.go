@@ -120,7 +120,12 @@ func setupServiceConfig() (*serviceConfig, error) {
     if _, err := os.Stat(etcdPath); os.IsNotExist(err) {
         os.MkdirAll(etcdPath, 0700);
     }
-    etcdCfg, err := embed.NewPocketConfig(etcdPath, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey)
+    // recommended parameter values
+    // heartbeat : 500
+    // election  : 5000 ( heartbeat * 10 )
+    // snapshot  : 1000
+    // TODO : these parameters need to be dynamically adjusted according to a cluster condition
+    etcdCfg, err := embed.NewPocketConfig(etcdPath, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey, 500, 5000, 1000)
     if err != nil {
         // this is critical
         return nil, errors.WithStack(err)
