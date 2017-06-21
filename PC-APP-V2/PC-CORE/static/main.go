@@ -178,27 +178,21 @@ func main() {
                     /// REGISTRY ///
 
                     case operation.CmdRegistryStart: {
-                        err = initRegistryService(a, config.regConfig)
-                        if err != nil {
-                            log.Debug(err)
-                            return
+                        sl := a.ServiceList()
+                        for i, _ := range sl {
+                            s := sl[i]
+                            log.Debugf("[SERVICE] %s, %v", s.Tag(), s.IsRunning())
                         }
-                        a.StartServices()
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdRegistryStop: {
-                        a.StopServices()
+
                         log.Debugf("[OP] %v", e.String())
                     }
 
                     /// STORAGE ///
 
                     case operation.CmdStorageStart: {
-                        err = initStorageServie(a, config.etcdConfig)
-                        if err != nil {
-                            log.Debug(err)
-                            return
-                        }
                         a.StartServices()
                         log.Debugf("[OP] %v", e.String())
                     }

@@ -167,8 +167,10 @@ type ServiceSupervisor interface {
     StartServices() error
     StopServices() error
 
-    // --- internal service --- //
+    // ---    status info   --- //
+    ServiceList() []Service
 
+    // --- internal service --- //
     serviceCount() int
 }
 
@@ -409,6 +411,18 @@ func (s *srvcSupervisor) StopServices() error {
     s.eventsC     = make(chan Event, broadcastChannelSize)
     s.stoppedC    = make(chan struct{})
     return nil
+}
+
+func (s *srvcSupervisor) ServiceList() []Service {
+    s.Lock()
+    defer s.Unlock()
+
+    var sl []Service = []Service{}
+    for i, _ := range s.services {
+        srv := s.services[i]
+        sl = append(sl, srv)
+    }
+    return sl
 }
 
 // ServiceCount returns the number of registered and actively running services
