@@ -101,19 +101,17 @@ func setupServiceConfig() (*serviceConfig, error) {
     // registry configuration
     var regPath = path.Join(dataDir, defaults.RepositoryPathPostfix)
     if _, err := os.Stat(regPath); os.IsNotExist(err) {
-        os.MkdirAll(regPath, 0700);
+        os.MkdirAll(path.Join(regPath, "docker/registry/v2/repositories"), 0700);
+        os.MkdirAll(path.Join(regPath, "docker/registry/v2/blobs"),        0700);
     }
     regCfg, err := registry.NewPocketRegistryConfig(false, regPath, hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    // TODO : GC when startup
-/*
     err = registry.GarbageCollection(regCfg)
     if err != nil {
         return nil, errors.WithStack(err)
     }
-*/
 
     //etcd configuration
     var etcdPath = path.Join(dataDir, defaults.StoragePathPostfix)
