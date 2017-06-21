@@ -26,13 +26,12 @@ const (
     CmdStorageStart
     CmdStorageStop
 
-    // Registry control
-    CmdRegistryStart
-    CmdRegistryStop
-
     // debug add node, root, & user
     CmdTeleportRootAdd
     CmdTeleportUserAdd
+
+    // Debug control
+    CmdDebug
 )
 
 func (c CommandType) String() string {
@@ -45,14 +44,12 @@ func (c CommandType) String() string {
             return "CmdStorageStart"
         case CmdStorageStop:
             return "CmdStroageStop"
-        case CmdRegistryStart:
-            return "CmdImageRegistryStart"
-        case CmdRegistryStop:
-            return "CmdImageRegistryStop"
         case CmdTeleportRootAdd:
             return "CmdTeleportRootAdd"
         case CmdTeleportUserAdd:
             return "CmdTeleportUserAdd"
+        case CmdDebug:
+            return "CmdDebug"
 
         default:
             return fmt.Sprintf("CommandType(%d)", c)

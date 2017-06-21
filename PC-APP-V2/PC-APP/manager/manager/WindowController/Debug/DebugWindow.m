@@ -36,20 +36,16 @@
     OpsCmdStorageStop();
 }
 
-- (IBAction)opsCmdRegistryStart:(id)sender {
-    OpsCmdRegistryStart();
-}
-
-- (IBAction)opsCmdRegistryStop:(id)sender {
-    OpsCmdRegistryStop();
-}
-
 - (IBAction)opsCmdTeleportRootAdd:(id)sender {
     OpsCmdTeleportRootAdd();
 }
 
 - (IBAction)opsCmdTeleportUserAdd:(id)sender {
     OpsCmdTeleportUserAdd();
+}
+
+- (IBAction)opsCmdDebug:(id)sender {
+    OpsCmdDebug();
 }
 
 @end

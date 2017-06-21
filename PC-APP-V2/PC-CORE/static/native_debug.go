@@ -36,20 +36,6 @@ func OpsCmdStorageStop() {
     }
 }
 
-//export OpsCmdRegistryStart
-func OpsCmdRegistryStart() {
-    theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdRegistryStart,
-    }
-}
-
-//export OpsCmdRegistryStop
-func OpsCmdRegistryStop() {
-    theApp.eventsIn <- operation.Operation{
-        Command:    operation.CmdRegistryStop,
-    }
-}
-
 //export OpsCmdTeleportRootAdd
 func OpsCmdTeleportRootAdd() {
     theApp.eventsIn <- operation.Operation{
@@ -61,5 +47,12 @@ func OpsCmdTeleportRootAdd() {
 func OpsCmdTeleportUserAdd() {
     theApp.eventsIn <- operation.Operation{
         Command:    operation.CmdTeleportUserAdd,
+    }
+}
+
+//export OpsCmdDebug
+func OpsCmdDebug() {
+    theApp.eventsIn <- operation.Operation{
+        Command:    operation.CmdDebug,
     }
 }
