@@ -101,26 +101,29 @@ func setupServiceConfig() (*serviceConfig, error) {
     // registry configuration
     var regPath = path.Join(dataDir, defaults.RepositoryPathPostfix)
     if _, err := os.Stat(regPath); os.IsNotExist(err) {
-        os.MkdirAll(regPath, 0700);
+        os.MkdirAll(path.Join(regPath, "docker/registry/v2/repositories"), 0700);
+        os.MkdirAll(path.Join(regPath, "docker/registry/v2/blobs"),        0700);
     }
     regCfg, err := registry.NewPocketRegistryConfig(false, regPath, hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    // TODO : GC when startup
-/*
     err = registry.GarbageCollection(regCfg)
     if err != nil {
         return nil, errors.WithStack(err)
     }
-*/
 
     //etcd configuration
     var etcdPath = path.Join(dataDir, defaults.StoragePathPostfix)
     if _, err := os.Stat(etcdPath); os.IsNotExist(err) {
         os.MkdirAll(etcdPath, 0700);
     }
-    etcdCfg, err := embed.NewPocketConfig(etcdPath, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey)
+    // recommended parameter values
+    // heartbeat : 500
+    // election  : 5000 ( heartbeat * 10 )
+    // snapshot  : 1000
+    // TODO : these parameters need to be dynamically adjusted according to a cluster condition
+    etcdCfg, err := embed.NewPocketConfig(etcdPath, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey, 500, 5000, 1000)
     if err != nil {
         // this is critical
         return nil, errors.WithStack(err)

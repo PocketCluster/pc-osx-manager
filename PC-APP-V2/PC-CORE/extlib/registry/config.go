@@ -9,10 +9,7 @@ import (
     "github.com/docker/distribution/configuration"
     "github.com/docker/distribution/context"
     "github.com/docker/distribution/registry/storage"
-    //_ "github.com/docker/distribution/registry/storage/cache"
-    //_ "github.com/docker/distribution/registry/storage/cache/memory"
     "github.com/docker/distribution/registry/storage/driver/factory"
-    //_ "github.com/docker/distribution/registry/storage/driver/inmemory"
     _ "github.com/docker/distribution/registry/storage/driver/filesystem"
     "github.com/docker/libtrust"
 
