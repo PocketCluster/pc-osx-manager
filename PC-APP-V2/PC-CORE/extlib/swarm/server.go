@@ -66,9 +66,8 @@ func newStoppableServiceForSingleHost(hosts []string, handler http.Handler, tlsC
     return &SwarmService{
         listener:      listener,
         server:        &graceful.Server{
-            Timeout:            10 * time.Second,
             NoSignalHandling:   true,
-            Server: &http.Server{
+            Server:             &http.Server{
                 Addr:           protoAddrParts[1],
                 Handler:        handler,
             },
@@ -92,6 +91,6 @@ func (s *SwarmService) ListenAndServeSingleHost() error {
 }
 
 func (s *SwarmService) Close() error {
-    s.server.Stop(time.Second)
+    s.server.Stop(10 * time.Second)
     return nil
 }
