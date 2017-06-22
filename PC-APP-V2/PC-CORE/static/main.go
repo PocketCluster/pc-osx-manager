@@ -176,6 +176,11 @@ func main() {
                     /// STORAGE ///
 
                     case operation.CmdStorageStart: {
+                        err = initStorageServie(a, config.etcdConfig)
+                        if err != nil {
+                            log.Debug(err)
+                            return
+                        }
                         a.StartServices()
                         log.Debugf("[OP] %v", e.String())
                     }
