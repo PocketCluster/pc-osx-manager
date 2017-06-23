@@ -29,8 +29,10 @@ func newListener(proto, addr string, tlsConfig *tls.Config) (net.Listener, error
 }
 
 // NewServer creates an api.Server.
-func newStoppableServiceForSingleHost(hosts []string, handler http.Handler, tlsConfig *tls.Config) (*SwarmService, error) {
+func newStoppableServiceForSingleHost(ctx *SwarmContext, handler http.Handler) (*SwarmService, error) {
     var (
+        hosts []string = ctx.managerHost
+        tlsConfig *tls.Config = ctx.tlsConfig
         listener net.Listener = nil
         err error = nil
     )
@@ -66,9 +68,9 @@ func newStoppableServiceForSingleHost(hosts []string, handler http.Handler, tlsC
     return &SwarmService{
         listener:      listener,
         server:        &graceful.Server{
-            Timeout:            10 * time.Second,
+            Timeout:            time.Duration(ctx.heartbeat * 6),
             NoSignalHandling:   true,
-            Server: &http.Server{
+            Server:             &http.Server{
                 Addr:           protoAddrParts[1],
                 Handler:        handler,
             },
@@ -92,6 +94,7 @@ func (s *SwarmService) ListenAndServeSingleHost() error {
 }
 
 func (s *SwarmService) Close() error {
-    s.server.Stop(time.Second)
+    var timeout time.Duration = time.Duration(s.server.Timeout * 2)
+    s.server.Stop(timeout)
     return nil
 }

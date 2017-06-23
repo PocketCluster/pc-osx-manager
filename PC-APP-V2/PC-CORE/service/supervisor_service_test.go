@@ -248,3 +248,51 @@ func (s *SupervisorSuite) Test_Supervisor_Iteration(c *C) {
     }
     close(eventLatch)
 }
+
+func (s *SupervisorSuite) Test_Service_List(c *C) {
+    const (
+        serviceTagTemplate = "test_service_%d"
+    )
+    var (
+        err error = nil
+    )
+    for i := 0; i < 5; i++ {
+        //register named service1
+        err = s.app.RegisterServiceWithFuncs(
+            fmt.Sprintf(serviceTagTemplate, i),
+            func() error {
+                for {
+                    select {
+                        case <-s.app.StopChannel():
+                            return nil
+                        default:
+                    }
+                }
+            })
+        c.Assert(err, IsNil)
+    }
+    c.Assert(s.app.serviceCount(), Equals, 5)
+
+    sl := s.app.ServiceList()
+    for i, _ := range sl {
+        s := sl[i]
+        t := fmt.Sprintf(serviceTagTemplate, i)
+        c.Assert(s.Tag(), Equals, t)
+        c.Assert(s.IsRunning(), Equals, false)
+    }
+
+    // start services
+    err = s.app.StartServices()
+    c.Assert(err, IsNil)
+
+    // wait a bit
+    time.Sleep(time.Second)
+
+    // stop service
+    err = s.app.StopServices()
+    c.Assert(err, IsNil)
+
+    // cleanup check
+    time.Sleep(time.Second)
+    c.Assert(s.app.serviceCount(), Equals, 0)
+}

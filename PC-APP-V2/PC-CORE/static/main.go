@@ -173,24 +173,6 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
 
-
-
-                    /// REGISTRY ///
-
-                    case operation.CmdRegistryStart: {
-                        err = initRegistryService(a, config.regConfig)
-                        if err != nil {
-                            log.Debug(err)
-                            return
-                        }
-                        a.StartServices()
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdRegistryStop: {
-                        a.StopServices()
-                        log.Debugf("[OP] %v", e.String())
-                    }
-
                     /// STORAGE ///
 
                     case operation.CmdStorageStart: {
@@ -231,6 +213,18 @@ func main() {
                     case operation.CmdTeleportUserAdd: {
 
                     }
+
+                    /// DEBUG ///
+
+                    case operation.CmdDebug: {
+                        sl := a.ServiceList()
+                        for i, _ := range sl {
+                            s := sl[i]
+                            log.Debugf("[SERVICE] %s, %v", s.Tag(), s.IsRunning())
+                        }
+                        log.Debugf("[OP] %v", e.String())
+                    }
+
 
                     default:
                         log.Debug("[OP-ERROR] THIS SHOULD NOT HAPPEN %v", e.String())

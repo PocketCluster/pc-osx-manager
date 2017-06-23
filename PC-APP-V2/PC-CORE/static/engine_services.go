@@ -92,19 +92,21 @@ func initSwarmService(a *mainLife) error {
             var (
                 swarmsrv *swarmemb.SwarmService = nil
             )
-            select {
-                case se := <- swarmSrvC: {
-                    srv, ok := se.Payload.(*swarmemb.SwarmService)
-                    if ok {
-                        swarmsrv = srv
+            for {
+                select {
+                    case se := <- swarmSrvC: {
+                        srv, ok := se.Payload.(*swarmemb.SwarmService)
+                        if ok {
+                            swarmsrv = srv
+                        }
                     }
-                }
-                case <- a.StopChannel(): {
-                    if swarmsrv != nil {
-                        err := swarmsrv.Close()
-                        return errors.WithStack(err)
+                    case <- a.StopChannel(): {
+                        if swarmsrv != nil {
+                            err := swarmsrv.Close()
+                            return errors.WithStack(err)
+                        }
+                        return errors.Errorf("[ERR] null SWARM instance")
                     }
-                    return errors.Errorf("[ERR] null SWARM instance")
                 }
             }
             return nil
