@@ -11,7 +11,8 @@ import (
 func setLogger(debug bool) {
     log.StandardLogger().Hooks = make(log.LevelHooks)
     log.SetFormatter(&log.TextFormatter{
-        DisableColors:      true,
+        // Let's enable color for now
+        //DisableColors:      true,
         TimestampFormat:    defaults.PocketTimeDateFormat,
     })
     if debug {

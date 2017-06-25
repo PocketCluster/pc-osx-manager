@@ -399,8 +399,6 @@ func findBoundedNodesForSwarm(b *beaconManger) []string {
     )
 
     var (
-        addr string = ""
-        err error = nil
         nodeList []string = []string{}
         bLen int = len(b.beaconList)
     )
@@ -408,11 +406,9 @@ func findBoundedNodesForSwarm(b *beaconManger) []string {
     for i := 0; i < bLen; i++ {
         bc := b.beaconList[i]
         if bc.CurrentState() == MasterBounded {
-            addr, err = bc.SlaveNode().IP4AddrString()
-            if err != nil {
-                continue
-            }
-            nodeList = append(nodeList, fmt.Sprintf("%s:%s", addr, dockerPort))
+            // TODO : should we use FQDN here?
+            nodeName := bc.SlaveNode().NodeName
+            nodeList = append(nodeList, fmt.Sprintf("%s:%s", nodeName, dockerPort))
         }
     }
     return nodeList
