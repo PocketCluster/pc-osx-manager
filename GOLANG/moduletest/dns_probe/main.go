@@ -2,12 +2,12 @@ package main
 
 import (
     "net"
+    "strings"
     "sync"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/miekg/dns"
-    "strings"
 )
 
 /*
@@ -86,7 +86,7 @@ func initDNSService(wg *sync.WaitGroup) error {
         }
         udpPacketConn *net.UDPConn = nil
         udpAddr *net.UDPAddr = nil
-        //err error = nil
+        err error = nil
     )
     defer func () {
         udpServer.Shutdown()
@@ -95,7 +95,6 @@ func initDNSService(wg *sync.WaitGroup) error {
         udpAddr = nil
         wg.Done()
     }()
-/*
     udpAddr, err = net.ResolveUDPAddr(udpServer.Net, udpServer.Addr)
     if err != nil {
         log.Errorf("%v", err)
@@ -107,8 +106,7 @@ func initDNSService(wg *sync.WaitGroup) error {
         return errors.WithStack(err)
     }
     udpServer.PacketConn = udpPacketConn
-*/
-    return errors.WithStack(udpServer.ListenAndServe())
+    return errors.WithStack(udpServer.ActivateAndServe())
 }
 
 func check_host_file(host string) {
@@ -116,7 +114,7 @@ func check_host_file(host string) {
     if err != nil {
         log.Errorf("%v", err)
     } else {
-        log.Infof("%v", addrs)
+        log.Infof("%v", strings.Join(addrs, ", "))
     }
 }
 
@@ -127,6 +125,7 @@ func main() {
 
     check_host_file(pcmaster)
     check_host_file(pcnode1)
+    check_host_file("www.google.com")
 
     dnsWG.Wait()
 }

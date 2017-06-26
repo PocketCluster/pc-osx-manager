@@ -4,6 +4,7 @@
 set -e
 
 # Figure out where things are coming from and going to
+GOROOT=${GOROOT:-"${HOME}/Workspace/POCKETPKG/DEPREPO/GOARCHIVE/go-1.7.6"}
 GOREPO=${GOREPO:-"${HOME}/Workspace/POCKETPKG"}
 GOPATH=${GOPATH:-"${GOREPO}:${GOWORKPLACE}"}
 GO=${GOROOT}/bin/go
@@ -17,9 +18,10 @@ if [ -d ${GG_BUILD} ]; then
     rm -rf ${GG_BUILD} && mkdir -p ${GG_BUILD}
 fi
 
-echo "Check go version"
+echo "--- --- --- --- --- --- --- --- --- --- --- --- GO ENVIRONMENTS --- --- --- --- --- --- --- --- --- --- --- ---"
 echo $(GO version)
 GO env
+echo "--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---"
 
 echo "Make the temp folders for go objects"
 mkdir -p ${GG_BUILD}

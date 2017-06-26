@@ -83,8 +83,13 @@ type BeaconManger interface {
     TransitionWithSearchData(searchD mcast.CastPack, ts time.Time) error
     TransitionWithTimestamp(ts time.Time) error
     Shutdown() error
+
     // swarm discovery backend
     discovery.Backend
+
+    // TODO : this need to be a separate interface
+    // dns service name
+    AddressForName(name string) (string, error)
 }
 
 // We might not need a locking mechanism as "select" statement will choose only "one input" at a time.
@@ -233,6 +238,12 @@ func (b *beaconManger) Shutdown() error {
     shutdownMasterBeacons(b)
     b.commChannel = nil
     return nil
+}
+
+// --- Node Name Service Methods --- //
+
+func (b *beaconManger) AddressForName(name string) (string, error) {
+    return findNodeForNameService(b, name)
 }
 
 // --- Swarm Discovery Methods --- //
@@ -412,6 +423,23 @@ func findBoundedNodesForSwarm(b *beaconManger) []string {
         }
     }
     return nodeList
+}
+
+func findNodeForNameService(b *beaconManger, name string) (string, error) {
+    b.Lock()
+    defer b.Unlock()
+
+    var (
+        bLen int = len(b.beaconList)
+    )
+
+    for i := 0; i < bLen; i++ {
+        bc := b.beaconList[i]
+        if bc.CurrentState() == MasterBounded && bc.SlaveNode().NodeName == name {
+            return bc.SlaveNode().IP4AddrString()
+        }
+    }
+    return "", errors.Errorf("[ERR] cannot find a node for name %s", name)
 }
 
 func shutdownMasterBeacons(b *beaconManger) {

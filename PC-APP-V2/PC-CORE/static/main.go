@@ -108,6 +108,19 @@ func main() {
 
                     case operation.CmdBaseServiceStart: {
 
+                        cid, err := context.SharedHostContext().MasterAgentName()
+                        if err != nil {
+                            log.Debug(err)
+                            return
+                        }
+
+                        // name service
+                        err = initPocketNameService(a, cid)
+                        if err != nil {
+                            log.Debug(err)
+                            return
+                        }
+
                         // storage service
                         err = initStorageServie(a, config.etcdConfig)
                         if err != nil {
@@ -131,12 +144,6 @@ func main() {
                         }
 
                         // beacon service added
-                        cid, err := context.SharedHostContext().MasterAgentName()
-                        if err != nil {
-                            log.Debug(err)
-                            return
-                        }
-
                         // TODO : use network interface
                         // TODO : need to catcher instance from GC
                         _, err = mcast.NewSearchCatcher(a.ServiceSupervisor, "en0")

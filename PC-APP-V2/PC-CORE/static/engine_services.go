@@ -1,12 +1,17 @@
 package main
 
 import (
+    "fmt"
+    "net"
+    "strings"
     "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/coreos/etcd/embed"
+    "github.com/miekg/dns"
 
+    "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/beacon"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/extlib/registry"
@@ -145,6 +150,144 @@ func initSwarmService(a *mainLife) error {
             }
             a.BroadcastEvent(service.Event{Name:iventSwarmInstanceSpawn, Payload:swarmsrv})
             err = swarmsrv.ListenAndServeSingleHost()
+            return errors.WithStack(err)
+        },
+        service.BindEventWithService(iventBeaconManagerSpawn, beaconManC))
+
+    return nil
+}
+
+// --- methods for name service --- //
+func failWithRcode(w dns.ResponseWriter, r *dns.Msg, rCode int) {
+    m := new(dns.Msg)
+    m.SetRcode(r, rCode)
+    w.WriteMsg(m)
+    m = nil
+}
+
+func clearNodeName(name, cfqdn string) string {
+    var nn = name
+    if strings.Contains(name, cfqdn) {
+        nn = strings.Trim(name, cfqdn)
+    }
+    return strings.Trim(nn, " .\t\r\n")
+}
+
+func locaNodeName(beaconMan beacon.BeaconManger, clusterID string, w dns.ResponseWriter, req *dns.Msg) {
+    if len(req.Question) != 1 {
+        failWithRcode(w, req, dns.RcodeRefused)
+        return
+    }
+
+    question := req.Question[0]
+    qtype := question.Qtype
+    if question.Qclass != dns.ClassINET {
+        failWithRcode(w, req, dns.RcodeRefused)
+        return
+    }
+
+    cfqdn := fmt.Sprintf(pcrypto.FormFQDNClusterID, clusterID)
+    remoteIP := w.RemoteAddr().(*net.UDPAddr).IP
+    m := new(dns.Msg)
+    m.Id = req.Id
+
+    switch qtype {
+        case dns.TypeA: {
+
+            if remoteIP4 := remoteIP.To4(); remoteIP4 != nil {
+                nn := clearNodeName(question.Name, cfqdn)
+                addr, err := beaconMan.AddressForName(nn)
+                if err == nil {
+                    rr := new(dns.A)
+                    rr.Hdr = dns.RR_Header{
+                        Name:      question.Name,
+                        Rrtype:    question.Qtype,
+                        Class:     dns.ClassINET,
+                        Ttl:       10,
+                    }
+                    rr.A = net.ParseIP(addr)
+                    m.Answer = []dns.RR{rr}
+
+                    log.Debugf("[NAME-SERVICE] %s for %s", addr, nn)
+                } else {
+                    log.Errorf("[NAME-SERVICE] %s ", err.Error())
+                }
+            }
+
+        }
+    }
+
+    m.Question = req.Question
+    m.Response = true
+    m.Authoritative = true
+    w.WriteMsg(m)
+    m = nil
+}
+
+func initPocketNameService(a *mainLife, clusterID string) error {
+    const (
+        iventNameServerInstanceSpawn string = "ivent.name.server.instance.spawn"
+    )
+
+    nameServerC := make(chan service.Event)
+    a.RegisterServiceWithFuncs(
+        operation.ServiceInternalNodeNameServer,
+        func() error {
+            ne := <- nameServerC
+            udpServer, ok := ne.Payload.(*dns.Server)
+            if !ok {
+                return errors.Errorf("[ERR] invalid name service instance type")
+            }
+            log.Debugf("[NAME-SERVICE] start service...")
+            return errors.WithStack(udpServer.ActivateAndServe())
+        },
+        service.BindEventWithService(iventNameServerInstanceSpawn, nameServerC))
+
+    beaconManC := make(chan service.Event)
+    a.RegisterServiceWithFuncs(
+        operation.ServiceInternalNodeNameOperation,
+        func() error {
+            var (
+                udpServer = &dns.Server {
+                    Addr:    "127.0.0.1:10059",
+                    Net:     "udp",
+                }
+                udpPacketConn *net.UDPConn = nil
+                udpAddr *net.UDPAddr = nil
+                err error = nil
+            )
+            // wait for beacon manager to come up
+            be := <- beaconManC
+            beaconMan, ok := be.Payload.(beacon.BeaconManger)
+            if !ok {
+                return errors.Errorf("[ERR] invalid beacon manager type")
+            }
+            dns.HandleFunc(".", func(w dns.ResponseWriter, req *dns.Msg) {
+                locaNodeName(beaconMan, clusterID, w, req)
+            })
+
+            // spawn name server
+            udpAddr, err = net.ResolveUDPAddr(udpServer.Net, udpServer.Addr)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            udpPacketConn, err = net.ListenUDP(udpServer.Net, udpAddr)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            udpServer.PacketConn = udpPacketConn
+
+            // send udp server to operation
+            a.BroadcastEvent(service.Event{Name:iventNameServerInstanceSpawn, Payload: udpServer})
+
+            // wait for stop event
+            <- a.StopChannel()
+            log.Debugf("[NAME-SERVICE] service shutting down")
+            err = udpServer.Shutdown()
+            udpServer = nil
+            dns.HandleRemove(".")
+            udpPacketConn = nil
+            udpAddr = nil
             return errors.WithStack(err)
         },
         service.BindEventWithService(iventBeaconManagerSpawn, beaconManC))
