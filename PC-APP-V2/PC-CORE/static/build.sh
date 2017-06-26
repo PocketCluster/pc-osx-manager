@@ -4,14 +4,16 @@
 set -e
 
 # Figure out where things are coming from and going to
-GOROOT=${GOROOT:-"${HOME}/Workspace/POCKETPKG/DEPREPO/GOARCHIVE/go-1.7.6"}
-GOREPO=${GOREPO:-"${HOME}/Workspace/POCKETPKG"}
-GOPATH=${GOPATH:-"${GOREPO}:${GOWORKPLACE}"}
-GO=${GOROOT}/bin/go
-GG_BUILD="${PWD}/../../.build"
-ARCHIVE="${GG_BUILD}/pc-core.a"
-PATH=${PATH:-"$GEM_HOME/ruby/2.0.0/bin:$HOME/.util:$GOROOT/bin:$GOREPO/bin:$GOWORKPLACE/bin:$HOME/.util:$NATIVE_PATH"}
-VERBOSE=${VERBOSE:-0}
+export GOROOT="${HOME}/Workspace/POCKETPKG/DEPREPO/GOARCHIVE/go-1.7.6"
+export GOREPO=${GOREPO:-"${HOME}/Workspace/POCKETPKG"}
+export GOWORKPLACE=${GOWORKPLACE:-"${HOME}/Workspace/GOPLACE"}
+export GOPATH="${GOREPO}:${GOWORKPLACE}"
+export GO=${GOROOT}/bin/go
+export GG_BUILD="${PWD}/../../.build"
+export ARCHIVE="${GG_BUILD}/pc-core.a"
+#PATH=${PATH:-"$GEM_HOME/ruby/2.0.0/bin:$HOME/.util:$GOROOT/bin:$GOREPO/bin:$GOWORKPLACE/bin:$HOME/.util:$NATIVE_PATH"}
+export PATH="$GOROOT/bin:$GOREPO/bin:$GOWORKPLACE/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export VERBOSE=${VERBOSE:-0}
 
 # Clean old directory
 if [ -d ${GG_BUILD} ]; then

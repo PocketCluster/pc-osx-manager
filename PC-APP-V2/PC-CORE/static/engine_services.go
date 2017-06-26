@@ -173,7 +173,7 @@ func clearNodeName(name, cfqdn string) string {
     return strings.Trim(nn, " .\t\r\n")
 }
 
-func locaNodeName(beaconMan beacon.BeaconManger, clusterID string, w dns.ResponseWriter, req *dns.Msg) {
+func locaNodeName(beaconMan beacon.BeaconManger, cfqdn string, w dns.ResponseWriter, req *dns.Msg) {
     if len(req.Question) != 1 {
         failWithRcode(w, req, dns.RcodeRefused)
         return
@@ -186,42 +186,48 @@ func locaNodeName(beaconMan beacon.BeaconManger, clusterID string, w dns.Respons
         return
     }
 
-    cfqdn := fmt.Sprintf(pcrypto.FormFQDNClusterID, clusterID)
     remoteIP := w.RemoteAddr().(*net.UDPAddr).IP
+    remoteIP4 := remoteIP.To4()
+
     m := new(dns.Msg)
     m.Id = req.Id
+    m.Question = req.Question
+    m.Response = true
 
     switch qtype {
         case dns.TypeA: {
 
-            if remoteIP4 := remoteIP.To4(); remoteIP4 != nil {
-                nn := clearNodeName(question.Name, cfqdn)
-                addr, err := beaconMan.AddressForName(nn)
-                if err == nil {
-                    rr := new(dns.A)
-                    rr.Hdr = dns.RR_Header{
-                        Name:      question.Name,
-                        Rrtype:    question.Qtype,
-                        Class:     dns.ClassINET,
-                        Ttl:       10,
-                    }
-                    rr.A = net.ParseIP(addr)
-                    m.Answer = []dns.RR{rr}
+            nn := clearNodeName(question.Name, cfqdn)
+            addr, err := beaconMan.AddressForName(nn)
 
-                    log.Debugf("[NAME-SERVICE] %s for %s", addr, nn)
-                } else {
-                    log.Errorf("[NAME-SERVICE] %s ", err.Error())
+            if remoteIP4 != nil && err == nil {
+
+                rr := new(dns.A)
+                rr.Hdr = dns.RR_Header{
+                    Name:      question.Name,
+                    Rrtype:    question.Qtype,
+                    Class:     dns.ClassINET,
+                    Ttl:       10,
                 }
+                rr.A = net.ParseIP(addr)
+
+                m.Answer = []dns.RR{rr}
+                m.Authoritative = true
+                w.WriteMsg(m)
+
+                log.Debugf("[NAME-SERVICE] %s for %s. Error : %v", addr, nn, err)
+                return
             }
 
         }
     }
 
-    m.Question = req.Question
-    m.Response = true
-    m.Authoritative = true
+    // libresolv continues to the next server when it receives
+    // an invalid referral response. See golang.org/issue/15434.
+    m.Rcode = dns.RcodeSuccess
+    m.Authoritative = false
+    m.RecursionAvailable = false
     w.WriteMsg(m)
-    m = nil
 }
 
 func initPocketNameService(a *mainLife, clusterID string) error {
@@ -248,6 +254,7 @@ func initPocketNameService(a *mainLife, clusterID string) error {
         operation.ServiceInternalNodeNameOperation,
         func() error {
             var (
+                cfqdn = fmt.Sprintf(pcrypto.FormFQDNClusterID, clusterID)
                 udpServer = &dns.Server {
                     Addr:    "127.0.0.1:10059",
                     Net:     "udp",
@@ -263,7 +270,7 @@ func initPocketNameService(a *mainLife, clusterID string) error {
                 return errors.Errorf("[ERR] invalid beacon manager type")
             }
             dns.HandleFunc(".", func(w dns.ResponseWriter, req *dns.Msg) {
-                locaNodeName(beaconMan, clusterID, w, req)
+                locaNodeName(beaconMan, cfqdn, w, req)
             })
 
             // spawn name server

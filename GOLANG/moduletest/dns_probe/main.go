@@ -4,6 +4,7 @@ import (
     "net"
     "strings"
     "sync"
+    "fmt"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -51,12 +52,16 @@ func locaNameServe(w dns.ResponseWriter, req *dns.Msg) {
     }
 
     remoteIP := w.RemoteAddr().(*net.UDPAddr).IP
+    remoteIP4 := remoteIP.To4()
+
     m := new(dns.Msg)
     m.Id = req.Id
+    m.Question = req.Question
+    m.Response = true
 
     switch qtype {
         case dns.TypeA: {
-            remoteIP4 := remoteIP.To4();
+
             if remoteIP4 != nil && (strings.HasPrefix(question.Name, pcmaster) || strings.HasPrefix(question.Name, pcnode1)) {
                 rr := new(dns.A)
                 rr.Hdr = dns.RR_Header{
@@ -66,14 +71,20 @@ func locaNameServe(w dns.ResponseWriter, req *dns.Msg) {
                     Ttl:       10,
                 }
                 rr.A = net.ParseIP("192.168.1.166")
+
                 m.Answer = []dns.RR{rr}
+                m.Authoritative = true
+                w.WriteMsg(m)
+                return
             }
         }
     }
 
-    m.Question = req.Question
-    m.Response = true
-    m.Authoritative = true
+    // libresolv continues to the next server when it receives
+    // an invalid referral response. See golang.org/issue/15434.
+    m.Rcode = dns.RcodeSuccess
+    m.Authoritative = false
+    m.RecursionAvailable = false
     w.WriteMsg(m)
 }
 
@@ -110,12 +121,14 @@ func initDNSService(wg *sync.WaitGroup) error {
 }
 
 func check_host_file(host string) {
+    log.Infof("Looking up %s", host)
     addrs, err := net.LookupHost(host)
     if err != nil {
         log.Errorf("%v", err)
     } else {
         log.Infof("%v", strings.Join(addrs, ", "))
     }
+    fmt.Printf("\n")
 }
 
 func main() {
