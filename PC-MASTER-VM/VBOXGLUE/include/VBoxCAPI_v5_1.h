@@ -20,7 +20,7 @@
  */
 
 /*
- * Copyright (C) 2008-2015 Oracle Corporation
+ * Copyright (C) 2008-2016 Oracle Corporation
  *
  * This file is part of a free software library; you can redistribute
  * it and/or modify it under the terms of the GNU Lesser General
@@ -43,9 +43,12 @@
 #define ___VirtualBox_CAPI_h
 
 #ifdef _WIN32
+# pragma warning(push)
+# pragma warning(disable:4668 4255) /* -Wall and windows.h */
 # undef COBJMACROS
 # define COBJMACROS
 # include "Windows.h"
+# pragma warning(pop)
 #endif /* _WIN32 */
 
 #ifdef WIN32
@@ -16270,6 +16273,8 @@ struct IMachineDebugger_vtbl
 
     nsresult (*GetVM)(IMachineDebugger *pThis, PRInt64 *VM);
 
+    nsresult (*GetUptime)(IMachineDebugger *pThis, PRInt64 *uptime);
+
     nsresult (*GetInternalAndReservedAttribute1IMachineDebugger)(IMachineDebugger *pThis, PRUint32 *reserved);
 
     nsresult (*GetInternalAndReservedAttribute2IMachineDebugger)(IMachineDebugger *pThis, PRUint32 *reserved);
@@ -16299,8 +16304,6 @@ struct IMachineDebugger_vtbl
     nsresult (*GetInternalAndReservedAttribute14IMachineDebugger)(IMachineDebugger *pThis, PRUint32 *reserved);
 
     nsresult (*GetInternalAndReservedAttribute15IMachineDebugger)(IMachineDebugger *pThis, PRUint32 *reserved);
-
-    nsresult (*GetInternalAndReservedAttribute16IMachineDebugger)(IMachineDebugger *pThis, PRUint32 *reserved);
 
     nsresult (*DumpGuestCore)(
         IMachineDebugger *pThis,
@@ -16540,6 +16543,8 @@ struct IMachineDebuggerVtbl
 
     nsresult (*GetVM)(IMachineDebugger *pThis, PRInt64 *VM);
 
+    nsresult (*GetUptime)(IMachineDebugger *pThis, PRInt64 *uptime);
+
     nsresult (*GetInternalAndReservedAttribute1IMachineDebugger)(IMachineDebugger *pThis, PRUint32 *reserved);
 
     nsresult (*GetInternalAndReservedAttribute2IMachineDebugger)(IMachineDebugger *pThis, PRUint32 *reserved);
@@ -16569,8 +16574,6 @@ struct IMachineDebuggerVtbl
     nsresult (*GetInternalAndReservedAttribute14IMachineDebugger)(IMachineDebugger *pThis, PRUint32 *reserved);
 
     nsresult (*GetInternalAndReservedAttribute15IMachineDebugger)(IMachineDebugger *pThis, PRUint32 *reserved);
-
-    nsresult (*GetInternalAndReservedAttribute16IMachineDebugger)(IMachineDebugger *pThis, PRUint32 *reserved);
 
     nsresult (*DumpGuestCore)(
         IMachineDebugger *pThis,
@@ -16815,6 +16818,8 @@ struct IMachineDebuggerVtbl
 #define IMachineDebugger_SetVirtualTimeRate(p, aVirtualTimeRate) ((p)->lpVtbl->SetVirtualTimeRate(p, aVirtualTimeRate))
 #define IMachineDebugger_get_VM(p, aVM) ((p)->lpVtbl->GetVM(p, aVM))
 #define IMachineDebugger_GetVM(p, aVM) ((p)->lpVtbl->GetVM(p, aVM))
+#define IMachineDebugger_get_Uptime(p, aUptime) ((p)->lpVtbl->GetUptime(p, aUptime))
+#define IMachineDebugger_GetUptime(p, aUptime) ((p)->lpVtbl->GetUptime(p, aUptime))
 #define IMachineDebugger_DumpGuestCore(p, aFilename, aCompression) ((p)->lpVtbl->DumpGuestCore(p, aFilename, aCompression))
 #define IMachineDebugger_DumpHostProcessCore(p, aFilename, aCompression) ((p)->lpVtbl->DumpHostProcessCore(p, aFilename, aCompression))
 #define IMachineDebugger_Info(p, aName, aArgs, aInfo) ((p)->lpVtbl->Info(p, aName, aArgs, aInfo))
