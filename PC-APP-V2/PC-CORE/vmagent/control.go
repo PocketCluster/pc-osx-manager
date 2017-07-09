@@ -288,7 +288,7 @@ func (m *masterControl) txTimeWindow() time.Duration {
     }
 }
 
-func translateStateWithTimestamp(master *masterControl, timestamp time.Time) (VBoxMasterTransition, error) {
+func stateTransitionWithTimestamp(master *masterControl, timestamp time.Time) (VBoxMasterTransition, error) {
     var transErr error = nil
 
     if master.txActionCount < TxActionLimit {
@@ -320,7 +320,7 @@ func (m *masterControl) TransitionWithTimestamp(timestamp time.Time) error {
         log.Panic("[CRITICAL] slaveMetaTransition func cannot be null")
     }
 
-    transition, transErr = translateStateWithTimestamp(m, timestamp)
+    transition, transErr = stateTransitionWithTimestamp(m, timestamp)
 
     // finalize state
     newState = stateTransition(oldState, transition)
