@@ -5,6 +5,7 @@ import (
 
     "github.com/stkim1/pc-vbox-core/vcagent"
     "github.com/pkg/errors"
+    "github.com/stkim1/pcrypto"
 )
 
 type bounded struct {
@@ -21,19 +22,35 @@ func (b *bounded) currentState() VBoxMasterState {
 
 func (b *bounded) transitionWithCoreMeta(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error) {
     var (
-        //meta *vcagent.VBoxCoreAgentMeta = nil
+        status *vcagent.VBoxCoreStatus
         err error = nil
     )
 
-    _, err = vcagent.CoreDecryptBounded(metaPackage, master.rsaDecryptor)
+    // decrypt status package
+    status, err = vcagent.CoreDecryptBounded(metaPackage, master.rsaDecryptor)
     if err != nil {
-        return VBoxMasterTransitionFail, errors.WithStack(err)
+        return VBoxMasterTransitionIdle, errors.WithStack(err)
     }
+
+    // TODO assign core node ip and share
+    master.coreNode = status
 
     return VBoxMasterTransitionOk, nil
 }
 
 func (b *bounded) transitionWithTimeStamp(master *masterControl, ts time.Time) error {
+    var (
+        ackpkg []byte = nil
+        err error = nil
+    )
+
+    ackpkg, err = MasterEncryptedBounded(master.rsaEncryptor)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    // send acknowledge package
+
     return nil
 }
 

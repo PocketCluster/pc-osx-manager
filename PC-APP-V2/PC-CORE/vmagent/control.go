@@ -11,7 +11,8 @@ import (
 
 type VBoxMasterState int
 const (
-    VBoxMasterKeyExchange       VBoxMasterState = iota
+    VBoxMasterUnbounded         VBoxMasterState = iota
+    VBoxMasterKeyExchange
     VBoxMasterBounded
     VBoxMasterBindBroken
 )
@@ -26,6 +27,8 @@ const (
 func (s VBoxMasterState) String() string {
     var state string
     switch s {
+        case VBoxMasterUnbounded:
+            state = "VBoxMasterUnbounded"
         case VBoxMasterKeyExchange:
             state = "VBoxMasterKeyExchange"
         case VBoxMasterBounded:
@@ -96,6 +99,8 @@ type masterControl struct {
     lastTransmissionTS          time.Time
 
     /* ---------------------------------------- all-states properties ----------------------------------------------- */
+    publicKey                   []byte
+    privateKey                  []byte
     rsaEncryptor                pcrypto.RsaEncryptor
     rsaDecryptor                pcrypto.RsaDecryptor
     coreNode                    interface{}
@@ -129,14 +134,23 @@ func stateTransition(currentState VBoxMasterState, transitCondition VBoxMasterTr
     switch transitCondition {
         // successfully transition to the next
         case VBoxMasterTransitionOk: {
-            nextState = VBoxMasterBounded
+            switch currentState {
+                case VBoxMasterUnbounded: {
+                    nextState = VBoxMasterKeyExchange
+                }
+                default: {
+                    nextState = VBoxMasterBounded
+                }
+            }
         }
 
         // failed to transit
         case VBoxMasterTransitionFail: {
             switch currentState {
+                case VBoxMasterUnbounded:
+                    fallthrough
                 case VBoxMasterKeyExchange: {
-                    nextState = VBoxMasterKeyExchange
+                    nextState = VBoxMasterUnbounded
                 }
                 default: {
                     nextState = VBoxMasterBindBroken
@@ -226,13 +240,15 @@ func newControllerForState(ctrl vboxController, newState, oldState VBoxMasterSta
     }
 
     switch newState {
+        case VBoxMasterUnbounded: {
+            newBeaconState = stateUnbounded()
+        }
         case VBoxMasterKeyExchange: {
             newBeaconState = stateKeyexchange()
         }
         case VBoxMasterBounded: {
             newBeaconState = stateBounded()
         }
-
         case VBoxMasterBindBroken:
             fallthrough
         default: {
