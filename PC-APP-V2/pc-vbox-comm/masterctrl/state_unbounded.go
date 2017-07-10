@@ -1,11 +1,11 @@
-package vmagent
+package masterctrl
 
 import (
     "time"
 
     "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
-    cpkg "github.com/stkim1/pc-vbox-core/vcagent/pkg"
+    cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
 )
 
 type unbounded struct {}

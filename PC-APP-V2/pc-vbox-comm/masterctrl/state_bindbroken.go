@@ -1,10 +1,10 @@
-package vmagent
+package masterctrl
 
 import (
     "time"
 
     "github.com/pkg/errors"
-    cpkg "github.com/stkim1/pc-vbox-core/vcagent/pkg"
+    cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
 )
 
 type bindbroken struct {}

@@ -1,4 +1,4 @@
-package vmagent
+package masterctrl
 
 import (
     "time"
@@ -6,7 +6,7 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
-    "github.com/stkim1/pc-core/utils"
+    "github.com/stkim1/pc-vbox-comm/utils"
     "github.com/stkim1/pc-core/model"
 )
 

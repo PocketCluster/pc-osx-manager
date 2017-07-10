@@ -1,11 +1,11 @@
-package vcagent
+package corereport
 
 import (
     "time"
 
     "github.com/pkg/errors"
-    mpkg "github.com/stkim1/pc-core/vmagent/pkg"
-    cpkg "github.com/stkim1/pc-vbox-core/vcagent/pkg"
+    mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
+    cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
 )
 
 type bounded struct {}
