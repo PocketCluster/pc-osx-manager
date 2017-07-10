@@ -20,40 +20,38 @@ func (k *keyexchange) transitionWithCoreMeta(master *masterControl, sender inter
         err error = nil
     )
 
-    // decrypt status package
+    // decrypt & update status package
     status, err = vcagent.CoreDecryptBounded(metaPackage, master.rsaDecryptor)
     if err != nil {
         return VBoxMasterTransitionIdle, errors.WithStack(err)
     }
-
-    // TODO assign core node ip and share
-    master.coreNode = status
+    master.coreNode.IP4Address = status.ExtIP4AddrSmask
+    master.coreNode.IP4Gateway = status.ExtIP4Gateway
 
     return VBoxMasterTransitionOk, nil
 }
 
 func (k *keyexchange) transitionWithTimeStamp(master *masterControl, ts time.Time) error {
     var (
+        authToken string = ""
         keypkg []byte = nil
         err error = nil
     )
 
-    // TODO : master corenode UUID
-    keypkg, err = MasterEncryptedKeyExchange(master.coreNode, master.publicKey, master.rsaEncryptor)
+    // send key exchange package
+    authToken, err = master.coreNode.GetAuthToken()
     if err != nil {
         return errors.WithStack(err)
     }
-
-    // send key exchange package
-    master.UcastSend("127.0.0.1", keypkg)
-
-    return nil
+    keypkg, err = MasterEncryptedKeyExchange(authToken, master.publicKey, master.rsaEncryptor)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    return master.UcastSend("127.0.0.1", keypkg)
 }
 
 func (k *keyexchange) onStateTranstionSuccess(master *masterControl, ts time.Time) error {
-    // save core node public key
-
-    return nil
+    return master.coreNode.JoinCore()
 }
 
 func (k *keyexchange) onStateTranstionFailure(master *masterControl, ts time.Time) error {

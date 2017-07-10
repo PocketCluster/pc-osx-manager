@@ -20,14 +20,13 @@ func (n *bindbroken) transitionWithCoreMeta(master *masterControl, sender interf
         err error = nil
     )
 
-    // decrypt status package
+    // decrypt & update status package
     status, err = vcagent.CoreDecryptBounded(metaPackage, master.rsaDecryptor)
     if err != nil {
         return VBoxMasterTransitionIdle, errors.WithStack(err)
     }
-
-    // TODO assign core node ip and share
-    master.coreNode = status
+    master.coreNode.IP4Address = status.ExtIP4AddrSmask
+    master.coreNode.IP4Gateway = status.ExtIP4Gateway
 
     return VBoxMasterTransitionOk, nil
 }

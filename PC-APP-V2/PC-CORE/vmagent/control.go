@@ -7,6 +7,7 @@ import (
     "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/utils"
+    "github.com/stkim1/pc-core/model"
 )
 
 type VBoxMasterState int
@@ -103,7 +104,7 @@ type masterControl struct {
     privateKey                  []byte
     rsaEncryptor                pcrypto.RsaEncryptor
     rsaDecryptor                pcrypto.RsaDecryptor
-    coreNode                    interface{}
+    coreNode                    *model.CoreNode
 
     // --------------------------------- onSuccess && onFailure external event -----------------------------------------
     ControlOnTransitionEvent

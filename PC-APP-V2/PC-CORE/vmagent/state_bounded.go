@@ -5,7 +5,6 @@ import (
 
     "github.com/stkim1/pc-vbox-core/vcagent"
     "github.com/pkg/errors"
-    "github.com/stkim1/pcrypto"
 )
 
 type bounded struct {}
@@ -21,14 +20,13 @@ func (b *bounded) transitionWithCoreMeta(master *masterControl, sender interface
         err error = nil
     )
 
-    // decrypt status package
+    // decrypt & update status package
     status, err = vcagent.CoreDecryptBounded(metaPackage, master.rsaDecryptor)
     if err != nil {
         return VBoxMasterTransitionIdle, errors.WithStack(err)
     }
-
-    // TODO assign core node ip and share
-    master.coreNode = status
+    master.coreNode.IP4Address = status.ExtIP4AddrSmask
+    master.coreNode.IP4Gateway = status.ExtIP4Gateway
 
     return VBoxMasterTransitionOk, nil
 }
@@ -39,16 +37,12 @@ func (b *bounded) transitionWithTimeStamp(master *masterControl, ts time.Time) e
         err error = nil
     )
 
-    // acknowledge package
+    // send acknowledge packagepackage
     ackpkg, err = MasterEncryptedBounded(master.rsaEncryptor)
     if err != nil {
         return errors.WithStack(err)
     }
-
-    // send acknowledge package
-    master.UcastSend("127.0.0.1", ackpkg)
-
-    return nil
+    return master.UcastSend("127.0.0.1", ackpkg)
 }
 
 func (b *bounded) onStateTranstionSuccess(master *masterControl, ts time.Time) error {

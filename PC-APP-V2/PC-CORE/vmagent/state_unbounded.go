@@ -42,7 +42,7 @@ func (u *unbounded) transitionWithCoreMeta(master *masterControl, sender interfa
     master.rsaDecryptor = decryptor
 
     // save core node public key
-    master.coreNode = meta.PublicKey
+    master.coreNode.PublicKey = meta.PublicKey
 
     return VBoxMasterTransitionOk, nil
 }
