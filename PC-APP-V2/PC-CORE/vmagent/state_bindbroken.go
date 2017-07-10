@@ -7,13 +7,8 @@ import (
     "github.com/pkg/errors"
 )
 
-type bindbroken struct {
-}
-
-func stateBindbroken() vboxController {
-    return &bindbroken {
-    }
-}
+type bindbroken struct {}
+func stateBindbroken() vboxController { return &bindbroken {} }
 
 func (n *bindbroken) currentState() VBoxMasterState {
     return VBoxMasterBindBroken
@@ -38,18 +33,6 @@ func (n *bindbroken) transitionWithCoreMeta(master *masterControl, sender interf
 }
 
 func (n *bindbroken) transitionWithTimeStamp(master *masterControl, ts time.Time) error {
-    var (
-        ackpkg []byte = nil
-        err error = nil
-    )
-
-    ackpkg, err = MasterEncryptedBounded(master.rsaEncryptor)
-    if err != nil {
-        return errors.WithStack(err)
-    }
-
-    // send acknowledge package
-
     return nil
 }
 

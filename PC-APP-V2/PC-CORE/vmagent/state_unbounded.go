@@ -12,9 +12,8 @@ type unbounded struct {}
 func stateUnbounded() vboxController { return &unbounded{}}
 
 func (u *unbounded) currentState() VBoxMasterState {
-    return VBoxMasterKeyExchange
+    return VBoxMasterUnbounded
 }
-
 
 func (u *unbounded) transitionWithCoreMeta(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error) {
     var (
@@ -35,7 +34,7 @@ func (u *unbounded) transitionWithCoreMeta(master *masterControl, sender interfa
     if err != nil {
         return VBoxMasterTransitionFail, errors.WithStack(err)
     }
-    pcrypto.NewRsaDecryptorFromKeyData(meta.PublicKey, master.privateKey)
+    decryptor, err = pcrypto.NewRsaDecryptorFromKeyData(meta.PublicKey, master.privateKey)
     if err != nil {
         return VBoxMasterTransitionFail, errors.WithStack(err)
     }
@@ -43,8 +42,7 @@ func (u *unbounded) transitionWithCoreMeta(master *masterControl, sender interfa
     master.rsaDecryptor = decryptor
 
     // save core node public key
-
-    // need to build & send acknowledge package
+    master.coreNode = meta.PublicKey
 
     return VBoxMasterTransitionOk, nil
 }

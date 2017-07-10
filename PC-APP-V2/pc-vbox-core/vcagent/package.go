@@ -156,6 +156,12 @@ func CoreDecryptBounded(metaPackage []byte, rsaDecryptor pcrypto.RsaDecryptor) (
     if status == nil {
         return nil, errors.Errorf("[ERR] null unpacked status")
     }
+    if len(status.ExtIP4AddrSmask) == 0 {
+        return nil, errors.Errorf("[ERR] invalid ip & subnet mask")
+    }
+    if len(status.ExtIP4Gateway) == 0 {
+        return nil, errors.Errorf("[ERR] invalid gateway")
+    }
 
     return status, nil
 }

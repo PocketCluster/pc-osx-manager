@@ -107,6 +107,9 @@ type masterControl struct {
 
     // --------------------------------- onSuccess && onFailure external event -----------------------------------------
     ControlOnTransitionEvent
+
+    // -------------------------------------  Communication Channel ----------------------------------------------------
+    CommChannel
 }
 
 func (m *masterControl) CurrentState() VBoxMasterState {

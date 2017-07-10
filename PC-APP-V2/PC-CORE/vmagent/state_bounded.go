@@ -8,13 +8,8 @@ import (
     "github.com/stkim1/pcrypto"
 )
 
-type bounded struct {
-}
-
-func stateBounded () vboxController {
-    return &bounded{
-    }
-}
+type bounded struct {}
+func stateBounded () vboxController { return &bounded{} }
 
 func (b *bounded) currentState() VBoxMasterState {
     return VBoxMasterBounded
@@ -44,12 +39,14 @@ func (b *bounded) transitionWithTimeStamp(master *masterControl, ts time.Time) e
         err error = nil
     )
 
+    // acknowledge package
     ackpkg, err = MasterEncryptedBounded(master.rsaEncryptor)
     if err != nil {
         return errors.WithStack(err)
     }
 
     // send acknowledge package
+    master.UcastSend("127.0.0.1", ackpkg)
 
     return nil
 }

@@ -45,14 +45,13 @@ func (k *keyexchange) transitionWithTimeStamp(master *masterControl, ts time.Tim
     }
 
     // send key exchange package
+    master.UcastSend("127.0.0.1", keypkg)
 
     return nil
 }
 
 func (k *keyexchange) onStateTranstionSuccess(master *masterControl, ts time.Time) error {
     // save core node public key
-
-    // share core node external ip address
 
     return nil
 }
