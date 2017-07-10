@@ -3,8 +3,9 @@ package vmagent
 import (
     "time"
 
-    "github.com/stkim1/pc-vbox-core/vcagent"
     "github.com/pkg/errors"
+    mpkg "github.com/stkim1/pc-core/vmagent/pkg"
+    cpkg "github.com/stkim1/pc-vbox-core/vcagent/pkg"
 )
 
 type keyexchange struct {}
@@ -16,12 +17,12 @@ func (k *keyexchange) currentState() VBoxMasterState {
 
 func (k *keyexchange) transitionWithCoreMeta(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error) {
     var (
-        status *vcagent.VBoxCoreStatus
+        status *cpkg.VBoxCoreStatus
         err error = nil
     )
 
     // decrypt & update status package
-    status, err = vcagent.CoreDecryptBounded(metaPackage, master.rsaDecryptor)
+    status, err = cpkg.CoreDecryptBounded(metaPackage, master.rsaDecryptor)
     if err != nil {
         return VBoxMasterTransitionIdle, errors.WithStack(err)
     }
@@ -43,7 +44,7 @@ func (k *keyexchange) transitionWithTimeStamp(master *masterControl, ts time.Tim
     if err != nil {
         return errors.WithStack(err)
     }
-    keypkg, err = MasterEncryptedKeyExchange(authToken, master.publicKey, master.rsaEncryptor)
+    keypkg, err = mpkg.MasterEncryptedKeyExchange(authToken, master.publicKey, master.rsaEncryptor)
     if err != nil {
         return errors.WithStack(err)
     }

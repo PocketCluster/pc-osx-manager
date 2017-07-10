@@ -3,9 +3,9 @@ package vmagent
 import (
     "time"
 
-    "github.com/stkim1/pc-vbox-core/vcagent"
     "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
+    cpkg "github.com/stkim1/pc-vbox-core/vcagent/pkg"
 )
 
 type unbounded struct {}
@@ -17,14 +17,14 @@ func (u *unbounded) currentState() VBoxMasterState {
 
 func (u *unbounded) transitionWithCoreMeta(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error) {
     var (
-        meta *vcagent.VBoxCoreAgentMeta = nil
+        meta *cpkg.VBoxCoreAgentMeta = nil
         encryptor pcrypto.RsaEncryptor
         decryptor pcrypto.RsaDecryptor
         err error = nil
     )
 
     // unpack unbounded
-    meta, err = vcagent.CoreUnpackingUnbounded(metaPackage)
+    meta, err = cpkg.CoreUnpackingUnbounded(metaPackage)
     if err != nil {
         return VBoxMasterTransitionIdle, errors.WithStack(err)
     }

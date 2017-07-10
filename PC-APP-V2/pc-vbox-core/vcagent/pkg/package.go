@@ -1,4 +1,4 @@
-package vcagent
+package pkg
 
 import (
     "time"

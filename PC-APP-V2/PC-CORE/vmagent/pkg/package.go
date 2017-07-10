@@ -1,4 +1,4 @@
-package vmagent
+package pkg
 
 import (
     "time"
@@ -30,26 +30,26 @@ type VBoxMasterAgentMeta struct {
 
 // --- Acknowledge Field ---
 const (
-    VBM_CORE_UUID            string = "m_cu"
+    VBM_AUTH_TOKEN           string = "m_at"
     VBM_TIMESTAMP            string = "m_ts"
 )
 
 type VBoxMasterAcknowledge struct {
-    CoreUUID                 string    `msgpack:"m_cu, omitempty"`
+    AuthToken                string    `msgpack:"m_at, omitempty"`
     TimeStamp                time.Time `msgpack:"m_ts"`
 }
 
 // --- Compositions ---
-func MasterEncryptedKeyExchange(coreUUID string, pubkey []byte, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
+func MasterEncryptedKeyExchange(authToken string, pubkey []byte, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
     var (
         ack = &VBoxMasterAcknowledge {
-            CoreUUID:     coreUUID,
+            AuthToken:    authToken,
             TimeStamp:    time.Now(),
         }
         err error = nil
     )
-    if len(coreUUID) == 0 {
-        return nil, errors.Errorf("[ERR] invalid core uuid assignment")
+    if len(authToken) == 0 {
+        return nil, errors.Errorf("[ERR] invalid auth token assignment")
     }
     if len(pubkey) == 0 {
         return nil, errors.Errorf("[ERR] invalid public key passed")
@@ -81,59 +81,66 @@ func MasterEncryptedKeyExchange(coreUUID string, pubkey []byte, rsaEncryptor pcr
     return mpkg, errors.WithStack(err)
 }
 
-func MasterDecryptedKeyExchange(metaPackage, prvkey []byte) (*VBoxMasterAcknowledge, pcrypto.RsaDecryptor, error) {
+func MasterDecryptedKeyExchange(metaPackage, prvkey []byte) (*VBoxMasterAcknowledge, pcrypto.RsaEncryptor, pcrypto.RsaDecryptor, error) {
     var (
         meta *VBoxMasterAgentMeta = nil
         ack *VBoxMasterAcknowledge = nil
+        decryptor pcrypto.RsaDecryptor
+        encryptor pcrypto.RsaEncryptor
         err error = nil
     )
 
     // unpack meta
     err = msgpack.Unmarshal(metaPackage, &meta)
     if err != nil {
-        return nil, nil, errors.WithStack(err)
+        return nil, nil, nil, errors.WithStack(err)
     }
     if meta == nil {
-        return nil, nil, errors.Errorf("[ERR] null unpacked meta")
+        return nil, nil, nil, errors.Errorf("[ERR] null unpacked meta")
     }
     if meta.ProtocolVersion != VBoxMasterVersion {
-        return nil, nil, errors.Errorf("[ERR] incorrect protocol version")
+        return nil, nil, nil, errors.Errorf("[ERR] incorrect protocol version")
     }
     if len(meta.EncryptedPackage) == 0 {
-        return nil, nil, errors.Errorf("[ERR] null encrypted ack")
+        return nil, nil, nil, errors.Errorf("[ERR] null encrypted ack")
     }
     if len(meta.PublicKey) == 0 {
-        return nil, nil, errors.Errorf("[ERR] null public key")
+        return nil, nil, nil, errors.Errorf("[ERR] null public key")
     }
     if len(meta.CryptoSignature) == 0 {
-        return nil, nil, errors.Errorf("[ERR] null crypto signature")
+        return nil, nil, nil, errors.Errorf("[ERR] null crypto signature")
     }
 
     // build decryptor
-    rsaDecrypto, err := pcrypto.NewRsaDecryptorFromKeyData(meta.PublicKey, prvkey)
+    encryptor, err = pcrypto.NewRsaEncryptorFromKeyData(meta.PublicKey, prvkey)
     if err != nil {
-        return nil, nil, errors.Errorf("[ERR] cannot build decryptor")
+        return nil, nil, nil, errors.Errorf("[ERR] cannot build encryptor")
+    }
+
+    decryptor, err = pcrypto.NewRsaDecryptorFromKeyData(meta.PublicKey, prvkey)
+    if err != nil {
+        return nil, nil, nil, errors.Errorf("[ERR] cannot build decryptor")
     }
 
     // decrypt message
-    apkg, err := rsaDecrypto.DecryptByRSA(meta.EncryptedPackage, meta.CryptoSignature)
+    apkg, err := decryptor.DecryptByRSA(meta.EncryptedPackage, meta.CryptoSignature)
     if err != nil {
-        return nil, nil, errors.Errorf("[ERR] cannot build decryptor")
+        return nil, nil, nil, errors.Errorf("[ERR] cannot build decryptor")
     }
 
     // unpack acknowledge
     err = msgpack.Unmarshal(apkg, &ack)
     if err != nil {
-        return nil, nil, errors.WithStack(err)
+        return nil, nil, nil, errors.WithStack(err)
     }
     if ack == nil {
-        return nil, nil, errors.Errorf("[ERR] null unpacked acknowledge")
+        return nil, nil, nil, errors.Errorf("[ERR] null unpacked acknowledge")
     }
-    if len(ack.CoreUUID) == 0 {
-        return nil, nil, errors.Errorf("[ERR] invalid core uuid assignment")
+    if len(ack.AuthToken) == 0 {
+        return nil, nil, nil, errors.Errorf("[ERR] invalid auth token assignment")
     }
 
-    return ack, rsaDecrypto, nil
+    return ack, encryptor, decryptor, nil
 }
 
 func MasterEncryptedBounded(rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
@@ -208,8 +215,8 @@ func MasterDecryptedBounded(metaPackage []byte, rsaDecryptor pcrypto.RsaDecrypto
     if ack == nil {
         return nil, errors.Errorf("[ERR] null unpacked acknowledge")
     }
-    if len(ack.CoreUUID) != 0 {
-        return nil, errors.Errorf("[ERR] invalid ack content w/ core uuid")
+    if len(ack.AuthToken) != 0 {
+        return nil, errors.Errorf("[ERR] invalid ack content w/ auth token")
     }
 
     return ack, nil

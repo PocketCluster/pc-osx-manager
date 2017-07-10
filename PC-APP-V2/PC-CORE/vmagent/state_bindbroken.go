@@ -3,8 +3,8 @@ package vmagent
 import (
     "time"
 
-    "github.com/stkim1/pc-vbox-core/vcagent"
     "github.com/pkg/errors"
+    cpkg "github.com/stkim1/pc-vbox-core/vcagent/pkg"
 )
 
 type bindbroken struct {}
@@ -16,12 +16,12 @@ func (n *bindbroken) currentState() VBoxMasterState {
 
 func (n *bindbroken) transitionWithCoreMeta(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error) {
     var (
-        status *vcagent.VBoxCoreStatus
+        status *cpkg.VBoxCoreStatus
         err error = nil
     )
 
     // decrypt & update status package
-    status, err = vcagent.CoreDecryptBounded(metaPackage, master.rsaDecryptor)
+    status, err = cpkg.CoreDecryptBounded(metaPackage, master.rsaDecryptor)
     if err != nil {
         return VBoxMasterTransitionIdle, errors.WithStack(err)
     }

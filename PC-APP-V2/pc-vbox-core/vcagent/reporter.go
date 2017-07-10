@@ -105,6 +105,7 @@ type coreReporter struct {
     privateKey                  []byte
     rsaEncryptor                pcrypto.RsaEncryptor
     rsaDecryptor                pcrypto.RsaDecryptor
+    authToken                   string
 
     // --------------------------------- onSuccess && onFailure external event -----------------------------------------
     ReporterActionsOnTransition
