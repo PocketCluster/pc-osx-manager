@@ -41,13 +41,13 @@ func (s VBoxMasterState) String() string {
 }
 
 const (
-    TransitionFailureLimit      int           = 6
+    TransitionFailureLimit      int           = 3
     // TODO : timeout mechanism for receiving slave meta
     // TransitionTimeout           time.Duration = time.Second * 10
 
-    TxActionLimit               int           = 6
+    TxActionLimit               int           = 3
     UnboundedTimeout            time.Duration = time.Second
-    BoundedTimeout              time.Duration = time.Second
+    BoundedTimeout              time.Duration = time.Second * 3
 )
 
 type CommChannel interface {
@@ -60,7 +60,7 @@ func (c CommChannelFunc) UcastSend(target string, data []byte) error {
     return c(target, data)
 }
 
-type ControlOnTransitionEvent interface {
+type ControllerActionOnTransition interface {
     OnStateTranstionSuccess(state VBoxMasterState, vcore interface{}, ts time.Time) error
     OnStateTranstionFailure(state VBoxMasterState, vcore interface{}, ts time.Time) error
 }
@@ -68,8 +68,8 @@ type ControlOnTransitionEvent interface {
 // MasterBeacon is assigned individually for each slave node.
 type VBoxMasterControl interface {
     CurrentState() VBoxMasterState
-    TransitionWithTimestamp(timestamp time.Time) error
     TransitionWithCoreMeta(sender interface{}, metaPackage []byte, timestamp time.Time) error
+    TransitionWithTimestamp(timestamp time.Time) error
     Shutdown()
 }
 
@@ -89,7 +89,7 @@ type masterControl struct {
 
     /* ---------------------------------- changing properties to record transaction --------------------------------- */
     // each time we try to make transtion and fail, count goes up.
-    transitionFailureCount      int
+    transitionActionCount       int
 
     // last time successfully transitioned state
     lastTransitionTS            time.Time
@@ -107,7 +107,7 @@ type masterControl struct {
     coreNode                    *model.CoreNode
 
     // --------------------------------- onSuccess && onFailure external event -----------------------------------------
-    ControlOnTransitionEvent
+    ControllerActionOnTransition
 
     // -------------------------------------  Communication Channel ----------------------------------------------------
     CommChannel
@@ -180,16 +180,16 @@ func finalizeStateTransitionWithTimeout(master *masterControl, nextStateCandiate
         // should have squashed suspected beacons and that's the role of TransitionWithTimestamp()
         case VBoxMasterTransitionOk: {
             master.lastTransitionTS = masterTimestamp
-            master.transitionFailureCount = 0
+            master.transitionActionCount = 0
             nextConfirmedState = VBoxMasterTransitionOk
             break
         }
         default: {
-            if master.transitionFailureCount < TransitionFailureLimit {
-                master.transitionFailureCount++
+            if master.transitionActionCount < TransitionFailureLimit {
+                master.transitionActionCount++
             }
 
-            if master.transitionFailureCount < TransitionFailureLimit && masterTimestamp.Sub(master.lastTransitionTS) < master.transitionTimeout() {
+            if master.transitionActionCount < TransitionFailureLimit && masterTimestamp.Sub(master.lastTransitionTS) < master.transitionTimeout() {
                 nextConfirmedState = VBoxMasterTransitionIdle
             } else {
                 nextConfirmedState = VBoxMasterTransitionFail
@@ -199,7 +199,6 @@ func finalizeStateTransitionWithTimeout(master *masterControl, nextStateCandiate
 
     return nextConfirmedState
 }
-
 
 func runOnTransitionEvents(master *masterControl, newState, oldState VBoxMasterState, transition VBoxMasterTransition, masterTimestamp time.Time) error {
     var (
@@ -213,7 +212,7 @@ func runOnTransitionEvents(master *masterControl, newState, oldState VBoxMasterS
             case VBoxMasterTransitionOk: {
                 ierr = master.controller.onStateTranstionSuccess(master, masterTimestamp)
 
-                if master.ControlOnTransitionEvent != nil {
+                if master.ControllerActionOnTransition != nil {
                     oerr = master.OnStateTranstionSuccess(master.CurrentState(), master.coreNode, masterTimestamp)
                 }
                 // TODO : we need to a way to formalize this
@@ -223,7 +222,7 @@ func runOnTransitionEvents(master *masterControl, newState, oldState VBoxMasterS
             case VBoxMasterTransitionFail: {
                 ierr = master.controller.onStateTranstionFailure(master, masterTimestamp)
 
-                if master.ControlOnTransitionEvent != nil {
+                if master.ControllerActionOnTransition != nil {
                     oerr = master.OnStateTranstionFailure(master.CurrentState(), master.coreNode, masterTimestamp)
                 }
                 // TODO : we need to a way to formalize this
@@ -236,7 +235,7 @@ func runOnTransitionEvents(master *masterControl, newState, oldState VBoxMasterS
 
 func newControllerForState(ctrl vboxController, newState, oldState VBoxMasterState) vboxController {
     var (
-        newBeaconState vboxController = nil
+        newController vboxController = nil
         err error = nil
     )
     if newState == oldState {
@@ -245,18 +244,18 @@ func newControllerForState(ctrl vboxController, newState, oldState VBoxMasterSta
 
     switch newState {
         case VBoxMasterUnbounded: {
-            newBeaconState = stateUnbounded()
+            newController = stateUnbounded()
         }
         case VBoxMasterKeyExchange: {
-            newBeaconState = stateKeyexchange()
+            newController = stateKeyexchange()
         }
         case VBoxMasterBounded: {
-            newBeaconState = stateBounded()
+            newController = stateBounded()
         }
         case VBoxMasterBindBroken:
             fallthrough
         default: {
-            newBeaconState = stateBindbroken()
+            newController = stateBindbroken()
             if err != nil {
                 // this should never happen
                 log.Panic(errors.WithStack(err))
@@ -264,7 +263,7 @@ func newControllerForState(ctrl vboxController, newState, oldState VBoxMasterSta
         }
     }
 
-    return newBeaconState
+    return newController
 }
 
 func (m *masterControl) TransitionWithCoreMeta(sender interface{}, metaPackage []byte, timestamp time.Time) error {
@@ -274,7 +273,7 @@ func (m *masterControl) TransitionWithCoreMeta(sender interface{}, metaPackage [
         transErr, eventErr error = nil, nil
     )
     if m.controller == nil {
-        log.Panic("[CRITICAL] slaveMetaTransition func cannot be null")
+        log.Panic("[CRITICAL] vboxController func cannot be null")
     }
 
     transitionCandidate, transErr = m.controller.transitionWithCoreMeta(m, sender, metaPackage, timestamp)
@@ -282,13 +281,13 @@ func (m *masterControl) TransitionWithCoreMeta(sender interface{}, metaPackage [
     // this is to apply failed time count and timeout window
     finalTransition = finalizeStateTransitionWithTimeout(m, transitionCandidate, timestamp)
 
-    // finalize master beacon state
+    // finalize master controller state
     newState = stateTransition(oldState, finalTransition)
 
     // execute on events
     eventErr = runOnTransitionEvents(m, newState, oldState, finalTransition, timestamp)
 
-    // assign vbox controller for state
+    // assign vbox controller for new state
     m.controller = newControllerForState(m.controller, newState, oldState)
 
     // return combined errors
@@ -296,7 +295,6 @@ func (m *masterControl) TransitionWithCoreMeta(sender interface{}, metaPackage [
 }
 
 /* ----------------------------------------- Timestamp Transition Functions ----------------------------------------- */
-
 func (m *masterControl) txTimeWindow() time.Duration {
     switch m.CurrentState() {
         case VBoxMasterBounded: {
@@ -327,7 +325,7 @@ func stateTransitionWithTimestamp(master *masterControl, timestamp time.Time) (V
     }
 
     // this is failure. the fact that this is called indicate that we're ready to move to failure state
-    return VBoxMasterTransitionFail, errors.Errorf("[ERR] Transmission count has exceeded a given limit")
+    return VBoxMasterTransitionFail, errors.Errorf("[ERR] transmission count has exceeded a given limit")
 }
 
 func (m *masterControl) TransitionWithTimestamp(timestamp time.Time) error {
@@ -337,7 +335,7 @@ func (m *masterControl) TransitionWithTimestamp(timestamp time.Time) error {
         transErr, eventErr error = nil, nil
     )
     if m.controller == nil {
-        log.Panic("[CRITICAL] slaveMetaTransition func cannot be null")
+        log.Panic("[CRITICAL] vboxController func cannot be null")
     }
 
     transition, transErr = stateTransitionWithTimestamp(m, timestamp)
