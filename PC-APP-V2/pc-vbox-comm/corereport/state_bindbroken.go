@@ -11,8 +11,8 @@ import (
 type bindbroken struct {}
 func stateBindbroken() vboxReporter { return &bindbroken{} }
 
-func (n *bindbroken) currentState() VBoxCoreState {
-    return VBoxCoreBindBroken
+func (n *bindbroken) currentState() cpkg.VBoxCoreState {
+    return cpkg.VBoxCoreBindBroken
 }
 
 func (n *bindbroken) transitionWithMasterMeta(core *coreReporter, sender interface{}, metaPackage []byte, ts time.Time) (VBoxCoreTransition, error) {
@@ -36,7 +36,7 @@ func (n *bindbroken) transitionWithTimeStamp(core *coreReporter, ts time.Time) e
 
     // send status to master
     // TODO get ip address and gateway
-    meta, err = cpkg.CoreEncryptedBounded("127.0.0.1", "192.168.1.1", core.rsaEncryptor)
+    meta, err = cpkg.CorePackingStatus(cpkg.VBoxCoreBindBroken, nil, "127.0.0.1", "192.168.1.1", core.rsaEncryptor)
     if err != nil {
         return errors.WithStack(err)
     }

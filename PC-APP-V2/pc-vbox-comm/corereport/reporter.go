@@ -7,13 +7,7 @@ import (
     "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-vbox-comm/utils"
-)
-
-type VBoxCoreState int
-const (
-    VBoxCoreUnbounded           VBoxCoreState = iota
-    VBoxCoreBounded
-    VBoxCoreBindBroken
+    cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
 )
 
 type VBoxCoreTransition int
@@ -22,19 +16,6 @@ const (
     VBoxCoreTransitionOk
     VBoxCoreTransitionIdle
 )
-
-func (s VBoxCoreState) String() string {
-    var state string
-    switch s {
-        case VBoxCoreUnbounded:
-            state = "VBoxCoreUnbounded"
-        case VBoxCoreBounded:
-            state = "VBoxCoreBounded"
-        case VBoxCoreBindBroken:
-            state = "VBoxCoreBindBroken"
-    }
-    return state
-}
 
 const (
     TransitionFailureLimit      int           = 3
@@ -61,19 +42,19 @@ func (c CommChannelFunc) UcastSend(target string, data []byte) error {
 }
 
 type ReporterActionsOnTransition interface {
-    OnStateTranstionSuccess(state VBoxCoreState, ts time.Time) error
-    OnStateTranstionFailure(state VBoxCoreState, ts time.Time) error
+    OnStateTranstionSuccess(state cpkg.VBoxCoreState, ts time.Time) error
+    OnStateTranstionFailure(state cpkg.VBoxCoreState, ts time.Time) error
 }
 
 // MasterBeacon is assigned individually for each slave node.
 type VBoxCoreReporter interface {
-    CurrentState() VBoxCoreState
+    CurrentState() cpkg.VBoxCoreState
     TransitionWithCoreMeta(sender interface{}, metaPackage []byte, ts time.Time) error
     TransitionWithTimestamp(ts time.Time) error
 }
 
 type vboxReporter interface {
-    currentState() VBoxCoreState
+    currentState() cpkg.VBoxCoreState
 
     transitionWithMasterMeta(core *coreReporter, sender interface{}, metaPackage []byte, ts time.Time) (VBoxCoreTransition, error)
     transitionWithTimeStamp(core *coreReporter, ts time.Time) error
@@ -115,7 +96,7 @@ type coreReporter struct {
 
 }
 
-func (c *coreReporter) CurrentState() VBoxCoreState {
+func (c *coreReporter) CurrentState() cpkg.VBoxCoreState {
     if c.reporter == nil {
         log.Panic("[CRITICAL] vboxReporter cannot be null")
     }
@@ -125,7 +106,7 @@ func (c *coreReporter) CurrentState() VBoxCoreState {
 /* ------------------------------------- Master Meta Transition Functions ------------------------------------------- */
 func (c *coreReporter) transitionTimeout() time.Duration {
     switch c.CurrentState() {
-        case VBoxCoreBounded: {
+        case cpkg.VBoxCoreBounded: {
             return BoundedTimeout * time.Duration(TxActionLimit)
         }
         default: {
@@ -134,23 +115,23 @@ func (c *coreReporter) transitionTimeout() time.Duration {
     }
 }
 
-func stateTransition(currentState VBoxCoreState, transitCondition VBoxCoreTransition) VBoxCoreState {
-    var nextState VBoxCoreState
+func stateTransition(currentState cpkg.VBoxCoreState, transitCondition VBoxCoreTransition) cpkg.VBoxCoreState {
+    var nextState cpkg.VBoxCoreState
 
     switch transitCondition {
         // successfully transition to the next
         case VBoxCoreTransitionOk: {
-            nextState = VBoxCoreBounded
+            nextState = cpkg.VBoxCoreBounded
         }
 
         // failed to transit
         case VBoxCoreTransitionFail: {
             switch currentState {
-                case VBoxCoreUnbounded: {
-                    nextState = VBoxCoreUnbounded
+                case cpkg.VBoxCoreUnbounded: {
+                    nextState = cpkg.VBoxCoreUnbounded
                 }
                 default: {
-                    nextState = VBoxCoreBindBroken
+                    nextState = cpkg.VBoxCoreBindBroken
                 }
             }
         }
@@ -189,7 +170,7 @@ func finalizeTransitionWithMeta(core *coreReporter, nextStateCandiate VBoxCoreTr
     return nextConfirmedState
 }
 
-func runOnTransitionEvents(core *coreReporter, newState, oldState VBoxCoreState, transition VBoxCoreTransition, ts time.Time) error {
+func runOnTransitionEvents(core *coreReporter, newState, oldState cpkg.VBoxCoreState, transition VBoxCoreTransition, ts time.Time) error {
     var (
         ierr, oerr error = nil, nil
     )
@@ -222,7 +203,7 @@ func runOnTransitionEvents(core *coreReporter, newState, oldState VBoxCoreState,
     return nil
 }
 
-func newReporterForState(reporter vboxReporter, newState, oldState VBoxCoreState) vboxReporter {
+func newReporterForState(reporter vboxReporter, newState, oldState cpkg.VBoxCoreState) vboxReporter {
     var (
         newReporter vboxReporter = nil
         err error = nil
@@ -232,13 +213,13 @@ func newReporterForState(reporter vboxReporter, newState, oldState VBoxCoreState
     }
 
     switch newState {
-        case VBoxCoreUnbounded: {
+        case cpkg.VBoxCoreUnbounded: {
             newReporter = stateUnbounded()
         }
-        case VBoxCoreBounded: {
+        case cpkg.VBoxCoreBounded: {
             newReporter = stateBounded()
         }
-        case VBoxCoreBindBroken:
+        case cpkg.VBoxCoreBindBroken:
             fallthrough
         default: {
             newReporter = stateBindbroken()
@@ -256,7 +237,7 @@ func (c *coreReporter) TransitionWithCoreMeta(sender interface{}, metaPackage []
     var (
         transitionCandidate, finalTransition VBoxCoreTransition
         transErr, eventErr error = nil, nil
-        newState, oldState VBoxCoreState = c.CurrentState(), c.CurrentState()
+        newState, oldState cpkg.VBoxCoreState = c.CurrentState(), c.CurrentState()
     )
     if c.reporter == nil {
         log.Panic("[CRITICAL] vboxReporter cannot be null")
@@ -282,7 +263,7 @@ func (c *coreReporter) TransitionWithCoreMeta(sender interface{}, metaPackage []
 /* ----------------------------------------- Timestamp Transition Functions ----------------------------------------- */
 func (c *coreReporter) txTimeWindow() time.Duration {
     switch c.CurrentState() {
-        case VBoxCoreBounded: {
+        case cpkg.VBoxCoreBounded: {
             return BoundedTimeout
         }
         default: {
@@ -314,7 +295,7 @@ func stateTransitionWithTimestamp(core *coreReporter, timestamp time.Time) (VBox
 
 func (c *coreReporter) TransitionWithTimestamp(timestamp time.Time) error {
     var (
-        newState, oldState VBoxCoreState = c.CurrentState(), c.CurrentState()
+        newState, oldState cpkg.VBoxCoreState = c.CurrentState(), c.CurrentState()
         transition VBoxCoreTransition
         transErr, eventErr error = nil, nil
     )

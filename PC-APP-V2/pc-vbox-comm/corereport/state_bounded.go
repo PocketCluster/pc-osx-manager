@@ -11,8 +11,8 @@ import (
 type bounded struct {}
 func stateBounded() vboxReporter { return &bounded{} }
 
-func (b *bounded) currentState() VBoxCoreState {
-    return VBoxCoreBounded
+func (b *bounded) currentState() cpkg.VBoxCoreState {
+    return cpkg.VBoxCoreBounded
 }
 
 func (b *bounded) transitionWithMasterMeta(core *coreReporter, sender interface{}, metaPackage []byte, ts time.Time) (VBoxCoreTransition, error) {
@@ -36,7 +36,7 @@ func (b *bounded) transitionWithTimeStamp(core *coreReporter, ts time.Time) erro
 
     // send status to master
     // TODO get ip address and gateway
-    meta, err = cpkg.CoreEncryptedBounded("127.0.0.1", "192.168.1.1", core.rsaEncryptor)
+    meta, err = cpkg.CorePackingStatus(cpkg.VBoxCoreBounded, nil, "127.0.0.1", "192.168.1.1", core.rsaEncryptor)
     if err != nil {
         return errors.WithStack(err)
     }

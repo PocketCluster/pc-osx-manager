@@ -12,8 +12,8 @@ import (
 type unbounded struct {}
 func stateUnbounded() vboxReporter { return &unbounded{} }
 
-func (u *unbounded) currentState() VBoxCoreState {
-    return VBoxCoreUnbounded
+func (u *unbounded) currentState() cpkg.VBoxCoreState {
+    return cpkg.VBoxCoreUnbounded
 }
 
 func (u *unbounded) transitionWithMasterMeta(core *coreReporter, sender interface{}, metaPackage []byte, ts time.Time) (VBoxCoreTransition, error) {
@@ -43,7 +43,7 @@ func (u *unbounded) transitionWithTimeStamp(core *coreReporter, ts time.Time) er
     )
 
     // send pubkey to master
-    meta, err = cpkg.CorePackingUnbounded(core.publicKey)
+    meta, err = cpkg.CorePackingStatus(cpkg.VBoxCoreUnbounded, core.publicKey, "", "", nil)
     if err != nil {
         return errors.WithStack(err)
     }
