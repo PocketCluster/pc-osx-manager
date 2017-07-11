@@ -5,10 +5,12 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+
     "github.com/stkim1/pcrypto"
+    "github.com/stkim1/pc-core/model"
+
     "github.com/stkim1/pc-vbox-comm/utils"
     mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
-    "github.com/stkim1/pc-core/model"
 )
 
 type VBoxMasterTransition int
