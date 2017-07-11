@@ -13,19 +13,47 @@ const (
     VBoxMasterVersion        string = "1.0.0"
 )
 
+type VBoxMasterState int
+const (
+    VBoxMasterUnbounded      VBoxMasterState = iota
+    VBoxMasterKeyExchange
+    VBoxMasterBounded
+    VBoxMasterBindBroken
+)
+
+func (s VBoxMasterState) String() string {
+    var state string
+    switch s {
+        case VBoxMasterUnbounded:
+            state = "VBoxMasterUnbounded"
+        case VBoxMasterKeyExchange:
+            state = "VBoxMasterKeyExchange"
+        case VBoxMasterBounded:
+            state = "VBoxMasterBounded"
+        case VBoxMasterBindBroken:
+            state = "VBoxMasterBindBroken"
+    }
+    return state
+}
+
 // --- Meta Field ---
 const (
     VBM_PROTOCOL_VERSION     string = "m_pv"
+    VBM_MASTER_STATE         string = "m_st"
     VBM_ENCRYPTED_PKG        string = "m_ep"
     VBM_MASTER_PUBKEY        string = "m_pk"
     VBM_CRYPTO_SIGNATURE     string = "m_cs"
 )
 
-type VBoxMasterAgentMeta struct {
-    ProtocolVersion          string    `msgpack:"m_pv"`
-    EncryptedPackage         []byte    `msgpack:"m_ep, inline, omitempty"`
-    PublicKey                []byte    `msgpack:"m_pk, omitempty"`
-    CryptoSignature          []byte    `msgpack:"m_cs, omitempty"`
+type VBoxMasterMeta struct {
+    ProtocolVersion          string                    `msgpack:"m_pv"`
+    MasterState              VBoxMasterState           `msgpack:"m_st"`
+    EncryptedPackage         []byte                    `msgpack:"m_ep, inline, omitempty"`
+    PublicKey                []byte                    `msgpack:"m_pk, omitempty"`
+    CryptoSignature          []byte                    `msgpack:"m_cs, omitempty"`
+    MasterAcknowledge        *VBoxMasterAcknowledge    `msgpack:"-"`
+    Encryptor                pcrypto.RsaEncryptor      `msgpack:"-"`
+    Decryptor                pcrypto.RsaDecryptor      `msgpack:"-"`
 }
 
 // --- Acknowledge Field ---
@@ -40,147 +68,102 @@ type VBoxMasterAcknowledge struct {
 }
 
 // --- Compositions ---
-func MasterEncryptedKeyExchange(authToken string, pubkey []byte, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
+func MasterPackingAcknowledge(state VBoxMasterState, authToken string, pubkey []byte, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
     var (
-        ack = &VBoxMasterAcknowledge {
-            AuthToken:    authToken,
-            TimeStamp:    time.Now(),
-        }
+        meta *VBoxMasterMeta = nil
+        apkg, epkg, mpkg []byte = nil, nil, nil
+        sig pcrypto.Signature = nil
         err error = nil
     )
-    if len(authToken) == 0 {
-        return nil, errors.Errorf("[ERR] invalid auth token assignment")
-    }
-    if len(pubkey) == 0 {
-        return nil, errors.Errorf("[ERR] invalid public key passed")
-    }
+
     if rsaEncryptor == nil {
-        return nil, errors.Errorf("[ERR] invalid encryptor passed")
+        return nil, errors.Errorf("[ERR] master RSA Encryptor cannot be null")
     }
 
-    // package acknowledge
-    apkg, err := msgpack.Marshal(ack)
-    if err != nil {
-        return nil, errors.WithStack(err)
-    }
+    switch state {
+        case VBoxMasterUnbounded: {
+            var (
+                ack = &VBoxMasterAcknowledge {
+                    AuthToken:    authToken,
+                    TimeStamp:    time.Now(),
+                }
+            )
 
-    // encrypt ack package
-    epkg, sig, err := rsaEncryptor.EncryptByRSA(apkg)
-    if err != nil {
-        return nil, errors.WithStack(err)
-    }
+            // error check
+            if len(authToken) == 0 {
+                return nil, errors.Errorf("[ERR] invalid auth token assignment")
+            }
+            if len(pubkey) == 0 {
+                return nil, errors.Errorf("[ERR] invalid public key passed")
+            }
 
-    // meta message packing
-    meta := &VBoxMasterAgentMeta {
-        ProtocolVersion:     VBoxMasterVersion,
-        EncryptedPackage:    epkg,
-        PublicKey:           pubkey,
-        CryptoSignature:     sig,
-    }
-    mpkg, err := msgpack.Marshal(meta)
-    return mpkg, errors.WithStack(err)
-}
+            // package acknowledge
+            apkg, err = msgpack.Marshal(ack)
+            if err != nil {
+                return nil, errors.WithStack(err)
+            }
 
-func MasterDecryptedKeyExchange(metaPackage, prvkey []byte) (*VBoxMasterAcknowledge, pcrypto.RsaEncryptor, pcrypto.RsaDecryptor, error) {
-    var (
-        meta *VBoxMasterAgentMeta = nil
-        ack *VBoxMasterAcknowledge = nil
-        decryptor pcrypto.RsaDecryptor
-        encryptor pcrypto.RsaEncryptor
-        err error = nil
-    )
+            // encrypt ack package
+            epkg, sig, err = rsaEncryptor.EncryptByRSA(apkg)
+            if err != nil {
+                return nil, errors.WithStack(err)
+            }
 
-    // unpack meta
-    err = msgpack.Unmarshal(metaPackage, &meta)
-    if err != nil {
-        return nil, nil, nil, errors.WithStack(err)
-    }
-    if meta == nil {
-        return nil, nil, nil, errors.Errorf("[ERR] null unpacked meta")
-    }
-    if meta.ProtocolVersion != VBoxMasterVersion {
-        return nil, nil, nil, errors.Errorf("[ERR] incorrect protocol version")
-    }
-    if len(meta.EncryptedPackage) == 0 {
-        return nil, nil, nil, errors.Errorf("[ERR] null encrypted ack")
-    }
-    if len(meta.PublicKey) == 0 {
-        return nil, nil, nil, errors.Errorf("[ERR] null public key")
-    }
-    if len(meta.CryptoSignature) == 0 {
-        return nil, nil, nil, errors.Errorf("[ERR] null crypto signature")
-    }
-
-    // build decryptor
-    encryptor, err = pcrypto.NewRsaEncryptorFromKeyData(meta.PublicKey, prvkey)
-    if err != nil {
-        return nil, nil, nil, errors.Errorf("[ERR] cannot build encryptor")
-    }
-
-    decryptor, err = pcrypto.NewRsaDecryptorFromKeyData(meta.PublicKey, prvkey)
-    if err != nil {
-        return nil, nil, nil, errors.Errorf("[ERR] cannot build decryptor")
-    }
-
-    // decrypt message
-    apkg, err := decryptor.DecryptByRSA(meta.EncryptedPackage, meta.CryptoSignature)
-    if err != nil {
-        return nil, nil, nil, errors.Errorf("[ERR] cannot build decryptor")
-    }
-
-    // unpack acknowledge
-    err = msgpack.Unmarshal(apkg, &ack)
-    if err != nil {
-        return nil, nil, nil, errors.WithStack(err)
-    }
-    if ack == nil {
-        return nil, nil, nil, errors.Errorf("[ERR] null unpacked acknowledge")
-    }
-    if len(ack.AuthToken) == 0 {
-        return nil, nil, nil, errors.Errorf("[ERR] invalid auth token assignment")
-    }
-
-    return ack, encryptor, decryptor, nil
-}
-
-func MasterEncryptedBounded(rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
-    var (
-        ack = &VBoxMasterAcknowledge {
-            TimeStamp:    time.Now(),
+            // meta message packing
+            meta = &VBoxMasterMeta{
+                ProtocolVersion:     VBoxMasterVersion,
+                MasterState:         VBoxMasterUnbounded,
+                EncryptedPackage:    epkg,
+                PublicKey:           pubkey,
+                CryptoSignature:     sig,
+            }
+            mpkg, err = msgpack.Marshal(meta)
+            return mpkg, errors.WithStack(err)
         }
-        err error = nil
-    )
+        default: {
+            var (
+                ack = &VBoxMasterAcknowledge {
+                    TimeStamp:    time.Now(),
+                }
+            )
 
-    // package acknowledge
-    apkg, err := msgpack.Marshal(ack)
-    if err != nil {
-        return nil, errors.WithStack(err)
-    }
+            // package acknowledge
+            apkg, err = msgpack.Marshal(ack)
+            if err != nil {
+                return nil, errors.WithStack(err)
+            }
 
-    // encrypt ack package
-    epkg, sig, err := rsaEncryptor.EncryptByRSA(apkg)
-    if err != nil {
-        return nil, errors.WithStack(err)
-    }
+            // encrypt ack package
+            epkg, sig, err = rsaEncryptor.EncryptByRSA(apkg)
+            if err != nil {
+                return nil, errors.WithStack(err)
+            }
 
-    // meta message packing
-    meta := &VBoxMasterAgentMeta {
-        ProtocolVersion:     VBoxMasterVersion,
-        EncryptedPackage:    epkg,
-        CryptoSignature:     sig,
+            // meta message packing
+            meta = &VBoxMasterMeta{
+                ProtocolVersion:     VBoxMasterVersion,
+                MasterState:         state,
+                EncryptedPackage:    epkg,
+                CryptoSignature:     sig,
+            }
+            mpkg, err = msgpack.Marshal(meta)
+            return mpkg, errors.WithStack(err)
+        }
     }
-    mpkg, err := msgpack.Marshal(meta)
-    return mpkg, errors.WithStack(err)
 }
 
-func MasterDecryptedBounded(metaPackage []byte, rsaDecryptor pcrypto.RsaDecryptor) (*VBoxMasterAcknowledge, error) {
+func MasterUnpackingAcknowledge(metaPackage, prvkey []byte, rsaDecryptor pcrypto.RsaDecryptor) (*VBoxMasterMeta, error) {
     var (
-        meta *VBoxMasterAgentMeta = nil
+        meta *VBoxMasterMeta = nil
         ack *VBoxMasterAcknowledge = nil
+        apkg []byte = nil
         err error = nil
     )
 
-    // unpack meta
+    // unpack meta & error check
+    if len(metaPackage) == 0 {
+        return nil, errors.Errorf("[ERR] meta package cannot be null")
+    }
     err = msgpack.Unmarshal(metaPackage, &meta)
     if err != nil {
         return nil, errors.WithStack(err)
@@ -191,33 +174,101 @@ func MasterDecryptedBounded(metaPackage []byte, rsaDecryptor pcrypto.RsaDecrypto
     if meta.ProtocolVersion != VBoxMasterVersion {
         return nil, errors.Errorf("[ERR] incorrect protocol version")
     }
-    if len(meta.EncryptedPackage) == 0 {
-        return nil, errors.Errorf("[ERR] null encrypted acknowledge")
-    }
-    if len(meta.PublicKey) != 0 {
-        return nil, errors.Errorf("[ERR] invalid meta package content w/ pubkey")
-    }
-    if len(meta.CryptoSignature) == 0 {
-        return nil, errors.Errorf("[ERR] null crypto signature")
-    }
 
-    // decrypt ack package
-    apkg, err := rsaDecryptor.DecryptByRSA(meta.EncryptedPackage, meta.CryptoSignature)
-    if err != nil {
-        return nil, errors.WithStack(err)
-    }
+    switch meta.MasterState {
+        case VBoxMasterKeyExchange: {
+            var (
+                decryptor pcrypto.RsaDecryptor
+                encryptor pcrypto.RsaEncryptor
+            )
 
-    // unpack acknowledge
-    err = msgpack.Unmarshal(apkg, &ack)
-    if err != nil {
-        return nil, errors.WithStack(err)
-    }
-    if ack == nil {
-        return nil, errors.Errorf("[ERR] null unpacked acknowledge")
-    }
-    if len(ack.AuthToken) != 0 {
-        return nil, errors.Errorf("[ERR] invalid ack content w/ auth token")
-    }
+            // error check
+            if len(prvkey) == 0 {
+                return nil, errors.Errorf("[ERR] private key cannot be null")
+            }
+            if len(meta.EncryptedPackage) == 0 {
+                return nil, errors.Errorf("[ERR] null encrypted ack")
+            }
+            if len(meta.PublicKey) == 0 {
+                return nil, errors.Errorf("[ERR] null public key")
+            }
+            if len(meta.CryptoSignature) == 0 {
+                return nil, errors.Errorf("[ERR] null crypto signature")
+            }
 
-    return ack, nil
+            // build decryptor
+            encryptor, err = pcrypto.NewRsaEncryptorFromKeyData(meta.PublicKey, prvkey)
+            if err != nil {
+                return nil, errors.Errorf("[ERR] cannot build encryptor")
+            }
+
+            decryptor, err = pcrypto.NewRsaDecryptorFromKeyData(meta.PublicKey, prvkey)
+            if err != nil {
+                return nil, errors.Errorf("[ERR] cannot build decryptor")
+            }
+
+            // decrypt message
+            apkg, err = decryptor.DecryptByRSA(meta.EncryptedPackage, meta.CryptoSignature)
+            if err != nil {
+                return nil, errors.Errorf("[ERR] cannot build decryptor")
+            }
+
+            // unpack acknowledge
+            err = msgpack.Unmarshal(apkg, &ack)
+            if err != nil {
+                return nil, errors.WithStack(err)
+            }
+            if ack == nil {
+                return nil, errors.Errorf("[ERR] null unpacked acknowledge")
+            }
+            if len(ack.AuthToken) == 0 {
+                return nil, errors.Errorf("[ERR] invalid auth token assignment")
+            }
+
+            // assign fields
+            meta.MasterAcknowledge = ack
+            meta.Encryptor = encryptor
+            meta.Decryptor = decryptor
+
+            return meta, nil
+        }
+        default: {
+            // error check
+            if rsaDecryptor == nil {
+                return nil, errors.Errorf("[ERR] core RSA Decryptor cannot be null")
+            }
+            if len(meta.EncryptedPackage) == 0 {
+                return nil, errors.Errorf("[ERR] null encrypted acknowledge")
+            }
+            if len(meta.PublicKey) != 0 {
+                return nil, errors.Errorf("[ERR] invalid meta package content w/ pubkey")
+            }
+            if len(meta.CryptoSignature) == 0 {
+                return nil, errors.Errorf("[ERR] null crypto signature")
+            }
+
+            // decrypt ack package
+            apkg, err = rsaDecryptor.DecryptByRSA(meta.EncryptedPackage, meta.CryptoSignature)
+            if err != nil {
+                return nil, errors.WithStack(err)
+            }
+
+            // unpack acknowledge
+            err = msgpack.Unmarshal(apkg, &ack)
+            if err != nil {
+                return nil, errors.WithStack(err)
+            }
+            if ack == nil {
+                return nil, errors.Errorf("[ERR] null unpacked acknowledge")
+            }
+            if len(ack.AuthToken) != 0 {
+                return nil, errors.Errorf("[ERR] invalid ack content w/ auth token")
+            }
+
+            // assing acknowledge
+            meta.MasterAcknowledge = ack
+
+            return meta, nil
+        }
+    }
 }

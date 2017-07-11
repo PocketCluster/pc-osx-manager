@@ -42,7 +42,7 @@ const (
     VBC_CRYPTO_SIGNATURE    string = "c_cs"
 )
 
-type VBoxCoreAgentMeta struct {
+type VBoxCoreMeta struct {
     ProtocolVersion         string             `msgpack:"c_pv"`
     CoreState               VBoxCoreState      `msgpack:"c_st"`
     EncryptedPackage        []byte             `msgpack:"c_ep, inline, omitempty"`
@@ -69,7 +69,7 @@ func CorePackingStatus(state VBoxCoreState, pubkey []byte, extAddr, extGateway s
     switch state {
         case VBoxCoreUnbounded: {
             var (
-                meta = &VBoxCoreAgentMeta {
+                meta = &VBoxCoreMeta{
                     ProtocolVersion:    VBoxCoreVersion,
                     CoreState:          VBoxCoreUnbounded,
                     PublicKey:          pubkey,
@@ -89,7 +89,7 @@ func CorePackingStatus(state VBoxCoreState, pubkey []byte, extAddr, extGateway s
 
         default: {
             var (
-                meta *VBoxCoreAgentMeta = nil
+                meta *VBoxCoreMeta = nil
                 status = &VBoxCoreStatus {
                     ExtIP4AddrSmask:    extAddr,
                     ExtIP4Gateway:      extGateway,
@@ -124,7 +124,7 @@ func CorePackingStatus(state VBoxCoreState, pubkey []byte, extAddr, extGateway s
             }
 
             // meta message packing
-            meta = &VBoxCoreAgentMeta {
+            meta = &VBoxCoreMeta{
                 ProtocolVersion:     VBoxCoreVersion,
                 CoreState:           state,
                 EncryptedPackage:    epkg,
@@ -136,9 +136,9 @@ func CorePackingStatus(state VBoxCoreState, pubkey []byte, extAddr, extGateway s
     }
 }
 
-func CoreUnpackingStatus(state VBoxCoreState, metaPackage []byte, rsaDecryptor pcrypto.RsaDecryptor) (*VBoxCoreAgentMeta, error) {
+func CoreUnpackingStatus(metaPackage []byte, rsaDecryptor pcrypto.RsaDecryptor) (*VBoxCoreMeta, error) {
     var (
-        meta *VBoxCoreAgentMeta
+        meta *VBoxCoreMeta
         err error = nil
     )
     // error check
@@ -146,19 +146,20 @@ func CoreUnpackingStatus(state VBoxCoreState, metaPackage []byte, rsaDecryptor p
         return nil, errors.Errorf("[ERR] meta package cannot be null")
     }
 
-    switch state {
+    // unpack meta package
+    err = msgpack.Unmarshal(metaPackage, &meta)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+    if meta == nil {
+        return nil, errors.Errorf("[ERR] null unpacked meta")
+    }
+    if meta.ProtocolVersion != VBoxCoreVersion {
+        return nil, errors.Errorf("[ERR] invalid protocol version")
+    }
+
+    switch meta.CoreState {
         case VBoxCoreUnbounded: {
-            // unpack meta package
-            err = msgpack.Unmarshal(metaPackage, &meta)
-            if err != nil {
-                return nil, errors.WithStack(err)
-            }
-            if meta == nil {
-                return nil, errors.Errorf("[ERR] null unpacked meta")
-            }
-            if meta.ProtocolVersion != VBoxCoreVersion {
-                return nil, errors.Errorf("[ERR] invalid protocol version")
-            }
             if len(meta.EncryptedPackage) != 0 {
                 return nil, errors.Errorf("[ERR] invalid meta package content w/ encrypted status")
             }
@@ -179,18 +180,6 @@ func CoreUnpackingStatus(state VBoxCoreState, metaPackage []byte, rsaDecryptor p
             // error check
             if rsaDecryptor == nil {
                 return nil, errors.Errorf("[ERR] core status RSA Decryptor cannot be null")
-            }
-
-            // unpack meta
-            err = msgpack.Unmarshal(metaPackage, &meta)
-            if err != nil {
-                return nil, errors.WithStack(err)
-            }
-            if meta == nil {
-                return nil, errors.Errorf("[ERR] null unpacked meta")
-            }
-            if meta.ProtocolVersion != VBoxCoreVersion {
-                return nil, errors.Errorf("[ERR] incorrect protocol version")
             }
             if len(meta.EncryptedPackage) == 0 {
                 return nil, errors.Errorf("[ERR] null encrypted status")

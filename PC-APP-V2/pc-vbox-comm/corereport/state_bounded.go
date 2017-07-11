@@ -20,7 +20,7 @@ func (b *bounded) transitionWithMasterMeta(core *coreReporter, sender interface{
         err error = nil
     )
 
-    _, err = mpkg.MasterDecryptedBounded(metaPackage, core.rsaDecryptor)
+    _, err = mpkg.MasterUnpackingAcknowledge(metaPackage, nil, core.rsaDecryptor)
     if err != nil {
         return VBoxCoreTransitionIdle, errors.WithStack(err)
     }

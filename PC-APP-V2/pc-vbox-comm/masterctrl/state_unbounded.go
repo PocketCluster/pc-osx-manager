@@ -5,26 +5,27 @@ import (
 
     "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
+    mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
     cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
 )
 
 type unbounded struct {}
 func stateUnbounded() vboxController { return &unbounded{}}
 
-func (u *unbounded) currentState() VBoxMasterState {
-    return VBoxMasterUnbounded
+func (u *unbounded) currentState() mpkg.VBoxMasterState {
+    return mpkg.VBoxMasterUnbounded
 }
 
 func (u *unbounded) transitionWithCoreMeta(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error) {
     var (
-        meta *cpkg.VBoxCoreAgentMeta = nil
+        meta *cpkg.VBoxCoreMeta = nil
         encryptor pcrypto.RsaEncryptor
         decryptor pcrypto.RsaDecryptor
         err error = nil
     )
 
     // unpack unbounded
-    meta, err = cpkg.CoreUnpackingUnbounded(metaPackage)
+    meta, err = cpkg.CoreUnpackingStatus(metaPackage, nil)
     if err != nil {
         return VBoxMasterTransitionIdle, errors.WithStack(err)
     }

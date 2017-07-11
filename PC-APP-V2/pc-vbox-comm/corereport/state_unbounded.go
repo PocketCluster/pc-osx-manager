@@ -4,7 +4,6 @@ import (
     "time"
 
     "github.com/pkg/errors"
-    "github.com/stkim1/pcrypto"
     mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
     cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
 )
@@ -18,20 +17,18 @@ func (u *unbounded) currentState() cpkg.VBoxCoreState {
 
 func (u *unbounded) transitionWithMasterMeta(core *coreReporter, sender interface{}, metaPackage []byte, ts time.Time) (VBoxCoreTransition, error) {
     var (
-        ack *mpkg.VBoxMasterAcknowledge = nil
-        encryptor pcrypto.RsaEncryptor
-        decryptor pcrypto.RsaDecryptor
+        meta *mpkg.VBoxMasterMeta = nil
         err error = nil
     )
 
     // get acknowledge, encryptor, & decryptor
-    ack, encryptor, decryptor, err = mpkg.MasterDecryptedKeyExchange(metaPackage, core.privateKey)
+    meta, err = mpkg.MasterUnpackingAcknowledge(metaPackage, core.privateKey, nil)
     if err != nil {
         return VBoxCoreTransitionIdle, errors.WithStack(err)
     }
-    core.rsaEncryptor = encryptor
-    core.rsaDecryptor = decryptor
-    core.authToken = ack.AuthToken
+    core.rsaEncryptor = meta.Encryptor
+    core.rsaDecryptor = meta.Decryptor
+    core.authToken = meta.MasterAcknowledge.AuthToken
 
     return VBoxCoreTransitionOk, nil
 }

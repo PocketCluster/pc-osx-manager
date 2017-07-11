@@ -11,23 +11,23 @@ import (
 type keyexchange struct {}
 func stateKeyexchange() vboxController { return &keyexchange {} }
 
-func (k *keyexchange) currentState() VBoxMasterState {
-    return VBoxMasterKeyExchange
+func (k *keyexchange) currentState() mpkg.VBoxMasterState {
+    return mpkg.VBoxMasterKeyExchange
 }
 
 func (k *keyexchange) transitionWithCoreMeta(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error) {
     var (
-        status *cpkg.VBoxCoreStatus
+        meta *cpkg.VBoxCoreMeta
         err error = nil
     )
 
     // decrypt & update status package
-    status, err = cpkg.CoreDecryptBounded(metaPackage, master.rsaDecryptor)
+    meta, err = cpkg.CoreUnpackingStatus(metaPackage, master.rsaDecryptor)
     if err != nil {
         return VBoxMasterTransitionIdle, errors.WithStack(err)
     }
-    master.coreNode.IP4Address = status.ExtIP4AddrSmask
-    master.coreNode.IP4Gateway = status.ExtIP4Gateway
+    master.coreNode.IP4Address = meta.CoreStatus.ExtIP4AddrSmask
+    master.coreNode.IP4Gateway = meta.CoreStatus.ExtIP4Gateway
 
     return VBoxMasterTransitionOk, nil
 }
@@ -44,7 +44,7 @@ func (k *keyexchange) transitionWithTimeStamp(master *masterControl, ts time.Tim
     if err != nil {
         return errors.WithStack(err)
     }
-    keypkg, err = mpkg.MasterEncryptedKeyExchange(authToken, master.publicKey, master.rsaEncryptor)
+    keypkg, err = mpkg.MasterPackingAcknowledge(mpkg.VBoxMasterKeyExchange, authToken, master.publicKey, master.rsaEncryptor)
     if err != nil {
         return errors.WithStack(err)
     }

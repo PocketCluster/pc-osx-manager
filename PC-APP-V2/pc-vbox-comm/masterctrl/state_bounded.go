@@ -11,23 +11,23 @@ import (
 type bounded struct {}
 func stateBounded () vboxController { return &bounded{} }
 
-func (b *bounded) currentState() VBoxMasterState {
-    return VBoxMasterBounded
+func (b *bounded) currentState() mpkg.VBoxMasterState {
+    return mpkg.VBoxMasterBounded
 }
 
 func (b *bounded) transitionWithCoreMeta(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error) {
     var (
-        status *cpkg.VBoxCoreStatus
+        meta *cpkg.VBoxCoreMeta
         err error = nil
     )
 
     // decrypt & update status package
-    status, err = cpkg.CoreDecryptBounded(metaPackage, master.rsaDecryptor)
+    meta, err = cpkg.CoreUnpackingStatus(metaPackage, master.rsaDecryptor)
     if err != nil {
         return VBoxMasterTransitionIdle, errors.WithStack(err)
     }
-    master.coreNode.IP4Address = status.ExtIP4AddrSmask
-    master.coreNode.IP4Gateway = status.ExtIP4Gateway
+    master.coreNode.IP4Address = meta.CoreStatus.ExtIP4AddrSmask
+    master.coreNode.IP4Gateway = meta.CoreStatus.ExtIP4Gateway
 
     return VBoxMasterTransitionOk, nil
 }
@@ -39,7 +39,7 @@ func (b *bounded) transitionWithTimeStamp(master *masterControl, ts time.Time) e
     )
 
     // send acknowledge packagepackage
-    ackpkg, err = mpkg.MasterEncryptedBounded(master.rsaEncryptor)
+    ackpkg, err = mpkg.MasterPackingAcknowledge(mpkg.VBoxMasterBounded, "", nil, master.rsaEncryptor)
     if err != nil {
         return errors.WithStack(err)
     }

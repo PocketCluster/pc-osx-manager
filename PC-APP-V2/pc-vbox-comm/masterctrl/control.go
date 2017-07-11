@@ -7,15 +7,8 @@ import (
     "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-vbox-comm/utils"
+    mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
     "github.com/stkim1/pc-core/model"
-)
-
-type VBoxMasterState int
-const (
-    VBoxMasterUnbounded         VBoxMasterState = iota
-    VBoxMasterKeyExchange
-    VBoxMasterBounded
-    VBoxMasterBindBroken
 )
 
 type VBoxMasterTransition int
@@ -24,21 +17,6 @@ const (
     VBoxMasterTransitionOk
     VBoxMasterTransitionIdle
 )
-
-func (s VBoxMasterState) String() string {
-    var state string
-    switch s {
-        case VBoxMasterUnbounded:
-            state = "VBoxMasterUnbounded"
-        case VBoxMasterKeyExchange:
-            state = "VBoxMasterKeyExchange"
-        case VBoxMasterBounded:
-            state = "VBoxMasterBounded"
-        case VBoxMasterBindBroken:
-            state = "VBoxMasterBindBroken"
-    }
-    return state
-}
 
 const (
     TransitionFailureLimit      int           = 3
@@ -61,13 +39,13 @@ func (c CommChannelFunc) UcastSend(target string, data []byte) error {
 }
 
 type ControllerActionOnTransition interface {
-    OnStateTranstionSuccess(state VBoxMasterState, vcore interface{}, ts time.Time) error
-    OnStateTranstionFailure(state VBoxMasterState, vcore interface{}, ts time.Time) error
+    OnStateTranstionSuccess(state mpkg.VBoxMasterState, vcore interface{}, ts time.Time) error
+    OnStateTranstionFailure(state mpkg.VBoxMasterState, vcore interface{}, ts time.Time) error
 }
 
 // MasterBeacon is assigned individually for each slave node.
 type VBoxMasterControl interface {
-    CurrentState() VBoxMasterState
+    CurrentState() mpkg.VBoxMasterState
     TransitionWithCoreMeta(sender interface{}, metaPackage []byte, timestamp time.Time) error
     TransitionWithTimestamp(timestamp time.Time) error
     Shutdown()
@@ -75,7 +53,7 @@ type VBoxMasterControl interface {
 
 // this interface is purely internal interface containing only functions, and could be replaced anytime you're to call it
 type vboxController interface {
-    currentState() VBoxMasterState
+    currentState() mpkg.VBoxMasterState
 
     transitionWithCoreMeta(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error)
     transitionWithTimeStamp(master *masterControl, ts time.Time) error
@@ -113,7 +91,7 @@ type masterControl struct {
     CommChannel
 }
 
-func (m *masterControl) CurrentState() VBoxMasterState {
+func (m *masterControl) CurrentState() mpkg.VBoxMasterState {
     if m.controller == nil {
         log.Panic("[CRITICAL] vboxController cannot be null")
     }
@@ -123,7 +101,7 @@ func (m *masterControl) CurrentState() VBoxMasterState {
 /* ------------------------------------------ Core Meta Transition Functions ---------------------------------------- */
 func (m *masterControl) transitionTimeout() time.Duration {
     switch m.CurrentState() {
-        case VBoxMasterBounded: {
+        case mpkg.VBoxMasterBounded: {
             return BoundedTimeout * time.Duration(TxActionLimit)
         }
         default: {
@@ -132,18 +110,18 @@ func (m *masterControl) transitionTimeout() time.Duration {
     }
 }
 
-func stateTransition(currentState VBoxMasterState, transitCondition VBoxMasterTransition) VBoxMasterState {
-    var nextState VBoxMasterState
+func stateTransition(currentState mpkg.VBoxMasterState, transitCondition VBoxMasterTransition) mpkg.VBoxMasterState {
+    var nextState mpkg.VBoxMasterState
 
     switch transitCondition {
         // successfully transition to the next
         case VBoxMasterTransitionOk: {
             switch currentState {
-                case VBoxMasterUnbounded: {
-                    nextState = VBoxMasterKeyExchange
+                case mpkg.VBoxMasterUnbounded: {
+                    nextState = mpkg.VBoxMasterKeyExchange
                 }
                 default: {
-                    nextState = VBoxMasterBounded
+                    nextState = mpkg.VBoxMasterBounded
                 }
             }
         }
@@ -151,13 +129,13 @@ func stateTransition(currentState VBoxMasterState, transitCondition VBoxMasterTr
         // failed to transit
         case VBoxMasterTransitionFail: {
             switch currentState {
-                case VBoxMasterUnbounded:
+                case mpkg.VBoxMasterUnbounded:
                     fallthrough
-                case VBoxMasterKeyExchange: {
-                    nextState = VBoxMasterUnbounded
+                case mpkg.VBoxMasterKeyExchange: {
+                    nextState = mpkg.VBoxMasterUnbounded
                 }
                 default: {
-                    nextState = VBoxMasterBindBroken
+                    nextState = mpkg.VBoxMasterBindBroken
                 }
             }
         }
@@ -200,7 +178,7 @@ func finalizeStateTransitionWithTimeout(master *masterControl, nextStateCandiate
     return nextConfirmedState
 }
 
-func runOnTransitionEvents(master *masterControl, newState, oldState VBoxMasterState, transition VBoxMasterTransition, masterTimestamp time.Time) error {
+func runOnTransitionEvents(master *masterControl, newState, oldState mpkg.VBoxMasterState, transition VBoxMasterTransition, masterTimestamp time.Time) error {
     var (
         ierr, oerr error = nil, nil
     )
@@ -233,7 +211,7 @@ func runOnTransitionEvents(master *masterControl, newState, oldState VBoxMasterS
     return nil
 }
 
-func newControllerForState(ctrl vboxController, newState, oldState VBoxMasterState) vboxController {
+func newControllerForState(ctrl vboxController, newState, oldState mpkg.VBoxMasterState) vboxController {
     var (
         newController vboxController = nil
         err error = nil
@@ -243,16 +221,16 @@ func newControllerForState(ctrl vboxController, newState, oldState VBoxMasterSta
     }
 
     switch newState {
-        case VBoxMasterUnbounded: {
+        case mpkg.VBoxMasterUnbounded: {
             newController = stateUnbounded()
         }
-        case VBoxMasterKeyExchange: {
+        case mpkg.VBoxMasterKeyExchange: {
             newController = stateKeyexchange()
         }
-        case VBoxMasterBounded: {
+        case mpkg.VBoxMasterBounded: {
             newController = stateBounded()
         }
-        case VBoxMasterBindBroken:
+        case mpkg.VBoxMasterBindBroken:
             fallthrough
         default: {
             newController = stateBindbroken()
@@ -268,7 +246,7 @@ func newControllerForState(ctrl vboxController, newState, oldState VBoxMasterSta
 
 func (m *masterControl) TransitionWithCoreMeta(sender interface{}, metaPackage []byte, timestamp time.Time) error {
     var (
-        newState, oldState VBoxMasterState = m.CurrentState(), m.CurrentState()
+        newState, oldState mpkg.VBoxMasterState = m.CurrentState(), m.CurrentState()
         transitionCandidate, finalTransition VBoxMasterTransition
         transErr, eventErr error = nil, nil
     )
@@ -297,7 +275,7 @@ func (m *masterControl) TransitionWithCoreMeta(sender interface{}, metaPackage [
 /* ----------------------------------------- Timestamp Transition Functions ----------------------------------------- */
 func (m *masterControl) txTimeWindow() time.Duration {
     switch m.CurrentState() {
-        case VBoxMasterBounded: {
+        case mpkg.VBoxMasterBounded: {
             return BoundedTimeout
         }
         default: {
@@ -330,7 +308,7 @@ func stateTransitionWithTimestamp(master *masterControl, timestamp time.Time) (V
 
 func (m *masterControl) TransitionWithTimestamp(timestamp time.Time) error {
     var (
-        newState, oldState VBoxMasterState = m.CurrentState(), m.CurrentState()
+        newState, oldState mpkg.VBoxMasterState = m.CurrentState(), m.CurrentState()
         transition VBoxMasterTransition
         transErr, eventErr error = nil, nil
     )
