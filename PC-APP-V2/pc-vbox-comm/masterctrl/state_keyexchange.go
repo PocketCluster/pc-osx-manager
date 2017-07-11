@@ -15,7 +15,7 @@ func (k *keyexchange) currentState() mpkg.VBoxMasterState {
     return mpkg.VBoxMasterKeyExchange
 }
 
-func (k *keyexchange) transitionWithCoreMeta(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error) {
+func (k *keyexchange) readCoreReport(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error) {
     var (
         meta *cpkg.VBoxCoreMeta
         err error = nil
@@ -26,33 +26,29 @@ func (k *keyexchange) transitionWithCoreMeta(master *masterControl, sender inter
     if err != nil {
         return VBoxMasterTransitionIdle, errors.WithStack(err)
     }
+    if meta.CoreState != cpkg.VBoxCoreBounded {
+        return VBoxMasterTransitionIdle, errors.Errorf("[ERR] core state should be VBoxCoreBounded")
+    }
+    // TODO need lock
     master.coreNode.IP4Address = meta.CoreStatus.ExtIP4AddrSmask
     master.coreNode.IP4Gateway = meta.CoreStatus.ExtIP4Gateway
 
     return VBoxMasterTransitionOk, nil
 }
 
-func (k *keyexchange) transitionWithTimeStamp(master *masterControl, ts time.Time) error {
+func (k *keyexchange) makeMasterAck(master *masterControl, ts time.Time) ([]byte, error) {
     var (
-        authToken string = ""
-        keypkg []byte = nil
+        ackpkg []byte = nil
         err error = nil
     )
 
-    // send key exchange package
-    authToken, err = master.coreNode.GetAuthToken()
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    keypkg, err = mpkg.MasterPackingAcknowledge(mpkg.VBoxMasterKeyExchange, authToken, master.publicKey, master.rsaEncryptor)
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    return master.UcastSend("127.0.0.1", keypkg)
+    // send acknowledge packagepackage
+    ackpkg, err = mpkg.MasterPackingAcknowledge(mpkg.VBoxMasterBounded, "", nil, master.rsaEncryptor)
+    return ackpkg, errors.WithStack(err)
 }
 
 func (k *keyexchange) onStateTranstionSuccess(master *masterControl, ts time.Time) error {
-    return master.coreNode.JoinCore()
+    return master.coreNode.Update()
 }
 
 func (k *keyexchange) onStateTranstionFailure(master *masterControl, ts time.Time) error {

@@ -46,7 +46,7 @@ type ControllerActionOnTransition interface {
 // MasterBeacon is assigned individually for each slave node.
 type VBoxMasterControl interface {
     CurrentState() mpkg.VBoxMasterState
-    TransitionWithCoreMeta(sender interface{}, metaPackage []byte, timestamp time.Time) error
+    TransitionWithCoreMeta(sender interface{}, metaPackage []byte, timestamp time.Time) ([]byte, error)
     TransitionWithTimestamp(timestamp time.Time) error
     Shutdown()
 }
@@ -55,8 +55,8 @@ type VBoxMasterControl interface {
 type vboxController interface {
     currentState() mpkg.VBoxMasterState
 
-    transitionWithCoreMeta(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error)
-    transitionWithTimeStamp(master *masterControl, ts time.Time) error
+    readCoreReport(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error)
+    makeMasterAck(master *masterControl, ts time.Time) ([]byte, error)
 
     onStateTranstionSuccess(master *masterControl, ts time.Time) error
     onStateTranstionFailure(master *masterControl, ts time.Time) error
@@ -244,17 +244,24 @@ func newControllerForState(ctrl vboxController, newState, oldState mpkg.VBoxMast
     return newController
 }
 
-func (m *masterControl) TransitionWithCoreMeta(sender interface{}, metaPackage []byte, timestamp time.Time) error {
+func (m *masterControl) TransitionWithCoreMeta(sender interface{}, metaPackage []byte, timestamp time.Time) ([]byte, error) {
     var (
         newState, oldState mpkg.VBoxMasterState = m.CurrentState(), m.CurrentState()
         transitionCandidate, finalTransition VBoxMasterTransition
-        transErr, eventErr error = nil, nil
+        transErr, eventErr, buildErr, tErr error = nil, nil, nil, nil
+        masterAck []byte = nil
     )
     if m.controller == nil {
         log.Panic("[CRITICAL] vboxController func cannot be null")
     }
 
-    transitionCandidate, transErr = m.controller.transitionWithCoreMeta(m, sender, metaPackage, timestamp)
+    transitionCandidate, transErr = m.controller.readCoreReport(m, sender, metaPackage, timestamp)
+
+    if transitionCandidate == VBoxMasterTransitionOk {
+        masterAck, buildErr = m.controller.makeMasterAck(m, timestamp)
+    } else {
+        buildErr = errors.Errorf("[ERR] invalid request from core to build master ack")
+    }
 
     // this is to apply failed time count and timeout window
     finalTransition = finalizeStateTransitionWithTimeout(m, transitionCandidate, timestamp)
@@ -269,7 +276,8 @@ func (m *masterControl) TransitionWithCoreMeta(sender interface{}, metaPackage [
     m.controller = newControllerForState(m.controller, newState, oldState)
 
     // return combined errors
-    return utils.SummarizeErrors(transErr, eventErr)
+    tErr = utils.SummarizeErrors(transErr, eventErr)
+    return masterAck, errors.WithStack(utils.SummarizeErrors(tErr, buildErr))
 }
 
 /* ----------------------------------------- Timestamp Transition Functions ----------------------------------------- */
@@ -285,21 +293,15 @@ func (m *masterControl) txTimeWindow() time.Duration {
 }
 
 func stateTransitionWithTimestamp(master *masterControl, timestamp time.Time) (VBoxMasterTransition, error) {
-    var transErr error = nil
-
     if master.txActionCount < TxActionLimit {
-
         // if tx timeout window is smaller than time delta (T_1 - T_0), don't do anything!!! just skip!
         if master.txTimeWindow() < timestamp.Sub(master.lastTransmissionTS) {
-
-            transErr = master.controller.transitionWithTimeStamp(master, timestamp)
             // since an action is taken, the action counter goes up regardless of error
             master.txActionCount++
             // we'll reset slave action timestamp
             master.lastTransmissionTS = timestamp
         }
-
-        return VBoxMasterTransitionIdle, transErr
+        return VBoxMasterTransitionIdle, nil
     }
 
     // this is failure. the fact that this is called indicate that we're ready to move to failure state

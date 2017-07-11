@@ -15,7 +15,7 @@ func (b *bounded) currentState() mpkg.VBoxMasterState {
     return mpkg.VBoxMasterBounded
 }
 
-func (b *bounded) transitionWithCoreMeta(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error) {
+func (b *bounded) readCoreReport(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error) {
     var (
         meta *cpkg.VBoxCoreMeta
         err error = nil
@@ -26,13 +26,17 @@ func (b *bounded) transitionWithCoreMeta(master *masterControl, sender interface
     if err != nil {
         return VBoxMasterTransitionIdle, errors.WithStack(err)
     }
+    if meta.CoreState != cpkg.VBoxCoreBounded {
+        return VBoxMasterTransitionIdle, errors.Errorf("[ERR] core state should be VBoxCoreBounded")
+    }
+    // TODO need lock
     master.coreNode.IP4Address = meta.CoreStatus.ExtIP4AddrSmask
     master.coreNode.IP4Gateway = meta.CoreStatus.ExtIP4Gateway
 
     return VBoxMasterTransitionOk, nil
 }
 
-func (b *bounded) transitionWithTimeStamp(master *masterControl, ts time.Time) error {
+func (b *bounded) makeMasterAck(master *masterControl, ts time.Time) ([]byte, error) {
     var (
         ackpkg []byte = nil
         err error = nil
@@ -40,10 +44,7 @@ func (b *bounded) transitionWithTimeStamp(master *masterControl, ts time.Time) e
 
     // send acknowledge packagepackage
     ackpkg, err = mpkg.MasterPackingAcknowledge(mpkg.VBoxMasterBounded, "", nil, master.rsaEncryptor)
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    return master.UcastSend("127.0.0.1", ackpkg)
+    return ackpkg, errors.WithStack(err)
 }
 
 func (b *bounded) onStateTranstionSuccess(master *masterControl, ts time.Time) error {
