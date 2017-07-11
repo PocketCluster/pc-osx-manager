@@ -22,7 +22,7 @@ func (u *unbounded) makeCoreReport(core *coreReporter, ts time.Time) ([]byte, er
     )
 
     // send pubkey to master
-    meta, err = cpkg.CorePackingStatus(cpkg.VBoxCoreUnbounded, core.publicKey, "", "", nil)
+    meta, err = cpkg.CorePackingUnboundedStatus(core.publicKey)
     return meta, errors.WithStack(err)
 }
 

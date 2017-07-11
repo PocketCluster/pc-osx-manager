@@ -1,12 +1,12 @@
 package service
 
 import (
+    "fmt"
     "testing"
     "time"
 
     . "gopkg.in/check.v1"
     log "github.com/Sirupsen/logrus"
-    "fmt"
 )
 
 const (

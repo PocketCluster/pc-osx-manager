@@ -23,7 +23,7 @@ func (b *bounded) makeCoreReport(core *coreReporter, ts time.Time) ([]byte, erro
 
     // send status to master
     // TODO get ip address and gateway
-    meta, err = cpkg.CorePackingStatus(cpkg.VBoxCoreBounded, nil, "127.0.0.1", "192.168.1.1", core.rsaEncryptor)
+    meta, err = cpkg.CorePackingBoundedStatus("127.0.0.1", "192.168.1.1", core.rsaEncryptor)
     return meta, errors.WithStack(err)
 }
 

@@ -65,7 +65,19 @@ type VBoxCoreStatus struct {
 }
 
 // --- Compositions ---
-func CorePackingStatus(state VBoxCoreState, pubkey []byte, extAddr, extGateway string, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
+func CorePackingUnboundedStatus(pubkey []byte) ([]byte, error) {
+    return corePackingStatus(VBoxCoreUnbounded, pubkey, "", "", nil)
+}
+
+func CorePackingBoundedStatus(extAddr, extGateway string, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
+    return corePackingStatus(VBoxCoreBounded, nil, extAddr, extGateway, rsaEncryptor)
+}
+
+func CorePackingBindBrokenStatus(extAddr, extGateway string, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
+    return corePackingStatus(VBoxCoreBindBroken, nil, extAddr, extGateway, rsaEncryptor)
+}
+
+func corePackingStatus(state VBoxCoreState, pubkey []byte, extAddr, extGateway string, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
     switch state {
         case VBoxCoreUnbounded: {
             var (
