@@ -43,7 +43,7 @@ func (n *bindbroken) makeMasterAck(master *masterControl, ts time.Time) ([]byte,
     )
 
     // send acknowledge packagepackage
-    ackpkg, err = mpkg.MasterPackingAcknowledge(mpkg.VBoxMasterBounded, "", nil, master.rsaEncryptor)
+    ackpkg, err = mpkg.MasterPackingBindBrokenAcknowledge(master.rsaEncryptor)
     return ackpkg, errors.WithStack(err)
 }
 

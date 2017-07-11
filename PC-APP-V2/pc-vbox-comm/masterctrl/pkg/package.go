@@ -68,7 +68,19 @@ type VBoxMasterAcknowledge struct {
 }
 
 // --- Compositions ---
-func MasterPackingAcknowledge(state VBoxMasterState, authToken string, pubkey []byte, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
+func MasterPackingKeyExchangeAcknowledge(authToken string, pubkey []byte, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
+    return masterPackingAcknowledge(VBoxMasterKeyExchange, authToken, pubkey, rsaEncryptor)
+}
+
+func MasterPackingBoundedAcknowledge(rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
+    return masterPackingAcknowledge(VBoxMasterBounded, "", nil, rsaEncryptor)
+}
+
+func MasterPackingBindBrokenAcknowledge(rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
+    return masterPackingAcknowledge(VBoxMasterBindBroken, "", nil, rsaEncryptor)
+}
+
+func masterPackingAcknowledge(state VBoxMasterState, authToken string, pubkey []byte, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
     var (
         meta *VBoxMasterMeta = nil
         apkg, epkg, mpkg []byte = nil, nil, nil
@@ -81,7 +93,7 @@ func MasterPackingAcknowledge(state VBoxMasterState, authToken string, pubkey []
     }
 
     switch state {
-        case VBoxMasterUnbounded: {
+        case VBoxMasterKeyExchange: {
             var (
                 ack = &VBoxMasterAcknowledge {
                     AuthToken:    authToken,
@@ -112,7 +124,7 @@ func MasterPackingAcknowledge(state VBoxMasterState, authToken string, pubkey []
             // meta message packing
             meta = &VBoxMasterMeta{
                 ProtocolVersion:     VBoxMasterVersion,
-                MasterState:         VBoxMasterUnbounded,
+                MasterState:         VBoxMasterKeyExchange,
                 EncryptedPackage:    epkg,
                 PublicKey:           pubkey,
                 CryptoSignature:     sig,
@@ -196,21 +208,20 @@ func MasterUnpackingAcknowledge(metaPackage, prvkey []byte, rsaDecryptor pcrypto
                 return nil, errors.Errorf("[ERR] null crypto signature")
             }
 
-            // build decryptor
+            // build encryptor & decryptor
             encryptor, err = pcrypto.NewRsaEncryptorFromKeyData(meta.PublicKey, prvkey)
             if err != nil {
-                return nil, errors.Errorf("[ERR] cannot build encryptor")
+                return nil, errors.WithStack(err)
             }
-
             decryptor, err = pcrypto.NewRsaDecryptorFromKeyData(meta.PublicKey, prvkey)
             if err != nil {
-                return nil, errors.Errorf("[ERR] cannot build decryptor")
+                return nil, errors.WithStack(err)
             }
 
             // decrypt message
             apkg, err = decryptor.DecryptByRSA(meta.EncryptedPackage, meta.CryptoSignature)
             if err != nil {
-                return nil, errors.Errorf("[ERR] cannot build decryptor")
+                return nil, errors.WithStack(err)
             }
 
             // unpack acknowledge

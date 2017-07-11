@@ -63,7 +63,7 @@ func (u *unbounded) makeMasterAck(master *masterControl, ts time.Time) ([]byte, 
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    keypkg, err = mpkg.MasterPackingAcknowledge(mpkg.VBoxMasterKeyExchange, authToken, master.publicKey, master.rsaEncryptor)
+    keypkg, err = mpkg.MasterPackingKeyExchangeAcknowledge(authToken, master.publicKey, master.rsaEncryptor)
     return keypkg, errors.WithStack(err)
 }
 

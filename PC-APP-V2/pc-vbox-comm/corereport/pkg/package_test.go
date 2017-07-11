@@ -16,7 +16,6 @@ const (
 func TestCorePackage(t *testing.T) { TestingT(t) }
 
 type PackageTestSuite struct {
-    privateKey []byte
     publicKey  []byte
     encryptor  pcrypto.RsaEncryptor
     decryptor  pcrypto.RsaDecryptor
