@@ -15,7 +15,19 @@ func (n *bindbroken) currentState() cpkg.VBoxCoreState {
     return cpkg.VBoxCoreBindBroken
 }
 
-func (n *bindbroken) transitionWithMasterMeta(core *coreReporter, sender interface{}, metaPackage []byte, ts time.Time) (VBoxCoreTransition, error) {
+func (n *bindbroken) makeCoreReport(core *coreReporter, ts time.Time) ([]byte, error) {
+    var (
+        meta []byte = nil
+        err error = nil
+    )
+
+    // send status to master
+    // TODO get ip address and gateway
+    meta, err = cpkg.CorePackingStatus(cpkg.VBoxCoreBindBroken, nil, "127.0.0.1", "192.168.1.1", core.rsaEncryptor)
+    return meta, errors.WithStack(err)
+}
+
+func (n *bindbroken) readMasterAck(core *coreReporter, metaPackage []byte, ts time.Time) (VBoxCoreTransition, error) {
     var (
         err error = nil
     )
@@ -26,21 +38,6 @@ func (n *bindbroken) transitionWithMasterMeta(core *coreReporter, sender interfa
     }
 
     return VBoxCoreTransitionOk, nil
-}
-
-func (n *bindbroken) transitionWithTimeStamp(core *coreReporter, ts time.Time) error {
-    var (
-        meta []byte = nil
-        err error = nil
-    )
-
-    // send status to master
-    // TODO get ip address and gateway
-    meta, err = cpkg.CorePackingStatus(cpkg.VBoxCoreBindBroken, nil, "127.0.0.1", "192.168.1.1", core.rsaEncryptor)
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    return core.UcastSend("127.0.0.1", meta)
 }
 
 func (n *bindbroken) onStateTranstionSuccess(core *coreReporter, ts time.Time) error {

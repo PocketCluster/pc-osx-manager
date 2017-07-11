@@ -15,7 +15,18 @@ func (u *unbounded) currentState() cpkg.VBoxCoreState {
     return cpkg.VBoxCoreUnbounded
 }
 
-func (u *unbounded) transitionWithMasterMeta(core *coreReporter, sender interface{}, metaPackage []byte, ts time.Time) (VBoxCoreTransition, error) {
+func (u *unbounded) makeCoreReport(core *coreReporter, ts time.Time) ([]byte, error) {
+    var (
+        meta []byte = nil
+        err error = nil
+    )
+
+    // send pubkey to master
+    meta, err = cpkg.CorePackingStatus(cpkg.VBoxCoreUnbounded, core.publicKey, "", "", nil)
+    return meta, errors.WithStack(err)
+}
+
+func (u *unbounded) readMasterAck(core *coreReporter, metaPackage []byte, ts time.Time) (VBoxCoreTransition, error) {
     var (
         meta *mpkg.VBoxMasterMeta = nil
         err error = nil
@@ -31,20 +42,6 @@ func (u *unbounded) transitionWithMasterMeta(core *coreReporter, sender interfac
     core.authToken = meta.MasterAcknowledge.AuthToken
 
     return VBoxCoreTransitionOk, nil
-}
-
-func (u *unbounded) transitionWithTimeStamp(core *coreReporter, ts time.Time) error {
-    var (
-        meta []byte = nil
-        err error = nil
-    )
-
-    // send pubkey to master
-    meta, err = cpkg.CorePackingStatus(cpkg.VBoxCoreUnbounded, core.publicKey, "", "", nil)
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    return core.UcastSend("127.0.0.1", meta)
 }
 
 func (u *unbounded) onStateTranstionSuccess(core *coreReporter, ts time.Time) error {

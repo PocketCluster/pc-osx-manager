@@ -28,16 +28,6 @@ const (
     BoundedTimeout              time.Duration = time.Second * 3
 )
 
-type CommChannel interface {
-    //McastSend(data []byte) error
-    UcastSend(target string, data []byte) error
-}
-
-type CommChannelFunc func(target string, data []byte) error
-func (c CommChannelFunc) UcastSend(target string, data []byte) error {
-    return c(target, data)
-}
-
 type ControllerActionOnTransition interface {
     OnStateTranstionSuccess(state mpkg.VBoxMasterState, vcore interface{}, ts time.Time) error
     OnStateTranstionFailure(state mpkg.VBoxMasterState, vcore interface{}, ts time.Time) error
@@ -86,9 +76,6 @@ type masterControl struct {
 
     // --------------------------------- onSuccess && onFailure external event -----------------------------------------
     ControllerActionOnTransition
-
-    // -------------------------------------  Communication Channel ----------------------------------------------------
-    CommChannel
 }
 
 func (m *masterControl) CurrentState() mpkg.VBoxMasterState {
