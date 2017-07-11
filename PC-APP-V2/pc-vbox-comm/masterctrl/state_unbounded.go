@@ -52,19 +52,7 @@ func (u *unbounded) readCoreReport(master *masterControl, sender interface{}, me
 }
 
 func (u *unbounded) makeMasterAck(master *masterControl, ts time.Time) ([]byte, error) {
-    var (
-        authToken string = ""
-        keypkg []byte = nil
-        err error = nil
-    )
-
-    // send key exchange package
-    authToken, err = master.coreNode.GetAuthToken()
-    if err != nil {
-        return nil, errors.WithStack(err)
-    }
-    keypkg, err = mpkg.MasterPackingKeyExchangeAcknowledge(authToken, master.publicKey, master.rsaEncryptor)
-    return keypkg, errors.WithStack(err)
+    return nil, errors.Errorf("[ERR] VBoxMasterUnbounded cannot yield output")
 }
 
 func (u *unbounded) onStateTranstionSuccess(master *masterControl, ts time.Time) error {

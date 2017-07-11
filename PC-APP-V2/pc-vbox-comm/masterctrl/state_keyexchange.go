@@ -38,13 +38,18 @@ func (k *keyexchange) readCoreReport(master *masterControl, sender interface{}, 
 
 func (k *keyexchange) makeMasterAck(master *masterControl, ts time.Time) ([]byte, error) {
     var (
-        ackpkg []byte = nil
+        authToken string = ""
+        keypkg []byte = nil
         err error = nil
     )
 
-    // send acknowledge packagepackage
-    ackpkg, err = mpkg.MasterPackingBoundedAcknowledge(master.rsaEncryptor)
-    return ackpkg, errors.WithStack(err)
+    // send key exchange package
+    authToken, err = master.coreNode.GetAuthToken()
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+    keypkg, err = mpkg.MasterPackingKeyExchangeAcknowledge(authToken, master.publicKey, master.rsaEncryptor)
+    return keypkg, errors.WithStack(err)
 }
 
 func (k *keyexchange) onStateTranstionSuccess(master *masterControl, ts time.Time) error {

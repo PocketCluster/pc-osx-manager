@@ -37,14 +37,7 @@ func (n *bindbroken) readCoreReport(master *masterControl, sender interface{}, m
 }
 
 func (n *bindbroken) makeMasterAck(master *masterControl, ts time.Time) ([]byte, error) {
-    var (
-        ackpkg []byte = nil
-        err error = nil
-    )
-
-    // send acknowledge packagepackage
-    ackpkg, err = mpkg.MasterPackingBindBrokenAcknowledge(master.rsaEncryptor)
-    return ackpkg, errors.WithStack(err)
+    return nil, errors.Errorf("[ERR] VBoxMasterUnbounded cannot yield output")
 }
 
 func (n *bindbroken) onStateTranstionSuccess(master *masterControl, ts time.Time) error {
