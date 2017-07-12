@@ -75,16 +75,13 @@ func NewVBoxMasterControl(prvkey, pubkey []byte, coreNode *model.CoreNode, event
     if coreNode == nil {
         return nil, errors.Errorf("[ERR] corenode model instance cannot be null")
     }
-    if coreNode.State != model.SNMStateJoined {
-        return nil, errors.Errorf("[ERR] corenode model instance should have joined")
-    }
     _, err = coreNode.GetAuthToken()
     if err != nil {
         return nil, errors.WithStack(err)
     }
 
     // unbounded
-    if true {
+    if coreNode.State != model.SNMStateJoined || len(coreNode.PublicKey) == 0 {
         controller = stateUnbounded()
 
     // bind broken

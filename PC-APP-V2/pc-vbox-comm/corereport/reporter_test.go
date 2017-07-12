@@ -1,6 +1,5 @@
 package corereport
 
-
 import (
     "testing"
     "time"

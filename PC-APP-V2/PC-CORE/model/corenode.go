@@ -5,7 +5,6 @@ import (
 
     "github.com/pkg/errors"
     "github.com/jinzhu/gorm"
-    "github.com/pborman/uuid"
 )
 
 const (
@@ -38,24 +37,24 @@ type CoreNode struct {
     PrivateKey      []byte       `gorm:"column:private_key;type:BLOB"`
 }
 
-func NewCoreNode() *CoreNode {
-    return &CoreNode {
-        ModelVersion:    CoreNodeModelVersion,
-        // there always is only one core node and it's name is "pc-core"
-        NodeName:        coreNodeName,
-        // whenever slave is generated, new UUID should be assigned to it.
-        AuthToken:       uuid.New(),
-        State:           SNMStateInit,
+func RetrieveCoreNode() *CoreNode {
+    var (
+        coreNodes []CoreNode = nil
+        node *CoreNode = nil
+    )
+    SharedRecordGate().Session().Find(&coreNodes)
+    if len(coreNodes) == 0 {
+        // when core is generated, new UUID should be assigned from teleport admin.
+        return &CoreNode{
+            ModelVersion:    CoreNodeModelVersion,
+            // there always is only one core node and it's name is "pc-core"
+            NodeName:        coreNodeName,
+            State:           SNMStateInit,
+        }
     }
-}
 
-func FindAllCoreNode() ([]CoreNode, error) {
-    var nodes []CoreNode = nil
-    SharedRecordGate().Session().Find(&nodes)
-    if len(nodes) == 0 {
-        return nil, NoItemFound
-    }
-    return nodes, nil
+    node = &(coreNodes[0])
+    return node
 }
 
 // instance methods
@@ -86,6 +85,27 @@ func (c *CoreNode) GetAuthToken() (string, error) {
         return "", errors.Errorf("[ERR] invalid core auth token")
     }
     return c.AuthToken, nil
+}
+
+func (c *CoreNode) CreateCore() error {
+    if c.ModelVersion != CoreNodeModelVersion {
+        return errors.Errorf("[ERR] incorrect core model version")
+    }
+    if c.NodeName != coreNodeName {
+        return errors.Errorf("[ERR] incorrect node name")
+    }
+    // TODO : check token format
+    if len(c.AuthToken) == 0 {
+        return errors.Errorf("[ERR] incorrect uuid length")
+    }
+    // TODO : check key format
+    if len(c.PublicKey) == 0 {
+        return errors.Errorf("[ERR] incorrect core public key")
+    }
+    ts := time.Now()
+    c.Joined = ts
+    SharedRecordGate().Session().Create(c)
+    return nil
 }
 
 func (c *CoreNode) JoinCore() error {

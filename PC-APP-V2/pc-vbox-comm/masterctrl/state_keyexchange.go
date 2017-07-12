@@ -53,7 +53,7 @@ func (k *keyexchange) makeMasterAck(master *masterControl, ts time.Time) ([]byte
 }
 
 func (k *keyexchange) onStateTranstionSuccess(master *masterControl, ts time.Time) error {
-    return master.coreNode.Update()
+    return master.coreNode.JoinCore()
 }
 
 func (k *keyexchange) onStateTranstionFailure(master *masterControl, ts time.Time) error {
