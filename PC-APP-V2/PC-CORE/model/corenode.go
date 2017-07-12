@@ -123,11 +123,19 @@ func (c *CoreNode) JoinCore() error {
     if len(c.PublicKey) == 0 {
         return errors.Errorf("[ERR] incorrect core public key")
     }
+    // TODO : check ip address form
+    if len(c.IP4Address) == 0 {
+        return errors.Errorf("[ERR] incorrect ip address value")
+    }
+    // TODO : check ip gateway form
+    if len(c.IP4Gateway) == 0 {
+        return errors.Errorf("[ERR] incorrect ip gateway value")
+    }
     ts := time.Now()
     c.State = SNMStateJoined
     c.Joined = ts
     c.LastAlive = ts
-    SharedRecordGate().Session().Create(c)
+    SharedRecordGate().Session().Save(c)
     return nil
 }
 

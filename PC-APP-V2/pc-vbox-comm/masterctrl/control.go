@@ -81,7 +81,7 @@ func NewVBoxMasterControl(prvkey, pubkey []byte, coreNode *model.CoreNode, event
     }
 
     // unbounded
-    if coreNode.State != model.SNMStateJoined || len(coreNode.PublicKey) == 0 {
+    if coreNode.State == model.SNMStateInit && len(coreNode.PublicKey) == 0 {
         controller = stateUnbounded()
 
     // bind broken

@@ -26,8 +26,8 @@ func (n *bindbroken) readCoreReport(master *masterControl, sender interface{}, m
     if err != nil {
         return VBoxMasterTransitionIdle, errors.WithStack(err)
     }
-    if meta.CoreState != cpkg.VBoxCoreBounded {
-        return VBoxMasterTransitionIdle, errors.Errorf("[ERR] core state should be VBoxCoreBounded")
+    if meta.CoreState != cpkg.VBoxCoreBindBroken {
+        return VBoxMasterTransitionIdle, errors.Errorf("[ERR] core state should be VBoxCoreBindBroken")
     }
     // TODO need lock
     master.coreNode.IP4Address = meta.CoreStatus.ExtIP4AddrSmask
@@ -37,7 +37,7 @@ func (n *bindbroken) readCoreReport(master *masterControl, sender interface{}, m
 }
 
 func (n *bindbroken) makeMasterAck(master *masterControl, ts time.Time) ([]byte, error) {
-    return nil, errors.Errorf("[ERR] VBoxMasterUnbounded cannot yield output")
+    return nil, errors.Errorf("[ERR] VBoxMasterBindBroken cannot yield output")
 }
 
 func (n *bindbroken) onStateTranstionSuccess(master *masterControl, ts time.Time) error {
