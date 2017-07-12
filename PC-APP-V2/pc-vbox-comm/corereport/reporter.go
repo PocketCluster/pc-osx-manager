@@ -31,6 +31,7 @@ const (
     BoundedTimeout              time.Duration = time.Second * 3
 )
 
+/* ---------------------------------------------- Interface Definitions --------------------------------------------- */
 type ReporterActionsOnTransition interface {
     OnStateTranstionSuccess(state cpkg.VBoxCoreState, ts time.Time) error
     OnStateTranstionFailure(state cpkg.VBoxCoreState, ts time.Time) error
@@ -53,33 +54,81 @@ type vboxReporter interface {
     onStateTranstionFailure(core *coreReporter, ts time.Time) error
 }
 
+/* ----------------------------------------------- Instance Definitions --------------------------------------------- */
+func NewCoreReporter(state cpkg.VBoxCoreState, corePrvkey, corePubkey, masterPubkey []byte) (VBoxCoreReporter, error) {
+    var (
+        rptr vboxReporter = nil
+        encryptor pcrypto.RsaEncryptor = nil
+        decryptor pcrypto.RsaDecryptor = nil
+        err error = nil
+    )
+    // check errors first
+    if len(corePrvkey) == 0 {
+        return nil, errors.Errorf("[ERR] core private key cannot be null")
+    }
+    if len(corePubkey) == 0 {
+        return nil, errors.Errorf("[ERR] core public key cannot be null")
+    }
+    if state != cpkg.VBoxCoreUnbounded && len(masterPubkey) == 0 {
+        return nil, errors.Errorf("[ERR] master public key cannot be null")
+    }
+    switch state {
+        case cpkg.VBoxCoreUnbounded: {
+            rptr = stateUnbounded()
+        }
+        case cpkg.VBoxCoreBindBroken: {
+            rptr = stateBindbroken()
+
+            encryptor, err = pcrypto.NewRsaEncryptorFromKeyData(masterPubkey, corePrvkey)
+            if err != nil {
+                return nil, errors.WithStack(err)
+            }
+            decryptor, err = pcrypto.NewRsaDecryptorFromKeyData(masterPubkey, corePrvkey)
+            if err != nil {
+                return nil, errors.WithStack(err)
+            }
+        }
+        default: {
+            return nil, errors.Errorf("[ERR] core state should either VBoxCoreUnbounded or VBoxCoreBindBroken")
+        }
+    }
+
+    return &coreReporter {
+        reporter:        rptr,
+        privateKey:      corePrvkey,
+        publicKey:       corePubkey,
+        rsaEncryptor:    encryptor,
+        rsaDecryptor:    decryptor,
+    }, nil
+}
+
 type coreReporter struct {
     reporter                     vboxReporter
 
     /* ---------------------------------- changing properties to record transaction --------------------------------- */
     // each time we try to make transtion and fail, count goes up.
-    transitionActionCount       int
+    transitionActionCount    int
 
     // last time successfully transitioned state.
-    lastTransitionTS            time.Time
+    lastTransitionTS         time.Time
 
     // each time we try to send something, count goes up. This include success/fail altogether.
-    txActionCount               int
+    txActionCount            int
 
     // last time transmission takes place. This is to control the frequnecy of transmission
     // !!!IMPORTANT!!! BY NOT SETTING A PARTICULAR VALUE, BY NOT SETTING ANYTHING, WE WILL AUTOMATICALLY EXECUTE
     // TX ACTION ON THE IDLE CYCLE RIGHT AFTER A SUCCESSFUL TRANSITION. SO DO NOT SET ANTYHING IN CONSTRUCTION
-    lastTransmissionTS          time.Time
+    lastTransmissionTS       time.Time
 
     /* ---------------------------------------- all-states properties ----------------------------------------------- */
-    publicKey                   []byte
-    privateKey                  []byte
-    rsaEncryptor                pcrypto.RsaEncryptor
-    rsaDecryptor                pcrypto.RsaDecryptor
-    authToken                   string
+    privateKey               []byte
+    publicKey                []byte
+    rsaEncryptor             pcrypto.RsaEncryptor
+    rsaDecryptor             pcrypto.RsaDecryptor
+    authToken                string
 
     // --------------------------------- onSuccess && onFailure external event -----------------------------------------
-    ReporterActionsOnTransition
+    eventAction              ReporterActionsOnTransition
 }
 
 func (c *coreReporter) CurrentState() cpkg.VBoxCoreState {
@@ -173,8 +222,8 @@ func runOnTransitionEvents(core *coreReporter, newState, oldState cpkg.VBoxCoreS
             case VBoxCoreTransitionOk: {
                 ierr = core.reporter.onStateTranstionSuccess(core, ts)
 
-                if core.ReporterActionsOnTransition != nil {
-                    oerr = core.OnStateTranstionSuccess(core.CurrentState(), ts)
+                if core.eventAction != nil {
+                    oerr = core.eventAction.OnStateTranstionSuccess(core.CurrentState(), ts)
                 }
                 // TODO : we need to a way to formalize this
                 return utils.SummarizeErrors(ierr, oerr)
@@ -183,8 +232,8 @@ func runOnTransitionEvents(core *coreReporter, newState, oldState cpkg.VBoxCoreS
             case VBoxCoreTransitionFail: {
                 ierr = core.reporter.onStateTranstionFailure(core, ts)
 
-                if core.ReporterActionsOnTransition != nil {
-                    oerr = core.OnStateTranstionFailure(core.CurrentState(), ts)
+                if core.eventAction != nil {
+                    oerr = core.eventAction.OnStateTranstionFailure(core.CurrentState(), ts)
                 }
                 // TODO : we need to a way to formalize this
                 return utils.SummarizeErrors(ierr, oerr)

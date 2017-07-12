@@ -23,7 +23,7 @@ const (
 
 func TestMasterControl(t *testing.T) { TestingT(t) }
 
-type coreProperties struct {
+type coreProperty struct {
     // Core node properties
     publicKey        []byte
     privateKey       []byte
@@ -37,7 +37,7 @@ type MasterControlTestSuite struct {
     master           *masterControl
 
     // core node properties
-    core             *coreProperties
+    core             *coreProperty
 }
 
 var _ = Suite(&MasterControlTestSuite{})
@@ -66,31 +66,82 @@ func (m *MasterControlTestSuite) TearDownTest(c *C) {
     context.DebugContextDestroy()
 }
 
+func (m *MasterControlTestSuite) prepareUnboundedMasterCore() error {
+    // setup core node
+    coreNode := model.RetrieveCoreNode()
+    coreNode.SetAuthToken(authToken)
+    err := coreNode.CreateCore()
+    if err != nil {
+        return err
+    }
+
+    // setup controller
+    ctrl, err := NewVBoxMasterControl(pcrypto.TestMasterStrongPrivateKey(), pcrypto.TestMasterStrongPublicKey(), coreNode, nil)
+    if err != nil {
+        return err
+    }
+    m.master = ctrl.(*masterControl)
+
+    // setup core
+    core := &coreProperty{
+        publicKey:     pcrypto.TestSlaveNodePublicKey(),
+        privateKey:    pcrypto.TestSlaveNodePrivateKey(),
+        timestamp:     m.timestamp,
+    }
+    m.core = core
+    return nil
+}
+
+func (m *MasterControlTestSuite) prepareBindBrokenMasterCore() error {
+    // setup core node
+    coreNode := model.RetrieveCoreNode()
+    coreNode.SetAuthToken(authToken)
+    err := coreNode.CreateCore()
+    if err != nil {
+        return err
+    }
+    coreNode.PublicKey  = pcrypto.TestSlaveNodePublicKey()
+    coreNode.IP4Address = coreExtIpAddrSmMask
+    coreNode.IP4Gateway = coreExtGateway
+    err = coreNode.JoinCore()
+    if err != nil {
+        return err
+    }
+
+    // re-setup controller
+    ctrl, err := NewVBoxMasterControl(pcrypto.TestMasterStrongPrivateKey(), pcrypto.TestMasterStrongPublicKey(), coreNode, nil)
+    if err != nil {
+        return err
+    }
+    m.master = ctrl.(*masterControl)
+
+    // setup core
+    encryptor, err := pcrypto.NewRsaEncryptorFromKeyData(pcrypto.TestMasterStrongPublicKey(), pcrypto.TestSlaveNodePrivateKey())
+    if err != nil {
+        return err
+    }
+    decryptor, err := pcrypto.NewRsaDecryptorFromKeyData(pcrypto.TestMasterStrongPublicKey(), pcrypto.TestSlaveNodePrivateKey())
+    if err != nil {
+        return err
+    }
+    core := &coreProperty{
+        publicKey:     pcrypto.TestSlaveNodePublicKey(),
+        privateKey:    pcrypto.TestSlaveNodePrivateKey(),
+        timestamp:     m.timestamp,
+        encryptor:     encryptor,
+        decryptor:     decryptor,
+    }
+    m.core = core
+    return nil
+}
+
 // --- Test Body ---
 
-func (m *MasterControlTestSuite) TestCoreNodeJoin(c *C) {
+func (m *MasterControlTestSuite) Test_Core_Join_To_Master(c *C) {
     // setup test specifics
-    {
-        // setup core node
-        coreNode := model.RetrieveCoreNode()
-        coreNode.SetAuthToken(authToken)
-        err := coreNode.CreateCore()
-        c.Assert(err, Equals, nil)
-
-        // setup controller
-        ctrl, err := NewVBoxMasterControl(pcrypto.TestMasterStrongPrivateKey(), pcrypto.TestMasterStrongPublicKey(), coreNode, nil)
-        if err != nil {
-            log.Panic(err.Error())
-        }
-        m.master = ctrl.(*masterControl)
-
-        // setup core
-        core := &coreProperties {
-            publicKey:     pcrypto.TestSlaveNodePublicKey(),
-            privateKey:    pcrypto.TestSlaveNodePrivateKey(),
-            timestamp:     m.timestamp,
-        }
-        m.core = core
+    err := m.prepareUnboundedMasterCore()
+    if err != nil {
+        log.Panic(err.Error())
     }
 
     // check master status
@@ -144,38 +195,9 @@ func (m *MasterControlTestSuite) TestCoreNodeJoin(c *C) {
 
 func (m *MasterControlTestSuite) TestCoreNodeBindRecovery(c *C) {
     // setup test specifics
-    {
-        // setup core node
-        coreNode := model.RetrieveCoreNode()
-        coreNode.SetAuthToken(authToken)
-        err := coreNode.CreateCore()
-        c.Assert(err, Equals, nil)
-        coreNode.PublicKey  = pcrypto.TestSlaveNodePublicKey()
-        coreNode.IP4Address = coreExtIpAddrSmMask
-        coreNode.IP4Gateway = coreExtGateway
-        err = coreNode.JoinCore()
-        c.Assert(err, Equals, nil)
-
-        // re-setup controller
-        ctrl, err := NewVBoxMasterControl(pcrypto.TestMasterStrongPrivateKey(), pcrypto.TestMasterStrongPublicKey(), coreNode, nil)
-        if err != nil {
-            log.Panic(err.Error())
-        }
-        m.master = ctrl.(*masterControl)
-
-        // setup core
-        encryptor, err := pcrypto.NewRsaEncryptorFromKeyData(pcrypto.TestMasterStrongPublicKey(), pcrypto.TestSlaveNodePrivateKey())
-        c.Assert(err, Equals, nil)
-        decryptor, err := pcrypto.NewRsaDecryptorFromKeyData(pcrypto.TestMasterStrongPublicKey(), pcrypto.TestSlaveNodePrivateKey())
-        c.Assert(err, Equals, nil)
-        core := &coreProperties {
-            publicKey:     pcrypto.TestSlaveNodePublicKey(),
-            privateKey:    pcrypto.TestSlaveNodePrivateKey(),
-            timestamp:     m.timestamp,
-            encryptor:     encryptor,
-            decryptor:     decryptor,
-        }
-        m.core = core
+    err := m.prepareBindBrokenMasterCore()
+    if err != nil {
+        log.Panic(err.Error())
     }
 
     // check master status
