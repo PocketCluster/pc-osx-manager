@@ -46,8 +46,7 @@ func (m *MasterControlTestSuite) SetUpSuite(c *C) {
     log.SetLevel(log.DebugLevel)
 }
 
-func (m *MasterControlTestSuite) TearDownSuite(c *C) {
-}
+func (m *MasterControlTestSuite) TearDownSuite(c *C) {}
 
 func (m *MasterControlTestSuite) SetUpTest(c *C) {
     context.DebugContextPrepare()
@@ -56,20 +55,13 @@ func (m *MasterControlTestSuite) SetUpTest(c *C) {
     // setup init time
     m.timestamp, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 
-    // setup core
-    core := &coreProperties {
-        publicKey:     pcrypto.TestSlaveNodePublicKey(),
-        privateKey:    pcrypto.TestSlaveNodePrivateKey(),
-        timestamp:     m.timestamp,
-    }
-    m.core = core
-
     log.Debugf("--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---")
 }
 
 func (m *MasterControlTestSuite) TearDownTest(c *C) {
     log.Debugf("\n\n")
     m.core = nil
+    m.master = nil
     model.DebugRecordGateDestroy(os.Getenv("TMPDIR"))
     context.DebugContextDestroy()
 }
@@ -82,7 +74,8 @@ func (m *MasterControlTestSuite) TestCoreNodeJoin(c *C) {
         // setup core node
         coreNode := model.RetrieveCoreNode()
         coreNode.SetAuthToken(authToken)
-        coreNode.CreateCore()
+        err := coreNode.CreateCore()
+        c.Assert(err, Equals, nil)
 
         // setup controller
         ctrl, err := NewVBoxMasterControl(pcrypto.TestMasterStrongPrivateKey(), pcrypto.TestMasterStrongPublicKey(), coreNode, nil)
@@ -90,7 +83,18 @@ func (m *MasterControlTestSuite) TestCoreNodeJoin(c *C) {
             log.Panic(err.Error())
         }
         m.master = ctrl.(*masterControl)
+
+        // setup core
+        core := &coreProperties {
+            publicKey:     pcrypto.TestSlaveNodePublicKey(),
+            privateKey:    pcrypto.TestSlaveNodePrivateKey(),
+            timestamp:     m.timestamp,
+        }
+        m.core = core
     }
+
+    // check master status
+    c.Assert(m.master.CurrentState(), Equals, mpkg.VBoxMasterUnbounded)
 
     // core report
     metaPackage, err := cpkg.CorePackingUnboundedStatus(m.core.publicKey)
@@ -144,11 +148,13 @@ func (m *MasterControlTestSuite) TestCoreNodeBindRecovery(c *C) {
         // setup core node
         coreNode := model.RetrieveCoreNode()
         coreNode.SetAuthToken(authToken)
-        coreNode.CreateCore()
-        coreNode.PublicKey = m.core.publicKey
+        err := coreNode.CreateCore()
+        c.Assert(err, Equals, nil)
+        coreNode.PublicKey  = pcrypto.TestSlaveNodePublicKey()
         coreNode.IP4Address = coreExtIpAddrSmMask
         coreNode.IP4Gateway = coreExtGateway
-        coreNode.JoinCore()
+        err = coreNode.JoinCore()
+        c.Assert(err, Equals, nil)
 
         // re-setup controller
         ctrl, err := NewVBoxMasterControl(pcrypto.TestMasterStrongPrivateKey(), pcrypto.TestMasterStrongPublicKey(), coreNode, nil)
@@ -156,14 +162,24 @@ func (m *MasterControlTestSuite) TestCoreNodeBindRecovery(c *C) {
             log.Panic(err.Error())
         }
         m.master = ctrl.(*masterControl)
+
+        // setup core
+        encryptor, err := pcrypto.NewRsaEncryptorFromKeyData(pcrypto.TestMasterStrongPublicKey(), pcrypto.TestSlaveNodePrivateKey())
+        c.Assert(err, Equals, nil)
+        decryptor, err := pcrypto.NewRsaDecryptorFromKeyData(pcrypto.TestMasterStrongPublicKey(), pcrypto.TestSlaveNodePrivateKey())
+        c.Assert(err, Equals, nil)
+        core := &coreProperties {
+            publicKey:     pcrypto.TestSlaveNodePublicKey(),
+            privateKey:    pcrypto.TestSlaveNodePrivateKey(),
+            timestamp:     m.timestamp,
+            encryptor:     encryptor,
+            decryptor:     decryptor,
+        }
+        m.core = core
     }
 
-    // re-setup core encryptor & decryptor
-    encryptor, _ := pcrypto.NewRsaEncryptorFromKeyData(pcrypto.TestMasterStrongPublicKey(), m.core.privateKey)
-    decryptor, _ := pcrypto.NewRsaDecryptorFromKeyData(pcrypto.TestMasterStrongPublicKey(), m.core.privateKey)
-    m.core.encryptor = encryptor
-    m.core.decryptor = decryptor
-
+    // check master status
+    c.Assert(m.master.CurrentState(), Equals, mpkg.VBoxMasterBindBroken)
 
     // core report
     metaPackage, err := cpkg.CorePackingBindBrokenStatus(coreExtIpAddrSmMask, coreExtGateway, m.core.encryptor)

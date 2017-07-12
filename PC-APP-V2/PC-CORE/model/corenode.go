@@ -98,12 +98,8 @@ func (c *CoreNode) CreateCore() error {
     if len(c.AuthToken) == 0 {
         return errors.Errorf("[ERR] incorrect uuid length")
     }
-    // TODO : check key format
-    if len(c.PublicKey) == 0 {
-        return errors.Errorf("[ERR] incorrect core public key")
-    }
     ts := time.Now()
-    c.Joined = ts
+    c.CreatedAt = ts
     SharedRecordGate().Session().Create(c)
     return nil
 }
