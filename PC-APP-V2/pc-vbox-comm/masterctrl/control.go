@@ -30,6 +30,7 @@ const (
     BoundedTimeout              time.Duration = time.Second * 3
 )
 
+/* ---------------------------------------------- Interface Definitions --------------------------------------------- */
 type ControllerActionOnTransition interface {
     OnStateTranstionSuccess(state mpkg.VBoxMasterState, vcore interface{}, ts time.Time) error
     OnStateTranstionFailure(state mpkg.VBoxMasterState, vcore interface{}, ts time.Time) error
@@ -39,7 +40,7 @@ type ControllerActionOnTransition interface {
 type VBoxMasterControl interface {
     CurrentState() mpkg.VBoxMasterState
 
-    ReadCoreMetaAndMakeMasterAck(sender interface{}, metaPackage []byte, timestamp time.Time) error
+    ReadCoreMetaAndMakeMasterAck(sender interface{}, metaPackage []byte, timestamp time.Time) ([]byte, error)
     CheckTransitionTimeWindow(timestamp time.Time) error
 
     Shutdown()
@@ -54,6 +55,60 @@ type vboxController interface {
 
     onStateTranstionSuccess(master *masterControl, ts time.Time) error
     onStateTranstionFailure(master *masterControl, ts time.Time) error
+}
+
+/* ----------------------------------------------- Instance Definitions --------------------------------------------- */
+func NewVBoxMasterControl(prvkey, pubkey []byte, coreNode *model.CoreNode, eventAction ControllerActionOnTransition) (VBoxMasterControl, error) {
+    // TODO check if controller is bounded or unbounded
+    var (
+        controller vboxController = nil
+        encryptor pcrypto.RsaEncryptor = nil
+        decryptor pcrypto.RsaDecryptor = nil
+        err error = nil
+    )
+    if prvkey == nil {
+        return nil, errors.Errorf("[ERR] private key cannot be null")
+    }
+    if pubkey == nil {
+        return nil, errors.Errorf("[ERR] public key cannot be null")
+    }
+    if coreNode == nil {
+        return nil, errors.Errorf("[ERR] corenode model instance cannot be null")
+    }
+    if coreNode.State != model.SNMStateJoined {
+        return nil, errors.Errorf("[ERR] corenode model instance should have joined")
+    }
+    _, err = coreNode.GetAuthToken()
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+
+    // unbounded
+    if true {
+        controller = stateUnbounded()
+
+    // bind broken
+    } else {
+        controller = stateBindbroken()
+        encryptor, err = pcrypto.NewRsaEncryptorFromKeyData(coreNode.PublicKey, prvkey)
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+        decryptor, err = pcrypto.NewRsaDecryptorFromKeyData(coreNode.PublicKey, prvkey)
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+    }
+
+    return &masterControl {
+        controller:      controller,
+        privateKey:      prvkey,
+        publicKey:       pubkey,
+        rsaEncryptor:    encryptor,
+        rsaDecryptor:    decryptor,
+        coreNode:        coreNode,
+        eventAction:     eventAction,
+    }, nil
 }
 
 type masterControl struct {
@@ -72,14 +127,14 @@ type masterControl struct {
     lastTransmissionTS          time.Time
 
     /* ---------------------------------------- all-states properties ----------------------------------------------- */
-    publicKey                   []byte
     privateKey                  []byte
+    publicKey                   []byte
     rsaEncryptor                pcrypto.RsaEncryptor
     rsaDecryptor                pcrypto.RsaDecryptor
     coreNode                    *model.CoreNode
 
     // --------------------------------- onSuccess && onFailure external event -----------------------------------------
-    ControllerActionOnTransition
+    eventAction                 ControllerActionOnTransition
 }
 
 func (m *masterControl) CurrentState() mpkg.VBoxMasterState {
@@ -181,8 +236,8 @@ func runOnTransitionEvents(master *masterControl, newState, oldState mpkg.VBoxMa
             case VBoxMasterTransitionOk: {
                 ierr = master.controller.onStateTranstionSuccess(master, masterTimestamp)
 
-                if master.ControllerActionOnTransition != nil {
-                    oerr = master.OnStateTranstionSuccess(master.CurrentState(), master.coreNode, masterTimestamp)
+                if master.eventAction != nil {
+                    oerr = master.eventAction.OnStateTranstionSuccess(master.CurrentState(), master.coreNode, masterTimestamp)
                 }
                 // TODO : we need to a way to formalize this
                 return utils.SummarizeErrors(ierr, oerr)
@@ -191,8 +246,8 @@ func runOnTransitionEvents(master *masterControl, newState, oldState mpkg.VBoxMa
             case VBoxMasterTransitionFail: {
                 ierr = master.controller.onStateTranstionFailure(master, masterTimestamp)
 
-                if master.ControllerActionOnTransition != nil {
-                    oerr = master.OnStateTranstionFailure(master.CurrentState(), master.coreNode, masterTimestamp)
+                if master.eventAction != nil {
+                    oerr = master.eventAction.OnStateTranstionFailure(master.CurrentState(), master.coreNode, masterTimestamp)
                 }
                 // TODO : we need to a way to formalize this
                 return utils.SummarizeErrors(ierr, oerr)
