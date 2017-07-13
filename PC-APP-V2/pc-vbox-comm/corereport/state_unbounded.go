@@ -45,6 +45,7 @@ func (u *unbounded) readMasterAck(core *coreReporter, metaPackage []byte, ts tim
 }
 
 func (u *unbounded) onStateTranstionSuccess(core *coreReporter, ts time.Time) error {
+    // TODO : save uuid to disk
     return nil
 }
 

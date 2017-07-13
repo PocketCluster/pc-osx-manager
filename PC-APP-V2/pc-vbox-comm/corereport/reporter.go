@@ -185,14 +185,16 @@ func stateTransition(currentState cpkg.VBoxCoreState, transitCondition VBoxCoreT
     return nextState
 }
 
-func finalizeTransitionWithMeta(core *coreReporter, nextStateCandiate VBoxCoreTransition, coreTimestamp time.Time) VBoxCoreTransition {
+func finalizeTransitionWithMeta(core *coreReporter, nextStateCandiate VBoxCoreTransition, timestamp time.Time) VBoxCoreTransition {
     var nextConfirmedState VBoxCoreTransition
     switch nextStateCandiate {
+        // TODO : need to think about how to reset variables
         case VBoxCoreTransitionOk: {
             // reset transition action count / timestamp to 0
             core.transitionActionCount = 0
-            core.lastTransitionTS = coreTimestamp
+            core.lastTransitionTS = timestamp
             core.txActionCount = 0
+            core.lastTransmissionTS = timestamp
             nextConfirmedState = VBoxCoreTransitionOk
         }
         default: {
@@ -200,7 +202,7 @@ func finalizeTransitionWithMeta(core *coreReporter, nextStateCandiate VBoxCoreTr
                 core.transitionActionCount++
             }
 
-            if core.transitionActionCount < TransitionFailureLimit && coreTimestamp.Sub(core.lastTransitionTS) < core.transitionTimeout() {
+            if core.transitionActionCount < TransitionFailureLimit && timestamp.Sub(core.lastTransitionTS) < core.transitionTimeout() {
                 nextConfirmedState = VBoxCoreTransitionIdle
             } else {
                 nextConfirmedState = VBoxCoreTransitionFail
@@ -210,7 +212,7 @@ func finalizeTransitionWithMeta(core *coreReporter, nextStateCandiate VBoxCoreTr
     return nextConfirmedState
 }
 
-func runOnTransitionEvents(core *coreReporter, newState, oldState cpkg.VBoxCoreState, transition VBoxCoreTransition, ts time.Time) error {
+func runOnTransitionEvents(core *coreReporter, newState, oldState cpkg.VBoxCoreState, transition VBoxCoreTransition, timestamp time.Time) error {
     var (
         ierr, oerr error = nil, nil
     )
@@ -220,20 +222,20 @@ func runOnTransitionEvents(core *coreReporter, newState, oldState cpkg.VBoxCoreS
     if newState != oldState {
         switch transition {
             case VBoxCoreTransitionOk: {
-                ierr = core.reporter.onStateTranstionSuccess(core, ts)
+                ierr = core.reporter.onStateTranstionSuccess(core, timestamp)
 
                 if core.eventAction != nil {
-                    oerr = core.eventAction.OnStateTranstionSuccess(core.CurrentState(), ts)
+                    oerr = core.eventAction.OnStateTranstionSuccess(core.CurrentState(), timestamp)
                 }
                 // TODO : we need to a way to formalize this
                 return utils.SummarizeErrors(ierr, oerr)
             }
 
             case VBoxCoreTransitionFail: {
-                ierr = core.reporter.onStateTranstionFailure(core, ts)
+                ierr = core.reporter.onStateTranstionFailure(core, timestamp)
 
                 if core.eventAction != nil {
-                    oerr = core.eventAction.OnStateTranstionFailure(core.CurrentState(), ts)
+                    oerr = core.eventAction.OnStateTranstionFailure(core.CurrentState(), timestamp)
                 }
                 // TODO : we need to a way to formalize this
                 return utils.SummarizeErrors(ierr, oerr)
@@ -285,6 +287,7 @@ func (c *coreReporter) txTimeWindow() time.Duration {
     }
 }
 
+// TODO : need to think about how to reset variables
 func stateTransitionWithTimestamp(core *coreReporter, timestamp time.Time) (VBoxCoreTransition, error) {
     if core.txActionCount < TxActionLimit {
 

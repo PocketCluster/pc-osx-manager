@@ -192,16 +192,19 @@ func stateTransition(currentState mpkg.VBoxMasterState, transitCondition VBoxMas
     return nextState
 }
 
-func finalizeStateTransitionWithTimeout(master *masterControl, nextStateCandiate VBoxMasterTransition, masterTimestamp time.Time) VBoxMasterTransition {
+func finalizeStateTransitionWithTimeout(master *masterControl, nextStateCandiate VBoxMasterTransition, timestamp time.Time) VBoxMasterTransition {
     var nextConfirmedState VBoxMasterTransition
 
     switch nextStateCandiate {
         // As MasterTransitionOk does not check timewindow, it could grant an infinite timewindow to make transition.
         // This is indeed intented as it will give us a chance to handle racing situations. Plus, CheckTransitionTimeWindow()
         // should have squashed suspected beacons and that's the role of CheckTransitionTimeWindow()
+        // TODO : need to think about how to reset variables
         case VBoxMasterTransitionOk: {
-            master.lastTransitionTS = masterTimestamp
             master.transitionActionCount = 0
+            master.lastTransitionTS = timestamp
+            master.txActionCount = 0
+            master.lastTransmissionTS = timestamp
             nextConfirmedState = VBoxMasterTransitionOk
             break
         }
@@ -210,7 +213,7 @@ func finalizeStateTransitionWithTimeout(master *masterControl, nextStateCandiate
                 master.transitionActionCount++
             }
 
-            if master.transitionActionCount < TransitionFailureLimit && masterTimestamp.Sub(master.lastTransitionTS) < master.transitionTimeout() {
+            if master.transitionActionCount < TransitionFailureLimit && timestamp.Sub(master.lastTransitionTS) < master.transitionTimeout() {
                 nextConfirmedState = VBoxMasterTransitionIdle
             } else {
                 nextConfirmedState = VBoxMasterTransitionFail
@@ -221,7 +224,7 @@ func finalizeStateTransitionWithTimeout(master *masterControl, nextStateCandiate
     return nextConfirmedState
 }
 
-func runOnTransitionEvents(master *masterControl, newState, oldState mpkg.VBoxMasterState, transition VBoxMasterTransition, masterTimestamp time.Time) error {
+func runOnTransitionEvents(master *masterControl, newState, oldState mpkg.VBoxMasterState, transition VBoxMasterTransition, timestamp time.Time) error {
     var (
         ierr, oerr error = nil, nil
     )
@@ -231,20 +234,20 @@ func runOnTransitionEvents(master *masterControl, newState, oldState mpkg.VBoxMa
     if newState != oldState {
         switch transition {
             case VBoxMasterTransitionOk: {
-                ierr = master.controller.onStateTranstionSuccess(master, masterTimestamp)
+                ierr = master.controller.onStateTranstionSuccess(master, timestamp)
 
                 if master.eventAction != nil {
-                    oerr = master.eventAction.OnStateTranstionSuccess(master.CurrentState(), master.coreNode, masterTimestamp)
+                    oerr = master.eventAction.OnStateTranstionSuccess(master.CurrentState(), master.coreNode, timestamp)
                 }
                 // TODO : we need to a way to formalize this
                 return utils.SummarizeErrors(ierr, oerr)
             }
 
             case VBoxMasterTransitionFail: {
-                ierr = master.controller.onStateTranstionFailure(master, masterTimestamp)
+                ierr = master.controller.onStateTranstionFailure(master, timestamp)
 
                 if master.eventAction != nil {
-                    oerr = master.eventAction.OnStateTranstionFailure(master.CurrentState(), master.coreNode, masterTimestamp)
+                    oerr = master.eventAction.OnStateTranstionFailure(master.CurrentState(), master.coreNode, timestamp)
                 }
                 // TODO : we need to a way to formalize this
                 return utils.SummarizeErrors(ierr, oerr)
@@ -333,6 +336,7 @@ func (m *masterControl) txTimeWindow() time.Duration {
     }
 }
 
+// TODO : need to think about how to reset variables
 func stateCheckTransitionTimeWindow(master *masterControl, timestamp time.Time) (VBoxMasterTransition, error) {
     if master.txActionCount < TxActionLimit {
         // if tx timeout window is smaller than time delta (T_1 - T_0), don't do anything!!! just skip!
