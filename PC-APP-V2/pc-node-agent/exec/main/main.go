@@ -330,6 +330,7 @@ func main() {
     log.SetLevel(log.DebugLevel)
 
     // TODO check user and reject if not root
+    // TODO check if this exceed Date limit set for raspberry pi 3
 
     // initialize slave context
     slcontext.SharedSlaveContext()

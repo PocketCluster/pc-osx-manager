@@ -4,7 +4,7 @@
 set -e
 
 # Figure out where things are coming from and going to
-export GOROOT="${HOME}/Workspace/POCKETPKG/DEPREPO/GOARCHIVE/go-1.7.6"
+export GOROOT="${HOME}/Workspace/GOARCHIVE/go-1.7.6-mod"
 export GOREPO=${GOREPO:-"${HOME}/Workspace/POCKETPKG"}
 export GOWORKPLACE=${GOWORKPLACE:-"${HOME}/Workspace/GOPLACE"}
 export GOPATH="${GOREPO}:${GOWORKPLACE}"

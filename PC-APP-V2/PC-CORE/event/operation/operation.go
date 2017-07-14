@@ -17,6 +17,7 @@ const(
     ServiceContainerRegistry string         = "service.container.registry"
     ServiceInternalNodeNameServer string    = "service.internal.node.name.server"
     ServiceInternalNodeNameOperation string = "service.internal.node.name.operation"
+    ServiceVBoxMasterControl string         = "service.vbox.master.control"
 )
 
 const (

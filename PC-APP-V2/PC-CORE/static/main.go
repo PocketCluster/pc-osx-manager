@@ -224,11 +224,18 @@ func main() {
                     /// DEBUG ///
 
                     case operation.CmdDebug: {
+/*
                         sl := a.ServiceList()
                         for i, _ := range sl {
                             s := sl[i]
                             log.Debugf("[SERVICE] %s, %v", s.Tag(), s.IsRunning())
                         }
+*/
+                        err = initVboxCoreReportService(a)
+                        if err != nil {
+                            log.Debug(err)
+                        }
+                        a.StartServices()
                         log.Debugf("[OP] %v", e.String())
                     }
 
