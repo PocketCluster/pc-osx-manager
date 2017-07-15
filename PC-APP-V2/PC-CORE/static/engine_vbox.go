@@ -11,7 +11,7 @@ import (
 
 func handleConnection(stopC <- chan struct{}, conn net.Conn) error {
     var (
-        buf = make([]byte, 10240)
+        buf [10240]byte
         count, errorCount int = 0, 0
         err error = nil
     )
@@ -29,20 +29,20 @@ func handleConnection(stopC <- chan struct{}, conn net.Conn) error {
                     return errors.WithStack(conn.Close())
                 }
 
-                err = conn.SetReadDeadline(time.Now().Add(time.Second * time.Duration(3)))
+                err = conn.SetReadDeadline(time.Now().Add(time.Second * 3))
                 if err != nil {
-                    log.Debugf("[CONTROL] read error (%v)", err.Error())
+                    log.Debugf("[CONTROL] timeout error (%v)", err.Error())
                     continue
                 }
 
                 // read from core
-                count, err = conn.Read(buf)
+                count, err = conn.Read(buf[:])
                 if err != nil {
                     log.Debugf("[CONTROL] read error (%v)", err.Error())
                     errorCount++
                     continue
                 }
-                log.Debugf("[CONTROL] Message Received Ok (%v)", count)
+                log.Debugf("[CONTROL] Message Rcvd Ok (%v)", count)
 
                 // write to core
                 count, err = conn.Write(buf[:count])
