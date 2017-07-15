@@ -10,7 +10,7 @@ import (
 
 func echoServer(w *sync.WaitGroup) {
     defer w.Done()
-    l, err := net.Listen("tcp", "0.0.0.0:10068")
+    l, err := net.Listen("tcp4", "127.0.0.1:10068")
     if err != nil {
         log.Panicln(err)
     }
@@ -38,12 +38,11 @@ func echoServer(w *sync.WaitGroup) {
 
 }
 
-func echoClient(w *sync.WaitGroup) {
+func echoClient(w *sync.WaitGroup, done chan bool) {
     defer w.Done()
 
     var (
         count, errorCount, success int = 0, 0, 0
-
         buf []byte  = make([]byte, 10240)
         conn net.Conn = nil
         err error = nil
@@ -51,39 +50,54 @@ func echoClient(w *sync.WaitGroup) {
     log.Debugf("[REPORTER] starting reporter service ...")
 
     for {
-        conn, err = net.DialTimeout("tcp", net.JoinHostPort("127.0.0.1", "10068"), time.Second * 3)
-        if err != nil {
-            log.Debugf("[REPORTER] connection error (%v)", err.Error())
-        } else {
-            errorCount = 0
-            success = 0
-            //err = conn.SetDeadline(time.Now().Add(time.Second * time.Duration(3)))
-            if err != nil {
-                log.Debugf("[REPORTER] deadline error (%v)", err.Error())
-            } else {
-                for {
-                    if 5 <= errorCount {
-                        conn.Close()
-                        conn = nil
-                        break
-                    }
-
-                    count, err = conn.Write([]byte("hello"))
+        select {
+            case <- done: {
+                return
+            }
+            default: {
+                conn, err = net.DialTimeout("tcp4", net.JoinHostPort("127.0.0.1", "10068"), time.Second * 3)
+                if err != nil {
+                    log.Debugf("[REPORTER] connection error (%v)", err.Error())
+                } else {
+                    errorCount = 0
+                    success = 0
+                    //err = conn.SetDeadline(time.Now().Add(time.Second * time.Duration(3)))
                     if err != nil {
-                        log.Debugf("[REPORTER] write error (%v)", err.Error())
-                        errorCount++
-                        continue
-                    }
+                        log.Debugf("[REPORTER] deadline error (%v)", err.Error())
+                    } else {
+                        for {
+                            select {
+                                case <- done: {
+                                    conn.Close()
+                                    return
+                                }
+                                default: {
+                                    if 5 <= errorCount {
+                                        conn.Close()
+                                        conn = nil
+                                        break
+                                    }
 
-                    count, err = conn.Read(buf)
-                    if err != nil {
-                        log.Debugf("[REPORTER] read error (%v)", err.Error())
-                        errorCount++
-                        continue
+                                    count, err = conn.Write([]byte("hello"))
+                                    if err != nil {
+                                        log.Debugf("[REPORTER] write error (%v)", err.Error())
+                                        errorCount++
+                                        continue
+                                    }
+
+                                    count, err = conn.Read(buf)
+                                    if err != nil {
+                                        log.Debugf("[REPORTER] read error (%v)", err.Error())
+                                        errorCount++
+                                        continue
+                                    }
+                                    success++
+                                    log.Debugf("[REPORTER] All OK! %d | %s", success, string(buf[:count]))
+                                    time.Sleep(time.Second * time.Duration(1))
+                                }
+                            }
+                        }
                     }
-                    success++
-                    log.Debugf("[REPORTER] All OK! %d | %s", success, string(buf[:count]))
-                    time.Sleep(time.Second * time.Duration(3))
                 }
             }
         }
@@ -92,10 +106,11 @@ func echoClient(w *sync.WaitGroup) {
 }
 
 func main() {
+    done := make(chan bool)
     log.SetLevel(log.DebugLevel)
     var wg sync.WaitGroup
     wg.Add(2)
     go echoServer(&wg)
-    go echoClient(&wg)
+    go echoClient(&wg, done)
     wg.Wait()
 }

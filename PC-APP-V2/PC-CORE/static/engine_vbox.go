@@ -9,10 +9,6 @@ import (
     "github.com/stkim1/pc-core/event/operation"
 )
 
-const (
-
-)
-
 func initVboxCoreReportService(a *mainLife) error {
 
     log.Debugf("[CONTROL] starting master control service ...")
@@ -23,7 +19,6 @@ func initVboxCoreReportService(a *mainLife) error {
             var (
                 buf = make([]byte, 10240)
                 count int = 0
-                deadline time.Duration = time.Second * time.Duration(3)
                 listen net.Listener = nil
                 conn net.Conn = nil
                 err error = nil
@@ -48,7 +43,8 @@ func initVboxCoreReportService(a *mainLife) error {
                         return nil
                     }
                     default: {
-                        err = conn.SetDeadline(time.Now().Add(deadline))
+                        log.Debugf("[CONTROL] waiting for connection to come...")
+                        err = conn.SetReadDeadline(time.Now().Add(time.Second * time.Duration(3)))
                         if err != nil {
                             log.Debugf("[CONTROL] read error (%v)", err.Error())
                             continue
@@ -69,7 +65,7 @@ func initVboxCoreReportService(a *mainLife) error {
                             continue
                         }
 
-                        log.Debugf("[CONTROL] Sent OK! count %d error %v", count)
+                        log.Debugf("[CONTROL] Sent OK! count %d", count)
                     }
                 }
             }

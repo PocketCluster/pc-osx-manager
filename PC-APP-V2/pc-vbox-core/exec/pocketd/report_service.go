@@ -6,58 +6,78 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/stkim1/pc-node-agent/service"
+    "github.com/pkg/errors"
 )
+
+func handleConnection(stopC <- chan struct{}, conn net.Conn) error {
+    var (
+        count, errorCount int = 0, 0
+        buf []byte  = make([]byte, 10240)
+        err error = nil
+    )
+    for {
+        select {
+            case <- stopC: {
+                if conn != nil {
+                    return conn.Close()
+                }
+            }
+            default: {
+                if 5 <= errorCount {
+                    log.Debugf("[REPORTER] error count exceeds 5. Let's close connection and return")
+                    return errors.WithStack(conn.Close())
+                }
+
+                count, err = conn.Write([]byte("hello"))
+                if err != nil {
+                    log.Debugf("[REPORTER] write error (%v)", err.Error())
+                    errorCount++
+                    continue
+                }
+
+                count, err = conn.Read(buf)
+                if err != nil {
+                    log.Debugf("[REPORTER] read error (%v)", err.Error())
+                    errorCount++
+                    continue
+                }
+
+                log.Debugf("[REPORTER] All OK! %d (%s)", count, string(buf[:count]))
+                time.Sleep(time.Second)
+                errorCount = 0
+            }
+        }
+    }
+}
 
 func initVboxCoreReportService(app service.AppSupervisor) error {
 
     app.RegisterServiceWithFuncs(
         func() error {
             var (
-                count, errorCount int = 0, 0
-                deadline time.Duration = time.Second
-                buf []byte  = make([]byte, 10240)
                 conn net.Conn = nil
                 err error = nil
             )
+
             log.Debugf("[REPORTER] starting reporter service ...")
 
             for {
-                conn, err = net.DialTimeout("tcp4", net.JoinHostPort("10.0.2.2", "10068"), time.Second)
-                if err != nil {
-                    log.Debugf("[REPORTER] connection error (%v)", err.Error())
-                } else {
-                    errorCount = 0
-                    err = conn.SetDeadline(time.Now().Add(deadline))
-                    if err != nil {
-                        log.Debugf("[REPORTER] deadline error (%v)", err.Error())
-                    } else {
-                        for {
-                            if 5 <= errorCount {
-                                conn.Close()
-                                conn = nil
-                                break
-                            }
-                            time.Sleep(time.Second * 3)
-
-                            count, err = conn.Write([]byte("hello"))
-                            if err != nil {
-                                log.Debugf("[REPORTER] write error (%v)", err.Error())
-                                errorCount++
-                                continue
-                            }
-
-                            count, err = conn.Read(buf)
-                            if err != nil {
-                                log.Debugf("[REPORTER] read error (%v)", err.Error())
-                                errorCount++
-                                continue
-                            }
-
-                            log.Info("[REPORTER] All OK! %d %s", count, string(buf[:count]))
+                select {
+                    case <- app.StopChannel(): {
+                        if conn != nil {
+                            return conn.Close()
+                        }
+                    }
+                    default: {
+                        conn, err = net.Dial("tcp4", net.JoinHostPort("10.0.2.2", "10068"))
+                        if err != nil {
+                            log.Debugf("[REPORTER] connection error (%v)", err.Error())
+                            time.Sleep(time.Second * time.Duration(3))
+                        } else {
+                            handleConnection(app.StopChannel(), conn)
                         }
                     }
                 }
-                time.Sleep(time.Second * 3)
             }
 
             return nil
