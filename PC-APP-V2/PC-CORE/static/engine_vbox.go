@@ -23,41 +23,55 @@ func initVboxCoreReportService(a *mainLife) error {
             var (
                 buf = make([]byte, 10240)
                 count int = 0
-                deadline time.Duration = time.Second
+                deadline time.Duration = time.Second * time.Duration(3)
                 listen net.Listener = nil
                 conn net.Conn = nil
                 err error = nil
             )
-            listen, err = net.Listen("tcp4", net.JoinHostPort("127.0.0.1", "10068"))
+            listen, err = net.Listen("tcp4", ":10068")
             if err != nil {
                 return errors.WithStack(err)
             }
-            defer listen.Close()
             conn, err = listen.Accept()
             if err != nil {
                 return errors.WithStack(err)
             }
-            defer conn.Close()
+
+            log.Debugf("[CONTROL] VBox controller service started...")
 
             for {
-                err = conn.SetDeadline(time.Now().Add(deadline))
-                if err != nil {
-                    continue
-                }
+                select {
+                    case <- a.StopChannel(): {
+                        conn.Close()
+                        listen.Close()
+                        log.Debugf("[CONTROL] VBox controller instance shutdown...")
+                        return nil
+                    }
+                    default: {
+                        err = conn.SetDeadline(time.Now().Add(deadline))
+                        if err != nil {
+                            log.Debugf("[CONTROL] read error (%v)", err.Error())
+                            continue
+                        }
 
-                // read from core
-                count, err = conn.Read(buf)
-                if err != nil {
-                    continue
-                }
+                        // read from core
+                        count, err = conn.Read(buf)
+                        if err != nil {
+                            log.Debugf("[CONTROL] read error (%v)", err.Error())
+                            continue
+                        }
+                        log.Debugf("[CONTROL] Message Received %v", string(buf[:count]))
 
-                // write to core
-                count, err = conn.Write([]byte("hello"))
-                if err != nil {
-                    continue
-                }
+                        // write to core
+                        count, err = conn.Write([]byte("hello"))
+                        if err != nil {
+                            log.Debugf("[CONTROL] write error (%v)", err.Error())
+                            continue
+                        }
 
-                log.Debugf("[CONTROL] All OK! count %d error %v", count, err.Error())
+                        log.Debugf("[CONTROL] Sent OK! count %d error %v", count)
+                    }
+                }
             }
             return nil
         })

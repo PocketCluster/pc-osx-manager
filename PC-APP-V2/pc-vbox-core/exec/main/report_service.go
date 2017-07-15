@@ -24,29 +24,31 @@ func initVboxCoreReportService(app service.AppSupervisor) error {
             for {
                 conn, err = net.DialTimeout("tcp4", net.JoinHostPort("10.0.2.2", "10068"), time.Second)
                 if err != nil {
-                    log.Debugf("[REPORTER] connection open error %v", err.Error())
+                    log.Debugf("[REPORTER] connection error (%v)", err.Error())
                 } else {
                     errorCount = 0
                     err = conn.SetDeadline(time.Now().Add(deadline))
                     if err != nil {
-                        log.Debugf("[REPORTER] deadline setup error %v", err.Error())
+                        log.Debugf("[REPORTER] deadline error (%v)", err.Error())
                     } else {
                         for {
                             if 5 <= errorCount {
+                                conn.Close()
+                                conn = nil
                                 break
                             }
                             time.Sleep(time.Second * 3)
 
                             count, err = conn.Write([]byte("hello"))
                             if err != nil {
-                                log.Debugf("[REPORTER] write report error %v", err.Error())
+                                log.Debugf("[REPORTER] write error (%v)", err.Error())
                                 errorCount++
                                 continue
                             }
 
                             count, err = conn.Read(buf)
                             if err != nil {
-                                log.Debugf("[REPORTER] read ack error %v", err.Error())
+                                log.Debugf("[REPORTER] read error (%v)", err.Error())
                                 errorCount++
                                 continue
                             }
