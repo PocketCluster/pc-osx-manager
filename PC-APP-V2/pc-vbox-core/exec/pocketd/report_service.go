@@ -71,10 +71,13 @@ func initVboxCoreReportService(app service.AppSupervisor) error {
                     default: {
                         conn, err = net.Dial("tcp4", net.JoinHostPort("10.0.2.2", "10068"))
                         if err != nil {
-                            log.Debugf("[REPORTER] connection error (%v)", err.Error())
+                            log.Debugf("[REPORTER] connection open error (%v)", err.Error())
                             time.Sleep(time.Second * time.Duration(3))
                         } else {
-                            handleConnection(app.StopChannel(), conn)
+                            err = handleConnection(app.StopChannel(), conn)
+                            if err != nil {
+                                log.Debugf("[REPORTER] connection handle error (%v)", err.Error())
+                            }
                         }
                     }
                 }
