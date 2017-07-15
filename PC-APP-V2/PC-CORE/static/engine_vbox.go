@@ -38,8 +38,13 @@ func handleConnection(stopC <- chan struct{}, conn net.Conn) error {
                 // read from core
                 count, err = conn.Read(buf[:])
                 if err != nil {
-                    log.Debugf("[CONTROL] read error (%v)", err.Error())
-                    errorCount++
+                    if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+                        log.Debugf("[CONTROL] timeout error (%v)", err.Error())
+                        continue
+                    } else {
+                        log.Debugf("[CONTROL] read error (%v)", err.Error())
+                        errorCount++
+                    }
                     continue
                 }
                 log.Debugf("[CONTROL] Message Rcvd Ok (%v)", count)
