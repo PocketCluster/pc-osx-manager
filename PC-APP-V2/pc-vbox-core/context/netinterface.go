@@ -1,4 +1,4 @@
-package slcontext
+package context
 
 import (
     "net"
@@ -131,4 +131,75 @@ func PrimaryNetworkInterface() (NetworkInterface, error) {
         // (2017-05-15) We'll only take the first ip address for now
         IP4Address:      ipaddrs,
     }, nil
+}
+
+func findNetworkInterface(iName string) (NetworkInterface, error) {
+    var (
+        err error                     = nil
+        gateway *netifaces.Gateway    = nil
+        ifcFound bool                 = false
+        gwaddr, gwiface string
+        ipaddrs []string
+        ifaces []net.Interface
+        netIface net.Interface
+        netStatus NetworkInterface    = NetworkInterface{}
+    )
+    if len(iName) == 0 {
+        return netStatus, errors.Errorf("[ERR] inappropriate interface name")
+    }
+
+
+    // --- find network interface hardware status ---
+    ifaces, err = net.Interfaces()
+    for _, i := range ifaces {
+        if i.Name == iName {
+            netIface = i
+            ifcFound = true
+            break
+        }
+    }
+    if !ifcFound {
+        return netStatus, errors.Errorf("[ERR] invalid interface name to find")
+    }
+    netStatus.Interface    = netIface
+    netStatus.HardwareAddr = netIface.HardwareAddr.String()
+
+
+    // --- find ip address status ---
+    ipaddrs, err = ip4AddrsToStringList(netIface)
+    if err != nil {
+        return netStatus, errors.WithStack(err)
+    }
+    netStatus.IP4Address   = ipaddrs
+
+
+    // --- find gateway information ---
+    gateway, err = netifaces.FindSystemGateways()
+    if err != nil {
+        return netStatus, errors.WithStack(err)
+    }
+    defer gateway.Release()
+
+    gwaddr, gwiface, err = gateway.DefaultIP4Gateway()
+    if err != nil {
+        return netStatus, errors.WithStack(err)
+    }
+    if len(gwaddr) == 0 || len(gwiface) == 0 {
+        return netStatus, errors.Errorf("[ERR] inappropriate gateway address or interface")
+    }
+    if strings.HasPrefix(gwiface, netIface.Name) {
+        netStatus.GatewayAddr = gwaddr
+    }
+
+
+    // --- results ---
+    return netStatus, nil
+}
+
+func FirstNetworkInterface() (NetworkInterface, error) {
+    return findNetworkInterface("eth0")
+}
+
+func SecondNetworkInterface() (NetworkInterface, error) {
+    return findNetworkInterface("eth1")
 }
