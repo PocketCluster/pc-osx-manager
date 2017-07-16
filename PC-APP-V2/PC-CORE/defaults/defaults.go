@@ -24,6 +24,10 @@ const (
     MasterBeaconPrivateKey string     = "pc_master_beacon" + pcrypto.FileExtPrivateKey
 
     MasterBeaconPublicKey string      = "pc_master_beacon" + pcrypto.FileExtPublicKey
+
+    MasterVBoxCtrlPrivateKey string   = "pc_master_vbox_ctrl" + pcrypto.FileExtPrivateKey
+
+    MasterVBoxCtrlPublicKey string    = "pc_master_vbox_ctrl" + pcrypto.FileExtPublicKey
 )
 
 const (

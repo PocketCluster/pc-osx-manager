@@ -56,6 +56,11 @@ type HostContext interface {
     UpdateBeaconCert(bundle *BeaconCertBundle)
     MasterBeaconPublicKey() ([]byte, error)
     MasterBeaconPrivateKey() ([]byte, error)
+
+    // vbox certificate
+    UpdateVBoxCert(bundle *VBoxCertBundle)
+    MasterVBoxCtrlPrivateKey() ([]byte, error)
+    MasterVBoxCtrlPublicKey() ([]byte, error)
 }
 
 type hostContext struct {
@@ -97,6 +102,9 @@ type hostContext struct {
 
     // beacon certificate
     beaconBundle                 *BeaconCertBundle
+
+    // VBox Control Certificate
+    vboxBundle                   *VBoxCertBundle
 }
 
 // singleton initialization
@@ -461,4 +469,36 @@ func (ctx *hostContext) MasterBeaconPrivateKey() ([]byte, error) {
         return nil, errors.Errorf("[ERR] invalid private beacon key")
     }
     return ctx.beaconBundle.PrivateKey, nil
+}
+
+type VBoxCertBundle struct {
+    PrivateKey     []byte
+    PublicKey      []byte
+}
+
+func (ctx *hostContext) UpdateVBoxCert(bundle *VBoxCertBundle) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    ctx.vboxBundle = bundle
+}
+
+func (ctx *hostContext) MasterVBoxCtrlPrivateKey() ([]byte, error) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    if ctx.vboxBundle == nil || ctx.vboxBundle.PrivateKey == nil {
+        return nil, errors.Errorf("[ERR] invalid vbox private key")
+    }
+    return ctx.vboxBundle.PrivateKey, nil
+}
+
+func (ctx *hostContext) MasterVBoxCtrlPublicKey() ([]byte, error) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    if ctx.vboxBundle == nil || ctx.vboxBundle.PublicKey == nil {
+        return nil, errors.Errorf("[ERR] invalid vbox public key")
+    }
+    return ctx.vboxBundle.PublicKey, nil
 }

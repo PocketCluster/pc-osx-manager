@@ -86,6 +86,14 @@ func setupServiceConfig() (*serviceConfig, error) {
     }
     ctx.UpdateBeaconCert(beaconBundle)
 
+    // vbox certificate
+    vboxBundle, err := buildVBoxReportCertificate(rec.Certdb(), meta.ClusterUUID)
+    if err != nil {
+        // this is critical
+        return nil, errors.WithStack(err)
+    }
+    ctx.UpdateVBoxCert(vboxBundle)
+
     // make teleport core config
     teleCfg := tervice.MakeCoreConfig(dataDir, true)
     teleCfg.AssignHostUUID(meta.ClusterUUID)

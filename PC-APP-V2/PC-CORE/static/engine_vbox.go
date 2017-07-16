@@ -7,11 +7,16 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/event/operation"
+    "github.com/stkim1/pc-vbox-comm/masterctrl"
+    "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/model"
 )
 
-func handleConnection(stopC <- chan struct{}, conn net.Conn) error {
+func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <- chan struct{}) error {
     var (
-        buf [10240]byte
+        recvPkg [10240]byte
+        sendPkg []byte = nil
+        eofMsg  []byte = []byte("EOF")
         count, errorCount int = 0, 0
         err error = nil
     )
@@ -21,23 +26,30 @@ func handleConnection(stopC <- chan struct{}, conn net.Conn) error {
     for {
         select {
             case <- stopC: {
+                ctrl.HandleCoreDisconnection(time.Now())
                 return errors.WithStack(conn.Close())
             }
             default: {
                 if 5 <= errorCount {
                     log.Debugf("[CONTROL] error count exceeds 5. Let's close connection and return")
+                    ctrl.HandleCoreDisconnection(time.Now())
                     return errors.WithStack(conn.Close())
                 }
+                if 0 < errorCount {
+                    time.Sleep(time.Second)
+                }
 
+/*
                 err = conn.SetReadDeadline(time.Now().Add(time.Second * 3))
                 if err != nil {
                     log.Debugf("[CONTROL] timeout error (%v)", err.Error())
                     continue
                 }
-
+*/
                 // read from core
-                count, err = conn.Read(buf[:])
+                count, err = conn.Read(recvPkg[:])
                 if err != nil {
+/*
                     if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
                         log.Debugf("[CONTROL] timeout error (%v)", err.Error())
                         continue
@@ -45,20 +57,28 @@ func handleConnection(stopC <- chan struct{}, conn net.Conn) error {
                         log.Debugf("[CONTROL] read error (%v)", err.Error())
                         errorCount++
                     }
+*/
+                    log.Debugf("[CONTROL] read error (%v)", err.Error())
+                    errorCount++
                     continue
                 }
-                log.Debugf("[CONTROL] Message Rcvd Ok (%v)", count)
+
+                sendPkg, err = ctrl.ReadCoreMetaAndMakeMasterAck(conn.RemoteAddr(), recvPkg[:count], time.Now())
+                if err != nil {
+                    log.Debugf("[CONTROL] ctrl meta error (%v)", err.Error())
+                    sendPkg = eofMsg
+                }
 
                 // write to core
-                count, err = conn.Write(buf[:count])
+                count, err = conn.Write(sendPkg)
                 if err != nil {
                     log.Debugf("[CONTROL] write error (%v)", err.Error())
                     errorCount++
                     continue
                 }
 
-                log.Debugf("[CONTROL] Message Sent Ok (%d)", count)
                 errorCount = 0
+                log.Debugf("[CONTROL] Message Sent Ok (%d)", count)
             }
         }
     }
@@ -72,10 +92,38 @@ func initVboxCoreReportService(a *mainLife) error {
         operation.ServiceVBoxMasterControl,
         func() error {
             var (
+                prvkey, pubkey []byte = nil, nil
+                coreNode *model.CoreNode
+                ctrl masterctrl.VBoxMasterControl = nil
                 listen net.Listener = nil
                 conn net.Conn = nil
                 err error = nil
             )
+
+            coreNode = model.RetrieveCoreNode()
+            _, err = coreNode.GetAuthToken()
+            if err != nil {
+                // TODO we need to wait for core node to get authtoken from Teleport
+                coreNode.SetAuthToken("bjAbqvJVCy2Yr2suWu5t2ZnD4Z5336oNJ0bBJWFZ4A0=")
+                err = coreNode.CreateCore()
+                if err != nil {
+                    return err
+                }
+            }
+
+            prvkey, err = context.SharedHostContext().MasterVBoxCtrlPrivateKey()
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            pubkey, err = context.SharedHostContext().MasterVBoxCtrlPublicKey()
+            if err != nil {
+                return errors.WithStack(err)
+            }
+
+            ctrl, err = masterctrl.NewVBoxMasterControl(prvkey, pubkey, coreNode, nil)
+            if err != nil {
+                return errors.WithStack(err)
+            }
 
             log.Debugf("[CONTROL] VBox controller service started...")
 
@@ -97,7 +145,7 @@ func initVboxCoreReportService(a *mainLife) error {
                             log.Debugf("[CONTROL] connection open error (%v)", err.Error())
                             time.Sleep(time.Second * time.Duration(3))
                         } else {
-                            err = handleConnection(a.StopChannel(), conn)
+                            err = handleConnection(ctrl, conn, a.StopChannel())
                             if err != nil {
                                 log.Debugf("[REPORTER] connection handle error (%v)", err.Error())
                             }

@@ -308,7 +308,8 @@ func stateTransitionWithTimestamp(core *coreReporter, timestamp time.Time) (VBox
 
 func (c *coreReporter) ReadMasterAcknowledgement(metaPackage []byte, timestamp time.Time) error {
     var (
-        newState, oldState cpkg.VBoxCoreState = c.CurrentState(), c.CurrentState()
+        oldState cpkg.VBoxCoreState = c.CurrentState()
+        newState cpkg.VBoxCoreState = cpkg.VBoxCoreUnbounded
         transition VBoxCoreTransition
         transErr, eventErr error = nil, nil
     )

@@ -41,9 +41,7 @@ type VBoxMasterControl interface {
     CurrentState() mpkg.VBoxMasterState
 
     ReadCoreMetaAndMakeMasterAck(sender interface{}, metaPackage []byte, timestamp time.Time) ([]byte, error)
-    CheckTransitionTimeWindow(timestamp time.Time) error
-
-    Shutdown()
+    HandleCoreDisconnection(timestamp time.Time) error
 }
 
 // this interface is purely internal interface containing only functions, and could be replaced anytime you're to call it
@@ -117,11 +115,6 @@ type masterControl struct {
 
     // last time successfully transitioned state
     lastTransitionTS            time.Time
-
-    txActionCount               int
-
-    // DO NOT SET ANY TIME ON THIS FIELD SO THE FIRST TX ACTION CAN BE DONE WITHIN THE CYCLE
-    lastTransmissionTS          time.Time
 
     /* ---------------------------------------- all-states properties ----------------------------------------------- */
     privateKey                  []byte
@@ -203,8 +196,6 @@ func finalizeStateTransitionWithTimeout(master *masterControl, nextStateCandiate
         case VBoxMasterTransitionOk: {
             master.transitionActionCount = 0
             master.lastTransitionTS = timestamp
-            master.txActionCount = 0
-            master.lastTransmissionTS = timestamp
             nextConfirmedState = VBoxMasterTransitionOk
             break
         }
@@ -336,48 +327,25 @@ func (m *masterControl) txTimeWindow() time.Duration {
     }
 }
 
-// TODO : need to think about how to reset variables
-func stateCheckTransitionTimeWindow(master *masterControl, timestamp time.Time) (VBoxMasterTransition, error) {
-    if master.txActionCount < TxActionLimit {
-        // if tx timeout window is smaller than time delta (T_1 - T_0), don't do anything!!! just skip!
-        if master.txTimeWindow() < timestamp.Sub(master.lastTransmissionTS) {
-            // since an action is taken, the action counter goes up regardless of error
-            master.txActionCount++
-            // we'll reset slave action timestamp
-            master.lastTransmissionTS = timestamp
-        }
-        return VBoxMasterTransitionIdle, nil
-    }
-
-    // this is failure. the fact that this is called indicate that we're ready to move to failure state
-    return VBoxMasterTransitionFail, errors.Errorf("[ERR] transmission count has exceeded a given limit")
-}
-
-func (m *masterControl) CheckTransitionTimeWindow(timestamp time.Time) error {
+func (m *masterControl) HandleCoreDisconnection(timestamp time.Time) error {
     var (
-        newState, oldState mpkg.VBoxMasterState = m.CurrentState(), m.CurrentState()
-        transition VBoxMasterTransition
+        oldState mpkg.VBoxMasterState = m.CurrentState()
+        newState mpkg.VBoxMasterState = mpkg.VBoxMasterUnbounded
         transErr, eventErr error = nil, nil
     )
     if m.controller == nil {
         log.Panic("[CRITICAL] vboxController func cannot be null")
     }
 
-    transition, transErr = stateCheckTransitionTimeWindow(m, timestamp)
-
     // finalize state
-    newState = stateTransition(oldState, transition)
+    newState = stateTransition(oldState, VBoxMasterTransitionFail)
 
     // event
-    eventErr = runOnTransitionEvents(m, newState, oldState, transition, timestamp)
+    eventErr = runOnTransitionEvents(m, newState, oldState, VBoxMasterTransitionFail, timestamp)
 
     // assign vbox controller for state
     m.controller = newControllerForState(m.controller, newState, oldState)
 
     // return combined errors
     return utils.SummarizeErrors(transErr, eventErr)
-}
-
-func (m *masterControl) Shutdown() {
-
 }
