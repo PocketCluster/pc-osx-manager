@@ -7,7 +7,7 @@ import (
     "github.com/stkim1/pc-vbox-core/context/config"
 )
 
-func DebugSlcontextPrepare() PocketCoreContext {
+func DebugPrepareCoreContext() PocketCoreContext {
     // instead of running singleton creation, we'll invalidate sync.once to disengage in singleton production
     // getSingletonSlaveContext()
     once.Do(func(){})
@@ -30,7 +30,7 @@ func DebugSlcontextPrepare() PocketCoreContext {
     return singletonContext
 }
 
-func DebugSlcontextPrepareWithRoot(rootPath string) PocketCoreContext {
+func DebugPrepareCoreContextWithRoot(rootPath string) PocketCoreContext {
     // instead of running singleton creation, we'll invalidate sync.once to disengage in singleton production
     // getSingletonSlaveContext()
     once.Do(func(){})
@@ -53,7 +53,7 @@ func DebugSlcontextPrepareWithRoot(rootPath string) PocketCoreContext {
     return singletonContext
 }
 
-func DebugSlcontextDestroy() {
+func DebugDestroyCoreContext() {
     singletonContext.DiscardAll()
     config.DebugConfigDestory(singletonContext.config)
     singletonContext = nil

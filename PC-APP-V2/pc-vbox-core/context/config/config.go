@@ -6,7 +6,6 @@ import (
 
     "github.com/pkg/errors"
     "gopkg.in/yaml.v2"
-    "github.com/pborman/uuid"
     "github.com/stkim1/pcrypto"
 )
 
@@ -52,12 +51,13 @@ const (
 
 // --- struct
 type ConfigMasterSection struct {
+    MasterIP4Address    string                   `yaml:"-"`
+    MasterIP6Address    string                   `yaml:"-"`
     MasterTimeZone      string                   `yaml:"master-timezone"`
 }
 
 type ConfigCoreSection struct {
     CoreNodeName        string                   `yaml:"core-node-name"`
-    CoreNodeUUID        string                   `yaml:"core-node-uuid"`
     CoreAuthToken       string                   `yaml:"core-auth-token"`
     CoreMacAddr         string                   `yaml:"core-mac-addr"`
 }
@@ -84,9 +84,7 @@ func _brandNewSlaveConfig(rootPath string) (*PocketCoreConfig) {
         rootPath:         rootPath,
         ConfigVersion:    CORE_CONFIG_VAL,
         MasterSection:    &ConfigMasterSection{},
-        CoreSection:      &ConfigCoreSection{
-            CoreNodeUUID:    uuid.New(),
-        },
+        CoreSection:      &ConfigCoreSection{},
     }
 }
 

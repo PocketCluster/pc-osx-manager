@@ -6,73 +6,66 @@ import (
 
     "github.com/stkim1/pcrypto"
     "github.com/davecgh/go-spew/spew"
-    "github.com/stkim1/pc-vbox-core/context/config"
 )
 
 const (
-    MASTER_AGENT_NAME string    = "master-yoda"
-    MASTER_IP4_ADDR string      = "192.168.1.4"
-    SLAVE_NODE_NAME string      = "pc-node1"
-    SLAVE_AUTH_TOKEN string     = "yyLq8F5NbSZQJ7aT"
+    CLUSTERID string        = "master-yoda"
+    MASTER_IP4_ADDR string  = "192.168.1.4"
+    CORE_AUTH_TOKEN string = "yyLq8F5NbSZQJ7aT"
 )
 
 func setUp() {
-    DebugSlcontextPrepare()
+    DebugPrepareCoreContext()
 }
 
 func tearDown() {
-    DebugSlcontextDestroy()
+    DebugDestroyCoreContext()
 }
 
 func TestGetDefaultConfiguration(t *testing.T) {
     setUp()
     defer tearDown()
 
-    t.Log(spew.Sdump(SharedSlaveContext().(*coreContext)))
+    t.Log(spew.Sdump(SharedCoreContext().(*coreContext)))
 }
 
 func TestSaveLoadSlaveContext(t *testing.T) {
     setUp()
     defer tearDown()
 
-    err := SharedSlaveContext().SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey());
+    err := SharedCoreContext().SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey());
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SetMasterAgent(MASTER_AGENT_NAME)
+    err = SharedCoreContext().SetClusterID(CLUSTERID)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SetMasterIP4Address(MASTER_IP4_ADDR)
+    err = SharedCoreContext().SetMasterIP4Address(MASTER_IP4_ADDR)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SetSlaveNodeName(SLAVE_NODE_NAME)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    err = SharedSlaveContext().SetSlaveAuthToken(SLAVE_AUTH_TOKEN)
+    err = SharedCoreContext().SetCoreAuthToken(CORE_AUTH_TOKEN)
     if err != nil {
         t.Error(err.Error())
         return
     }
 
-    old_uuid, err := SharedSlaveContext().GetSlaveNodeUUID()
+    _, err = SharedCoreContext().GetCoreAuthToken()
     if err != nil {
         t.Error(err.Error())
         return
     }
 
-    err = SharedSlaveContext().SyncAll()
+    err = SharedCoreContext().SyncAll()
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SaveConfiguration()
+    err = SharedCoreContext().SaveConfiguration()
     if err != nil {
         t.Error(err.Error())
         return
@@ -83,9 +76,9 @@ func TestSaveLoadSlaveContext(t *testing.T) {
     singletonContext.config = nil
     singletonContext = nil
     t.Logf("[INFO] old root %s", oldRoot)
-    DebugSlcontextPrepareWithRoot(oldRoot)
+    DebugPrepareCoreContextWithRoot(oldRoot)
 
-    mpk, err := SharedSlaveContext().GetMasterPublicKey()
+    mpk, err := SharedCoreContext().GetMasterPublicKey()
     if err != nil {
         t.Error(err.Error())
         return
@@ -95,74 +88,37 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         return
     }
 
-    man, err := SharedSlaveContext().GetMasterAgent()
+    cid, err := SharedCoreContext().GetClusterID()
     if err != nil {
         t.Error(err.Error())
         return
     }
-    if man != MASTER_AGENT_NAME {
-        t.Error("[ERR] Incorrect Master Name")
+    if cid != CLUSTERID {
+        t.Error("[ERR] Incorrect Cluster ID")
         return
     }
 
     // Master IP address will not be saved as it is allowed to be on DHCP
-    _, err = SharedSlaveContext().GetMasterIP4Address()
+    _, err = SharedCoreContext().GetMasterIP4Address()
     if err == nil {
         t.Error("[ERR] Incorrect Master ip address. Master IP address should be null after reload")
         return
     }
 
-    snn, err := SharedSlaveContext().GetSlaveNodeName()
+    sat, err := SharedCoreContext().GetCoreAuthToken()
     if err != nil {
         t.Error(err.Error())
         return
     }
-    if snn != SLAVE_NODE_NAME {
-        t.Error("[ERR] Incorrect slave node name")
-        return
-    }
-
-    sat, err := SharedSlaveContext().GetSlaveAuthToken()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    if sat != SLAVE_AUTH_TOKEN {
+    if sat != CORE_AUTH_TOKEN {
         t.Errorf("[ERR] incorrect slave auth token")
         return
     }
 
-    new_uuid, err := SharedSlaveContext().GetSlaveNodeUUID()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    if old_uuid != new_uuid {
-        t.Error("[ERR] Incorrect slave uuid")
-        return
-    }
-
     // slave network section
-    paddr, err := PrimaryNetworkInterface()
+    _, err = PrimaryNetworkInterface()
     if err != nil {
         t.Error(err.Error())
-        return
-    }
-    cfg := SharedSlaveContext().(*coreContext).config
-    if paddr.HardwareAddr != cfg.SlaveSection.SlaveMacAddr {
-        t.Error("[ERR] Incorrect slave mac address")
-        return
-    }
-    if paddr.PrimaryIP4Addr() != cfg.SlaveSection.SlaveIP4Addr {
-        t.Error("[ERR] Incorrect slave ip address")
-        return
-    }
-    if paddr.GatewayAddr != cfg.SlaveSection.SlaveGateway {
-        t.Error("[ERR] Incorrect slave gateway")
-        return
-    }
-    if config.SLAVE_NAMESRV_VALUE != cfg.SlaveSection.SlaveNameServ {
-        t.Error("[ERR] Incorrect slave name server")
         return
     }
 }
@@ -171,44 +127,39 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
     setUp()
     defer tearDown()
 
-    err := SharedSlaveContext().SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey());
+    err := SharedCoreContext().SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey());
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SetMasterAgent(MASTER_AGENT_NAME)
+    err = SharedCoreContext().SetClusterID(CLUSTERID)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SetMasterIP4Address(MASTER_IP4_ADDR)
+    err = SharedCoreContext().SetMasterIP4Address(MASTER_IP4_ADDR)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SetSlaveNodeName(SLAVE_NODE_NAME)
+    err = SharedCoreContext().SetCoreAuthToken(CORE_AUTH_TOKEN)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SetSlaveAuthToken(SLAVE_AUTH_TOKEN)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    old_uuid, err := SharedSlaveContext().GetSlaveNodeUUID()
+    _, err = SharedCoreContext().GetCoreAuthToken()
     if err != nil {
         t.Error(err.Error())
         return
     }
 
     // sync, save, reload
-    err = SharedSlaveContext().SyncAll()
+    err = SharedCoreContext().SyncAll()
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SaveConfiguration()
+    err = SharedCoreContext().SaveConfiguration()
     if err != nil {
         t.Error(err.Error())
         return
@@ -217,73 +168,42 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
     oldRoot := singletonContext.config.DebugGetRootPath()
     singletonContext.config = nil
     singletonContext = nil
-    DebugSlcontextPrepareWithRoot(oldRoot)
+    DebugPrepareCoreContextWithRoot(oldRoot)
     // discard all slave & master info
-    err = SharedSlaveContext().DiscardAll()
+    err = SharedCoreContext().DiscardAll()
     if err != nil {
         t.Error(err.Error())
         return
     }
 
-    _, err = SharedSlaveContext().GetMasterPublicKey()
+    _, err = SharedCoreContext().GetMasterPublicKey()
     if err == nil {
         t.Error("[ERR] master public key should be null")
         return
     }
 
-    _, err = SharedSlaveContext().GetMasterAgent()
+    _, err = SharedCoreContext().GetClusterID()
     if err == nil {
-        t.Error("[ERR] master agent name should be empty")
+        t.Error("[ERR] cluster id should be empty")
         return
     }
 
-    _, err = SharedSlaveContext().GetMasterIP4Address()
+    _, err = SharedCoreContext().GetMasterIP4Address()
     if err == nil {
         t.Error("[ERR] master ip address should be empty")
         return
     }
 
-    _, err = SharedSlaveContext().GetSlaveNodeName()
+    _, err = SharedCoreContext().GetCoreAuthToken()
     if err == nil {
-        t.Error("[ERR] slave node name should be null")
-        return
-    }
-    _, err = SharedSlaveContext().GetSlaveAuthToken()
-    if err == nil {
-        t.Errorf("[ERR] slave authtoken should be null")
-        return
-    }
-    new_uuid, err := SharedSlaveContext().GetSlaveNodeUUID()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    if old_uuid != new_uuid {
-        t.Error("[ERR] Incorrect slave uuid. Slave UUID should be immutable")
+        t.Errorf("[ERR] core authtoken should be null")
         return
     }
 
     // slave network section
-    paddr, err := PrimaryNetworkInterface()
+    _, err = PrimaryNetworkInterface()
     if err != nil {
         t.Error(err.Error())
-        return
-    }
-    cfg := SharedSlaveContext().(*coreContext).config
-    if paddr.HardwareAddr != cfg.SlaveSection.SlaveMacAddr {
-        t.Error("[ERR] Incorrect slave mac address")
-        return
-    }
-    if paddr.PrimaryIP4Addr() != cfg.SlaveSection.SlaveIP4Addr {
-        t.Error("[ERR] Incorrect slave ip address")
-        return
-    }
-    if paddr.GatewayAddr != cfg.SlaveSection.SlaveGateway {
-        t.Error("[ERR] Incorrect slave gateway")
-        return
-    }
-    if config.SLAVE_NAMESRV_VALUE != cfg.SlaveSection.SlaveNameServ {
-        t.Error("[ERR] Incorrect slave name server")
         return
     }
 }
@@ -292,44 +212,34 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
     setUp()
     defer tearDown()
 
-    err := SharedSlaveContext().SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey());
+    err := SharedCoreContext().SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey());
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SetMasterAgent(MASTER_AGENT_NAME)
+    err = SharedCoreContext().SetClusterID(CLUSTERID)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SetMasterIP4Address(MASTER_IP4_ADDR)
+    err = SharedCoreContext().SetMasterIP4Address(MASTER_IP4_ADDR)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SetSlaveNodeName(SLAVE_NODE_NAME)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    err = SharedSlaveContext().SetSlaveAuthToken(SLAVE_AUTH_TOKEN)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    old_uuid, err := SharedSlaveContext().GetSlaveNodeUUID()
+    err = SharedCoreContext().SetCoreAuthToken(CORE_AUTH_TOKEN)
     if err != nil {
         t.Error(err.Error())
         return
     }
 
     // sync, save, reload
-    err = SharedSlaveContext().SyncAll()
+    err = SharedCoreContext().SyncAll()
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SaveConfiguration()
+    err = SharedCoreContext().SaveConfiguration()
     if err != nil {
         t.Error(err.Error())
         return
@@ -338,11 +248,11 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
     oldRoot := singletonContext.config.DebugGetRootPath()
     singletonContext.config = nil
     singletonContext = nil
-    DebugSlcontextPrepareWithRoot(oldRoot)
+    DebugPrepareCoreContextWithRoot(oldRoot)
     // discard master session
-    SharedSlaveContext().DiscardMasterSession()
+    SharedCoreContext().DiscardMasterSession()
 
-    mpk, err := SharedSlaveContext().GetMasterPublicKey()
+    mpk, err := SharedCoreContext().GetMasterPublicKey()
     if len(mpk) == 0 {
         t.Error("[ERR] master public key should not be null")
         return
@@ -356,17 +266,17 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
         return
     }
 
-    ma, err := SharedSlaveContext().GetMasterAgent()
+    ma, err := SharedCoreContext().GetClusterID()
     if len(ma) == 0 {
-        t.Error("[ERR] master agent name should not be void")
+        t.Error("[ERR] cluster id should not be void")
         return
     }
     if err != nil {
-        t.Error("[ERR] accessing master agent name should not generate error")
+        t.Error("[ERR] accessing cluster id should not generate error")
         return
     }
 
-    maddr, err := SharedSlaveContext().GetMasterIP4Address()
+    maddr, err := SharedCoreContext().GetMasterIP4Address()
     if len(maddr) != 0 {
         t.Error("[ERR] master ip address should be empty")
         return
@@ -376,35 +286,13 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
         return
     }
 
-    key := SharedSlaveContext().GetAESKey()
-    if len(key) != 0 {
-        t.Error("[ERR] accessing session AES key should return null value")
-        return
-    }
-
-    _, err = SharedSlaveContext().AESCryptor()
-    if err == nil {
-        t.Error("[ERR] accessing session AES cryptor should generate error")
-        return
-    }
-
-    sat, err := SharedSlaveContext().GetSlaveAuthToken()
+    sat, err := SharedCoreContext().GetCoreAuthToken()
     if err != nil {
         t.Error(err.Error())
         return
     }
-    if sat != SLAVE_AUTH_TOKEN {
+    if sat != CORE_AUTH_TOKEN {
         t.Errorf("[ERR] incorrect slave auth token")
-        return
-    }
-
-    new_uuid, err := SharedSlaveContext().GetSlaveNodeUUID()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    if old_uuid != new_uuid {
-        t.Error("[ERR] Incorrect slave uuid. Slave UUID should be immutable")
         return
     }
 

@@ -10,36 +10,37 @@ import (
 )
 
 type PocketCoreContext interface {
-    // Once sync, all the configuration is saved, and slave node is bounded
+    // Once sync, all the configuration is saved, and core node is bounded
     // This must be executed on success from CheckCrypto -> Bound, or BindBroken -> Bind
     // No other place can execute this
     SyncAll() error
-    // Discard all data communicated with master (not the one from slave itself such as network info)
+
+    // Discard all data communicated with master (not the one from core itself such as network info)
     // This should executed on failure from joining states (unbounded, inquired, keyexchange, checkcrypto)
     DiscardAll() error
-    // reload all configuration
 
-    // TODO : how to test this?
-    // ReloadConfiguration() error
+    // Discard master ip address, and other session related data
+    DiscardMasterSession()
+
+    // reload all configuration
+    ReloadConfiguration() error
 
     // This must be executed on success from CheckCrypto -> Bound, or BindBroken -> Bound.
     // No other place can execute this
     SaveConfiguration() error
+
+    SetClusterID(clusterID string) error
+    GetClusterID() (string, error)
+
     GetPublicKey() (pubkey []byte)
     GetPrivateKey() (prvkey []byte)
     pcrypto.RsaDecryptor
 
     SetMasterPublicKey(masterPubkey []byte) error
     GetMasterPublicKey() ([]byte, error)
-    
-    SetClusterID(clusterID string) error
-    GetClusterID() (string, error)
 
     SetMasterIP4Address(ip4Address string) error
     GetMasterIP4Address() (string, error)
-
-    // Discard master aes key, ip address, and other session related data
-    DiscardMasterSession()
 
     // authtoken
     SetCoreAuthToken(authToken string) error
@@ -66,11 +67,11 @@ type coreContext struct {
 }
 
 // this method should never have an error
-func SharedSlaveContext() PocketCoreContext {
-    return getSingletonSlaveContext()
+func SharedCoreContext() PocketCoreContext {
+    return getSingletonCoreContext()
 }
 
-func getSingletonSlaveContext() *coreContext {
+func getSingletonCoreContext() *coreContext {
     once.Do(func() {
         var (
             cfg *config.PocketCoreConfig = nil
@@ -88,27 +89,27 @@ func getSingletonSlaveContext() *coreContext {
 }
 
 // --- Sync All ---
-func initWithConfig(sc *coreContext, cfg *config.PocketCoreConfig) error {
+func initWithConfig(c *coreContext, cfg *config.PocketCoreConfig) error {
     var err error
-    sc.config = cfg
+    c.config = cfg
 
     // pocket private key
-    sc.pocketPrivateKey, err = cfg.CorePrivateKey()
+    c.pocketPrivateKey, err = cfg.CorePrivateKey()
     if err != nil {
         return errors.WithStack(err)
     }
     // pocket public key
-    sc.pocketPublicKey , err = cfg.CorePublicKey()
+    c.pocketPublicKey , err = cfg.CorePublicKey()
     if err != nil {
         return errors.WithStack(err)
     }
 
     // if master public key exists
     if pcmspubkey, err := cfg.MasterPublicKey(); len(pcmspubkey) != 0 && err == nil {
-        sc.masterPubkey = pcmspubkey
+        c.masterPubkey = pcmspubkey
 
-        if decryptor, err := pcrypto.NewRsaDecryptorFromKeyData(pcmspubkey, sc.pocketPrivateKey); decryptor != nil && err == nil {
-            sc.pocketDecryptor = decryptor
+        if decryptor, err := pcrypto.NewRsaDecryptorFromKeyData(pcmspubkey, c.pocketPrivateKey); decryptor != nil && err == nil {
+            c.pocketDecryptor = decryptor
         }
     }
 
@@ -118,132 +119,137 @@ func initWithConfig(sc *coreContext, cfg *config.PocketCoreConfig) error {
 // Once sync, all the configuration is saved, and slave node is bounded
 // This must be executed on success from Unbounded -> Bound, or BindBroken -> Bind
 // No other place can execute this
-func (sc *coreContext) SyncAll() error {
+func (c *coreContext) SyncAll() error {
     return nil
 }
 
 // Discard all data communicated with master (not the one from slave itself such as network info)
 // This should executed on failure from joining states (unbounded, inquired, keyexchange, checkcrypto)
-func (sc *coreContext) DiscardAll() error {
+func (c *coreContext) DiscardAll() error {
     // discard aeskey
-    sc.DiscardMasterSession()
+    c.DiscardMasterSession()
 
     // remove decryptor
-    sc.masterPubkey = nil
-    sc.pocketDecryptor = nil
+    c.masterPubkey = nil
+    c.pocketDecryptor = nil
     // this is to remove master pub key if it exists
-    if sc.config != nil {
-        sc.config.ClearMasterPublicKey()
+    if c.config != nil {
+        c.config.ClearMasterPublicKey()
     }
     // master agent name
-    sc.config.ClusterID = ""
+    c.config.ClusterID = ""
     // slave auth token
-    sc.config.CoreSection.CoreAuthToken = ""
+    c.config.CoreSection.CoreAuthToken = ""
     return nil
 }
 
+func (c *coreContext) DiscardMasterSession() {
+    c.config.MasterSection.MasterIP4Address = ""
+    return
+}
+
 // reload all configuration
-func (sc *coreContext) ReloadConfiguration() error {
-    return initWithConfig(sc, config.LoadPocketCoreConfig())
+func (c *coreContext) ReloadConfiguration() error {
+    return initWithConfig(c, config.LoadPocketCoreConfig())
 }
 
 // This must be executed on success from CheckCrypto -> Bound, or BindBroken -> Bind
 // No other place can execute this
-func (sc *coreContext) SaveConfiguration() error {
+func (c *coreContext) SaveConfiguration() error {
     // master pubkey
-    mpubkey, err := sc.GetMasterPublicKey()
+    mpubkey, err := c.GetMasterPublicKey()
     if err != nil {
         return errors.WithStack(err)
     }
-    sc.config.SaveMasterPublicKey(mpubkey)
+    c.config.SaveMasterPublicKey(mpubkey)
 
-    return sc.config.SaveCoreConfig()
-}
-
-// decryptor/encryptor interface
-func (sc *coreContext) GetPublicKey() ([]byte) {
-    return sc.pocketPublicKey
-}
-
-func (sc *coreContext) GetPrivateKey() ([]byte) {
-    return sc.pocketPrivateKey
-}
-
-func (sc *coreContext) DecryptByRSA(crypted []byte, sendSig pcrypto.Signature) ([]byte, error) {
-    if sc.pocketDecryptor == nil {
-        return nil, errors.Errorf("[ERR] cannot decrypt with null decryptor")
-    }
-    return sc.pocketDecryptor.DecryptByRSA(crypted, sendSig)
-}
-
-// --- Master Public key ---
-func (sc *coreContext) SetMasterPublicKey(masterPubkey []byte) error {
-    if len(masterPubkey) == 0 {
-        return errors.Errorf("[ERR] Master public key is nil")
-    }
-    sc.masterPubkey = masterPubkey
-
-    decryptor, err := pcrypto.NewRsaDecryptorFromKeyData(masterPubkey, sc.pocketPrivateKey)
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    sc.pocketDecryptor = decryptor
-    return nil
-}
-
-func (sc *coreContext) GetMasterPublicKey() ([]byte, error) {
-    if sc.masterPubkey == nil {
-        return nil, errors.Errorf("[ERR] Empty master public key")
-    }
-    return sc.masterPubkey, nil
+    return c.config.SaveCoreConfig()
 }
 
 // --- Master Agent Name ---
-func (sc *coreContext) SetClusterID(clusterID string) error {
+func (c *coreContext) SetClusterID(clusterID string) error {
     if len(clusterID) == 0 {
-        return errors.Errorf("[ERR] Cannot set empty master agent name")
+        return errors.Errorf("[ERR] invalid cluster id to set")
     }
-    sc.config.ClusterID = clusterID
+    c.config.ClusterID = clusterID
     return nil
 }
 
-func (sc *coreContext) GetClusterID() (string, error) {
-    if len(sc.config.ClusterID) == 0 {
-        return "", errors.Errorf("[ERR] Empty master agent name")
+func (c *coreContext) GetClusterID() (string, error) {
+    if len(c.config.ClusterID) == 0 {
+        return "", errors.Errorf("[ERR] cluster id name")
     }
-    return sc.config.ClusterID, nil
+    return c.config.ClusterID, nil
+}
+
+//--- decryptor/encryptor interface ---
+func (c *coreContext) GetPublicKey() ([]byte) {
+    return c.pocketPublicKey
+}
+
+func (c *coreContext) GetPrivateKey() ([]byte) {
+    return c.pocketPrivateKey
+}
+
+func (c *coreContext) DecryptByRSA(crypted []byte, sendSig pcrypto.Signature) ([]byte, error) {
+    if c.pocketDecryptor == nil {
+        return nil, errors.Errorf("[ERR] cannot decrypt with null decryptor")
+    }
+    return c.pocketDecryptor.DecryptByRSA(crypted, sendSig)
+}
+
+// --- Master Public key ---
+func (c *coreContext) SetMasterPublicKey(masterPubkey []byte) error {
+    if len(masterPubkey) == 0 {
+        return errors.Errorf("[ERR] Master public key is nil")
+    }
+    c.masterPubkey = masterPubkey
+
+    decryptor, err := pcrypto.NewRsaDecryptorFromKeyData(masterPubkey, c.pocketPrivateKey)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    c.pocketDecryptor = decryptor
+    return nil
+}
+
+func (c *coreContext) GetMasterPublicKey() ([]byte, error) {
+    if c.masterPubkey == nil {
+        return nil, errors.Errorf("[ERR] Empty master public key")
+    }
+    return c.masterPubkey, nil
 }
 
 // --- Master IP4 Address ---
-func (sc *coreContext) SetMasterIP4Address(ip4Address string) error {
+func (c *coreContext) SetMasterIP4Address(ip4Address string) error {
     if len(ip4Address) == 0 {
         return errors.Errorf("[ERR] Cannot set empty master ip4 address")
     }
-    sc.config.MasterSection.MasterIP4Address = ip4Address
+    c.config.MasterSection.MasterIP4Address = ip4Address
     return nil
 }
 
-func (sc *coreContext) GetMasterIP4Address() (string, error) {
-    if len(sc.config.MasterSection.MasterIP4Address) == 0 {
+func (c *coreContext) GetMasterIP4Address() (string, error) {
+    if len(c.config.MasterSection.MasterIP4Address) == 0 {
         return "", errors.Errorf("[ERR] Empty master ip4 address")
     }
-    return sc.config.MasterSection.MasterIP4Address , nil
+    return c.config.MasterSection.MasterIP4Address , nil
 }
 
-// --- Slave Node UUID ---
-func (sc *coreContext) SetCoreAuthToken(authToken string) error {
+// --- Auth Token ---
+func (c *coreContext) SetCoreAuthToken(authToken string) error {
     if len(authToken) == 0 {
-        return errors.Errorf("[ERR] cannot assign invalid slave auth token")
+        return errors.Errorf("[ERR] cannot assign invalid core auth token")
     }
-    sc.config.CoreSection.CoreAuthToken = authToken
+    c.config.CoreSection.CoreAuthToken = authToken
     return nil
 }
 
-func (sc *coreContext) GetCoreAuthToken() (string, error) {
-    if len(sc.config.CoreSection.CoreAuthToken) == 0 {
-        return "", errors.Errorf("[ERR] invalid slave auth token")
+func (c *coreContext) GetCoreAuthToken() (string, error) {
+    if len(c.config.CoreSection.CoreAuthToken) == 0 {
+        return "", errors.Errorf("[ERR] invalid core auth token")
     }
-    return sc.config.CoreSection.CoreAuthToken, nil
+    return c.config.CoreSection.CoreAuthToken, nil
 }
 
 // TODO : add tests
