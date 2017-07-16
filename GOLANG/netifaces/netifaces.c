@@ -1257,6 +1257,35 @@ find_default_ip6_gw(Gateway** results) {
     return find_default_gateway_by_family(results, AF_INET6);
 }
 
+
+    
+static Gateway*
+find_first_gateway_by_family_and_interface(Gateway** results, unsigned char family, char *interface) {
+    Gateway *node = *results;
+    if (*results == NULL) {
+        return NULL;
+    }
+    while(node != NULL) {
+        if (node->family == family && strcmp(node->ifname, interface) == 0) {
+            return node;
+        }
+        node = node->next;
+    }
+    return NULL;
+}
+
+// find the ip4 gateway for an interface
+Gateway*
+find_ip4_gw_for_interface(Gateway** results, char *interface) {
+    return find_first_gateway_by_family_and_interface(results, AF_INET, interface);
+}
+
+// find the ip4 gateway for an interface
+Gateway*
+find_ip6_gw_for_interface(Gateway** results, char *interface) {
+    return find_first_gateway_by_family_and_interface(results, AF_INET6, interface);
+}
+    
 int
 find_system_gateways(Gateway** results)
 {

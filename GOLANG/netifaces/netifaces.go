@@ -1,14 +1,16 @@
 package netifaces
 /*
 // #include <string.h>
+#include <stdlib.h>
 #include "netifaces.h"
 */
 import "C"
 import (
     "syscall"
-    "fmt"
     "bytes"
 //    "unsafe"
+
+    "github.com/pkg/errors"
 )
 
 type Gateway struct {
@@ -49,7 +51,7 @@ func FindSystemGateways() (*Gateway, error) {
     var gw *Gateway = &Gateway{}
     syserr := C.find_system_gateways(&gw.gateway)
     if syserr != 0 {
-        return nil, fmt.Errorf("[ERR] Cannot find all system gateways %s", syscall.Errno(syserr).Error())
+        return nil, errors.Errorf("[ERR] Cannot find all system gateways %s", syscall.Errno(syserr).Error())
     }
     return gw, nil
 }
@@ -63,12 +65,12 @@ func (g *Gateway) Release() {
 func (g *Gateway) DefaultIP4Gateway() (string, string, error) {
     var (
         address, ifname string = "", ""
-        gw *C.Gateway
+        gw *C.Gateway = nil
     )
 
     gw = C.find_default_ip4_gw(&g.gateway)
     if gw == nil {
-        return "", "", fmt.Errorf("[ERR] Cannot find default gateway for IP4")
+        return "", "", errors.Errorf("[ERR] Cannot find default gateway for IPv4")
     }
 
     // FIXME : C-String to Go-String conversion with strlen() has cuased erraneous, extra character addition.
@@ -78,4 +80,24 @@ func (g *Gateway) DefaultIP4Gateway() (string, string, error) {
     address = filteredIp4String([]byte(C.GoString(gw.addr)))
     ifname = filteredInterfaceString([]byte(C.GoString(gw.ifname)))
     return address, ifname, nil
+}
+
+func (g *Gateway) FindGatewayForInterface(iName string) (string, error) {
+    var (
+        address string = ""
+        cIname *C.char = nil
+        gw *C.Gateway = nil
+    )
+    if len(iName) == 0 {
+        return "", errors.Errorf("[ERR] invalid interface name for gateway")
+    }
+    cIname = C.CString(iName)
+    defer C.free(cIname)
+
+    gw = C.find_ip4_gw_for_interface(&g.gateway, cIname)
+    if gw == nil {
+        return "", errors.Errorf("[ERR] Cannot find IPv4 gateway for %s", iName)
+    }
+    address = filteredIp4String([]byte(C.GoString(gw.addr)))
+    return address, nil
 }

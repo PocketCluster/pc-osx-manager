@@ -55,6 +55,12 @@ Gateway* find_default_ip4_gw(Gateway** results);
 // find the first ip6 default gateway in the results
 Gateway* find_default_ip6_gw(Gateway** results);
 
+// find the ip4 gateway for an interface
+Gateway* find_ip4_gw_for_interface(Gateway** results, char *interface);
+
+// find the ip4 gateway for an interface
+Gateway* find_ip6_gw_for_interface(Gateway** results, char *interface);
+
 #endif
 
 #endif /* netifaces_h */

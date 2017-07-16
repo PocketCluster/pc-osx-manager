@@ -157,21 +157,7 @@ func (sc *coreContext) SaveConfiguration() error {
     }
     sc.config.SaveMasterPublicKey(mpubkey)
 
-    // TODO : (2017-05-15) we'll re-evaluate this option later. For not, this is none critical
-/*
-    // slave network interface
-    err = sc.config.SaveFixedNetworkInterface()
-    if err != nil {
-        return errors.WithStack(err)
-    }
-*/
-    // save slave node name to hostname
-    err = sc.config.SaveHostname()
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    // whole slave config
-    return sc.config.SaveSlaveConfig()
+    return sc.config.SaveCoreConfig()
 }
 
 // decryptor/encryptor interface
@@ -212,63 +198,20 @@ func (sc *coreContext) GetMasterPublicKey() ([]byte, error) {
     return sc.masterPubkey, nil
 }
 
-// --- AES key ---
-func (sc *coreContext) SetAESKey(aesKey []byte) error {
-    cryptor, err := pcrypto.NewAESCrypto(aesKey)
-    if err != nil {
-        return nil
-    }
-    sc.aesCryptor = cryptor
-    sc.aeskey = aesKey
-    return nil
-}
-
-func (sc *coreContext) GetAESKey() ([]byte) {
-    return sc.aeskey
-}
-
-func (sc *coreContext) DiscardMasterSession() {
-    sc.aesCryptor = nil
-    sc.aeskey = nil
-    sc.config.MasterSection.MasterIP4Address = ""
-    return
-}
-
-func (sc *coreContext) AESCryptor() (pcrypto.AESCryptor, error) {
-    if sc.aesCryptor == nil {
-        return nil, errors.Errorf("[ERR] AESKey or AESCryptor is not setup")
-    }
-    return sc.aesCryptor, nil
-}
-
-func (sc *coreContext) EncryptByAES(data []byte) ([]byte, error) {
-    if sc.aesCryptor == nil {
-        return nil, errors.Errorf("[ERR] Cannot AES encrypt with null cryptor")
-    }
-    return sc.aesCryptor.EncryptByAES(data)
-}
-
-func (sc *coreContext) DecryptByAES(data []byte) ([]byte, error) {
-    if sc.aesCryptor == nil {
-        return nil, errors.Errorf("[ERR] Cannot AES decrypt with null cryptor")
-    }
-    return sc.aesCryptor.DecryptByAES(data)
-}
-
 // --- Master Agent Name ---
-func (sc *coreContext) SetClusterID(agentName string) error {
-    if len(agentName) == 0 {
+func (sc *coreContext) SetClusterID(clusterID string) error {
+    if len(clusterID) == 0 {
         return errors.Errorf("[ERR] Cannot set empty master agent name")
     }
-    sc.config.MasterSection.MasterBoundAgent = agentName
+    sc.config.ClusterID = clusterID
     return nil
 }
 
 func (sc *coreContext) GetClusterID() (string, error) {
-    if len(sc.config.MasterSection.MasterBoundAgent) == 0 {
+    if len(sc.config.ClusterID) == 0 {
         return "", errors.Errorf("[ERR] Empty master agent name")
     }
-    return sc.config.MasterSection.MasterBoundAgent, nil
+    return sc.config.ClusterID, nil
 }
 
 // --- Master IP4 Address ---
@@ -287,43 +230,20 @@ func (sc *coreContext) GetMasterIP4Address() (string, error) {
     return sc.config.MasterSection.MasterIP4Address , nil
 }
 
-// --- Slave Node Name ---
-func (sc *coreContext) SetSlaveNodeName(nodeName string) error {
-    if len(nodeName) == 0 {
-        return errors.Errorf("[ERR] Cannot set empty slave nodename")
-    }
-    sc.config.SlaveSection.SlaveNodeName = nodeName
-    return nil
-}
-
-func (sc *coreContext) GetSlaveNodeName() (string, error) {
-    if len(sc.config.SlaveSection.SlaveNodeName) == 0 {
-        return "", errors.Errorf("[ERR] empty slave node name")
-    }
-    return sc.config.SlaveSection.SlaveNodeName, nil
-}
-
 // --- Slave Node UUID ---
-func (sc *coreContext) GetCoreUUID() (string, error) {
-    if len(sc.config.SlaveSection.SlaveNodeUUID) == 0 {
-        return "", errors.Errorf("[ERR] invalid slave node UUID")
-    }
-    return sc.config.SlaveSection.SlaveNodeUUID, nil
-}
-
 func (sc *coreContext) SetCoreAuthToken(authToken string) error {
     if len(authToken) == 0 {
         return errors.Errorf("[ERR] cannot assign invalid slave auth token")
     }
-    sc.config.SlaveSection.SlaveAuthToken = authToken
+    sc.config.CoreSection.CoreAuthToken = authToken
     return nil
 }
 
 func (sc *coreContext) GetCoreAuthToken() (string, error) {
-    if len(sc.config.SlaveSection.SlaveAuthToken) == 0 {
+    if len(sc.config.CoreSection.CoreAuthToken) == 0 {
         return "", errors.Errorf("[ERR] invalid slave auth token")
     }
-    return sc.config.SlaveSection.SlaveAuthToken, nil
+    return sc.config.CoreSection.CoreAuthToken, nil
 }
 
 // TODO : add tests

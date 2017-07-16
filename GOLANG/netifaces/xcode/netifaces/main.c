@@ -63,6 +63,8 @@ int main(int argc, const char * argv[]) {
     }
     Gateway* default_gw = find_default_ip4_gw(&results);
     printf("default ip4 gw %s ifname %s\n", default_gw->addr, default_gw->ifname);
+    Gateway* en0_gw = find_ip4_gw_for_interface(&results, "en1");
+    printf("en1 ip4 gw %s ifname %s\n", en0_gw->addr, en0_gw->ifname);
     release_gateways_info(&results);
     
     

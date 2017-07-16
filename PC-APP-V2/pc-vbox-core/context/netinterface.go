@@ -136,9 +136,9 @@ func PrimaryNetworkInterface() (NetworkInterface, error) {
 func findNetworkInterface(iName string) (NetworkInterface, error) {
     var (
         err error                     = nil
-        gateway *netifaces.Gateway    = nil
+        gw *netifaces.Gateway         = nil
         ifcFound bool                 = false
-        gwaddr, gwiface string
+        gwaddr string
         ipaddrs []string
         ifaces []net.Interface
         netIface net.Interface
@@ -174,23 +174,19 @@ func findNetworkInterface(iName string) (NetworkInterface, error) {
 
 
     // --- find gateway information ---
-    gateway, err = netifaces.FindSystemGateways()
+    gw, err = netifaces.FindSystemGateways()
     if err != nil {
         return netStatus, errors.WithStack(err)
     }
-    defer gateway.Release()
+    defer gw.Release()
 
-    gwaddr, gwiface, err = gateway.DefaultIP4Gateway()
+    gwaddr, err = gw.FindGatewayForInterface(iName)
     if err != nil {
         return netStatus, errors.WithStack(err)
     }
-    if len(gwaddr) == 0 || len(gwiface) == 0 {
-        return netStatus, errors.Errorf("[ERR] inappropriate gateway address or interface")
-    }
-    if strings.HasPrefix(gwiface, netIface.Name) {
+    if len(gwaddr) != 0 {
         netStatus.GatewayAddr = gwaddr
     }
-
 
     // --- results ---
     return netStatus, nil
