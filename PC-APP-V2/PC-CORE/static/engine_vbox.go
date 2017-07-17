@@ -84,7 +84,7 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
     }
 }
 
-func initVboxCoreReportService(a *mainLife) error {
+func initVboxCoreReportService(a *mainLife, clusterID string) error {
 
     log.Debugf("[CONTROL] starting master control service ...")
 
@@ -120,7 +120,8 @@ func initVboxCoreReportService(a *mainLife) error {
                 return errors.WithStack(err)
             }
 
-            ctrl, err = masterctrl.NewVBoxMasterControl(prvkey, pubkey, coreNode, nil)
+            // TODO external ip address
+            ctrl, err = masterctrl.NewVBoxMasterControl(clusterID, "192.168.1.105", prvkey, pubkey, coreNode, nil)
             if err != nil {
                 return errors.WithStack(err)
             }

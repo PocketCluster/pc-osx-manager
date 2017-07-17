@@ -98,7 +98,12 @@ func initVboxCoreReportService(app service.AppSupervisor) error {
                 }
             }
 
-            log.Debugf("[REPORTER] starting reporter service ...")
+            inif, err := crcontext.InternalNetworkInterface()
+            if err != nil {
+                return errors.WithStack(err)
+            }
+
+            log.Debugf("[REPORTER] starting reporter service to %s...", inif.GatewayAddr)
 
             for {
                 select {
@@ -108,7 +113,7 @@ func initVboxCoreReportService(app service.AppSupervisor) error {
                         }
                     }
                     default: {
-                        conn, err = net.Dial("tcp4", net.JoinHostPort("10.0.2.2", "10068"))
+                        conn, err = net.Dial("tcp4", net.JoinHostPort(inif.GatewayAddr, "10068"))
                         if err != nil {
                             log.Debugf("[REPORTER] connection open error (%v)", err.Error())
                             // this is telling reporter to break bind if necessary

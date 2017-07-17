@@ -10,10 +10,13 @@ import (
 
     mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
     cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
+    "github.com/stkim1/pc-vbox-core/crcontext"
 )
 
 const (
     authToken           string = "bjAbqvJVCy2Yr2suWu5t2ZnD4Z5336oNJ0bBJWFZ4A0="
+    clusterID           string = "ZKYQbwGnKJfFRTcW"
+    masterExtIP4Addr    string = "192.168.1.105"
     coreExtIpAddrSmMask string = "192.168.1.105/24"
     coreExtGateway      string = "192.168.1.1"
 )
@@ -50,12 +53,14 @@ func (r *CoreReportTestSuite) TearDownSuite(c *C) {}
 
 func (r *CoreReportTestSuite) SetUpTest(c *C) {
     log.Debugf("--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---")
+    crcontext.DebugPrepareCoreContextWithRoot(c.MkDir())
 }
 
 func (r *CoreReportTestSuite) TearDownTest(c *C) {
     log.Debugf("\n\n")
     r.core = nil
     r.master = nil
+    crcontext.DebugDestroyCoreContext()
 }
 
 func (r *CoreReportTestSuite) prepareUnboundedCoreMaster() error {
@@ -134,7 +139,7 @@ func (r *CoreReportTestSuite) Test_Unbounded_Core_Joining_To_Master(c *C) {
 
     // master make acknowledge
     r.master.timestamp = r.master.timestamp.Add(time.Second)
-    metaPackage, err = mpkg.MasterPackingKeyExchangeAcknowledge(authToken, r.master.publicKey, r.master.encryptor)
+    metaPackage, err = mpkg.MasterPackingKeyExchangeAcknowledge(clusterID, authToken, masterExtIP4Addr, r.master.publicKey, r.master.encryptor)
     c.Assert(err, IsNil)
     c.Assert(len(metaPackage), Not(Equals), 0)
 
@@ -169,7 +174,7 @@ func (r *CoreReportTestSuite) Test_BindBroken_Core_Joining_To_Master(c *C) {
 
     // master make acknowledge
     r.master.timestamp = r.master.timestamp.Add(time.Second)
-    metaPackage, err = mpkg.MasterPackingBindBrokenAcknowledge(r.master.encryptor)
+    metaPackage, err = mpkg.MasterPackingBindBrokenAcknowledge(clusterID, masterExtIP4Addr, r.master.encryptor)
     c.Assert(err, IsNil)
     c.Assert(len(metaPackage), Not(Equals), 0)
 

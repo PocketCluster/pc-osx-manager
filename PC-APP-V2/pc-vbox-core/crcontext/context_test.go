@@ -11,7 +11,7 @@ import (
 const (
     CLUSTERID string        = "master-yoda"
     MASTER_IP4_ADDR string  = "192.168.1.4"
-    CORE_AUTH_TOKEN string = "yyLq8F5NbSZQJ7aT"
+    CORE_AUTH_TOKEN string  = "yyLq8F5NbSZQJ7aT"
 )
 
 func setUp() {
@@ -43,7 +43,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    err = SharedCoreContext().SetMasterIP4Address(MASTER_IP4_ADDR)
+    err = SharedCoreContext().SetMasterIP4ExtAddr(MASTER_IP4_ADDR)
     if err != nil {
         t.Error(err.Error())
         return
@@ -60,11 +60,6 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         return
     }
 
-    err = SharedCoreContext().SyncAll()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
     err = SharedCoreContext().SaveConfiguration()
     if err != nil {
         t.Error(err.Error())
@@ -99,7 +94,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
     }
 
     // Master IP address will not be saved as it is allowed to be on DHCP
-    _, err = SharedCoreContext().GetMasterIP4Address()
+    _, err = SharedCoreContext().GetMasterIP4ExtAddr()
     if err == nil {
         t.Error("[ERR] Incorrect Master ip address. Master IP address should be null after reload")
         return
@@ -137,7 +132,7 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    err = SharedCoreContext().SetMasterIP4Address(MASTER_IP4_ADDR)
+    err = SharedCoreContext().SetMasterIP4ExtAddr(MASTER_IP4_ADDR)
     if err != nil {
         t.Error(err.Error())
         return
@@ -154,11 +149,6 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
     }
 
     // sync, save, reload
-    err = SharedCoreContext().SyncAll()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
     err = SharedCoreContext().SaveConfiguration()
     if err != nil {
         t.Error(err.Error())
@@ -188,7 +178,7 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
         return
     }
 
-    _, err = SharedCoreContext().GetMasterIP4Address()
+    _, err = SharedCoreContext().GetMasterIP4ExtAddr()
     if err == nil {
         t.Error("[ERR] master ip address should be empty")
         return
@@ -222,7 +212,7 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    err = SharedCoreContext().SetMasterIP4Address(MASTER_IP4_ADDR)
+    err = SharedCoreContext().SetMasterIP4ExtAddr(MASTER_IP4_ADDR)
     if err != nil {
         t.Error(err.Error())
         return
@@ -234,11 +224,6 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
     }
 
     // sync, save, reload
-    err = SharedCoreContext().SyncAll()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
     err = SharedCoreContext().SaveConfiguration()
     if err != nil {
         t.Error(err.Error())
@@ -276,7 +261,7 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
         return
     }
 
-    maddr, err := SharedCoreContext().GetMasterIP4Address()
+    maddr, err := SharedCoreContext().GetMasterIP4ExtAddr()
     if len(maddr) != 0 {
         t.Error("[ERR] master ip address should be empty")
         return

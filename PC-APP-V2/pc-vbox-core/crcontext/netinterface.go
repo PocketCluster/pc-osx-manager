@@ -192,10 +192,10 @@ func findNetworkInterface(iName string) (NetworkInterface, error) {
     return netStatus, nil
 }
 
-func FirstNetworkInterface() (NetworkInterface, error) {
+func InternalNetworkInterface() (NetworkInterface, error) {
     return findNetworkInterface("enp0s3")
 }
 
-func SecondNetworkInterface() (NetworkInterface, error) {
-    return findNetworkInterface("eth1")
+func ExternalNetworkInterface() (NetworkInterface, error) {
+    return findNetworkInterface("enp0s3")
 }

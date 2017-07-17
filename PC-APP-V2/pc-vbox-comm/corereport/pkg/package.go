@@ -116,9 +116,12 @@ func corePackingStatus(state VBoxCoreState, pubkey []byte, extAddr, extGateway s
             if len(extAddr) == 0 {
                 return nil, errors.Errorf("[ERR] core status external address cannot be empty")
             }
+            // TODO : this can really be zero. find out more cases
+            /*
             if len(extGateway) == 0 {
                 return nil, errors.Errorf("[ERR] core status external gateway cannot be empty")
             }
+            */
             if rsaEncryptor == nil {
                 return nil, errors.Errorf("[ERR] core status RSA Encryptor cannot be null")
             }
@@ -220,9 +223,12 @@ func CoreUnpackingStatus(metaPackage []byte, rsaDecryptor pcrypto.RsaDecryptor) 
             if len(status.ExtIP4AddrSmask) == 0 {
                 return nil, errors.Errorf("[ERR] invalid ip & subnet mask")
             }
+            // TODO : this can really be zero. find out more cases
+            /*
             if len(status.ExtIP4Gateway) == 0 {
                 return nil, errors.Errorf("[ERR] invalid gateway")
             }
+            */
 
             // assign status
             meta.CoreStatus = status

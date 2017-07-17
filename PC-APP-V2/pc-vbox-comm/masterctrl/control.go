@@ -39,6 +39,7 @@ type ControllerActionOnTransition interface {
 // MasterBeacon is assigned individually for each slave node.
 type VBoxMasterControl interface {
     CurrentState() mpkg.VBoxMasterState
+    SetExternalIP4Addr(ip4Address string) error
 
     ReadCoreMetaAndMakeMasterAck(sender interface{}, metaPackage []byte, timestamp time.Time) ([]byte, error)
     HandleCoreDisconnection(timestamp time.Time) error
@@ -56,7 +57,7 @@ type vboxController interface {
 }
 
 /* ----------------------------------------------- Instance Definitions --------------------------------------------- */
-func NewVBoxMasterControl(prvkey, pubkey []byte, coreNode *model.CoreNode, eventAction ControllerActionOnTransition) (VBoxMasterControl, error) {
+func NewVBoxMasterControl(clusterID, extIP4Addr string, prvkey, pubkey []byte, coreNode *model.CoreNode, eventAction ControllerActionOnTransition) (VBoxMasterControl, error) {
     // TODO check if controller is bounded or unbounded
     var (
         controller vboxController = nil
@@ -64,6 +65,12 @@ func NewVBoxMasterControl(prvkey, pubkey []byte, coreNode *model.CoreNode, event
         decryptor pcrypto.RsaDecryptor = nil
         err error = nil
     )
+    if len(clusterID) == 0 {
+        return nil, errors.Errorf("[ERR] invalid cluster id")
+    }
+    if len(extIP4Addr) == 0 {
+        return nil, errors.Errorf("[ERR] invalid external ip4 address")
+    }
     if prvkey == nil {
         return nil, errors.Errorf("[ERR] private key cannot be null")
     }
@@ -97,6 +104,8 @@ func NewVBoxMasterControl(prvkey, pubkey []byte, coreNode *model.CoreNode, event
 
     return &masterControl {
         controller:      controller,
+        clusterID:       clusterID,
+        extIP4Addr:      extIP4Addr,
         privateKey:      prvkey,
         publicKey:       pubkey,
         rsaEncryptor:    encryptor,
@@ -117,6 +126,8 @@ type masterControl struct {
     lastTransitionTS            time.Time
 
     /* ---------------------------------------- all-states properties ----------------------------------------------- */
+    clusterID                   string
+    extIP4Addr                  string
     privateKey                  []byte
     publicKey                   []byte
     rsaEncryptor                pcrypto.RsaEncryptor
@@ -132,6 +143,14 @@ func (m *masterControl) CurrentState() mpkg.VBoxMasterState {
         log.Panic("[CRITICAL] vboxController cannot be null")
     }
     return m.controller.currentState()
+}
+
+func (m *masterControl) SetExternalIP4Addr(ip4Address string) error {
+    if len(ip4Address) == 0 {
+        return errors.Errorf("[ERR] invalid master external IPv4 address")
+    }
+    m.extIP4Addr = ip4Address
+    return nil
 }
 
 /* ------------------------------------------ Core Meta Transition Functions ---------------------------------------- */

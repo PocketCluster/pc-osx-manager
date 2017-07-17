@@ -17,8 +17,10 @@ import (
 
 const (
     authToken           string = "bjAbqvJVCy2Yr2suWu5t2ZnD4Z5336oNJ0bBJWFZ4A0="
-    coreExtIpAddrSmMask string = "192.168.1.105/24"
-    coreExtGateway      string = "192.168.1.1"
+    clusterID           string = "ZKYQbwGnKJfFRTcW"
+    masterExtIp4Addr    string = "192.168.1.100"
+    coreExtIp4AdrSmMask string = "192.168.1.105/24"
+    coreExtIp4Gateway   string = "192.168.1.1"
 )
 
 func TestMasterControl(t *testing.T) { TestingT(t) }
@@ -76,7 +78,7 @@ func (m *MasterControlTestSuite) prepareUnboundedMasterCore() error {
     }
 
     // setup controller
-    ctrl, err := NewVBoxMasterControl(pcrypto.TestMasterStrongPrivateKey(), pcrypto.TestMasterStrongPublicKey(), coreNode, nil)
+    ctrl, err := NewVBoxMasterControl(clusterID, masterExtIp4Addr, pcrypto.TestMasterStrongPrivateKey(), pcrypto.TestMasterStrongPublicKey(), coreNode, nil)
     if err != nil {
         return err
     }
@@ -101,15 +103,15 @@ func (m *MasterControlTestSuite) prepareBindBrokenMasterCore() error {
         return err
     }
     coreNode.PublicKey  = pcrypto.TestSlaveNodePublicKey()
-    coreNode.IP4Address = coreExtIpAddrSmMask
-    coreNode.IP4Gateway = coreExtGateway
+    coreNode.IP4Address = coreExtIp4AdrSmMask
+    coreNode.IP4Gateway = coreExtIp4Gateway
     err = coreNode.JoinCore()
     if err != nil {
         return err
     }
 
     // re-setup controller
-    ctrl, err := NewVBoxMasterControl(pcrypto.TestMasterStrongPrivateKey(), pcrypto.TestMasterStrongPublicKey(), coreNode, nil)
+    ctrl, err := NewVBoxMasterControl(clusterID, masterExtIp4Addr, pcrypto.TestMasterStrongPrivateKey(), pcrypto.TestMasterStrongPublicKey(), coreNode, nil)
     if err != nil {
         return err
     }
@@ -172,7 +174,7 @@ func (m *MasterControlTestSuite) Test_Core_Join_To_Master(c *C) {
 
     // core report
     m.core.timestamp = m.core.timestamp.Add(time.Second)
-    metaPackage, err = cpkg.CorePackingBoundedStatus(coreExtIpAddrSmMask, coreExtGateway, m.core.encryptor)
+    metaPackage, err = cpkg.CorePackingBoundedStatus(coreExtIp4AdrSmMask, coreExtIp4Gateway, m.core.encryptor)
     c.Assert(err, IsNil)
     c.Assert(len(metaPackage), Not(Equals), 0)
 
@@ -204,7 +206,7 @@ func (m *MasterControlTestSuite) TestCoreNodeBindRecovery(c *C) {
     c.Assert(m.master.CurrentState(), Equals, mpkg.VBoxMasterBindBroken)
 
     // core report
-    metaPackage, err := cpkg.CorePackingBindBrokenStatus(coreExtIpAddrSmMask, coreExtGateway, m.core.encryptor)
+    metaPackage, err := cpkg.CorePackingBindBrokenStatus(coreExtIp4AdrSmMask, coreExtIp4Gateway, m.core.encryptor)
     c.Assert(err, IsNil)
     c.Assert(len(metaPackage), Not(Equals), 0)
 
@@ -226,7 +228,7 @@ func (m *MasterControlTestSuite) TestCoreNodeBindRecovery(c *C) {
 
     // core report
     m.core.timestamp = m.core.timestamp.Add(time.Second)
-    metaPackage, err = cpkg.CorePackingBoundedStatus(coreExtIpAddrSmMask, coreExtGateway, m.core.encryptor)
+    metaPackage, err = cpkg.CorePackingBoundedStatus(coreExtIp4AdrSmMask, coreExtIp4Gateway, m.core.encryptor)
     c.Assert(err, IsNil)
     c.Assert(len(metaPackage), Not(Equals), 0)
 

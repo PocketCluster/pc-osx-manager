@@ -118,17 +118,20 @@ type coreReporter struct {
     // last time transmission takes place. This is to control the frequnecy of transmission
     // !!!IMPORTANT!!! BY NOT SETTING A PARTICULAR VALUE, BY NOT SETTING ANYTHING, WE WILL AUTOMATICALLY EXECUTE
     // TX ACTION ON THE IDLE CYCLE RIGHT AFTER A SUCCESSFUL TRANSITION. SO DO NOT SET ANTYHING IN CONSTRUCTION
-    lastTransmissionTS       time.Time
+    lastTransmissionTS time.Time
 
     /* ---------------------------------------- all-states properties ----------------------------------------------- */
     privateKey               []byte
     publicKey                []byte
+    masterPubKey             []byte
+    clusterID                string
+    authToken                string
+    masterExtIp4Addr         string
     rsaEncryptor             pcrypto.RsaEncryptor
     rsaDecryptor             pcrypto.RsaDecryptor
-    authToken                string
 
     // --------------------------------- onSuccess && onFailure external event -----------------------------------------
-    eventAction              ReporterActionsOnTransition
+    eventAction        ReporterActionsOnTransition
 }
 
 func (c *coreReporter) CurrentState() cpkg.VBoxCoreState {

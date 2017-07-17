@@ -58,29 +58,33 @@ type VBoxMasterMeta struct {
 
 // --- Acknowledge Field ---
 const (
+    VBM_CLUSTER_ID           string = "m_ci"
     VBM_AUTH_TOKEN           string = "m_at"
+    VBM_EXT_IP4_ADDR         string = "m_e4"
     VBM_TIMESTAMP            string = "m_ts"
 )
 
 type VBoxMasterAcknowledge struct {
+    ClusterID                string    `msgpack:"m_ci, omitempty"`
     AuthToken                string    `msgpack:"m_at, omitempty"`
+    ExtIP4Addr               string    `msgpack:"m_e4, omitempty"`
     TimeStamp                time.Time `msgpack:"m_ts"`
 }
 
 // --- Compositions ---
-func MasterPackingKeyExchangeAcknowledge(authToken string, pubkey []byte, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
-    return masterPackingAcknowledge(VBoxMasterKeyExchange, authToken, pubkey, rsaEncryptor)
+func MasterPackingKeyExchangeAcknowledge(clusterID, authToken, extIP4Addr string, pubkey []byte, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
+    return masterPackingAcknowledge(VBoxMasterKeyExchange, clusterID, authToken, extIP4Addr, pubkey, rsaEncryptor)
 }
 
-func MasterPackingBoundedAcknowledge(rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
-    return masterPackingAcknowledge(VBoxMasterBounded, "", nil, rsaEncryptor)
+func MasterPackingBoundedAcknowledge(clusterID, extIP4Addr string, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
+    return masterPackingAcknowledge(VBoxMasterBounded, clusterID, "", extIP4Addr, nil, rsaEncryptor)
 }
 
-func MasterPackingBindBrokenAcknowledge(rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
-    return masterPackingAcknowledge(VBoxMasterBindBroken, "", nil, rsaEncryptor)
+func MasterPackingBindBrokenAcknowledge(clusterID, extIP4Addr string, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
+    return masterPackingAcknowledge(VBoxMasterBindBroken, clusterID, "", extIP4Addr, nil, rsaEncryptor)
 }
 
-func masterPackingAcknowledge(state VBoxMasterState, authToken string, pubkey []byte, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
+func masterPackingAcknowledge(state VBoxMasterState, clusterID, authToken, extIP4Addr string, pubkey []byte, rsaEncryptor pcrypto.RsaEncryptor) ([]byte, error) {
     var (
         meta *VBoxMasterMeta = nil
         apkg, epkg, mpkg []byte = nil, nil, nil
@@ -88,6 +92,12 @@ func masterPackingAcknowledge(state VBoxMasterState, authToken string, pubkey []
         err error = nil
     )
 
+    if len(clusterID) == 0 {
+        return nil, errors.Errorf("[ERR] invalid cluster id assignment")
+    }
+    if len(extIP4Addr) == 0 {
+        return nil, errors.Errorf("[ERR] invalid external master ip4 address")
+    }
     if rsaEncryptor == nil {
         return nil, errors.Errorf("[ERR] master RSA Encryptor cannot be null")
     }
@@ -96,8 +106,10 @@ func masterPackingAcknowledge(state VBoxMasterState, authToken string, pubkey []
         case VBoxMasterKeyExchange: {
             var (
                 ack = &VBoxMasterAcknowledge {
-                    AuthToken:    authToken,
-                    TimeStamp:    time.Now(),
+                    ClusterID:     clusterID,
+                    AuthToken:     authToken,
+                    ExtIP4Addr:    extIP4Addr,
+                    TimeStamp:     time.Now(),
                 }
             )
 
@@ -135,7 +147,9 @@ func masterPackingAcknowledge(state VBoxMasterState, authToken string, pubkey []
         default: {
             var (
                 ack = &VBoxMasterAcknowledge {
-                    TimeStamp:    time.Now(),
+                    ClusterID:     clusterID,
+                    ExtIP4Addr:    extIP4Addr,
+                    TimeStamp:     time.Now(),
                 }
             )
 
@@ -232,8 +246,14 @@ func MasterUnpackingAcknowledge(metaPackage, prvkey []byte, rsaDecryptor pcrypto
             if ack == nil {
                 return nil, errors.Errorf("[ERR] null unpacked acknowledge")
             }
+            if len(ack.ClusterID) == 0 {
+                return nil, errors.Errorf("[ERR] invalid cluster id assignment")
+            }
             if len(ack.AuthToken) == 0 {
                 return nil, errors.Errorf("[ERR] invalid auth token assignment")
+            }
+            if len(ack.ExtIP4Addr) == 0 {
+                return nil, errors.Errorf("[ERR] invalid external master ip4 address")
             }
 
             // assign fields
@@ -272,8 +292,11 @@ func MasterUnpackingAcknowledge(metaPackage, prvkey []byte, rsaDecryptor pcrypto
             if ack == nil {
                 return nil, errors.Errorf("[ERR] null unpacked acknowledge")
             }
-            if len(ack.AuthToken) != 0 {
-                return nil, errors.Errorf("[ERR] invalid ack content w/ auth token")
+            if len(ack.ClusterID) == 0 {
+                return nil, errors.Errorf("[ERR] invalid cluster id assignment")
+            }
+            if len(ack.ExtIP4Addr) == 0 {
+                return nil, errors.Errorf("[ERR] invalid external master ip4 address")
             }
 
             // assing acknowledge

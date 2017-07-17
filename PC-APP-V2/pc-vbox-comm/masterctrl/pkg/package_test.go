@@ -10,6 +10,8 @@ import (
 
 const (
     authToken string = "bjAbqvJVCy2Yr2suWu5t2ZnD4Z5336oNJ0bBJWFZ4A0="
+    clusterID string = "ZKYQbwGnKJfFRTcW"
+    extIP4Adr string = "192.168.1.105"
 )
 
 func TestMasterPackage(t *testing.T) { TestingT(t) }
@@ -46,7 +48,7 @@ func (p *PackageTestSuite) TearDownTest(c *C) {
 
 func (p *PackageTestSuite) Test_KeyExchangeStatus_Package(c *C) {
     // master side
-    metaPackage, err := MasterPackingKeyExchangeAcknowledge(authToken, p.publicKey, p.encryptor)
+    metaPackage, err := MasterPackingKeyExchangeAcknowledge(clusterID, authToken, extIP4Adr, p.publicKey, p.encryptor)
     c.Assert(err, IsNil)
 
     // core side
@@ -57,7 +59,7 @@ func (p *PackageTestSuite) Test_KeyExchangeStatus_Package(c *C) {
 
 func (p *PackageTestSuite) Test_BoundedStatus_Package(c *C) {
     // master side
-    metaPackage, err := MasterPackingBoundedAcknowledge(p.encryptor)
+    metaPackage, err := MasterPackingBoundedAcknowledge(clusterID, extIP4Adr, p.encryptor)
     c.Assert(err, IsNil)
 
     // core side
@@ -68,7 +70,7 @@ func (p *PackageTestSuite) Test_BoundedStatus_Package(c *C) {
 
 func (p *PackageTestSuite) Test_BindBrokenStatus_Package(c *C) {
     // master side
-    metaPackage, err := MasterPackingBindBrokenAcknowledge(p.encryptor)
+    metaPackage, err := MasterPackingBindBrokenAcknowledge(clusterID, extIP4Adr, p.encryptor)
     c.Assert(err, IsNil)
 
     // core side

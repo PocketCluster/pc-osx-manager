@@ -4,6 +4,7 @@ import (
     "time"
 
     "github.com/pkg/errors"
+    "github.com/stkim1/pc-vbox-core/crcontext"
     mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
     cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
 )
@@ -22,17 +23,26 @@ func (n *bindbroken) makeCoreReport(core *coreReporter, ts time.Time) ([]byte, e
     )
 
     // send status to master
-    // TODO get ip address and gateway
-    meta, err = cpkg.CorePackingBindBrokenStatus("127.0.0.1", "192.168.1.1", core.rsaEncryptor)
+    eni, err := crcontext.ExternalNetworkInterface()
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+
+    meta, err = cpkg.CorePackingBindBrokenStatus(eni.IP4Address[0], eni.GatewayAddr, core.rsaEncryptor)
     return meta, errors.WithStack(err)
 }
 
 func (n *bindbroken) readMasterAck(core *coreReporter, metaPackage []byte, ts time.Time) (VBoxCoreTransition, error) {
     var (
+        meta *mpkg.VBoxMasterMeta = nil
         err error = nil
     )
 
-    _, err = mpkg.MasterUnpackingAcknowledge(metaPackage, nil, core.rsaDecryptor)
+    meta, err = mpkg.MasterUnpackingAcknowledge(metaPackage, nil, core.rsaDecryptor)
+    if err != nil {
+        return VBoxCoreTransitionIdle, errors.WithStack(err)
+    }
+    err = crcontext.SharedCoreContext().SetMasterIP4ExtAddr(meta.MasterAcknowledge.ExtIP4Addr)
     if err != nil {
         return VBoxCoreTransitionIdle, errors.WithStack(err)
     }
@@ -45,5 +55,5 @@ func (n *bindbroken) onStateTranstionSuccess(core *coreReporter, ts time.Time) e
 }
 
 func (n *bindbroken) onStateTranstionFailure(core *coreReporter, ts time.Time) error {
-    return nil
+    return errors.WithStack(crcontext.SharedCoreContext().DiscardMasterSession())
 }

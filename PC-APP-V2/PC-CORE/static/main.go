@@ -231,7 +231,14 @@ func main() {
                             log.Debugf("[SERVICE] %s, %v", s.Tag(), s.IsRunning())
                         }
 */
-                        err = initVboxCoreReportService(a)
+
+                        cid, err := context.SharedHostContext().MasterAgentName()
+                        if err != nil {
+                            log.Debug(err)
+                            return
+                        }
+
+                        err = initVboxCoreReportService(a, cid)
                         if err != nil {
                             log.Debug(err)
                         }
