@@ -9,7 +9,7 @@ import (
 
 const (
     coreNodeName         string = "pc-core"
-    coreNodeTable        string = `corenode`
+    coreNodeTable        string = `pc_corenode`
     CoreNodeModelVersion string = "0.1.4"
 )
 

@@ -58,7 +58,6 @@ type ConfigMasterSection struct {
 }
 
 type ConfigCoreSection struct {
-    CoreNodeName        string                   `yaml:"core-node-name"`
     CoreAuthToken       string                   `yaml:"core-auth-token"`
     CoreMacAddr         string                   `yaml:"core-mac-addr"`
 }
