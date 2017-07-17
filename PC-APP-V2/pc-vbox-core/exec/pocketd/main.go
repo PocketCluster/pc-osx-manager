@@ -4,6 +4,7 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/stkim1/pc-node-agent/service"
+    "github.com/stkim1/pc-vbox-core/context"
 )
 
 func main() {
@@ -12,6 +13,9 @@ func main() {
         app service.AppSupervisor = service.NewAppSupervisor()
     )
     log.SetLevel(log.DebugLevel)
+    context.SharedCoreContext()
+
+
 
     err = initVboxCoreReportService(app)
     if err != nil {
