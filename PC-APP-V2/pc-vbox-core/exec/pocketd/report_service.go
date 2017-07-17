@@ -61,7 +61,7 @@ func handleConnection(reporter corereport.VBoxCoreReporter, conn net.Conn, stopC
                 }
                 err = reporter.ReadMasterAcknowledgement(rcvdPkg, time.Now())
                 if err != nil {
-                    log.Debugf("[REPORTER] master ack read error (%v)", err.Error())
+                    log.Debugf("[REPORTER] (%s) master ack read error (%v)", reporter.CurrentState().String(), err.Error())
                 }
 
                 // cear connection error count
@@ -103,7 +103,7 @@ func initVboxCoreReportService(app service.AppSupervisor) error {
                 return errors.WithStack(err)
             }
 
-            log.Debugf("[REPORTER] starting reporter service to %s...", inif.GatewayAddr)
+            log.Debugf("[REPORTER] (%s) starting reporter service to %s...", reporter.CurrentState().String(), inif.GatewayAddr)
 
             for {
                 select {
@@ -119,7 +119,7 @@ func initVboxCoreReportService(app service.AppSupervisor) error {
                             // this is telling reporter to break bind if necessary
                             err = reporter.ReadMasterAcknowledgement(nil, time.Now())
                             if err != nil {
-                                log.Debugf("[REPORTER] transition error (%v)", err.Error())
+                                log.Debugf("[REPORTER] (%s) transition error (%v)", reporter.CurrentState().String(), err.Error())
                             }
                             time.Sleep(time.Second * time.Duration(3))
                         } else {

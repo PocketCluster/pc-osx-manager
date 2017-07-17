@@ -302,7 +302,8 @@ func newControllerForState(ctrl vboxController, newState, oldState mpkg.VBoxMast
 
 func (m *masterControl) ReadCoreMetaAndMakeMasterAck(sender interface{}, metaPackage []byte, timestamp time.Time) ([]byte, error) {
     var (
-        newState, oldState mpkg.VBoxMasterState = m.CurrentState(), m.CurrentState()
+        oldState mpkg.VBoxMasterState = m.CurrentState()
+        newState mpkg.VBoxMasterState = mpkg.VBoxMasterUnbounded
         transitionCandidate, finalTransition VBoxMasterTransition
         transErr, eventErr, buildErr, tErr error = nil, nil, nil, nil
         masterAck []byte = nil

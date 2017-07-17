@@ -111,6 +111,9 @@ func (c *CoreNode) JoinCore() error {
     if c.NodeName != coreNodeName {
         return errors.Errorf("[ERR] incorrect node name")
     }
+    if c.State != SNMStateInit {
+        return errors.Errorf("[ERR] cannot join corenode when core isn't init state")
+    }
     // TODO : check token format
     if len(c.AuthToken) == 0 {
         return errors.Errorf("[ERR] incorrect uuid length")

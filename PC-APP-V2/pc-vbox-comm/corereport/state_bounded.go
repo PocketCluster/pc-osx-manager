@@ -28,7 +28,7 @@ func (b *bounded) makeCoreReport(core *coreReporter, ts time.Time) ([]byte, erro
         return nil, errors.WithStack(err)
     }
 
-    meta, err = cpkg.CorePackingBindBrokenStatus(eni.IP4Address[0], eni.GatewayAddr, core.rsaEncryptor)
+    meta, err = cpkg.CorePackingBoundedStatus(eni.IP4Address[0], eni.GatewayAddr, core.rsaEncryptor)
     return meta, errors.WithStack(err)
 }
 

@@ -65,7 +65,7 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
 
                 sendPkg, err = ctrl.ReadCoreMetaAndMakeMasterAck(conn.RemoteAddr(), recvPkg[:count], time.Now())
                 if err != nil {
-                    log.Debugf("[CONTROL] ctrl meta error (%v)", err.Error())
+                    log.Debugf("[CONTROL] [%s] ctrl meta error (%v)", ctrl.CurrentState().String(), err.Error())
                     sendPkg = eofMsg
                 }
 
@@ -126,7 +126,7 @@ func initVboxCoreReportService(a *mainLife, clusterID string) error {
                 return errors.WithStack(err)
             }
 
-            log.Debugf("[CONTROL] VBox controller service started...")
+            log.Debugf("[CONTROL] VBox controller service started... %s", ctrl.CurrentState().String())
 
             listen, err = net.Listen("tcp4", net.JoinHostPort("127.0.0.1", "10068"))
             if err != nil {
