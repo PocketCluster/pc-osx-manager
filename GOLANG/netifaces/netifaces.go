@@ -8,7 +8,7 @@ import "C"
 import (
     "syscall"
     "bytes"
-//    "unsafe"
+    "unsafe"
 
     "github.com/pkg/errors"
 )
@@ -92,7 +92,7 @@ func (g *Gateway) FindGatewayForInterface(iName string) (string, error) {
         return "", errors.Errorf("[ERR] invalid interface name for gateway")
     }
     cIname = C.CString(iName)
-    defer C.free(cIname)
+    defer C.free(unsafe.Pointer(cIname))
 
     gw = C.find_ip4_gw_for_interface(&g.gateway, cIname)
     if gw == nil {

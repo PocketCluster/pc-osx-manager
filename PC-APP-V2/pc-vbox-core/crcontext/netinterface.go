@@ -193,7 +193,7 @@ func findNetworkInterface(iName string) (NetworkInterface, error) {
 }
 
 func FirstNetworkInterface() (NetworkInterface, error) {
-    return findNetworkInterface("eth0")
+    return findNetworkInterface("enp0s3")
 }
 
 func SecondNetworkInterface() (NetworkInterface, error) {

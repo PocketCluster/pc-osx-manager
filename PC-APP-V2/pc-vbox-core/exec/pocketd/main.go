@@ -15,6 +15,13 @@ func main() {
     log.SetLevel(log.DebugLevel)
     crcontext.SharedCoreContext()
 
+    nf, err := crcontext.FirstNetworkInterface()
+    if err == nil {
+        log.Debugf("Interface %s | Address %s | Gateway %s | Hardware %s", nf.Interface.Name, nf.IP4Address, nf.GatewayAddr, nf.HardwareAddr)
+    } else {
+        log.Debugf("[ERR] %v", err.Error())
+    }
+
     err = initVboxCoreReportService(app)
     if err != nil {
         log.Panic(errors.WithStack(err))
