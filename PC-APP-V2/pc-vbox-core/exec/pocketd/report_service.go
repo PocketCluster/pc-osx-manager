@@ -10,7 +10,7 @@ import (
     "github.com/stkim1/pc-vbox-comm/corereport"
     cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
 
-    "github.com/stkim1/pc-vbox-core/context"
+    "github.com/stkim1/pc-vbox-core/crcontext"
 )
 
 func handleConnection(reporter corereport.VBoxCoreReporter, conn net.Conn, stopC <- chan struct{}) error {
@@ -76,7 +76,7 @@ func initVboxCoreReportService(app service.AppSupervisor) error {
     app.RegisterServiceWithFuncs(
         func() error {
             var (
-                ctx = context.SharedCoreContext()
+                ctx = crcontext.SharedCoreContext()
                 reporter corereport.VBoxCoreReporter = nil
                 conn net.Conn = nil
                 err error = nil

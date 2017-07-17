@@ -4,6 +4,7 @@ import (
     "io/ioutil"
     "os"
 
+    log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "gopkg.in/yaml.v2"
     "github.com/stkim1/pcrypto"
@@ -103,6 +104,8 @@ func _loadCoreConfig(rootPath string) (*PocketCoreConfig) {
         configFilePath string   = rootPath + core_config_file
 
         makeKeys bool           = false
+
+        err error               = nil
     )
 
     // check if config dir exists, and creat if DNE
@@ -123,7 +126,10 @@ func _loadCoreConfig(rootPath string) (*PocketCoreConfig) {
         makeKeys = true
     }
     if makeKeys {
-        pcrypto.GenerateStrongKeyPairFiles(pcPubKeyPath, pcPrvKeyPath, "")
+        err = pcrypto.GenerateStrongKeyPairFiles(pcPubKeyPath, pcPrvKeyPath, "")
+        if err != nil {
+            log.Panic(errors.WithStack(err).Error())
+        }
     }
 
     // check if config file exists in path.
@@ -167,7 +173,7 @@ func (cfg *PocketCoreConfig) SaveCoreConfig() error {
 func (pc *PocketCoreConfig) CorePublicKey() ([]byte, error) {
     pubKeyPath := pc.rootPath + core_public_Key_file
     if _, err := os.Stat(pubKeyPath); os.IsNotExist(err) {
-        return nil, errors.Errorf("[ERR] keys have not been generated properly. This is a critical error")
+        return nil, errors.Errorf("[ERR] public key has not been generated properly. This is a critical error")
     }
     return ioutil.ReadFile(pubKeyPath)
 }
@@ -175,7 +181,7 @@ func (pc *PocketCoreConfig) CorePublicKey() ([]byte, error) {
 func (pc *PocketCoreConfig) CorePrivateKey() ([]byte, error) {
     prvKeyPath := pc.rootPath + core_prvate_Key_file
     if _, err := os.Stat(prvKeyPath); os.IsNotExist(err) {
-        return nil, errors.Errorf("[ERR] keys have not been generated properly. This is a critical error")
+        return nil, errors.Errorf("[ERR] private key has not been generated properly. This is a critical error")
     }
     return ioutil.ReadFile(prvKeyPath)
 }

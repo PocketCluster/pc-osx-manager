@@ -1,10 +1,10 @@
-package context
+package crcontext
 
 import (
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
 
-    "github.com/stkim1/pc-vbox-core/context/config"
+    "github.com/stkim1/pc-vbox-core/crcontext/config"
 )
 
 func DockerEnvironemtPostProcess() error {

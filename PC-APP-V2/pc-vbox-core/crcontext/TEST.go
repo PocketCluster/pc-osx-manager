@@ -1,10 +1,10 @@
-package context
+package crcontext
 
 import (
     "log"
 
     "github.com/stkim1/pcrypto"
-    "github.com/stkim1/pc-vbox-core/context/config"
+    "github.com/stkim1/pc-vbox-core/crcontext/config"
 )
 
 func DebugPrepareCoreContext() PocketCoreContext {
