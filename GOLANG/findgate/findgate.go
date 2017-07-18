@@ -14,7 +14,6 @@ import (
 
 const (
     route_tbl_path string = "/proc/net/route"
-    line_head_skip int    = 1                   // line containing the gateway addr. (first line: 0)
     line_separater string = "\t"                // field separator
 )
 
@@ -35,7 +34,7 @@ const (
     field_mask
     field_mtu
     field_window
-    field_IRTT
+    field_irtt
 )
 
 type Gateway struct {
@@ -85,7 +84,7 @@ func hexMaskToIPv4(gwHexMask string) (net.IPMask, string, error) {
     return gwMask, net.IP(gwMask).String(), nil
 }
 
-func DefaultGatewayWithInterface() (*Gateway, error){
+func DefaultIPv4Gateway() (*Gateway, error){
     var (
         scanner *bufio.Scanner = nil
         file *os.File = nil
@@ -102,14 +101,11 @@ func DefaultGatewayWithInterface() (*Gateway, error){
     }
     defer file.Close()
 
+    // jump to line containing the agteway address
     scanner = bufio.NewScanner(file)
+    scanner.Scan()
+
     for scanner.Scan() {
-
-        // jump to line containing the agteway address
-        for i := 0; i < line_head_skip; i++ {
-            scanner.Scan()
-        }
-
         // get the default gateway address
         tokens = strings.Split(scanner.Text(), line_separater)
 
@@ -142,7 +138,63 @@ func DefaultGatewayWithInterface() (*Gateway, error){
     return nil, errors.Errorf("[ERR] should have returned gateway info already")
 }
 
-func FindGatewayForInterface(iName string) (string, error) {
+func AllIPv4Gateways() (map[string][]Gateway, error) {
+    var (
+        gwList = map[string][]Gateway{}
+        gwIP net.IP
+        gwMask net.IPMask
+        scanner *bufio.Scanner = nil
+        file *os.File = nil
+        err error = nil
+        tokens []string = nil
+        addr, mask, iface string
+    )
 
-    return "", nil
+    file, err = os.Open(route_tbl_path)
+    if err != nil {
+        return gwList, errors.WithStack(err)
+    }
+    defer file.Close()
+
+    // jump to line containing the agteway address
+    scanner = bufio.NewScanner(file)
+    scanner.Scan()
+
+    for scanner.Scan() {
+        // get the default gateway address
+        tokens = strings.Split(scanner.Text(), line_separater)
+
+        // get field containing gateway address
+        gwIP, addr, err = hexAddressToIPv4(tokens[field_gateway])
+        if err != nil {
+            continue
+        }
+
+        // get gateway interface
+        iface = strings.TrimSpace(tokens[field_interface])
+
+        // get gateway mask
+        gwMask, mask, err = hexMaskToIPv4(tokens[field_mask])
+        if err != nil {
+            continue
+        }
+
+        // allocate & append gw instance
+        gwList[iface] = append(gwList[iface],
+            Gateway{
+                AddrMask:   net.IPNet{
+                    IP:     gwIP,
+                    Mask:   gwMask,
+                },
+                Address:    addr,
+                Mask:       mask,
+                Interface:  iface,
+            })
+    }
+
+    return gwList, nil
+}
+
+func FindIPv4GatewayWithInterface(iName string) (*Gateway, error) {
+    return nil, nil
 }
