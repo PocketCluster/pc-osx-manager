@@ -39,17 +39,17 @@ const (
 
 // Reference : /usr/include/linux/route.h
 const (
-    RTF_UP          uint16 = 0x0001    /* route usable                 */
-    RTF_GATEWAY     uint16 = 0x0002    /* destination is a gateway     */
-    RTF_HOST        uint16 = 0x0004    /* host entry (net otherwise)   */
-    RTF_REINSTATE   uint16 = 0x0008    /* reinstate route after tmout  */
-    RTF_DYNAMIC     uint16 = 0x0010    /* created dyn. (by redirect)   */
-    RTF_MODIFIED    uint16 = 0x0020    /* modified dyn. (by redirect)  */
-    RTF_MTU         uint16 = 0x0040    /* specific MTU for this route  */
-    RTF_MSS         uint16 = RTF_MTU   /* Compatibility :-(            */
-    RTF_WINDOW      uint16 = 0x0080    /* per route window clamping    */
-    RTF_IRTT        uint16 = 0x0100    /* Initial round trip time      */
-    RTF_REJECT      uint16 = 0x0200    /* Reject route                 */
+    rtf_up          uint16 = 0x0001    /* route usable                 */
+    rtf_gateway     uint16 = 0x0002    /* destination is a gateway     */
+    rtf_host        uint16 = 0x0004    /* host entry (net otherwise)   */
+    rtf_reinstate   uint16 = 0x0008    /* reinstate route after tmout  */
+    rtf_dynamic     uint16 = 0x0010    /* created dyn. (by redirect)   */
+    rtf_modified    uint16 = 0x0020    /* modified dyn. (by redirect)  */
+    rtf_mtu         uint16 = 0x0040    /* specific MTU for this route  */
+    rtf_mss         uint16 = rtf_mtu   /* Compatibility :-(            */
+    rtf_window      uint16 = 0x0080    /* per route window clamping    */
+    rtf_irtt        uint16 = 0x0100    /* Initial round trip time      */
+    rtf_reject      uint16 = 0x0200    /* Reject route                 */
 )
 
 type IPv4Gateway struct {
@@ -61,7 +61,7 @@ type IPv4Gateway struct {
 }
 
 func (i *IPv4Gateway) IsUsable() bool {
-    return (i.Flag & RTF_UP) != 0
+    return (i.Flag & rtf_up) != 0
 }
 
 func hexAddressToIPv4(gwHexAddr string) (net.IP, string, error) {
@@ -150,14 +150,14 @@ func DefaultIPv4Gateway() (*IPv4Gateway, error){
         }
         tokens = strings.Split(entry, line_separater)
 
+        // get gateway interface
+        iface = strings.TrimSpace(tokens[field_interface])
+
         // get field containing gateway address
         gwIP, addr, err = hexAddressToIPv4(tokens[field_gateway])
         if err != nil {
             return nil, errors.WithStack(err)
         }
-
-        // get gateway interface
-        iface = strings.TrimSpace(tokens[field_interface])
 
         // get gateway mask
         gwMask, mask, err = hexMaskToIPv4(tokens[field_mask])
@@ -217,14 +217,14 @@ func AllIPv4Gateways() (map[string][]IPv4Gateway, error) {
         }
         tokens = strings.Split(entry, line_separater)
 
+        // get gateway interface
+        iface = strings.TrimSpace(tokens[field_interface])
+
         // get field containing gateway address
         gwIP, addr, err = hexAddressToIPv4(tokens[field_gateway])
         if err != nil {
             continue
         }
-
-        // get gateway interface
-        iface = strings.TrimSpace(tokens[field_interface])
 
         // get gateway mask
         gwMask, mask, err = hexMaskToIPv4(tokens[field_mask])
@@ -255,6 +255,82 @@ func AllIPv4Gateways() (map[string][]IPv4Gateway, error) {
     return gwList, nil
 }
 
-func FindIPv4GatewayWithInterface(iName string) (*IPv4Gateway, error) {
-    return nil, nil
+func FindIPv4GatewayWithInterface(iName string) ([]IPv4Gateway, error) {
+    var (
+        gwList = []IPv4Gateway{}
+        gwIP net.IP
+        gwMask net.IPMask
+        scanner *bufio.Scanner = nil
+        file *os.File = nil
+        err error = nil
+        tokens []string = nil
+        addr, mask, iface, entry string
+        flag uint16 = 0
+    )
+
+    if len(iName) == 0 {
+        return gwList, errors.Errorf("[ERR] invalid interface name")
+    }
+
+    file, err = os.Open(ipv4_route_tbl_path)
+    if err != nil {
+        return gwList, errors.WithStack(err)
+    }
+    defer file.Close()
+
+    // jump to line containing the agteway address
+    scanner = bufio.NewScanner(file)
+    scanner.Scan()
+
+    for scanner.Scan() {
+        // get the default gateway address
+        entry = strings.TrimSpace(scanner.Text())
+        if len(entry) == 0 {
+            continue
+        }
+        tokens = strings.Split(entry, line_separater)
+
+        // get gateway interface & match with given name
+        iface = strings.TrimSpace(tokens[field_interface])
+        if iface != iName {
+            continue
+        }
+
+        // get field containing gateway address
+        gwIP, addr, err = hexAddressToIPv4(tokens[field_gateway])
+        if err != nil {
+            continue
+        }
+
+        // get gateway mask
+        gwMask, mask, err = hexMaskToIPv4(tokens[field_mask])
+        if err != nil {
+            continue
+        }
+
+        // get gateway flag
+        flag, err = hexFlagToUint16(tokens[field_flags])
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+
+        // allocate & append gw instance
+        gwList = append(gwList,
+            IPv4Gateway{
+                AddrMask:   net.IPNet{
+                    IP:     gwIP,
+                    Mask:   gwMask,
+                },
+                Flag:       flag,
+                Address:    addr,
+                Mask:       mask,
+                Interface:  iface,
+            })
+    }
+
+    // check if we've found any
+    if len(gwList) == 0 {
+        return gwList, errors.Errorf("[ERR] cannot find a gateway for interface %s", iName)
+    }
+    return gwList, nil
 }
