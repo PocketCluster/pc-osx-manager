@@ -193,9 +193,9 @@ func findNetworkInterface(iName string) (NetworkInterface, error) {
 }
 
 func InternalNetworkInterface() (NetworkInterface, error) {
-    return findNetworkInterface("enp0s8")
+    return findNetworkInterface("enp0s3")
 }
 
 func ExternalNetworkInterface() (NetworkInterface, error) {
-    return findNetworkInterface("enp0s3")
+    return findNetworkInterface("enp0s8")
 }

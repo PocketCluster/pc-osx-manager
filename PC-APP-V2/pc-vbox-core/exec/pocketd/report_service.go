@@ -9,6 +9,7 @@ import (
     "github.com/pkg/errors"
     "github.com/stkim1/pc-vbox-comm/corereport"
     cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
+    "github.com/stkim1/pc-vbox-comm/utils"
 
     "github.com/stkim1/pc-vbox-core/crcontext"
 )
@@ -113,7 +114,8 @@ func initVboxCoreReportService(app service.AppSupervisor) error {
                         }
                     }
                     default: {
-                        conn, err = net.Dial("tcp4", net.JoinHostPort(inif.GatewayAddr, "10068"))
+                        conn, err = utils.DialFromInterface("enp0s3").Dial("tcp4", net.JoinHostPort(inif.GatewayAddr, "10068"))
+                        //conn, err = net.Dial("tcp4", net.JoinHostPort(inif.GatewayAddr, "10068"))
                         if err != nil {
                             log.Debugf("[REPORTER] connection open error (%v)", err.Error())
                             // this is telling reporter to break bind if necessary
