@@ -8,6 +8,11 @@ import (
     "github.com/stkim1/findgate"
 )
 
+const (
+    InternalNetworkDevice string = "eth0"
+    ExternalNetworkDevice string = "eth1"
+)
+
 type NetworkInterface struct {
     net.Interface
     HardwareAddr    string
@@ -167,7 +172,7 @@ func findNetworkInterface(iName string) (NetworkInterface, error) {
     if err != nil {
         return netStatus, errors.WithStack(err)
     }
-    // TODO : find the default gateway for this interface
+    // TODO : find the default gateway for this interface. Most likely, the first gateway is the default gateway for the given interface
     netStatus.GatewayAddr = gateways[0].Address
 
     // --- results ---
@@ -175,9 +180,9 @@ func findNetworkInterface(iName string) (NetworkInterface, error) {
 }
 
 func InternalNetworkInterface() (NetworkInterface, error) {
-    return findNetworkInterface("enp0s3")
+    return findNetworkInterface(InternalNetworkDevice)
 }
 
 func ExternalNetworkInterface() (NetworkInterface, error) {
-    return findNetworkInterface("enp0s8")
+    return findNetworkInterface(ExternalNetworkDevice)
 }
