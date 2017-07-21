@@ -24,7 +24,7 @@ const (
     iventBeaconManagerSpawn string  = "ivent.beacon.manager.spawn"
 )
 
-func initStorageServie(a *mainLife, config *embed.PocketConfig) error {
+func initStorageServie(a *appMainLife, config *embed.PocketConfig) error {
     a.RegisterServiceWithFuncs(
         operation.ServiceStorageProcess,
         func() error {
@@ -61,7 +61,7 @@ func initStorageServie(a *mainLife, config *embed.PocketConfig) error {
     return nil
 }
 
-func initRegistryService(a *mainLife, config *registry.PocketRegistryConfig) error {
+func initRegistryService(a *appMainLife, config *registry.PocketRegistryConfig) error {
     a.RegisterServiceWithFuncs(
         operation.ServiceContainerRegistry,
         func() error {
@@ -84,7 +84,7 @@ func initRegistryService(a *mainLife, config *registry.PocketRegistryConfig) err
     return nil
 }
 
-func initSwarmService(a *mainLife) error {
+func initSwarmService(a *appMainLife) error {
     const (
         iventSwarmInstanceSpawn string  = "ivent.swarm.instance.spawn"
     )
@@ -230,7 +230,7 @@ func locaNodeName(beaconMan beacon.BeaconManger, cfqdn string, w dns.ResponseWri
     w.WriteMsg(m)
 }
 
-func initPocketNameService(a *mainLife, clusterID string) error {
+func initPocketNameService(a *appMainLife, clusterID string) error {
     const (
         iventNameServerInstanceSpawn string = "ivent.name.server.instance.spawn"
     )

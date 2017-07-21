@@ -29,7 +29,7 @@ import (
     "github.com/stkim1/pc-core/event/crash"
 )
 
-type mainLife struct {
+type appMainLife struct {
     *app
     service.ServiceSupervisor
 }
@@ -37,7 +37,7 @@ type mainLife struct {
 var (
     initThreadID uint64
 
-    theApp = &mainLife{
+    theApp = &appMainLife{
         app:&app{
             eventsOut:      make(chan interface{}),
             lifecycleStage: lifecycle.StageDead,
@@ -63,7 +63,7 @@ func init() {
 }
 
 // this was app package of main()
-func mainLifeCycle(f func(*mainLife)) int {
+func appLifeCycle(f func(*appMainLife)) int {
     if tid := uint64(C.PCNativeThreadID()); tid != initThreadID {
         log.Fatalf("[CRITICAL] engine main called on thread %d, but inititaed from %d", tid, initThreadID)
     }

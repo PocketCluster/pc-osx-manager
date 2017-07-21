@@ -51,7 +51,7 @@ func dhcpAgent() {
         return
     }
 
-    dhcpEvent := &dhcp.DhcpEvent{}
+    dhcpEvent := &dhcp.PocketDhcpEvent{}
 
     dhcpEvent.Timestamp                               = time.Now().Format(time.RFC3339)
     dhcpEvent.Reason                                  = os.Getenv("reason")
@@ -154,7 +154,7 @@ func dhcpAgent() {
     dhcpEvent.Requested.Dhcp6DomainSearch             = os.Getenv("requested_dhcp6_domain_search")
     dhcpEvent.Requested.Dhcp6NameServers              = os.Getenv("requested_dhcp6_name_servers")
 
-    conn, err := net.DialUnix("unix", nil, &net.UnixAddr{dhcp.DHCPEventSocketPath, "unix"})
+    conn, err := net.DialUnix("unix", nil, &net.UnixAddr{dhcp.PocketDHCPEventSocketPath, "unix"})
     if err != nil {
         log.Error(errors.WithStack(err))
         return
@@ -174,9 +174,9 @@ func dhcpAgent() {
 
     if len(*dev) != 0 && *dev == devJsonPrint {
         json.NewEncoder(os.Stdout).Encode(struct {
-            Event         *dhcp.DhcpEvent    `json:"dhcp_event, omitempty"`
-            Pid           int                `json:"dhcp_pid, omitempty"`
-            Executable    string             `json:"dhcp_executable, omitempty"`
+            Event         *dhcp.PocketDhcpEvent    `json:"dhcp_event, omitempty"`
+            Pid           int                      `json:"dhcp_pid, omitempty"`
+            Executable    string                   `json:"dhcp_executable, omitempty"`
         }{
             Event:        dhcpEvent,
             Pid:          os.Getpid(),
@@ -189,16 +189,16 @@ func pocketDaemon() {
     log.Info("Pocket Daemon Started...")
 
     buf := make([]byte, 20480)
-    dhcpEvent := &dhcp.DhcpEvent{}
+    dhcpEvent := &dhcp.PocketDhcpEvent{}
 
     // firstly clear off previous socket
-    os.Remove(dhcp.DHCPEventSocketPath)
-    listen, err := net.ListenUnix("unix", &net.UnixAddr{dhcp.DHCPEventSocketPath, "unix"})
+    os.Remove(dhcp.PocketDHCPEventSocketPath)
+    listen, err := net.ListenUnix("unix", &net.UnixAddr{Name:dhcp.PocketDHCPEventSocketPath, Net: "unix"})
     if err != nil {
         log.Error(errors.WithStack(err))
         return
     }
-    defer os.Remove(dhcp.DHCPEventSocketPath)
+    defer os.Remove(dhcp.PocketDHCPEventSocketPath)
     defer listen.Close()
 
     for {

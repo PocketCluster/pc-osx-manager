@@ -7,7 +7,7 @@ import (
     "github.com/pkg/errors"
     "github.com/miekg/dns"
     "github.com/stkim1/pc-node-agent/service"
-    "github.com/stkim1/pc-node-agent/slcontext"
+    "github.com/stkim1/pc-vbox-core/crcontext"
     "github.com/stkim1/pcrypto"
 )
 
@@ -43,13 +43,13 @@ func locaNameServe(w dns.ResponseWriter, req *dns.Msg) {
 
         case dns.TypeA: {
 
-            remoteIP4 := remoteIP.To4();
-            ma, err := slcontext.SharedSlaveContext().GetMasterAgent()
+            remoteIP4 := remoteIP.To4()
+            cid, err := crcontext.SharedCoreContext().GetClusterID()
 
             if err == nil && remoteIP4 != nil {
 
-                fqdn := fmt.Sprintf(fqdnPocketMasterName, ma)
-                maddr, err := slcontext.SharedSlaveContext().GetMasterIP4Address()
+                fqdn := fmt.Sprintf(fqdnPocketMasterName, cid)
+                maddr, err := crcontext.SharedCoreContext().GetMasterIP4ExtAddr()
 
                 if err == nil && (question.Name == localPocketMasterName || question.Name == fqdn) {
                     rr := new(dns.A)

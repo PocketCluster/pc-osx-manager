@@ -17,7 +17,7 @@ import (
 func handleConnection(reporter corereport.VBoxCoreReporter, conn net.Conn, stopC <- chan struct{}) error {
     var (
         count, errorCount int = 0, 0
-        rcvdPkg []byte  = make([]byte, 10240)
+        rcvdPkg []byte = make([]byte, 10240)
         sendPkg []byte = nil
         err error = nil
     )

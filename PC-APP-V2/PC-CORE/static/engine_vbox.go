@@ -14,7 +14,7 @@ import (
 
 func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <- chan struct{}) error {
     var (
-        recvPkg [10240]byte
+        recvPkg []byte = make([]byte, 10240)
         sendPkg []byte = nil
         eofMsg  []byte = []byte("EOF")
         count, errorCount int = 0, 0
@@ -84,7 +84,7 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
     }
 }
 
-func initVboxCoreReportService(a *mainLife, clusterID string) error {
+func initVboxCoreReportService(a *appMainLife, clusterID string) error {
 
     log.Debugf("[CONTROL] starting master control service ...")
 

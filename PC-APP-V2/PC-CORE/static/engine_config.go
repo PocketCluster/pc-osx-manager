@@ -109,8 +109,8 @@ func setupServiceConfig() (*serviceConfig, error) {
     // registry configuration
     var regPath = path.Join(dataDir, defaults.RepositoryPathPostfix)
     if _, err := os.Stat(regPath); os.IsNotExist(err) {
-        os.MkdirAll(path.Join(regPath, "docker/registry/v2/repositories"), 0700);
-        os.MkdirAll(path.Join(regPath, "docker/registry/v2/blobs"),        0700);
+        os.MkdirAll(path.Join(regPath, "docker/registry/v2/repositories"), 0700)
+        os.MkdirAll(path.Join(regPath, "docker/registry/v2/blobs"),        0700)
     }
     regCfg, err := registry.NewPocketRegistryConfig(false, regPath, hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
@@ -124,7 +124,7 @@ func setupServiceConfig() (*serviceConfig, error) {
     //etcd configuration
     var etcdPath = path.Join(dataDir, defaults.StoragePathPostfix)
     if _, err := os.Stat(etcdPath); os.IsNotExist(err) {
-        os.MkdirAll(etcdPath, 0700);
+        os.MkdirAll(etcdPath, 0700)
     }
     // recommended parameter values
     // heartbeat : 500

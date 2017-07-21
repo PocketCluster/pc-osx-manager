@@ -16,7 +16,7 @@ import (
 
 func main() {
 
-    mainLifeCycle(func(a *mainLife) {
+    appLifeCycle(func(a *appMainLife) {
 
         var (
             config *serviceConfig = nil

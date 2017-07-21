@@ -21,7 +21,7 @@ type beaconEventRoute struct {
     *tervice.PocketConfig
 }
 
-func (b *beaconEventRoute) close() error {
+func (b *beaconEventRoute) terminate() error {
     b.ServiceSupervisor = nil
     b.PocketConfig = nil
     return nil
@@ -62,7 +62,7 @@ func (b *beaconEventRoute) BeaconEventShutdown() error {
     return nil
 }
 
-func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.PocketConfig) error {
+func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.PocketConfig) error {
     var (
         beaconC = make(chan service.Event)
         searchC = make(chan service.Event)
@@ -108,7 +108,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
                         if err != nil {
                             log.Debug(err.Error())
                         }
-                        err = beaconRoute.close()
+                        err = beaconRoute.terminate()
                         if err != nil {
                             log.Debug(err.Error())
                         }
