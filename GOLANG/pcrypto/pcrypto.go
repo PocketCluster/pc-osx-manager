@@ -32,6 +32,8 @@ const (
     FileExtPublicKey         string = ".pub"
     // ssh key file
     FileExtSSHCertificate    string = ".ssh"
+    // authotiry cert
+    FileExtAuthCertificate   string = ".acr"
 
     //------------------------------------------------ RSA PRIVATE KEY -------------------------------------------------
     // As of now (10/13/2016), 1024-bit keysize is ineffective to defend from malicious attack.

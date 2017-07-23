@@ -1,15 +1,24 @@
 package main
 
 import (
+    "fmt"
     "net"
     "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
-    "github.com/stkim1/pc-core/event/operation"
+
+    "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-vbox-comm/masterctrl"
+    "github.com/stkim1/pc-vbox-core/vboxutil"
+
     "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/model"
+
+    "github.com/gravitational/teleport/embed"
+    "github.com/gravitational/teleport/lib/auth"
+    tervice "github.com/gravitational/teleport/lib/service"
 )
 
 func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <- chan struct{}) error {
@@ -158,4 +167,53 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
         })
 
     return nil
+}
+
+func initVboxMachinePrep(clusterID string, tcfg *tervice.PocketConfig) error {
+    log.Debugf("[VBOX_DISK] generate vbox disk data")
+
+    var (
+        hostFQDN       string = fmt.Sprintf("pc-core." + pcrypto.FormFQDNClusterID, clusterID)
+        authToken      string = ""
+        dataPath       string = ""
+        caSigner       *pcrypto.CaSigner = nil
+        tclt           *auth.TunClient
+        auth, cert, pk [] byte
+        md             *vboxutil.MachineDisk
+        err            error             = nil
+    )
+
+    caSigner, err = context.SharedHostContext().CertAuthSigner()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    _, pk, _, err = pcrypto.GenerateStrongKeyPair()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    cert, err = caSigner.GenerateSignedCertificate(hostFQDN, "", pk)
+    if err != nil {
+        log.Warningf("[AUTH] Node pc-core cannot receive a signed certificate : cert generation error. %v", err)
+        return errors.WithStack(err)
+    }
+    auth = caSigner.CertificateAuthority()
+
+
+    tclt, err = embed.OpenAdminClientWithAuthService(tcfg)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    defer tclt.Close()
+    authToken, err = embed.GenerateNodeInviationWithTTL(tclt, embed.MaxInvitationTLL)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    dataPath, err = context.SharedHostContext().ApplicationUserDataDirectory()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    md = vboxutil.NewMachineDisk(dataPath, "pc-core-hdd", 20000, clusterID, authToken, auth, cert, pk, true)
+    return errors.WithStack(md.BuildCoreDiskImage())
 }

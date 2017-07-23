@@ -23,23 +23,29 @@ const (
 // ------ CONFIGURATION FILES ------
 const (
     // POCKET SPECIFIC CONFIG
-    core_config_dir string             = "/etc/pocket/"
-    core_config_file string            = core_config_dir + "core-conf.yaml"
+    CORE_CONFIG_DIR  string            = "/etc/pocket/"
+    CORE_CLUSTER_ID_FILE string        = CORE_CONFIG_DIR + "cluster.id"
+    CORE_SSH_AUTH_TOKEN_FILE string    = CORE_CONFIG_DIR + "ssh.auth.token"
+    core_config_file string            = CORE_CONFIG_DIR + "core-conf.yaml"
 
-    core_keys_dir string               = core_config_dir + "pki/"
+    CORE_CERTS_DIR string              = CORE_CONFIG_DIR + "pki/"
     // these files are 2048 RSA crypto files used to join network
-    core_public_Key_file string        = core_keys_dir + "pc_core_vbox_report" + pcrypto.FileExtPublicKey
-    core_prvate_Key_file string        = core_keys_dir + "pc_core_vbox_report" + pcrypto.FileExtPrivateKey
-    master_public_Key_file string      = core_keys_dir + "pc_master_vbox_ctrl" + pcrypto.FileExtPublicKey
+    core_public_Key_file string        = CORE_CERTS_DIR + "pc_core_vbox_report" + pcrypto.FileExtPublicKey
+    core_prvate_Key_file string        = CORE_CERTS_DIR + "pc_core_vbox_report" + pcrypto.FileExtPrivateKey
+    master_public_Key_file string      = CORE_CERTS_DIR + "pc_master_vbox_ctrl" + pcrypto.FileExtPublicKey
+
+    CORE_TLS_AUTH_CERT_FILE string     = CORE_CERTS_DIR + "pc_core_tls"         + pcrypto.FileExtAuthCertificate
+    CORE_TLS_PRVATE_KEY_FILE string    = CORE_CERTS_DIR + "pc_core_tls"         + pcrypto.FileExtPrivateKey
+    CERT_TLS_CERTIFICATE_FILE string   = CORE_CERTS_DIR + "pc_core_tls"         + pcrypto.FileExtCertificate
 
     // these files are 2048 RSA crypto files used for Docker & Registry. This should be acquired from Teleport Auth server
-    CoreAuthCertFileName string        = core_keys_dir + "pc_cert_auth"        + pcrypto.FileExtCertificate
-    CoreEngineKeyFileName string       = core_keys_dir + "pc_core_engine"      + pcrypto.FileExtPrivateKey
-    CoreEngineCertFileName string      = core_keys_dir + "pc_core_engine"      + pcrypto.FileExtCertificate
+    CoreAuthCertFileName string        = CORE_CERTS_DIR + "pc_cert_auth"        + pcrypto.FileExtCertificate
+    CoreEngineKeyFileName string       = CORE_CERTS_DIR + "pc_core_engine"      + pcrypto.FileExtPrivateKey
+    CoreEngineCertFileName string      = CORE_CERTS_DIR + "pc_core_engine"      + pcrypto.FileExtCertificate
 
     // these are files used for teleport certificate
-    CoreSSHCertificateFileName string  = core_keys_dir + "pc_core_ssh"         + pcrypto.FileExtSSHCertificate
-    CoreSSHPrivateKeyFileName string   = core_keys_dir + "pc_core_ssh"         + pcrypto.FileExtPrivateKey
+    CoreSSHCertificateFileName string  = CORE_CERTS_DIR + "pc_core_ssh"         + pcrypto.FileExtSSHCertificate
+    CoreSSHPrivateKeyFileName string   = CORE_CERTS_DIR + "pc_core_ssh"         + pcrypto.FileExtPrivateKey
 
     // HOST GENERAL CONFIG
     host_timezone_file string          = "/etc/timezone"
@@ -92,8 +98,8 @@ func _loadCoreConfig(rootPath string) (*PocketCoreConfig) {
 
     var (
         // config and key directories
-        configDirPath string    = rootPath + core_config_dir
-        keysDirPath string      = rootPath + core_keys_dir
+        configDirPath string    = rootPath + CORE_CONFIG_DIR
+        keysDirPath string      = rootPath + CORE_CERTS_DIR
 
         // pocket cluster join keys
         pcPubKeyPath string     = rootPath + core_public_Key_file
@@ -153,7 +159,7 @@ func _loadCoreConfig(rootPath string) (*PocketCoreConfig) {
 
 func (cfg *PocketCoreConfig) SaveCoreConfig() error {
     // check if config dir exists, and creat if DNE
-    configDirPath := cfg.rootPath + core_config_dir
+    configDirPath := cfg.rootPath + CORE_CONFIG_DIR
     if _, err := os.Stat(configDirPath); os.IsNotExist(err) {
         os.MkdirAll(configDirPath, os.ModeDir|0700);
     }
@@ -207,9 +213,9 @@ func (pc *PocketCoreConfig) ClearMasterPublicKey() error {
 }
 
 func (c *PocketCoreConfig) KeyAndCertDir() string {
-    return c.rootPath + core_keys_dir
+    return c.rootPath + CORE_CERTS_DIR
 }
 
 func (c *PocketCoreConfig) ConfigDir() string {
-    return c.rootPath + core_config_dir
+    return c.rootPath + CORE_CONFIG_DIR
 }

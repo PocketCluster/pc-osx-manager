@@ -224,25 +224,26 @@ func main() {
                     /// DEBUG ///
 
                     case operation.CmdDebug: {
+                        cid, err := context.SharedHostContext().MasterAgentName()
+                        if err != nil {
+                            log.Debug(err)
+                        }
+                        err = initVboxMachinePrep(cid, config.teleConfig)
+                        if err != nil {
+                            log.Debug(err)
+                        }
+
 /*
+                        err = initVboxCoreReportService(a, cid)
+                        if err != nil {
+                            log.Debug(err)
+                        }
                         sl := a.ServiceList()
                         for i, _ := range sl {
                             s := sl[i]
                             log.Debugf("[SERVICE] %s, %v", s.Tag(), s.IsRunning())
                         }
 */
-
-                        cid, err := context.SharedHostContext().MasterAgentName()
-                        if err != nil {
-                            log.Debug(err)
-                            return
-                        }
-
-                        err = initVboxCoreReportService(a, cid)
-                        if err != nil {
-                            log.Debug(err)
-                        }
-                        a.StartServices()
                         log.Debugf("[OP] %v", e.String())
                     }
 

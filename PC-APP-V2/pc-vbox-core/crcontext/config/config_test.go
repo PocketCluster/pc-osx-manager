@@ -18,13 +18,13 @@ func TestConfigSaveReload(t *testing.T) {
     t.Log(spew.Sdump(cfg))
 
     // check if config dir exists, and creat if DNE
-    configDirPath := cfg.rootPath + core_config_dir
+    configDirPath := cfg.rootPath + CORE_CONFIG_DIR
     if _, err := os.Stat(configDirPath); os.IsNotExist(err) {
         t.Error("[ERR] slave config dir should have existed")
         return
     }
     // check if config secure key dir also exists and creat if DNE
-    keysDirPath := cfg.rootPath + core_keys_dir
+    keysDirPath := cfg.rootPath + CORE_CERTS_DIR
     if _, err := os.Stat(keysDirPath); os.IsNotExist(err) {
         t.Error("[ERR] slave keys dir should have existed")
         return
