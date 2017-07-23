@@ -1,10 +1,13 @@
 package model
 
 import (
+    "testing"
     "time"
 
     . "gopkg.in/check.v1"
 )
+
+func TestCluster(t *testing.T) { TestingT(t) }
 
 type ClusterSuite struct {
     dataDir     string
