@@ -21,7 +21,7 @@ const (
     DOCKER_AUTH_CERT_FILE string        = DOCKER_AUTH_CERT_PATH + "ca" + pcrypto.FileExtCertificate
 
     SYSTEM_AUTH_CERT_NATIVE_FILE string = "/etc/ssl/certs/ca-certificates.crt"
-    SYSTEM_AUTH_CERT_BACKUP_PATH string = CORE_CONFIG_DIR + "backup/"
+    SYSTEM_AUTH_CERT_BACKUP_PATH string = core_config_dir + "backup/"
     SYSTEM_AUTH_CERT_BACKUP_FILE string = SYSTEM_AUTH_CERT_BACKUP_PATH + "ca-certificates" + pcrypto.FileExtCertificate
 )
 

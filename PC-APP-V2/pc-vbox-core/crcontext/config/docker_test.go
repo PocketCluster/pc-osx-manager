@@ -67,7 +67,7 @@ func TestDockerAuthorityCert(t *testing.T) {
     defer DebugConfigDestory(cfg)
 
     // make slave pki path
-    err = os.MkdirAll(path.Join(cfg.rootPath, CORE_CERTS_DIR), cert_path_permission);
+    err = os.MkdirAll(path.Join(cfg.rootPath, core_certs_dir), cert_path_permission);
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -143,7 +143,7 @@ func TestAppendAuthCertFowardSystemCertAuthority(t *testing.T) {
         return
     }
     // make slave pki path
-    err = os.MkdirAll(path.Join(cfg.rootPath, CORE_CERTS_DIR), cert_path_permission);
+    err = os.MkdirAll(path.Join(cfg.rootPath, core_certs_dir), cert_path_permission);
     if err != nil {
         t.Errorf(err.Error())
         return

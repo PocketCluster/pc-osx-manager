@@ -23,33 +23,36 @@ const (
 // ------ CONFIGURATION FILES ------
 const (
     // POCKET SPECIFIC CONFIG
-    CORE_CONFIG_DIR  string            = "/etc/pocket/"
-    CORE_CLUSTER_ID_FILE string        = CORE_CONFIG_DIR + "cluster.id"
-    CORE_SSH_AUTH_TOKEN_FILE string    = CORE_CONFIG_DIR + "ssh.auth.token"
-    CORE_USER_NAME_FILE string         = CORE_CONFIG_DIR + "core.user.name"
-    core_config_file string            = CORE_CONFIG_DIR + "core-conf.yaml"
+    core_config_dir string             = "/etc/pocket/"
+    core_config_file string            = core_config_dir + "core-conf.yaml"
 
-    CORE_CERTS_DIR string              = CORE_CONFIG_DIR + "pki/"
+    core_certs_dir string              = core_config_dir + "pki/"
     // these files are 2048 RSA crypto files used to join network
-    core_public_Key_file string        = CORE_CERTS_DIR + "pc_core_vbox_report" + pcrypto.FileExtPublicKey
-    core_prvate_Key_file string        = CORE_CERTS_DIR + "pc_core_vbox_report" + pcrypto.FileExtPrivateKey
-    master_public_Key_file string      = CORE_CERTS_DIR + "pc_master_vbox_ctrl" + pcrypto.FileExtPublicKey
-
-    CORE_TLS_AUTH_CERT_FILE string     = CORE_CERTS_DIR + "pc_core_tls"         + pcrypto.FileExtAuthCertificate
-    CORE_TLS_PRVATE_KEY_FILE string    = CORE_CERTS_DIR + "pc_core_tls"         + pcrypto.FileExtPrivateKey
-    CERT_TLS_CERTIFICATE_FILE string   = CORE_CERTS_DIR + "pc_core_tls"         + pcrypto.FileExtCertificate
+    core_public_Key_file string        = core_certs_dir + "pc_core_vbox_report" + pcrypto.FileExtPublicKey
+    core_prvate_Key_file string        = core_certs_dir + "pc_core_vbox_report" + pcrypto.FileExtPrivateKey
+    master_public_Key_file string      = core_certs_dir + "pc_master_vbox_ctrl" + pcrypto.FileExtPublicKey
 
     // these files are 2048 RSA crypto files used for Docker & Registry. This should be acquired from Teleport Auth server
-    CoreAuthCertFileName string        = CORE_CERTS_DIR + "pc_cert_auth"        + pcrypto.FileExtCertificate
-    CoreEngineKeyFileName string       = CORE_CERTS_DIR + "pc_core_engine"      + pcrypto.FileExtPrivateKey
-    CoreEngineCertFileName string      = CORE_CERTS_DIR + "pc_core_engine"      + pcrypto.FileExtCertificate
+    CoreAuthCertFileName string        = core_certs_dir + "pc_core_engine"      + pcrypto.FileExtAuthCertificate
+    CoreEngineKeyFileName string       = core_certs_dir + "pc_core_engine"      + pcrypto.FileExtPrivateKey
+    CoreEngineCertFileName string      = core_certs_dir + "pc_core_engine"      + pcrypto.FileExtCertificate
 
     // these are files used for teleport certificate
-    CoreSSHCertificateFileName string  = CORE_CERTS_DIR + "pc_core_ssh"         + pcrypto.FileExtSSHCertificate
-    CoreSSHPrivateKeyFileName string   = CORE_CERTS_DIR + "pc_core_ssh"         + pcrypto.FileExtPrivateKey
+    CoreSSHCertificateFileName string  = core_certs_dir + "pc_core_ssh"         + pcrypto.FileExtSSHCertificate
+    CoreSSHPrivateKeyFileName string   = core_certs_dir + "pc_core_ssh"         + pcrypto.FileExtPrivateKey
 
     // HOST GENERAL CONFIG
     host_timezone_file string          = "/etc/timezone"
+
+
+    core_cluster_id_file        string = "cluster.id"
+    core_ssh_auth_token_file    string = "ssh.auth.token"
+    core_user_name_file         string = "core.user.name"
+
+    core_tls_auth_cert_file     string = "pki/pc_core_tls" + pcrypto.FileExtAuthCertificate
+    cert_tls_key_cert_file      string = "pki/pc_core_tls" + pcrypto.FileExtCertificate
+    core_tls_prvate_key_file    string = "pki/pc_core_tls" + pcrypto.FileExtPrivateKey
+
 )
 
 // ------ SALT DEFAULT ------
@@ -99,8 +102,8 @@ func _loadCoreConfig(rootPath string) (*PocketCoreConfig) {
 
     var (
         // config and key directories
-        configDirPath string    = rootPath + CORE_CONFIG_DIR
-        keysDirPath string      = rootPath + CORE_CERTS_DIR
+        configDirPath string    = rootPath + core_config_dir
+        keysDirPath string      = rootPath + core_certs_dir
 
         // pocket cluster join keys
         pcPubKeyPath string     = rootPath + core_public_Key_file
@@ -160,7 +163,7 @@ func _loadCoreConfig(rootPath string) (*PocketCoreConfig) {
 
 func (cfg *PocketCoreConfig) SaveCoreConfig() error {
     // check if config dir exists, and creat if DNE
-    configDirPath := cfg.rootPath + CORE_CONFIG_DIR
+    configDirPath := cfg.rootPath + core_config_dir
     if _, err := os.Stat(configDirPath); os.IsNotExist(err) {
         os.MkdirAll(configDirPath, os.ModeDir|0700);
     }
@@ -214,9 +217,64 @@ func (pc *PocketCoreConfig) ClearMasterPublicKey() error {
 }
 
 func (c *PocketCoreConfig) KeyAndCertDir() string {
-    return c.rootPath + CORE_CERTS_DIR
+    return c.rootPath + core_certs_dir
 }
 
 func (c *PocketCoreConfig) ConfigDir() string {
-    return c.rootPath + CORE_CONFIG_DIR
+    return c.rootPath + core_config_dir
 }
+
+// --- to reading for config ---
+func (c *PocketCoreConfig) FilePathClusterID() string {
+    return c.rootPath + core_config_dir + core_cluster_id_file
+}
+
+func (c *PocketCoreConfig) FilePathAuthToken() string {
+    return c.rootPath + core_config_dir + core_ssh_auth_token_file
+}
+
+func (c *PocketCoreConfig) FilePathUserName() string {
+    return c.rootPath + core_config_dir + core_user_name_file
+}
+
+func (c *PocketCoreConfig) FilePathTLSAuthCert() string {
+    return c.rootPath + core_config_dir + core_tls_auth_cert_file
+}
+
+func (c *PocketCoreConfig) FilePathTLSKeyCert() string {
+    return c.rootPath + core_config_dir + cert_tls_key_cert_file
+}
+
+func (c *PocketCoreConfig) FilePathTLSPrivateKey() string {
+    return c.rootPath + core_config_dir + core_tls_prvate_key_file
+}
+
+// --- to build tar archive file ---
+func ArchivePathClusterID() string {
+    return core_cluster_id_file
+}
+
+func ArchivePathAuthToken() string {
+    return core_ssh_auth_token_file
+}
+
+func ArchivePathUserName() string {
+    return core_user_name_file
+}
+
+func ArchivePathTLSDir() string {
+    return "pki"
+}
+
+func ArchivePathTLSAuthCert() string {
+    return core_tls_auth_cert_file
+}
+
+func ArchivePathTLSKeyCert() string {
+    return cert_tls_key_cert_file
+}
+
+func ArchivePathTLSPrivateKey() string {
+    return core_tls_prvate_key_file
+}
+

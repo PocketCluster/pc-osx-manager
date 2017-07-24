@@ -74,17 +74,11 @@ func (m *MachineDisk) BuildCoreDiskImage() error {
             return errors.WithStack(err)
         }
 
-        // config dir
-        file = &tar.Header{Name: config.CORE_CONFIG_DIR, Typeflag: tar.TypeDir, Mode: 0700}
-        if err := tw.WriteHeader(file); err != nil {
-            return errors.WithStack(err)
-        }
-
         // cluster id
         if len(m.ClusterID) == 0 {
             return errors.Errorf("[ERR] invalid cluster id")
         }
-        file = &tar.Header{Name: config.CORE_CLUSTER_ID_FILE, Size: int64(len(m.ClusterID)), Mode: 0600}
+        file = &tar.Header{Name: config.ArchivePathClusterID(), Size: int64(len(m.ClusterID)), Mode: 0600}
         if err := tw.WriteHeader(file); err != nil {
             return errors.WithStack(err)
         }
@@ -96,7 +90,7 @@ func (m *MachineDisk) BuildCoreDiskImage() error {
         if len(m.AuthToken) == 0 {
             return errors.Errorf("[ERR] invalid auth token")
         }
-        file = &tar.Header{Name: config.CORE_SSH_AUTH_TOKEN_FILE, Size: int64(len(m.AuthToken)), Mode: 0600}
+        file = &tar.Header{Name: config.ArchivePathAuthToken(), Size: int64(len(m.AuthToken)), Mode: 0600}
         if err := tw.WriteHeader(file); err != nil {
             return errors.WithStack(err)
         }
@@ -108,7 +102,7 @@ func (m *MachineDisk) BuildCoreDiskImage() error {
         if len(m.UserName) == 0 {
             return errors.Errorf("[ERR] invalid user name")
         }
-        file = &tar.Header{Name: config.CORE_USER_NAME_FILE, Size: int64(len(m.UserName)), Mode: 0600}
+        file = &tar.Header{Name: config.ArchivePathUserName(), Size: int64(len(m.UserName)), Mode: 0600}
         if err := tw.WriteHeader(file); err != nil {
             return errors.WithStack(err)
         }
@@ -118,7 +112,7 @@ func (m *MachineDisk) BuildCoreDiskImage() error {
 
 
         // cert dir
-        file = &tar.Header{Name: config.CORE_CERTS_DIR, Typeflag: tar.TypeDir, Mode: 0700}
+        file = &tar.Header{Name: config.ArchivePathTLSDir(), Typeflag: tar.TypeDir, Mode: 0700}
         if err := tw.WriteHeader(file); err != nil {
             return errors.WithStack(err)
         }
@@ -127,7 +121,7 @@ func (m *MachineDisk) BuildCoreDiskImage() error {
         if len(m.AuthCert) == 0 {
             return errors.Errorf("[ERR] invalid auth certificate")
         }
-        file = &tar.Header{Name: config.CORE_TLS_AUTH_CERT_FILE, Size: int64(len(m.AuthCert)), Mode: 0600}
+        file = &tar.Header{Name: config.ArchivePathTLSAuthCert(), Size: int64(len(m.AuthCert)), Mode: 0600}
         if err := tw.WriteHeader(file); err != nil {
             return errors.WithStack(err)
         }
@@ -139,7 +133,7 @@ func (m *MachineDisk) BuildCoreDiskImage() error {
         if len(m.PrivateKey) == 0 {
             return errors.Errorf("[ERR] invalid private key")
         }
-        file = &tar.Header{Name: config.CORE_TLS_PRVATE_KEY_FILE, Size: int64(len(m.PrivateKey)), Mode: 0600}
+        file = &tar.Header{Name: config.ArchivePathTLSPrivateKey(), Size: int64(len(m.PrivateKey)), Mode: 0600}
         if err := tw.WriteHeader(file); err != nil {
             return errors.WithStack(err)
         }
@@ -151,7 +145,7 @@ func (m *MachineDisk) BuildCoreDiskImage() error {
         if len(m.KeyCert) == 0 {
             return errors.Errorf("[ERR] invalid key certificate")
         }
-        file = &tar.Header{Name: config.CERT_TLS_CERTIFICATE_FILE, Size: int64(len(m.KeyCert)), Mode: 0600}
+        file = &tar.Header{Name: config.ArchivePathTLSKeyCert(), Size: int64(len(m.KeyCert)), Mode: 0600}
         if err := tw.WriteHeader(file); err != nil {
             return errors.WithStack(err)
         }
