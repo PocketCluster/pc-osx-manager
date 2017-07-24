@@ -15,7 +15,7 @@ import (
 )
 
 const (
-    magicString string = "boot2docker, please format-me"
+    magicString string = "pc-core, please format-me"
     DefualtCoreDiskName = "pc-core-hdd"
 )
 
