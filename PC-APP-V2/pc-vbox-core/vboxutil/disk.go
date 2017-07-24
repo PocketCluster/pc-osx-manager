@@ -9,12 +9,14 @@ import (
     "os/exec"
     "path/filepath"
 
+    log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/stkim1/pc-vbox-core/crcontext/config"
 )
 
 const (
     magicString string = "boot2docker, please format-me"
+    DefualtCoreDiskName = "pc-core-hdd"
 )
 
 // MachineDisk information.
@@ -31,13 +33,14 @@ type MachineDisk struct {
     VBM          string
     ClusterID    string
     AuthToken    string
+    UserName     string
     AuthCert     []byte
     KeyCert      []byte
     PrivateKey   []byte
     PublicKey    []byte
 }
 
-func NewMachineDisk(baseFolder, imageName string, diskSize uint, cid, token string, auth, cert, pk []byte, debug bool) *MachineDisk {
+func NewMachineDisk(baseFolder, imageName string, diskSize uint, cid, token, user string, acrt, kcrt, pk []byte, debug bool) *MachineDisk {
     return &MachineDisk {
         Debug:         debug,
         DiskSize:      diskSize,
@@ -46,8 +49,9 @@ func NewMachineDisk(baseFolder, imageName string, diskSize uint, cid, token stri
 
         ClusterID:     cid,
         AuthToken:     token,
-        AuthCert:      auth,
-        KeyCert:       cert,
+        UserName:      user,
+        AuthCert:      acrt,
+        KeyCert:       kcrt,
         PrivateKey:    pk,
     }
 }
@@ -97,6 +101,18 @@ func (m *MachineDisk) BuildCoreDiskImage() error {
             return errors.WithStack(err)
         }
         if _, err := tw.Write([]byte(m.AuthToken)); err != nil {
+            return errors.WithStack(err)
+        }
+
+        // core user name
+        if len(m.UserName) == 0 {
+            return errors.Errorf("[ERR] invalid user name")
+        }
+        file = &tar.Header{Name: config.CORE_USER_NAME_FILE, Size: int64(len(m.UserName)), Mode: 0600}
+        if err := tw.WriteHeader(file); err != nil {
+            return errors.WithStack(err)
+        }
+        if _, err := tw.Write([]byte(m.UserName)); err != nil {
             return errors.WithStack(err)
         }
 
@@ -158,8 +174,8 @@ func (m *MachineDisk) BuildCoreDiskImage() error {
         }
 
         if m.Debug {
-            fmt.Println("Initializing disk with ssh keys")
-            fmt.Printf("WRITING: %s\n-----\n", buf)
+            log.Debugf("Initializing disk with pre-generated core data size %d\n", len(buf.Bytes()))
+            log.Debugf("WRITING: %s\n-----\n", buf)
         }
     }
 

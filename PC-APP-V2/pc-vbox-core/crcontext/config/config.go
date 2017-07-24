@@ -26,6 +26,7 @@ const (
     CORE_CONFIG_DIR  string            = "/etc/pocket/"
     CORE_CLUSTER_ID_FILE string        = CORE_CONFIG_DIR + "cluster.id"
     CORE_SSH_AUTH_TOKEN_FILE string    = CORE_CONFIG_DIR + "ssh.auth.token"
+    CORE_USER_NAME_FILE string         = CORE_CONFIG_DIR + "core.user.name"
     core_config_file string            = CORE_CONFIG_DIR + "core-conf.yaml"
 
     CORE_CERTS_DIR string              = CORE_CONFIG_DIR + "pki/"
