@@ -36,8 +36,7 @@ func copyDiskImage(dst, src string) (err error) {
 
 
 func (s *VboxUtilSuite) TestDiskCreation(c *C) {
-    d := NewMachineDisk(s.dataDir, "testdisk", 20000, "cluster_id", "auth_token", "stkim1",
-    pcrypto.TestMasterStrongPublicKey(), pcrypto.TestCertPublicAuth(), pcrypto.TestCertPrivateKey(), true)
+    d := NewMachineDisk(s.dataDir, "testdisk", 20000, true)
     err := d.BuildCoreDiskImage()
     c.Assert(err, IsNil)
 

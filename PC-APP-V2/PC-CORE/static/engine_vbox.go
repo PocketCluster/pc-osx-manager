@@ -173,33 +173,59 @@ func initVboxMachinePrep(clusterID string, tcfg *tervice.PocketConfig) error {
     log.Debugf("[VBOX_DISK] generate vbox disk data")
 
     var (
-        hostFQDN       string = fmt.Sprintf("pc-core." + pcrypto.FormFQDNClusterID, clusterID)
-        authToken      string = ""
-        dataPath       string = ""
-        userName       string = ""
-        acrt, kcrt, pk [] byte = nil, nil, nil
-        err            error             = nil
-        caSigner       *pcrypto.CaSigner = nil
-        tclt           *auth.TunClient   = nil
-        md             *vboxutil.MachineDisk = nil
+        hostFQDN           string                = fmt.Sprintf("pc-core." + pcrypto.FormFQDNClusterID, clusterID)
+        authToken          string                = ""
+        dataPath           string                = ""
+        userName           string                = ""
+        cVpuk, cVprk, mVpuk [] byte              = nil, nil, nil
+        eAcrt, eKcrt, ePrk [] byte               = nil, nil, nil
+        err                error                 = nil
+        caSigner           *pcrypto.CaSigner     = nil
+        tclt               *auth.TunClient       = nil
+        md                 *vboxutil.MachineDisk = nil
     )
 
+    // core user & disk path
+    dataPath, err = context.SharedHostContext().ApplicationUserDataDirectory()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    userName, err = context.SharedHostContext().LoginUserName()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+
+    // Vbox ctrl & report keys
+    mVpuk, err = context.SharedHostContext().MasterVBoxCtrlPublicKey()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    // TODO save this to core node model
+    cVpuk, cVprk, _, err = pcrypto.GenerateStrongKeyPair()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+
+    // signed core engine key & certificate
     caSigner, err = context.SharedHostContext().CertAuthSigner()
     if err != nil {
         return errors.WithStack(err)
     }
-    acrt = caSigner.CertificateAuthority()
-    _, pk, _, err = pcrypto.GenerateStrongKeyPair()
+    eAcrt = caSigner.CertificateAuthority()
+    _, ePrk, _, err = pcrypto.GenerateStrongKeyPair()
     if err != nil {
         return errors.WithStack(err)
     }
-    kcrt, err = caSigner.GenerateSignedCertificate(hostFQDN, "", pk)
+    eKcrt, err = caSigner.GenerateSignedCertificate(hostFQDN, "", ePrk)
     if err != nil {
         log.Warningf("[AUTH] Node pc-core cannot receive a signed certificate : cert generation error. %v", err)
         return errors.WithStack(err)
     }
 
 
+    // generate ssh auth token
     tclt, err = embed.OpenAdminClientWithAuthService(tcfg)
     if err != nil {
         return errors.WithStack(err)
@@ -210,15 +236,16 @@ func initVboxMachinePrep(clusterID string, tcfg *tervice.PocketConfig) error {
         return errors.WithStack(err)
     }
 
-    dataPath, err = context.SharedHostContext().ApplicationUserDataDirectory()
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    userName, err = context.SharedHostContext().LoginUserName()
-    if err != nil {
-        return errors.WithStack(err)
-    }
+    md = vboxutil.NewMachineDisk(dataPath, vboxutil.DefualtCoreDiskName,20000, true)
+    md.ClusterID = clusterID
+    md.AuthToken = authToken
+    md.UserName = userName
+    md.CoreVboxPublicKey = cVpuk
+    md.CoreVboxPrivateKey = cVprk
+    md.MasterVboxPublicKey = mVpuk
+    md.EngineAuthCert = eAcrt
+    md.EngineKeyCert = eKcrt
+    md.EnginePrivateKey = ePrk
 
-    md = vboxutil.NewMachineDisk(dataPath, vboxutil.DefualtCoreDiskName,20000, clusterID, authToken, userName, acrt, kcrt, pk, true)
     return errors.WithStack(md.BuildCoreDiskImage())
 }

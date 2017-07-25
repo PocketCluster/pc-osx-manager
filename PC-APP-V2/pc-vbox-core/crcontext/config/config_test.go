@@ -70,12 +70,6 @@ func TestConfigSaveReloadPublicMasterKey(t *testing.T) {
     }
     defer DebugConfigDestory(cfg)
 
-    err = cfg.SaveMasterPublicKey(pcrypto.TestMasterWeakPublicKey())
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-
     master, err := cfg.MasterPublicKey()
     if err != nil {
         t.Error(err.Error())

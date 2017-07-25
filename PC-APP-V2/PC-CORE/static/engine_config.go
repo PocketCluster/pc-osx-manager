@@ -87,15 +87,12 @@ func setupServiceConfig() (*serviceConfig, error) {
     ctx.UpdateBeaconCert(beaconBundle)
 
     // vbox certificate
-    // Note: let's stop creating vbox cert pair as this is to be deprecated (2017-07-24)
-/*
     vboxBundle, err := buildVBoxReportCertificate(rec.Certdb(), meta.ClusterUUID)
     if err != nil {
         // this is critical
         return nil, errors.WithStack(err)
     }
     ctx.UpdateVBoxCert(vboxBundle)
-*/
 
     // make teleport core config
     teleCfg := tervice.MakeCoreConfig(dataDir, true)

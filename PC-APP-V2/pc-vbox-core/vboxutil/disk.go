@@ -30,29 +30,24 @@ type MachineDisk struct {
 
 
     // VBoxManager executable
-    VBM          string
-    ClusterID    string
-    AuthToken    string
-    UserName     string
-    AuthCert     []byte
-    KeyCert      []byte
-    PrivateKey   []byte
-    PublicKey    []byte
+    VBM                 string
+    ClusterID           string
+    AuthToken           string
+    UserName            string
+    CoreVboxPublicKey   []byte
+    CoreVboxPrivateKey  []byte
+    MasterVboxPublicKey []byte
+    EngineAuthCert      []byte
+    EngineKeyCert       []byte
+    EnginePrivateKey    []byte
 }
 
-func NewMachineDisk(baseFolder, imageName string, diskSize uint, cid, token, user string, acrt, kcrt, pk []byte, debug bool) *MachineDisk {
+func NewMachineDisk(baseFolder, imageName string, diskSize uint, debug bool) *MachineDisk {
     return &MachineDisk {
-        Debug:         debug,
-        DiskSize:      diskSize,
-        DiskImage:     filepath.Join(baseFolder, fmt.Sprintf("%s.vmdk", imageName)),
-        VBM:           "/usr/local/bin/VBoxManage",
-
-        ClusterID:     cid,
-        AuthToken:     token,
-        UserName:      user,
-        AuthCert:      acrt,
-        KeyCert:       kcrt,
-        PrivateKey:    pk,
+        Debug:               debug,
+        DiskSize:            diskSize,
+        DiskImage:           filepath.Join(baseFolder, fmt.Sprintf("%s.vmdk", imageName)),
+        VBM:                 "/usr/local/bin/VBoxManage",
     }
 }
 
@@ -112,47 +107,85 @@ func (m *MachineDisk) BuildCoreDiskImage() error {
 
 
         // cert dir
-        file = &tar.Header{Name: config.ArchivePathTLSDir(), Typeflag: tar.TypeDir, Mode: 0700}
+        file = &tar.Header{Name: config.ArchivePathCertsDir(), Typeflag: tar.TypeDir, Mode: 0700}
         if err := tw.WriteHeader(file); err != nil {
+            return errors.WithStack(err)
+        }
+
+        // core vbox public key
+        if len(m.CoreVboxPublicKey) == 0 {
+            return errors.Errorf("[ERR] invalid core vbox public key")
+        }
+        file = &tar.Header{Name: config.ArchivePathCoreVboxPublicKey(), Size: int64(len(m.CoreVboxPublicKey)), Mode: 0600}
+        if err := tw.WriteHeader(file); err != nil {
+            return errors.WithStack(err)
+        }
+        if _, err := tw.Write(m.CoreVboxPublicKey); err != nil {
+            return errors.WithStack(err)
+        }
+
+        // core vbox private key
+        if len(m.CoreVboxPrivateKey) == 0 {
+            return errors.Errorf("[ERR] invalid core vbox private key")
+        }
+        file = &tar.Header{Name: config.ArchivePathCoreVboxPrivateKey(), Size: int64(len(m.CoreVboxPrivateKey)), Mode: 0600}
+        if err := tw.WriteHeader(file); err != nil {
+            return errors.WithStack(err)
+        }
+        if _, err := tw.Write(m.CoreVboxPrivateKey); err != nil {
+            return errors.WithStack(err)
+        }
+
+        // master vbox public key
+        if len(m.MasterVboxPublicKey) == 0 {
+            return errors.Errorf("[ERR] invalid master vbox public key")
+        }
+        file = &tar.Header{Name: config.ArchivePathMasterVboxPublicKey(), Size: int64(len(m.MasterVboxPublicKey)), Mode: 0600}
+        if err := tw.WriteHeader(file); err != nil {
+            return errors.WithStack(err)
+        }
+        if _, err := tw.Write(m.MasterVboxPublicKey); err != nil {
             return errors.WithStack(err)
         }
 
         // tls auth cert
-        if len(m.AuthCert) == 0 {
+        if len(m.EngineAuthCert) == 0 {
             return errors.Errorf("[ERR] invalid auth certificate")
         }
-        file = &tar.Header{Name: config.ArchivePathTLSAuthCert(), Size: int64(len(m.AuthCert)), Mode: 0600}
+        file = &tar.Header{Name: config.ArchivePathCoreEngineAuthCert(), Size: int64(len(m.EngineAuthCert)), Mode: 0600}
         if err := tw.WriteHeader(file); err != nil {
             return errors.WithStack(err)
         }
-        if _, err := tw.Write(m.AuthCert); err != nil {
-            return errors.WithStack(err)
-        }
-
-        // tls private key
-        if len(m.PrivateKey) == 0 {
-            return errors.Errorf("[ERR] invalid private key")
-        }
-        file = &tar.Header{Name: config.ArchivePathTLSPrivateKey(), Size: int64(len(m.PrivateKey)), Mode: 0600}
-        if err := tw.WriteHeader(file); err != nil {
-            return errors.WithStack(err)
-        }
-        if _, err := tw.Write(m.PrivateKey); err != nil {
+        if _, err := tw.Write(m.EngineAuthCert); err != nil {
             return errors.WithStack(err)
         }
 
         // tls key certificate
-        if len(m.KeyCert) == 0 {
+        if len(m.EngineKeyCert) == 0 {
             return errors.Errorf("[ERR] invalid key certificate")
         }
-        file = &tar.Header{Name: config.ArchivePathTLSKeyCert(), Size: int64(len(m.KeyCert)), Mode: 0600}
+        file = &tar.Header{Name: config.ArchivePathCoreEngineKeyCert(), Size: int64(len(m.EngineKeyCert)), Mode: 0600}
         if err := tw.WriteHeader(file); err != nil {
             return errors.WithStack(err)
         }
-        if _, err := tw.Write(m.KeyCert); err != nil {
+        if _, err := tw.Write(m.EngineKeyCert); err != nil {
             return errors.WithStack(err)
         }
 
+        // tls private key
+        if len(m.EnginePrivateKey) == 0 {
+            return errors.Errorf("[ERR] invalid private key")
+        }
+        file = &tar.Header{Name: config.ArchivePathCoreEnginePrivateKey(), Size: int64(len(m.EnginePrivateKey)), Mode: 0600}
+        if err := tw.WriteHeader(file); err != nil {
+            return errors.WithStack(err)
+        }
+        if _, err := tw.Write(m.EnginePrivateKey); err != nil {
+            return errors.WithStack(err)
+        }
+
+
+        // close archive
         if err := tw.Close(); err != nil {
             return errors.WithStack(err)
         }
@@ -170,65 +203,6 @@ func (m *MachineDisk) BuildCoreDiskImage() error {
         if m.Debug {
             log.Debugf("Initializing disk with pre-generated core data size %d\n", len(buf.Bytes()))
             log.Debugf("WRITING: %s\n-----\n", buf)
-        }
-    }
-
-    return nil
-}
-
-func (m *MachineDisk) BuildDiskImage() error {
-    if _, err := os.Stat(m.DiskImage); err != nil {
-        if !os.IsNotExist(err) {
-            return errors.WithStack(err)
-        }
-
-        buf := new(bytes.Buffer)
-        tw := tar.NewWriter(buf)
-
-        // magicString first so the automount script knows to format the disk
-        file := &tar.Header{Name: magicString, Size: int64(len(magicString))}
-        if err := tw.WriteHeader(file); err != nil {
-            return errors.WithStack(err)
-        }
-        if _, err := tw.Write([]byte(magicString)); err != nil {
-            return errors.WithStack(err)
-        }
-        // .ssh/key.pub => authorized_keys
-        file = &tar.Header{Name: ".ssh", Typeflag: tar.TypeDir, Mode: 0700}
-        if err := tw.WriteHeader(file); err != nil {
-            return errors.WithStack(err)
-        }
-        file = &tar.Header{Name: ".ssh/authorized_keys", Size: int64(len(m.PublicKey)), Mode: 0644}
-        if err := tw.WriteHeader(file); err != nil {
-            return errors.WithStack(err)
-        }
-        if _, err := tw.Write(m.PublicKey); err != nil {
-            return errors.WithStack(err)
-        }
-        file = &tar.Header{Name: ".ssh/authorized_keys2", Size: int64(len(m.PublicKey)), Mode: 0644}
-        if err := tw.WriteHeader(file); err != nil {
-            return errors.WithStack(err)
-        }
-        if _, err := tw.Write(m.PublicKey); err != nil {
-            return errors.WithStack(err)
-        }
-        if err := tw.Close(); err != nil {
-            return errors.WithStack(err)
-        }
-
-        // Create the dest dir.
-        if err := os.MkdirAll(filepath.Dir(m.DiskImage), 0755); err != nil {
-            return errors.WithStack(err)
-        }
-        // Fill in the magic string so boot2docker VM will detect this and format
-        // the disk upon first boot.
-        if err := makeDiskImage(m, bytes.NewReader(buf.Bytes())); err != nil {
-            return errors.WithStack(err)
-        }
-
-        if m.Debug {
-            fmt.Println("Initializing disk with ssh keys")
-            fmt.Printf("WRITING: %s\n-----\n", buf)
         }
     }
 
