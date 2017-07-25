@@ -12,10 +12,6 @@ type PocketCoreContext interface {
     // reload all configuration
     ReloadConfiguration() error
 
-    // Discard all data communicated with master (not the one from core itself such as network info)
-    // This should executed on failure from joining states (unbounded, inquired, keyexchange, checkcrypto)
-    DiscardAll() error
-
     // Discard master ip address, and other session related data
     DiscardMasterSession() error
 
@@ -23,24 +19,15 @@ type PocketCoreContext interface {
     // No other place can execute this
     SaveConfiguration() error
 
-    SetClusterID(clusterID string) error
     GetClusterID() (string, error)
-
-    // authtoken
-    SetCoreAuthToken(authToken string) error
     GetCoreAuthToken() (string, error)
 
-    GetPrivateKey() (prvkey []byte)
-    GetPublicKey() (pubkey []byte)
-
-    SetMasterPublicKey(masterPubkey []byte) error
-    GetMasterPublicKey() ([]byte, error)
+    GetPrivateKey() ([]byte)
+    GetPublicKey() ([]byte)
+    GetMasterPublicKey() ([]byte)
 
     SetMasterIP4ExtAddr(ip4Address string) error
     GetMasterIP4ExtAddr() (string, error)
-
-    CoreKeyAndCertPath() string
-    CoreConfigPath() string
 }
 
 // Singleton handling
@@ -84,7 +71,6 @@ func getSingletonCoreContext() *coreContext {
 // --- Sync All ---
 func initWithConfig(c *coreContext, cfg *config.PocketCoreConfig) error {
     var (
-        mpubkey []byte = nil
         err error = nil
     )
     c.config = cfg
@@ -99,11 +85,10 @@ func initWithConfig(c *coreContext, cfg *config.PocketCoreConfig) error {
     if err != nil {
         return errors.WithStack(err)
     }
-
-    // if master public key exists
-    mpubkey, err = cfg.MasterPublicKey()
-    if len(mpubkey) != 0 && err == nil {
-        c.masterPubkey = mpubkey
+    // master public key
+    c.masterPubkey, err = cfg.MasterPublicKey()
+    if err != nil {
+        return errors.WithStack(err)
     }
     return nil
 }
@@ -113,25 +98,7 @@ func (c *coreContext) ReloadConfiguration() error {
     return initWithConfig(c, config.LoadPocketCoreConfig())
 }
 
-// Discard all data communicated with master (not the one from slave itself such as network info)
-// This should executed on failure from joining states (unbounded, inquired, keyexchange, checkcrypto)
-func (c *coreContext) DiscardAll() error {
-    // discard aeskey
-    c.DiscardMasterSession()
-
-    // remove decryptor
-    c.masterPubkey = nil
-    // this is to remove master pub key if it exists
-    if c.config != nil {
-        c.config.ClearMasterPublicKey()
-    }
-    // master agent name
-    c.config.ClusterID = ""
-    // slave auth token
-    c.config.CoreSection.CoreAuthToken = ""
-    return nil
-}
-
+// Discard master ip address, and other session related data
 func (c *coreContext) DiscardMasterSession() error {
     c.Lock()
     defer c.Unlock()
@@ -143,25 +110,10 @@ func (c *coreContext) DiscardMasterSession() error {
 // This must be executed on success from CheckCrypto -> Bound, or BindBroken -> Bind
 // No other place can execute this
 func (c *coreContext) SaveConfiguration() error {
-    // master pubkey
-    mpubkey, err := c.GetMasterPublicKey()
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    c.config.SaveMasterPublicKey(mpubkey)
-
     return c.config.SaveCoreConfig()
 }
 
-// --- Master Agent Name ---
-func (c *coreContext) SetClusterID(clusterID string) error {
-    if len(clusterID) == 0 {
-        return errors.Errorf("[ERR] invalid cluster id to set")
-    }
-    c.config.ClusterID = clusterID
-    return nil
-}
-
+// --- Cluster ID ---
 func (c *coreContext) GetClusterID() (string, error) {
     if len(c.config.ClusterID) == 0 {
         return "", errors.Errorf("[ERR] cluster id name")
@@ -170,14 +122,6 @@ func (c *coreContext) GetClusterID() (string, error) {
 }
 
 // --- Auth Token ---
-func (c *coreContext) SetCoreAuthToken(authToken string) error {
-    if len(authToken) == 0 {
-        return errors.Errorf("[ERR] cannot assign invalid core auth token")
-    }
-    c.config.CoreSection.CoreAuthToken = authToken
-    return nil
-}
-
 func (c *coreContext) GetCoreAuthToken() (string, error) {
     if len(c.config.CoreSection.CoreAuthToken) == 0 {
         return "", errors.Errorf("[ERR] invalid core auth token")
@@ -195,19 +139,8 @@ func (c *coreContext) GetPublicKey() ([]byte) {
 }
 
 // --- Master Public key ---
-func (c *coreContext) SetMasterPublicKey(masterPubkey []byte) error {
-    if len(masterPubkey) == 0 {
-        return errors.Errorf("[ERR] invalid master public key")
-    }
-    c.masterPubkey = masterPubkey
-    return nil
-}
-
-func (c *coreContext) GetMasterPublicKey() ([]byte, error) {
-    if c.masterPubkey == nil {
-        return nil, errors.Errorf("[ERR] empty master public key")
-    }
-    return c.masterPubkey, nil
+func (c *coreContext) GetMasterPublicKey() ([]byte) {
+    return c.masterPubkey
 }
 
 // --- Master IP4 Address ---
@@ -230,14 +163,4 @@ func (c *coreContext) GetMasterIP4ExtAddr() (string, error) {
         return "", errors.Errorf("[ERR] empty master ip4 address")
     }
     return c.config.MasterSection.MasterIP4Address , nil
-}
-
-// TODO : add tests
-func (s *coreContext) CoreKeyAndCertPath() string {
-    return s.config.KeyAndCertDir()
-}
-
-// TODO : add tests
-func (s *coreContext) CoreConfigPath() string {
-    return s.config.ConfigDir()
 }

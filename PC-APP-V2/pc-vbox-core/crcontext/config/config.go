@@ -134,19 +134,13 @@ func LoadPocketCoreConfig() *PocketCoreConfig {
 }
 
 func (c *PocketCoreConfig) SaveCoreConfig() error {
-    // check if config dir exists, and creat if DNE
-    dir := DirPathCoreConfig(c.rootPath)
-    if _, err := os.Stat(dir); os.IsNotExist(err) {
-        os.MkdirAll(dir, os.ModeDir|0700)
-    }
-
-    path := FilePathCoreConfig(c.rootPath)
-    config, err := yaml.Marshal(c)
+    cfg, err := yaml.Marshal(c)
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
-    if err = ioutil.WriteFile(path, config, 0600); err != nil {
-        return err
+    err = ioutil.WriteFile(FilePathCoreConfig(c.rootPath), cfg, 0600)
+    if err != nil {
+        return errors.WithStack(err)
     }
     return nil
 }

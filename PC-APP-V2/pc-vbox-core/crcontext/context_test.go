@@ -4,14 +4,13 @@ import (
     "testing"
     "reflect"
 
-    "github.com/stkim1/pcrypto"
     "github.com/davecgh/go-spew/spew"
+    "github.com/stkim1/pcrypto"
+    "github.com/stkim1/pc-vbox-core/crcontext/config"
 )
 
 const (
-    CLUSTERID string        = "master-yoda"
     MASTER_IP4_ADDR string  = "192.168.1.4"
-    CORE_AUTH_TOKEN string  = "yyLq8F5NbSZQJ7aT"
 )
 
 func setUp() {
@@ -33,27 +32,11 @@ func TestSaveLoadSlaveContext(t *testing.T) {
     setUp()
     defer tearDown()
 
-    err := SharedCoreContext().SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey());
+    err := SharedCoreContext().SetMasterIP4ExtAddr(MASTER_IP4_ADDR)
     if err != nil {
         t.Error(err.Error())
         return
     }
-    err = SharedCoreContext().SetClusterID(CLUSTERID)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    err = SharedCoreContext().SetMasterIP4ExtAddr(MASTER_IP4_ADDR)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    err = SharedCoreContext().SetCoreAuthToken(CORE_AUTH_TOKEN)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-
     _, err = SharedCoreContext().GetCoreAuthToken()
     if err != nil {
         t.Error(err.Error())
@@ -73,12 +56,8 @@ func TestSaveLoadSlaveContext(t *testing.T) {
     t.Logf("[INFO] old root %s", oldRoot)
     DebugPrepareCoreContextWithRoot(oldRoot)
 
-    mpk, err := SharedCoreContext().GetMasterPublicKey()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    if !reflect.DeepEqual(mpk, pcrypto.TestMasterWeakPublicKey()) {
+    mpk := SharedCoreContext().GetMasterPublicKey()
+    if !reflect.DeepEqual(mpk, pcrypto.TestMasterStrongPublicKey()) {
         t.Error("[ERR] Master Public key is not properly loaded")
         return
     }
@@ -88,7 +67,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if cid != CLUSTERID {
+    if cid != config.TestClusterID {
         t.Error("[ERR] Incorrect Cluster ID")
         return
     }
@@ -105,7 +84,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if sat != CORE_AUTH_TOKEN {
+    if sat != config.TestAuthToken {
         t.Errorf("[ERR] incorrect slave auth token")
         return
     }
@@ -122,22 +101,7 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
     setUp()
     defer tearDown()
 
-    err := SharedCoreContext().SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey());
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    err = SharedCoreContext().SetClusterID(CLUSTERID)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    err = SharedCoreContext().SetMasterIP4ExtAddr(MASTER_IP4_ADDR)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    err = SharedCoreContext().SetCoreAuthToken(CORE_AUTH_TOKEN)
+    err := SharedCoreContext().SetMasterIP4ExtAddr(MASTER_IP4_ADDR)
     if err != nil {
         t.Error(err.Error())
         return
@@ -160,33 +124,15 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
     singletonContext = nil
     DebugPrepareCoreContextWithRoot(oldRoot)
     // discard all slave & master info
-    err = SharedCoreContext().DiscardAll()
+    err = SharedCoreContext().DiscardMasterSession()
     if err != nil {
         t.Error(err.Error())
-        return
-    }
-
-    _, err = SharedCoreContext().GetMasterPublicKey()
-    if err == nil {
-        t.Error("[ERR] master public key should be null")
-        return
-    }
-
-    _, err = SharedCoreContext().GetClusterID()
-    if err == nil {
-        t.Error("[ERR] cluster id should be empty")
         return
     }
 
     _, err = SharedCoreContext().GetMasterIP4ExtAddr()
     if err == nil {
         t.Error("[ERR] master ip address should be empty")
-        return
-    }
-
-    _, err = SharedCoreContext().GetCoreAuthToken()
-    if err == nil {
-        t.Errorf("[ERR] core authtoken should be null")
         return
     }
 
@@ -202,22 +148,7 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
     setUp()
     defer tearDown()
 
-    err := SharedCoreContext().SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey());
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    err = SharedCoreContext().SetClusterID(CLUSTERID)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    err = SharedCoreContext().SetMasterIP4ExtAddr(MASTER_IP4_ADDR)
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
-    err = SharedCoreContext().SetCoreAuthToken(CORE_AUTH_TOKEN)
+    err := SharedCoreContext().SetMasterIP4ExtAddr(MASTER_IP4_ADDR)
     if err != nil {
         t.Error(err.Error())
         return
@@ -237,12 +168,12 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
     // discard master session
     SharedCoreContext().DiscardMasterSession()
 
-    mpk, err := SharedCoreContext().GetMasterPublicKey()
+    mpk := SharedCoreContext().GetMasterPublicKey()
     if len(mpk) == 0 {
         t.Error("[ERR] master public key should not be null")
         return
     }
-    if !reflect.DeepEqual(mpk, pcrypto.TestMasterWeakPublicKey()) {
+    if !reflect.DeepEqual(mpk, pcrypto.TestMasterStrongPublicKey()) {
         t.Error("[ERR] Master Public key is not properly loaded")
         return
     }
@@ -252,8 +183,8 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
     }
 
     ma, err := SharedCoreContext().GetClusterID()
-    if len(ma) == 0 {
-        t.Error("[ERR] cluster id should not be void")
+    if ma != config.TestClusterID {
+        t.Error("[ERR] incorrect cluster id")
         return
     }
     if err != nil {
@@ -276,9 +207,8 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    if sat != CORE_AUTH_TOKEN {
+    if sat != config.TestAuthToken {
         t.Errorf("[ERR] incorrect slave auth token")
         return
     }
-
 }

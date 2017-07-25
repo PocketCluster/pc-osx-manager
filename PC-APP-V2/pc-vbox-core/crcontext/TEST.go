@@ -2,32 +2,19 @@ package crcontext
 
 import (
     "log"
+    "os"
+    "path/filepath"
 
-    "github.com/stkim1/pcrypto"
+    "github.com/pborman/uuid"
     "github.com/stkim1/pc-vbox-core/crcontext/config"
 )
 
 func DebugPrepareCoreContext() PocketCoreContext {
-    // instead of running singleton creation, we'll invalidate sync.once to disengage in singleton production
-    // getSingletonSlaveContext()
-    once.Do(func(){})
-
-    // load config and generate
-    singletonContext = &coreContext{}
-    cfg, err := config.DebugConfigPrepare()
-    if err != nil {
-        log.Panic(err.Error())
-    }
-    err = initWithConfig(singletonContext, cfg)
-    if err != nil {
-        log.Panic(err.Error())
-    }
-
-    // pub/priv keys are generated
-    singletonContext.pocketPublicKey    = pcrypto.TestSlavePublicKey()
-    singletonContext.pocketPrivateKey   = pcrypto.TestSlavePrivateKey()
-
-    return singletonContext
+    var (
+        // check if the path exists and make it if absent
+        rootPath string = filepath.Join(os.TempDir(), uuid.New())
+    )
+    return DebugPrepareCoreContextWithRoot(rootPath)
 }
 
 func DebugPrepareCoreContextWithRoot(rootPath string) PocketCoreContext {
@@ -46,15 +33,11 @@ func DebugPrepareCoreContextWithRoot(rootPath string) PocketCoreContext {
         log.Panic(err.Error())
     }
 
-    // pub/priv keys are generated
-    singletonContext.pocketPublicKey    = pcrypto.TestSlavePublicKey()
-    singletonContext.pocketPrivateKey   = pcrypto.TestSlavePrivateKey()
-
     return singletonContext
 }
 
 func DebugDestroyCoreContext() {
-    singletonContext.DiscardAll()
+    singletonContext.DiscardMasterSession()
     config.DebugConfigDestory(singletonContext.config)
     singletonContext = nil
 }
