@@ -22,37 +22,34 @@ const (
 
 // ------ CONFIGURATION FILES ------
 const (
-    // POCKET SPECIFIC CONFIG
+    // POCKET CONFIG DIRECTORIES
     core_config_dir string             = "/etc/pocket/"
-    core_config_file string            = core_config_dir + "core-conf.yaml"
-
     core_certs_dir string              = core_config_dir + "pki/"
-    // these files are 2048 RSA crypto files used to join network
-    core_public_Key_file string        = core_certs_dir + "pc_core_vbox_report" + pcrypto.FileExtPublicKey
-    core_prvate_Key_file string        = core_certs_dir + "pc_core_vbox_report" + pcrypto.FileExtPrivateKey
-    master_public_Key_file string      = core_certs_dir + "pc_master_vbox_ctrl" + pcrypto.FileExtPublicKey
 
-    // these files are 2048 RSA crypto files used for Docker & Registry. This should be acquired from Teleport Auth server
-    CoreAuthCertFileName string        = core_certs_dir + "pc_core_engine"      + pcrypto.FileExtAuthCertificate
-    CoreEngineKeyFileName string       = core_certs_dir + "pc_core_engine"      + pcrypto.FileExtPrivateKey
-    CoreEngineCertFileName string      = core_certs_dir + "pc_core_engine"      + pcrypto.FileExtCertificate
-
+    // core config file
+    core_config_file string            = core_config_dir + "core-conf.yaml"
     // these are files used for teleport certificate
-    CoreSSHCertificateFileName string  = core_certs_dir + "pc_core_ssh"         + pcrypto.FileExtSSHCertificate
-    CoreSSHPrivateKeyFileName string   = core_certs_dir + "pc_core_ssh"         + pcrypto.FileExtPrivateKey
-
-    // HOST GENERAL CONFIG
-    host_timezone_file string          = "/etc/timezone"
-
+    CoreSSHCertificateFileName  string = core_certs_dir + "pc_core_ssh" + pcrypto.FileExtSSHCertificate
+    CoreSSHPrivateKeyFileName   string = core_certs_dir + "pc_core_ssh" + pcrypto.FileExtPrivateKey
 
     core_cluster_id_file        string = "cluster.id"
     core_ssh_auth_token_file    string = "ssh.auth.token"
     core_user_name_file         string = "core.user.name"
 
     core_tls_auth_cert_file     string = "pki/pc_core_tls" + pcrypto.FileExtAuthCertificate
-    cert_tls_key_cert_file      string = "pki/pc_core_tls" + pcrypto.FileExtCertificate
+    core_tls_key_cert_file      string = "pki/pc_core_tls" + pcrypto.FileExtCertificate
     core_tls_prvate_key_file    string = "pki/pc_core_tls" + pcrypto.FileExtPrivateKey
 
+
+    // --- --- --- --- --- --- --- --- --- POSSIBLY DEPRECATED --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    // HOST GENERAL CONFIG
+    host_timezone_file string          = "/etc/timezone"
+    // these files are 2048 RSA crypto files used for Docker & Registry. This should be acquired from Teleport Auth server
+    CoreAuthCertFileName string        = core_certs_dir + "pc_core_engine"      + pcrypto.FileExtAuthCertificate
+    // these files are 2048 RSA crypto files used to join network
+    core_public_Key_file string        = core_certs_dir + "pc_core_vbox_report" + pcrypto.FileExtPublicKey
+    core_prvate_Key_file string        = core_certs_dir + "pc_core_vbox_report" + pcrypto.FileExtPrivateKey
+    master_public_Key_file string      = core_certs_dir + "pc_master_vbox_ctrl" + pcrypto.FileExtPublicKey
 )
 
 // ------ SALT DEFAULT ------
@@ -242,7 +239,7 @@ func (c *PocketCoreConfig) FilePathTLSAuthCert() string {
 }
 
 func (c *PocketCoreConfig) FilePathTLSKeyCert() string {
-    return c.rootPath + core_config_dir + cert_tls_key_cert_file
+    return c.rootPath + core_config_dir + core_tls_key_cert_file
 }
 
 func (c *PocketCoreConfig) FilePathTLSPrivateKey() string {
@@ -271,10 +268,9 @@ func ArchivePathTLSAuthCert() string {
 }
 
 func ArchivePathTLSKeyCert() string {
-    return cert_tls_key_cert_file
+    return core_tls_key_cert_file
 }
 
 func ArchivePathTLSPrivateKey() string {
     return core_tls_prvate_key_file
 }
-
