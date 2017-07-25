@@ -1,11 +1,13 @@
 package config
 
 import (
-    "os"
-    "os/user"
     "log"
+    "io/ioutil"
+    "os"
+    "path/filepath"
 
     "github.com/pborman/uuid"
+    "github.com/stkim1/pcrypto"
 )
 
 func (pc *PocketCoreConfig) DebugGetRootPath() string {
@@ -13,25 +15,29 @@ func (pc *PocketCoreConfig) DebugGetRootPath() string {
 }
 
 func DebugConfigPrepare() (*PocketCoreConfig, error) {
-
-    usr, err := user.Current()
-    if err != nil {
-        return nil, err
-    }
-
-    // TODO : ubuntu does not support TMPDIR env. CI host should have it's TMP as memfs in the future
-    //root := os.Getenv("TMPDIR")
-
     var (
-        tuid string = uuid.New()
         // check if the path exists and make it if absent
-        root string     = usr.HomeDir + "/temp/" + tuid
+        rootPath string = filepath.Join(os.TempDir(), uuid.New())
     )
-
-    return _loadCoreConfig(root), nil
+    return DebugConfigPrepareWithRoot(rootPath)
 }
 
 func DebugConfigPrepareWithRoot(rootPath string) (*PocketCoreConfig, error) {
+    var (
+        dirConfig        string = DirPathCoreConfig(rootPath)
+        dirCerts         string = DirPathCoreCerts(rootPath)
+        pathCorePubKey   string = FilePathCoreVboxPublicKey(rootPath)
+        pathCorePrvKey   string = FilePathCoreVboxPrivateKey(rootPath)
+        pathMasterPubKey string = FilePathMasterVboxPublicKey(rootPath)
+    )
+
+    os.MkdirAll(dirConfig, os.ModeDir|0700)
+    os.MkdirAll(dirCerts,  os.ModeDir|0700)
+
+    ioutil.WriteFile(pathCorePubKey,   pcrypto.TestSlaveNodePublicKey(),    0600)
+    ioutil.WriteFile(pathCorePrvKey,   pcrypto.TestSlaveNodePrivateKey(),   0600)
+    ioutil.WriteFile(pathMasterPubKey, pcrypto.TestMasterStrongPublicKey(), 0600)
+
     return _loadCoreConfig(rootPath), nil
 }
 
@@ -41,11 +47,4 @@ func DebugConfigDestory(cfg *PocketCoreConfig) {
     }
 
     os.RemoveAll(cfg.rootPath)
-
-    // TODO : safely remove file. It seems file creation in test case create race condition *following does not work*
-/*
-    if _, err := os.Stat(cfg.rootPath); os.IsExist(err) {
-        os.RemoveAll(cfg.rootPath)
-    }
- */
 }

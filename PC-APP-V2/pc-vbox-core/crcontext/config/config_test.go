@@ -60,23 +60,12 @@ func TestConfigSaveReload(t *testing.T) {
         t.Error("[ERR] private key cannot be null")
         return
     }
-}
-
-func TestConfigSaveReloadPublicMasterKey(t *testing.T) {
-    cfg, err := DebugConfigPrepare()
-    if err != nil {
-        t.Errorf(err.Error())
-        return
-    }
-    defer DebugConfigDestory(cfg)
-
     master, err := cfg.MasterPublicKey()
     if err != nil {
         t.Error(err.Error())
         return
     }
-
-    if !reflect.DeepEqual(master, pcrypto.TestMasterWeakPublicKey()) {
+    if !reflect.DeepEqual(master, pcrypto.TestMasterStrongPublicKey()) {
         t.Error("[ERR] Master Publickey is different!")
         return
     }
