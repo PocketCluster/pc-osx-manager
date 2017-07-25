@@ -3,6 +3,7 @@ package config
 import (
     "io/ioutil"
     "os"
+    "path/filepath"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -12,52 +13,42 @@ import (
 
 // ------ CONFIG VERSION -------
 const (
-    CORE_CONFIG_KEY string            = "config-version"
-    CORE_CONFIG_VAL string            = "1.0.1"
-)
-
-const (
-    CORE_STATUS_KEY string            = "binding-status"
+    PC_MASTER                   string = "pc-master"
+    CORE_STATUS_KEY             string = "binding-status"
+    CORE_CONFIG_KEY             string = "config-version"
+    CORE_CONFIG_VAL             string = "1.0.1"
 )
 
 // ------ CONFIGURATION FILES ------
 const (
-    // POCKET CONFIG DIRECTORIES
-    core_config_dir string             = "/etc/pocket/"
-    core_certs_dir string              = core_config_dir + "pki/"
+    // config directory
+    dir_core_config             string = "/etc/pocket/"
 
     // core config file
-    core_config_file string            = core_config_dir + "core-conf.yaml"
-    // these are files used for teleport certificate
-    CoreSSHCertificateFileName  string = core_certs_dir + "pc_core_ssh" + pcrypto.FileExtSSHCertificate
-    CoreSSHPrivateKeyFileName   string = core_certs_dir + "pc_core_ssh" + pcrypto.FileExtPrivateKey
-
+    core_config_file            string = "core.conf.yaml"
     core_cluster_id_file        string = "cluster.id"
     core_ssh_auth_token_file    string = "ssh.auth.token"
     core_user_name_file         string = "core.user.name"
 
-    core_tls_auth_cert_file     string = "pki/pc_core_tls" + pcrypto.FileExtAuthCertificate
-    core_tls_key_cert_file      string = "pki/pc_core_tls" + pcrypto.FileExtCertificate
-    core_tls_prvate_key_file    string = "pki/pc_core_tls" + pcrypto.FileExtPrivateKey
+    // cert directory
+    dir_core_certs              string = "pki"
 
-
-    // --- --- --- --- --- --- --- --- --- POSSIBLY DEPRECATED --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-    // HOST GENERAL CONFIG
-    host_timezone_file string          = "/etc/timezone"
-    // these files are 2048 RSA crypto files used for Docker & Registry. This should be acquired from Teleport Auth server
-    CoreAuthCertFileName string        = core_certs_dir + "pc_core_engine"      + pcrypto.FileExtAuthCertificate
     // these files are 2048 RSA crypto files used to join network
-    core_public_Key_file string        = core_certs_dir + "pc_core_vbox_report" + pcrypto.FileExtPublicKey
-    core_prvate_Key_file string        = core_certs_dir + "pc_core_vbox_report" + pcrypto.FileExtPrivateKey
-    master_public_Key_file string      = core_certs_dir + "pc_master_vbox_ctrl" + pcrypto.FileExtPublicKey
+    core_vbox_public_Key_file   string = "pc_core_vbox" + pcrypto.FileExtPublicKey
+    core_vbox_prvate_Key_file   string = "pc_core_vbox" + pcrypto.FileExtPrivateKey
+    master_vbox_public_Key_file string = "pc_master_vbox" + pcrypto.FileExtPublicKey
+
+    // these files are 2048 RSA crypto files used for Docker & Registry
+    core_engine_auth_cert_file  string = "pc_core_engine" + pcrypto.FileExtAuthCertificate
+    core_engine_key_cert_file   string = "pc_core_engine" + pcrypto.FileExtCertificate
+    core_engine_prvate_key_file string = "pc_core_engine" + pcrypto.FileExtPrivateKey
+
+    // these are files used for teleport certificate
+    core_ssh_key_cert_file      string = "pc_core_ssh" + pcrypto.FileExtSSHCertificate
+    core_ssh_private_key_file   string = "pc_core_ssh" + pcrypto.FileExtPrivateKey
 )
 
-// ------ SALT DEFAULT ------
-const (
-    PC_MASTER string                   = "pc-master"
-)
-
-// --- struct
+// --- structs ---
 type ConfigMasterSection struct {
     MasterIP4Address    string                   `yaml:"-"`
     MasterIP6Address    string                   `yaml:"-"`
@@ -85,7 +76,7 @@ func LoadPocketCoreConfig() *PocketCoreConfig {
     return _loadCoreConfig("")
 }
 
-// --- func
+// --- functions ---
 func _brandNewSlaveConfig(rootPath string) (*PocketCoreConfig) {
     return &PocketCoreConfig{
         rootPath:         rootPath,
@@ -99,52 +90,51 @@ func _loadCoreConfig(rootPath string) (*PocketCoreConfig) {
 
     var (
         // config and key directories
-        configDirPath string    = rootPath + core_config_dir
-        keysDirPath string      = rootPath + core_certs_dir
+        dirConfig      string = DirPathCoreConfig(rootPath)
+        dirCerts       string = DirPathCoreCerts(rootPath)
 
         // pocket cluster join keys
-        pcPubKeyPath string     = rootPath + core_public_Key_file
-        pcPrvKeyPath string     = rootPath + core_prvate_Key_file
+        pathCorePubKey string = FilePathCoreVboxPublicKey(rootPath)
+        pathCorePrvKey string = FilePathCoreVboxPrivateKey(rootPath)
 
         // config file path
-        configFilePath string   = rootPath + core_config_file
+        pathConfigFile string = FilePathCoreConfig(rootPath)
+        makeKeys       bool   = false
 
-        makeKeys bool           = false
-
-        err error               = nil
+        err            error  = nil
     )
 
     // check if config dir exists, and creat if DNE
-    if _, err := os.Stat(configDirPath); os.IsNotExist(err) {
-        os.MkdirAll(configDirPath, 0700);
+    if _, err := os.Stat(dirConfig); os.IsNotExist(err) {
+        os.MkdirAll(dirConfig, 0700);
     }
 
     // check if config secure key dir also exists and creat if DNE
-    if _, err := os.Stat(keysDirPath); os.IsNotExist(err) {
-        os.MkdirAll(keysDirPath, 0700);
+    if _, err := os.Stat(dirCerts); os.IsNotExist(err) {
+        os.MkdirAll(dirCerts, 0700);
     }
 
     // create pocketcluster join key sets
-    if _, err := os.Stat(pcPubKeyPath); os.IsNotExist(err) {
+    if _, err := os.Stat(pathCorePubKey); os.IsNotExist(err) {
         makeKeys = true
     }
-    if _, err := os.Stat(pcPrvKeyPath); os.IsNotExist(err) {
+    if _, err := os.Stat(pathCorePrvKey); os.IsNotExist(err) {
         makeKeys = true
     }
     if makeKeys {
-        err = pcrypto.GenerateStrongKeyPairFiles(pcPubKeyPath, pcPrvKeyPath, "")
+        err = pcrypto.GenerateStrongKeyPairFiles(pathCorePubKey, pathCorePrvKey, "")
         if err != nil {
             log.Panic(errors.WithStack(err).Error())
         }
     }
 
     // check if config file exists in path.
-    if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
+    if _, err := os.Stat(pathConfigFile); os.IsNotExist(err) {
         return _brandNewSlaveConfig(rootPath)
     }
 
     // if does, unmarshal and load them.
-    if configData, err := ioutil.ReadFile(configFilePath); err != nil {
+    if configData, err := ioutil.ReadFile(pathConfigFile); err != nil {
         return _brandNewSlaveConfig(rootPath)
     } else {
         var config PocketCoreConfig
@@ -160,7 +150,7 @@ func _loadCoreConfig(rootPath string) (*PocketCoreConfig) {
 
 func (cfg *PocketCoreConfig) SaveCoreConfig() error {
     // check if config dir exists, and creat if DNE
-    configDirPath := cfg.rootPath + core_config_dir
+    configDirPath := cfg.rootPath + dir_core_config
     if _, err := os.Stat(configDirPath); os.IsNotExist(err) {
         os.MkdirAll(configDirPath, os.ModeDir|0700);
     }
@@ -177,7 +167,7 @@ func (cfg *PocketCoreConfig) SaveCoreConfig() error {
 }
 
 func (pc *PocketCoreConfig) CorePublicKey() ([]byte, error) {
-    pubKeyPath := pc.rootPath + core_public_Key_file
+    pubKeyPath := pc.rootPath + core_vbox_public_Key_file
     if _, err := os.Stat(pubKeyPath); os.IsNotExist(err) {
         return nil, errors.Errorf("[ERR] public key has not been generated properly. This is a critical error")
     }
@@ -185,7 +175,7 @@ func (pc *PocketCoreConfig) CorePublicKey() ([]byte, error) {
 }
 
 func (pc *PocketCoreConfig) CorePrivateKey() ([]byte, error) {
-    prvKeyPath := pc.rootPath + core_prvate_Key_file
+    prvKeyPath := pc.rootPath + core_vbox_prvate_Key_file
     if _, err := os.Stat(prvKeyPath); os.IsNotExist(err) {
         return nil, errors.Errorf("[ERR] private key has not been generated properly. This is a critical error")
     }
@@ -193,57 +183,53 @@ func (pc *PocketCoreConfig) CorePrivateKey() ([]byte, error) {
 }
 
 func (pc *PocketCoreConfig) MasterPublicKey() ([]byte, error) {
-    masterPubKey := pc.rootPath + master_public_Key_file
+    masterPubKey := pc.rootPath + master_vbox_public_Key_file
     if _, err := os.Stat(masterPubKey); os.IsNotExist(err) {
         return nil, errors.Errorf("[ERR] Master Publickey might have not been synced yet.")
     }
     return ioutil.ReadFile(masterPubKey)
 }
 
-func (pc *PocketCoreConfig) SaveMasterPublicKey(masterPubKey []byte) error {
-    if len(masterPubKey) == 0 {
-        return errors.Errorf("[ERR] Cannot save empty master key")
-    }
-    keyPath := pc.rootPath + master_public_Key_file
-    return ioutil.WriteFile(keyPath, masterPubKey, 0600)
+// --- to read config ---
+func DirPathCoreConfig(rootPath string) string {
+    return filepath.Join(rootPath, dir_core_config)
 }
 
-func (pc *PocketCoreConfig) ClearMasterPublicKey() error {
-    keyPath := pc.rootPath + master_public_Key_file
-    return os.Remove(keyPath)
+func FilePathCoreConfig(rootPath string) string {
+    return filepath.Join(DirPathCoreConfig(rootPath), core_config_file)
 }
 
-func (c *PocketCoreConfig) KeyAndCertDir() string {
-    return c.rootPath + core_certs_dir
+func FilePathClusterID(rootPath string) string {
+    return filepath.Join(DirPathCoreConfig(rootPath), core_cluster_id_file)
 }
 
-func (c *PocketCoreConfig) ConfigDir() string {
-    return c.rootPath + core_config_dir
+func FilePathAuthToken(rootPath string) string {
+    return filepath.Join(DirPathCoreConfig(rootPath), core_ssh_auth_token_file)
 }
 
-// --- to reading for config ---
-func (c *PocketCoreConfig) FilePathClusterID() string {
-    return c.rootPath + core_config_dir + core_cluster_id_file
+// --- to read certs ---
+func DirPathCoreCerts(rootPath string) string {
+    return filepath.Join(DirPathCoreConfig(rootPath), dir_core_certs)
 }
 
-func (c *PocketCoreConfig) FilePathAuthToken() string {
-    return c.rootPath + core_config_dir + core_ssh_auth_token_file
+func FilePathCoreVboxPublicKey(rootPath string) string {
+    return filepath.Join(DirPathCoreCerts(rootPath), core_vbox_public_Key_file)
 }
 
-func (c *PocketCoreConfig) FilePathUserName() string {
-    return c.rootPath + core_config_dir + core_user_name_file
+func FilePathCoreVboxPrivateKey(rootPath string) string {
+    return filepath.Join(DirPathCoreCerts(rootPath), core_vbox_prvate_Key_file)
 }
 
-func (c *PocketCoreConfig) FilePathTLSAuthCert() string {
-    return c.rootPath + core_config_dir + core_tls_auth_cert_file
+func FilePathMasterVboxPublicKey(rootPath string) string {
+    return filepath.Join(DirPathCoreCerts(rootPath), master_vbox_public_Key_file)
 }
 
-func (c *PocketCoreConfig) FilePathTLSKeyCert() string {
-    return c.rootPath + core_config_dir + core_tls_key_cert_file
+func FilePathCoreSSHKeyCert(rootPath string) string {
+    return filepath.Join(DirPathCoreCerts(rootPath), core_ssh_key_cert_file)
 }
 
-func (c *PocketCoreConfig) FilePathTLSPrivateKey() string {
-    return c.rootPath + core_config_dir + core_tls_prvate_key_file
+func FilePathCoreSSHPrivateKey(rootPath string) string {
+    return filepath.Join(DirPathCoreCerts(rootPath), core_ssh_private_key_file)
 }
 
 // --- to build tar archive file ---
@@ -259,18 +245,30 @@ func ArchivePathUserName() string {
     return core_user_name_file
 }
 
-func ArchivePathTLSDir() string {
-    return "pki"
+func ArchivePathCertsDir() string {
+    return dir_core_certs
 }
 
-func ArchivePathTLSAuthCert() string {
-    return core_tls_auth_cert_file
+func ArchivePathCoreVboxPublicKey() string {
+    return filepath.Join(ArchivePathCertsDir(), core_vbox_public_Key_file)
 }
 
-func ArchivePathTLSKeyCert() string {
-    return core_tls_key_cert_file
+func ArchivePathCoreVboxPrivateKey() string {
+    return filepath.Join(ArchivePathCertsDir(), core_vbox_prvate_Key_file)
 }
 
-func ArchivePathTLSPrivateKey() string {
-    return core_tls_prvate_key_file
+func ArchivePathMasterVboxPublicKey() string {
+    return filepath.Join(ArchivePathCertsDir(), master_vbox_public_Key_file)
+}
+
+func ArchivePathCoreEngineAuthCert() string {
+    return filepath.Join(ArchivePathCertsDir(), core_engine_auth_cert_file)
+}
+
+func ArchivePathCoreEngineKeyCert() string {
+    return filepath.Join(ArchivePathCertsDir(), core_engine_key_cert_file)
+}
+
+func ArchivePathCoreEnginePrivateKey() string {
+    return filepath.Join(ArchivePathCertsDir(), core_engine_prvate_key_file)
 }
