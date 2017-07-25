@@ -11,10 +11,10 @@ import (
 
 // ------ CONFIG VERSION -------
 const (
-    PC_MASTER                   string = "pc-master"
-    CORE_STATUS_KEY             string = "binding-status"
-    CORE_CONFIG_KEY             string = "config-version"
-    CORE_CONFIG_VAL             string = "1.0.4"
+    PC_MASTER           string = "pc-master"
+    CORE_STATUS_KEY     string = "binding-status"
+    CORE_CONFIG_KEY     string = "config-version"
+    CORE_CONFIG_VER     string = "1.0.4"
 )
 
 // --- structs ---
@@ -41,22 +41,62 @@ type PocketCoreConfig struct {
 }
 
 // --- functions ---
-func _brandNewSlaveConfig(rootPath string) (*PocketCoreConfig) {
-    return &PocketCoreConfig {
-        rootPath:         rootPath,
-        ConfigVersion:    CORE_CONFIG_VAL,
-        MasterSection:    &MasterConfigSection{},
-        CoreSection:      &CoreConfigSection{},
+func brandNewSlaveConfig(rootPath string) (*PocketCoreConfig) {
+    var (
+        pathCoreConfig   string = FilePathCoreConfig(rootPath)
+        pathClusterID    string = FilePathClusterID(rootPath)
+        pathAuthToken    string = FilePathAuthToken(rootPath)
+        cfg              *PocketCoreConfig = nil
+        cfgData          []byte = nil
+        clusterID        []byte = nil
+        authToken        []byte = nil
+        err              error  = nil
+    )
+
+    // read & delete cluster id
+    clusterID, err = ioutil.ReadFile(pathClusterID)
+    if err != nil {
+        log.Panic(errors.WithStack(err).Error())
+    } else {
+        os.Remove(pathClusterID)
     }
+
+    // read & delete auth token
+    authToken, err = ioutil.ReadFile(pathAuthToken)
+    if err != nil {
+        log.Panic(errors.WithStack(err).Error())
+    } else {
+        os.Remove(pathAuthToken)
+    }
+
+    // core config
+    cfg = &PocketCoreConfig {
+        rootPath:         rootPath,
+        ConfigVersion:    CORE_CONFIG_VER,
+        ClusterID:        string(clusterID),
+        MasterSection:    &MasterConfigSection{},
+        CoreSection:      &CoreConfigSection{
+            CoreAuthToken:    string(authToken),
+        },
+    }
+    cfgData, err = yaml.Marshal(cfg)
+    if err != nil {
+        log.Panic(errors.WithStack(err).Error())
+    }
+    err = ioutil.WriteFile(pathCoreConfig, cfgData, 0600)
+    if err != nil {
+        log.Panic(errors.WithStack(err).Error())
+    }
+    return cfg
 }
 
-func _loadCoreConfig(rootPath string) (*PocketCoreConfig) {
+func loadCoreConfig(rootPath string) (*PocketCoreConfig) {
     var (
         dirConfig      string = DirPathCoreConfig(rootPath)
         dirCerts       string = DirPathCoreCerts(rootPath)
         pathCoreConfig string = FilePathCoreConfig(rootPath)
 
-        config         *PocketCoreConfig = &PocketCoreConfig{}
+        cfg            *PocketCoreConfig = &PocketCoreConfig{}
         cfgData        []byte            = nil
         err            error             = nil
     )
@@ -77,29 +117,27 @@ func _loadCoreConfig(rootPath string) (*PocketCoreConfig) {
     // if does, unmarshal and load them.
     cfgData, err = ioutil.ReadFile(pathCoreConfig)
     if err != nil {
-        return _brandNewSlaveConfig(rootPath)
-    } else {
-        err = yaml.Unmarshal(cfgData, config)
-        if err != nil {
-            return _brandNewSlaveConfig(rootPath)
-        } else {
-            // as rootpath is ignored, we need to restore it
-            config.rootPath = rootPath
-            return config
-        }
+        return brandNewSlaveConfig(rootPath)
     }
+    err = yaml.Unmarshal(cfgData, cfg)
+    if err != nil {
+        return brandNewSlaveConfig(rootPath)
+    }
+    // as rootpath is ignored, we need to restore it
+    cfg.rootPath = rootPath
+    return cfg
 }
 
 // This is default public constructor as it does not accept root file path
 func LoadPocketCoreConfig() *PocketCoreConfig {
-    return _loadCoreConfig("")
+    return loadCoreConfig("")
 }
 
 func (c *PocketCoreConfig) SaveCoreConfig() error {
     // check if config dir exists, and creat if DNE
     dir := DirPathCoreConfig(c.rootPath)
     if _, err := os.Stat(dir); os.IsNotExist(err) {
-        os.MkdirAll(dir, os.ModeDir|0700);
+        os.MkdirAll(dir, os.ModeDir|0700)
     }
 
     path := FilePathCoreConfig(c.rootPath)
