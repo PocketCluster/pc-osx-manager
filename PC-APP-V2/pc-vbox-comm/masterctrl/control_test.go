@@ -68,32 +68,6 @@ func (m *MasterControlTestSuite) TearDownTest(c *C) {
     context.DebugContextDestroy()
 }
 
-func (m *MasterControlTestSuite) prepareUnboundedMasterCore() error {
-    // setup core node
-    coreNode := model.RetrieveCoreNode()
-    coreNode.SetAuthToken(authToken)
-    err := coreNode.CreateCore()
-    if err != nil {
-        return err
-    }
-
-    // setup controller
-    ctrl, err := NewVBoxMasterControl(clusterID, masterExtIp4Addr, pcrypto.TestMasterStrongPrivateKey(), pcrypto.TestMasterStrongPublicKey(), coreNode, nil)
-    if err != nil {
-        return err
-    }
-    m.master = ctrl.(*masterControl)
-
-    // setup core
-    core := &coreProperty{
-        publicKey:     pcrypto.TestSlaveNodePublicKey(),
-        privateKey:    pcrypto.TestSlaveNodePrivateKey(),
-        timestamp:     m.timestamp,
-    }
-    m.core = core
-    return nil
-}
-
 func (m *MasterControlTestSuite) prepareBindBrokenMasterCore() error {
     // setup core node
     coreNode := model.RetrieveCoreNode()
@@ -139,62 +113,6 @@ func (m *MasterControlTestSuite) prepareBindBrokenMasterCore() error {
 
 // --- Test Body ---
 
-func (m *MasterControlTestSuite) Test_Core_Join_To_Master(c *C) {
-    // setup test specifics
-    err := m.prepareUnboundedMasterCore()
-    if err != nil {
-        log.Panic(err.Error())
-    }
-
-    // check master status
-    c.Assert(m.master.CurrentState(), Equals, mpkg.VBoxMasterUnbounded)
-
-    // core report
-    metaPackage, err := cpkg.CorePackingUnboundedStatus(m.core.publicKey)
-    c.Assert(err, IsNil)
-    c.Assert(len(metaPackage), Not(Equals), 0)
-
-    // master read and ack
-    m.timestamp = m.core.timestamp.Add(time.Second)
-    metaPackage, err = m.master.ReadCoreMetaAndMakeMasterAck(nil, metaPackage, m.timestamp)
-    c.Assert(err, IsNil)
-    c.Assert(len(metaPackage), Not(Equals), 0)
-    c.Assert(m.master.CurrentState(), Equals, mpkg.VBoxMasterKeyExchange)
-
-    // core read
-    m.core.timestamp = m.timestamp.Add(time.Second)
-    meta, err := mpkg.MasterUnpackingAcknowledge(metaPackage, m.core.privateKey, nil)
-    c.Assert(err, IsNil)
-    c.Assert(meta.MasterState, Equals, mpkg.VBoxMasterKeyExchange)
-    c.Assert(meta.MasterAcknowledge.AuthToken, Equals, authToken)
-    c.Assert(meta.Encryptor, NotNil)
-    c.Assert(meta.Decryptor, NotNil)
-    m.core.encryptor = meta.Encryptor
-    m.core.decryptor = meta.Decryptor
-
-    // core report
-    m.core.timestamp = m.core.timestamp.Add(time.Second)
-    metaPackage, err = cpkg.CorePackingBoundedStatus(coreExtIp4AdrSmMask, coreExtIp4Gateway, m.core.encryptor)
-    c.Assert(err, IsNil)
-    c.Assert(len(metaPackage), Not(Equals), 0)
-
-    // master read and ack
-    m.timestamp = m.core.timestamp.Add(time.Second)
-    metaPackage, err = m.master.ReadCoreMetaAndMakeMasterAck(nil, metaPackage, m.timestamp)
-    c.Assert(err, IsNil)
-    c.Assert(len(metaPackage), Not(Equals), 0)
-    c.Assert(m.master.CurrentState(), Equals, mpkg.VBoxMasterBounded)
-
-    // core read
-    m.core.timestamp = m.timestamp.Add(time.Second)
-    meta, err = mpkg.MasterUnpackingAcknowledge(metaPackage, nil, m.core.decryptor)
-    c.Assert(err, IsNil)
-    c.Assert(meta.MasterState, Equals, mpkg.VBoxMasterBounded)
-    c.Assert(meta.MasterAcknowledge.AuthToken, Equals, "")
-    c.Assert(meta.Encryptor, Equals, nil)
-    c.Assert(meta.Decryptor, Equals, nil)
-}
-
 func (m *MasterControlTestSuite) TestCoreNodeBindRecovery(c *C) {
     // setup test specifics
     err := m.prepareBindBrokenMasterCore()
@@ -206,7 +124,7 @@ func (m *MasterControlTestSuite) TestCoreNodeBindRecovery(c *C) {
     c.Assert(m.master.CurrentState(), Equals, mpkg.VBoxMasterBindBroken)
 
     // core report
-    metaPackage, err := cpkg.CorePackingBindBrokenStatus(coreExtIp4AdrSmMask, coreExtIp4Gateway, m.core.encryptor)
+    metaPackage, err := cpkg.CorePackingBindBrokenStatus(clusterID, coreExtIp4AdrSmMask, coreExtIp4Gateway, m.core.encryptor)
     c.Assert(err, IsNil)
     c.Assert(len(metaPackage), Not(Equals), 0)
 
@@ -219,16 +137,13 @@ func (m *MasterControlTestSuite) TestCoreNodeBindRecovery(c *C) {
 
     // core read
     m.core.timestamp = m.timestamp.Add(time.Second)
-    meta, err := mpkg.MasterUnpackingAcknowledge(metaPackage, nil, m.core.decryptor)
+    meta, err := mpkg.MasterUnpackingAcknowledge(clusterID, metaPackage, m.core.decryptor)
     c.Assert(err, IsNil)
-    c.Assert(meta.MasterState, Equals, mpkg.VBoxMasterBounded)
-    c.Assert(meta.MasterAcknowledge.AuthToken, Equals, "")
-    c.Assert(meta.Encryptor, Equals, nil)
-    c.Assert(meta.Decryptor, Equals, nil)
+    c.Assert(meta.MasterAcknowledge.MasterState, Equals, mpkg.VBoxMasterBounded)
 
     // core report
     m.core.timestamp = m.core.timestamp.Add(time.Second)
-    metaPackage, err = cpkg.CorePackingBoundedStatus(coreExtIp4AdrSmMask, coreExtIp4Gateway, m.core.encryptor)
+    metaPackage, err = cpkg.CorePackingBoundedStatus(clusterID, coreExtIp4AdrSmMask, coreExtIp4Gateway, m.core.encryptor)
     c.Assert(err, IsNil)
     c.Assert(len(metaPackage), Not(Equals), 0)
 
@@ -241,10 +156,7 @@ func (m *MasterControlTestSuite) TestCoreNodeBindRecovery(c *C) {
 
     // core read
     m.core.timestamp = m.timestamp.Add(time.Second)
-    meta, err = mpkg.MasterUnpackingAcknowledge(metaPackage, nil, m.core.decryptor)
+    meta, err = mpkg.MasterUnpackingAcknowledge(clusterID, metaPackage, m.core.decryptor)
     c.Assert(err, IsNil)
-    c.Assert(meta.MasterState, Equals, mpkg.VBoxMasterBounded)
-    c.Assert(meta.MasterAcknowledge.AuthToken, Equals, "")
-    c.Assert(meta.Encryptor, Equals, nil)
-    c.Assert(meta.Decryptor, Equals, nil)
+    c.Assert(meta.MasterAcknowledge.MasterState, Equals, mpkg.VBoxMasterBounded)
 }

@@ -28,7 +28,7 @@ func (n *bindbroken) makeCoreReport(core *coreReporter, ts time.Time) ([]byte, e
         return nil, errors.WithStack(err)
     }
 
-    meta, err = cpkg.CorePackingBindBrokenStatus(eni.IP4Address[0], eni.GatewayAddr, core.rsaEncryptor)
+    meta, err = cpkg.CorePackingBindBrokenStatus(core.clusterID, eni.IP4Address[0], eni.GatewayAddr, core.rsaEncryptor)
     return meta, errors.WithStack(err)
 }
 
@@ -38,7 +38,7 @@ func (n *bindbroken) readMasterAck(core *coreReporter, metaPackage []byte, ts ti
         err error = nil
     )
 
-    meta, err = mpkg.MasterUnpackingAcknowledge(metaPackage, nil, core.rsaDecryptor)
+    meta, err = mpkg.MasterUnpackingAcknowledge(core.clusterID, metaPackage, core.rsaDecryptor)
     if err != nil {
         return VBoxCoreTransitionIdle, errors.WithStack(err)
     }

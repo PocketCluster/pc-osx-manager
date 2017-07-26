@@ -22,11 +22,11 @@ func (b *bounded) readCoreReport(master *masterControl, sender interface{}, meta
     )
 
     // decrypt & update status package
-    meta, err = cpkg.CoreUnpackingStatus(metaPackage, master.rsaDecryptor)
+    meta, err = cpkg.CoreUnpackingStatus(master.clusterID, metaPackage, master.rsaDecryptor)
     if err != nil {
         return VBoxMasterTransitionIdle, errors.WithStack(err)
     }
-    if meta.CoreState != cpkg.VBoxCoreBounded {
+    if meta.CoreStatus.CoreState != cpkg.VBoxCoreBounded {
         return VBoxMasterTransitionIdle, errors.Errorf("[ERR] core state should be VBoxCoreBounded")
     }
     // TODO need lock

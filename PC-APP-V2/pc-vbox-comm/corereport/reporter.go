@@ -55,55 +55,45 @@ type vboxReporter interface {
 }
 
 /* ----------------------------------------------- Instance Definitions --------------------------------------------- */
-func NewCoreReporter(state cpkg.VBoxCoreState, corePrvkey, corePubkey, masterPubkey []byte) (VBoxCoreReporter, error) {
+// New core reporter always start with bind broken state
+func NewCoreReporter(clusterID string, corePrvkey, corePubkey, masterPubkey []byte) (VBoxCoreReporter, error) {
     var (
-        rptr vboxReporter = nil
         encryptor pcrypto.RsaEncryptor = nil
         decryptor pcrypto.RsaDecryptor = nil
         err error = nil
     )
     // check errors first
+    if len(clusterID) == 0 {
+        return nil, errors.Errorf("[ERR] core cluster id cannot be null")
+    }
     if len(corePrvkey) == 0 {
         return nil, errors.Errorf("[ERR] core private key cannot be null")
     }
     if len(corePubkey) == 0 {
         return nil, errors.Errorf("[ERR] core public key cannot be null")
     }
-    if state != cpkg.VBoxCoreUnbounded && len(masterPubkey) == 0 {
+    if len(masterPubkey) == 0 {
         return nil, errors.Errorf("[ERR] master public key cannot be null")
     }
-    switch state {
-        case cpkg.VBoxCoreUnbounded: {
-            rptr = stateUnbounded()
-        }
-        case cpkg.VBoxCoreBindBroken: {
-            rptr = stateBindbroken()
-
-            encryptor, err = pcrypto.NewRsaEncryptorFromKeyData(masterPubkey, corePrvkey)
-            if err != nil {
-                return nil, errors.WithStack(err)
-            }
-            decryptor, err = pcrypto.NewRsaDecryptorFromKeyData(masterPubkey, corePrvkey)
-            if err != nil {
-                return nil, errors.WithStack(err)
-            }
-        }
-        default: {
-            return nil, errors.Errorf("[ERR] core state should either VBoxCoreUnbounded or VBoxCoreBindBroken")
-        }
+    encryptor, err = pcrypto.NewRsaEncryptorFromKeyData(masterPubkey, corePrvkey)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+    decryptor, err = pcrypto.NewRsaDecryptorFromKeyData(masterPubkey, corePrvkey)
+    if err != nil {
+        return nil, errors.WithStack(err)
     }
 
     return &coreReporter {
-        reporter:        rptr,
-        privateKey:      corePrvkey,
-        publicKey:       corePubkey,
+        reporter:        stateBindbroken(),
+        clusterID:       clusterID,
         rsaEncryptor:    encryptor,
         rsaDecryptor:    decryptor,
     }, nil
 }
 
 type coreReporter struct {
-    reporter                     vboxReporter
+    reporter                 vboxReporter
 
     /* ---------------------------------- changing properties to record transaction --------------------------------- */
     // each time we try to make transtion and fail, count goes up.
@@ -118,14 +108,10 @@ type coreReporter struct {
     // last time transmission takes place. This is to control the frequnecy of transmission
     // !!!IMPORTANT!!! BY NOT SETTING A PARTICULAR VALUE, BY NOT SETTING ANYTHING, WE WILL AUTOMATICALLY EXECUTE
     // TX ACTION ON THE IDLE CYCLE RIGHT AFTER A SUCCESSFUL TRANSITION. SO DO NOT SET ANTYHING IN CONSTRUCTION
-    lastTransmissionTS time.Time
+    lastTransmissionTS       time.Time
 
     /* ---------------------------------------- all-states properties ----------------------------------------------- */
-    privateKey               []byte
-    publicKey                []byte
-    masterPubKey             []byte
     clusterID                string
-    authToken                string
     masterExtIp4Addr         string
     rsaEncryptor             pcrypto.RsaEncryptor
     rsaDecryptor             pcrypto.RsaDecryptor
@@ -169,14 +155,7 @@ func stateTransition(currentState cpkg.VBoxCoreState, transitCondition VBoxCoreT
 
         // failed to transit
         case VBoxCoreTransitionFail: {
-            switch currentState {
-                case cpkg.VBoxCoreUnbounded: {
-                    nextState = cpkg.VBoxCoreUnbounded
-                }
-                default: {
-                    nextState = cpkg.VBoxCoreBindBroken
-                }
-            }
+            nextState = cpkg.VBoxCoreBindBroken
         }
 
         // idle
@@ -250,32 +229,22 @@ func runOnTransitionEvents(core *coreReporter, newState, oldState cpkg.VBoxCoreS
 
 func newReporterForState(reporter vboxReporter, newState, oldState cpkg.VBoxCoreState) vboxReporter {
     var (
-        newReporter vboxReporter = nil
-        err error = nil
+        rptr vboxReporter = nil
     )
     if newState == oldState {
         return reporter
     }
 
     switch newState {
-        case cpkg.VBoxCoreUnbounded: {
-            newReporter = stateUnbounded()
-        }
         case cpkg.VBoxCoreBounded: {
-            newReporter = stateBounded()
+            rptr = stateBounded()
         }
-        case cpkg.VBoxCoreBindBroken:
-            fallthrough
         default: {
-            newReporter = stateBindbroken()
-            if err != nil {
-                // this should never happen
-                log.Panic(errors.WithStack(err))
-            }
+            rptr = stateBindbroken()
         }
     }
 
-    return newReporter
+    return rptr
 }
 
 /* ----------------------------------------- Timestamp Transition Functions ----------------------------------------- */
@@ -312,7 +281,7 @@ func stateTransitionWithTimestamp(core *coreReporter, timestamp time.Time) (VBox
 func (c *coreReporter) ReadMasterAcknowledgement(metaPackage []byte, timestamp time.Time) error {
     var (
         oldState cpkg.VBoxCoreState = c.CurrentState()
-        newState cpkg.VBoxCoreState = cpkg.VBoxCoreUnbounded
+        newState cpkg.VBoxCoreState = cpkg.VBoxCoreBindBroken
         transition VBoxCoreTransition
         transErr, eventErr error = nil, nil
     )

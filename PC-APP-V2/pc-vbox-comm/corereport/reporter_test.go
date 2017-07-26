@@ -14,7 +14,6 @@ import (
 )
 
 const (
-    authToken           string = "bjAbqvJVCy2Yr2suWu5t2ZnD4Z5336oNJ0bBJWFZ4A0="
     clusterID           string = "ZKYQbwGnKJfFRTcW"
     masterExtIP4Addr    string = "192.168.1.105"
     coreExtIpAddrSmMask string = "192.168.1.105/24"
@@ -63,22 +62,6 @@ func (r *CoreReportTestSuite) TearDownTest(c *C) {
     crcontext.DebugDestroyCoreContext()
 }
 
-func (r *CoreReportTestSuite) prepareUnboundedCoreMaster() error {
-    m := &masterProperty {
-        privateKey:    pcrypto.TestMasterStrongPrivateKey(),
-        publicKey:     pcrypto.TestMasterStrongPublicKey(),
-        timestamp:     r.timestamp,
-    }
-    r.master = m
-
-    core, err := NewCoreReporter(cpkg.VBoxCoreUnbounded, pcrypto.TestSlaveNodePrivateKey(), pcrypto.TestSlaveNodePublicKey(), nil)
-    if err != nil {
-        return err
-    }
-    r.core = core.(*coreReporter)
-    return nil
-}
-
 func (r *CoreReportTestSuite) prepareBindBrokenCoreMaster() error {
     encryptor, err := pcrypto.NewRsaEncryptorFromKeyData(pcrypto.TestSlaveNodePublicKey(), pcrypto.TestMasterStrongPrivateKey())
     if err != nil {
@@ -97,7 +80,7 @@ func (r *CoreReportTestSuite) prepareBindBrokenCoreMaster() error {
     }
     r.master = m
 
-    core, err := NewCoreReporter(cpkg.VBoxCoreBindBroken, pcrypto.TestSlaveNodePrivateKey(), pcrypto.TestSlaveNodePublicKey(), pcrypto.TestMasterStrongPublicKey())
+    core, err := NewCoreReporter(clusterID, pcrypto.TestSlaveNodePrivateKey(), pcrypto.TestSlaveNodePublicKey(), pcrypto.TestMasterStrongPublicKey())
     if err != nil {
         return err
     }
@@ -106,51 +89,6 @@ func (r *CoreReportTestSuite) prepareBindBrokenCoreMaster() error {
 }
 
 // --- Test Body ---
-
-func (r *CoreReportTestSuite) Test_Unbounded_Core_Joining_To_Master(c *C) {
-    // setup test specifics
-    err := r.prepareUnboundedCoreMaster()
-    if err != nil {
-        log.Panic(err.Error())
-    }
-
-    // check core state
-    c.Assert(r.core.CurrentState(), Equals, cpkg.VBoxCoreUnbounded)
-
-    // core makes report
-    metaPackage, err := r.core.MakeCoreReporter(r.timestamp)
-    c.Assert(err, IsNil)
-    c.Assert(len(metaPackage), Not(Equals), 0)
-
-    // master read
-    r.master.timestamp = r.timestamp.Add(time.Second)
-    meta, err := cpkg.CoreUnpackingStatus(metaPackage, nil)
-    c.Assert(err, IsNil)
-    c.Assert(meta.CoreState, Equals, cpkg.VBoxCoreUnbounded)
-
-    // master build encryptor & decryptor
-    r.master.timestamp = r.master.timestamp.Add(time.Second)
-    encryptor, err := pcrypto.NewRsaEncryptorFromKeyData(meta.PublicKey, pcrypto.TestMasterStrongPrivateKey())
-    c.Assert(err, IsNil)
-    r.master.encryptor = encryptor
-    decryptor, err := pcrypto.NewRsaDecryptorFromKeyData(meta.PublicKey, pcrypto.TestMasterStrongPrivateKey())
-    c.Assert(err, IsNil)
-    r.master.decryptor = decryptor
-
-    // master make acknowledge
-    r.master.timestamp = r.master.timestamp.Add(time.Second)
-    metaPackage, err = mpkg.MasterPackingKeyExchangeAcknowledge(clusterID, authToken, masterExtIP4Addr, r.master.publicKey, r.master.encryptor)
-    c.Assert(err, IsNil)
-    c.Assert(len(metaPackage), Not(Equals), 0)
-
-    // core read acknowledge
-    r.timestamp = r.master.timestamp.Add(time.Second)
-    err = r.core.ReadMasterAcknowledgement(metaPackage, r.master.timestamp)
-    c.Assert(err, IsNil)
-    c.Assert(r.core.CurrentState(), Equals, cpkg.VBoxCoreBounded)
-    c.Assert(r.core.authToken, Equals, authToken)
-}
-
 func (r *CoreReportTestSuite) Test_BindBroken_Core_Joining_To_Master(c *C) {
     // setup test specifics
     err := r.prepareBindBrokenCoreMaster()
@@ -168,9 +106,9 @@ func (r *CoreReportTestSuite) Test_BindBroken_Core_Joining_To_Master(c *C) {
 
     // master read
     r.master.timestamp = r.timestamp.Add(time.Second)
-    meta, err := cpkg.CoreUnpackingStatus(metaPackage, r.master.decryptor)
+    meta, err := cpkg.CoreUnpackingStatus(clusterID, metaPackage, r.master.decryptor)
     c.Assert(err, IsNil)
-    c.Assert(meta.CoreState, Equals, cpkg.VBoxCoreBindBroken)
+    c.Assert(meta.CoreStatus.CoreState, Equals, cpkg.VBoxCoreBindBroken)
 
     // master make acknowledge
     r.master.timestamp = r.master.timestamp.Add(time.Second)
@@ -183,5 +121,4 @@ func (r *CoreReportTestSuite) Test_BindBroken_Core_Joining_To_Master(c *C) {
     err = r.core.ReadMasterAcknowledgement(metaPackage, r.master.timestamp)
     c.Assert(err, IsNil)
     c.Assert(r.core.CurrentState(), Equals, cpkg.VBoxCoreBounded)
-    c.Assert(r.core.authToken, Equals, "")
 }

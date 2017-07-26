@@ -60,7 +60,6 @@ type vboxController interface {
 func NewVBoxMasterControl(clusterID, extIP4Addr string, prvkey, pubkey []byte, coreNode *model.CoreNode, eventAction ControllerActionOnTransition) (VBoxMasterControl, error) {
     // TODO check if controller is bounded or unbounded
     var (
-        controller vboxController = nil
         encryptor pcrypto.RsaEncryptor = nil
         decryptor pcrypto.RsaDecryptor = nil
         err error = nil
@@ -80,34 +79,19 @@ func NewVBoxMasterControl(clusterID, extIP4Addr string, prvkey, pubkey []byte, c
     if coreNode == nil {
         return nil, errors.Errorf("[ERR] corenode model instance cannot be null")
     }
-    _, err = coreNode.GetAuthToken()
+    encryptor, err = pcrypto.NewRsaEncryptorFromKeyData(coreNode.PublicKey, prvkey)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+    decryptor, err = pcrypto.NewRsaDecryptorFromKeyData(coreNode.PublicKey, prvkey)
     if err != nil {
         return nil, errors.WithStack(err)
     }
 
-    // unbounded
-    if coreNode.State == model.SNMStateInit && len(coreNode.PublicKey) == 0 {
-        controller = stateUnbounded()
-
-    // bind broken
-    } else {
-        controller = stateBindbroken()
-        encryptor, err = pcrypto.NewRsaEncryptorFromKeyData(coreNode.PublicKey, prvkey)
-        if err != nil {
-            return nil, errors.WithStack(err)
-        }
-        decryptor, err = pcrypto.NewRsaDecryptorFromKeyData(coreNode.PublicKey, prvkey)
-        if err != nil {
-            return nil, errors.WithStack(err)
-        }
-    }
-
     return &masterControl {
-        controller:      controller,
+        controller:      stateBindbroken(),
         clusterID:       clusterID,
         extIP4Addr:      extIP4Addr,
-        privateKey:      prvkey,
-        publicKey:       pubkey,
         rsaEncryptor:    encryptor,
         rsaDecryptor:    decryptor,
         coreNode:        coreNode,
@@ -128,8 +112,6 @@ type masterControl struct {
     /* ---------------------------------------- all-states properties ----------------------------------------------- */
     clusterID                   string
     extIP4Addr                  string
-    privateKey                  []byte
-    publicKey                   []byte
     rsaEncryptor                pcrypto.RsaEncryptor
     rsaDecryptor                pcrypto.RsaDecryptor
     coreNode                    *model.CoreNode
@@ -171,28 +153,12 @@ func stateTransition(currentState mpkg.VBoxMasterState, transitCondition VBoxMas
     switch transitCondition {
         // successfully transition to the next
         case VBoxMasterTransitionOk: {
-            switch currentState {
-                case mpkg.VBoxMasterUnbounded: {
-                    nextState = mpkg.VBoxMasterKeyExchange
-                }
-                default: {
-                    nextState = mpkg.VBoxMasterBounded
-                }
-            }
+            nextState = mpkg.VBoxMasterBounded
         }
 
         // failed to transit
         case VBoxMasterTransitionFail: {
-            switch currentState {
-                case mpkg.VBoxMasterUnbounded:
-                    fallthrough
-                case mpkg.VBoxMasterKeyExchange: {
-                    nextState = mpkg.VBoxMasterUnbounded
-                }
-                default: {
-                    nextState = mpkg.VBoxMasterBindBroken
-                }
-            }
+            nextState = mpkg.VBoxMasterBindBroken
         }
 
         // idle
@@ -270,30 +236,17 @@ func runOnTransitionEvents(master *masterControl, newState, oldState mpkg.VBoxMa
 func newControllerForState(ctrl vboxController, newState, oldState mpkg.VBoxMasterState) vboxController {
     var (
         newController vboxController = nil
-        err error = nil
     )
     if newState == oldState {
         return ctrl
     }
 
     switch newState {
-        case mpkg.VBoxMasterUnbounded: {
-            newController = stateUnbounded()
-        }
-        case mpkg.VBoxMasterKeyExchange: {
-            newController = stateKeyexchange()
-        }
         case mpkg.VBoxMasterBounded: {
             newController = stateBounded()
         }
-        case mpkg.VBoxMasterBindBroken:
-            fallthrough
         default: {
             newController = stateBindbroken()
-            if err != nil {
-                // this should never happen
-                log.Panic(errors.WithStack(err))
-            }
         }
     }
 
@@ -303,7 +256,7 @@ func newControllerForState(ctrl vboxController, newState, oldState mpkg.VBoxMast
 func (m *masterControl) ReadCoreMetaAndMakeMasterAck(sender interface{}, metaPackage []byte, timestamp time.Time) ([]byte, error) {
     var (
         oldState mpkg.VBoxMasterState = m.CurrentState()
-        newState mpkg.VBoxMasterState = mpkg.VBoxMasterUnbounded
+        newState mpkg.VBoxMasterState = mpkg.VBoxMasterBindBroken
         transitionCandidate, finalTransition VBoxMasterTransition
         transErr, eventErr, buildErr, tErr error = nil, nil, nil, nil
         masterAck []byte = nil
@@ -350,7 +303,7 @@ func (m *masterControl) txTimeWindow() time.Duration {
 func (m *masterControl) HandleCoreDisconnection(timestamp time.Time) error {
     var (
         oldState mpkg.VBoxMasterState = m.CurrentState()
-        newState mpkg.VBoxMasterState = mpkg.VBoxMasterUnbounded
+        newState mpkg.VBoxMasterState = mpkg.VBoxMasterBindBroken
         transErr, eventErr error = nil, nil
     )
     if m.controller == nil {
