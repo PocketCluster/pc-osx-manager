@@ -228,16 +228,16 @@ func main() {
                         if err != nil {
                             log.Debug(err)
                         }
-                        err = initVboxMachinePrep(cid, config.teleConfig)
+//                        err = initVboxMachinePrep(cid, config.teleConfig)
                         if err != nil {
                             log.Debug(err)
                         }
 
-/*
                         err = initVboxCoreReportService(a, cid)
                         if err != nil {
                             log.Debug(err)
                         }
+/*
                         sl := a.ServiceList()
                         for i, _ := range sl {
                             s := sl[i]

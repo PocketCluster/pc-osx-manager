@@ -8,7 +8,6 @@ import (
     "github.com/stkim1/pc-node-agent/service"
     "github.com/pkg/errors"
     "github.com/stkim1/pc-vbox-comm/corereport"
-    cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
     //"github.com/stkim1/pc-vbox-comm/utils"
 
     "github.com/stkim1/pc-vbox-core/crcontext"
