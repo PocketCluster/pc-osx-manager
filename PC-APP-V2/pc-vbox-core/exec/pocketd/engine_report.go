@@ -77,26 +77,23 @@ func initVboxCoreReportService(app service.AppSupervisor) error {
     app.RegisterServiceWithFuncs(
         func() error {
             var (
-                ctx = crcontext.SharedCoreContext()
-                reporter corereport.VBoxCoreReporter = nil
-                conn net.Conn = nil
-                err error = nil
-                cprv, cpub, mpub []byte = nil, nil, nil
+                cprv         []byte = crcontext.SharedCoreContext().GetPrivateKey()
+                cpub         []byte = crcontext.SharedCoreContext().GetPublicKey()
+                mpub         []byte = crcontext.SharedCoreContext().GetMasterPublicKey()
+                reporter     corereport.VBoxCoreReporter = nil
+                conn         net.Conn = nil
+                clusterID    string
+                err          error = nil
             )
 
-            cprv = ctx.GetPrivateKey()
-            cpub = ctx.GetPublicKey()
-            mpub, err = ctx.GetMasterPublicKey()
-            if len(mpub) != 0 && err == nil {
-                reporter, err = corereport.NewCoreReporter(cpkg.VBoxCoreBindBroken, cprv, cpub, mpub)
-                if err != nil {
-                    return errors.WithStack(err)
-                }
-            } else {
-                reporter, err = corereport.NewCoreReporter(cpkg.VBoxCoreUnbounded, cprv, cpub, nil)
-                if err != nil {
-                    return errors.WithStack(err)
-                }
+            clusterID, err = crcontext.SharedCoreContext().GetClusterID()
+            if err != nil {
+                return errors.WithStack(err)
+            }
+
+            reporter, err = corereport.NewCoreReporter(clusterID, cprv, cpub, mpub)
+            if err != nil {
+                return errors.WithStack(err)
             }
 
             inif, err := crcontext.InternalNetworkInterface()
