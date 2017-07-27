@@ -6,22 +6,17 @@ import (
 
     "gopkg.in/vmihailenco/msgpack.v2"
     "github.com/gravitational/teleport/embed"
-    sysd "github.com/coreos/go-systemd/dbus"
     tervice "github.com/gravitational/teleport/lib/service"
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
 
     "github.com/stkim1/pc-node-agent/utils/dhcp"
-    "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-node-agent/service"
+    "github.com/stkim1/pc-vbox-core/crcontext"
 )
 
 const (
     iventNodeDHCPFeedback string    = "ivent.node.dhcp.feedback"
-    systemdDockerServiceUnit string = "docker.service"
-
-    servicePcsshInit string         = "service.pcssh.init"
-    servicePcsshStart string        = "service.pcssh.start"
 )
 
 func initDhcpListner(app service.AppSupervisor) error {
@@ -82,69 +77,14 @@ func initDhcpListner(app service.AppSupervisor) error {
 }
 
 func initTeleportNodeService(app service.AppSupervisor) error {
-    app.RegisterNamedServiceWithFuncs(
-        servicePcsshInit,
+    app.RegisterServiceWithFuncs(
         func() error{
             var (
                 pcsshNode *embed.EmbeddedNodeProcess = nil
                 err error = nil
             )
             // restart teleport
-            cfg, err := tervice.MakeNodeConfig(slcontext.SharedSlaveContext(), true)
-            if err != nil {
-                return errors.WithStack(err)
-            }
-            pcsshNode, err = embed.NewEmbeddedNodeProcess(app, cfg)
-            if err != nil {
-                log.Errorf(err.Error())
-                return errors.WithStack(err)
-            }
-
-            // execute docker engine cert acquisition before SSH node start
-            // TODO : create a waitforevent channel and restart docker engine accordingly
-            err = pcsshNode.AcquireEngineCertificate(slcontext.DockerEnvironemtPostProcess)
-            if err != nil {
-                return errors.WithStack(err)
-            }
-
-            err = pcsshNode.StartNodeSSH()
-            if err != nil {
-                return errors.WithStack(err)
-            }
-            log.Debugf("\n\n(INFO) teleport node started success!\n")
-
-            return nil
-
-            // restart docker engine
-            // TODO : FIX /opt/gopkg/src/github.com/godbus/dbus/conn.go:345 send on closed channel
-            conn, err := sysd.NewSystemdConnection()
-            if err != nil {
-                log.Errorf(err.Error())
-            } else {
-                did, err := conn.RestartUnit(systemdDockerServiceUnit, "replace", nil)
-                if err != nil {
-                    log.Errorf(err.Error())
-                } else {
-                    conn.Close()
-                    log.Debugf("\n\n(INFO) docker engin restart success! ID %d\n", did)
-                }
-            }
-
-            return nil
-        },
-        func(_ func(interface{})) error {
-            return nil
-        })
-
-    app.RegisterNamedServiceWithFuncs(
-        servicePcsshStart,
-        func() error{
-            var (
-                pcsshNode *embed.EmbeddedNodeProcess = nil
-                err error = nil
-            )
-            // restart teleport
-            cfg, err := tervice.MakeNodeConfig(slcontext.SharedSlaveContext(), true)
+            cfg, err := tervice.MakeCoreConfig(crcontext.SharedCoreContext(), true)
             if err != nil {
                 return errors.WithStack(err)
             }
@@ -158,23 +98,6 @@ func initTeleportNodeService(app service.AppSupervisor) error {
                 return errors.WithStack(err)
             }
             log.Debugf("\n\n(INFO) teleport node started success!\n")
-
-            return nil
-
-            // restart docker engine
-            // TODO : FIX /opt/gopkg/src/github.com/godbus/dbus/conn.go:345 send on closed channel
-            conn, err := sysd.NewSystemdConnection()
-            if err != nil {
-                log.Errorf(err.Error())
-            } else {
-                did, err := conn.RestartUnit(systemdDockerServiceUnit, "replace", nil)
-                if err != nil {
-                    return errors.WithStack(err)
-                } else {
-                    conn.Close()
-                    log.Debugf("\n\n(INFO) docker engin restart success! ID %d\n", did)
-                }
-            }
 
             return nil
         },

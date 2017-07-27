@@ -50,7 +50,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
     }
 
     // we're to destroy context w/o deleting the config file
-    oldRoot := singletonContext.config.DebugGetRootPath()
+    oldRoot := singletonContext.config.RootPath()
     singletonContext.config = nil
     singletonContext = nil
     t.Logf("[INFO] old root %s", oldRoot)
@@ -119,7 +119,7 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
         return
     }
     // we're to destroy context w/o deleting the config file
-    oldRoot := singletonContext.config.DebugGetRootPath()
+    oldRoot := singletonContext.config.RootPath()
     singletonContext.config = nil
     singletonContext = nil
     DebugPrepareCoreContextWithRoot(oldRoot)
@@ -161,7 +161,7 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
         return
     }
     // we're to destroy context w/o deleting the config file
-    oldRoot := singletonContext.config.DebugGetRootPath()
+    oldRoot := singletonContext.config.RootPath()
     singletonContext.config = nil
     singletonContext = nil
     DebugPrepareCoreContextWithRoot(oldRoot)

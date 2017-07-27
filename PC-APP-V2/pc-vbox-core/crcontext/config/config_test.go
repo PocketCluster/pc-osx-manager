@@ -89,12 +89,12 @@ func TestConfigMultiReload(t *testing.T) {
     }
     defer DebugConfigDestory(cfg1)
 
-    cfg2 := loadCoreConfig(cfg1.DebugGetRootPath())
+    cfg2 := loadCoreConfig(cfg1.RootPath())
     if !reflect.DeepEqual(cfg1, cfg2) {
         t.Errorf("[ERR] 2nd configuration should be identical without crash")
     }
 
-    cfg3 := loadCoreConfig(cfg1.DebugGetRootPath())
+    cfg3 := loadCoreConfig(cfg1.RootPath())
     if !reflect.DeepEqual(cfg2, cfg3) {
         t.Errorf("[ERR] third configuration should be identical without crash")
     }

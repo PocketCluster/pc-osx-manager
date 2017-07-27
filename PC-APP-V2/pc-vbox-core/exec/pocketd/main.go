@@ -33,14 +33,14 @@ func main() {
         log.Panic(errors.WithStack(err))
     }
 
-    // teleport management
-    //err = initTeleportNodeService(app)
+    // DNS Service
+    err = initDNSService(app)
     if err != nil {
         log.Panic(errors.WithStack(err))
     }
 
-    // DNS Service
-    err = initDNSService(app)
+    // teleport management
+    err = initTeleportNodeService(app)
     if err != nil {
         log.Panic(errors.WithStack(err))
     }

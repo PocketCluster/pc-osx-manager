@@ -137,7 +137,7 @@ func main() {
 
                         // teleport service added
                         // TODO : need to hold teleport instance from GC
-                        _, err = tembed.NewEmbeddedCoreProcess(a.ServiceSupervisor, config.teleConfig)
+                        _, err = tembed.NewEmbeddedMasterProcess(a.ServiceSupervisor, config.teleConfig)
                         if err != nil {
                             log.Debug(err)
                             return

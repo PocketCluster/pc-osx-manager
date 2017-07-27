@@ -16,10 +16,6 @@ const (
     TestAuthToken       string = "22acc6140aa95e69c9bfd6ed778645f9"
 )
 
-func (pc *PocketCoreConfig) DebugGetRootPath() string {
-    return pc.rootPath
-}
-
 func DebugConfigPrepare() (*PocketCoreConfig, error) {
     var (
         // check if the path exists and make it if absent

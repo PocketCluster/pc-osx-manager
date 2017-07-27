@@ -6,6 +6,7 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+    "github.com/pborman/uuid"
     "gopkg.in/yaml.v2"
 )
 
@@ -25,6 +26,7 @@ type MasterConfigSection struct {
 }
 
 type CoreConfigSection struct {
+    CoreNodeUUID        string                   `yaml:"core-node-uuid"`
     CoreAuthToken       string                   `yaml:"core-auth-token"`
     CoreMacAddr         string                   `yaml:"core-mac-addr"`
 }
@@ -76,6 +78,7 @@ func brandNewSlaveConfig(rootPath string) (*PocketCoreConfig) {
         ClusterID:        string(clusterID),
         MasterSection:    &MasterConfigSection{},
         CoreSection:      &CoreConfigSection{
+            CoreNodeUUID:     uuid.New(),
             CoreAuthToken:    string(authToken),
         },
     }
@@ -131,6 +134,10 @@ func loadCoreConfig(rootPath string) (*PocketCoreConfig) {
 // This is default public constructor as it does not accept root file path
 func LoadPocketCoreConfig() *PocketCoreConfig {
     return loadCoreConfig("")
+}
+
+func (c *PocketCoreConfig) RootPath() string {
+    return c.rootPath
 }
 
 func (c *PocketCoreConfig) SaveCoreConfig() error {

@@ -95,13 +95,13 @@ func setupServiceConfig() (*serviceConfig, error) {
     ctx.UpdateVBoxCert(vboxBundle)
 
     // make teleport core config
-    teleCfg := tervice.MakeCoreConfig(dataDir, true)
+    teleCfg := tervice.MakeMasterConfig(dataDir, true)
     teleCfg.AssignHostUUID(meta.ClusterUUID)
     teleCfg.AssignDatabaseEngine(rec.DataBase())
     teleCfg.AssignCertStorage(rec.Certdb())
     teleCfg.AssignCASigner(caBundle.CASigner)
     teleCfg.AssignHostCertAuth(caBundle.CAPrvKey, caBundle.CASSHChk, meta.ClusterDomain)
-    err = tervice.ValidateCoreConfig(teleCfg)
+    err = tervice.ValidateMasterConfig(teleCfg)
     if err != nil {
         return nil, errors.WithStack(err)
     }

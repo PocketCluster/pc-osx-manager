@@ -20,14 +20,14 @@ type PocketCoreContext interface {
     SaveConfiguration() error
 
     GetClusterID() (string, error)
-    GetCoreAuthToken() (string, error)
-
     GetPrivateKey() ([]byte)
     GetPublicKey() ([]byte)
     GetMasterPublicKey() ([]byte)
 
     SetMasterIP4ExtAddr(ip4Address string) error
     GetMasterIP4ExtAddr() (string, error)
+
+    PocketCoreSSHInfo
 }
 
 // Singleton handling
@@ -119,14 +119,6 @@ func (c *coreContext) GetClusterID() (string, error) {
         return "", errors.Errorf("[ERR] cluster id name")
     }
     return c.config.ClusterID, nil
-}
-
-// --- Auth Token ---
-func (c *coreContext) GetCoreAuthToken() (string, error) {
-    if len(c.config.CoreSection.CoreAuthToken) == 0 {
-        return "", errors.Errorf("[ERR] invalid core auth token")
-    }
-    return c.config.CoreSection.CoreAuthToken, nil
 }
 
 //--- decryptor/encryptor interface ---
