@@ -24,6 +24,7 @@ type PocketCoreSSHInfo interface {
 
     CoreSSHCertificateFileName() string
     CoreSSHPrivateKeyFileName() string
+    CoreSSHAdvertiseAddr() string
 
     CoreAuthServerAddr() (string, error)
 }
@@ -58,6 +59,10 @@ func (c *coreContext) CoreKeyAndCertPath() string {
 // TODO : add tests
 func (c *coreContext) CoreSSHCertificateFileName() string {
     return config.FilePathCoreSSHKeyCert(c.config.RootPath())
+}
+
+func (c *coreContext) CoreSSHAdvertiseAddr() string {
+    return "127.0.0.1"
 }
 
 // TODO : add tests
