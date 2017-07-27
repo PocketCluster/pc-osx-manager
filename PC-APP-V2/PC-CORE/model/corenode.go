@@ -94,23 +94,6 @@ func (c *CoreNode) CreateCore() error {
     if c.NodeName != coreNodeName {
         return errors.Errorf("[ERR] incorrect node name")
     }
-    // TODO : check token format
-    if len(c.AuthToken) == 0 {
-        return errors.Errorf("[ERR] incorrect uuid length")
-    }
-    ts := time.Now()
-    c.CreatedAt = ts
-    SharedRecordGate().Session().Create(c)
-    return nil
-}
-
-func (c *CoreNode) JoinCore() error {
-    if c.ModelVersion != CoreNodeModelVersion {
-        return errors.Errorf("[ERR] incorrect core model version")
-    }
-    if c.NodeName != coreNodeName {
-        return errors.Errorf("[ERR] incorrect node name")
-    }
     if c.State != SNMStateInit {
         return errors.Errorf("[ERR] cannot join corenode when core isn't init state")
     }
@@ -122,19 +105,14 @@ func (c *CoreNode) JoinCore() error {
     if len(c.PublicKey) == 0 {
         return errors.Errorf("[ERR] incorrect core public key")
     }
-    // TODO : check ip address form
-    if len(c.IP4Address) == 0 {
-        return errors.Errorf("[ERR] incorrect ip address value")
+    if len(c.PrivateKey) == 0 {
+        return errors.Errorf("[ERR] incorrect core private key")
     }
-    // TODO : check ip gateway form
-    if len(c.IP4Gateway) == 0 {
-        return errors.Errorf("[ERR] incorrect ip gateway value")
-    }
-    ts := time.Now()
     c.State = SNMStateJoined
+    ts := time.Now()
+    c.CreatedAt = ts
     c.Joined = ts
-    c.LastAlive = ts
-    SharedRecordGate().Session().Save(c)
+    SharedRecordGate().Session().Create(c)
     return nil
 }
 
@@ -155,6 +133,9 @@ func (c *CoreNode) Update() error {
     // TODO : check key format
     if len(c.PublicKey) == 0 {
         return errors.Errorf("[ERR] incorrect core public key")
+    }
+    if len(c.PrivateKey) == 0 {
+        return errors.Errorf("[ERR] incorrect core private key")
     }
     c.LastAlive = time.Now()
     SharedRecordGate().Session().Save(c)

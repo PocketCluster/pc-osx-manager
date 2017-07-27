@@ -196,39 +196,18 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
 
-/*
-                    case operation.CmdTeleportNodeAdd: {
-                        clt, err := tembed.OpenAdminClientWithAuthService(config.teleConfig)
-                        if err != nil {
-                            log.Error(err.Error())
-                        }
-                        token, err := tembed.GenerateNodeInviationWithTTL(clt, tembed.MaxInvitationTLL)
-                        if err != nil {
-                            log.Error(err.Error())
-                        }
-                        err = clt.Close()
-                        if err != nil {
-                            log.Error(err.Error())
-                        }
-                        log.Debugf("TELEPORT NODE ADDED FOR TOKEN : %s", token)
-                        log.Debugf("[OP] %v", e.String())
-                    }
-*/
                     case operation.CmdTeleportRootAdd: {
-
-                    }
-                    case operation.CmdTeleportUserAdd: {
-
-                    }
-
-                    /// DEBUG ///
-
-                    case operation.CmdDebug: {
                         cid, err := context.SharedHostContext().MasterAgentName()
                         if err != nil {
                             log.Debug(err)
                         }
-//                        err = initVboxMachinePrep(cid, config.teleConfig)
+                        err = buildVboxCoreDisk(cid, config.teleConfig)
+                        if err != nil {
+                            log.Debug(err)
+                        }
+                    }
+                    case operation.CmdTeleportUserAdd: {
+                        cid, err := context.SharedHostContext().MasterAgentName()
                         if err != nil {
                             log.Debug(err)
                         }
@@ -237,13 +216,16 @@ func main() {
                         if err != nil {
                             log.Debug(err)
                         }
-/*
+                    }
+
+                    /// DEBUG ///
+
+                    case operation.CmdDebug: {
                         sl := a.ServiceList()
                         for i, _ := range sl {
                             s := sl[i]
                             log.Debugf("[SERVICE] %s, %v", s.Tag(), s.IsRunning())
                         }
-*/
                         log.Debugf("[OP] %v", e.String())
                     }
 

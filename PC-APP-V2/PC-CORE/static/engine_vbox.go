@@ -101,23 +101,19 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
         operation.ServiceVBoxMasterControl,
         func() error {
             var (
-                prvkey, pubkey []byte = nil, nil
-                coreNode *model.CoreNode
-                ctrl masterctrl.VBoxMasterControl = nil
-                listen net.Listener = nil
-                conn net.Conn = nil
-                err error = nil
+                prvkey, pubkey []byte                       = nil, nil
+                coreNode       *model.CoreNode              = nil
+                ctrl           masterctrl.VBoxMasterControl = nil
+                listen         net.Listener                 = nil
+                conn           net.Conn                     = nil
+                err            error                        = nil
             )
 
+            // by this time, all the core node data should have been generated
             coreNode = model.RetrieveCoreNode()
             _, err = coreNode.GetAuthToken()
             if err != nil {
-                // TODO we need to wait for core node to get authtoken from Teleport
-                coreNode.SetAuthToken("bjAbqvJVCy2Yr2suWu5t2ZnD4Z5336oNJ0bBJWFZ4A0=")
-                err = coreNode.CreateCore()
-                if err != nil {
-                    return err
-                }
+                return errors.Errorf("[ERR] core node should have auth token at this point")
             }
 
             prvkey, err = context.SharedHostContext().MasterVBoxCtrlPrivateKey()
@@ -169,8 +165,8 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
     return nil
 }
 
-func initVboxMachinePrep(clusterID string, tcfg *tervice.PocketConfig) error {
-    log.Debugf("[VBOX_DISK] generate vbox disk data")
+func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
+    log.Debugf("[VBOX_DISK] build vbox core disk ")
 
     var (
         hostFQDN           string                = fmt.Sprintf("pc-core." + pcrypto.FormFQDNClusterID, clusterID)
@@ -183,6 +179,7 @@ func initVboxMachinePrep(clusterID string, tcfg *tervice.PocketConfig) error {
         caSigner           *pcrypto.CaSigner     = nil
         tclt               *auth.TunClient       = nil
         md                 *vboxutil.MachineDisk = nil
+        coreNode           *model.CoreNode       = nil
     )
 
     // core user & disk path
@@ -232,6 +229,20 @@ func initVboxMachinePrep(clusterID string, tcfg *tervice.PocketConfig) error {
     }
     defer tclt.Close()
     authToken, err = embed.GenerateNodeInviationWithTTL(tclt, embed.MaxInvitationTLL)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    // setup core node
+    coreNode = model.RetrieveCoreNode()
+    _, err = coreNode.GetAuthToken()
+    if err == nil {
+        return errors.Errorf("[ERR] core node shouldn't have any auth token by this point")
+    }
+    coreNode.SetAuthToken(authToken)
+    coreNode.PublicKey = cVpuk
+    coreNode.PrivateKey = cVprk
+    err = coreNode.CreateCore()
     if err != nil {
         return errors.WithStack(err)
     }
