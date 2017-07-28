@@ -19,16 +19,10 @@ const (
 
 const (
     TransitionFailureLimit      int           = 3
-
-    // TODO : timeout mechanism for receiving master meta
-    // Currently (v0.1.4), there is no timeout mechanism implemented for receiving master meta (i.e. if not master
-    // response for a certian amount of time, state goes to failure mode). Instead, (TxActionLimit * Unbounded or Bounded)
-    // times out the crrent state. When TxAction does not work, state will stall. We'll reinvestigate in the future
-    //TransitionTimeout      time.Duration = time.Second * 10
-
     TxActionLimit               int           = 3
+
     UnboundedTimeout            time.Duration = time.Second
-    BoundedTimeout              time.Duration = time.Second * 3
+    BoundedTimeout              time.Duration = time.Second
 )
 
 /* ---------------------------------------------- Interface Definitions --------------------------------------------- */

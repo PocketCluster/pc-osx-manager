@@ -216,6 +216,8 @@ func main() {
                         if err != nil {
                             log.Debug(err)
                         }
+                        a.StartServices()
+                        log.Debugf("[OP] %v", e.String())
                     }
 
                     /// DEBUG ///

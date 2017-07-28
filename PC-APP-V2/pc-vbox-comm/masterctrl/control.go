@@ -22,12 +22,10 @@ const (
 
 const (
     TransitionFailureLimit      int           = 3
-    // TODO : timeout mechanism for receiving slave meta
-    // TransitionTimeout           time.Duration = time.Second * 10
-
     TxActionLimit               int           = 3
+
     UnboundedTimeout            time.Duration = time.Second
-    BoundedTimeout              time.Duration = time.Second * 3
+    BoundedTimeout              time.Duration = time.Second
 )
 
 /* ---------------------------------------------- Interface Definitions --------------------------------------------- */

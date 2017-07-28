@@ -33,7 +33,7 @@ func handleConnection(reporter corereport.VBoxCoreReporter, conn net.Conn, stopC
                     return errors.WithStack(conn.Close())
                 }
                 // give it one second pause
-                time.Sleep(time.Second)
+                time.Sleep(corereport.BoundedTimeout)
 
                 // send core report
                 sendPkg, err = reporter.MakeCoreReporter(time.Now())
@@ -116,7 +116,7 @@ func initVboxCoreReportService(app service.AppSupervisor) error {
                             if err != nil {
                                 log.Debugf("[REPORTER] (%s) transition error (%v)", reporter.CurrentState().String(), err.Error())
                             }
-                            time.Sleep(time.Second * time.Duration(3))
+                            time.Sleep(corereport.BoundedTimeout)
                         } else {
                             err = handleConnection(reporter, conn, app.StopChannel())
                             if err != nil {
