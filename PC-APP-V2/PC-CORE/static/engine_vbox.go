@@ -236,15 +236,16 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
             if err != nil {
                 return errors.WithStack(err)
             }
+            a.BroadcastEvent(service.Event{Name:iventVboxCtrlListenerSpawn, Payload:listen})
+            time.Sleep(time.Millisecond * 500)
 
             // TODO external ip address
             ctrl, err = masterctrl.NewVBoxMasterControl(clusterID, "192.168.1.105", prvkey, pubkey, coreNode, nil)
             if err != nil {
                 return errors.WithStack(err)
             }
-
-            a.BroadcastEvent(service.Event{Name:iventVboxCtrlListenerSpawn, Payload:listen})
             a.BroadcastEvent(service.Event{Name:iventVboxCtrlInstanceSpawn, Payload:ctrl})
+            time.Sleep(time.Millisecond * 500)
 
             log.Debugf("[CONTROL] VBox Core Control service started... %s", ctrl.CurrentState().String())
             for {
@@ -274,6 +275,7 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
             lc := <- listenerC
             listen, ok = lc.Payload.(net.Listener)
             if !ok {
+                log.Debugf("[ERR] invalid VBoxMasterControl type")
                 return errors.Errorf("[ERR] invalid listener type")
             }
 
@@ -281,6 +283,7 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
             cc := <- ctrlObjC
             ctrl, ok = cc.Payload.(masterctrl.VBoxMasterControl)
             if !ok {
+                log.Debugf("[ERR] invalid VBoxMasterControl type")
                 return errors.Errorf("[ERR] invalid VBoxMasterControl type")
             }
 
@@ -288,7 +291,7 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
             for {
                 select {
                     case <- a.StopChannel(): {
-                        log.Debugf("[CONTROL] VBox controller instance shutdown...")
+                        log.Debugf("[CONTROL] VBox Core listener shutdown...")
                         return nil
                     }
                     default: {
