@@ -35,7 +35,7 @@ func initDhcpListner(app service.AppSupervisor) error {
     app.RegisterServiceWithFuncs(
         func () error {
             var (
-                buf [20480]byte
+                buf []byte = make([]byte, 20480)
                 dhcpEvent = &dhcp.PocketDhcpEvent{}
             )
 
