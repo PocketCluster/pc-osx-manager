@@ -1,10 +1,11 @@
 package model
 
 import (
+    "sync"
     "time"
 
-    "github.com/pkg/errors"
     "github.com/jinzhu/gorm"
+    "github.com/pkg/errors"
 )
 
 const (
@@ -35,6 +36,8 @@ type CoreNode struct {
     UserMadeName    string       `gorm:"column:user_made_name;type:VARCHAR(256)"`
     PublicKey       []byte       `gorm:"column:public_key;type:BLOB"`
     PrivateKey      []byte       `gorm:"column:private_key;type:BLOB"`
+
+    updateLock      sync.Mutex   `gorm:"-"`
 }
 
 func RetrieveCoreNode() *CoreNode {
@@ -64,6 +67,9 @@ func (CoreNode) TableName() string {
 
 // returns IP4 string part only
 func (c *CoreNode) IP4AddrString() (string, error) {
+    c.updateLock.Lock()
+    defer c.updateLock.Unlock()
+
     return IP4AddrToString(c.IP4Address)
 }
 
@@ -139,5 +145,22 @@ func (c *CoreNode) Update() error {
     }
     c.LastAlive = time.Now()
     SharedRecordGate().Session().Save(c)
+    return nil
+}
+
+func (c *CoreNode) UpdateIPv4WithGW(ipv4, gwv4 string) error {
+    c.updateLock.Lock()
+    defer c.updateLock.Unlock()
+
+    // TODO add ip address format check
+    if len(ipv4) == 0 {
+        return errors.Errorf("[ERR] invalid IPv4 address format")
+    }
+    if len(gwv4) == 0 {
+        return errors.Errorf("[ERR] invalid gateway address format")
+    }
+
+    c.IP4Address = ipv4
+    c.IP4Gateway = gwv4
     return nil
 }

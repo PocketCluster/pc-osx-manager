@@ -5,9 +5,9 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
-    "github.com/stkim1/pcrypto"
-    "github.com/stkim1/pc-vbox-comm/utils"
     cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
+    "github.com/stkim1/pc-vbox-comm/utils"
+    "github.com/stkim1/pcrypto"
 )
 
 type VBoxCoreTransition int

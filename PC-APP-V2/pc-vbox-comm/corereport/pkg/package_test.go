@@ -3,9 +3,9 @@ package pkg
 import (
     "testing"
 
-    . "gopkg.in/check.v1"
     log "github.com/Sirupsen/logrus"
     "github.com/stkim1/pcrypto"
+    . "gopkg.in/check.v1"
 )
 
 const (

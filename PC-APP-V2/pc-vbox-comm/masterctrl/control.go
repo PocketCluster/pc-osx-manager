@@ -1,16 +1,15 @@
 package masterctrl
 
 import (
+    "sync"
     "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
-
-    "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/model"
-
-    "github.com/stkim1/pc-vbox-comm/utils"
     mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
+    "github.com/stkim1/pc-vbox-comm/utils"
+    "github.com/stkim1/pcrypto"
 )
 
 type VBoxMasterTransition int
@@ -37,7 +36,7 @@ type ControllerActionOnTransition interface {
 // MasterBeacon is assigned individually for each slave node.
 type VBoxMasterControl interface {
     CurrentState() mpkg.VBoxMasterState
-    SetExternalIP4Addr(ip4Address string) error
+    GetCoreNode() *model.CoreNode
 
     ReadCoreMetaAndMakeMasterAck(sender interface{}, metaPackage []byte, timestamp time.Time) ([]byte, error)
     HandleCoreDisconnection(timestamp time.Time) error
@@ -98,6 +97,7 @@ func NewVBoxMasterControl(clusterID, extIP4Addr string, prvkey, pubkey []byte, c
 }
 
 type masterControl struct {
+    sync.Mutex
     controller                  vboxController
 
     /* ---------------------------------- changing properties to record transaction --------------------------------- */
@@ -119,18 +119,17 @@ type masterControl struct {
 }
 
 func (m *masterControl) CurrentState() mpkg.VBoxMasterState {
+    m.Lock()
+    defer m.Unlock()
+
     if m.controller == nil {
         log.Panic("[CRITICAL] vboxController cannot be null")
     }
     return m.controller.currentState()
 }
 
-func (m *masterControl) SetExternalIP4Addr(ip4Address string) error {
-    if len(ip4Address) == 0 {
-        return errors.Errorf("[ERR] invalid master external IPv4 address")
-    }
-    m.extIP4Addr = ip4Address
-    return nil
+func (m *masterControl) GetCoreNode() *model.CoreNode {
+    return m.coreNode
 }
 
 /* ------------------------------------------ Core Meta Transition Functions ---------------------------------------- */
@@ -276,7 +275,9 @@ func (m *masterControl) ReadCoreMetaAndMakeMasterAck(sender interface{}, metaPac
     eventErr = runOnTransitionEvents(m, newState, oldState, finalTransition, timestamp)
 
     // assign vbox controller for new state
+    m.Lock()
     m.controller = newControllerForState(m.controller, newState, oldState)
+    m.Unlock()
 
     // -------------------------------------- make master acknowledgement ----------------------------------------------
     masterAck, buildErr = m.controller.makeMasterAck(m, timestamp)
@@ -315,7 +316,9 @@ func (m *masterControl) HandleCoreDisconnection(timestamp time.Time) error {
     eventErr = runOnTransitionEvents(m, newState, oldState, VBoxMasterTransitionFail, timestamp)
 
     // assign vbox controller for state
+    m.Lock()
     m.controller = newControllerForState(m.controller, newState, oldState)
+    m.Unlock()
 
     // return combined errors
     return utils.SummarizeErrors(transErr, eventErr)

@@ -3,9 +3,9 @@ package pkg
 import (
     "time"
 
-    "gopkg.in/vmihailenco/msgpack.v2"
     "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
+    "gopkg.in/vmihailenco/msgpack.v2"
 )
 
 // --- Version ---
@@ -95,11 +95,9 @@ func corePackingStatus(state VBoxCoreState, clusterID, extAddr, extGateway strin
         return nil, errors.Errorf("[ERR] core status external address cannot be empty")
     }
     // TODO : this can really be zero. find out more cases
-    /*
     if len(extGateway) == 0 {
         return nil, errors.Errorf("[ERR] core status external gateway cannot be empty")
     }
-    */
 
     // packaging status
     spkg, err = msgpack.Marshal(status)
@@ -188,11 +186,9 @@ func CoreUnpackingStatus(clusterID string, metaPackage []byte, rsaDecryptor pcry
         return nil, errors.Errorf("[ERR] invalid ip & subnet mask")
     }
     // TODO : this can really be zero. find out more cases
-    /*
     if len(status.ExtIP4Gateway) == 0 {
         return nil, errors.Errorf("[ERR] invalid gateway")
     }
-    */
 
     // assign status
     meta.CoreStatus = status

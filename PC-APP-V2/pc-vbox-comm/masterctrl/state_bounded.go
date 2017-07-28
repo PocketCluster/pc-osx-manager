@@ -4,8 +4,8 @@ import (
     "time"
 
     "github.com/pkg/errors"
-    mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
     cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
+    mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
 )
 
 type bounded struct {}
@@ -29,9 +29,10 @@ func (b *bounded) readCoreReport(master *masterControl, sender interface{}, meta
     if meta.CoreStatus.CoreState != cpkg.VBoxCoreBounded {
         return VBoxMasterTransitionIdle, errors.Errorf("[ERR] core state should be VBoxCoreBounded")
     }
-    // TODO need lock
-    master.coreNode.IP4Address = meta.CoreStatus.ExtIP4AddrSmask
-    master.coreNode.IP4Gateway = meta.CoreStatus.ExtIP4Gateway
+    err = master.coreNode.UpdateIPv4WithGW(meta.CoreStatus.ExtIP4AddrSmask, meta.CoreStatus.ExtIP4Gateway)
+    if err != nil {
+        return VBoxMasterTransitionIdle, errors.WithMessage(err,"[ERR] cannot update core node with address and gateway")
+    }
 
     return VBoxMasterTransitionOk, nil
 }

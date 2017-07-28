@@ -5,14 +5,14 @@ import (
     "testing"
     "time"
 
-    . "gopkg.in/check.v1"
     log "github.com/Sirupsen/logrus"
-    "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/model"
+    "github.com/stkim1/pcrypto"
+    . "gopkg.in/check.v1"
 
-    mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
     cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
+    mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
 )
 
 const (
@@ -72,14 +72,16 @@ func (m *MasterControlTestSuite) prepareBindBrokenMasterCore() error {
     // setup core node
     coreNode := model.RetrieveCoreNode()
     coreNode.SetAuthToken(authToken)
+    coreNode.PublicKey   = pcrypto.TestSlaveNodePublicKey()
+    coreNode.PrivateKey  = pcrypto.TestSlaveNodePrivateKey()
     err := coreNode.CreateCore()
     if err != nil {
         return err
     }
-    coreNode.PublicKey  = pcrypto.TestSlaveNodePublicKey()
+
     coreNode.IP4Address = coreExtIp4AdrSmMask
     coreNode.IP4Gateway = coreExtIp4Gateway
-    err = coreNode.JoinCore()
+    err = coreNode.Update()
     if err != nil {
         return err
     }
