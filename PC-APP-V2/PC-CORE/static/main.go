@@ -165,6 +165,11 @@ func main() {
                             return
                         }
 
+                        err = initVboxCoreReportService(a, cid)
+                        if err != nil {
+                            log.Debug(err)
+                        }
+
                         err = initMasterBeaconService(a, cid, config.teleConfig)
                         if err != nil {
                             log.Debug(err)
@@ -207,16 +212,6 @@ func main() {
                         }
                     }
                     case operation.CmdTeleportUserAdd: {
-                        cid, err := context.SharedHostContext().MasterAgentName()
-                        if err != nil {
-                            log.Debug(err)
-                        }
-
-                        err = initVboxCoreReportService(a, cid)
-                        if err != nil {
-                            log.Debug(err)
-                        }
-                        a.StartServices()
                         log.Debugf("[OP] %v", e.String())
                     }
 

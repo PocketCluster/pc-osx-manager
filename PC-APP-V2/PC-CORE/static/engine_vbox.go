@@ -188,7 +188,7 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
                 }
 
                 errorCount = 0
-                log.Debugf("[CONTROL] Message Sent Ok (%d)", count)
+                //log.Debugf("[CONTROL] Message Sent Ok (%d)", count)
             }
         }
     }
