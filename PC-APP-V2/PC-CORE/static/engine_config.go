@@ -15,6 +15,7 @@ import (
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/extlib/registry"
+    "github.com/stkim1/pc-core/extlib/pcssh/sshcfg"
 )
 
 type serviceConfig struct {
@@ -95,13 +96,13 @@ func setupServiceConfig() (*serviceConfig, error) {
     ctx.UpdateVBoxCert(vboxBundle)
 
     // make teleport core config
-    teleCfg := tervice.MakeMasterConfig(dataDir, true)
-    teleCfg.AssignHostUUID(meta.ClusterUUID)
-    teleCfg.AssignDatabaseEngine(rec.DataBase())
-    teleCfg.AssignCertStorage(rec.Certdb())
-    teleCfg.AssignCASigner(caBundle.CASigner)
-    teleCfg.AssignHostCertAuth(caBundle.CAPrvKey, caBundle.CASSHChk, meta.ClusterDomain)
-    err = tervice.ValidateMasterConfig(teleCfg)
+    teleCfg := sshcfg.MakeMasterConfig(dataDir, true)
+    sshcfg.AssignHostUUID(teleCfg, meta.ClusterUUID)
+    sshcfg.AssignDatabaseEngine(teleCfg, rec.DataBase())
+    sshcfg.AssignCertStorage(teleCfg, rec.Certdb())
+    sshcfg.AssignCASigner(teleCfg, caBundle.CASigner)
+    sshcfg.AssignHostCertAuth(teleCfg, caBundle.CAPrvKey, caBundle.CASSHChk, meta.ClusterDomain)
+    err = sshcfg.ValidateMasterConfig(teleCfg)
     if err != nil {
         return nil, errors.WithStack(err)
     }

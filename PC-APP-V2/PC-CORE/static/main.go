@@ -3,7 +3,6 @@ package main
 import "C"
 import (
     log "github.com/Sirupsen/logrus"
-    tembed "github.com/gravitational/teleport/embed"
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
 
@@ -12,6 +11,7 @@ import (
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
+    "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
 )
 
 func main() {
@@ -137,7 +137,7 @@ func main() {
 
                         // teleport service added
                         // TODO : need to hold teleport instance from GC
-                        _, err = tembed.NewEmbeddedMasterProcess(a.ServiceSupervisor, config.teleConfig)
+                        _, err = sshproc.NewEmbeddedMasterProcess(a.ServiceSupervisor, config.teleConfig)
                         if err != nil {
                             log.Debug(err)
                             return

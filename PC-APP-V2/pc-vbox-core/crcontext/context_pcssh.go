@@ -20,7 +20,6 @@ type PocketCoreSSHInfo interface {
     CoreSSHPrivateKeyFileName() string
 
     CoreAuthServerAddr() (string, error)
-    CoreSSHAdvertiseAddr() string
 }
 
 func (c *coreContext) CoreNodeUUID() string {
@@ -59,6 +58,6 @@ func (c *coreContext) CoreAuthServerAddr() (string, error) {
     return inif.GatewayAddr, nil
 }
 
-func (c *coreContext) CoreSSHAdvertiseAddr() string {
+func CoreSSHAdvertiseAddr() string {
     return "127.0.0.1"
 }

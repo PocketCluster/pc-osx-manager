@@ -1,6 +1,8 @@
 package slcontext
 
 import (
+    "strings"
+
     "github.com/pkg/errors"
     "github.com/stkim1/pc-node-agent/slcontext/config"
 )
@@ -20,8 +22,6 @@ type PocketSlaveSSHInfo interface {
     SlaveEngineAuthCertFileName() string
     SlaveEngineKeyCertFileName() string
     SlaveEnginePrivateKeyFileName() string
-
-    SlaveSSHAdvertiszeAddr() (string, error)
 }
 
 // --- Slave Node UUID ---
@@ -74,6 +74,20 @@ func (s *slaveContext) SlaveEnginePrivateKeyFileName() string {
     return config.FilePathSlaveEnginePrivateKey(s.config.RootPath())
 }
 
-func (s *slaveContext) SlaveSSHAdvertiszeAddr() (string, error) {
-    return "", nil
+func SlaveSSHAdvertiszeAddr() (string, error) {
+    netif, err := PrimaryNetworkInterface()
+    if err != nil {
+        // TODO if this keeps fail, we'll enforce to get current interface
+        return "", errors.WithStack(err)
+    }
+
+    ip4addr := netif.PrimaryIP4Addr()
+    if len(ip4addr) == 0 || !strings.Contains(ip4addr, "/") {
+        return "", errors.Errorf("[ERR] invalid ip4 + subnet format")
+    }
+    addrform := strings.Split(ip4addr, "/")
+    if len(addrform) != 2 {
+        return "", errors.Errorf("[ERR] invalid ip4 + subnet format")
+    }
+    return addrform[0], nil
 }

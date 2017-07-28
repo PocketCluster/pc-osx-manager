@@ -5,14 +5,14 @@ import (
     "os"
 
     "gopkg.in/vmihailenco/msgpack.v2"
-    "github.com/gravitational/teleport/embed"
-    tervice "github.com/gravitational/teleport/lib/service"
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
 
-    "github.com/stkim1/pc-node-agent/utils/dhcp"
+    "github.com/stkim1/pc-node-agent/pcssh/sshproc"
     "github.com/stkim1/pc-node-agent/service"
+    "github.com/stkim1/pc-node-agent/utils/dhcp"
     "github.com/stkim1/pc-vbox-core/crcontext"
+    "github.com/stkim1/pc-vbox-core/pcssh/sshcfg"
 )
 
 const (
@@ -80,15 +80,15 @@ func initTeleportNodeService(app service.AppSupervisor) error {
     app.RegisterServiceWithFuncs(
         func() error{
             var (
-                pcsshNode *embed.EmbeddedNodeProcess = nil
+                pcsshNode *sshproc.EmbeddedNodeProcess = nil
                 err error = nil
             )
             // restart teleport
-            cfg, err := tervice.MakeCoreConfig(crcontext.SharedCoreContext(), true)
+            cfg, err := sshcfg.MakeCoreConfig(crcontext.SharedCoreContext(), true)
             if err != nil {
                 return errors.WithStack(err)
             }
-            pcsshNode, err = embed.NewEmbeddedNodeProcess(app, cfg)
+            pcsshNode, err = sshproc.NewEmbeddedNodeProcess(app, cfg)
             if err != nil {
                 return errors.WithStack(err)
             }

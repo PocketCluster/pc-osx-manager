@@ -5,15 +5,15 @@ import (
     "os"
 
     "gopkg.in/vmihailenco/msgpack.v2"
-    "github.com/gravitational/teleport/embed"
     sysd "github.com/coreos/go-systemd/dbus"
-    tervice "github.com/gravitational/teleport/lib/service"
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
 
-    "github.com/stkim1/pc-node-agent/utils/dhcp"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-node-agent/service"
+    "github.com/stkim1/pc-node-agent/pcssh/sshcfg"
+    "github.com/stkim1/pc-node-agent/pcssh/sshproc"
+    "github.com/stkim1/pc-node-agent/utils/dhcp"
 )
 
 const (
@@ -86,15 +86,15 @@ func initTeleportNodeService(app service.AppSupervisor) error {
         servicePcsshInit,
         func() error{
             var (
-                pcsshNode *embed.EmbeddedNodeProcess = nil
+                pcsshNode *sshproc.EmbeddedNodeProcess = nil
                 err error = nil
             )
             // restart teleport
-            cfg, err := tervice.MakeNodeConfig(slcontext.SharedSlaveContext(), true)
+            cfg, err := sshcfg.MakeNodeConfig(slcontext.SharedSlaveContext(), true)
             if err != nil {
                 return errors.WithStack(err)
             }
-            pcsshNode, err = embed.NewEmbeddedNodeProcess(app, cfg)
+            pcsshNode, err = sshproc.NewEmbeddedNodeProcess(app, cfg)
             if err != nil {
                 log.Errorf(err.Error())
                 return errors.WithStack(err)
@@ -140,15 +140,15 @@ func initTeleportNodeService(app service.AppSupervisor) error {
         servicePcsshStart,
         func() error{
             var (
-                pcsshNode *embed.EmbeddedNodeProcess = nil
+                pcsshNode *sshproc.EmbeddedNodeProcess = nil
                 err error = nil
             )
             // restart teleport
-            cfg, err := tervice.MakeNodeConfig(slcontext.SharedSlaveContext(), true)
+            cfg, err := sshcfg.MakeNodeConfig(slcontext.SharedSlaveContext(), true)
             if err != nil {
                 return errors.WithStack(err)
             }
-            pcsshNode, err = embed.NewEmbeddedNodeProcess(app, cfg)
+            pcsshNode, err = sshproc.NewEmbeddedNodeProcess(app, cfg)
             if err != nil {
                 return errors.WithStack(err)
             }
