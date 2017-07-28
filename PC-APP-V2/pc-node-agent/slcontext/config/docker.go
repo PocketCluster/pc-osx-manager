@@ -94,7 +94,7 @@ func SetupDockerEnvironement(rootPath string) error {
 
 func SetupDockerAuthorityCert(rootPath string) error {
     var (
-        slaveAuthCertFile string  = FilePathSlaveAuthCert(rootPath)
+        slaveAuthCertFile string  = FilePathSlaveEngineAuthCert(rootPath)
         dockerAuthCertPath string = path.Join(rootPath, DOCKER_AUTH_CERT_PATH)
         dockerAuthCertFile string = path.Join(rootPath, DOCKER_AUTH_CERT_FILE)
 
@@ -131,7 +131,7 @@ func SetupDockerAuthorityCert(rootPath string) error {
 // This function assumes that docker auth certificate exists, and we just need to append it to system certs collection
 func AppendAuthCertFowardSystemCertAuthority(rootPath string) error {
     var (
-        slaveAuthCertFile string        = FilePathSlaveAuthCert(rootPath)
+        slaveAuthCertFile string        = FilePathSlaveEngineAuthCert(rootPath)
         systemAuthCertNativeFile string = path.Join(rootPath, SYSTEM_AUTH_CERT_NATIVE_FILE)
         systemAuthCertBackupPath string = path.Join(rootPath, SYSTEM_AUTH_CERT_BACKUP_PATH)
         systemAuthCertBackupFile string = path.Join(rootPath, SYSTEM_AUTH_CERT_BACKUP_FILE)

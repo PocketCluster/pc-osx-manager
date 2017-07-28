@@ -1,6 +1,7 @@
 package crcontext
 
 import (
+    "fmt"
     "testing"
     "reflect"
 
@@ -37,9 +38,9 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    _, err = SharedCoreContext().GetCoreAuthToken()
-    if err != nil {
-        t.Error(err.Error())
+    at := SharedCoreContext().CoreAuthToken()
+    if len(at) == 0 {
+        t.Error(fmt.Errorf("[ERR] invalid auth token"))
         return
     }
 
@@ -56,17 +57,13 @@ func TestSaveLoadSlaveContext(t *testing.T) {
     t.Logf("[INFO] old root %s", oldRoot)
     DebugPrepareCoreContextWithRoot(oldRoot)
 
-    mpk := SharedCoreContext().GetMasterPublicKey()
+    mpk := SharedCoreContext().MasterPublicKey()
     if !reflect.DeepEqual(mpk, pcrypto.TestMasterStrongPublicKey()) {
         t.Error("[ERR] Master Public key is not properly loaded")
         return
     }
 
-    cid, err := SharedCoreContext().GetClusterID()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
+    cid := SharedCoreContext().CoreClusterID()
     if cid != config.TestClusterID {
         t.Error("[ERR] Incorrect Cluster ID")
         return
@@ -79,9 +76,9 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         return
     }
 
-    sat, err := SharedCoreContext().GetCoreAuthToken()
-    if err != nil {
-        t.Error(err.Error())
+    sat := SharedCoreContext().CoreAuthToken()
+    if len(sat) == 0 {
+        t.Error(fmt.Errorf("[ERR] invalid auth token"))
         return
     }
     if sat != config.TestAuthToken {
@@ -106,9 +103,9 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    _, err = SharedCoreContext().GetCoreAuthToken()
-    if err != nil {
-        t.Error(err.Error())
+    at := SharedCoreContext().CoreAuthToken()
+    if len(at) == 0 {
+        t.Error(fmt.Errorf("[ERR] invalid auth token"))
         return
     }
 
@@ -168,7 +165,7 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
     // discard master session
     SharedCoreContext().DiscardMasterSession()
 
-    mpk := SharedCoreContext().GetMasterPublicKey()
+    mpk := SharedCoreContext().MasterPublicKey()
     if len(mpk) == 0 {
         t.Error("[ERR] master public key should not be null")
         return
@@ -182,13 +179,9 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
         return
     }
 
-    ma, err := SharedCoreContext().GetClusterID()
-    if ma != config.TestClusterID {
+    cid := SharedCoreContext().CoreClusterID()
+    if cid != config.TestClusterID {
         t.Error("[ERR] incorrect cluster id")
-        return
-    }
-    if err != nil {
-        t.Error("[ERR] accessing cluster id should not generate error")
         return
     }
 
@@ -202,9 +195,9 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
         return
     }
 
-    sat, err := SharedCoreContext().GetCoreAuthToken()
-    if err != nil {
-        t.Error(err.Error())
+    sat := SharedCoreContext().CoreAuthToken()
+    if len(sat) == 0 {
+        t.Error(fmt.Errorf("[ERR] invalid auth token"))
         return
     }
     if sat != config.TestAuthToken {

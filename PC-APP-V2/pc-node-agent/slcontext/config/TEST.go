@@ -10,10 +10,6 @@ import (
     "github.com/pborman/uuid"
 )
 
-func (c *PocketSlaveConfig) DebugGetRootPath() string {
-    return c.rootPath
-}
-
 func DebugConfigPrepare() (*PocketSlaveConfig, error) {
     var (
         // check if the path exists and make it if absent

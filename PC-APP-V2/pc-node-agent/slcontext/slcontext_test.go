@@ -6,14 +6,13 @@ import (
 
     "github.com/stkim1/pcrypto"
     "github.com/davecgh/go-spew/spew"
-    "github.com/stkim1/pc-node-agent/slcontext/config"
 )
 
 const (
-    MASTER_AGENT_NAME string    = "master-yoda"
-    MASTER_IP4_ADDR string      = "192.168.1.4"
-    SLAVE_NODE_NAME string      = "pc-node1"
-    SLAVE_AUTH_TOKEN string     = "yyLq8F5NbSZQJ7aT"
+    CLUSTER_ID       string = "master-yoda"
+    MASTER_IP4_ADDR  string = "192.168.1.4"
+    SLAVE_NODE_NAME  string = "pc-node1"
+    SLAVE_AUTH_TOKEN string = "yyLq8F5NbSZQJ7aT"
 )
 
 func setUp() {
@@ -40,7 +39,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SetMasterAgent(MASTER_AGENT_NAME)
+    err = SharedSlaveContext().SetClusterID(CLUSTER_ID)
     if err != nil {
         t.Error(err.Error())
         return
@@ -61,11 +60,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         return
     }
 
-    old_uuid, err := SharedSlaveContext().GetSlaveNodeUUID()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
+    old_uuid := SharedSlaveContext().SlaveNodeUUID()
 
     err = SharedSlaveContext().SyncAll()
     if err != nil {
@@ -79,7 +74,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
     }
 
     // we're to destroy context w/o deleting the config file
-    oldRoot := singletonContext.config.DebugGetRootPath()
+    oldRoot := singletonContext.config.RootPath()
     singletonContext.config = nil
     singletonContext = nil
     t.Logf("[INFO] old root %s", oldRoot)
@@ -95,12 +90,12 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         return
     }
 
-    man, err := SharedSlaveContext().GetMasterAgent()
+    man, err := SharedSlaveContext().GetClusterID()
     if err != nil {
         t.Error(err.Error())
         return
     }
-    if man != MASTER_AGENT_NAME {
+    if man != CLUSTER_ID {
         t.Error("[ERR] Incorrect Master Name")
         return
     }
@@ -132,11 +127,7 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         return
     }
 
-    new_uuid, err := SharedSlaveContext().GetSlaveNodeUUID()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
+    new_uuid := SharedSlaveContext().SlaveNodeUUID()
     if old_uuid != new_uuid {
         t.Error("[ERR] Incorrect slave uuid")
         return
@@ -161,10 +152,6 @@ func TestSaveLoadSlaveContext(t *testing.T) {
         t.Error("[ERR] Incorrect slave gateway")
         return
     }
-    if config.SLAVE_NAMESRV_VALUE != cfg.SlaveSection.SlaveNameServ {
-        t.Error("[ERR] Incorrect slave name server")
-        return
-    }
 }
 
 func Test_Save_Load_DiscardAll(t *testing.T) {
@@ -176,7 +163,7 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SetMasterAgent(MASTER_AGENT_NAME)
+    err = SharedSlaveContext().SetClusterID(CLUSTER_ID)
     if err != nil {
         t.Error(err.Error())
         return
@@ -196,11 +183,7 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    old_uuid, err := SharedSlaveContext().GetSlaveNodeUUID()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
+    old_uuid := SharedSlaveContext().SlaveNodeUUID()
 
     // sync, save, reload
     err = SharedSlaveContext().SyncAll()
@@ -214,7 +197,7 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
         return
     }
     // we're to destroy context w/o deleting the config file
-    oldRoot := singletonContext.config.DebugGetRootPath()
+    oldRoot := singletonContext.config.RootPath()
     singletonContext.config = nil
     singletonContext = nil
     DebugSlcontextPrepareWithRoot(oldRoot)
@@ -231,7 +214,7 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
         return
     }
 
-    _, err = SharedSlaveContext().GetMasterAgent()
+    _, err = SharedSlaveContext().GetClusterID()
     if err == nil {
         t.Error("[ERR] master agent name should be empty")
         return
@@ -253,11 +236,7 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
         t.Errorf("[ERR] slave authtoken should be null")
         return
     }
-    new_uuid, err := SharedSlaveContext().GetSlaveNodeUUID()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
+    new_uuid := SharedSlaveContext().SlaveNodeUUID()
     if old_uuid != new_uuid {
         t.Error("[ERR] Incorrect slave uuid. Slave UUID should be immutable")
         return
@@ -282,10 +261,6 @@ func Test_Save_Load_DiscardAll(t *testing.T) {
         t.Error("[ERR] Incorrect slave gateway")
         return
     }
-    if config.SLAVE_NAMESRV_VALUE != cfg.SlaveSection.SlaveNameServ {
-        t.Error("[ERR] Incorrect slave name server")
-        return
-    }
 }
 
 func Test_Save_Load_DiscardMasterSession(t *testing.T) {
@@ -297,7 +272,7 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    err = SharedSlaveContext().SetMasterAgent(MASTER_AGENT_NAME)
+    err = SharedSlaveContext().SetClusterID(CLUSTER_ID)
     if err != nil {
         t.Error(err.Error())
         return
@@ -317,11 +292,7 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
         t.Error(err.Error())
         return
     }
-    old_uuid, err := SharedSlaveContext().GetSlaveNodeUUID()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
+    old_uuid := SharedSlaveContext().SlaveNodeUUID()
 
     // sync, save, reload
     err = SharedSlaveContext().SyncAll()
@@ -335,7 +306,7 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
         return
     }
     // we're to destroy context w/o deleting the config file
-    oldRoot := singletonContext.config.DebugGetRootPath()
+    oldRoot := singletonContext.config.RootPath()
     singletonContext.config = nil
     singletonContext = nil
     DebugSlcontextPrepareWithRoot(oldRoot)
@@ -356,7 +327,7 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
         return
     }
 
-    ma, err := SharedSlaveContext().GetMasterAgent()
+    ma, err := SharedSlaveContext().GetClusterID()
     if len(ma) == 0 {
         t.Error("[ERR] master agent name should not be void")
         return
@@ -398,11 +369,7 @@ func Test_Save_Load_DiscardMasterSession(t *testing.T) {
         return
     }
 
-    new_uuid, err := SharedSlaveContext().GetSlaveNodeUUID()
-    if err != nil {
-        t.Error(err.Error())
-        return
-    }
+    new_uuid := SharedSlaveContext().SlaveNodeUUID()
     if old_uuid != new_uuid {
         t.Error("[ERR] Incorrect slave uuid. Slave UUID should be immutable")
         return

@@ -140,7 +140,7 @@ dns-nameserver pc-master:53535
 func testFixateNetworkInterfaces(t *testing.T) {
     for i := 0; i < 3; i++ {
         ifacedata := testUnfixedNetworkInterface(i)
-        slaveConfig := ConfigSlaveSection{
+        slaveConfig := SlaveConfigSection{
             SlaveNodeName   : "pc-node1",
             SlaveMacAddr    : "FACEMACADDRESS",
             SlaveIP4Addr    : "192.168.1.240",
@@ -168,7 +168,7 @@ func testFixedNetworkInterfaceFile(t *testing.T) {
     }
     defer DebugConfigDestory(cfg)
 
-    cfg.SlaveSection = &ConfigSlaveSection{
+    cfg.SlaveSection = &SlaveConfigSection{
         SlaveNodeName   : "pc-node1",
         SlaveMacAddr    : "FACEMACADDRESS",
         SlaveIP4Addr    : "192.168.1.240",

@@ -35,7 +35,7 @@ const (
 )
 
 // --- network interface redefinition
-func _network_iface_redefined(slaveConfig *ConfigSlaveSection) []string {
+func _network_iface_redefined(slaveConfig *SlaveConfigSection) []string {
     return []string {
         POCKET_START,
         "iface eth0 inet static",
@@ -56,7 +56,7 @@ func _network_keyword_prefixed(line string) bool {
     return false
 }
 
-func _fixateNetworkInterfaces(slaveConfig *ConfigSlaveSection, ifaceData []string) []string {
+func _fixateNetworkInterfaces(slaveConfig *SlaveConfigSection, ifaceData []string) []string {
     var ifacelines []string
     is_pocket_defiend := false
     is_pocket_editing := false

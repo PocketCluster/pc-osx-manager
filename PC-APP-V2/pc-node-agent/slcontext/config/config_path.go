@@ -1,7 +1,6 @@
 package config
 
 import (
-    "path"
     "path/filepath"
 
     "github.com/stkim1/pcrypto"
@@ -25,9 +24,9 @@ const (
     master_public_Key_file      string = "pc_master_beacon" + pcrypto.FileExtPublicKey
 
     // these files are 2048 RSA crypto files used for Docker & Registry. This should be acquired from Teleport Auth server
-    slave_auth_cert_file        string = "pc_node_engine"   + pcrypto.FileExtAuthCertificate
-    slave_engine_cert_file      string = "pc_node_engine"   + pcrypto.FileExtCertificate
-    slave_engine_key_file       string = "pc_node_engine"   + pcrypto.FileExtPrivateKey
+    slave_engine_auth_cert_file string = "pc_node_engine"   + pcrypto.FileExtAuthCertificate
+    slave_engine_key_cert_file  string = "pc_node_engine"   + pcrypto.FileExtCertificate
+    slave_engine_prv_key_file   string = "pc_node_engine"   + pcrypto.FileExtPrivateKey
 
     // these are files used for teleport certificate
     slave_ssh_key_cert_file     string = "pc_node_ssh"      + pcrypto.FileExtSSHCertificate
@@ -36,7 +35,7 @@ const (
 
 // --- System Configuration --- //
 func DirPathSystemConfig(rootPath string) string {
-    return path.Join(rootPath, dir_system_config)
+    return filepath.Join(rootPath, dir_system_config)
 }
 
 func FilePathSystemHostname(rootPath string) string {
@@ -49,7 +48,7 @@ func FilePathSystemTimezone(rootPath string) string {
 
 // --- Slave Configuration --- //
 func DirPathSlaveConfig(rootPath string) string {
-    return path.Join(DirPathSystemConfig(rootPath), dir_slave_config)
+    return filepath.Join(DirPathSystemConfig(rootPath), dir_slave_config)
 }
 
 func FilePathSlaveConfig(rootPath string) string {
@@ -58,7 +57,7 @@ func FilePathSlaveConfig(rootPath string) string {
 
 // --- Slave Certificates --- //
 func DirPathSlaveCerts(rootPath string) string {
-    return path.Join(DirPathSlaveConfig(rootPath), dir_slave_certs)
+    return filepath.Join(DirPathSlaveConfig(rootPath), dir_slave_certs)
 }
 
 func FilePathSlavePublicKey(rootPath string) string {
@@ -73,16 +72,16 @@ func FilePathMasterPublicKey(rootPath string) string {
     return filepath.Join(DirPathSlaveCerts(rootPath), master_public_Key_file)
 }
 
-func FilePathSlaveAuthCert(rootPath string) string {
-    return filepath.Join(DirPathSlaveCerts(rootPath), slave_auth_cert_file)
+func FilePathSlaveEngineAuthCert(rootPath string) string {
+    return filepath.Join(DirPathSlaveCerts(rootPath), slave_engine_auth_cert_file)
 }
 
 func FilePathSlaveEngineKeyCert(rootPath string) string {
-    return filepath.Join(DirPathSlaveCerts(rootPath), slave_engine_cert_file)
+    return filepath.Join(DirPathSlaveCerts(rootPath), slave_engine_key_cert_file)
 }
 
 func FilePathSlaveEnginePrivateKey(rootPath string) string {
-    return filepath.Join(DirPathSlaveCerts(rootPath), slave_engine_key_file)
+    return filepath.Join(DirPathSlaveCerts(rootPath), slave_engine_prv_key_file)
 }
 
 func FilePathSlaveSSHKeyCert(rootPath string) string {

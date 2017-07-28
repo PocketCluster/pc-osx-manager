@@ -73,7 +73,7 @@ func TestDockerAuthorityCert(t *testing.T) {
         return
     }
     // first save some file to pki place
-    err = ioutil.WriteFile(FilePathSlaveAuthCert(cfg.rootPath), pcrypto.TestCertPublicAuth(), cert_file_permission)
+    err = ioutil.WriteFile(FilePathSlaveEngineAuthCert(cfg.rootPath), pcrypto.TestCertPublicAuth(), cert_file_permission)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -149,7 +149,7 @@ func TestAppendAuthCertFowardSystemCertAuthority(t *testing.T) {
         return
     }
     // slave cert
-    err = ioutil.WriteFile(FilePathSlaveAuthCert(cfg.rootPath), pcrypto.TestCertPublicAuth(), cert_file_permission)
+    err = ioutil.WriteFile(FilePathSlaveEngineAuthCert(cfg.rootPath), pcrypto.TestCertPublicAuth(), cert_file_permission)
     if err != nil {
         t.Errorf(err.Error())
         return

@@ -1,10 +1,12 @@
 package crcontext
 
 import (
+    "fmt"
     "sync"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+    "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-vbox-core/crcontext/config"
 )
 
@@ -19,10 +21,13 @@ type PocketCoreContext interface {
     // No other place can execute this
     SaveConfiguration() error
 
-    GetClusterID() (string, error)
-    GetPrivateKey() ([]byte)
-    GetPublicKey() ([]byte)
-    GetMasterPublicKey() ([]byte)
+    CoreNodeName() string
+    CoreNodeNameFQDN() string
+
+    CoreClusterID() string
+    CorePrivateKey() []byte
+    CorePublicKey() []byte
+    MasterPublicKey() []byte
 
     SetMasterIP4ExtAddr(ip4Address string) error
     GetMasterIP4ExtAddr() (string, error)
@@ -113,25 +118,31 @@ func (c *coreContext) SaveConfiguration() error {
     return c.config.SaveCoreConfig()
 }
 
+func (c *coreContext) CoreNodeName() string {
+    return coreNodeName
+}
+
+// TODO : add tests
+func (c *coreContext) CoreNodeNameFQDN() string {
+    return fmt.Sprintf(coreNodeName + "." + pcrypto.FormFQDNClusterID, c.config.ClusterID)
+}
+
 // --- Cluster ID ---
-func (c *coreContext) GetClusterID() (string, error) {
-    if len(c.config.ClusterID) == 0 {
-        return "", errors.Errorf("[ERR] cluster id name")
-    }
-    return c.config.ClusterID, nil
+func (c *coreContext) CoreClusterID() string {
+    return c.config.ClusterID
 }
 
 //--- decryptor/encryptor interface ---
-func (c *coreContext) GetPrivateKey() ([]byte) {
+func (c *coreContext) CorePrivateKey() []byte {
     return c.pocketPrivateKey
 }
 
-func (c *coreContext) GetPublicKey() ([]byte) {
+func (c *coreContext) CorePublicKey() []byte {
     return c.pocketPublicKey
 }
 
 // --- Master Public key ---
-func (c *coreContext) GetMasterPublicKey() ([]byte) {
+func (c *coreContext) MasterPublicKey() []byte {
     return c.masterPubkey
 }
 

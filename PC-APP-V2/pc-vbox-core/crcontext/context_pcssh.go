@@ -1,10 +1,7 @@
 package crcontext
 
 import (
-    "fmt"
-
     "github.com/stkim1/pc-vbox-core/crcontext/config"
-    "github.com/stkim1/pcrypto"
 )
 
 const (
@@ -13,9 +10,6 @@ const (
 
 // for teleport to build configuration
 type PocketCoreSSHInfo interface {
-    CoreNodeName() string
-    CoreNodeNameFQDN() string
-
     CoreNodeUUID() string
     CoreAuthToken() string
 
@@ -24,18 +18,9 @@ type PocketCoreSSHInfo interface {
 
     CoreSSHCertificateFileName() string
     CoreSSHPrivateKeyFileName() string
-    CoreSSHAdvertiseAddr() string
 
     CoreAuthServerAddr() (string, error)
-}
-
-func (c *coreContext) CoreNodeName() string {
-    return coreNodeName
-}
-
-// TODO : add tests
-func (c *coreContext) CoreNodeNameFQDN() string {
-    return fmt.Sprintf(coreNodeName + "." + pcrypto.FormFQDNClusterID, c.config.ClusterID)
+    CoreSSHAdvertiseAddr() string
 }
 
 func (c *coreContext) CoreNodeUUID() string {
@@ -61,10 +46,6 @@ func (c *coreContext) CoreSSHCertificateFileName() string {
     return config.FilePathCoreSSHKeyCert(c.config.RootPath())
 }
 
-func (c *coreContext) CoreSSHAdvertiseAddr() string {
-    return "127.0.0.1"
-}
-
 // TODO : add tests
 func (c *coreContext) CoreSSHPrivateKeyFileName() string {
     return config.FilePathCoreSSHPrivateKey(c.config.RootPath())
@@ -76,4 +57,8 @@ func (c *coreContext) CoreAuthServerAddr() (string, error) {
         return "", err
     }
     return inif.GatewayAddr, nil
+}
+
+func (c *coreContext) CoreSSHAdvertiseAddr() string {
+    return "127.0.0.1"
 }

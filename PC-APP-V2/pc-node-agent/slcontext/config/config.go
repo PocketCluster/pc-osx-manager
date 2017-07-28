@@ -18,9 +18,8 @@ const (
 )
 
 // --- struct
-type ConfigMasterSection struct {
-    // Master Agent Specific String
-    MasterBoundAgent    string                   `yaml:"master-binder-agent"`
+// Master Agent Specific String
+type MasterConfigSection struct {
     // Last Known IP4
     MasterIP4Address    string                   `yaml:"-"`
     //MasterIP6Address    string                   `yaml:"-"`
@@ -28,7 +27,7 @@ type ConfigMasterSection struct {
     MasterTimeZone      string                   `yaml:"master-timezone"`
 }
 
-type ConfigSlaveSection struct {
+type SlaveConfigSection struct {
     SlaveNodeName       string                   `yaml:"slave-node-name"`
     SlaveNodeUUID       string                   `yaml:"slave-node-uuid"`
     SlaveAuthToken      string                   `yaml:"slave-auth-token"`
@@ -45,8 +44,9 @@ type PocketSlaveConfig struct {
     rootPath            string                   `yaml:"-"`
     ConfigVersion       string                   `yaml:"config-version"`
     //BindingStatus       string                   `yaml:"binding-status"`
-    MasterSection       *ConfigMasterSection     `yaml:"master-section"`
-    SlaveSection        *ConfigSlaveSection      `yaml:"slave-section"`
+    ClusterID           string                   `yaml:"cluster-id"`
+    MasterSection       *MasterConfigSection     `yaml:"master-section"`
+    SlaveSection        *SlaveConfigSection      `yaml:"slave-section"`
 }
 
 // This is default public constructor as it does not accept root file path
@@ -61,8 +61,8 @@ func brandNewSlaveConfig(rootPath string) (*PocketSlaveConfig) {
         ConfigVersion:    SLAVE_CONFIG_VAL,
         // TODO : we need to avoid cyclic import but need to fix this
         //BindingStatus:    "SlaveUnbounded", //locator.SlaveUnbounded.String(),
-        MasterSection:    &ConfigMasterSection{},
-        SlaveSection:     &ConfigSlaveSection{
+        MasterSection:    &MasterConfigSection{},
+        SlaveSection:     &SlaveConfigSection{
             SlaveNodeUUID:    uuid.New(),
         },
     }
@@ -122,6 +122,10 @@ func loadSlaveConfig(rootPath string) (*PocketSlaveConfig) {
     // as rootpath is ignored, we need to restore it
     cfg.rootPath = rootPath
     return cfg
+}
+
+func (c *PocketSlaveConfig) RootPath() string {
+    return c.rootPath
 }
 
 func (c *PocketSlaveConfig) SaveSlaveConfig() error {
@@ -189,12 +193,4 @@ func (c *PocketSlaveConfig) SaveMasterPublicKey(masterPubKey []byte) error {
 
 func (c *PocketSlaveConfig) ClearMasterPublicKey() error {
     return os.Remove(FilePathMasterPublicKey(c.rootPath))
-}
-
-func (c *PocketSlaveConfig) ConfigDir() string {
-    return DirPathSlaveConfig(c.rootPath)
-}
-
-func (c *PocketSlaveConfig) KeyAndCertDir() string {
-    return DirPathSlaveCerts(c.rootPath)
 }
