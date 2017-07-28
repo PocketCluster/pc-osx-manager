@@ -1,6 +1,7 @@
 package config
 
 import (
+    "path"
     "path/filepath"
 
     "github.com/stkim1/pcrypto"
@@ -37,7 +38,7 @@ const (
 
 // --- to read config ---
 func DirPathCoreConfig(rootPath string) string {
-    return filepath.Join(rootPath, dir_core_config)
+    return path.Join(rootPath, dir_core_config)
 }
 
 func FilePathCoreConfig(rootPath string) string {
@@ -54,7 +55,7 @@ func FilePathAuthToken(rootPath string) string {
 
 // --- To read config ---
 func DirPathCoreCerts(rootPath string) string {
-    return filepath.Join(DirPathCoreConfig(rootPath), dir_core_certs)
+    return path.Join(DirPathCoreConfig(rootPath), dir_core_certs)
 }
 
 func FilePathCoreVboxPublicKey(rootPath string) string {

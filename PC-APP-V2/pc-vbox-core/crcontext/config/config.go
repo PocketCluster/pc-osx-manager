@@ -15,7 +15,7 @@ const (
     PC_MASTER           string = "pc-master"
     CORE_STATUS_KEY     string = "binding-status"
     CORE_CONFIG_KEY     string = "config-version"
-    CORE_CONFIG_VER     string = "1.0.4"
+    CORE_CONFIG_VER     string = "1.0.1"
 )
 
 // --- structs ---
@@ -38,8 +38,8 @@ type PocketCoreConfig struct {
 
     // Cluster Identity
     ClusterID           string                   `yaml:"cluster-id"`
-    MasterSection       *MasterConfigSection     `yaml:"master-section",inline,flow`
-    CoreSection         *CoreConfigSection       `yaml:"core-section",inline,flow`
+    MasterSection       *MasterConfigSection     `yaml:"master-section"`
+    CoreSection         *CoreConfigSection       `yaml:"core-section"`
 }
 
 // --- functions ---
@@ -124,7 +124,7 @@ func loadCoreConfig(rootPath string) (*PocketCoreConfig) {
     }
     err = yaml.Unmarshal(cfgData, cfg)
     if err != nil {
-        return brandNewSlaveConfig(rootPath)
+        log.Panic("[CRITICAL] config file cannot be properly read %v", err.Error())
     }
     // as rootpath is ignored, we need to restore it
     cfg.rootPath = rootPath

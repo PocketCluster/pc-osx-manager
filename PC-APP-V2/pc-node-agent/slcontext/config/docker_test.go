@@ -67,13 +67,13 @@ func TestDockerAuthorityCert(t *testing.T) {
     defer DebugConfigDestory(cfg)
 
     // make slave pki path
-    err = os.MkdirAll(path.Join(cfg.rootPath, slave_keys_dir), cert_path_permission);
+    err = os.MkdirAll(DirPathSlaveCerts(cfg.rootPath), cert_path_permission);
     if err != nil {
         t.Errorf(err.Error())
         return
     }
     // first save some file to pki place
-    err = ioutil.WriteFile(path.Join(cfg.rootPath, SlaveAuthCertFileName), pcrypto.TestCertPublicAuth(), cert_file_permission)
+    err = ioutil.WriteFile(FilePathSlaveAuthCert(cfg.rootPath), pcrypto.TestCertPublicAuth(), cert_file_permission)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -143,13 +143,13 @@ func TestAppendAuthCertFowardSystemCertAuthority(t *testing.T) {
         return
     }
     // make slave pki path
-    err = os.MkdirAll(path.Join(cfg.rootPath, slave_keys_dir), cert_path_permission);
+    err = os.MkdirAll(DirPathSlaveCerts(cfg.rootPath), cert_path_permission);
     if err != nil {
         t.Errorf(err.Error())
         return
     }
     // slave cert
-    err = ioutil.WriteFile(path.Join(cfg.rootPath, SlaveAuthCertFileName), pcrypto.TestCertPublicAuth(), cert_file_permission)
+    err = ioutil.WriteFile(FilePathSlaveAuthCert(cfg.rootPath), pcrypto.TestCertPublicAuth(), cert_file_permission)
     if err != nil {
         t.Errorf(err.Error())
         return
