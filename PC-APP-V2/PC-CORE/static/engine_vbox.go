@@ -216,13 +216,14 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
                 prvkey, pubkey []byte                       = nil, nil
                 err            error                        = nil
             )
+
+            // --- build vbox controller --- //
             // by this time, all the core node data should have been generated
             coreNode = model.RetrieveCoreNode()
             _, err = coreNode.GetAuthToken()
             if err != nil {
                 return errors.Errorf("[ERR] core node should have auth token at this point")
             }
-
             prvkey, err = context.SharedHostContext().MasterVBoxCtrlPrivateKey()
             if err != nil {
                 return errors.WithStack(err)
@@ -231,20 +232,20 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
             if err != nil {
                 return errors.WithStack(err)
             }
-
-            listen, err = net.Listen("tcp4", net.JoinHostPort("127.0.0.1", "10068"))
-            if err != nil {
-                return errors.WithStack(err)
-            }
-            a.BroadcastEvent(service.Event{Name:iventVboxCtrlListenerSpawn, Payload:listen})
-            time.Sleep(time.Millisecond * 500)
-
             // TODO external ip address
             ctrl, err = masterctrl.NewVBoxMasterControl(clusterID, "192.168.1.105", prvkey, pubkey, coreNode, nil)
             if err != nil {
                 return errors.WithStack(err)
             }
             a.BroadcastEvent(service.Event{Name:iventVboxCtrlInstanceSpawn, Payload:ctrl})
+            time.Sleep(time.Millisecond * 500)
+
+            // --- build network listener --- //
+            listen, err = net.Listen("tcp4", net.JoinHostPort("127.0.0.1", "10068"))
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            a.BroadcastEvent(service.Event{Name:iventVboxCtrlListenerSpawn, Payload:listen})
             time.Sleep(time.Millisecond * 500)
 
             log.Debugf("[CONTROL] VBox Core Control service started... %s", ctrl.CurrentState().String())
@@ -271,20 +272,20 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
                 ok        bool                         = false
             )
 
-            // net.Listener
-            lc := <- listenerC
-            listen, ok = lc.Payload.(net.Listener)
-            if !ok {
-                log.Debugf("[ERR] invalid VBoxMasterControl type")
-                return errors.Errorf("[ERR] invalid listener type")
-            }
-
             // masterctrl.VBoxMasterControl
             cc := <- ctrlObjC
             ctrl, ok = cc.Payload.(masterctrl.VBoxMasterControl)
             if !ok {
                 log.Debugf("[ERR] invalid VBoxMasterControl type")
                 return errors.Errorf("[ERR] invalid VBoxMasterControl type")
+            }
+
+            // net.Listener
+            lc := <- listenerC
+            listen, ok = lc.Payload.(net.Listener)
+            if !ok {
+                log.Debugf("[ERR] invalid VBoxMasterControl type")
+                return errors.Errorf("[ERR] invalid listener type")
             }
 
             log.Debugf("[CONTROL] VBox Core Listener service started... %s", ctrl.CurrentState().String())
