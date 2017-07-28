@@ -3,7 +3,6 @@ package main
 import (
     "time"
 
-    "github.com/gravitational/teleport/embed"
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
 
@@ -12,6 +11,7 @@ import (
     "github.com/stkim1/pc-node-agent/locator"
     "github.com/stkim1/pc-node-agent/slcontext"
     "github.com/stkim1/pc-node-agent/service"
+    "github.com/stkim1/pc-node-agent/pcssh/sshproc"
 )
 
 import (
@@ -70,7 +70,7 @@ func initAgentService(app service.AppSupervisor) error {
                 log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | FAILED ", ts, state.String())
                 switch state {
                 case locator.SlaveBounded: {
-                    app.BroadcastEvent(service.Event{Name:embed.EventNodeSSHServiceStop})
+                    app.BroadcastEvent(service.Event{Name:sshproc.EventNodeSSHServiceStop})
                     return nil
                 }
                 default: {
