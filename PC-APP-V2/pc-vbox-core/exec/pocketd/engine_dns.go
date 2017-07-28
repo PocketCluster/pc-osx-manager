@@ -42,11 +42,12 @@ func locaNameServe(w dns.ResponseWriter, req *dns.Msg) {
     switch qtype {
 
         case dns.TypeA: {
+            var (
+                remoteIP4 = remoteIP.To4()
+                cid       = crcontext.SharedCoreContext().CoreClusterID()
+            )
 
-            remoteIP4 := remoteIP.To4()
-            cid, err := crcontext.SharedCoreContext().GetClusterID()
-
-            if err == nil && remoteIP4 != nil {
+            if remoteIP4 != nil && len(cid) != 0 {
 
                 fqdn := fmt.Sprintf(fqdnPocketMasterName, cid)
                 maddr, err := crcontext.SharedCoreContext().GetMasterIP4ExtAddr()

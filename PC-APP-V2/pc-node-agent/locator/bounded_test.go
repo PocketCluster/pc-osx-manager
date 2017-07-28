@@ -113,7 +113,7 @@ func Test_Unbounded_Bounded_Onepass(t *testing.T) {
         return
     }
     // Verification
-    if msName, _ := context.GetMasterAgent(); msName != masterAgentName {
+    if msName, _ := context.GetClusterID(); msName != masterAgentName {
         t.Errorf("[ERR] master node name is setup inappropriately | Current : %s\n", msName)
         return
     }
@@ -270,7 +270,7 @@ func Test_Bounded_Unbroken_Loop(t *testing.T) {
             return
         }
         // Verification
-        if msName, _ := context.GetMasterAgent(); msName != masterAgentName {
+        if msName, _ := context.GetClusterID(); msName != masterAgentName {
             t.Errorf("[ERR] master node name is setup inappropriately | Current : %s\n", msName)
             return
         }
@@ -460,7 +460,7 @@ func Test_Bounded_BindBroken_TxActionFail(t *testing.T) {
     )
 
     context.SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey())
-    context.SetMasterAgent(masterAgentName)
+    context.SetClusterID(masterAgentName)
     context.SetSlaveNodeName(slaveNodeName)
     context.SetSlaveAuthToken(authToken)
 

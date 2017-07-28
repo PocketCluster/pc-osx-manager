@@ -141,7 +141,7 @@ func Test_Cryptocheck_Bounded_MasterMetaFail(t *testing.T) {
                 t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
                 return
             }
-            _, err = context.GetMasterAgent()
+            _, err = context.GetClusterID()
             if err == nil {
                 t.Errorf("[ERR] Master Agent Name should be nil")
                 return
@@ -294,7 +294,7 @@ func Test_Cryptocheck_Bounded_TxActionFail(t *testing.T) {
                 t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
                 return
             }
-            _, err = context.GetMasterAgent()
+            _, err = context.GetClusterID()
             if err == nil {
                 t.Errorf("[ERR] Master Agent Name should be nil")
                 return

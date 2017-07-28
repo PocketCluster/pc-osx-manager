@@ -39,7 +39,7 @@ type bounded struct{
 func (ls *bounded) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
     slctx := slcontext.SharedSlaveContext()
 
-    masterAgentName, err := slctx.GetMasterAgent()
+    masterAgentName, err := slctx.GetClusterID()
     if err != nil {
         return errors.WithStack(err)
     }
@@ -83,7 +83,7 @@ func (ls *bounded) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta,
         return SlaveTransitionIdle, errors.Errorf("[ERR] Null or incorrect version of master meta")
     }
 
-    msAgent, err := slcontext.SharedSlaveContext().GetMasterAgent()
+    msAgent, err := slcontext.SharedSlaveContext().GetClusterID()
     if err != nil {
         return SlaveTransitionFail, errors.WithStack(err)
     }

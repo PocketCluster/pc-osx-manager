@@ -76,19 +76,15 @@ func initVboxCoreReportService(app service.AppSupervisor) error {
     app.RegisterServiceWithFuncs(
         func() error {
             var (
-                cprv         []byte = crcontext.SharedCoreContext().GetPrivateKey()
-                cpub         []byte = crcontext.SharedCoreContext().GetPublicKey()
-                mpub         []byte = crcontext.SharedCoreContext().GetMasterPublicKey()
+                cprv         []byte = crcontext.SharedCoreContext().CorePrivateKey()
+                cpub         []byte = crcontext.SharedCoreContext().CorePublicKey()
+                mpub         []byte = crcontext.SharedCoreContext().MasterPublicKey()
+                clusterID    string = crcontext.SharedCoreContext().CoreClusterID()
                 reporter     corereport.VBoxCoreReporter = nil
                 conn         net.Conn = nil
-                clusterID    string
+
                 err          error = nil
             )
-
-            clusterID, err = crcontext.SharedCoreContext().GetClusterID()
-            if err != nil {
-                return errors.WithStack(err)
-            }
 
             reporter, err = corereport.NewCoreReporter(clusterID, cprv, cpub, mpub)
             if err != nil {

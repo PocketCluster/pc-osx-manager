@@ -39,7 +39,7 @@ type keyexchange struct{
 func (ls *keyexchange) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
     slctx := slcontext.SharedSlaveContext()
 
-    masterAgentName, err := slctx.GetMasterAgent()
+    masterAgentName, err := slctx.GetClusterID()
     if err != nil {
         return err
     }
@@ -83,7 +83,7 @@ func (ls *keyexchange) transitionWithMasterMeta(meta *msagent.PocketMasterAgentM
         return SlaveTransitionFail, errors.Errorf("[ERR] Null or incorrect slave status from master command")
     }
 
-    msAgent, err := slcontext.SharedSlaveContext().GetMasterAgent()
+    msAgent, err := slcontext.SharedSlaveContext().GetClusterID()
     if err != nil {
         return SlaveTransitionFail, errors.WithStack(err)
     }

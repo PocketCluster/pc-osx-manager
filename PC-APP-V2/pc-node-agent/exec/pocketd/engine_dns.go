@@ -44,7 +44,7 @@ func locaNameServe(w dns.ResponseWriter, req *dns.Msg) {
         case dns.TypeA: {
 
             remoteIP4 := remoteIP.To4()
-            ma, err := slcontext.SharedSlaveContext().GetMasterAgent()
+            ma, err := slcontext.SharedSlaveContext().GetClusterID()
 
             if err == nil && remoteIP4 != nil {
 

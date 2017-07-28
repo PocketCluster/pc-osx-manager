@@ -79,7 +79,7 @@ func TestKeyExchange_CryptoCheckTransition(t *testing.T) {
 
 
     // Verification
-    if msName, _ := context.GetMasterAgent(); msName != masterAgentName {
+    if msName, _ := context.GetClusterID(); msName != masterAgentName {
         t.Errorf("[ERR] master node name is setup inappropriately | Current : %s\n", msName)
         return
     }
@@ -199,7 +199,7 @@ func Test_Keyexchange_Cryptocheck_MasterMetaFail(t *testing.T) {
                 t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
                 return
             }
-            _, err = context.GetMasterAgent()
+            _, err = context.GetClusterID()
             if err == nil {
                 t.Errorf("[ERR] Master Agent Name should be nil")
                 return
@@ -330,7 +330,7 @@ func Test_keyexchange_Cryptocheck_TxActionFail(t *testing.T) {
                 t.Errorf("[ERR] Slave state does not change properly | Current : %s\n", state.String())
                 return
             }
-            _, err = context.GetMasterAgent()
+            _, err = context.GetClusterID()
             if err == nil {
                 t.Errorf("[ERR] Master Agent Name should be nil")
                 return

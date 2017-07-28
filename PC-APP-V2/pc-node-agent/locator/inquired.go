@@ -76,7 +76,7 @@ func (ls *inquired) transitionWithMasterMeta(meta *msagent.PocketMasterAgentMeta
     }
 
     // set master agent name
-    if err := slcontext.SharedSlaveContext().SetMasterAgent(meta.MasterBoundAgent); err != nil {
+    if err := slcontext.SharedSlaveContext().SetClusterID(meta.MasterBoundAgent); err != nil {
         return SlaveTransitionFail, errors.WithStack(err)
     }
 
