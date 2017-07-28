@@ -2,6 +2,7 @@ package beacon
 
 import (
     "fmt"
+    "strings"
     "sync"
     "time"
 
@@ -11,6 +12,8 @@ import (
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
+    "github.com/stkim1/pc-vbox-comm/masterctrl"
+    mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-node-agent/slagent"
 )
@@ -26,11 +29,11 @@ type BeaconEventNotification interface {
     BeaconEventShutdown() error
 }
 
-func NewBeaconManagerWithFunc(cid string, noti BeaconEventNotification, comm CommChannelFunc) (BeaconManger, error) {
-    return NewBeaconManager(cid, noti, comm)
+func NewBeaconManagerWithFunc(cid string, vbox masterctrl.VBoxMasterControl, noti BeaconEventNotification, comm CommChannelFunc) (BeaconManger, error) {
+    return NewBeaconManager(cid, vbox, noti, comm)
 }
 
-func NewBeaconManager(cid string, noti BeaconEventNotification, comm CommChannel) (BeaconManger, error) {
+func NewBeaconManager(cid string, vbox masterctrl.VBoxMasterControl, noti BeaconEventNotification, comm CommChannel) (BeaconManger, error) {
     var (
         beacons []MasterBeacon = []MasterBeacon{}
         bm *beaconManger = nil
@@ -47,6 +50,7 @@ func NewBeaconManager(cid string, noti BeaconEventNotification, comm CommChannel
 
     bm = &beaconManger {
         clusterID:       cid,
+        vboxCtrl:        vbox,
         notiReceiver:    noti,
         commChannel:     comm,
     }
@@ -96,6 +100,7 @@ type BeaconManger interface {
 type beaconManger struct {
     sync.Mutex
     clusterID         string
+    vboxCtrl          masterctrl.VBoxMasterControl
     notiReceiver      BeaconEventNotification
     commChannel       CommChannel
     beaconList        []MasterBeacon
@@ -243,6 +248,9 @@ func (b *beaconManger) Shutdown() error {
 // --- Node Name Service Methods --- //
 
 func (b *beaconManger) AddressForName(name string) (string, error) {
+    if strings.HasPrefix(name, b.vboxCtrl.GetCoreNode().NodeName) {
+        return b.vboxCtrl.GetCoreNode().IP4AddrString()
+    }
     return findNodeForNameService(b, name)
 }
 
@@ -406,7 +414,7 @@ func findBoundedNodesForSwarm(b *beaconManger) []string {
     defer b.Unlock()
 
     const (
-        dockerPort string = "2375"
+        dockerPort string = "2376"
     )
 
     var (
@@ -422,6 +430,12 @@ func findBoundedNodesForSwarm(b *beaconManger) []string {
             nodeList = append(nodeList, fmt.Sprintf("%s:%s", nodeName, dockerPort))
         }
     }
+
+    // append core node
+    if b.vboxCtrl.CurrentState() == mpkg.VBoxMasterBounded {
+        nodeList = append(nodeList, fmt.Sprintf("%s:%s", b.vboxCtrl.GetCoreNode().NodeName, dockerPort))
+    }
+
     return nodeList
 }
 

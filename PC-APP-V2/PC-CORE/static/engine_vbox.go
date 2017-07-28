@@ -22,6 +22,10 @@ import (
     "github.com/stkim1/pc-core/service"
 )
 
+const (
+    iventVboxCtrlInstanceSpawn string  = "ivent.vbox.ctrl.instance.spawn"
+)
+
 func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     log.Debugf("[VBOX_DISK] build vbox core disk ")
 
@@ -197,7 +201,6 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
 func initVboxCoreReportService(a *appMainLife, clusterID string) error {
     const (
         iventVboxCtrlListenerSpawn string  = "ivent.vbox.ctrl.listener.spawn"
-        iventVboxCtrlInstanceSpawn string  = "ivent.vbox.ctrl.instance.spawn"
     )
     var (
         listenerC = make(chan service.Event)

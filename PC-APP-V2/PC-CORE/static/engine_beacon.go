@@ -10,6 +10,7 @@ import (
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
+    "github.com/stkim1/pc-vbox-comm/masterctrl"
     "github.com/stkim1/pc-core/beacon"
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/service"
@@ -66,34 +67,45 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
     var (
         beaconC = make(chan service.Event)
         searchC = make(chan service.Event)
+        vboxC   = make(chan service.Event)
     )
     a.RegisterServiceWithFuncs(
         operation.ServiceBeaconMaster,
         func() error {
             var (
-                timer = time.NewTicker(time.Second)
-
-                beaconRoute *beaconEventRoute = &beaconEventRoute{
+                beaconRoute *beaconEventRoute  = &beaconEventRoute{
                     ServiceSupervisor:a.ServiceSupervisor,
                     PocketConfig: tcfg,
                 }
-
-                beaconMan, err = beacon.NewBeaconManagerWithFunc(
-                    clusterID,
-                    beaconRoute,
-                    func(host string, payload []byte) error {
-                        log.Debugf("[BEACON-TX] [%v] Host %v", time.Now(), host)
-                        a.BroadcastEvent(
-                            service.Event{
-                                Name:       ucast.EventBeaconCoreLocationSend,
-                                Payload:    ucast.BeaconSend{
-                                    Host:       host,
-                                    Payload:    payload,
-                                },
-                            })
-                        return nil
-                    })
+                timer                          = time.NewTicker(time.Second)
+                beaconMan  beacon.BeaconManger = nil
+                err        error               = nil
             )
+            // wait for vbox control
+            vc := <- vboxC
+            ctrl, ok := vc.Payload.(masterctrl.VBoxMasterControl)
+            if !ok {
+                log.Debugf("[ERR] invalid VBoxMasterControl type")
+                return errors.Errorf("[ERR] invalid VBoxMasterControl type")
+            }
+
+            // beacon manager
+            beaconMan, err = beacon.NewBeaconManagerWithFunc(
+                clusterID,
+                ctrl,
+                beaconRoute,
+                func(host string, payload []byte) error {
+                    log.Debugf("[BEACON-TX] [%v] Host %v", time.Now(), host)
+                    a.BroadcastEvent(
+                        service.Event{
+                            Name:       ucast.EventBeaconCoreLocationSend,
+                            Payload:    ucast.BeaconSend{
+                                Host:       host,
+                                Payload:    payload,
+                            },
+                        })
+                    return nil
+                })
             if err != nil {
                 return errors.WithStack(err)
             }
@@ -144,7 +156,8 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
             return nil
         },
         service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
-        service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC))
+        service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
+        service.BindEventWithService(iventVboxCtrlInstanceSpawn,           vboxC))
 
     return nil
 }

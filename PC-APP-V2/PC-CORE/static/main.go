@@ -165,15 +165,15 @@ func main() {
                             return
                         }
 
-                        err = initVboxCoreReportService(a, cid)
-                        if err != nil {
-                            log.Debug(err)
-                        }
-
                         err = initMasterBeaconService(a, cid, config.teleConfig)
                         if err != nil {
                             log.Debug(err)
                             return
+                        }
+
+                        err = initVboxCoreReportService(a, cid)
+                        if err != nil {
+                            log.Debug(err)
                         }
 
                         a.StartServices()

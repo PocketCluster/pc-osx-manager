@@ -28,7 +28,7 @@ const (
 func dockerEnvContent() []byte {
     return []byte(`# PocketCluster Docker Upstart and SysVinit configuration file
 
-DOCKER_OPTS="-H tcp://0.0.0.0:2375 --dns 127.0.0.1 --tlsverify --tlscacert=/etc/pocket/pki/pc_node_engine.acr --tlscert=/etc/pocket/pki/pc_node_engine.crt --tlskey=/etc/pocket/pki/pc_node_engine.pem --cluster-advertise=eth0:2375 --cluster-store=etcd://pc-master:2379 --cluster-store-opt kv.cacertfile=/etc/pocket/pki/pc_node_engine.acr --cluster-store-opt kv.certfile=/etc/pocket/pki/pc_node_engine.crt --cluster-store-opt kv.keyfile=/etc/pocket/pki/pc_node_engine.pem"`)
+DOCKER_OPTS="-H tcp://0.0.0.0:2376 --dns 127.0.0.1 --tlsverify --tlscacert=/etc/pocket/pki/pc_node_engine.acr --tlscert=/etc/pocket/pki/pc_node_engine.crt --tlskey=/etc/pocket/pki/pc_node_engine.pem --cluster-advertise=eth0:2376 --cluster-store=etcd://pc-master:2379 --cluster-store-opt kv.cacertfile=/etc/pocket/pki/pc_node_engine.acr --cluster-store-opt kv.certfile=/etc/pocket/pki/pc_node_engine.crt --cluster-store-opt kv.keyfile=/etc/pocket/pki/pc_node_engine.pem"`)
 }
 
 func copyFile(src, dst string) error {

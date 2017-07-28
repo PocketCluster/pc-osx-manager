@@ -15,8 +15,9 @@
 - [ ] Disable Docker when there is no TLS certs available
 - [ ] Append 'CA' <http://rt.openssl.org/Ticket/History.html?user=guest&pass=guest&id=3979>
 - [ ] Run `dockerd` with script and check conditions there like boot2docker
-- [ ] Move Docker port to `0.0.0.0:2376` for ssl connection
-- [ ] User Namespace Remap
+- [ ] Combine Docker related stuff in a unified package
+- [ ] Combine `pc-core` related consts, variable in a unified package
+- [ ] Docker User Namespace Remap
   * <https://docs.oracle.com/cd/E37670_01/E75728/html/ol-docker-userns-remap.html>
   * <https://docs.docker.com/edge/engine/reference/commandline/dockerd/#daemon-user-namespace-options>
 - [ ] Singleton lock for it’s property access
@@ -39,6 +40,7 @@
 - [ ] [_RPI_] cannot acquire proper interface name from netifaces for default gateway
 - [x] [_ODROID_] netmask format fix for network/interfaces (`ffffff00` -> `255.255.255.0`)
 - [x] Vagrant Fix Network Interface Order (eth0 : internal/ eth1 : external)
+- [x] Move Docker port to `0.0.0.0:2376` for ssl connection
 - [x] AESKEY regeneration when `MasterBeacon` goes to `BindBroken` state
 - [x] Shorten `msgpack` name field to reduce message package size
 - [x] Network Broadcast Form -> 192.168.2.211/24
