@@ -55,12 +55,10 @@ func brandNewSlaveConfig(rootPath string) (*PocketCoreConfig) {
         err              error  = nil
     )
 
-    // read & delete cluster id
+    // read & delete cluster id. Do not remove cluster id as it's necessary for docker to start
     clusterID, err = ioutil.ReadFile(pathClusterID)
     if err != nil {
         log.Panic(errors.WithStack(err).Error())
-    } else {
-        os.Remove(pathClusterID)
     }
 
     // read & delete auth token
