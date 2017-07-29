@@ -2,7 +2,6 @@ package beacon
 
 import (
     "fmt"
-    "strings"
     "sync"
     "time"
 
@@ -248,7 +247,7 @@ func (b *beaconManger) Shutdown() error {
 // --- Node Name Service Methods --- //
 
 func (b *beaconManger) AddressForName(name string) (string, error) {
-    if strings.HasPrefix(name, b.vboxCtrl.GetCoreNode().NodeName) {
+    if name == model.CoreNodeName {
         return b.vboxCtrl.GetCoreNode().IP4AddrString()
     }
     return findNodeForNameService(b, name)
@@ -433,7 +432,7 @@ func findBoundedNodesForSwarm(b *beaconManger) []string {
 
     // append core node
     if b.vboxCtrl.CurrentState() == mpkg.VBoxMasterBounded {
-        nodeList = append(nodeList, fmt.Sprintf("%s:%s", b.vboxCtrl.GetCoreNode().NodeName, dockerPort))
+        nodeList = append(nodeList, fmt.Sprintf("%s:%s", model.CoreNodeName, dockerPort))
     }
 
     return nodeList

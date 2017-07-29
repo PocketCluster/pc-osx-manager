@@ -9,7 +9,7 @@ import (
 )
 
 const (
-    coreNodeName         string = "pc-core"
+    CoreNodeName         string = "pc-core"
     coreNodeTable        string = `pc_corenode`
     CoreNodeModelVersion string = "0.1.4"
 )
@@ -51,7 +51,7 @@ func RetrieveCoreNode() *CoreNode {
         return &CoreNode{
             ModelVersion:    CoreNodeModelVersion,
             // there always is only one core node and it's name is "pc-core"
-            NodeName:        coreNodeName,
+            NodeName:        CoreNodeName,
             State:           SNMStateInit,
         }
     }
@@ -97,7 +97,7 @@ func (c *CoreNode) CreateCore() error {
     if c.ModelVersion != CoreNodeModelVersion {
         return errors.Errorf("[ERR] incorrect core model version")
     }
-    if c.NodeName != coreNodeName {
+    if c.NodeName != CoreNodeName {
         return errors.Errorf("[ERR] incorrect node name")
     }
     if c.State != SNMStateInit {
@@ -129,7 +129,7 @@ func (c *CoreNode) Update() error {
     if c.ModelVersion != CoreNodeModelVersion {
         return errors.Errorf("[ERR] incorrect core model version")
     }
-    if c.NodeName != coreNodeName {
+    if c.NodeName != CoreNodeName {
         return errors.Errorf("[ERR] incorrect node name")
     }
     // TODO : check token format
