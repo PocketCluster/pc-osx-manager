@@ -9,14 +9,15 @@ import (
 
 func DockerEnvironemtPostProcess() error {
     var (
+        cid string = ""
         err error = nil
     )
-    err = config.SetupDockerEnvironement("")
+    cid, err = SharedSlaveContext().GetClusterID()
     if err != nil {
         log.Debugf(err.Error())
         return errors.WithStack(err)
     }
-    err = config.SetupDockerAuthorityCert("")
+    err = config.SetupDockerEnvironement("", cid)
     if err != nil {
         log.Debugf(err.Error())
         return errors.WithStack(err)

@@ -53,29 +53,29 @@ func initAgentService(app service.AppSupervisor) error {
             if transOk {
                 log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | SUCCESS ", ts, state.String())
                 switch state {
-                case locator.SlaveCryptoCheck: {
-                    app.RunNamedService(servicePcsshInit)
-                    return nil
-                }
-                case locator.SlaveBindBroken: {
-                    app.RunNamedService(servicePcsshStart)
-                    return nil
-                }
-                default: {
-                    return nil
-                }
+                    case locator.SlaveCryptoCheck: {
+                        app.RunNamedService(servicePcsshInit)
+                        return nil
+                    }
+                    case locator.SlaveBindBroken: {
+                        app.RunNamedService(servicePcsshStart)
+                        return nil
+                    }
+                    default: {
+                        return nil
+                    }
                 }
 
             } else {
                 log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | FAILED ", ts, state.String())
                 switch state {
-                case locator.SlaveBounded: {
-                    app.BroadcastEvent(service.Event{Name:sshproc.EventNodeSSHServiceStop})
-                    return nil
-                }
-                default: {
-                    return nil
-                }
+                    case locator.SlaveBounded: {
+                        app.BroadcastEvent(service.Event{Name:sshproc.EventNodeSSHServiceStop})
+                        return nil
+                    }
+                    default: {
+                        return nil
+                    }
                 }
             }
 

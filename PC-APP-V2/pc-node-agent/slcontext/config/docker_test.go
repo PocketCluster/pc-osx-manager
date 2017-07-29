@@ -10,6 +10,10 @@ import (
     "github.com/stkim1/pcrypto"
 )
 
+const (
+    cluster_id string = "mdFj7mEaWNhbCI84"
+)
+
 func TestDockerEnvironment(t *testing.T) {
     cfg, err := DebugConfigPrepare()
     if err != nil {
@@ -19,7 +23,7 @@ func TestDockerEnvironment(t *testing.T) {
     defer DebugConfigDestory(cfg)
 
     // there shouldn't be an error
-    err = SetupDockerEnvironement(cfg.rootPath)
+    err = SetupDockerEnvironement(cfg.rootPath, cluster_id)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -30,7 +34,7 @@ func TestDockerEnvironment(t *testing.T) {
         t.Errorf(err.Error())
         return
     }
-    if !reflect.DeepEqual(env, dockerEnvContent()) {
+    if !reflect.DeepEqual(env, dockerEnvContent(cluster_id)) {
         t.Errorf(err.Error())
         return
     }
@@ -42,7 +46,7 @@ func TestDockerEnvironment(t *testing.T) {
         return
     }
     // there shouldn't be an error
-    err = SetupDockerEnvironement(cfg.rootPath)
+    err = SetupDockerEnvironement(cfg.rootPath, cluster_id)
     if err != nil {
         t.Errorf(err.Error())
         return
@@ -53,7 +57,7 @@ func TestDockerEnvironment(t *testing.T) {
         t.Errorf(err.Error())
         return
     }
-    if !reflect.DeepEqual(env, dockerEnvContent()) {
+    if !reflect.DeepEqual(env, dockerEnvContent(cluster_id)) {
         t.Errorf(err.Error())
     }
 }
@@ -75,45 +79,6 @@ func TestDockerAuthorityCert(t *testing.T) {
     // first save some file to pki place
     err = ioutil.WriteFile(FilePathSlaveEngineAuthCert(cfg.rootPath), pcrypto.TestCertPublicAuth(), cert_file_permission)
     if err != nil {
-        t.Errorf(err.Error())
-        return
-    }
-    // setup docker authority
-    err = SetupDockerAuthorityCert(cfg.rootPath)
-    if err != nil {
-        t.Errorf(err.Error())
-        return
-    }
-    // compare two certs to make sure they are the same
-    dca, err := ioutil.ReadFile(path.Join(cfg.rootPath, DOCKER_AUTH_CERT_FILE))
-    if err != nil {
-        t.Errorf(err.Error())
-        return
-    }
-    if !reflect.DeepEqual(dca, pcrypto.TestCertPublicAuth()) {
-        t.Errorf(err.Error())
-        return
-    }
-
-    // when there is file exists, overwrite it first
-    err = ioutil.WriteFile(path.Join(cfg.rootPath, DOCKER_AUTH_CERT_FILE), []byte("nothing"), cert_file_permission)
-    if err != nil {
-        t.Errorf(err.Error())
-        return
-    }
-    // setup docker authority
-    err = SetupDockerAuthorityCert(cfg.rootPath)
-    if err != nil {
-        t.Errorf(err.Error())
-        return
-    }
-    // compare two certs to make sure they are the same
-    dca, err = ioutil.ReadFile(path.Join(cfg.rootPath, DOCKER_AUTH_CERT_FILE))
-    if err != nil {
-        t.Errorf(err.Error())
-        return
-    }
-    if !reflect.DeepEqual(dca, pcrypto.TestCertPublicAuth()) {
         t.Errorf(err.Error())
         return
     }
