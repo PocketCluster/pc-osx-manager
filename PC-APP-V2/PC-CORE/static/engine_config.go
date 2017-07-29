@@ -132,7 +132,7 @@ func setupServiceConfig() (*serviceConfig, error) {
     // election  : 5000 ( heartbeat * 10 )
     // snapshot  : 1000
     // TODO : these parameters need to be dynamically adjusted according to a cluster condition
-    etcdCfg, err := embed.NewPocketConfig(etcdPath, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey, 500, 5000, 1000)
+    etcdCfg, err := embed.NewPocketConfig(etcdPath, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey, 500, 5000, 1000, true)
     if err != nil {
         // this is critical
         return nil, errors.WithStack(err)
