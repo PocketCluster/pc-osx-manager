@@ -8,12 +8,11 @@ import (
     "github.com/miekg/dns"
     "github.com/stkim1/pc-node-agent/service"
     "github.com/stkim1/pc-vbox-core/crcontext"
-    "github.com/stkim1/pcrypto"
 )
 
 const (
     localPocketMasterName string = "pc-master."
-    fqdnPocketMasterName  string = localPocketMasterName + pcrypto.FormFQDNClusterID
+    fqdnPocketMasterName  string = "pc-master.%s.cluster.pocketcluster.io."
 )
 
 func failWithRcode(w dns.ResponseWriter, r *dns.Msg, rCode int) {
