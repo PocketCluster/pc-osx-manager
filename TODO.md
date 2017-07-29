@@ -13,6 +13,8 @@
 ### V0.1.4
 - [ ] Repartition logic from Boot2Docker
 - [ ] Disable Docker when there is no TLS certs available
+- [ ] Use FQDN name for certification and name server ( e.g. `pc-core.Q1oqc1921lq.cluster.pocketcluster.io` )
+- [ ] Provide `pc-master` DNS for `docker-compose`
 - [ ] Append 'CA' <http://rt.openssl.org/Ticket/History.html?user=guest&pass=guest&id=3979>
 - [ ] Run `dockerd` with script and check conditions there like boot2docker
 - [ ] Combine Docker related stuff in a unified package
@@ -27,6 +29,9 @@
 - [ ] `Makefile` to remove all *_test.go and TEST.go
 - [ ] Clean up core node including `vi`
 - [ ] Pass `uid` to all slave nodes to have them setup the __user__ with the same `uid`
+- [ ] Look carefully `etcd` TLS configuration behave with `docker-compose` connected.
+  * At initial, etcd `network/bridged` API point isn't available and dockerd complains. This seems to be normal though.
+  * <https://dims-devguide.readthedocs.io/en/latest/dockerdatacenter.html>
 - [ ] **Slave** : Remove unnecessary `const` in `slagent` package such as `SLAVE_CLUSTER_MEMBERS`
 - [ ] **Slave** : Remove unnecessary `field` in `PocketSlaveDiscovery` & `PocketSlaveDiscovery` struct
 - [ ] **Slave** : search logic in master `Beacon` package
