@@ -8,7 +8,6 @@ import (
 
     "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
-    "fmt"
 )
 
 const (
@@ -23,13 +22,10 @@ const (
     SYSTEM_AUTH_CERT_BACKUP_FILE string = SYSTEM_AUTH_CERT_BACKUP_PATH + "ca-certificates" + pcrypto.FileExtCertificate
 )
 
-func dockerEnvContent(clusterID string) []byte {
-    var (
-        dkOpt = fmt.Sprintf(`# PocketCluster Docker Upstart and SysVinit configuration file
+func dockerEnvContent() []byte {
+    return []byte(`# PocketCluster Docker Upstart and SysVinit configuration file
 
-DOCKER_OPTS="-H tcp://0.0.0.0:2376 --dns 127.0.0.1 --tlsverify --tlscacert=/etc/pocket/pki/pc_node_engine.acr --tlscert=/etc/pocket/pki/pc_node_engine.crt --tlskey=/etc/pocket/pki/pc_node_engine.pem --cluster-advertise=eth0:2376 --cluster-store=etcd://pc-master.%s.cluster.pocketcluster.io:2379 --cluster-store-opt kv.cacertfile=/etc/pocket/pki/pc_node_engine.acr --cluster-store-opt kv.certfile=/etc/pocket/pki/pc_node_engine.crt --cluster-store-opt kv.keyfile=/etc/pocket/pki/pc_node_engine.pem"`, clusterID)
-    )
-    return []byte(dkOpt)
+DOCKER_OPTS="-H tcp://0.0.0.0:2376 --dns 127.0.0.1 --tlsverify --tlscacert=/etc/pocket/pki/pc_node_engine.acr --tlscert=/etc/pocket/pki/pc_node_engine.crt --tlskey=/etc/pocket/pki/pc_node_engine.pem --cluster-advertise=eth0:2376 --cluster-store=etcd://pc-master:2379 --cluster-store-opt kv.cacertfile=/etc/pocket/pki/pc_node_engine.acr --cluster-store-opt kv.certfile=/etc/pocket/pki/pc_node_engine.crt --cluster-store-opt kv.keyfile=/etc/pocket/pki/pc_node_engine.pem"`)
 }
 
 func copyFile(src, dst string) error {
@@ -63,7 +59,7 @@ func copyFile(src, dst string) error {
     return nil
 }
 
-func SetupDockerEnvironement(rootPath, clusterID string) error {
+func SetupDockerEnvironement(rootPath string) error {
     var (
         dockerEnvPath string = path.Join(rootPath, DOCKER_ENV_PATH)
         dockerEnvFile string = path.Join(rootPath, DOCKER_ENV_FILE)
@@ -89,7 +85,7 @@ func SetupDockerEnvironement(rootPath, clusterID string) error {
 */
     os.Remove(dockerEnvFile)
 
-    err = ioutil.WriteFile(dockerEnvFile, dockerEnvContent(clusterID), cert_file_permission)
+    err = ioutil.WriteFile(dockerEnvFile, dockerEnvContent(), cert_file_permission)
     return errors.WithStack(err)
 }
 
