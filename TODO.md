@@ -13,7 +13,7 @@
 ### V0.1.4
 - [ ] Repartition logic from Boot2Docker
 - [ ] Disable Docker when there is no TLS certs available
-- [ ] Use FQDN name for certification and name server ( e.g. `pc-core.Q1oqc1921lq.cluster.pocketcluster.io` )
+
 - [ ] Provide `pc-master` DNS for `docker-compose`
 - [ ] Append 'CA' <http://rt.openssl.org/Ticket/History.html?user=guest&pass=guest&id=3979>
 - [ ] Run `dockerd` with script and check conditions there like boot2docker
@@ -53,7 +53,8 @@
 - [x] _Master_ teleport bolts -> SQLite
 - [-] Slave sends SSH key in cryptocheck to keyexchange of master
 - [-] [_PINE64_] `fdisk` new partition incorrectly begins new partition sector from 2048
-
+- [-] Use FQDN name for certification and name server ( e.g. `pc-core.Q1oqc1921lq.cluster.pocketcluster.io` )
+  * `pc-master` queries to main DNS.
 
 ### V0.1.3
 -

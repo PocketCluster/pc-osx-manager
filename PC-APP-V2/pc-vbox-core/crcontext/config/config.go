@@ -59,6 +59,8 @@ func brandNewSlaveConfig(rootPath string) (*PocketCoreConfig) {
     clusterID, err = ioutil.ReadFile(pathClusterID)
     if err != nil {
         log.Panic(errors.WithStack(err).Error())
+    } else {
+        os.Remove(pathClusterID)
     }
 
     // read & delete auth token
