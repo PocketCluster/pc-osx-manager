@@ -30,7 +30,6 @@ func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     log.Debugf("[VBOX_DISK] build vbox core disk ")
 
     var (
-        hostFQDN           string                = fmt.Sprintf("pc-core." + pcrypto.FormFQDNClusterID, clusterID)
         authToken          string                = ""
         dataPath           string                = ""
         userName           string                = ""
@@ -77,7 +76,7 @@ func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     if err != nil {
         return errors.WithStack(err)
     }
-    eKcrt, err = caSigner.GenerateSignedCertificate(hostFQDN, "", ePrk)
+    eKcrt, err = caSigner.GenerateSignedCertificate("pc-core", "", ePrk)
     if err != nil {
         log.Warningf("[AUTH] Node pc-core cannot receive a signed certificate : cert generation error. %v", err)
         return errors.WithStack(err)
