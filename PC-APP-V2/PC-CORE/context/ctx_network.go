@@ -10,6 +10,8 @@ import (
 
 type HostContextNetwork interface {
     HostPrimaryAddress() (string, error)
+    HostPrimaryInterfaceShortName() (string, error)
+    HostPrimaryInterfaceFullName() (string, error)
     HostDefaultGatewayAddress() (string, error)
     UpdateNetworkInterfaces(interfaces []*HostNetworkInterface) bool
     UpdateNetworkGateways(gateways []*HostNetworkGateway)
@@ -58,11 +60,33 @@ func (ctx *hostContext) HostPrimaryAddress() (string, error) {
     defer ctx.Unlock()
 
     addr := ctx.primaryAddress
-    if addr != nil {
-        return addr.Address, nil
+    if addr == nil {
+        return "", errors.Errorf("[ERR] no primary address has been found")
     }
 
-    return "", errors.Errorf("[ERR] No primary address has been found")
+    return addr.Address, nil
+}
+
+func (ctx *hostContext) HostPrimaryInterfaceShortName() (string, error) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    iface := ctx.primaryInteface
+    if iface == nil {
+        return "", errors.Errorf("[ERR] no primary interface has been found")
+    }
+    return iface.BsdName, nil
+}
+
+func (ctx *hostContext) HostPrimaryInterfaceFullName() (string, error) {
+    ctx.Lock()
+    defer ctx.Unlock()
+
+    iface := ctx.primaryInteface
+    if iface == nil {
+        return "", errors.Errorf("[ERR] no primary interface has been found")
+    }
+    return iface.DisplayName, nil
 }
 
 func (ctx *hostContext) HostDefaultGatewayAddress() (string, error) {

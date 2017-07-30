@@ -110,6 +110,8 @@ func main() {
 
                     case operation.CmdBaseServiceStart: {
 
+                        // TODO check all the status before start
+
                         cid, err := context.SharedHostContext().MasterAgentName()
                         if err != nil {
                             log.Debug(err)
@@ -146,9 +148,12 @@ func main() {
                         }
 
                         // beacon service added
-                        // TODO : use network interface
-                        // TODO : need to catcher instance from GC
-                        _, err = mcast.NewSearchCatcher(a.ServiceSupervisor, "en0")
+                        iname, err := context.SharedHostContext().HostPrimaryInterfaceShortName()
+                        if err != nil {
+                            log.Debug(err)
+                            return
+                        }
+                        _, err = mcast.NewSearchCatcher(a.ServiceSupervisor, iname)
                         if err != nil {
                             log.Debug(err)
                             return
