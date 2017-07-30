@@ -77,12 +77,12 @@ func main() {
                         case network.NetworkChangeInterface: {
                             //log.Debugf(spew.Sdump(e.HostInterfaces))
                             log.Debugf("[NET] %v", e.String())
-                            context.MonitorNetworkInterfaces(e.HostInterfaces)
+                            context.SharedHostContext().RefreshNetworkInterfaces(e.HostInterfaces)
                         }
                         case network.NetworkChangeGateway: {
                             //log.Debugf(spew.Sdump(e.HostGateways))
                             log.Debugf("[NET] %v", e.String())
-                            context.MonitorNetworkGateways(e.HostGateways)
+                            context.SharedHostContext().RefreshNetworkGateways(e.HostGateways)
                         }
                     }
                 }

@@ -94,40 +94,48 @@ func DebugContextPrepare() (HostContext) {
     }
 
     _context = &hostContext{
-        cocoaHomePath:               "/Users/almightykim",
-        posixHomePath:               "/Users/almightykim",
-        fullUserName:                "Almighty Kim",
-        loginUserName:               "almightykim",
-        userTempPath:                "/var/folders/1s/nn_7b2vd75g6lfs5_vxcgt_c0000gn/T/",
-
-        applicationSupportPath:      "/Users/almightykim/Library/Application Support/SysUtil",
-        applicationDocumentPath:     "/Users/almightykim/Documents",
-        applicationTempPath:         "/var/folders/1s/nn_7b2vd75g6lfs5_vxcgt_c0000gn/T/",
-        applicationLibCachePath:     "/Users/almightykim/Library/Caches",
-        applicationResourcePath:     "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/Resources",
-        applicationExecutablePath:   "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/MacOS/SysUtil",
-
         clusterPublicName:           "G8815052XYLLWQCK",
 
-        processorCount:              8,
-        activeProcessorCount:        8,
-        physicalMemorySize:          34359738368,
+        hostUserEnv: hostUserEnv {
+            cocoaHomePath:               "/Users/almightykim",
+            posixHomePath:               "/Users/almightykim",
+            fullUserName:                "Almighty Kim",
+            loginUserName:               "almightykim",
+            userTempPath:                "/var/folders/1s/nn_7b2vd75g6lfs5_vxcgt_c0000gn/T/",
+        },
 
-        currentLanguageCode:         "EN",
-        currentCountryCode:          "KR",
+        hostAppEnv: hostAppEnv {
+            applicationSupportPath:      "/Users/almightykim/Library/Application Support/SysUtil",
+            applicationDocumentPath:     "/Users/almightykim/Documents",
+            applicationTempPath:         "/var/folders/1s/nn_7b2vd75g6lfs5_vxcgt_c0000gn/T/",
+            applicationLibCachePath:     "/Users/almightykim/Library/Caches",
+            applicationResourcePath:     "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/Resources",
+            applicationExecutablePath:   "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/MacOS/SysUtil",
 
-        // cert authority
-        caBundle:                    caBundle,
+            currentLanguageCode:         "EN",
+            currentCountryCode:          "KR",
+        },
 
-        // host certificate
-        hostBundle:                  hostBundle,
+        hostSysResource: hostSysResource {
+            processorCount:              8,
+            activeProcessorCount:        8,
+            physicalMemorySize:          34359738368,
+        },
 
-        // beacon certificate
-        beaconBundle:                beaconBundle,
+        hostCertificate: hostCertificate {
+            // cert authority
+            caBundle:                    caBundle,
+
+            // host certificate
+            hostBundle:                  hostBundle,
+
+            // beacon certificate
+            beaconBundle:                beaconBundle,
+        },
     }
 
-    _context.refreshNetworkGateways(test_gateways)
-    _context.refreshNetworkInterfaces(test_intefaces)
+    _context.RefreshNetworkGateways(test_gateways)
+    _context.RefreshNetworkInterfaces(test_intefaces)
 
     return _context
 }
