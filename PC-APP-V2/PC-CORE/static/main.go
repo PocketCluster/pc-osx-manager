@@ -72,11 +72,12 @@ func main() {
                             log.Debugf("[NET] %v", e.String())
 
                             // TODO check if service is running
-                            isSrvRun := false
+                            isSrvRun := len(a.ServiceList()) != 0
                             updated := context.SharedHostContext().UpdateNetworkInterfaces(e.HostInterfaces)
 
                             // services should be running before receiving event. Otherwise, service will not start
                             if isSrvRun && updated {
+                                log.Debugf("[NET] network address change event triggered")
                                 a.BroadcastEvent(service.Event{Name:iventNetworkAddressChange})
                             }
                         }

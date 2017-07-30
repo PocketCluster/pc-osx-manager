@@ -90,7 +90,7 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
             vc := <- vboxC
             ctrl, ok := vc.Payload.(masterctrl.VBoxMasterControl)
             if !ok {
-                log.Debugf("[ERR] invalid VBoxMasterControl type")
+                log.Debugf("[AGENT] (ERR) invalid VBoxMasterControl type")
                 return errors.Errorf("[ERR] invalid VBoxMasterControl type")
             }
 
@@ -100,7 +100,7 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
                 ctrl,
                 beaconRoute,
                 func(host string, payload []byte) error {
-                    log.Debugf("[BEACON-TX] [%v] Host %v", time.Now(), host)
+                    log.Debugf("[AGENT] BEACON-TX [%v] Host %v", time.Now(), host)
                     a.BroadcastEvent(
                         service.Event{
                             Name:       ucast.EventBeaconCoreLocationSend,
@@ -137,7 +137,7 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
                         if ok {
                             err = beaconMan.TransitionWithBeaconData(bp, time.Now())
                             if err != nil {
-                                log.Debugf("[BEACON-RX] Error : %v", err)
+                                log.Debugf("[AGENT] BEACON-RX Error : %v", err)
                             }
                         }
                     }
@@ -146,7 +146,7 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
                         if ok {
                             err = beaconMan.TransitionWithSearchData(cp, time.Now())
                             if err != nil {
-                                log.Debugf("[SEARCH-RX] Error : %v", err)
+                                log.Debugf("[AGENT] SEARCH-RX Error : %v", err)
                             }
                         }
                     }
@@ -158,6 +158,7 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
                     }
                     case <- netC: {
                         // TODO update primary address
+                        log.Debugf("[AGENT] Host Address changed")
                     }
                 }
             }
