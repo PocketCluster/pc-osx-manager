@@ -70,16 +70,25 @@ func main() {
                     switch e.NetworkEvent {
                         case network.NetworkChangeInterface: {
                             log.Debugf("[NET] %v", e.String())
-                            if context.SharedHostContext().UpdateNetworkInterfaces(e.HostInterfaces) {
+
+                            // TODO check if service is running
+                            isSrvRun := false
+                            updated := context.SharedHostContext().UpdateNetworkInterfaces(e.HostInterfaces)
+
+                            // services should be running before receiving event. Otherwise, service will not start
+                            if isSrvRun && updated {
                                 a.BroadcastEvent(service.Event{Name:iventNetworkAddressChange})
-                            }
-                            // config should be setup after acquiring ip address on wifi
-                            config, err = setupServiceConfig()
-                            if err != nil {
-                                // TODO send error report
-                                log.Debugf("[LIFE] CRITICAL ERROR %v", err)
+
                             } else {
-                                FeedSend("[LIFE] SUCCESSFULLY INITIATED ENGINE " + config.teleConfig.HostUUID)
+                                // config should be setup after acquiring ip address on wifi
+                                config, err = setupServiceConfig()
+                                if err != nil {
+                                    // TODO send error report
+                                    log.Debugf("[LIFE] CRITICAL ERROR %v", err)
+                                } else {
+                                    FeedSend("[LIFE] SUCCESSFULLY INITIATED ENGINE " + config.teleConfig.HostUUID)
+                                }
+
                             }
                         }
                         case network.NetworkChangeGateway: {

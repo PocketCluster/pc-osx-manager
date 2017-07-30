@@ -165,8 +165,8 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
         },
         service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
         service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
-        service.BindEventWithService(iventVboxCtrlInstanceSpawn,           vboxC))
-        //service.BindEventWithService(iventNetworkAddressChange,            netC))
+        service.BindEventWithService(iventVboxCtrlInstanceSpawn,           vboxC),
+        service.BindEventWithService(iventNetworkAddressChange,            netC))
 
     return nil
 }
