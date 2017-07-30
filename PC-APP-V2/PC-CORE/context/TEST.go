@@ -134,8 +134,8 @@ func DebugContextPrepare() (HostContext) {
         },
     }
 
-    _context.RefreshNetworkGateways(test_gateways)
-    _context.RefreshNetworkInterfaces(test_intefaces)
+    _context.UpdateNetworkGateways(test_gateways)
+    _context.UpdateNetworkInterfaces(test_intefaces)
 
     return _context
 }

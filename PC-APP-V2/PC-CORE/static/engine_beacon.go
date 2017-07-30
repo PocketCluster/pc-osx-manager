@@ -17,6 +17,10 @@ import (
     "github.com/stkim1/pc-core/model"
 )
 
+const (
+    iventNetworkAddressChange string = "ivent.network.address.change"
+)
+
 type beaconEventRoute struct {
     service.ServiceSupervisor
     *tervice.PocketConfig
@@ -68,6 +72,7 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
         beaconC = make(chan service.Event)
         searchC = make(chan service.Event)
         vboxC   = make(chan service.Event)
+        netC    = make(chan service.Event)
     )
     a.RegisterServiceWithFuncs(
         operation.ServiceBeaconMaster,
@@ -151,13 +156,17 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
                             log.Debug(err.Error())
                         }
                     }
+                    case <- netC: {
+                        // TODO update primary address
+                    }
                 }
             }
             return nil
         },
         service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
         service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
-        service.BindEventWithService(iventVboxCtrlInstanceSpawn,           vboxC))
+        service.BindEventWithService(iventVboxCtrlInstanceSpawn,           vboxC),
+        service.BindEventWithService(iventNetworkAddressChange,            netC))
 
     return nil
 }

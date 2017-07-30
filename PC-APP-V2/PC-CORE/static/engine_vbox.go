@@ -216,6 +216,7 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
                 listen         net.Listener                 = nil
                 prvkey, pubkey []byte                       = nil, nil
                 err            error                        = nil
+                paddr          string                       = ""
             )
 
             // --- build vbox controller --- //
@@ -233,8 +234,11 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
             if err != nil {
                 return errors.WithStack(err)
             }
-            // TODO external ip address
-            ctrl, err = masterctrl.NewVBoxMasterControl(clusterID, "192.168.1.105", prvkey, pubkey, coreNode, nil)
+            paddr, err = context.SharedHostContext().HostPrimaryAddress()
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            ctrl, err = masterctrl.NewVBoxMasterControl(clusterID, paddr, prvkey, pubkey, coreNode, nil)
             if err != nil {
                 return errors.WithStack(err)
             }

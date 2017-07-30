@@ -12,6 +12,7 @@ import (
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
+    "github.com/stkim1/pc-core/service"
 )
 
 func main() {
@@ -75,14 +76,14 @@ func main() {
                 case network.Event: {
                     switch e.NetworkEvent {
                         case network.NetworkChangeInterface: {
-                            //log.Debugf(spew.Sdump(e.HostInterfaces))
                             log.Debugf("[NET] %v", e.String())
-                            context.SharedHostContext().RefreshNetworkInterfaces(e.HostInterfaces)
+                            if context.SharedHostContext().UpdateNetworkInterfaces(e.HostInterfaces) {
+                                a.BroadcastEvent(service.Event{Name:iventNetworkAddressChange})
+                            }
                         }
                         case network.NetworkChangeGateway: {
-                            //log.Debugf(spew.Sdump(e.HostGateways))
                             log.Debugf("[NET] %v", e.String())
-                            context.SharedHostContext().RefreshNetworkGateways(e.HostGateways)
+                            context.SharedHostContext().UpdateNetworkGateways(e.HostGateways)
                         }
                     }
                 }
