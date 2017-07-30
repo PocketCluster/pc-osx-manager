@@ -13,8 +13,10 @@ import (
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/pc-vbox-comm/masterctrl"
     mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
-    "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-node-agent/slagent"
+
+    "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/model"
 )
 import (
     "github.com/davecgh/go-spew/spew"
@@ -247,10 +249,22 @@ func (b *beaconManger) Shutdown() error {
 // --- Node Name Service Methods --- //
 
 func (b *beaconManger) AddressForName(name string) (string, error) {
-    if name == model.CoreNodeName {
-        return b.vboxCtrl.GetCoreNode().IP4AddrString()
+    // TODO refactor this into an appropriate package
+    const (
+        pcmaster string = "pc-master"
+    )
+
+    switch name {
+        case pcmaster: {
+            return context.SharedHostContext().HostPrimaryAddress()
+        }
+        case model.CoreNodeName: {
+            return b.vboxCtrl.GetCoreNode().IP4AddrString()
+        }
+        default: {
+            return findNodeForNameService(b, name)
+        }
     }
-    return findNodeForNameService(b, name)
 }
 
 // --- Swarm Discovery Methods --- //
