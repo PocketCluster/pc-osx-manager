@@ -3,6 +3,7 @@ package sshcfg
 import (
     "database/sql"
     "fmt"
+    "net"
     "os"
     "io/ioutil"
     "path/filepath"
@@ -16,13 +17,16 @@ import (
 
     "github.com/cloudflare/cfssl/certdb"
     "github.com/stkim1/pcrypto"
-
+    "github.com/stkim1/pc-core/context"
 )
 
 // MakeDefaultConfig creates a new Config structure and populates it with defaults
-func MakeMasterConfig(dataDir string, debug bool) *service.PocketConfig {
+func MakeMasterConfig(ctx context.HostContext, debug bool) (*service.PocketConfig, error) {
     config := &service.PocketConfig{}
-    applyMasterDefaults(config, dataDir)
+    err := applyMasterDefaults(config, ctx)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
     if debug {
         config.Console = ioutil.Discard
         log.Info("Teleport DEBUG output configured")
@@ -31,11 +35,25 @@ func MakeMasterConfig(dataDir string, debug bool) *service.PocketConfig {
         config.Console = os.Stdout
         log.Info("Teleport NORMAL cli output configured")
     }
-    return config
+    return config, nil
 }
 
 // applyDefaults applies default values to the existing config structure
-func applyMasterDefaults(cfg *service.PocketConfig, dataDir string) {
+func applyMasterDefaults(cfg *service.PocketConfig, ctx context.HostContext) error {
+
+    dataDir, err := ctx.ApplicationUserDataDirectory()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    paddr, err := ctx.HostPrimaryAddress()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    cUUID, err := ctx.GetClusterUUID()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
     // defaults for the auth service:
     cfg.SeedConfig                   = false
     cfg.Auth.Enabled                 = true
@@ -68,11 +86,10 @@ func applyMasterDefaults(cfg *service.PocketConfig, dataDir string) {
 
     // global defaults
     cfg.Hostname                      = defaults.CoreHostName
+    cfg.HostUUID                      = cUUID
     cfg.DataDir                       = dataDir
-}
-
-func AssignHostUUID(cfg *service.PocketConfig, uuid string) {
-    cfg.HostUUID = uuid
+    cfg.AdvertiseIP                   = net.ParseIP(paddr)
+    return nil
 }
 
 func AssignCertStorage(cfg *service.PocketConfig, certStorage certdb.Accessor) {

@@ -55,7 +55,7 @@ func setupServiceConfig() (*serviceConfig, error) {
         meta = cluster[0]
     }
     log.Debugf("Cluster ID %v | UUID %v", meta.ClusterID, meta.ClusterUUID)
-    ctx.SetMasterAgentName(meta.ClusterID)
+    ctx.SetClusterMeta(meta)
 
     country, err := ctx.CurrentCountryCode()
     if err != nil {
@@ -96,8 +96,10 @@ func setupServiceConfig() (*serviceConfig, error) {
     ctx.UpdateVBoxCert(vboxBundle)
 
     // make teleport core config
-    teleCfg := sshcfg.MakeMasterConfig(dataDir, true)
-    sshcfg.AssignHostUUID(teleCfg, meta.ClusterUUID)
+    teleCfg, err := sshcfg.MakeMasterConfig(context.SharedHostContext(), true)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
     sshcfg.AssignDatabaseEngine(teleCfg, rec.DataBase())
     sshcfg.AssignCertStorage(teleCfg, rec.Certdb())
     sshcfg.AssignCASigner(teleCfg, caBundle.CASigner)

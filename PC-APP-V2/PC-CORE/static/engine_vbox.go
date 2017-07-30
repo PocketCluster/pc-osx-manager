@@ -133,8 +133,6 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
         err error = nil
     )
 
-    log.Debugf("[CONTROL] handle connection")
-
     for {
         select {
             case <- stopC: {
@@ -143,7 +141,7 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
             }
             default: {
                 if masterctrl.TransitionFailureLimit <= errorCount {
-                    log.Debugf("[CONTROL] error count exceeds 5. Let's close connection and return")
+                    log.Debugf("[VBOXLSTN] error count exceeds 5. Let's close connection and return")
                     ctrl.HandleCoreDisconnection(time.Now())
                     return errors.WithStack(conn.Close())
                 }
@@ -170,21 +168,21 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
                         errorCount++
                     }
 */
-                    log.Debugf("[CONTROL] read error (%v)", err.Error())
+                    log.Debugf("[VBOXLSTN] read error (%v)", err.Error())
                     errorCount++
                     continue
                 }
 
                 sendPkg, err = ctrl.ReadCoreMetaAndMakeMasterAck(conn.RemoteAddr(), recvPkg[:count], time.Now())
                 if err != nil {
-                    log.Debugf("[CONTROL] [%s] ctrl meta error (%v)", ctrl.CurrentState().String(), err.Error())
+                    log.Debugf("[VBOXLSTN] [%s] ctrl meta error (%v)", ctrl.CurrentState().String(), err.Error())
                     sendPkg = eofMsg
                 }
 
                 // write to core
                 count, err = conn.Write(sendPkg)
                 if err != nil {
-                    log.Debugf("[CONTROL] write error (%v)", err.Error())
+                    log.Debugf("[VBOXLSTN] write error (%v)", err.Error())
                     errorCount++
                     continue
                 }
@@ -204,8 +202,6 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
         listenerC = make(chan service.Event)
         ctrlObjC  = make(chan service.Event)
     )
-
-    log.Debugf("[CONTROL] starting master control service ...")
 
     a.RegisterServiceWithFuncs(
         operation.ServiceVBoxMasterControl,
@@ -238,6 +234,7 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
             if err != nil {
                 return errors.WithStack(err)
             }
+            log.Debugf("[VBOXCTRL] external ip address %v", paddr)
             ctrl, err = masterctrl.NewVBoxMasterControl(clusterID, paddr, prvkey, pubkey, coreNode, nil)
             if err != nil {
                 return errors.WithStack(err)
@@ -253,11 +250,11 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
             a.BroadcastEvent(service.Event{Name:iventVboxCtrlListenerSpawn, Payload:listen})
             time.Sleep(time.Millisecond * 500)
 
-            log.Debugf("[CONTROL] VBox Core Control service started... %s", ctrl.CurrentState().String())
+            log.Debugf("[VBOXCTRL] VBox Core Control service started... %s", ctrl.CurrentState().String())
             for {
                 select {
                     case <- a.StopChannel(): {
-                        log.Debugf("[CONTROL] VBox Core Control shutdown...")
+                        log.Debugf("[VBOXCTRL] VBox Core Control shutdown...")
                         return errors.WithStack(listen.Close())
                     }
                 }
@@ -293,23 +290,23 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
                 return errors.Errorf("[ERR] invalid listener type")
             }
 
-            log.Debugf("[CONTROL] VBox Core Listener service started... %s", ctrl.CurrentState().String())
+            log.Debugf("[VBOXLSTN] VBox Core Listener service started... %s", ctrl.CurrentState().String())
             for {
                 select {
                     case <- a.StopChannel(): {
-                        log.Debugf("[CONTROL] VBox Core listener shutdown...")
+                        log.Debugf("[VBOXLSTN] VBox Core listener shutdown...")
                         return nil
                     }
                     default: {
                         conn, err = listen.Accept()
                         if err != nil {
-                            log.Debugf("[CONTROL] connection open error (%v)", err.Error())
+                            log.Debugf("[VBOXLSTN] connection open error (%v)", err.Error())
                             time.Sleep(masterctrl.BoundedTimeout)
                         } else {
-                            log.Debugf("[CONTROL] new connection opens")
+                            log.Debugf("[VBOXLSTN] new connection opens")
                             err = handleConnection(ctrl, conn, a.StopChannel())
                             if err != nil {
-                                log.Debugf("[REPORTER] connection handle error (%v)", err.Error())
+                                log.Debugf("[VBOXLSTN] connection handle error (%v)", err.Error())
                             }
                         }
                     }

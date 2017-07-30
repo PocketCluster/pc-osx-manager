@@ -96,6 +96,7 @@ func initSwarmService(a *appMainLife) error {
                     case se := <- swarmSrvC: {
                         srv, ok := se.Payload.(*swarmemb.SwarmService)
                         if ok {
+                            log.Debugf("[SWARM-CTRL] swarm instance detected...")
                             swarmsrv = srv
                         }
                     }
@@ -143,6 +144,7 @@ func initSwarmService(a *appMainLife) error {
                 return errors.WithStack(err)
             }
             a.BroadcastEvent(service.Event{Name:iventSwarmInstanceSpawn, Payload:swarmsrv})
+            log.Debugf("[SWARM] swarm service started...")
             err = swarmsrv.ListenAndServeSingleHost()
             return errors.WithStack(err)
         },

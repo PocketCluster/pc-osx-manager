@@ -41,13 +41,6 @@ func main() {
                     switch e.Crosses(lifecycle.StageAlive) {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is now alive %v", e.String())
-                            config, err = setupServiceConfig()
-                            if err != nil {
-                                // TODO send error report
-                                log.Debugf("[LIFE] CRITICAL ERROR %v", err)
-                            } else {
-                                FeedSend("[LIFE] successfully initiated engine ..." + config.teleConfig.HostUUID)
-                            }
                         }
                         case lifecycle.CrossOff: {
                             log.Debugf("[LIFE] app is inactive %v", e.String())
@@ -79,6 +72,14 @@ func main() {
                             log.Debugf("[NET] %v", e.String())
                             if context.SharedHostContext().UpdateNetworkInterfaces(e.HostInterfaces) {
                                 a.BroadcastEvent(service.Event{Name:iventNetworkAddressChange})
+                            }
+                            // config should be setup after acquiring ip address on wifi
+                            config, err = setupServiceConfig()
+                            if err != nil {
+                                // TODO send error report
+                                log.Debugf("[LIFE] CRITICAL ERROR %v", err)
+                            } else {
+                                FeedSend("[LIFE] SUCCESSFULLY INITIATED ENGINE " + config.teleConfig.HostUUID)
                             }
                         }
                         case network.NetworkChangeGateway: {

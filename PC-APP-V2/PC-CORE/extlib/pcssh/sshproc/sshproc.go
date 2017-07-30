@@ -460,7 +460,6 @@ func (p *EmbeddedMasterProcess) initProxy() error {
                 cfg.HostUUID,
                 []ssh.Signer{conn.Identity.KeySigner},
                 conn.Client,
-                // TODO : we need to supply proxy ip
                 cfg.AdvertiseIP,
                 srv.SetLimiter(proxyLimiter),
                 srv.SetProxyMode(tsrv),

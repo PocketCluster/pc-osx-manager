@@ -6,14 +6,13 @@ import (
     "sync"
 
     "github.com/pkg/errors"
+    "github.com/stkim1/pc-core/model"
 )
 
 type HostContext interface {
     RefreshStatus() error
 
-    MasterAgentName() (string, error)
-    SetMasterAgentName(man string)
-
+    HostContextClusterMeta
     HostContextApplicationEnv
     HostContextUserEnv
     HostContextSysResource
@@ -24,8 +23,7 @@ type HostContext interface {
 type hostContext struct {
     sync.Mutex
 
-    clusterPublicName    string
-
+    *model.ClusterMeta
     hostAppEnv
     hostUserEnv
     hostSysResource
@@ -47,18 +45,6 @@ func singletonContextInstance() (*hostContext) {
         _context.RefreshStatus()
     })
     return _context
-}
-
-//TODO : master specific identifier is necessary
-func (ctx *hostContext) MasterAgentName() (string, error) {
-    if len(ctx.clusterPublicName) == 0 {
-        return "", errors.Errorf("[ERR] Invalid host device serial")
-    }
-    return ctx.clusterPublicName, nil
-}
-
-func (ctx *hostContext) SetMasterAgentName(man string) {
-    ctx.clusterPublicName = man
 }
 
 func SetupBasePath() error {
