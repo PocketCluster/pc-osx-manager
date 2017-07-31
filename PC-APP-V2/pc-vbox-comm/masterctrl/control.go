@@ -155,6 +155,15 @@ func (m *masterControl) ClearMasterIPv4ExternalAddress() error {
     return nil
 }
 
+// this is a helper internal method
+func (m *masterControl) getMasterIPv4ExternalAddress() string {
+    // as master external ipv4 is accessed, we need to synchronize.
+    m.Lock()
+    defer m.Unlock()
+
+    return m.extIP4Addr
+}
+
 /* ------------------------------------------ Core Meta Transition Functions ---------------------------------------- */
 func (m *masterControl) transitionTimeout() time.Duration {
     switch m.CurrentState() {

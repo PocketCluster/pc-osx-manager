@@ -44,7 +44,7 @@ func (b *bounded) makeMasterAck(master *masterControl, ts time.Time) ([]byte, er
     )
 
     // send acknowledge packagepackage
-    ackpkg, err = mpkg.MasterPackingBoundedAcknowledge(master.clusterID, master.extIP4Addr, master.rsaEncryptor)
+    ackpkg, err = mpkg.MasterPackingBoundedAcknowledge(master.clusterID, master.getMasterIPv4ExternalAddress(), master.rsaEncryptor)
     return ackpkg, errors.WithStack(err)
 }
 

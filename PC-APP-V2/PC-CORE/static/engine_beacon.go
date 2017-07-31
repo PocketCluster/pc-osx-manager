@@ -10,7 +10,6 @@ import (
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
-    "github.com/stkim1/pc-vbox-comm/masterctrl"
     "github.com/stkim1/pc-core/beacon"
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/service"
@@ -84,7 +83,7 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
             )
             // wait for vbox control
             vc := <- vboxC
-            ctrl, ok := vc.Payload.(masterctrl.VBoxMasterControl)
+            vbc, ok := vc.Payload.(vboxCtrlObjBrcst)
             if !ok {
                 log.Debugf("[AGENT] (ERR) invalid VBoxMasterControl type")
                 return errors.Errorf("[ERR] invalid VBoxMasterControl type")
@@ -93,7 +92,7 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
             // beacon manager
             beaconMan, err = beacon.NewBeaconManagerWithFunc(
                 clusterID,
-                ctrl,
+                vbc.VBoxMasterControl,
                 beaconRoute,
                 func(host string, payload []byte) error {
                     log.Debugf("[AGENT] BEACON-TX [%v] Host %v", time.Now(), host)

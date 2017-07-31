@@ -190,12 +190,14 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
     }
 }
 
+// this is to broadcast masterctrl object w/ listener
+type vboxCtrlObjBrcst struct {
+    masterctrl.VBoxMasterControl
+    net.Listener
+}
+
 func initVboxCoreReportService(a *appMainLife, clusterID string) error {
-    const (
-        iventVboxCtrlListenerSpawn string  = "ivent.vbox.ctrl.listener.spawn"
-    )
     var (
-        listenerC = make(chan service.Event)
         ctrlObjC  = make(chan service.Event)
         netC      = make(chan service.Event)
     )
@@ -236,16 +238,20 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
             if err != nil {
                 return errors.WithStack(err)
             }
-            a.BroadcastEvent(service.Event{Name:iventVboxCtrlInstanceSpawn, Payload:ctrl})
-            time.Sleep(time.Millisecond * 500)
 
             // --- build network listener --- //
             listen, err = net.Listen("tcp4", net.JoinHostPort("127.0.0.1", "10068"))
             if err != nil {
                 return errors.WithStack(err)
             }
-            a.BroadcastEvent(service.Event{Name:iventVboxCtrlListenerSpawn, Payload:listen})
-            time.Sleep(time.Millisecond * 500)
+
+            // broadcase the two
+            a.BroadcastEvent(service.Event{
+                Name:iventVboxCtrlInstanceSpawn,
+                Payload: vboxCtrlObjBrcst{
+                    Listener:          listen,
+                    VBoxMasterControl: ctrl,
+                }})
 
             log.Debugf("[VBOXCTRL] VBox Core Control service started... %s", ctrl.CurrentState().String())
             for {
@@ -283,24 +289,17 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
                 listen    net.Listener                 = nil
                 conn      net.Conn                     = nil
                 err       error                        = nil
-                ok        bool                         = false
             )
 
             // masterctrl.VBoxMasterControl
             cc := <- ctrlObjC
-            ctrl, ok = cc.Payload.(masterctrl.VBoxMasterControl)
+            vbc, ok := cc.Payload.(vboxCtrlObjBrcst)
             if !ok {
                 log.Debugf("[ERR] invalid VBoxMasterControl type")
                 return errors.Errorf("[ERR] invalid VBoxMasterControl type")
             }
-
-            // net.Listener
-            lc := <- listenerC
-            listen, ok = lc.Payload.(net.Listener)
-            if !ok {
-                log.Debugf("[ERR] invalid VBoxMasterControl type")
-                return errors.Errorf("[ERR] invalid listener type")
-            }
+            ctrl = vbc.VBoxMasterControl
+            listen = vbc.Listener
 
             log.Debugf("[VBOXLSTN] VBox Core Listener service started... %s", ctrl.CurrentState().String())
             for {
@@ -326,7 +325,6 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
             }
             return nil
         },
-        service.BindEventWithService(iventVboxCtrlListenerSpawn, listenerC),
         service.BindEventWithService(iventVboxCtrlInstanceSpawn, ctrlObjC))
 
     return nil
