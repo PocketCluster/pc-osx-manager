@@ -21,10 +21,6 @@ import (
     "github.com/stkim1/pc-core/service"
 )
 
-const (
-    iventVboxCtrlInstanceSpawn string  = "ivent.vbox.ctrl.instance.spawn"
-)
-
 func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     log.Debugf("[VBOX_DISK] build vbox core disk ")
 
@@ -201,6 +197,7 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
     var (
         listenerC = make(chan service.Event)
         ctrlObjC  = make(chan service.Event)
+        netC      = make(chan service.Event)
     )
 
     a.RegisterServiceWithFuncs(
@@ -257,11 +254,26 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
                         log.Debugf("[VBOXCTRL] VBox Core Control shutdown...")
                         return errors.WithStack(listen.Close())
                     }
+                    case <- netC: {
+                        log.Debugf("[VBOXCTRL] Host Address changed")
+                        paddr, err := context.SharedHostContext().HostPrimaryAddress()
+
+                        // when there is an error
+                        if err != nil {
+                            ctrl.ClearMasterIPv4ExternalAddress()
+
+                        // when there is no error to change the primary address
+                        } else {
+                            ctrl.SetMasterIPv4ExternalAddress(paddr)
+
+                        }
+                    }
                 }
             }
 
             return nil
-        })
+        },
+        service.BindEventWithService(iventNetworkAddressChange, netC))
 
     a.RegisterServiceWithFuncs(
         operation.ServiceVBoxMasterListener,

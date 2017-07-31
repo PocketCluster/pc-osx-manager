@@ -17,10 +17,6 @@ import (
     "github.com/stkim1/pc-core/model"
 )
 
-const (
-    iventNetworkAddressChange string = "ivent.network.address.change"
-)
-
 type beaconEventRoute struct {
     service.ServiceSupervisor
     *tervice.PocketConfig

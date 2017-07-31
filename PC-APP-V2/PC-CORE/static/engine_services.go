@@ -14,10 +14,6 @@ import (
     "github.com/stkim1/pc-core/service"
 )
 
-const (
-    iventBeaconManagerSpawn string  = "ivent.beacon.manager.spawn"
-)
-
 func initStorageServie(a *appMainLife, config *embed.PocketConfig) error {
     a.RegisterServiceWithFuncs(
         operation.ServiceStorageProcess,

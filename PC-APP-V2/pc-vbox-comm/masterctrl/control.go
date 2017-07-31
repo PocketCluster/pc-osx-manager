@@ -38,6 +38,9 @@ type VBoxMasterControl interface {
     CurrentState() mpkg.VBoxMasterState
     GetCoreNode() *model.CoreNode
 
+    SetMasterIPv4ExternalAddress(addr string) error
+    ClearMasterIPv4ExternalAddress() error
+
     ReadCoreMetaAndMakeMasterAck(sender interface{}, metaPackage []byte, timestamp time.Time) ([]byte, error)
     HandleCoreDisconnection(timestamp time.Time) error
 }
@@ -130,6 +133,26 @@ func (m *masterControl) CurrentState() mpkg.VBoxMasterState {
 
 func (m *masterControl) GetCoreNode() *model.CoreNode {
     return m.coreNode
+}
+
+func (m *masterControl) SetMasterIPv4ExternalAddress(addr string) error {
+    m.Lock()
+    defer m.Unlock()
+
+    if len(addr) == 0 {
+        return errors.Errorf("[ERR] cannot assign invalid external IPv4 address")
+    }
+
+    m.extIP4Addr = addr
+    return nil
+}
+
+func (m *masterControl) ClearMasterIPv4ExternalAddress() error {
+    m.Lock()
+    defer m.Unlock()
+
+    m.extIP4Addr = ""
+    return nil
 }
 
 /* ------------------------------------------ Core Meta Transition Functions ---------------------------------------- */
