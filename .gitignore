@@ -1,0 +1,34 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
+.glide/
+
+# OSX.
+*.iml
+.idea
+.DS_Store
+
+# OSX + OSXFuse.
+._.DS_Store
+._*
+
+# Vim.
+*.sw*
+
+# Test temporary dir.
+test_tmp/
+
+# Sample binaries.
+samples/create_vm/create_vm
+samples/delete_vm/delete_vm
+samples/mouse_event/mouse_event
