@@ -45,6 +45,8 @@
 static void
 print_error_info(char *message_buffer, const char *pszErrorMsg, HRESULT rc)
 {
+    sprintf(message_buffer, "\n--- %s (rc=%#010x) ---\n", pszErrorMsg, (unsigned)S_OK);
+#if 0
     IErrorInfo *ex;
     HRESULT rc2 = S_OK;
     
@@ -97,6 +99,7 @@ print_error_info(char *message_buffer, const char *pszErrorMsg, HRESULT rc)
         IErrorInfo_Release(ex);
         g_pVBoxFuncs->pfnClearException();
     }
+#endif
 }
 
 # if 0

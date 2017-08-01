@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		0415F08C1D2F6B8700EE470A /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 0415F08B1D2F6B8700EE470A /* main.c */; };
-		0415F0971D2F6D6800EE470A /* VBoxCAPIGlue.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 0415F0951D2F6D6800EE470A /* VBoxCAPIGlue.o */; };
-		0415F0981D2F6D6800EE470A /* VirtualBox_i.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 0415F0961D2F6D6800EE470A /* VirtualBox_i.o */; };
 		0426EF701D34A5CB00E0B36D /* VboxCom.m in Sources */ = {isa = PBXBuildFile; fileRef = 0426EF6F1D34A5CB00E0B36D /* VboxCom.m */; };
 		0426EF721D34A5E000E0B36D /* VboxCom.h in Headers */ = {isa = PBXBuildFile; fileRef = 0426EF711D34A5E000E0B36D /* VboxCom.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0426EF751D34A68C00E0B36D /* libvboxcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 0426EF731D34A68C00E0B36D /* libvboxcom.c */; };
@@ -17,9 +15,10 @@
 		0464E7441D36649700FA0AB0 /* GlobalMacro.h in Headers */ = {isa = PBXBuildFile; fileRef = 0464E7431D36649700FA0AB0 /* GlobalMacro.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		046ED9F81D3A6E9200A6028A /* libvboxcom_init_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 046ED9F71D3A6E9200A6028A /* libvboxcom_init_test.m */; };
 		046ED9FA1D3A6FA400A6028A /* libvboxcom_create_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 046ED9F91D3A6FA400A6028A /* libvboxcom_create_test.m */; };
+		048C0C7B1F306D6500993424 /* VBoxCAPIGlue.c in Sources */ = {isa = PBXBuildFile; fileRef = 048C0C7A1F306D6500993424 /* VBoxCAPIGlue.c */; };
+		048C0C7C1F306D6500993424 /* VBoxCAPIGlue.c in Sources */ = {isa = PBXBuildFile; fileRef = 048C0C7A1F306D6500993424 /* VBoxCAPIGlue.c */; };
+		048C0C7D1F306D6500993424 /* VBoxCAPIGlue.c in Sources */ = {isa = PBXBuildFile; fileRef = 048C0C7A1F306D6500993424 /* VBoxCAPIGlue.c */; };
 		04BF54871D3F75B4006DDB2E /* VBoxCAPI_v5_1.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BF54861D3F75B4006DDB2E /* VBoxCAPI_v5_1.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		04C9E11B1D34A2CE00EB299C /* VBoxCAPIGlue.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 0415F0951D2F6D6800EE470A /* VBoxCAPIGlue.o */; };
-		04C9E11C1D34A2CE00EB299C /* VirtualBox_i.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 0415F0961D2F6D6800EE470A /* VirtualBox_i.o */; };
 		04C9E11D1D34A2D600EB299C /* bios_settings.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F0B4AE1D2FF00B002947B2 /* bios_settings.c */; };
 		04C9E11E1D34A2D600EB299C /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F0B4AF1D2FF00B002947B2 /* console.c */; };
 		04C9E11F1D34A2D600EB299C /* keyboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F0B4B01D2FF00B002947B2 /* keyboard.c */; };
@@ -80,8 +79,6 @@
 /* Begin PBXFileReference section */
 		0415F0881D2F6B8700EE470A /* PC-MASTER-VM */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "PC-MASTER-VM"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0415F08B1D2F6B8700EE470A /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
-		0415F0951D2F6D6800EE470A /* VBoxCAPIGlue.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = VBoxCAPIGlue.o; sourceTree = "<group>"; };
-		0415F0961D2F6D6800EE470A /* VirtualBox_i.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = VirtualBox_i.o; sourceTree = "<group>"; };
 		0426EF6F1D34A5CB00E0B36D /* VboxCom.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VboxCom.m; sourceTree = "<group>"; };
 		0426EF711D34A5E000E0B36D /* VboxCom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VboxCom.h; sourceTree = "<group>"; };
 		0426EF731D34A68C00E0B36D /* libvboxcom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = libvboxcom.c; sourceTree = "<group>"; };
@@ -89,6 +86,7 @@
 		0464E7431D36649700FA0AB0 /* GlobalMacro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalMacro.h; sourceTree = "<group>"; };
 		046ED9F71D3A6E9200A6028A /* libvboxcom_init_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = libvboxcom_init_test.m; sourceTree = "<group>"; };
 		046ED9F91D3A6FA400A6028A /* libvboxcom_create_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = libvboxcom_create_test.m; sourceTree = "<group>"; };
+		048C0C7A1F306D6500993424 /* VBoxCAPIGlue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VBoxCAPIGlue.c; sourceTree = "<group>"; };
 		04BF54861D3F75B4006DDB2E /* VBoxCAPI_v5_1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VBoxCAPI_v5_1.h; sourceTree = "<group>"; };
 		04C9E1111D34A22900EB299C /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		04C9E1171D34A2AA00EB299C /* liblibvboxcom.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblibvboxcom.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -134,8 +132,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				04F0B4871D2FCFD1002947B2 /* Foundation.framework in Frameworks */,
-				0415F0971D2F6D6800EE470A /* VBoxCAPIGlue.o in Frameworks */,
-				0415F0981D2F6D6800EE470A /* VirtualBox_i.o in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -144,8 +140,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				04C9E12B1D34A31300EB299C /* Foundation.framework in Frameworks */,
-				04C9E11B1D34A2CE00EB299C /* VBoxCAPIGlue.o in Frameworks */,
-				04C9E11C1D34A2CE00EB299C /* VirtualBox_i.o in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -196,8 +190,6 @@
 				0464E7431D36649700FA0AB0 /* GlobalMacro.h */,
 				04F0B4CA1D2FF013002947B2 /* include */,
 				04F0B4AD1D2FF00B002947B2 /* lib */,
-				0415F0951D2F6D6800EE470A /* VBoxCAPIGlue.o */,
-				0415F0961D2F6D6800EE470A /* VirtualBox_i.o */,
 				045915AA1D3503EB00FE9D8A /* libvboxcom.h */,
 				0426EF731D34A68C00E0B36D /* libvboxcom.c */,
 				0426EF711D34A5E000E0B36D /* VboxCom.h */,
@@ -220,6 +212,7 @@
 		04F0B4AD1D2FF00B002947B2 /* lib */ = {
 			isa = PBXGroup;
 			children = (
+				048C0C7A1F306D6500993424 /* VBoxCAPIGlue.c */,
 				04F0B4AE1D2FF00B002947B2 /* bios_settings.c */,
 				04F0B4AF1D2FF00B002947B2 /* console.c */,
 				04F0B4B01D2FF00B002947B2 /* keyboard.c */,
@@ -393,6 +386,7 @@
 				0415F08C1D2F6B8700EE470A /* main.c in Sources */,
 				04F0B4C21D2FF00B002947B2 /* network.c in Sources */,
 				04F0B4C01D2FF00B002947B2 /* medium.c in Sources */,
+				048C0C7B1F306D6500993424 /* VBoxCAPIGlue.c in Sources */,
 				04F0B4C11D2FF00B002947B2 /* medium_format.c in Sources */,
 				04F0B4C81D2FF00B002947B2 /* usb_controller.c in Sources */,
 				04F0B4C31D2FF00B002947B2 /* os_type.c in Sources */,
@@ -411,6 +405,7 @@
 				04C9E11D1D34A2D600EB299C /* bios_settings.c in Sources */,
 				0426EF701D34A5CB00E0B36D /* VboxCom.m in Sources */,
 				04C9E11E1D34A2D600EB299C /* console.c in Sources */,
+				048C0C7C1F306D6500993424 /* VBoxCAPIGlue.c in Sources */,
 				04C9E11F1D34A2D600EB299C /* keyboard.c in Sources */,
 				04C9E1201D34A2D600EB299C /* machine.c in Sources */,
 				04C9E1211D34A2D600EB299C /* medium.c in Sources */,
@@ -431,6 +426,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				048C0C7D1F306D6500993424 /* VBoxCAPIGlue.c in Sources */,
 				046ED9FA1D3A6FA400A6028A /* libvboxcom_create_test.m in Sources */,
 				046ED9F81D3A6E9200A6028A /* libvboxcom_init_test.m in Sources */,
 				04C9E1331D34A33F00EB299C /* libvboxcom_build_test.m in Sources */,
