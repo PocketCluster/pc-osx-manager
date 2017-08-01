@@ -243,7 +243,7 @@ VBRESULT
 vbox_session_init(VOID_DPTR vbox_client, VOID_DPTR vbox_session, VOID_DPTR virtualbox, char* error_message) {
     HRESULT result;
     VboxClientInitialize(CLIENT_DPTR(vbox_client));
-    if (!vbox_client || CLIENT_DREF(vbox_client) == NULL) {
+    if (FAILED(result) || !vbox_client || CLIENT_DREF(vbox_client) == NULL) {
         print_error_info(error_message, "[FATAL] Failed to get VirtualBoxClient reference", result);
         return FATAL;
     }
