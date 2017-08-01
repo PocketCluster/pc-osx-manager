@@ -348,7 +348,10 @@ VBRESULT
 vbox_machine_build(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, int cpu_count, int memory_size, char* error_message) {
     HRESULT result;
     VBRESULT ret = GOOD;
-    
+
+    assert(VBOX_DREF(virtualbox)      != NULL);
+    assert(MACHINE_DREF(vbox_machine) != NULL);
+
     // Setup BIOS
     {
         // get BIOS settings
