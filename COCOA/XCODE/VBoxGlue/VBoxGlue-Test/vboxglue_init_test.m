@@ -12,6 +12,7 @@
 
 @interface vboxglue_init_test : XCTestCase {
     VBoxGlue *vboxGlue;
+    NSString *userhome;
 }
 @end
 
@@ -19,6 +20,7 @@
 
 - (void)setUp {
     [super setUp];
+    userhome = NSHomeDirectory();
     VBGlueResult ret = NewVBoxGlue(&vboxGlue);
     if ( ret != VBGlue_Ok ) {
         NSLog(@"error!!!");
@@ -46,7 +48,7 @@
 }
 
 - (void)testCreateAndReleaseMachine {
-    XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue, "pc-master-1"), @"Machine creation should return ok");
+    XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue, "pc-master-1", [userhome UTF8String]), @"Machine creation should return ok");
     NSLog(@"setting file path %s", VboxGetSettingFilePath(vboxGlue));
     
     // release machine
@@ -54,7 +56,7 @@
 }
 
 - (void)test_Create_Find_Release_Machine {
-    XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue, "pc-master-2"), @"Machine creation should return true");
+    XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue, "pc-master-2", [userhome UTF8String]), @"Machine creation should return true");
     NSLog(@"setting file path %s", VboxGetSettingFilePath(vboxGlue));
     NSLog(@"MachineID %s", VboxGetMachineID(vboxGlue));
     

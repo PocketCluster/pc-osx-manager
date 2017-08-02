@@ -247,7 +247,7 @@ VBoxFindMachineByNameOrID(VBoxGlue* glue, const char* machine_name) {
 }
 
 VBGlueResult
-VBoxCreateMachineByName(VBoxGlue* glue, const char* machine_name) {
+VBoxCreateMachineByName(VBoxGlue* glue, const char* machine_name, const char* base_folder) {
     
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -262,7 +262,7 @@ VBoxCreateMachineByName(VBoxGlue* glue, const char* machine_name) {
     }
     
     // create machine file name
-    result = VboxComposeMachineFilename(session->vbox, machine_name, "", "", &(session->setting_file_path));
+    result = VboxComposeMachineFilename(session->vbox, machine_name, "", (char *)base_folder, &(session->setting_file_path));
     if (FAILED(result)) {
         print_error_info(session->error_msg, "[VBox] Failed composing machine name", result);
         return VBGlue_Fail;

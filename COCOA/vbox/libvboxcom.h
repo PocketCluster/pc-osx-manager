@@ -46,7 +46,7 @@ VBGlueResult
 VBoxFindMachineByNameOrID(VBoxGlue* glue, const char* machine_name);
 
 VBGlueResult
-VBoxCreateMachineByName(VBoxGlue* glue, const char* machine_name);
+VBoxCreateMachineByName(VBoxGlue* glue, const char* machine_name, const char* base_folder);
 
 VBGlueResult
 VBoxReleaseMachine(VBoxGlue* glue);
