@@ -3,8 +3,10 @@
 package vboxglue
 
 /*
-#cgo LDFLAGS: -Wl,-U,_NewVBoxGlue,-U,_CloseVBoxGlue,-U,_VBoxAppVersion,-U,_VBoxApiVersion,-U,_VBoxIsMachineSettingChanged,-U,_VBoxFindMachineByNameOrID,-U,_VBoxCreateMachineByName,-U,_VBoxReleaseMachine
-#cgo LDFLAGS: -Wl,-U,_VBoxDestoryMachine,-U,_VBoxTestErrorMessage,-U,_VBoxGetErrorMessage,-U,_VboxGetSettingFilePath,-U,_VboxGetMachineID
+#cgo LDFLAGS: -Wl,-U,_NewVBoxGlue,-U,_CloseVBoxGlue,-U,_VBoxAppVersion,-U,_VBoxApiVersion,-U,_VBoxIsMachineSettingChanged
+#cgo LDFLAGS: -Wl,-U,_VBoxFindMachineByNameOrID,-U,_VBoxCreateMachineByName,-U,_VBoxReleaseMachine
+#cgo LDFLAGS: -Wl,-U,_VBoxDestoryMachine,-U,_VBoxGetErrorMessage,-U,_VboxGetSettingFilePath,-U,_VboxGetMachineID
+#cgo LDFLAGS: -Wl,-U,_VBoxTestErrorMessage
 
 #include <stdbool.h>
 #include <stdlib.h>

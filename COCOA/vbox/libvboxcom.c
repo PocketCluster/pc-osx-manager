@@ -86,9 +86,9 @@ VBGlueResult vbox_machine_destroy(VOID_DPTR vbox_machine, char* base_folder, con
  * @param   rc              COM/XPCOM result code
  */
 static inline void
-print_error_info(char *message_buffer, const char *pszErrorMsg, HRESULT rc) {
-    memset(message_buffer, 0, ERROR_MESSAGE_BUF_SIZE);
-    sprintf(message_buffer, "\n--- %s (rc=%#010x) ---\n", pszErrorMsg, rc);
+print_error_info(char *buffer, const char *message, HRESULT rc) {
+    memset(buffer, 0, ERROR_MESSAGE_BUF_SIZE);
+    sprintf(buffer, "%s (CODE : 0x%08X)", message, rc);
 }
 
 #pragma mark - DEFINITION
