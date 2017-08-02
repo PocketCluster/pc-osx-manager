@@ -467,6 +467,7 @@ vbox_machine_add_bridged_network(IMachine* vbox_machine, ISession* vbox_session,
     
     assert(vbox_machine != NULL);
     assert(vbox_session != NULL);
+    assert(host_interface != NULL && strlen(host_interface) != 0);
 
     //firstly lock the machine
     HRESULT result = VboxLockMachine(vbox_machine, vbox_session, LockType_Write);
@@ -561,6 +562,7 @@ vbox_machine_add_shared_folder(IMachine* vbox_machine, ISession* vbox_session, c
     
     assert(vbox_machine != NULL);
     assert(vbox_session != NULL);
+    assert(shared_name != NULL && strlen(shared_name) != 0);
     
     //firstly lock the machine
     result = VboxLockMachine(vbox_machine, vbox_session, LockType_Write);
@@ -612,6 +614,7 @@ vbox_machine_add_storage_controller(IMachine* vbox_machine, ISession* vbox_sessi
     
     assert(vbox_machine != NULL);
     assert(vbox_session != NULL);
+    assert(storage_controller_name != NULL && strlen(storage_controller_name) != 0);
     
     //firstly lock the machine
     result = VboxLockMachine(vbox_machine, vbox_session, LockType_Write);
