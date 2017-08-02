@@ -949,40 +949,36 @@ vbox_machine_add_hard_disk(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DP
     return ret;
 }
 
-#pragma mark - DESTROY MACHINE
+#pragma mark destroy machine
 VBGlueResult
-vbox_machine_destroy(VOID_DPTR vbox_machine, char* base_folder, const char* storage_controller_name, int remove_dvd, void(^build_progress)(int progress, int done), char *error_message) {
+VBoxDestoryMachine(VBoxGlue* glue) {
+
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
     
+    iVBoxSession* session = toiVBoxSession(glue);
     HRESULT result;
     ULONG media_count;
-    VBGlueResult ret = VBGlue_Ok;
     IProgress *progress;
     IMedium** media;
     
     // unregister
-    result = VboxMachineUnregister(MACHINE_DREF(vbox_machine), (remove_dvd == 0 ? CleanupMode_DetachAllReturnHardDisksOnly:CleanupMode_Full) , &media, &media_count);
+    result = VboxMachineUnregister(session->machine, CleanupMode_DetachAllReturnHardDisksOnly, &media, &media_count);
     if (FAILED(result)) {
-        if (ret == VBGlue_Ok) {
-            print_error_info(error_message, "[VBox] Failed to unregister media", result);
-            return VBGlue_Fail;
-        }
+        print_error_info(session->error_msg, "[VBox] Failed to unregister media", result);
+        return VBGlue_Fail;
     }
     // delete medium
-    result = VboxMachineDeleteConfig(MACHINE_DREF(vbox_machine), media_count, media, &progress);
+    result = VboxMachineDeleteConfig(session->machine, media_count, media, &progress);
     if (FAILED(result)) {
-        if (ret == VBGlue_Ok) {
-            print_error_info(error_message, "[VBox] Failed to delete medium", result);
-            return VBGlue_Fail;
-        }
+        print_error_info(session->error_msg, "[VBox] Failed to delete medium", result);
+        return VBGlue_Fail;
     }
     // delete progress
-    VboxProgressWaitForCompletion(progress, 3);
+    VboxProgressWaitForCompletion(progress, 500);
     PRUint32 progress_percent = 0;
     do {
         VboxGetProgressPercent(progress, &progress_percent);
-        if (build_progress != NULL) {
-            build_progress((int)progress_percent, 0);
-        }
         usleep(500000);
     } while (progress_percent < 100);
     VboxIProgressRelease(progress);
@@ -991,24 +987,11 @@ vbox_machine_destroy(VOID_DPTR vbox_machine, char* base_folder, const char* stor
     VboxArrayOutFree(media);
 
     // release machine
-    result = VboxIMachineRelease(MACHINE_DREF(vbox_machine));
-    if (FAILED(result)) {
-        print_error_info(error_message, "[VBox] Failed to close machine referenece", result);
-    }
-    // release base folder
-    if (base_folder != NULL) {
-        VboxUtf8Free(base_folder);
-    }
-    // report the end of result
-    if (build_progress != NULL) {
-        build_progress(100, 1);
-    }
-    return ret;
+    return VBoxReleaseMachine(glue);
 }
 
 
 #pragma mark start & stop machine
-
 
 /**
  * Register passive event listener for the selected VM.

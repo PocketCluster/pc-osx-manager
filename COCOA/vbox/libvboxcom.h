@@ -54,6 +54,11 @@ VBoxReleaseMachine(VBoxGlue* glue);
 
 
 
+#pragma mark destroy machine
+VBGlueResult
+VBoxDestoryMachine(VBoxGlue* glue);
+
+
 #pragma mark utils
 VBGlueResult
 VBoxTestErrorMessage(VBoxGlue* glue);

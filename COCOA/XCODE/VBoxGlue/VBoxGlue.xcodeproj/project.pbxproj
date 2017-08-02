@@ -92,7 +92,7 @@
 		042D03EE1F31081D002FACE8 /* vbox.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vbox.c; sourceTree = "<group>"; };
 		042D03EF1F31081D002FACE8 /* VBoxCAPIGlue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VBoxCAPIGlue.c; sourceTree = "<group>"; };
 		042D03F01F31081D002FACE8 /* libvboxcom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = libvboxcom.c; sourceTree = "<group>"; };
-		042D03F11F31081D002FACE8 /* libvboxcom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libvboxcom.h; sourceTree = "<group>"; };
+		042D03F11F31081D002FACE8 /* libvboxcom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libvboxcom.h; path = "/Users/almightykim/Workspace/pc-osx-manager/COCOA/vbox/libvboxcom.h"; sourceTree = "<absolute>"; };
 		042D03F21F31081D002FACE8 /* os-typeid-list.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "os-typeid-list.txt"; sourceTree = "<group>"; };
 		042D04271F310900002FACE8 /* libvboxcom_build_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = libvboxcom_build_test.m; sourceTree = "<group>"; };
 		042D04281F310900002FACE8 /* libvboxcom_create_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = libvboxcom_create_test.m; sourceTree = "<group>"; };
@@ -170,8 +170,8 @@
 			children = (
 				042D03CE1F31081D002FACE8 /* include */,
 				042D03E01F31081D002FACE8 /* lib */,
-				042D03F01F31081D002FACE8 /* libvboxcom.c */,
 				042D03F11F31081D002FACE8 /* libvboxcom.h */,
+				042D03F01F31081D002FACE8 /* libvboxcom.c */,
 				042D03F21F31081D002FACE8 /* os-typeid-list.txt */,
 			);
 			name = vbox;
@@ -514,6 +514,7 @@
 				042D03BC1F31076E002FACE8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		042D03C91F3107A4002FACE8 /* Build configuration list for PBXNativeTarget "VBoxGlue-Test" */ = {
 			isa = XCConfigurationList;
@@ -522,6 +523,7 @@
 				042D03CB1F3107A4002FACE8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
