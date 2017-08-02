@@ -10,25 +10,51 @@
 #ifndef __LIBVBOXCOM_H__
 #define __LIBVBOXCOM_H__
 
+#include <stdbool.h>
+
 typedef void** VOID_DPTR;
 
-typedef enum VBRESULT {
-    GOOD = 0,
-    INFO,
-    FATAL
-} VBRESULT;
+typedef enum VBGlueResult {
+    VBGlue_Ok      = 0,
+    VBGlue_Fail
+} VBGlueResult;
 
 typedef void VBoxGlue;
 
 #pragma mark init & close
-VBRESULT
-NewVBoxGlue(VBoxGlue**);
+VBGlueResult
+NewVBoxGlue(VBoxGlue** glue);
 
-VBRESULT
+VBGlueResult
 CloseVBoxGlue(VBoxGlue* glue);
 
 #pragma mark app & api version
 extern unsigned int VBoxAppVersion(void);
 extern unsigned int VBoxApiVersion(void);
+
+#pragma mark machine meta
+VBGlueResult
+VBoxGetMachineID(VBoxGlue* glue, char** machine_id);
+
+VBGlueResult
+VBoxGetMachineSettingFilePath(VBoxGlue* glue, char** setting_file_path);
+
+bool
+VBoxIsMachineSettingChanged(VBoxGlue* glue);
+
+
+
+
+
+
+
+
+
+#pragma mark utils
+VBGlueResult
+VBoxTestErrorMessage(VBoxGlue* glue);
+
+const char*
+VBoxGetErrorMessage(VBoxGlue* glue);
 
 #endif /* __LIBVBOXCOM_H__ */

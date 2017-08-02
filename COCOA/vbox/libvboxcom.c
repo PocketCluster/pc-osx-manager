@@ -25,8 +25,10 @@
 
 #pragma mark - TYPES
 
+#define ERROR_MESSAGE_BUF_SIZE 256
+
 typedef struct iVBoxSession {
-    char                  errMsg[256];
+    char                  errMsg[ERROR_MESSAGE_BUF_SIZE];
     IVirtualBox*          cbox;     // vbox machine
     IVirtualBoxClient*    client;   // vbox client
     ISession*             csession; // vbox session
@@ -54,54 +56,34 @@ typedef struct iVBoxSession {
 
 #pragma mark - DECLARATION
 
-#pragma mark get machine id
-static VBRESULT
-vbox_machine_getid(IMachine* vbox_machine, char** machine_id, char *error_message);
-
-#pragma mark machine status
-static int
-vbox_machine_is_setting_changed(IMachine* vbox_machine, ISession* vbox_session, char *error_message);
-
-static VBRESULT
-vbox_machine_setting_path(IMachine* vbox_machine, char** base_folder, char* error_message);
-
-
-#pragma mark session init
-static VBRESULT
-vbox_session_init(IVirtualBoxClient** vbox_client, ISession** vbox_session, IVirtualBox** virtualbox, char* error_message);
-
-static VBRESULT
-vbox_session_close(IVirtualBoxClient* vbox_client, ISession* vbox_session, IVirtualBox* virtualbox, char* error_message);
-
-
 #pragma mark find, build & destroy machine
-static VBRESULT
+static VBGlueResult
 vbox_machine_find(IVirtualBox* virtualbox, IMachine** vbox_machine, const char* machine_name, char* error_message);
 
-static VBRESULT
+static VBGlueResult
 vbox_machine_create(IVirtualBox* virtualbox, IMachine** vbox_machine, const char* machine_name, char** base_folder, char* error_message);
 
-static VBRESULT
+static VBGlueResult
 vbox_machine_release(IMachine* vbox_machine, char* base_folder, char* error_message);
 
 
 #pragma mark build machine base
-VBRESULT vbox_machine_build(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, int cpu_count, int memory_size, char* error_message);
+VBGlueResult vbox_machine_build(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, int cpu_count, int memory_size, char* error_message);
 
-VBRESULT vbox_machine_add_bridged_network(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* host_interface, char* error_message);
+VBGlueResult vbox_machine_add_bridged_network(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* host_interface, char* error_message);
 
-VBRESULT vbox_machine_add_shared_folder(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* shared_name, const char *host_folder, char* error_message);
+VBGlueResult vbox_machine_add_shared_folder(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* shared_name, const char *host_folder, char* error_message);
 
 
-VBRESULT vbox_machine_add_storage_controller(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* storage_controller_name, char* error_message);
+VBGlueResult vbox_machine_add_storage_controller(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* storage_controller_name, char* error_message);
 
-VBRESULT vbox_machine_add_boot_image(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* storage_controller_name, const char *boot_image_path, char *error_message);
+VBGlueResult vbox_machine_add_boot_image(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* storage_controller_name, const char *boot_image_path, char *error_message);
 
-VBRESULT vbox_machine_add_hard_disk(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* storage_controller_name, const char *hdd_medium_path, int disk_size, void(^build_progress)(int progress, int done), char *error_message);
+VBGlueResult vbox_machine_add_hard_disk(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* storage_controller_name, const char *hdd_medium_path, int disk_size, void(^build_progress)(int progress, int done), char *error_message);
 
 
 #pragma mark delete & release machine
-VBRESULT vbox_machine_destroy(VOID_DPTR vbox_machine, char* base_folder, const char* storage_controller_name, int remove_dvd, void(^build_progress)(int progress, int done), char *error_message);
+VBGlueResult vbox_machine_destroy(VOID_DPTR vbox_machine, char* base_folder, const char* storage_controller_name, int remove_dvd, void(^build_progress)(int progress, int done), char *error_message);
 
 
 #pragma mark utils
@@ -112,15 +94,16 @@ VBRESULT vbox_machine_destroy(VOID_DPTR vbox_machine, char* base_folder, const c
  */
 static inline void
 print_error_info(char *message_buffer, const char *pszErrorMsg, HRESULT rc) {
-    memset(message_buffer, 0, sizeof(256));
-    sprintf(message_buffer, "\n--- %s (rc=%#010x) ---\n", pszErrorMsg, (unsigned)rc);
+    memset(message_buffer, 0, ERROR_MESSAGE_BUF_SIZE);
+    sprintf(message_buffer, "\n--- %s (rc=%#010x) ---\n", pszErrorMsg, rc);
 }
 
 #pragma mark - DEFINITION
 
 #pragma mark init & close
-VBRESULT
+VBGlueResult
 NewVBoxGlue(VBoxGlue** glue) {
+
     // make sure the pointer passed IS null.
     assert(glue != NULL && *glue == NULL);
     
@@ -131,44 +114,59 @@ NewVBoxGlue(VBoxGlue** glue) {
     
     result = VBoxCGlueInit();
     if (FAILED(result)) {
-        print_error_info(session->errMsg, "failed to load vbox api", result);
-        return FATAL;
+        print_error_info(session->errMsg, "[VBox] failed to load vbox api", result);
+        return VBGlue_Fail;
     }
 
     result = VboxClientInitialize(&(session->client));
     if ( FAILED(result) || session->client == NULL ) {
-        print_error_info(session->errMsg, "failed to init vbox client", result);
-        return FATAL;
+        print_error_info(session->errMsg, "[VBox] failed to init vbox client", result);
+        return VBGlue_Fail;
     }
 
     result = VboxGetVirtualBox(session->client, &(session->cbox));
     if ( FAILED(result) || session->cbox == NULL ) {
-        print_error_info(session->errMsg, "failed to get VirtualBox reference", result);
-        return FATAL;
+        print_error_info(session->errMsg, "[VBox] failed to get VirtualBox reference", result);
+        return VBGlue_Fail;
     }
 
-    return GOOD;
+    result = VboxGetSession(session->client, &(session->csession));
+    if ( FAILED(result) || session->csession == NULL ) {
+        print_error_info(session->errMsg, "[VBox] Failed to get Session reference", result);
+        return VBGlue_Fail;
+    }
+
+    return VBGlue_Ok;
 }
 
-VBRESULT
+VBGlueResult
 CloseVBoxGlue(VBoxGlue* glue) {
+
+    // make sure the pointer passed is not null.
     assert(glue != NULL);
     
     iVBoxSession* session = toiVBoxSession(glue);
     HRESULT result;
     
+    if ( session->csession != NULL ) {
+        result = VboxISessionRelease(session->csession);
+        if (FAILED(result)) {
+            print_error_info(session->errMsg, "[VBox] Failed to release ISession reference", result);
+            return VBGlue_Fail;
+        }
+    }
     if ( session->cbox != NULL ) {
         result = VboxIVirtualBoxRelease(session->cbox);
         if (FAILED(result)) {
-            print_error_info(session->errMsg, "failed to release vbox reference", result);
-            return FATAL;
+            print_error_info(session->errMsg, "[VBox] failed to release vbox reference", result);
+            return VBGlue_Fail;
         }
     }
     if ( session->client != NULL ) {
         result = VboxClientRelease(session->client);
         if (FAILED(result)) {
-            print_error_info(session->errMsg, "failed to release vbox client", result);
-            return FATAL;
+            print_error_info(session->errMsg, "[VBox] failed to release vbox client", result);
+            return VBGlue_Fail;
         }
     }
 
@@ -176,133 +174,90 @@ CloseVBoxGlue(VBoxGlue* glue) {
     VBoxCGlueTerm();
     free(session);
     
-    return GOOD;
+    return VBGlue_Ok;
 }
 
 
-#pragma mark get machine id
-VBRESULT
-vbox_machine_getid(IMachine* vbox_machine, char** machine_id, char *error_message) {
-    HRESULT result = VboxMachineGetID(vbox_machine, machine_id);
+#pragma mark machine meta
+VBGlueResult
+VBoxGetMachineID(VBoxGlue* glue, char** machine_id) {
+
+    iVBoxSession* session = toiVBoxSession(glue);
+    
+    HRESULT result = VboxMachineGetID(session->cmachine, machine_id);
     if (FAILED(result)) {
-        print_error_info(error_message, "[INFO] Failed to get Machine ID", result);
-        return FATAL;
+        print_error_info(session->errMsg, "[VBox] Failed to get Machine ID", result);
+        return VBGlue_Fail;
     }
-    return GOOD;
+
+    return VBGlue_Ok;
 }
 
+VBGlueResult
+VBoxGetMachineSettingFilePath(VBoxGlue* glue, char** setting_file_path) {
 
-#pragma mark machine status
-VBRESULT
-vbox_machine_setting_path(IMachine* vbox_machine, char** base_folder, char* error_message) {
-    HRESULT result = VboxGetMachineSettingsFilePath(vbox_machine, base_folder);
+    iVBoxSession* session = toiVBoxSession(glue);
+
+    HRESULT result = VboxGetMachineSettingsFilePath(session->cmachine, setting_file_path);
     if (FAILED(result)) {
-        print_error_info(error_message, "[INFO] Fail to get setting path", result);
-        return INFO;
+        print_error_info(session->errMsg, "[VBox] Fail to get setting path", result);
+        return VBGlue_Fail;
     }
-    return GOOD;
+
+    return VBGlue_Ok;
 }
 
-int
-vbox_machine_is_setting_changed(IMachine* vbox_machine, ISession* vbox_session, char *error_message) {
+bool
+VBoxIsMachineSettingChanged(VBoxGlue* glue) {
 
-    PRBool changed = (PRBool)0;
+    iVBoxSession* session = toiVBoxSession(glue);
+    PRBool changed = PR_FALSE;
     IMachine *mutable_machine;
     
     //firstly lock the machine
-    HRESULT result = VboxLockMachine(vbox_machine, vbox_session, LockType_Write);
+    HRESULT result = VboxLockMachine(session->cmachine, session->csession, LockType_Write);
     if (FAILED(result)) {
-        print_error_info(error_message, "[INFO] Failed to lock machine for adding storage controller", result);
+        print_error_info(session->errMsg, "[VBox] Failed to lock machine for adding storage controller", result);
     }
     // get mutable machine
-    result = VboxGetSessionMachine(vbox_session, &mutable_machine);
+    result = VboxGetSessionMachine(session->csession, &mutable_machine);
     if (FAILED(result) || mutable_machine == NULL) {
-        print_error_info(error_message, "[INFO] Failed to get a mutable copy of a machine", result);
+        print_error_info(session->errMsg, "[VBox] Failed to get a mutable copy of a machine", result);
     }
     // check if settings modified
     result = VboxGetMachineSettingsModified(mutable_machine, &changed);
     if (FAILED(result)) {
-        print_error_info(error_message, "[INFO] Fail to get setting modification", result);
+        print_error_info(session->errMsg, "[VBox] Fail to get setting modification", result);
     }
     // then we can safely release the mutable machine
     if (mutable_machine) {
         result = VboxIMachineRelease(mutable_machine);
         if (FAILED(result)) {
-            print_error_info(error_message, "[INFO] Failed to release locked machine for attaching adapter", result);
+            print_error_info(session->errMsg, "[VBox] Failed to release locked machine for attaching adapter", result);
         }
     }
     // then unlock machine
-    result = VboxUnlockMachine(vbox_session);
+    result = VboxUnlockMachine(session->csession);
     if (FAILED(result)) {
-        print_error_info(error_message, "[INFO] Failed to unlock machine for attaching adapter", result);
+        print_error_info(session->errMsg, "[VBox] Failed to unlock machine for attaching adapter", result);
     }
-    return changed;
-}
 
-#pragma mark session init
-VBRESULT
-vbox_session_init(IVirtualBoxClient** vbox_client, ISession** vbox_session, IVirtualBox** virtualbox, char* error_message) {
-    HRESULT result;
-    VboxClientInitialize(vbox_client);
-    if ( FAILED(result) || vbox_client == NULL ) {
-        print_error_info(error_message, "[FATAL] Failed to get VirtualBoxClient reference", result);
-        return FATAL;
-    }
-    result = VboxGetVirtualBox(*vbox_client, virtualbox);
-    if ( FAILED(result) || virtualbox == NULL ) {
-        print_error_info(error_message, "[FATAL] Failed to get VirtualBox reference", result);
-        return FATAL;
-    }
-    result = VboxGetSession(*vbox_client, vbox_session);
-    if ( FAILED(result) || vbox_session == NULL ) {
-        print_error_info(error_message, "[FATAL] Failed to get Session reference", result);
-        return FATAL;
-    }
-    return GOOD;
-}
-
-VBRESULT
-vbox_session_close(IVirtualBoxClient* vbox_client, ISession* vbox_session, IVirtualBox* virtualbox, char* error_message) {
-    VBRESULT ret = GOOD;
-    HRESULT result;
-    if ( vbox_session != NULL ) {
-        result = VboxISessionRelease(vbox_session);
-        if (FAILED(result)) {
-            print_error_info(error_message, "[INFO] Failed to release ISession reference", result);
-            ret = INFO;
-        }
-    }
-    if ( virtualbox != NULL ) {
-        result = VboxIVirtualBoxRelease(virtualbox);
-        if (FAILED(result)) {
-            print_error_info(error_message, "[INFO] Failed to release IVirtualBox reference", result);
-            ret = INFO;
-        }
-    }
-    if ( vbox_client != NULL ) {
-        result = VboxClientRelease(vbox_client);
-        if (FAILED(result)) {
-            print_error_info(error_message, "[INFO] Failed to release IVirtualBoxClient reference", result);
-            ret = INFO;
-        }
-    }
-    VboxClientUninitialize();
-    return ret;
+    return (bool)(changed == PR_TRUE);
 }
 
 
 #pragma mark find, build & destroy machine
-VBRESULT
+VBGlueResult
 vbox_machine_find(IVirtualBox* virtualbox, IMachine** vbox_machine, const char* machine_name, char* error_message) {
-    VBRESULT result = VboxFindMachine(virtualbox, machine_name, vbox_machine);
+    VBGlueResult result = VboxFindMachine(virtualbox, machine_name, vbox_machine);
     if (FAILED(result)) {
-        print_error_info(error_message, "[INFO] Failed to find machine", result);
-        return INFO;
+        print_error_info(error_message, "[VBox] Failed to find machine", result);
+        return VBGlue_Fail;
     }
-    return GOOD;
+    return VBGlue_Ok;
 }
 
-VBRESULT
+VBGlueResult
 vbox_machine_create(IVirtualBox* virtualbox, IMachine** vbox_machine, const char* machine_name, char** base_folder, char* error_message) {
     HRESULT result;
 
@@ -312,26 +267,26 @@ vbox_machine_create(IVirtualBox* virtualbox, IMachine** vbox_machine, const char
     // create machine file name
     result = VboxComposeMachineFilename(virtualbox, machine_name, "", "", base_folder);
     if (FAILED(result)) {
-        print_error_info(error_message, "[FATAL] Failed composing machine name", result);
-        return FATAL;
+        print_error_info(error_message, "[VBGlue_Error] Failed composing machine name", result);
+        return VBGlue_Fail;
     }
     // create machine based on the
     result = VboxCreateMachine(virtualbox, *base_folder, machine_name, "Linux26_64", "", vbox_machine);
     if (FAILED(result) || *vbox_machine == NULL) {
-        print_error_info(error_message, "[FATAL] Failed to create machine", result);
-        return FATAL;
+        print_error_info(error_message, "[VBGlue_Error] Failed to create machine", result);
+        return VBGlue_Fail;
     }
-    return GOOD;
+    return VBGlue_Ok;
 }
 
-VBRESULT
+VBGlueResult
 vbox_machine_release(IMachine* vbox_machine, char* base_folder, char* error_message) {
-    HRESULT result = GOOD;
+    HRESULT result = VBGlue_Ok;
     // release machine
     if (vbox_machine != NULL) {
         HRESULT result = VboxIMachineRelease(vbox_machine);
         if (FAILED(result)) {
-            print_error_info(error_message, "[INFO] Failed to close machine referenece", result);
+            print_error_info(error_message, "[VBox] Failed to close machine referenece", result);
         }
     }
     // release base folder
@@ -344,10 +299,10 @@ vbox_machine_release(IMachine* vbox_machine, char* base_folder, char* error_mess
 
 
 #pragma mark build machine base
-VBRESULT
+VBGlueResult
 vbox_machine_build(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, int cpu_count, int memory_size, char* error_message) {
     HRESULT result;
-    VBRESULT ret = GOOD;
+    VBGlueResult ret = VBGlue_Ok;
 
     assert(VBOX_DREF(virtualbox)      != NULL);
     assert(MACHINE_DREF(vbox_machine) != NULL);
@@ -358,31 +313,31 @@ vbox_machine_build(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, int cpu_count, 
         IBIOSSettings *bios;
         result = VboxGetMachineBIOSSettings(MACHINE_DREF(vbox_machine), &bios);
         if (FAILED(result) || bios == NULL) {
-            print_error_info(error_message, "[INFO] Failed to acquire bios settings", result);
-            ret = INFO;
+            print_error_info(error_message, "[VBox] Failed to acquire bios settings", result);
+            return VBGlue_Fail;
         }
         // enable I/O APIC
         result = IBIOSSettings_SetIOAPICEnabled(bios, (PRBool)1);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to enable IO/APIC", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to enable IO/APIC", result);
+                return VBGlue_Fail;
             }
         }
         // set ACPI enabled
         result = IBIOSSettings_SetACPIEnabled(bios, (PRBool)1);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to enable ACPI", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to enable ACPI", result);
+                return VBGlue_Fail;
             }
         }
         // release bios settings
         result = VboxIBiosSettingsRelease(bios);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to release BIOS", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to release BIOS", result);
+                return VBGlue_Fail;
             }
         }
     }
@@ -392,50 +347,50 @@ vbox_machine_build(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, int cpu_count, 
         // set memory
         result = VboxSetMachineMemorySize(MACHINE_DREF(vbox_machine), memory_size);
         if (FAILED(result)) {
-            print_error_info(error_message, "[FATAL] Failed to set memory size", result);
-            return FATAL;
+            print_error_info(error_message, "[VBGlue_Error] Failed to set memory size", result);
+            return VBGlue_Fail;
         }
         
         // set up Boot Order
         result = IMachine_SetBootOrder(MACHINE_DREF(vbox_machine), 1, DeviceType_DVD);
         if (FAILED(result)) {
-            print_error_info(error_message, "[FATAL] Failed to fix boot order", result);
-            return FATAL;
+            print_error_info(error_message, "[VBGlue_Error] Failed to fix boot order", result);
+            return VBGlue_Fail;
         }
         result = IMachine_SetBootOrder(MACHINE_DREF(vbox_machine), 2, DeviceType_HardDisk);
         if (FAILED(result)) {
-            print_error_info(error_message, "[FATAL] Failed to fix boot order", result);
-            return FATAL;
+            print_error_info(error_message, "[VBGlue_Error] Failed to fix boot order", result);
+            return VBGlue_Fail;
         }
         result = IMachine_SetBootOrder(MACHINE_DREF(vbox_machine), 3, DeviceType_Null);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to fix boot order", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to fix boot order", result);
+                return VBGlue_Fail;
             }
         }
         result = IMachine_SetBootOrder(MACHINE_DREF(vbox_machine), 4, DeviceType_Null);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to fix boot order", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to fix boot order", result);
+                return VBGlue_Fail;
             }
         }
         
         // set Chipset type
         result = IMachine_SetChipsetType(MACHINE_DREF(vbox_machine), ChipsetType_ICH9);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to setting chipset type", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to setting chipset type", result);
+                return VBGlue_Fail;
             }
         }
         // set RTC timer
         result = IMachine_SetRTCUseUTC(MACHINE_DREF(vbox_machine), (PRBool)1);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to setting Hardware UTC timer", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to setting Hardware UTC timer", result);
+                return VBGlue_Fail;
             }
         }
     }
@@ -445,24 +400,24 @@ vbox_machine_build(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, int cpu_count, 
         // set CPU Count
         result = IMachine_SetCPUCount(MACHINE_DREF(vbox_machine), cpu_count);
         if (FAILED(result)) {
-            print_error_info(error_message, "[FATAL] Failed to setting CPU count", result);
-            return FATAL;
+            print_error_info(error_message, "[VBGlue_Error] Failed to setting CPU count", result);
+            return VBGlue_Fail;
         }
         // set Execution Cap
         result = IMachine_SetCPUExecutionCap(MACHINE_DREF(vbox_machine), 100);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to setting CPU execution cap", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to setting CPU execution cap", result);
+                return VBGlue_Fail;
             }
         }
         // PAE enabled
         PRBool enabled = (PRBool)1;
         result = IMachine_GetCPUProperty(MACHINE_DREF(vbox_machine), CPUPropertyType_PAE, &enabled);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to setting PAE/NX enabling", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to setting PAE/NX enabling", result);
+                return VBGlue_Fail;
             }
         }
     }
@@ -472,17 +427,17 @@ vbox_machine_build(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, int cpu_count, 
         // Paravirtualization setting
         result = IMachine_SetParavirtProvider(MACHINE_DREF(vbox_machine), ParavirtProvider_Default);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to setting Pravirtualization", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to setting Pravirtualization", result);
+                return VBGlue_Fail;
             }
         }
         // Nested Paging
         result = IMachine_SetHWVirtExProperty(MACHINE_DREF(vbox_machine), HWVirtExPropertyType_Enabled, (PRBool)1);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to setting HWVirtExPropertyType", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to setting HWVirtExPropertyType", result);
+                return VBGlue_Fail;
             }
         }
     }
@@ -492,9 +447,9 @@ vbox_machine_build(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, int cpu_count, 
         // set VRAM
         result = VboxSetMachineVRAMSize(MACHINE_DREF(vbox_machine), 12);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to VRAM size", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to VRAM size", result);
+                return VBGlue_Fail;
             }
         }
     }
@@ -504,364 +459,364 @@ vbox_machine_build(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, int cpu_count, 
         // save settings
         result = VboxMachineSaveSettings(MACHINE_DREF(vbox_machine));
         if (FAILED(result)) {
-            print_error_info(error_message, "[FATAL] Failed to save machine before attaching a medium", result);
-            return FATAL;
+            print_error_info(error_message, "[VBGlue_Error] Failed to save machine before attaching a medium", result);
+            return VBGlue_Fail;
         }
         // Register machine
         result = VboxRegisterMachine(VBOX_DREF(virtualbox), MACHINE_DREF(vbox_machine));
         if (FAILED(result)) {
-            print_error_info(error_message, "[FATAL] Failed to register machine", result);
-            return FATAL;
+            print_error_info(error_message, "[VBGlue_Error] Failed to register machine", result);
+            return VBGlue_Fail;
         }
     }
     return ret;
 }
 
-VBRESULT
+VBGlueResult
 vbox_machine_add_bridged_network(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* host_interface, char* error_message) {
 
     INetworkAdapter *adapter = NULL;
-    VBRESULT ret = GOOD;
+    VBGlueResult ret = VBGlue_Ok;
     
     //firstly lock the machine
     HRESULT result = VboxLockMachine(MACHINE_DREF(vbox_machine), SESSION_DREF(vbox_session), LockType_Write);
     if (FAILED(result)) {
-        print_error_info(error_message, "[FATAL] Failed to lock machine for networking", result);
-        return FATAL;
+        print_error_info(error_message, "[VBGlue_Error] Failed to lock machine for networking", result);
+        return VBGlue_Fail;
     }
     // get mutable machine
     IMachine *mutable_machine;
     result = VboxGetSessionMachine(SESSION_DREF(vbox_session), &mutable_machine);
     if (FAILED(result) || mutable_machine == NULL) {
-        print_error_info(error_message, "[FATAL] Failed to get a mutable copy of a machine for networking", result);
-        ret = FATAL;
+        print_error_info(error_message, "[VBGlue_Error] Failed to get a mutable copy of a machine for networking", result);
+        ret = VBGlue_Fail;
     }
     // get network adapter
     result = VboxMachineGetNetworkAdapter(mutable_machine, 0, &adapter);
     if (FAILED(result) || adapter == NULL) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[FATAL] Failed to acquire adapter from slot 0", result);
-            ret = FATAL;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBGlue_Error] Failed to acquire adapter from slot 0", result);
+            ret = VBGlue_Fail;
         }
     }
     // enable network adapter
     result = VboxNetworkAdapterSetEnabled(adapter, TRUE);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[FATAL] Failed to enable network adapter", result);
-            ret = FATAL;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBGlue_Error] Failed to enable network adapter", result);
+            ret = VBGlue_Fail;
         }
     }
     // set bridged network type
     result = VboxNetworkAdapterSetAttachmentType(adapter, NetworkAttachmentType_Bridged);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[FATAL] Failed to set network attachement type", result);
-            ret = FATAL;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBGlue_Error] Failed to set network attachement type", result);
+            ret = VBGlue_Fail;
         }
     }
 
     // set host network adapter this bridge should connect to
     result = VboxNetworkAdapterSetBridgedHostInterface(adapter, host_interface);
     if (FAILED(result)) {
-        print_error_info(error_message, "[FATAL] Failed to connect to host network interface", result);
-        ret = FATAL;
+        print_error_info(error_message, "[VBGlue_Error] Failed to connect to host network interface", result);
+        ret = VBGlue_Fail;
     }    
     // set adapter type (AMD PCnet-FAST III, VBox Default)
     result = VboxNetworkAdapterSetAdapterType(adapter, NetworkAdapterType_Am79C973);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[FATAL] Failed to set network adapter type", result);
-            ret = FATAL;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBGlue_Error] Failed to set network adapter type", result);
+            ret = VBGlue_Fail;
         }
     }
     // promiscuous mode policy
     result = VboxNetworkAdapterSetPromiscModePolicy(adapter, NetworkAdapterPromiscModePolicy_Deny);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[INFO] Failed to set promiscuous mode", result);
-            ret = INFO;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBox] Failed to set promiscuous mode", result);
+            return VBGlue_Fail;
         }
     }
     // set cable connected
     result = VboxNetworkAdapterSetCableConnected(adapter, TRUE);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[INFO] Failed to set cable connected", result);
-            ret = INFO;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBox] Failed to set cable connected", result);
+            return VBGlue_Fail;
         }
     }
     // save setting
     result = VboxMachineSaveSettings(mutable_machine);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[FATAL] Failed to save machine after attaching hard disk medium", result);
-            ret = FATAL;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBGlue_Error] Failed to save machine after attaching hard disk medium", result);
+            ret = VBGlue_Fail;
         }
     }
     // release the first adapter
     result = VboxNetworkAdapterRelease(adapter);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[INFO] Failed to release adapter", result);
-            ret = INFO;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBox] Failed to release adapter", result);
+            return VBGlue_Fail;
         }
     }
     // then we can safely release the mutable machine
     if (mutable_machine) {
         result = VboxIMachineRelease(mutable_machine);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to release locked machine for attaching adapter", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to release locked machine for attaching adapter", result);
+                return VBGlue_Fail;
             }
         }
     }
     // then unlock machine
     result = VboxUnlockMachine(SESSION_DREF(vbox_session));
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[INFO] Failed to unlock machine for attaching adapter", result);
-            ret = INFO;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBox] Failed to unlock machine for attaching adapter", result);
+            return VBGlue_Fail;
         }
     }
     
     return ret;
 }
 
-VBRESULT
+VBGlueResult
 vbox_machine_add_shared_folder(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* shared_name, const char *host_folder, char* error_message) {
 
-    VBRESULT ret = GOOD;
+    VBGlueResult ret = VBGlue_Ok;
     HRESULT result;
     
     //firstly lock the machine
     result = VboxLockMachine(MACHINE_DREF(vbox_machine), SESSION_DREF(vbox_session), LockType_Write);
     if (FAILED(result)) {
-        print_error_info(error_message, "[FATAL] Failed to lock machine for shared folder", result);
-        return FATAL;
+        print_error_info(error_message, "[VBGlue_Error] Failed to lock machine for shared folder", result);
+        return VBGlue_Fail;
     }
     // get mutable machine
     IMachine *mutable_machine;
     result = VboxGetSessionMachine(SESSION_DREF(vbox_session), &mutable_machine);
     if (FAILED(result) || mutable_machine == NULL) {
-        print_error_info(error_message, "[FATAL] Failed to get a mutable copy of a machine for shared folder", result);
-        ret = FATAL;
+        print_error_info(error_message, "[VBGlue_Error] Failed to get a mutable copy of a machine for shared folder", result);
+        ret = VBGlue_Fail;
     }
     // create shared folder
     result = VboxMachineCreateSharedFolder(mutable_machine, shared_name, host_folder, TRUE, TRUE);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[FATAL] Failed to add shared folder", result);
-            ret = FATAL;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBGlue_Error] Failed to add shared folder", result);
+            ret = VBGlue_Fail;
         }
     }
     // save setting
     result = VboxMachineSaveSettings(mutable_machine);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[FATAL] Failed to save machine for adding shared folder", result);
-            ret = FATAL;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBGlue_Error] Failed to save machine for adding shared folder", result);
+            ret = VBGlue_Fail;
         }
     }
     // then we can safely release the mutable machine
     if (mutable_machine) {
         result = VboxIMachineRelease(mutable_machine);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to release machine for adding shared folder", result);
-                ret = FATAL;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to release machine for adding shared folder", result);
+                ret = VBGlue_Fail;
             }
         }
     }
     // then unlock machine
     result = VboxUnlockMachine(SESSION_DREF(vbox_session));
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[INFO] Failed to unlock machine for adding shared folder", result);
-            ret = INFO;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBox] Failed to unlock machine for adding shared folder", result);
+            return VBGlue_Fail;
         }
     }
     return ret;
 }
 
-VBRESULT
+VBGlueResult
 vbox_machine_add_storage_controller(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* storage_controller_name, char* error_message) {
 
-    VBRESULT ret = GOOD;
+    VBGlueResult ret = VBGlue_Ok;
     HRESULT result;
     IStorageController *storage_controller;
     
     //firstly lock the machine
     result = VboxLockMachine(MACHINE_DREF(vbox_machine), SESSION_DREF(vbox_session), LockType_Write);
     if (FAILED(result)) {
-        print_error_info(error_message, "[FATAL] Failed to lock machine for adding storage controller", result);
-        return FATAL;
+        print_error_info(error_message, "[VBGlue_Error] Failed to lock machine for adding storage controller", result);
+        return VBGlue_Fail;
     }
     // get mutable machine
     IMachine *mutable_machine;
     result = VboxGetSessionMachine(SESSION_DREF(vbox_session), &mutable_machine);
     if (FAILED(result) || mutable_machine == NULL) {
-        print_error_info(error_message, "[FATAL] Failed to get a mutable copy of a machine", result);
-        ret = FATAL;
+        print_error_info(error_message, "[VBGlue_Error] Failed to get a mutable copy of a machine", result);
+        ret = VBGlue_Fail;
     }
     // add storage controller
     result = VboxMachineAddStorageController(mutable_machine, storage_controller_name, StorageBus_SATA, &storage_controller);
     if (FAILED(result) || storage_controller_name == NULL) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[FATAL] Failed to add storage controller", result);
-            ret = FATAL;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBGlue_Error] Failed to add storage controller", result);
+            ret = VBGlue_Fail;
         }
     }
     // storage controller type
     result = VboxSetStorageControllerType(storage_controller, StorageControllerType_IntelAhci);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[INFO] Failed to set storage controller type", result);
-            ret = INFO;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBox] Failed to set storage controller type", result);
+            return VBGlue_Fail;
         }
     }
     // storage controller set # of ports
     result = IStorageController_SetPortCount(storage_controller, 10);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[FATAL] Failed to increase port count", result);
-            ret = FATAL;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBGlue_Error] Failed to increase port count", result);
+            ret = VBGlue_Fail;
         }
     }
     // Enable host IO cache for imaging
     PRBool use_host_iocache = (PRBool)1;
     result = IStorageController_SetUseHostIOCache(storage_controller, use_host_iocache);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[INFO] Failed to enable host IO cache", result);
-            ret = INFO;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBox] Failed to enable host IO cache", result);
+            return VBGlue_Fail;
         }
     }
     // release storage controller
     result = VboxIStorageControllerRelease(storage_controller);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[INFO] Failed to release storage controller for attaching storage controller", result);
-            ret = FATAL;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBox] Failed to release storage controller for attaching storage controller", result);
+            ret = VBGlue_Fail;
         }
         
     }
     // save setting
     result = VboxMachineSaveSettings(mutable_machine);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[FATAL] Failed to save machine after attaching storage controller", result);
-            ret = FATAL;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBGlue_Error] Failed to save machine after attaching storage controller", result);
+            ret = VBGlue_Fail;
         }
     }
     // then we can safely release the mutable machine
     if (mutable_machine) {
         result = VboxIMachineRelease(mutable_machine);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to release mutable machine for attaching storage controller", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to release mutable machine for attaching storage controller", result);
+                return VBGlue_Fail;
             }
         }
     }
     // then unlock machine
     result = VboxUnlockMachine(SESSION_DREF(vbox_session));
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[INFO] Failed to unlock machine for attaching storage controller", result);
-            ret = INFO;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBox] Failed to unlock machine for attaching storage controller", result);
+            return VBGlue_Fail;
         }
     }
 
     return ret;
 }
 
-VBRESULT
+VBGlueResult
 vbox_machine_add_boot_image(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* storage_controller_name, const char *boot_image_path, char *error_message) {
     
     IMedium *boot_image;
-    VBRESULT ret = GOOD;
+    VBGlueResult ret = VBGlue_Ok;
     HRESULT result;
 
     // open medium
     PRBool use_old_uuid = (PRBool)0;
     result = VboxOpenMedium(VBOX_DREF(virtualbox), boot_image_path, DeviceType_DVD, AccessMode_ReadOnly, use_old_uuid, &boot_image);
     if (FAILED(result) || boot_image == NULL) {
-        print_error_info(error_message, "[FATAL] Failed to open boot image for attaching boot image", result);
-        return FATAL;
+        print_error_info(error_message, "[VBGlue_Error] Failed to open boot image for attaching boot image", result);
+        return VBGlue_Fail;
     }
     //firstly lock the machine
     result = VboxLockMachine(MACHINE_DREF(vbox_machine), SESSION_DREF(vbox_session), LockType_Write);
     if (FAILED(result)) {
-        print_error_info(error_message, "[FATAL] Failed to lock machine for attaching boot image", result);
-        return FATAL;
+        print_error_info(error_message, "[VBGlue_Error] Failed to lock machine for attaching boot image", result);
+        return VBGlue_Fail;
     }
     // get mutable machine
     IMachine *mutable_machine;
     result = VboxGetSessionMachine(SESSION_DREF(vbox_session), &mutable_machine);
     if (FAILED(result) || mutable_machine == NULL) {
-        print_error_info(error_message, "[FATAL] Failed to get a mutable copy of a machine", result);
-        ret = FATAL;
+        print_error_info(error_message, "[VBGlue_Error] Failed to get a mutable copy of a machine", result);
+        ret = VBGlue_Fail;
     }
     // attach a medium
     result = VboxMachineAttachDevice(mutable_machine, storage_controller_name, 0, 0, DeviceType_DVD, boot_image);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[FATAL] Failed to attach boot image", result);
-            ret = FATAL;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBGlue_Error] Failed to attach boot image", result);
+            ret = VBGlue_Fail;
         }
     }
     // save setting
     result = VboxMachineSaveSettings(mutable_machine);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[FATAL] Failed to save machine after attaching boot image", result);
-            ret = FATAL;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBGlue_Error] Failed to save machine after attaching boot image", result);
+            ret = VBGlue_Fail;
         }
     }
     // then we can safely release the mutable machine
     if (mutable_machine) {
         result = VboxIMachineRelease(mutable_machine);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to release machine after attaching boot image", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to release machine after attaching boot image", result);
+                return VBGlue_Fail;
             }
         }
     }
     // then unlock machine
     result = VboxUnlockMachine(SESSION_DREF(vbox_session));
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[INFO] Failed to unlock machine for attaching boot image", result);
-            ret = INFO;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBox] Failed to unlock machine for attaching boot image", result);
+            return VBGlue_Fail;
         }
     }
     // release medium
     result = VboxIMediumRelease(boot_image);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[INFO] Failed to release boot image", result);
-            ret = INFO;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBox] Failed to release boot image", result);
+            return VBGlue_Fail;
         }
     }
     return ret;
 }
 
-VBRESULT
+VBGlueResult
 vbox_machine_add_hard_disk(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* storage_controller_name, const char *hdd_medium_path, int disk_size, void(^build_progress)(int progress, int done), char *error_message) {
 
     // Create and Open hard drive
     HRESULT result;
-    VBRESULT ret = GOOD;
+    VBGlueResult ret = VBGlue_Ok;
     IMedium *hdd_medium;
     {
         // set medium image
         result = VboxCreateHardDisk(VBOX_DREF(virtualbox), "VMDK", hdd_medium_path, DeviceType_HardDisk, AccessMode_ReadWrite, &hdd_medium);
         if (FAILED(result) || hdd_medium == NULL) {
-            print_error_info(error_message, "[FATAL] Failed to create harddrive", result);
-            return FATAL;
+            print_error_info(error_message, "[VBGlue_Error] Failed to create harddrive", result);
+            return VBGlue_Fail;
         }
         // create medium
         //REF : https://www.virtualbox.org/sdkref/_virtual_box_8idl.html#adedcbf1a6e5e35fe7a0ca0c4b3447154
@@ -870,15 +825,15 @@ vbox_machine_add_hard_disk(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DP
         IProgress *progress;
         result = VboxMediumCreateBaseStorage(hdd_medium, (1 << 24), variantCount, cVariant, &progress);
         if (FAILED(result)){
-            print_error_info(error_message, "[FATAL] Failed to create base storage", result);
-            return FATAL;
+            print_error_info(error_message, "[VBGlue_Error] Failed to create base storage", result);
+            return VBGlue_Fail;
         }
         
         // it is recommended to wait short amount of time
         result = VboxProgressWaitForCompletion(progress, 3);
         if (FAILED(result)) {
-            print_error_info(error_message, "[FATAL] Failed to complete creating base storage", result);
-            ret = FATAL;
+            print_error_info(error_message, "[VBGlue_Error] Failed to complete creating base storage", result);
+            ret = VBGlue_Fail;
         }
         else {
             PRUint32 progress_percent = 0;
@@ -895,8 +850,8 @@ vbox_machine_add_hard_disk(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DP
         PRInt32 code;
         result = VboxGetProgressResultCode(progress, &code);
         if (FAILED(result)|| code != 0) {
-            print_error_info(error_message, "[FATAL] Failed to actuqire storage creation result code", result);
-            return FATAL;
+            print_error_info(error_message, "[VBGlue_Error] Failed to actuqire storage creation result code", result);
+            return VBGlue_Fail;
         }
         // release progress
         VboxIProgressRelease(progress);
@@ -905,8 +860,8 @@ vbox_machine_add_hard_disk(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DP
         PRBool use_old_uuid = (PRBool)0;
         result = VboxOpenMedium(VBOX_DREF(virtualbox), hdd_medium_path, DeviceType_HardDisk, AccessMode_ReadWrite, use_old_uuid, &hdd_medium);
         if (FAILED(result)) {
-            print_error_info(error_message, "[FATAL] Failed to open hard drive", result);
-            return FATAL;
+            print_error_info(error_message, "[VBGlue_Error] Failed to open hard drive", result);
+            return VBGlue_Fail;
         }
     }
     
@@ -915,50 +870,50 @@ vbox_machine_add_hard_disk(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DP
         //firstly lock the machine
         result = VboxLockMachine(MACHINE_DREF(vbox_machine), SESSION_DREF(vbox_session), LockType_Write);
         if (FAILED(result)) {
-            print_error_info(error_message, "[FATAL] Failed to lock machine for attaching hdd to storage controller", result);
-            return FATAL;
+            print_error_info(error_message, "[VBGlue_Error] Failed to lock machine for attaching hdd to storage controller", result);
+            return VBGlue_Fail;
         }
         // get mutable machine
         IMachine *mutable_machine;
         result = VboxGetSessionMachine(SESSION_DREF(vbox_session), &mutable_machine);
         if (FAILED(result) || mutable_machine == NULL) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[FATAL] Failed to get a mutable copy of a machine for attaching hard disk medium", result);
-                ret = FATAL;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBGlue_Error] Failed to get a mutable copy of a machine for attaching hard disk medium", result);
+                ret = VBGlue_Fail;
             }
         }
         // attach a medium
         result = VboxMachineAttachDevice(mutable_machine, storage_controller_name, 1, 0, DeviceType_HardDisk, hdd_medium);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[FATAL] Failed to attach hard disk medium", result);
-                ret = FATAL;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBGlue_Error] Failed to attach hard disk medium", result);
+                ret = VBGlue_Fail;
             }
         }
         // save setting
         result = VboxMachineSaveSettings(mutable_machine);
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[FATAL] Failed to save machine after attaching hard disk medium", result);
-                ret = FATAL;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBGlue_Error] Failed to save machine after attaching hard disk medium", result);
+                ret = VBGlue_Fail;
             }
         }
         // then we can safely release the mutable machine
         if (mutable_machine) {
             result = VboxIMachineRelease(mutable_machine);
             if (FAILED(result)) {
-                if (ret == GOOD) {
-                    print_error_info(error_message, "[INFO] Failed to release machine after attaching hard disk medium", result);
-                    ret = INFO;
+                if (ret == VBGlue_Ok) {
+                    print_error_info(error_message, "[VBox] Failed to release machine after attaching hard disk medium", result);
+                    return VBGlue_Fail;
                 }
             }
         }
         // then unlock machine
         result = VboxUnlockMachine(SESSION_DREF(vbox_session));
         if (FAILED(result)) {
-            if (ret == GOOD) {
-                print_error_info(error_message, "[INFO] Failed to unlock machine after attaching hard disk medium", result);
-                ret = INFO;
+            if (ret == VBGlue_Ok) {
+                print_error_info(error_message, "[VBox] Failed to unlock machine after attaching hard disk medium", result);
+                return VBGlue_Fail;
             }
         }
     }
@@ -966,9 +921,9 @@ vbox_machine_add_hard_disk(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DP
     // Close & release hard drive
     result = VboxIMediumRelease(hdd_medium);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[INFO] Failed to release a hard drive", result);
-            ret = INFO;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBox] Failed to release a hard drive", result);
+            return VBGlue_Fail;
         }
     }
     
@@ -980,29 +935,29 @@ vbox_machine_add_hard_disk(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DP
 }
 
 #pragma mark - DESTROY MACHINE
-VBRESULT
+VBGlueResult
 vbox_machine_destroy(VOID_DPTR vbox_machine, char* base_folder, const char* storage_controller_name, int remove_dvd, void(^build_progress)(int progress, int done), char *error_message) {
     
     HRESULT result;
     ULONG media_count;
-    VBRESULT ret = GOOD;
+    VBGlueResult ret = VBGlue_Ok;
     IProgress *progress;
     IMedium** media;
     
     // unregister
     result = VboxMachineUnregister(MACHINE_DREF(vbox_machine), (remove_dvd == 0 ? CleanupMode_DetachAllReturnHardDisksOnly:CleanupMode_Full) , &media, &media_count);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[INFO] Failed to unregister media", result);
-            ret = INFO;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBox] Failed to unregister media", result);
+            return VBGlue_Fail;
         }
     }
     // delete medium
     result = VboxMachineDeleteConfig(MACHINE_DREF(vbox_machine), media_count, media, &progress);
     if (FAILED(result)) {
-        if (ret == GOOD) {
-            print_error_info(error_message, "[INFO] Failed to delete medium", result);
-            ret = INFO;
+        if (ret == VBGlue_Ok) {
+            print_error_info(error_message, "[VBox] Failed to delete medium", result);
+            return VBGlue_Fail;
         }
     }
     // delete progress
@@ -1023,7 +978,7 @@ vbox_machine_destroy(VOID_DPTR vbox_machine, char* base_folder, const char* stor
     // release machine
     result = VboxIMachineRelease(MACHINE_DREF(vbox_machine));
     if (FAILED(result)) {
-        print_error_info(error_message, "[INFO] Failed to close machine referenece", result);
+        print_error_info(error_message, "[VBox] Failed to close machine referenece", result);
     }
     // release base folder
     if (base_folder != NULL) {
@@ -1228,6 +1183,18 @@ VboxMachineStart(IVirtualBox *virtualBox, ISession *session, IMachine *cmachine,
 }
 
 #pragma mark - UTILS
+
+VBGlueResult
+VBoxTestErrorMessage(VBoxGlue* glue) {
+    iVBoxSession* session = toiVBoxSession(glue);
+    print_error_info(session->errMsg, "[VBox] VBoxGlue Error Message Test", (unsigned)S_OK);
+    return VBGlue_Fail;
+}
+
+const char*
+VBoxGetErrorMessage(VBoxGlue* glue) {
+    return toiVBoxSession(glue)->errMsg;
+}
 
 # if 0
 /**
