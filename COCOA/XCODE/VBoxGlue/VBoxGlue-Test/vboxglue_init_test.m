@@ -47,15 +47,7 @@
     NSLog(@"Error Message %s", VBoxGetErrorMessage(vboxGlue));
 }
 
-- (void)testCreateAndReleaseMachine {
-    XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue, "pc-master-1", [userhome UTF8String]), @"Machine creation should return ok");
-    NSLog(@"setting file path %s", VboxGetSettingFilePath(vboxGlue));
-    
-    // release machine
-    XCTAssertTrue( VBGlue_Ok == VBoxReleaseMachine(vboxGlue), @"Releasing machine should not generate error");
-}
-
-- (void)test_Create_Find_Release_Machine {
+- (void)test_Create_Release_Machine {
     XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue, "pc-master-2", [userhome UTF8String]), @"Machine creation should return true");
     NSLog(@"setting file path %s", VboxGetSettingFilePath(vboxGlue));
     NSLog(@"MachineID %s", VboxGetMachineID(vboxGlue));

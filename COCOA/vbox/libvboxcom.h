@@ -59,6 +59,14 @@ VBGlueResult
 VBoxDestoryMachine(VBoxGlue* glue);
 
 
+#pragma mark start & stop machine
+VBGlueResult
+VBoxStartMachine(VBoxGlue* glue);
+
+VBGlueResult
+VBoxStopMachine(VBoxGlue* glue);
+
+
 #pragma mark utils
 VBGlueResult
 VBoxTestErrorMessage(VBoxGlue* glue);

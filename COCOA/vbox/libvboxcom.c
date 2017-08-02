@@ -990,7 +990,6 @@ VBoxDestoryMachine(VBoxGlue* glue) {
     return VBoxReleaseMachine(glue);
 }
 
-
 #pragma mark start & stop machine
 
 /**
