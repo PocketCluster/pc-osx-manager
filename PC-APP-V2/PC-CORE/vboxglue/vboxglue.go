@@ -90,6 +90,9 @@ func (v *goVoxGlue) IsMachineSettingChanged() (bool, error) {
 }
 
 func (v *goVoxGlue) FindMachineByNameOrID(machineName string) error {
+    if len(machineName) == 0 {
+        return errors.Errorf("[ERR] machine name should be provided")
+    }
     cMachineName := C.CString(machineName)
     result := C.VBoxFindMachineByNameOrID(v.cvboxglue, cMachineName)
     C.free(unsafe.Pointer(cMachineName))
@@ -101,6 +104,12 @@ func (v *goVoxGlue) FindMachineByNameOrID(machineName string) error {
 }
 
 func (v *goVoxGlue) CreateMachineByName(baseFolder, machineName string) error {
+    if len(baseFolder) == 0 {
+        return errors.Errorf("[ERR] base folder path should be provided")
+    }
+    if len(machineName) == 0 {
+        return errors.Errorf("[ERR] machine name should be provided")
+    }
     var (
         cBaseFolder  = C.CString(baseFolder)
         cMachineName = C.CString(machineName)
