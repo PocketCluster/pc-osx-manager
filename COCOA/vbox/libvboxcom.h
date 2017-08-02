@@ -14,13 +14,14 @@
 
 typedef void** VOID_DPTR;
 
+
+
 typedef enum VBGlueResult {
     VBGlue_Ok      = 0,
     VBGlue_Fail
 } VBGlueResult;
 
 typedef void VBoxGlue;
-
 
 #pragma mark init & close
 VBGlueResult
@@ -35,13 +36,7 @@ extern unsigned int VBoxAppVersion(void);
 extern unsigned int VBoxApiVersion(void);
 
 
-#pragma mark machine meta
-VBGlueResult
-VBoxGetMachineID(VBoxGlue* glue, char** machine_id);
-
-VBGlueResult
-VBoxGetMachineSettingFilePath(VBoxGlue* glue, char** setting_file_path);
-
+#pragma mark machine status
 bool
 VBoxIsMachineSettingChanged(VBoxGlue* glue);
 
@@ -51,7 +46,7 @@ VBGlueResult
 VBoxFindMachineByNameOrID(VBoxGlue* glue, const char* machine_name);
 
 VBGlueResult
-VBoxCreateMachineByName(VBoxGlue* glue, const char* machine_name, char** setting_file_path);
+VBoxCreateMachineByName(VBoxGlue* glue, const char* machine_name);
 
 VBGlueResult
 VBoxReleaseMachine(VBoxGlue* glue);
@@ -65,5 +60,12 @@ VBoxTestErrorMessage(VBoxGlue* glue);
 
 const char*
 VBoxGetErrorMessage(VBoxGlue* glue);
+
+const char*
+VboxGetSettingFilePath(VBoxGlue* glue);
+
+const char*
+VboxGetMachineID(VBoxGlue* glue);
+
 
 #endif /* __LIBVBOXCOM_H__ */

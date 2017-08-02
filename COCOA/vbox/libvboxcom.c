@@ -28,11 +28,13 @@
 #define ERROR_MESSAGE_BUF_SIZE 256
 
 typedef struct iVBoxSession {
-    char                  errMsg[ERROR_MESSAGE_BUF_SIZE];
-    IVirtualBox*          cbox;     // vbox machine
-    IVirtualBoxClient*    client;   // vbox client
-    ISession*             csession; // vbox session
-    IMachine*             cmachine; // vbox machine
+    char                  error_msg[ERROR_MESSAGE_BUF_SIZE];
+    IVirtualBox*          vbox;                             // virtualbox
+    IVirtualBoxClient*    client;                           // vbox client
+    ISession*             vsession;                         // vbox session
+    IMachine*             machine;                          // vbox machine
+    char*                 machine_id;                       // machine id
+    char*                 setting_file_path;                // setting file
 } iVBoxSession;
 
 #pragma mark - MACROS
@@ -103,25 +105,25 @@ NewVBoxGlue(VBoxGlue** glue) {
     
     result = VBoxCGlueInit();
     if (FAILED(result)) {
-        print_error_info(session->errMsg, "[VBox] failed to load vbox api", result);
+        print_error_info(session->error_msg, "[VBox] failed to load vbox api", result);
         return VBGlue_Fail;
     }
 
     result = VboxClientInitialize(&(session->client));
     if ( FAILED(result) || session->client == NULL ) {
-        print_error_info(session->errMsg, "[VBox] failed to init vbox client", result);
+        print_error_info(session->error_msg, "[VBox] failed to init vbox client", result);
         return VBGlue_Fail;
     }
 
-    result = VboxGetVirtualBox(session->client, &(session->cbox));
-    if ( FAILED(result) || session->cbox == NULL ) {
-        print_error_info(session->errMsg, "[VBox] failed to get VirtualBox reference", result);
+    result = VboxGetVirtualBox(session->client, &(session->vbox));
+    if ( FAILED(result) || session->vbox == NULL ) {
+        print_error_info(session->error_msg, "[VBox] failed to get VirtualBox reference", result);
         return VBGlue_Fail;
     }
 
-    result = VboxGetSession(session->client, &(session->csession));
-    if ( FAILED(result) || session->csession == NULL ) {
-        print_error_info(session->errMsg, "[VBox] Failed to get Session reference", result);
+    result = VboxGetSession(session->client, &(session->vsession));
+    if ( FAILED(result) || session->vsession == NULL ) {
+        print_error_info(session->error_msg, "[VBox] Failed to get Session reference", result);
         return VBGlue_Fail;
     }
 
@@ -137,28 +139,28 @@ CloseVBoxGlue(VBoxGlue* glue) {
     iVBoxSession* session = toiVBoxSession(glue);
     HRESULT result;
     
-    if ( session->csession != NULL ) {
-        result = VboxISessionRelease(session->csession);
+    if ( session->vsession != NULL ) {
+        result = VboxISessionRelease(session->vsession);
         if (FAILED(result)) {
-            print_error_info(session->errMsg, "[VBox] Failed to release ISession reference", result);
+            print_error_info(session->error_msg, "[VBox] Failed to release ISession reference", result);
             return VBGlue_Fail;
         }
     }
-    if ( session->cbox != NULL ) {
-        result = VboxIVirtualBoxRelease(session->cbox);
+    if ( session->vbox != NULL ) {
+        result = VboxIVirtualBoxRelease(session->vbox);
         if (FAILED(result)) {
-            print_error_info(session->errMsg, "[VBox] failed to release vbox reference", result);
+            print_error_info(session->error_msg, "[VBox] failed to release vbox reference", result);
             return VBGlue_Fail;
         }
     }
     if ( session->client != NULL ) {
         result = VboxClientRelease(session->client);
         if (FAILED(result)) {
-            print_error_info(session->errMsg, "[VBox] failed to release vbox client", result);
+            print_error_info(session->error_msg, "[VBox] failed to release vbox client", result);
             return VBGlue_Fail;
         }
     }
-
+    
     VboxClientUninitialize();
     VBoxCGlueTerm();
     free(session);
@@ -167,41 +169,7 @@ CloseVBoxGlue(VBoxGlue* glue) {
 }
 
 
-#pragma mark machine meta
-VBGlueResult
-VBoxGetMachineID(VBoxGlue* glue, char** machine_id) {
-    
-    // make sure the pointer passed is not null.
-    assert(glue != NULL);
-
-    iVBoxSession* session = toiVBoxSession(glue);
-    
-    HRESULT result = VboxMachineGetID(session->cmachine, machine_id);
-    if (FAILED(result)) {
-        print_error_info(session->errMsg, "[VBox] Failed to get Machine ID", result);
-        return VBGlue_Fail;
-    }
-
-    return VBGlue_Ok;
-}
-
-VBGlueResult
-VBoxGetMachineSettingFilePath(VBoxGlue* glue, char** setting_file_path) {
-    
-    // make sure the pointer passed is not null.
-    assert(glue != NULL);
-
-    iVBoxSession* session = toiVBoxSession(glue);
-
-    HRESULT result = VboxGetMachineSettingsFilePath(session->cmachine, setting_file_path);
-    if (FAILED(result)) {
-        print_error_info(session->errMsg, "[VBox] Fail to get setting path", result);
-        return VBGlue_Fail;
-    }
-
-    return VBGlue_Ok;
-}
-
+#pragma mark machine status
 bool
 VBoxIsMachineSettingChanged(VBoxGlue* glue) {
     
@@ -213,31 +181,31 @@ VBoxIsMachineSettingChanged(VBoxGlue* glue) {
     IMachine *mutable_machine;
     
     //firstly lock the machine
-    HRESULT result = VboxLockMachine(session->cmachine, session->csession, LockType_Write);
+    HRESULT result = VboxLockMachine(session->machine, session->vsession, LockType_Write);
     if (FAILED(result)) {
-        print_error_info(session->errMsg, "[VBox] Failed to lock machine for adding storage controller", result);
+        print_error_info(session->error_msg, "[VBox] Failed to lock machine for adding storage controller", result);
     }
     // get mutable machine
-    result = VboxGetSessionMachine(session->csession, &mutable_machine);
+    result = VboxGetSessionMachine(session->vsession, &mutable_machine);
     if (FAILED(result) || mutable_machine == NULL) {
-        print_error_info(session->errMsg, "[VBox] Failed to get a mutable copy of a machine", result);
+        print_error_info(session->error_msg, "[VBox] Failed to get a mutable copy of a machine", result);
     }
     // check if settings modified
     result = VboxGetMachineSettingsModified(mutable_machine, &changed);
     if (FAILED(result)) {
-        print_error_info(session->errMsg, "[VBox] Fail to get setting modification", result);
+        print_error_info(session->error_msg, "[VBox] Fail to get setting modification", result);
     }
     // then we can safely release the mutable machine
     if (mutable_machine) {
         result = VboxIMachineRelease(mutable_machine);
         if (FAILED(result)) {
-            print_error_info(session->errMsg, "[VBox] Failed to release locked machine for attaching adapter", result);
+            print_error_info(session->error_msg, "[VBox] Failed to release locked machine for attaching adapter", result);
         }
     }
     // then unlock machine
-    result = VboxUnlockMachine(session->csession);
+    result = VboxUnlockMachine(session->vsession);
     if (FAILED(result)) {
-        print_error_info(session->errMsg, "[VBox] Failed to unlock machine for attaching adapter", result);
+        print_error_info(session->error_msg, "[VBox] Failed to unlock machine for attaching adapter", result);
     }
 
     return (bool)(changed == PR_TRUE);
@@ -253,21 +221,33 @@ VBoxFindMachineByNameOrID(VBoxGlue* glue, const char* machine_name) {
 
     iVBoxSession* session = toiVBoxSession(glue);
 
-    if ( session->cmachine  == NULL ) {
-        HRESULT result = VboxFindMachine(session->cbox, machine_name, &(session->cmachine));
+    if ( session->machine  == NULL ) {
+        HRESULT result;
+        result = VboxFindMachine(session->vbox, machine_name, &(session->machine));
         if (FAILED(result)) {
-            print_error_info(session->errMsg, "[VBox] Failed to find machine", result);
+            print_error_info(session->error_msg, "[VBox] Failed to find machine", result);
             return VBGlue_Fail;
         }
+        result = VboxGetMachineSettingsFilePath(session->machine, &(session->setting_file_path));
+        if (FAILED(result)) {
+            print_error_info(session->error_msg, "[VBox] Fail to get setting file path", result);
+            return VBGlue_Fail;
+        }
+        result = VboxMachineGetID(session->machine, &(session->machine_id));
+        if (FAILED(result)) {
+            print_error_info(session->error_msg, "[VBox] Failed to get Machine ID", result);
+            return VBGlue_Fail;
+        }
+
     } else {
-        print_error_info(session->errMsg, "[VBox] machine instance already exists", S_OK);
+        print_error_info(session->error_msg, "[VBox] machine instance already exists", S_OK);
         return VBGlue_Fail;
     }
     return VBGlue_Ok;
 }
 
 VBGlueResult
-VBoxCreateMachineByName(VBoxGlue* glue, const char* machine_name, char** setting_file_path) {
+VBoxCreateMachineByName(VBoxGlue* glue, const char* machine_name) {
     
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -276,23 +256,29 @@ VBoxCreateMachineByName(VBoxGlue* glue, const char* machine_name, char** setting
     iVBoxSession* session = toiVBoxSession(glue);
     HRESULT result;
 
-    if ( session->cmachine  != NULL ) {
-        print_error_info(session->errMsg, "[VBox] machine instance already exists", S_OK);
+    if ( session->machine  != NULL ) {
+        print_error_info(session->error_msg, "[VBox] machine instance already exists", S_OK);
         return VBGlue_Fail;
     }
     
     // create machine file name
-    result = VboxComposeMachineFilename(session->cbox, machine_name, "", "", setting_file_path);
+    result = VboxComposeMachineFilename(session->vbox, machine_name, "", "", &(session->setting_file_path));
     if (FAILED(result)) {
-        print_error_info(session->errMsg, "[VBox] Failed composing machine name", result);
+        print_error_info(session->error_msg, "[VBox] Failed composing machine name", result);
         return VBGlue_Fail;
     }
     // create machine based on the
-    result = VboxCreateMachine(session->cbox, *setting_file_path, machine_name, "Linux26_64", "", &(session->cmachine));
-    if (FAILED(result) || session->cmachine == NULL) {
-        print_error_info(session->errMsg, "[VBox] Failed to create machine", result);
+    result = VboxCreateMachine(session->vbox, session->setting_file_path, machine_name, "Linux26_64", "", &(session->machine));
+    if (FAILED(result) || session->machine == NULL) {
+        print_error_info(session->error_msg, "[VBox] Failed to create machine", result);
         return VBGlue_Fail;
     }
+    result = VboxMachineGetID(session->machine, &(session->machine_id));
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] Failed to get Machine ID", result);
+        return VBGlue_Fail;
+    }
+
     return VBGlue_Ok;
 }
 
@@ -305,13 +291,21 @@ VBoxReleaseMachine(VBoxGlue* glue) {
     iVBoxSession* session = toiVBoxSession(glue);
 
     // release machine
-    if (session->cmachine != NULL) {
-        HRESULT result = VboxIMachineRelease(session->cmachine);
+    if ( session->setting_file_path != NULL ) {
+        VboxUtf8Free(session->setting_file_path);
+        session->setting_file_path = NULL;
+    }
+    if ( session->machine_id != NULL ) {
+        VboxUtf8Free(session->machine_id);
+        session->machine_id = NULL;
+    }
+    if (session->machine != NULL) {
+        HRESULT result = VboxIMachineRelease(session->machine);
         if (FAILED(result)) {
-            print_error_info(session->errMsg, "[VBox] Failed to close machine referenece", result);
+            print_error_info(session->error_msg, "[VBox] Failed to close machine referenece", result);
             return VBGlue_Fail;
         } else {
-            session->cmachine = NULL;
+            session->machine = NULL;
         }
     }
     
@@ -1208,14 +1202,25 @@ VboxMachineStart(IVirtualBox *virtualBox, ISession *session, IMachine *cmachine,
 VBGlueResult
 VBoxTestErrorMessage(VBoxGlue* glue) {
     iVBoxSession* session = toiVBoxSession(glue);
-    print_error_info(session->errMsg, "[VBox] VBoxGlue Error Message Test", (unsigned)S_OK);
+    print_error_info(session->error_msg, "[VBox] VBoxGlue Error Message Test", (unsigned)S_OK);
     return VBGlue_Fail;
 }
 
 const char*
 VBoxGetErrorMessage(VBoxGlue* glue) {
-    return toiVBoxSession(glue)->errMsg;
+    return toiVBoxSession(glue)->error_msg;
 }
+
+const char*
+VboxGetSettingFilePath(VBoxGlue* glue) {
+    return toiVBoxSession(glue)->setting_file_path;
+}
+
+const char*
+VboxGetMachineID(VBoxGlue* glue) {
+    return toiVBoxSession(glue)->machine_id;
+}
+
 
 # if 0
 /**

@@ -46,24 +46,17 @@
 }
 
 - (void)testCreateAndReleaseMachine {
-    char* setting_file = NULL;
-    
-    XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue, "pc-master-1", &setting_file), @"Machine creation should return ok");
-    NSLog(@"setting file path %s", setting_file);
+    XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue, "pc-master-1"), @"Machine creation should return ok");
+    NSLog(@"setting file path %s", VboxGetSettingFilePath(vboxGlue));
     
     // release machine
     XCTAssertTrue( VBGlue_Ok == VBoxReleaseMachine(vboxGlue), @"Releasing machine should not generate error");
 }
 
 - (void)test_Create_Find_Release_Machine {
-    char* setting_file = NULL;
-    char* machine_id = NULL;
-    
-    XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue, "pc-master-2", &setting_file), @"Machine creation should return true");
-    NSLog(@"setting file path %s", setting_file);
-    
-    XCTAssertTrue( VBGlue_Ok == VBoxGetMachineID(vboxGlue, &machine_id), @"Machine id should not be empty");
-    NSLog(@"MachineID %s", machine_id);
+    XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue, "pc-master-2"), @"Machine creation should return true");
+    NSLog(@"setting file path %s", VboxGetSettingFilePath(vboxGlue));
+    NSLog(@"MachineID %s", VboxGetMachineID(vboxGlue));
     
     // release machine
     XCTAssertTrue( VBGlue_Ok == VBoxReleaseMachine(vboxGlue), @"Releasing machine should not generate error");
