@@ -15,19 +15,11 @@ void VboxUtf8Free(char* cstring) {
     cstring = NULL;
 }
 
-HRESULT VboxInit() {
-    return VBoxCGlueInit();
-}
-
-void VboxTerm() {
-    VBoxCGlueTerm();
-}
-
-unsigned int VboxGetAppVersion() {
+unsigned int VBoxAppVersion() {
     return g_pVBoxFuncs->pfnGetVersion();
 }
 
-unsigned int VboxGetApiVersion() {
+unsigned int VBoxApiVersion() {
     return g_pVBoxFuncs->pfnGetAPIVersion();
 }
 

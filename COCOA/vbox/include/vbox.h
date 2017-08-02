@@ -9,13 +9,9 @@
 #ifndef __VBOX_H__
 #define __VBOX_H__
 
-HRESULT VboxInit();
+unsigned int VBoxAppVersion();
 
-void VboxTerm();
-
-unsigned int VboxGetAppVersion();
-
-unsigned int VboxGetApiVersion();
+unsigned int VBoxApiVersion();
 
 HRESULT VboxClientInitialize(IVirtualBoxClient** client);
 

@@ -6,6 +6,10 @@
 //  Copyright © 2016 io.pocketcluster. All rights reserved.
 //
 
+#include <assert.h>
+#include <unistd.h>
+#include <Block.h>
+
 #include "common.h"
 #include "vbox.h"
 #include "session.h"
@@ -16,12 +20,25 @@
 #include "progress.h"
 #include "storage_controller.h"
 #include "network.h"
-#include <assert.h>
-#include <unistd.h>
 
 #include "libvboxcom.h"
 
-#pragma mark - MACRO
+#pragma mark - TYPES
+
+typedef struct iVBoxSession {
+    char                  errMsg[256];
+    IVirtualBox*          cbox;     // vbox machine
+    IVirtualBoxClient*    client;   // vbox client
+    ISession*             csession; // vbox session
+    IMachine*             cmachine; // vbox machine
+} iVBoxSession;
+
+#pragma mark - MACROS
+
+// these two are convert between internal <-> external types
+#define toiVBoxSession(ptr) ((iVBoxSession*)ptr)
+#define toVBoxGlue(ptr)     ((VBoxGlue*)ptr)
+
 
 #define CLIENT_DPTR(ptr)  ((IVirtualBoxClient**)ptr)     // Client double pointer
 #define CLIENT_DREF(ptr)  ((IVirtualBoxClient*)(*(ptr))) // Client deref
@@ -35,135 +52,138 @@
 #define MACHINE_DPTR(ptr) ((IMachine**)ptr)              // Machine Double Pointer
 #define MACHINE_DREF(ptr) ((IMachine*)(*(ptr)))          // Machine deref
 
-#pragma mark - UTIL
+#pragma mark - DECLARATION
 
+#pragma mark get machine id
+static VBRESULT
+vbox_machine_getid(IMachine* vbox_machine, char** machine_id, char *error_message);
+
+#pragma mark machine status
+static int
+vbox_machine_is_setting_changed(IMachine* vbox_machine, ISession* vbox_session, char *error_message);
+
+static VBRESULT
+vbox_machine_setting_path(IMachine* vbox_machine, char** base_folder, char* error_message);
+
+
+#pragma mark session init
+static VBRESULT
+vbox_session_init(IVirtualBoxClient** vbox_client, ISession** vbox_session, IVirtualBox** virtualbox, char* error_message);
+
+static VBRESULT
+vbox_session_close(IVirtualBoxClient* vbox_client, ISession* vbox_session, IVirtualBox* virtualbox, char* error_message);
+
+
+#pragma mark find, build & destroy machine
+static VBRESULT
+vbox_machine_find(IVirtualBox* virtualbox, IMachine** vbox_machine, const char* machine_name, char* error_message);
+
+static VBRESULT
+vbox_machine_create(IVirtualBox* virtualbox, IMachine** vbox_machine, const char* machine_name, char** base_folder, char* error_message);
+
+static VBRESULT
+vbox_machine_release(IMachine* vbox_machine, char* base_folder, char* error_message);
+
+
+#pragma mark build machine base
+VBRESULT vbox_machine_build(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, int cpu_count, int memory_size, char* error_message);
+
+VBRESULT vbox_machine_add_bridged_network(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* host_interface, char* error_message);
+
+VBRESULT vbox_machine_add_shared_folder(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* shared_name, const char *host_folder, char* error_message);
+
+
+VBRESULT vbox_machine_add_storage_controller(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* storage_controller_name, char* error_message);
+
+VBRESULT vbox_machine_add_boot_image(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* storage_controller_name, const char *boot_image_path, char *error_message);
+
+VBRESULT vbox_machine_add_hard_disk(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* storage_controller_name, const char *hdd_medium_path, int disk_size, void(^build_progress)(int progress, int done), char *error_message);
+
+
+#pragma mark delete & release machine
+VBRESULT vbox_machine_destroy(VOID_DPTR vbox_machine, char* base_folder, const char* storage_controller_name, int remove_dvd, void(^build_progress)(int progress, int done), char *error_message);
+
+
+#pragma mark utils
 /**
  * Print detailed error information if available.
  * @param   pszErrorMsg     string containing the code location specific error message
  * @param   rc              COM/XPCOM result code
  */
-static void
-print_error_info(char *message_buffer, const char *pszErrorMsg, HRESULT rc)
-{
-    sprintf(message_buffer, "\n--- %s (rc=%#010x) ---\n", pszErrorMsg, (unsigned)S_OK);
-#if 0
-    IErrorInfo *ex;
-    HRESULT rc2 = S_OK;
-    
+static inline void
+print_error_info(char *message_buffer, const char *pszErrorMsg, HRESULT rc) {
+    memset(message_buffer, 0, sizeof(256));
     sprintf(message_buffer, "\n--- %s (rc=%#010x) ---\n", pszErrorMsg, (unsigned)rc);
-    rc2 = g_pVBoxFuncs->pfnGetException(&ex);
-    
-    if (SUCCEEDED(rc2) && ex) {
-        
-        IVirtualBoxErrorInfo *ei;
-        rc2 = IErrorInfo_QueryInterface(ex, &IID_IVirtualBoxErrorInfo, (void **)&ei);
-        
-        if (FAILED(rc2)) {
-            ei = NULL;
-        }
-        
-        if (ei) {
-            /* got extended error info, maybe multiple infos */
-            do {
-                LONG resultCode = S_OK;
-                BSTR componentUtf16 = NULL;
-                char *component = NULL;
-                BSTR textUtf16 = NULL;
-                char *text = NULL;
-                IVirtualBoxErrorInfo *ei_next = NULL;
-                sprintf(message_buffer, "Extended error info (IVirtualBoxErrorInfo):\n");
-                
-                IVirtualBoxErrorInfo_get_ResultCode(ei, &resultCode);
-                sprintf(message_buffer, "  resultCode=%#010x\n", (unsigned)resultCode);
-                
-                IVirtualBoxErrorInfo_get_Component(ei, &componentUtf16);
-                g_pVBoxFuncs->pfnUtf16ToUtf8(componentUtf16, &component);
-                g_pVBoxFuncs->pfnComUnallocString(componentUtf16);
-                sprintf(message_buffer, "  component=%s\n", component);
-                g_pVBoxFuncs->pfnUtf8Free(component);
-                
-                IVirtualBoxErrorInfo_get_Text(ei, &textUtf16);
-                g_pVBoxFuncs->pfnUtf16ToUtf8(textUtf16, &text);
-                g_pVBoxFuncs->pfnComUnallocString(textUtf16);
-                sprintf(message_buffer, "  text=%s\n", text);
-                g_pVBoxFuncs->pfnUtf8Free(text);
-                
-                rc2 = IVirtualBoxErrorInfo_get_Next(ei, &ei_next);
-                if (FAILED(rc2))
-                    ei_next = NULL;
-                IVirtualBoxErrorInfo_Release(ei);
-                ei = ei_next;
-            } while (ei);
-        }
-        
-        IErrorInfo_Release(ex);
-        g_pVBoxFuncs->pfnClearException();
-    }
-#endif
 }
 
-# if 0
-// You must free the result if result is non-NULL.
-static char*
-str_replace(char* orig, const char* rep, const char* with) {
-    char *result;         // the return string
-    char *ins;            // the next insert point
-    char *tmp;            // varies
-    size_t len_rep;       // length of rep
-    size_t len_with;      // length of with
-    size_t len_front;     // distance between rep and end of last rep
-    size_t count;         // number of replacements
-    
-    if (!orig) {
-        return (char *)NULL;
-    }
-    if (!rep) {
-        rep = "";
-    }
-    len_rep = strlen(rep);
-    if (!with) {
-        with = "";
-    }
-    len_with = strlen(with);
-    
-    ins = orig;
-    for (count = 0; (tmp = strstr(ins, rep)); ++count) {
-        ins = tmp + len_rep;
-    }
-    
-    // first time through the loop, all the variable are set correctly
-    // from here on,
-    //    tmp points to the end of the result string
-    //    ins points to the next occurrence of rep in orig
-    //    orig points to the remainder of orig after "end of rep"
-    tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
-    
-    if (!result) {
-        return NULL;
-    }
-    while (count--) {
-        ins = strstr(orig, rep);
-        len_front = ins - orig;
-        tmp = strncpy(tmp, orig, len_front) + len_front;
-        tmp = strcpy(tmp, with) + len_with;
-        orig += len_front + len_rep; // move to next "end of rep"
-    }
-    strcpy(tmp, orig);
-    return result;
-}
-#endif
+#pragma mark - DEFINITION
 
-#pragma mark - APP & API VERSION
-
-unsigned int
-vbox_app_version() {
-    return VboxGetAppVersion();
-}
-
-#pragma mark - GET MACHINE ID
+#pragma mark init & close
 VBRESULT
-vbox_machine_getid(VOID_DPTR vbox_machine, char** machine_id, char *error_message) {
-    HRESULT result = VboxMachineGetID(MACHINE_DREF(vbox_machine), machine_id);
+NewVBoxGlue(VBoxGlue** glue) {
+    // make sure the pointer passed IS null.
+    assert(glue != NULL && *glue == NULL);
+    
+    HRESULT result;
+    iVBoxSession* session = (iVBoxSession*)calloc(1, sizeof(iVBoxSession));
+    // assign to return value
+    *glue = toVBoxGlue(session);
+    
+    result = VBoxCGlueInit();
+    if (FAILED(result)) {
+        print_error_info(session->errMsg, "failed to load vbox api", result);
+        return FATAL;
+    }
+
+    result = VboxClientInitialize(&(session->client));
+    if ( FAILED(result) || session->client == NULL ) {
+        print_error_info(session->errMsg, "failed to init vbox client", result);
+        return FATAL;
+    }
+
+    result = VboxGetVirtualBox(session->client, &(session->cbox));
+    if ( FAILED(result) || session->cbox == NULL ) {
+        print_error_info(session->errMsg, "failed to get VirtualBox reference", result);
+        return FATAL;
+    }
+
+    return GOOD;
+}
+
+VBRESULT
+CloseVBoxGlue(VBoxGlue* glue) {
+    assert(glue != NULL);
+    
+    iVBoxSession* session = toiVBoxSession(glue);
+    HRESULT result;
+    
+    if ( session->cbox != NULL ) {
+        result = VboxIVirtualBoxRelease(session->cbox);
+        if (FAILED(result)) {
+            print_error_info(session->errMsg, "failed to release vbox reference", result);
+            return FATAL;
+        }
+    }
+    if ( session->client != NULL ) {
+        result = VboxClientRelease(session->client);
+        if (FAILED(result)) {
+            print_error_info(session->errMsg, "failed to release vbox client", result);
+            return FATAL;
+        }
+    }
+
+    VboxClientUninitialize();
+    VBoxCGlueTerm();
+    free(session);
+    
+    return GOOD;
+}
+
+
+#pragma mark get machine id
+VBRESULT
+vbox_machine_getid(IMachine* vbox_machine, char** machine_id, char *error_message) {
+    HRESULT result = VboxMachineGetID(vbox_machine, machine_id);
     if (FAILED(result)) {
         print_error_info(error_message, "[INFO] Failed to get Machine ID", result);
         return FATAL;
@@ -172,10 +192,10 @@ vbox_machine_getid(VOID_DPTR vbox_machine, char** machine_id, char *error_messag
 }
 
 
-#pragma mark - MACHINE STATUS
+#pragma mark machine status
 VBRESULT
-vbox_machine_setting_path(VOID_DPTR vbox_machine, char** base_folder, char* error_message) {
-    HRESULT result = VboxGetMachineSettingsFilePath(MACHINE_DREF(vbox_machine), base_folder);
+vbox_machine_setting_path(IMachine* vbox_machine, char** base_folder, char* error_message) {
+    HRESULT result = VboxGetMachineSettingsFilePath(vbox_machine, base_folder);
     if (FAILED(result)) {
         print_error_info(error_message, "[INFO] Fail to get setting path", result);
         return INFO;
@@ -184,18 +204,18 @@ vbox_machine_setting_path(VOID_DPTR vbox_machine, char** base_folder, char* erro
 }
 
 int
-vbox_machine_is_setting_changed(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, char *error_message) {
+vbox_machine_is_setting_changed(IMachine* vbox_machine, ISession* vbox_session, char *error_message) {
 
     PRBool changed = (PRBool)0;
     IMachine *mutable_machine;
     
     //firstly lock the machine
-    HRESULT result = VboxLockMachine(MACHINE_DREF(vbox_machine), SESSION_DREF(vbox_session), LockType_Write);
+    HRESULT result = VboxLockMachine(vbox_machine, vbox_session, LockType_Write);
     if (FAILED(result)) {
         print_error_info(error_message, "[INFO] Failed to lock machine for adding storage controller", result);
     }
     // get mutable machine
-    result = VboxGetSessionMachine(SESSION_DREF(vbox_session), &mutable_machine);
+    result = VboxGetSessionMachine(vbox_session, &mutable_machine);
     if (FAILED(result) || mutable_machine == NULL) {
         print_error_info(error_message, "[INFO] Failed to get a mutable copy of a machine", result);
     }
@@ -212,48 +232,29 @@ vbox_machine_is_setting_changed(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, 
         }
     }
     // then unlock machine
-    result = VboxUnlockMachine(SESSION_DREF(vbox_session));
+    result = VboxUnlockMachine(vbox_session);
     if (FAILED(result)) {
         print_error_info(error_message, "[INFO] Failed to unlock machine for attaching adapter", result);
     }
     return changed;
 }
 
-
-#pragma mark - INIT & CLOSE
+#pragma mark session init
 VBRESULT
-vbox_init(char* error_message) {
+vbox_session_init(IVirtualBoxClient** vbox_client, ISession** vbox_session, IVirtualBox** virtualbox, char* error_message) {
     HRESULT result;
-    result = VboxInit();
-    if (FAILED(result)) {
-        print_error_info(error_message, "[FATAL] Failed to initialize VBOX", result);
-        return FATAL;
-    }
-    return GOOD;
-}
-
-void
-vbox_term() {
-    VboxTerm();
-}
-
-
-#pragma mark - SESSION INIT
-VBRESULT
-vbox_session_init(VOID_DPTR vbox_client, VOID_DPTR vbox_session, VOID_DPTR virtualbox, char* error_message) {
-    HRESULT result;
-    VboxClientInitialize(CLIENT_DPTR(vbox_client));
-    if (FAILED(result) || !vbox_client || CLIENT_DREF(vbox_client) == NULL) {
+    VboxClientInitialize(vbox_client);
+    if ( FAILED(result) || vbox_client == NULL ) {
         print_error_info(error_message, "[FATAL] Failed to get VirtualBoxClient reference", result);
         return FATAL;
     }
-    result = VboxGetVirtualBox(CLIENT_DREF(vbox_client), VBOX_DPTR(virtualbox));
-    if (FAILED(result) || VBOX_DREF(virtualbox) == NULL) {
+    result = VboxGetVirtualBox(*vbox_client, virtualbox);
+    if ( FAILED(result) || virtualbox == NULL ) {
         print_error_info(error_message, "[FATAL] Failed to get VirtualBox reference", result);
         return FATAL;
     }
-    result = VboxGetSession(CLIENT_DREF(vbox_client), SESSION_DPTR(vbox_session));
-    if (FAILED(result) || SESSION_DREF(vbox_session) == NULL) {
+    result = VboxGetSession(*vbox_client, vbox_session);
+    if ( FAILED(result) || vbox_session == NULL ) {
         print_error_info(error_message, "[FATAL] Failed to get Session reference", result);
         return FATAL;
     }
@@ -261,25 +262,25 @@ vbox_session_init(VOID_DPTR vbox_client, VOID_DPTR vbox_session, VOID_DPTR virtu
 }
 
 VBRESULT
-vbox_session_close(VOID_DPTR vbox_client, VOID_DPTR vbox_session, VOID_DPTR virtualbox, char* error_message) {
+vbox_session_close(IVirtualBoxClient* vbox_client, ISession* vbox_session, IVirtualBox* virtualbox, char* error_message) {
     VBRESULT ret = GOOD;
     HRESULT result;
-    if (SESSION_DREF(vbox_session) != NULL) {
-        result = VboxISessionRelease(SESSION_DREF(vbox_session));
+    if ( vbox_session != NULL ) {
+        result = VboxISessionRelease(vbox_session);
         if (FAILED(result)) {
             print_error_info(error_message, "[INFO] Failed to release ISession reference", result);
             ret = INFO;
         }
     }
-    if (VBOX_DREF(virtualbox) != NULL) {
-        result = VboxIVirtualBoxRelease(VBOX_DREF(virtualbox));
+    if ( virtualbox != NULL ) {
+        result = VboxIVirtualBoxRelease(virtualbox);
         if (FAILED(result)) {
             print_error_info(error_message, "[INFO] Failed to release IVirtualBox reference", result);
             ret = INFO;
         }
     }
-    if (CLIENT_DREF(vbox_client) != NULL) {
-        result = VboxClientRelease(CLIENT_DREF(vbox_client));
+    if ( vbox_client != NULL ) {
+        result = VboxClientRelease(vbox_client);
         if (FAILED(result)) {
             print_error_info(error_message, "[INFO] Failed to release IVirtualBoxClient reference", result);
             ret = INFO;
@@ -290,11 +291,10 @@ vbox_session_close(VOID_DPTR vbox_client, VOID_DPTR vbox_session, VOID_DPTR virt
 }
 
 
-#pragma mark - FIND, BUILD & DESTROY MACHINE
+#pragma mark find, build & destroy machine
 VBRESULT
-vbox_machine_find(VOID_DPTR virtualbox, VOID_DPTR vbox_machine , const char* machine_name, char* error_message) {
-
-    VBRESULT result = VboxFindMachine(VBOX_DREF(virtualbox), machine_name, MACHINE_DPTR(vbox_machine));
+vbox_machine_find(IVirtualBox* virtualbox, IMachine** vbox_machine, const char* machine_name, char* error_message) {
+    VBRESULT result = VboxFindMachine(virtualbox, machine_name, vbox_machine);
     if (FAILED(result)) {
         print_error_info(error_message, "[INFO] Failed to find machine", result);
         return INFO;
@@ -303,21 +303,21 @@ vbox_machine_find(VOID_DPTR virtualbox, VOID_DPTR vbox_machine , const char* mac
 }
 
 VBRESULT
-vbox_machine_create(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, const char* machine_name, char** base_folder, char* error_message) {
+vbox_machine_create(IVirtualBox* virtualbox, IMachine** vbox_machine, const char* machine_name, char** base_folder, char* error_message) {
     HRESULT result;
 
     assert(machine_name != NULL || strlen(machine_name) != 0);
-    assert(VBOX_DREF(virtualbox) != NULL);
+    assert(virtualbox != NULL);
 
     // create machine file name
-    result = VboxComposeMachineFilename(VBOX_DREF(virtualbox), machine_name, "", "", base_folder);
+    result = VboxComposeMachineFilename(virtualbox, machine_name, "", "", base_folder);
     if (FAILED(result)) {
         print_error_info(error_message, "[FATAL] Failed composing machine name", result);
         return FATAL;
     }
     // create machine based on the
-    result = VboxCreateMachine(VBOX_DREF(virtualbox), *base_folder, machine_name, "Linux26_64", "", MACHINE_DPTR(vbox_machine));
-    if (FAILED(result) || MACHINE_DREF(vbox_machine) == NULL) {
+    result = VboxCreateMachine(virtualbox, *base_folder, machine_name, "Linux26_64", "", vbox_machine);
+    if (FAILED(result) || *vbox_machine == NULL) {
         print_error_info(error_message, "[FATAL] Failed to create machine", result);
         return FATAL;
     }
@@ -325,11 +325,11 @@ vbox_machine_create(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, const char* ma
 }
 
 VBRESULT
-vbox_machine_release(VOID_DPTR vbox_machine, char* base_folder, char* error_message) {
+vbox_machine_release(IMachine* vbox_machine, char* base_folder, char* error_message) {
     HRESULT result = GOOD;
     // release machine
-    if (MACHINE_DREF(vbox_machine) != NULL) {
-        HRESULT result = VboxIMachineRelease(MACHINE_DREF(vbox_machine));
+    if (vbox_machine != NULL) {
+        HRESULT result = VboxIMachineRelease(vbox_machine);
         if (FAILED(result)) {
             print_error_info(error_message, "[INFO] Failed to close machine referenece", result);
         }
@@ -343,7 +343,7 @@ vbox_machine_release(VOID_DPTR vbox_machine, char* base_folder, char* error_mess
 }
 
 
-#pragma mark - BUILD MACHINE BASE
+#pragma mark build machine base
 VBRESULT
 vbox_machine_build(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, int cpu_count, int memory_size, char* error_message) {
     HRESULT result;
@@ -1037,7 +1037,7 @@ vbox_machine_destroy(VOID_DPTR vbox_machine, char* base_folder, const char* stor
 }
 
 
-#pragma mark - START & STOP MACHINE
+#pragma mark start & stop machine
 
 
 /**
@@ -1226,3 +1226,118 @@ VboxMachineStart(IVirtualBox *virtualBox, ISession *session, IMachine *cmachine,
     //IMachine_Release(machine);
     return rc;
 }
+
+#pragma mark - UTILS
+
+# if 0
+/**
+ * Print detailed error information if available.
+ * @param   pszErrorMsg     string containing the code location specific error message
+ * @param   rc              COM/XPCOM result code
+ */
+void
+print_error_info(char *message_buffer, const char *pszErrorMsg, HRESULT rc)
+{
+    IErrorInfo *ex;
+    HRESULT rc2 = S_OK;
+    
+    sprintf(message_buffer, "\n--- %s (rc=%#010x) ---\n", pszErrorMsg, (unsigned)rc);
+    rc2 = g_pVBoxFuncs->pfnGetException(&ex);
+    
+    if (SUCCEEDED(rc2) && ex) {
+        
+        IVirtualBoxErrorInfo *ei;
+        rc2 = IErrorInfo_QueryInterface(ex, &IID_IVirtualBoxErrorInfo, (void **)&ei);
+        
+        if (FAILED(rc2)) {
+            ei = NULL;
+        }
+        
+        if (ei) {
+            /* got extended error info, maybe multiple infos */
+            do {
+                LONG resultCode = S_OK;
+                BSTR componentUtf16 = NULL;
+                char *component = NULL;
+                BSTR textUtf16 = NULL;
+                char *text = NULL;
+                IVirtualBoxErrorInfo *ei_next = NULL;
+                sprintf(message_buffer, "Extended error info (IVirtualBoxErrorInfo):\n");
+                
+                IVirtualBoxErrorInfo_get_ResultCode(ei, &resultCode);
+                sprintf(message_buffer, "  resultCode=%#010x\n", (unsigned)resultCode);
+                
+                IVirtualBoxErrorInfo_get_Component(ei, &componentUtf16);
+                g_pVBoxFuncs->pfnUtf16ToUtf8(componentUtf16, &component);
+                g_pVBoxFuncs->pfnComUnallocString(componentUtf16);
+                sprintf(message_buffer, "  component=%s\n", component);
+                g_pVBoxFuncs->pfnUtf8Free(component);
+                
+                IVirtualBoxErrorInfo_get_Text(ei, &textUtf16);
+                g_pVBoxFuncs->pfnUtf16ToUtf8(textUtf16, &text);
+                g_pVBoxFuncs->pfnComUnallocString(textUtf16);
+                sprintf(message_buffer, "  text=%s\n", text);
+                g_pVBoxFuncs->pfnUtf8Free(text);
+                
+                rc2 = IVirtualBoxErrorInfo_get_Next(ei, &ei_next);
+                if (FAILED(rc2))
+                    ei_next = NULL;
+                IVirtualBoxErrorInfo_Release(ei);
+                ei = ei_next;
+            } while (ei);
+        }
+        
+        IErrorInfo_Release(ex);
+        g_pVBoxFuncs->pfnClearException();
+    }
+}
+
+// You must free the result if result is non-NULL.
+static char*
+str_replace(char* orig, const char* rep, const char* with) {
+    char *result;         // the return string
+    char *ins;            // the next insert point
+    char *tmp;            // varies
+    size_t len_rep;       // length of rep
+    size_t len_with;      // length of with
+    size_t len_front;     // distance between rep and end of last rep
+    size_t count;         // number of replacements
+    
+    if (!orig) {
+        return (char *)NULL;
+    }
+    if (!rep) {
+        rep = "";
+    }
+    len_rep = strlen(rep);
+    if (!with) {
+        with = "";
+    }
+    len_with = strlen(with);
+    
+    ins = orig;
+    for (count = 0; (tmp = strstr(ins, rep)); ++count) {
+        ins = tmp + len_rep;
+    }
+    
+    // first time through the loop, all the variable are set correctly
+    // from here on,
+    //    tmp points to the end of the result string
+    //    ins points to the next occurrence of rep in orig
+    //    orig points to the remainder of orig after "end of rep"
+    tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+    
+    if (!result) {
+        return NULL;
+    }
+    while (count--) {
+        ins = strstr(orig, rep);
+        len_front = ins - orig;
+        tmp = strncpy(tmp, orig, len_front) + len_front;
+        tmp = strcpy(tmp, with) + len_with;
+        orig += len_front + len_rep; // move to next "end of rep"
+    }
+    strcpy(tmp, orig);
+    return result;
+}
+#endif

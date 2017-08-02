@@ -42,9 +42,7 @@
 		042D04211F31081D002FACE8 /* VBoxCAPIGlue.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03EF1F31081D002FACE8 /* VBoxCAPIGlue.c */; };
 		042D04231F31081D002FACE8 /* libvboxcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03F01F31081D002FACE8 /* libvboxcom.c */; };
 		042D04251F31081D002FACE8 /* libvboxcom.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03F11F31081D002FACE8 /* libvboxcom.h */; };
-		042D042A1F310900002FACE8 /* libvboxcom_build_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 042D04271F310900002FACE8 /* libvboxcom_build_test.m */; };
-		042D042B1F310900002FACE8 /* libvboxcom_create_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 042D04281F310900002FACE8 /* libvboxcom_create_test.m */; };
-		042D042C1F310900002FACE8 /* libvboxcom_init_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 042D04291F310900002FACE8 /* libvboxcom_init_test.m */; };
+		042D04321F3120FD002FACE8 /* vboxglue_init_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 042D04311F3120FD002FACE8 /* vboxglue_init_test.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,6 +101,7 @@
 		042D042E1F310A06002FACE8 /* GlobalMacro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GlobalMacro.h; sourceTree = "<group>"; };
 		042D042F1F310A06002FACE8 /* VboxCom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VboxCom.h; sourceTree = "<group>"; };
 		042D04301F310A06002FACE8 /* VboxCom.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VboxCom.m; sourceTree = "<group>"; };
+		042D04311F3120FD002FACE8 /* vboxglue_init_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = vboxglue_init_test.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -161,6 +160,7 @@
 				042D04281F310900002FACE8 /* libvboxcom_create_test.m */,
 				042D04291F310900002FACE8 /* libvboxcom_init_test.m */,
 				042D03C51F3107A4002FACE8 /* Info.plist */,
+				042D04311F3120FD002FACE8 /* vboxglue_init_test.m */,
 			);
 			path = "VBoxGlue-Test";
 			sourceTree = "<group>";
@@ -363,9 +363,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				042D042A1F310900002FACE8 /* libvboxcom_build_test.m in Sources */,
-				042D042C1F310900002FACE8 /* libvboxcom_init_test.m in Sources */,
-				042D042B1F310900002FACE8 /* libvboxcom_create_test.m in Sources */,
+				042D04321F3120FD002FACE8 /* vboxglue_init_test.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
