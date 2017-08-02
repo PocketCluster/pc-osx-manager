@@ -39,6 +39,7 @@ type VBoxGlue interface {
     CreateMachineByName(baseFolder, machineName string) error
     ReleaseMachine() error
 
+    BuildMachine() error
     DestoryMachine() error
 
     TestErrorMessage() error
