@@ -339,6 +339,7 @@ func vboxOperation(a *appMainLife) error {
     }
 
     log.Debugf("AppVersion %d, ApiVersion %d", vglue.AppVersion(), vglue.APIVersion())
+    vglue.BuildMachine()
     log.Debugf(vglue.TestErrorMessage().Error())
     return vglue.Close()
 }

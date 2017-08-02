@@ -5,7 +5,8 @@ package vboxglue
 /*
 #cgo LDFLAGS: -Wl,-U,_NewVBoxGlue,-U,_CloseVBoxGlue,-U,_VBoxAppVersion,-U,_VBoxApiVersion,-U,_VBoxIsMachineSettingChanged
 #cgo LDFLAGS: -Wl,-U,_VBoxFindMachineByNameOrID,-U,_VBoxCreateMachineByName,-U,_VBoxReleaseMachine
-#cgo LDFLAGS: -Wl,-U,_VBoxDestoryMachine,-U,_VBoxGetErrorMessage,-U,_VboxGetSettingFilePath,-U,_VboxGetMachineID
+#cgo LDFLAGS: -Wl,-U,_VBoxMakeBuildOption,-U,_VBoxBuildMachine,-U,_VBoxDestoryMachine
+#cgo LDFLAGS: -Wl,-U,_VBoxGetErrorMessage,-U,_VboxGetSettingFilePath,-U,_VboxGetMachineID
 #cgo LDFLAGS: -Wl,-U,_VBoxTestErrorMessage
 
 #include <stdbool.h>
@@ -130,6 +131,29 @@ func (v *goVoxGlue) ReleaseMachine() error {
     if result != VBGlue_Ok {
         return errors.Errorf("[ERR] unable to release machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
     }
+    return nil
+}
+
+func (v *goVoxGlue) BuildMachine() error {
+    var (
+        cHostInterface    = C.CString("en1: Wi-Fi (AirPort)")
+        cSharedFolderName = C.CString("/Users/almightykim/Workspace/")
+        cBootImagePath    = C.CString("/Users/almightykim/Workspace/VBOX-IMAGE/pc-core.iso")
+        cHddImagePath     = C.CString("/Users/almightykim/Workspace/VBOX-IMAGE/pc-core-hdd.vmdk")
+        option            = C.VBoxMakeBuildOption(2, 2048, cHostInterface, cSharedFolderName, cBootImagePath, cHddImagePath)
+    )
+
+    result := C.VBoxBuildMachine(v.cvboxglue, option)
+    if result != VBGlue_Ok {
+        return errors.Errorf("[ERR] unable to build machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
+    }
+
+    C.free(unsafe.Pointer(cHostInterface))
+    C.free(unsafe.Pointer(cSharedFolderName))
+    C.free(unsafe.Pointer(cBootImagePath))
+    C.free(unsafe.Pointer(cHddImagePath))
+    C.free(unsafe.Pointer(option))
+
     return nil
 }
 

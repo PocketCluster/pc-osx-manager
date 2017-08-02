@@ -19,12 +19,12 @@ typedef enum VBGlueResult {
 } VBGlueResult;
 
 typedef struct VBoxBuildOption {
-    int      CpuCount;
-    int      MemorySize;
-    char*    HostInterface;
-    char*    SharedFolderPath;
-    char*    BootImagePath;
-    char*    HddImagePath;
+    int            CpuCount;
+    int            MemorySize;
+    const char*    HostInterface;
+    const char*    SharedDirPath;
+    const char*    BootImagePath;
+    const char*    HddImagePath;
 } VBoxBuildOption;
 
 
@@ -46,7 +46,7 @@ VBGlueResult
 VBoxIsMachineSettingChanged(VBoxGlue glue, bool* isMachineChanged);
 
 
-#pragma mark find, create, & build machine
+#pragma mark find, create, & release machine
 VBGlueResult
 VBoxFindMachineByNameOrID(VBoxGlue glue, const char* machine_name);
 
@@ -56,12 +56,19 @@ VBoxCreateMachineByName(VBoxGlue glue, const char* base_folder, const char* mach
 VBGlueResult
 VBoxReleaseMachine(VBoxGlue glue);
 
+
+#pragma mark build & destroy machine
+// option created by this function does not handle deallocation.
+// make sure to dealloc it once done
+VBoxBuildOption*
+VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* shared, const char* boot, const char* hdd);
+
 VBGlueResult
 VBoxBuildMachine(VBoxGlue glue, VBoxBuildOption* option);
 
-#pragma mark destroy machine
 VBGlueResult
 VBoxDestoryMachine(VBoxGlue glue);
+
 
 #if 0
 #pragma mark start & stop machine

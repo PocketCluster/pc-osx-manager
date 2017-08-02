@@ -310,7 +310,7 @@ VBoxReleaseMachine(VBoxGlue glue) {
 }
 
 
-#pragma mark build machine base
+#pragma mark build & destroy machine
 HRESULT
 vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_count, int memory_size, char* error_message) {
 
@@ -870,6 +870,20 @@ vbox_machine_add_hard_disk(IVirtualBox* virtualbox, IMachine* vbox_machine, ISes
     return NS_OK;
 }
 
+
+#pragma mark -
+VBoxBuildOption*
+VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* shared, const char* boot, const char* hdd) {
+    VBoxBuildOption* option = (VBoxBuildOption*)calloc(1, sizeof(VBoxBuildOption));
+    option->CpuCount      = cpu;
+    option->MemorySize    = mem;
+    option->HostInterface = host;
+    option->SharedDirPath = shared;
+    option->BootImagePath = boot;
+    option->HddImagePath  = hdd;
+    return option;
+}
+
 VBGlueResult
 VBoxBuildMachine(VBoxGlue glue, VBoxBuildOption* option) {
     
@@ -879,14 +893,13 @@ VBoxBuildMachine(VBoxGlue glue, VBoxBuildOption* option) {
     printf("CPU Count %d", option->CpuCount);
     printf("MEM Size  %d", option->MemorySize);
     printf("HostIface %s", option->HostInterface);
-    printf("SharedFdl %s", option->SharedFolderPath);
+    printf("SharedFdl %s", option->SharedDirPath);
+    printf("BOOT CD   %s", option->BootImagePath);
     printf("HDD Path  %s", option->HddImagePath);
     
     return VBGlue_Ok;
 }
 
-
-#pragma mark destroy machine
 VBGlueResult
 VBoxDestoryMachine(VBoxGlue glue) {
 
@@ -926,6 +939,7 @@ VBoxDestoryMachine(VBoxGlue glue) {
     // release machine
     return VBoxReleaseMachine(glue);
 }
+
 
 #pragma mark start & stop machine
 
