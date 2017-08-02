@@ -209,7 +209,7 @@ VBoxIsMachineSettingChanged(VBoxGlue glue, bool* isMachineChanged) {
 }
 
 
-#pragma mark find, build & destroy machine
+#pragma mark find, create, & build machine
 VBGlueResult
 VBoxFindMachineByNameOrID(VBoxGlue glue, const char* machine_name) {
     
@@ -869,6 +869,22 @@ vbox_machine_add_hard_disk(IVirtualBox* virtualbox, IMachine* vbox_machine, ISes
     
     return NS_OK;
 }
+
+VBGlueResult
+VBoxBuildMachine(VBoxGlue glue, VBoxBuildOption* option) {
+    
+    assert(glue   != NULL);
+    assert(option != NULL);
+    
+    printf("CPU Count %d", option->CpuCount);
+    printf("MEM Size  %d", option->MemorySize);
+    printf("HostIface %s", option->HostInterface);
+    printf("SharedFdl %s", option->SharedFolderPath);
+    printf("HDD Path  %s", option->HddImagePath);
+    
+    return VBGlue_Ok;
+}
+
 
 #pragma mark destroy machine
 VBGlueResult

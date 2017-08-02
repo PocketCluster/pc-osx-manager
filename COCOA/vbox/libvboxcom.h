@@ -11,12 +11,22 @@
 
 #include <stdbool.h>
 
+typedef void* VBoxGlue;
+
 typedef enum VBGlueResult {
     VBGlue_Ok      = 0,
     VBGlue_Fail
 } VBGlueResult;
 
-typedef void* VBoxGlue;
+typedef struct VBoxBuildOption {
+    int      CpuCount;
+    int      MemorySize;
+    char*    HostInterface;
+    char*    SharedFolderPath;
+    char*    BootImagePath;
+    char*    HddImagePath;
+} VBoxBuildOption;
+
 
 #pragma mark init & close
 VBGlueResult
@@ -36,7 +46,7 @@ VBGlueResult
 VBoxIsMachineSettingChanged(VBoxGlue glue, bool* isMachineChanged);
 
 
-#pragma mark find, build & destroy machine
+#pragma mark find, create, & build machine
 VBGlueResult
 VBoxFindMachineByNameOrID(VBoxGlue glue, const char* machine_name);
 
@@ -46,6 +56,8 @@ VBoxCreateMachineByName(VBoxGlue glue, const char* base_folder, const char* mach
 VBGlueResult
 VBoxReleaseMachine(VBoxGlue glue);
 
+VBGlueResult
+VBoxBuildMachine(VBoxGlue glue, VBoxBuildOption* option);
 
 #pragma mark destroy machine
 VBGlueResult
