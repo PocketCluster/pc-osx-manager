@@ -360,12 +360,12 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
         // set up Boot Order
         result = IMachine_SetBootOrder(vbox_machine, 1, DeviceType_DVD);
         if (FAILED(result)) {
-            print_error_info(error_message, "[VBGlue_Error] Failed to fix boot order", result);
+            print_error_info(error_message, "[VBox] Failed to fix boot order", result);
             return result;
         }
         result = IMachine_SetBootOrder(vbox_machine, 2, DeviceType_HardDisk);
         if (FAILED(result)) {
-            print_error_info(error_message, "[VBGlue_Error] Failed to fix boot order", result);
+            print_error_info(error_message, "[VBox] Failed to fix boot order", result);
             return result;
         }
         result = IMachine_SetBootOrder(vbox_machine, 3, DeviceType_Null);
@@ -764,8 +764,9 @@ vbox_machine_add_hard_disk(IVirtualBox* virtualbox, IMachine* vbox_machine, ISes
     assert(storage_controller_name != NULL && strlen(storage_controller_name) != 0);
     assert(hdd_medium_path != NULL && strlen(hdd_medium_path) != 0);
 
-    
     {
+// (2017/08/03) we'll use VBoxManage and raw input to create VMDK
+#if CREATE_HDD_WITH_XPCOM
         // set medium image
         result = VboxCreateHardDisk(virtualbox, "VMDK", hdd_medium_path, DeviceType_HardDisk, AccessMode_ReadWrite, &hdd_medium);
         if (FAILED(result) || hdd_medium == NULL) {
@@ -779,7 +780,7 @@ vbox_machine_add_hard_disk(IVirtualBox* virtualbox, IMachine* vbox_machine, ISes
         IProgress *progress;
         result = VboxMediumCreateBaseStorage(hdd_medium, (1 << 24), variantCount, cVariant, &progress);
         if (FAILED(result)){
-            print_error_info(error_message, "[VBGlue_Error] Failed to create base storage", result);
+            print_error_info(error_message, "[VBox] Failed to create base storage", result);
             return result;
         }
         
@@ -806,7 +807,7 @@ vbox_machine_add_hard_disk(IVirtualBox* virtualbox, IMachine* vbox_machine, ISes
         }
         // release progress
         VboxIProgressRelease(progress);
-        
+#endif
         // open medium
         PRBool use_old_uuid = (PRBool)0;
         result = VboxOpenMedium(virtualbox, hdd_medium_path, DeviceType_HardDisk, AccessMode_ReadWrite, use_old_uuid, &hdd_medium);
