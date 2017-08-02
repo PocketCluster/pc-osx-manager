@@ -56,17 +56,6 @@ typedef struct iVBoxSession {
 
 #pragma mark - DECLARATION
 
-#pragma mark find, build & destroy machine
-static VBGlueResult
-vbox_machine_find(IVirtualBox* virtualbox, IMachine** vbox_machine, const char* machine_name, char* error_message);
-
-static VBGlueResult
-vbox_machine_create(IVirtualBox* virtualbox, IMachine** vbox_machine, const char* machine_name, char** base_folder, char* error_message);
-
-static VBGlueResult
-vbox_machine_release(IMachine* vbox_machine, char* base_folder, char* error_message);
-
-
 #pragma mark build machine base
 VBGlueResult vbox_machine_build(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, int cpu_count, int memory_size, char* error_message);
 
@@ -181,6 +170,9 @@ CloseVBoxGlue(VBoxGlue* glue) {
 #pragma mark machine meta
 VBGlueResult
 VBoxGetMachineID(VBoxGlue* glue, char** machine_id) {
+    
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
 
     iVBoxSession* session = toiVBoxSession(glue);
     
@@ -195,6 +187,9 @@ VBoxGetMachineID(VBoxGlue* glue, char** machine_id) {
 
 VBGlueResult
 VBoxGetMachineSettingFilePath(VBoxGlue* glue, char** setting_file_path) {
+    
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
 
     iVBoxSession* session = toiVBoxSession(glue);
 
@@ -209,6 +204,9 @@ VBoxGetMachineSettingFilePath(VBoxGlue* glue, char** setting_file_path) {
 
 bool
 VBoxIsMachineSettingChanged(VBoxGlue* glue) {
+    
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
 
     iVBoxSession* session = toiVBoxSession(glue);
     PRBool changed = PR_FALSE;
@@ -248,53 +246,76 @@ VBoxIsMachineSettingChanged(VBoxGlue* glue) {
 
 #pragma mark find, build & destroy machine
 VBGlueResult
-vbox_machine_find(IVirtualBox* virtualbox, IMachine** vbox_machine, const char* machine_name, char* error_message) {
-    VBGlueResult result = VboxFindMachine(virtualbox, machine_name, vbox_machine);
-    if (FAILED(result)) {
-        print_error_info(error_message, "[VBox] Failed to find machine", result);
+VBoxFindMachineByNameOrID(VBoxGlue* glue, const char* machine_name) {
+    
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
+
+    iVBoxSession* session = toiVBoxSession(glue);
+
+    if ( session->cmachine  == NULL ) {
+        HRESULT result = VboxFindMachine(session->cbox, machine_name, &(session->cmachine));
+        if (FAILED(result)) {
+            print_error_info(session->errMsg, "[VBox] Failed to find machine", result);
+            return VBGlue_Fail;
+        }
+    } else {
+        print_error_info(session->errMsg, "[VBox] machine instance already exists", S_OK);
         return VBGlue_Fail;
     }
     return VBGlue_Ok;
 }
 
 VBGlueResult
-vbox_machine_create(IVirtualBox* virtualbox, IMachine** vbox_machine, const char* machine_name, char** base_folder, char* error_message) {
+VBoxCreateMachineByName(VBoxGlue* glue, const char* machine_name, char** setting_file_path) {
+    
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
+    assert(machine_name != NULL || strlen(machine_name) != 0);
+    
+    iVBoxSession* session = toiVBoxSession(glue);
     HRESULT result;
 
-    assert(machine_name != NULL || strlen(machine_name) != 0);
-    assert(virtualbox != NULL);
-
+    if ( session->cmachine  != NULL ) {
+        print_error_info(session->errMsg, "[VBox] machine instance already exists", S_OK);
+        return VBGlue_Fail;
+    }
+    
     // create machine file name
-    result = VboxComposeMachineFilename(virtualbox, machine_name, "", "", base_folder);
+    result = VboxComposeMachineFilename(session->cbox, machine_name, "", "", setting_file_path);
     if (FAILED(result)) {
-        print_error_info(error_message, "[VBGlue_Error] Failed composing machine name", result);
+        print_error_info(session->errMsg, "[VBox] Failed composing machine name", result);
         return VBGlue_Fail;
     }
     // create machine based on the
-    result = VboxCreateMachine(virtualbox, *base_folder, machine_name, "Linux26_64", "", vbox_machine);
-    if (FAILED(result) || *vbox_machine == NULL) {
-        print_error_info(error_message, "[VBGlue_Error] Failed to create machine", result);
+    result = VboxCreateMachine(session->cbox, *setting_file_path, machine_name, "Linux26_64", "", &(session->cmachine));
+    if (FAILED(result) || session->cmachine == NULL) {
+        print_error_info(session->errMsg, "[VBox] Failed to create machine", result);
         return VBGlue_Fail;
     }
     return VBGlue_Ok;
 }
 
 VBGlueResult
-vbox_machine_release(IMachine* vbox_machine, char* base_folder, char* error_message) {
-    HRESULT result = VBGlue_Ok;
+VBoxReleaseMachine(VBoxGlue* glue) {
+    
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
+
+    iVBoxSession* session = toiVBoxSession(glue);
+
     // release machine
-    if (vbox_machine != NULL) {
-        HRESULT result = VboxIMachineRelease(vbox_machine);
+    if (session->cmachine != NULL) {
+        HRESULT result = VboxIMachineRelease(session->cmachine);
         if (FAILED(result)) {
-            print_error_info(error_message, "[VBox] Failed to close machine referenece", result);
+            print_error_info(session->errMsg, "[VBox] Failed to close machine referenece", result);
+            return VBGlue_Fail;
+        } else {
+            session->cmachine = NULL;
         }
     }
-    // release base folder
-    if (base_folder != NULL) {
-        VboxUtf8Free(base_folder);
-    }
     
-    return result;
+    return VBGlue_Ok;
 }
 
 

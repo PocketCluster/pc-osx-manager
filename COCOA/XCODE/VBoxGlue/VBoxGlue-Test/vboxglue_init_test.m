@@ -35,43 +35,41 @@
 
 -(void)test_App_API_Version {
     NSLog(@"App Version %d", VBoxAppVersion());
-    XCTAssertTrue(5001022 <= VBoxAppVersion(), @"Virtualbox version should be greater than or equal to 5001022");
+    XCTAssertTrue( 5001022 <= VBoxAppVersion(), @"Virtualbox version should be greater than or equal to 5001022");
     NSLog(@"API Version %d", VBoxApiVersion());
-    XCTAssertTrue(5001 <= VBoxApiVersion(), @"VBox API version should be greater than or equal to  5001");
+    XCTAssertTrue( 5001 <= VBoxApiVersion(), @"VBox API version should be greater than or equal to  5001");
 }
 
 -(void)test_Error_Message {
-    XCTAssertTrue(VBGlue_Fail == VBoxTestErrorMessage(vboxGlue), @"Should generate error");
+    XCTAssertTrue( VBGlue_Fail == VBoxTestErrorMessage(vboxGlue), @"Should generate error");
     NSLog(@"Error Message %s", VBoxGetErrorMessage(vboxGlue));
 }
 
+- (void)testCreateAndReleaseMachine {
+    char* setting_file = NULL;
+    
+    XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue, "pc-master-1", &setting_file), @"Machine creation should return ok");
+    NSLog(@"setting file path %s", setting_file);
+    
+    // release machine
+    XCTAssertTrue( VBGlue_Ok == VBoxReleaseMachine(vboxGlue), @"Releasing machine should not generate error");
+}
+
+- (void)test_Create_Find_Release_Machine {
+    char* setting_file = NULL;
+    char* machine_id = NULL;
+    
+    XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue, "pc-master-2", &setting_file), @"Machine creation should return true");
+    NSLog(@"setting file path %s", setting_file);
+    
+    XCTAssertTrue( VBGlue_Ok == VBoxGetMachineID(vboxGlue, &machine_id), @"Machine id should not be empty");
+    NSLog(@"MachineID %s", machine_id);
+    
+    // release machine
+    XCTAssertTrue( VBGlue_Ok == VBoxReleaseMachine(vboxGlue), @"Releasing machine should not generate error");
+}
 
 #if 0
-- (void)testCreateAndReleaseMachine {
-    __autoreleasing NSError *error = nil;
-    XCTAssertTrue([self.vboxInterface createMachineWithName:@"pc-master-1" error:&error],@"Machine creation should return true");
-    XCTAssertNil(error, @"Machine creation should not generate any error");
-    
-    // reelase machine
-    [self.vboxInterface releaseMachine:&error];
-    XCTAssertNil(error, @"Releasing machine should not generate error");
-}
-
-- (void)testCreateAndFindMachine {
-    __autoreleasing NSError *error = nil;
-    XCTAssertTrue([self.vboxInterface createMachineWithName:@"pc-master-2" error:&error],@"Machine creation should return true");
-    XCTAssertNil(error, @"Machine creation should not generate any error");
-    
-    NSString *machineID = [self.vboxInterface retrieveMachineId:&error];
-    XCTAssertNotNil(machineID, @"Machine id should not be empty");
-    XCTAssertNil(error, @"Finding machine id should not generate any error");
-    NSLog(@"MachineID %@", machineID);
-    
-    // relase machine
-    [self.vboxInterface releaseMachine:&error];
-    XCTAssertNil(error, @"Releasing machine should not generate error");
-}
-
 - (void)testFindMachineBeforeRegistration {
     __autoreleasing NSError *error = nil;
     XCTAssertFalse([self.vboxInterface acquireMachineByNameOrID:@"89be88f7-fc05-4aed-b3c7-9cf553be16a4" error:&error]);
