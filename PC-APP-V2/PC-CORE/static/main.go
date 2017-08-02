@@ -240,6 +240,12 @@ func main() {
                             s := sl[i]
                             log.Debugf("[SERVICE] %s, %v", s.Tag(), s.IsRunning())
                         }
+
+                        err := vboxOperation(a)
+                        if err != nil {
+                            log.Debugf("vbox operation error %v", err)
+                        }
+
                         log.Debugf("[OP] %v", e.String())
                     }
 

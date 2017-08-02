@@ -19,6 +19,7 @@ import (
     "github.com/gravitational/teleport/lib/auth"
     tervice "github.com/gravitational/teleport/lib/service"
     "github.com/stkim1/pc-core/service"
+    "github.com/stkim1/pc-core/vboxglue"
 )
 
 func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
@@ -328,4 +329,16 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
         service.BindEventWithService(iventVboxCtrlInstanceSpawn, ctrlObjC))
 
     return nil
+}
+
+
+func vboxOperation(a *appMainLife) error {
+    vglue, err := vboxglue.NewGOVboxGlue()
+    if err != nil {
+        errors.WithStack(err)
+    }
+
+    log.Debugf("AppVersion %d, ApiVersion %d", vglue.AppVersion(), vglue.APIVersion())
+    log.Debugf(vglue.TestErrorMessage().Error())
+    return vglue.Close()
 }

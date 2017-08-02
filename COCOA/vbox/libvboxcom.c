@@ -41,7 +41,7 @@ typedef struct iVBoxSession {
 
 // these two are convert between internal <-> external types
 #define toiVBoxSession(ptr) ((iVBoxSession*)ptr)
-#define toVBoxGlue(ptr)     ((VBoxGlue*)ptr)
+#define toVBoxGlue(ptr)     ((VBoxGlue)ptr)
 
 
 #define CLIENT_DPTR(ptr)  ((IVirtualBoxClient**)ptr)     // Client double pointer
@@ -59,6 +59,8 @@ typedef struct iVBoxSession {
 #pragma mark - DECLARATION
 
 #pragma mark build machine base
+typedef void** VOID_DPTR;
+
 VBGlueResult vbox_machine_build(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, int cpu_count, int memory_size, char* error_message);
 
 VBGlueResult vbox_machine_add_bridged_network(VOID_DPTR vbox_machine, VOID_DPTR vbox_session, const char* host_interface, char* error_message);
@@ -93,7 +95,7 @@ print_error_info(char *message_buffer, const char *pszErrorMsg, HRESULT rc) {
 
 #pragma mark init & close
 VBGlueResult
-NewVBoxGlue(VBoxGlue** glue) {
+NewVBoxGlue(VBoxGlue* glue) {
 
     // make sure the pointer passed IS null.
     assert(glue != NULL && *glue == NULL);
@@ -105,7 +107,8 @@ NewVBoxGlue(VBoxGlue** glue) {
     
     result = VBoxCGlueInit();
     if (FAILED(result)) {
-        print_error_info(session->error_msg, "[VBox] failed to load vbox api", result);
+        // it is more reasonable to print lib's error message
+        strcpy(session->error_msg, g_szVBoxErrMsg);
         return VBGlue_Fail;
     }
 
@@ -131,7 +134,7 @@ NewVBoxGlue(VBoxGlue** glue) {
 }
 
 VBGlueResult
-CloseVBoxGlue(VBoxGlue* glue) {
+CloseVBoxGlue(VBoxGlue glue) {
 
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -170,51 +173,58 @@ CloseVBoxGlue(VBoxGlue* glue) {
 
 
 #pragma mark machine status
-bool
-VBoxIsMachineSettingChanged(VBoxGlue* glue) {
+VBGlueResult
+VBoxIsMachineSettingChanged(VBoxGlue glue, bool* isMachineChanged) {
     
     // make sure the pointer passed is not null.
     assert(glue != NULL);
 
     iVBoxSession* session = toiVBoxSession(glue);
     PRBool changed = PR_FALSE;
+    *isMachineChanged = (bool)changed;
     IMachine *mutable_machine;
     
     //firstly lock the machine
     HRESULT result = VboxLockMachine(session->machine, session->vsession, LockType_Write);
     if (FAILED(result)) {
         print_error_info(session->error_msg, "[VBox] Failed to lock machine for adding storage controller", result);
+        return VBGlue_Fail;
     }
     // get mutable machine
     result = VboxGetSessionMachine(session->vsession, &mutable_machine);
     if (FAILED(result) || mutable_machine == NULL) {
         print_error_info(session->error_msg, "[VBox] Failed to get a mutable copy of a machine", result);
+        return VBGlue_Fail;
     }
     // check if settings modified
     result = VboxGetMachineSettingsModified(mutable_machine, &changed);
     if (FAILED(result)) {
         print_error_info(session->error_msg, "[VBox] Fail to get setting modification", result);
+        return VBGlue_Fail;
     }
     // then we can safely release the mutable machine
     if (mutable_machine) {
         result = VboxIMachineRelease(mutable_machine);
         if (FAILED(result)) {
             print_error_info(session->error_msg, "[VBox] Failed to release locked machine for attaching adapter", result);
+            return VBGlue_Fail;
         }
     }
     // then unlock machine
     result = VboxUnlockMachine(session->vsession);
     if (FAILED(result)) {
         print_error_info(session->error_msg, "[VBox] Failed to unlock machine for attaching adapter", result);
+        return VBGlue_Fail;
     }
 
-    return (bool)(changed == PR_TRUE);
+    *isMachineChanged = (bool)(changed == PR_TRUE);
+    return VBGlue_Ok;
 }
 
 
 #pragma mark find, build & destroy machine
 VBGlueResult
-VBoxFindMachineByNameOrID(VBoxGlue* glue, const char* machine_name) {
+VBoxFindMachineByNameOrID(VBoxGlue glue, const char* machine_name) {
     
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -247,7 +257,7 @@ VBoxFindMachineByNameOrID(VBoxGlue* glue, const char* machine_name) {
 }
 
 VBGlueResult
-VBoxCreateMachineByName(VBoxGlue* glue, const char* machine_name, const char* base_folder) {
+VBoxCreateMachineByName(VBoxGlue glue, const char* base_folder, const char* machine_name) {
     
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -283,7 +293,7 @@ VBoxCreateMachineByName(VBoxGlue* glue, const char* machine_name, const char* ba
 }
 
 VBGlueResult
-VBoxReleaseMachine(VBoxGlue* glue) {
+VBoxReleaseMachine(VBoxGlue glue) {
     
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -951,7 +961,7 @@ vbox_machine_add_hard_disk(VOID_DPTR virtualbox, VOID_DPTR vbox_machine, VOID_DP
 
 #pragma mark destroy machine
 VBGlueResult
-VBoxDestoryMachine(VBoxGlue* glue) {
+VBoxDestoryMachine(VBoxGlue glue) {
 
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -1182,24 +1192,24 @@ VboxMachineStart(IVirtualBox *virtualBox, ISession *session, IMachine *cmachine,
 #pragma mark - UTILS
 
 VBGlueResult
-VBoxTestErrorMessage(VBoxGlue* glue) {
+VBoxTestErrorMessage(VBoxGlue glue) {
     iVBoxSession* session = toiVBoxSession(glue);
     print_error_info(session->error_msg, "[VBox] VBoxGlue Error Message Test", (unsigned)S_OK);
     return VBGlue_Fail;
 }
 
 const char*
-VBoxGetErrorMessage(VBoxGlue* glue) {
+VBoxGetErrorMessage(VBoxGlue glue) {
     return toiVBoxSession(glue)->error_msg;
 }
 
 const char*
-VboxGetSettingFilePath(VBoxGlue* glue) {
+VboxGetSettingFilePath(VBoxGlue glue) {
     return toiVBoxSession(glue)->setting_file_path;
 }
 
 const char*
-VboxGetMachineID(VBoxGlue* glue) {
+VboxGetMachineID(VBoxGlue glue) {
     return toiVBoxSession(glue)->machine_id;
 }
 

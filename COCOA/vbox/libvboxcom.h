@@ -6,29 +6,24 @@
 //  Copyright © 2016 io.pocketcluster. All rights reserved.
 //
 
-
 #ifndef __LIBVBOXCOM_H__
 #define __LIBVBOXCOM_H__
 
 #include <stdbool.h>
-
-typedef void** VOID_DPTR;
-
-
 
 typedef enum VBGlueResult {
     VBGlue_Ok      = 0,
     VBGlue_Fail
 } VBGlueResult;
 
-typedef void VBoxGlue;
+typedef void* VBoxGlue;
 
 #pragma mark init & close
 VBGlueResult
-NewVBoxGlue(VBoxGlue** glue);
+NewVBoxGlue(VBoxGlue* glue);
 
 VBGlueResult
-CloseVBoxGlue(VBoxGlue* glue);
+CloseVBoxGlue(VBoxGlue glue);
 
 
 #pragma mark app & api version
@@ -37,48 +32,46 @@ extern unsigned int VBoxApiVersion(void);
 
 
 #pragma mark machine status
-bool
-VBoxIsMachineSettingChanged(VBoxGlue* glue);
+VBGlueResult
+VBoxIsMachineSettingChanged(VBoxGlue glue, bool* isMachineChanged);
 
 
 #pragma mark find, build & destroy machine
 VBGlueResult
-VBoxFindMachineByNameOrID(VBoxGlue* glue, const char* machine_name);
+VBoxFindMachineByNameOrID(VBoxGlue glue, const char* machine_name);
 
 VBGlueResult
-VBoxCreateMachineByName(VBoxGlue* glue, const char* machine_name, const char* base_folder);
+VBoxCreateMachineByName(VBoxGlue glue, const char* base_folder, const char* machine_name);
 
 VBGlueResult
-VBoxReleaseMachine(VBoxGlue* glue);
-
-
+VBoxReleaseMachine(VBoxGlue glue);
 
 
 #pragma mark destroy machine
 VBGlueResult
-VBoxDestoryMachine(VBoxGlue* glue);
+VBoxDestoryMachine(VBoxGlue glue);
 
-
+#if 0
 #pragma mark start & stop machine
 VBGlueResult
-VBoxStartMachine(VBoxGlue* glue);
+VBoxStartMachine(VBoxGlue glue);
 
 VBGlueResult
-VBoxStopMachine(VBoxGlue* glue);
+VBoxStopMachine(VBoxGlue glue);
+#endif
 
 
 #pragma mark utils
 VBGlueResult
-VBoxTestErrorMessage(VBoxGlue* glue);
+VBoxTestErrorMessage(VBoxGlue glue);
 
 const char*
-VBoxGetErrorMessage(VBoxGlue* glue);
+VBoxGetErrorMessage(VBoxGlue glue);
 
 const char*
-VboxGetSettingFilePath(VBoxGlue* glue);
+VboxGetSettingFilePath(VBoxGlue glue);
 
 const char*
-VboxGetMachineID(VBoxGlue* glue);
-
+VboxGetMachineID(VBoxGlue glue);
 
 #endif /* __LIBVBOXCOM_H__ */

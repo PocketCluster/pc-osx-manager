@@ -11,7 +11,7 @@
 #include "libvboxcom.h"
 
 @interface vboxglue_init_test : XCTestCase {
-    VBoxGlue *vboxGlue;
+    VBoxGlue vboxGlue;
     NSString *userhome;
 }
 @end
