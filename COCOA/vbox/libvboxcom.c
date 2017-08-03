@@ -487,6 +487,9 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
 
 HRESULT
 vbox_machine_add_1st_nat_network(IMachine* vbox_machine, ISession* vbox_session, char* error_message) {
+    static const char* NAT_RULE_PCSSH = "PC SSH";
+    static const char* NAT_HOST_IP    = "127.0.0.1";
+    static const char* NAT_GUEST_IP   = "";
     
     INetworkAdapter *adapter = NULL;
     
@@ -536,6 +539,14 @@ vbox_machine_add_1st_nat_network(IMachine* vbox_machine, ISession* vbox_session,
         print_error_info(error_message, "[VBox] Failed to set cable connected", result);
         return result;
     }
+    
+    // add port forwarding rule
+    result = VboxNetworkAddPortForwardingRule(adapter, NAT_RULE_PCSSH, NATProtocol_TCP, NAT_HOST_IP, (unsigned short)3022, NAT_GUEST_IP, (unsigned short)3022);
+    if (FAILED(result)) {
+        print_error_info(error_message, "[VBox] Failed to port forward for ssh", result);
+        return result;
+    }
+    
     // save setting
     result = VboxMachineSaveSettings(mutable_machine);
     if (FAILED(result)) {
@@ -747,7 +758,7 @@ vbox_machine_add_storage_controller(IMachine* vbox_machine, ISession* vbox_sessi
         return result;
     }
     // storage controller set # of ports
-    result = IStorageController_SetPortCount(storage_controller, 10);
+    result = IStorageController_SetPortCount(storage_controller, 2);
     if (FAILED(result)) {
         print_error_info(error_message, "[VBox] Failed to increase port count", result);
         return result;

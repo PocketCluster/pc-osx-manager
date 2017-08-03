@@ -21,6 +21,8 @@ HRESULT VboxNetworkAdapterSetPromiscModePolicy(INetworkAdapter *cAdapter, Networ
 
 HRESULT VboxNetworkAdapterSetCableConnected(INetworkAdapter *cAdapter, BOOL isConnected);
 
+HRESULT VboxNetworkAddPortForwardingRule(INetworkAdapter *cAdapter, const char* cRuleName, NATProtocol protocol, const char* cHostIp, unsigned short hostPort, const char* cGuestIp, unsigned short guestPort);
+
 HRESULT VboxNetworkAdapterRelease(INetworkAdapter *cAdapter);
 
 #endif /* network_h */

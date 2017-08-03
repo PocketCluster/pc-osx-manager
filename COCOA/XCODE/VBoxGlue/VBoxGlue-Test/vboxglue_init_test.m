@@ -66,7 +66,7 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
 -(void)test_Build_machine {
     VBoxBuildOption *options =
         VBoxMakeBuildOption(2, 2048,
-                            "en1",
+                            "en1: Wi-Fi (AirPort)",
                             "/tmp", "/temp",
                             "/Users/almightykim/Workspace/VBOX-IMAGE/pc-core.iso",
                             "/Users/almightykim/Workspace/VBOX-IMAGE/pc-core-hdd.vmdk");

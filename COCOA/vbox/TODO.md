@@ -1,10 +1,10 @@
 # TODO
 
-- [ ] pass a folder to be shared
-- [ ] pass a name for shared foler
 - [ ] pass appropriate host network interface name  
-- [ ] check if a shared folder exists when machine is created  
-- [ ] report the error to server  
+- [x] port forwarding host : (127.0.01:3022) <-> guest : (x.x.x.15:3022)
+- [x] sata host cache
+- [x] pass a folder to be shared
+- [x] pass a name for shared foler
 - [x] add network interfaces  
 - [x] add `NAT` or `Host Adapter` in the future for communication.
 - [x] add **Shared Folder**  

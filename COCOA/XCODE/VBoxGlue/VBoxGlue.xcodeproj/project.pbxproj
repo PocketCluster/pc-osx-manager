@@ -99,6 +99,7 @@
 		042D042F1F310A06002FACE8 /* VboxCom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VboxCom.h; sourceTree = "<group>"; };
 		042D04301F310A06002FACE8 /* VboxCom.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VboxCom.m; sourceTree = "<group>"; };
 		042D04311F3120FD002FACE8 /* vboxglue_init_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = vboxglue_init_test.m; sourceTree = "<group>"; };
+		04F663481F33B9FA004A418F /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -166,6 +167,7 @@
 				042D03E01F31081D002FACE8 /* lib */,
 				042D03F11F31081D002FACE8 /* libvboxcom.h */,
 				042D03F01F31081D002FACE8 /* libvboxcom.c */,
+				04F663481F33B9FA004A418F /* TODO.md */,
 				042D03F21F31081D002FACE8 /* os-typeid-list.txt */,
 			);
 			name = vbox;
