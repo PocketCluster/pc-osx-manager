@@ -332,13 +332,13 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
             return result;
         }
         // enable I/O APIC
-        result = IBIOSSettings_SetIOAPICEnabled(bios, (PRBool)1);
+        result = IBIOSSettings_SetIOAPICEnabled(bios, PR_TRUE);
         if ( FAILED(result) ) {
             print_error_info(error_message, "[VBox] Failed to enable IO/APIC", result);
             return result;
         }
         // set ACPI enabled
-        result = IBIOSSettings_SetACPIEnabled(bios, (PRBool)1);
+        result = IBIOSSettings_SetACPIEnabled(bios, PR_TRUE);
         if ( FAILED(result) ) {
             print_error_info(error_message, "[VBox] Failed to enable ACPI", result);
             return result;
@@ -382,6 +382,12 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
             return result;
         }
         
+        // enable high precision event timer
+        result = IMachine_SetHPETEnabled(vbox_machine, PR_TRUE);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to enable HPET", result);
+            return result;
+        }
         // set Chipset type
         result = IMachine_SetChipsetType(vbox_machine, ChipsetType_ICH9);
         if (FAILED(result)) {
@@ -389,7 +395,7 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
             return result;
         }
         // set RTC timer
-        result = IMachine_SetRTCUseUTC(vbox_machine, (PRBool)1);
+        result = IMachine_SetRTCUseUTC(vbox_machine, PR_TRUE);
         if (FAILED(result)) {
             print_error_info(error_message, "[VBox] Failed to setting Hardware UTC timer", result);
             return result;
@@ -411,12 +417,42 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
             return result;
         }
         // PAE enabled
-        PRBool enabled = (PRBool)1;
-        result = IMachine_GetCPUProperty(vbox_machine, CPUPropertyType_PAE, &enabled);
+        result = IMachine_SetCPUProperty(vbox_machine, CPUPropertyType_PAE, PR_TRUE);
         if (FAILED(result)) {
-            print_error_info(error_message, "[VBox] Failed to setting PAE/NX enabling", result);
+            print_error_info(error_message, "[VBox] Failed to enable PAE/NX", result);
             return result;
         }
+        // long mode enabled for 64bit os
+        result = IMachine_SetCPUProperty(vbox_machine, CPUPropertyType_LongMode, PR_TRUE);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to enable longmode", result);
+            return result;
+        }
+        // use hardware virtualization (VT-x/AMD-V) if available
+        result = IMachine_SetHWVirtExProperty(vbox_machine, HWVirtExPropertyType_Enabled, PR_TRUE);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to enable (VT-x/AMD-V)", result);
+            return result;
+        }
+        // use VT-x VPID if available
+        result = IMachine_SetHWVirtExProperty(vbox_machine, HWVirtExPropertyType_VPID, PR_TRUE);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to enable VT-x VPID", result);
+            return result;
+        }
+        // use Nested Paging if available
+        result = IMachine_SetHWVirtExProperty(vbox_machine, HWVirtExPropertyType_NestedPaging, PR_TRUE);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to enable Nested Paging", result);
+            return result;
+        }
+        // use large page allocation if available. Requires nested paging and a 64-bit host.
+        result = IMachine_SetHWVirtExProperty(vbox_machine, HWVirtExPropertyType_LargePages, PR_TRUE);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to enable large page allocation", result);
+            return result;
+        }
+        
     }
     
     // Acceleration
@@ -487,7 +523,7 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
 
 HRESULT
 vbox_machine_add_1st_nat_network(IMachine* vbox_machine, ISession* vbox_session, char* error_message) {
-    static const char* NAT_RULE_PCSSH = "PC SSH";
+    static const char* NAT_RULE_PCSSH = "PC_SSH";
     static const char* NAT_HOST_IP    = "127.0.0.1";
     static const char* NAT_GUEST_IP   = "";
     
