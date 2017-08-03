@@ -177,7 +177,7 @@ VBoxIsMachineSettingChanged(VBoxGlue glue, bool* isMachineChanged) {
     //firstly lock the machine
     HRESULT result = VboxLockMachine(session->machine, session->vsession, LockType_Write);
     if (FAILED(result)) {
-        print_error_info(session->error_msg, "[VBox] Failed to lock machine for adding storage controller", result);
+        print_error_info(session->error_msg, "[VBox] Failed to lock machine for checking machine setting", result);
         return VBGlue_Fail;
     }
     // get mutable machine
@@ -196,7 +196,7 @@ VBoxIsMachineSettingChanged(VBoxGlue glue, bool* isMachineChanged) {
     if (mutable_machine) {
         result = VboxIMachineRelease(mutable_machine);
         if (FAILED(result)) {
-            print_error_info(session->error_msg, "[VBox] Failed to release locked machine for attaching adapter", result);
+            print_error_info(session->error_msg, "[VBox] Failed to release locked machine", result);
             return VBGlue_Fail;
         }
     }

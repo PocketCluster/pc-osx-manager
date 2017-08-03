@@ -8,7 +8,10 @@
 
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
+#import <string.h>
 #include "libvboxcom.h"
+
+static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
 
 @interface vboxglue_init_test : XCTestCase {
     VBoxGlue vboxGlue;
@@ -43,26 +46,48 @@
 }
 
 -(void)test_Error_Message {
-    XCTAssertTrue( VBGlue_Fail == VBoxTestErrorMessage(vboxGlue), @"Should generate error");
+    XCTAssertTrue( VBGlue_Fail == VBoxTestErrorMessage(vboxGlue),               @"Should generate error");
     NSLog(@"Error Message %s", VBoxGetErrorMessage(vboxGlue));
 }
 
 - (void)test_Create_Release_Machine {
-    XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue, "pc-master-2", [userhome UTF8String]), @"Machine creation should return true");
+    static const char* TEST_MACHINE_NAME = "TEST_MACHINE_NAME";
+
+    XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue,
+                                                        [userhome UTF8String],
+                                                        TEST_MACHINE_NAME),     @"Machine creation should return true");
     NSLog(@"setting file path %s", VboxGetSettingFilePath(vboxGlue));
-    NSLog(@"MachineID %s", VboxGetMachineID(vboxGlue));
+    NSLog(@"MachineID Origin %s", VboxGetMachineID(vboxGlue));
     
-    // release machine
-    XCTAssertTrue( VBGlue_Ok == VBoxReleaseMachine(vboxGlue), @"Releasing machine should not generate error");
+
+    XCTAssertTrue( VBGlue_Ok == VBoxReleaseMachine(vboxGlue),                   @"Releasing machine should not generate error");
 }
 
-#if 0
-- (void)testFindMachineBeforeRegistration {
-    __autoreleasing NSError *error = nil;
-    XCTAssertFalse([self.vboxInterface acquireMachineByNameOrID:@"89be88f7-fc05-4aed-b3c7-9cf553be16a4" error:&error]);
-    XCTAssertNotNil(error, @"Finding machine id should not generate any error");
-    NSLog(@"%@", [error localizedFailureReason]);
+-(void)test_Build_machine {
+    VBoxBuildOption *options =
+        VBoxMakeBuildOption(2, 2048,
+                            "en1",
+                            "/tmp", "/temp",
+                            "/Users/almightykim/Workspace/VBOX-IMAGE/pc-core.iso",
+                            "/Users/almightykim/Workspace/VBOX-IMAGE/pc-core-hdd.vmdk");
+ 
+    XCTAssertTrue( VBGlue_Ok == VBoxCreateMachineByName(vboxGlue,
+                                                        [userhome UTF8String],
+                                                        TARGET_MACHINE_NAME),   @"Machine creation should return true");
+    XCTAssertTrue( VBGlue_Ok == VBoxBuildMachine(vboxGlue, options),            @"Machine building should return true");
+    NSLog(@"setting file path %s", VboxGetSettingFilePath(vboxGlue));
+    NSLog(@"MachineID Origin %s", VboxGetMachineID(vboxGlue));
+    XCTAssertTrue( strlen(VboxGetMachineID(vboxGlue)) != 0,                     @"Machine id should not be zero");
 }
-#endif
+
+-(void)test_Destory_Machine {
+    bool isChanged = true;
+    XCTAssertTrue( VBGlue_Ok == VBoxFindMachineByNameOrID(vboxGlue,
+                                                          TARGET_MACHINE_NAME), @"Should be able to find existing machine return true");
+    XCTAssertTrue( VBGlue_Ok == VBoxIsMachineSettingChanged(vboxGlue, &isChanged),@"Machine setting checking should return true");
+    XCTAssertTrue( !isChanged,                                                  @"Machine setting should have not changed");
+    XCTAssertTrue( VBGlue_Ok == VBoxDestoryMachine(vboxGlue),                   @"Machine Destruction should go fine");
+    XCTAssertTrue( VBGlue_Ok == VBoxReleaseMachine(vboxGlue),                   @"Releasing machine should not generate error");
+}
 
 @end
