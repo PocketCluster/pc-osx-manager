@@ -13,7 +13,7 @@
 - [x] add test cases  
 - [x] check options from `boot2docker`
 
-  * VBoxInternal/CPUM/EnableHVP
+  - VBoxInternal/CPUM/EnableHVP
   * m.Flag |= F_pae
   * m.Flag |= F_longmode // important: use x86-64 processor
   * m.Flag |= F_rtcuseutc
@@ -24,3 +24,8 @@
   * m.Flag |= F_vtxvpid
   * m.Flag |= F_largepages
   * m.Flag |= F_nestedpaging
+  * firmware", "bios",
+  * bioslogofadein", "off",
+  * bioslogofadeout", "off",
+  * bioslogodisplaytime", "0",
+  * biosbootmenu", "disabled",

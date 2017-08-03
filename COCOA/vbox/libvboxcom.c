@@ -343,6 +343,26 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
             print_error_info(error_message, "[VBox] Failed to enable ACPI", result);
             return result;
         }
+        result = IBIOSSettings_SetLogoFadeIn(bios, PR_FALSE);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to disable bios fade-in", result);
+            return result;
+        }
+        result = IBIOSSettings_SetLogoFadeOut(bios, PR_FALSE);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to disable bios fade-out", result);
+            return result;
+        }
+        result = IBIOSSettings_SetLogoDisplayTime(bios, 0);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to disable bios display time", result);
+            return result;
+        }
+        result = IBIOSSettings_SetBootMenuMode(bios, BIOSBootMenuMode_Disabled);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to disable bios menu", result);
+            return result;
+        }
         // release bios settings
         result = VboxIBiosSettingsRelease(bios);
         if (FAILED(result)) {
@@ -379,6 +399,12 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
         result = IMachine_SetBootOrder(vbox_machine, 4, DeviceType_Null);
         if (FAILED(result)) {
             print_error_info(error_message, "[VBox] Failed to fix boot order", result);
+            return result;
+        }
+        
+        result = IMachine_SetFirmwareType(vbox_machine, FirmwareType_BIOS);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to set firmware time", result);
             return result;
         }
         

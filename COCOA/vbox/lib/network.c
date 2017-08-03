@@ -68,6 +68,19 @@ HRESULT VboxNetworkAddPortForwardingRule(INetworkAdapter *cAdapter, const char* 
         return result;
     }
 
+    // the DNS Host Resolver doesn't support SRV records
+    // the DNS proxy has performance issues
+    // direct DNS pass-through doesn't support roaming laptops well
+    // we can't win, so let's go direct and at least get performance
+    result = INATEngine_SetDNSProxy(natEngine, PR_FALSE);
+    if (FAILED(result)) {
+        return result;
+    }
+    result = INATEngine_SetDNSUseHostResolver(natEngine, PR_FALSE);
+    if (FAILED(result)) {
+        return result;
+    }
+    
     // release NAT engine
     result = INATEngine_Release(natEngine);
     if (FAILED(result)) {
