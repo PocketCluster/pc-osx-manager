@@ -445,6 +445,27 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
         }
     }
     
+    // audio
+    {
+        IAudioAdapter *audio = NULL;
+        result = IMachine_get_AudioAdapter(vbox_machine, &audio);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] failed get audio control", result);
+            return result;
+        }
+        result = IAudioAdapter_SetEnabled(audio, PR_FALSE);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] failed get audio control", result);
+            return result;
+        }
+        result = IAudioAdapter_Release(audio);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] failed release audio control", result);
+            return result;
+        }
+        audio = NULL;
+    }
+    
     // SAVE SETTINGS & REGISTER MACHINE BEFORE ATTACH A MEDIUM
     {
         // save settings
