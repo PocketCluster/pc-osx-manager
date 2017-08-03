@@ -20,9 +20,10 @@ typedef enum VBGlueResult {
 
 typedef struct VBoxBuildOption {
     int            CpuCount;
-    int            MemorySize;
+    int            MemSize;
     const char*    HostInterface;
     const char*    SharedDirPath;
+    const char*    SharedDirName;
     const char*    BootImagePath;
     const char*    HddImagePath;
 } VBoxBuildOption;
@@ -48,10 +49,10 @@ VBoxIsMachineSettingChanged(VBoxGlue glue, bool* isMachineChanged);
 
 #pragma mark find, create, & release machine
 VBGlueResult
-VBoxFindMachineByNameOrID(VBoxGlue glue, const char* machine_name);
+VBoxFindMachineByNameOrID(VBoxGlue glue, const char* machineName);
 
 VBGlueResult
-VBoxCreateMachineByName(VBoxGlue glue, const char* base_folder, const char* machine_name);
+VBoxCreateMachineByName(VBoxGlue glue, const char* baseFolder, const char* machineName);
 
 VBGlueResult
 VBoxReleaseMachine(VBoxGlue glue);
@@ -61,7 +62,7 @@ VBoxReleaseMachine(VBoxGlue glue);
 // option created by this function does not handle deallocation.
 // make sure to dealloc it once done
 VBoxBuildOption*
-VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* shared, const char* boot, const char* hdd);
+VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* spath, const char* sname, const char* boot, const char* hdd);
 
 VBGlueResult
 VBoxBuildMachine(VBoxGlue glue, VBoxBuildOption* option);

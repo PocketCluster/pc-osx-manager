@@ -27,7 +27,7 @@
 
 #define ERROR_MESSAGE_BUF_SIZE 256
 
-typedef struct iVBoxSession {
+typedef struct ivbox_session {
     char                  error_msg[ERROR_MESSAGE_BUF_SIZE];
     IVirtualBox*          vbox;                             // virtualbox
     IVirtualBoxClient*    client;                           // vbox client
@@ -35,12 +35,12 @@ typedef struct iVBoxSession {
     IMachine*             machine;                          // vbox machine
     char*                 machine_id;                       // machine id
     char*                 setting_file_path;                // setting file
-} iVBoxSession;
+} ivbox_session;
 
 #pragma mark - MACROS
 
 // these two are convert between internal <-> external types
-#define toiVBoxSession(ptr) ((iVBoxSession*)ptr)
+#define toiVBoxSession(ptr) ((ivbox_session*)ptr)
 #define toVBoxGlue(ptr)     ((VBoxGlue)ptr)
 
 #pragma mark - DECLARATION
@@ -51,7 +51,10 @@ static HRESULT
 vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_count, int memory_size, char* error_message);
 
 static HRESULT
-vbox_machine_add_bridged_network(IMachine* vbox_machine, ISession* vbox_session, const char* host_interface, char* error_message);
+vbox_machine_add_1st_nat_network(IMachine* vbox_machine, ISession* vbox_session, char* error_message);
+
+static HRESULT
+vbox_machine_add_2nd_bridged_network(IMachine* vbox_machine, ISession* vbox_session, const char* host_interface, char* error_message);
 
 static HRESULT
 vbox_machine_add_shared_folder(IMachine* vbox_machine, ISession* vbox_session, const char* shared_name, const char *host_folder, char* error_message);
@@ -88,7 +91,7 @@ NewVBoxGlue(VBoxGlue* glue) {
     assert(glue != NULL && *glue == NULL);
     
     HRESULT result;
-    iVBoxSession* session = (iVBoxSession*)calloc(1, sizeof(iVBoxSession));
+    ivbox_session* session = (ivbox_session*)calloc(1, sizeof(ivbox_session));
     // assign to return value
     *glue = toVBoxGlue(session);
     
@@ -126,7 +129,7 @@ CloseVBoxGlue(VBoxGlue glue) {
     // make sure the pointer passed is not null.
     assert(glue != NULL);
     
-    iVBoxSession* session = toiVBoxSession(glue);
+    ivbox_session* session = toiVBoxSession(glue);
     HRESULT result;
     
     if ( session->vsession != NULL ) {
@@ -166,7 +169,7 @@ VBoxIsMachineSettingChanged(VBoxGlue glue, bool* isMachineChanged) {
     // make sure the pointer passed is not null.
     assert(glue != NULL);
 
-    iVBoxSession* session = toiVBoxSession(glue);
+    ivbox_session* session = toiVBoxSession(glue);
     PRBool changed = PR_FALSE;
     *isMachineChanged = (bool)changed;
     IMachine *mutable_machine;
@@ -211,16 +214,16 @@ VBoxIsMachineSettingChanged(VBoxGlue glue, bool* isMachineChanged) {
 
 #pragma mark find, create, & build machine
 VBGlueResult
-VBoxFindMachineByNameOrID(VBoxGlue glue, const char* machine_name) {
+VBoxFindMachineByNameOrID(VBoxGlue glue, const char* machineName) {
     
     // make sure the pointer passed is not null.
     assert(glue != NULL);
 
-    iVBoxSession* session = toiVBoxSession(glue);
+    ivbox_session* session = toiVBoxSession(glue);
 
     if ( session->machine  == NULL ) {
         HRESULT result;
-        result = VboxFindMachine(session->vbox, machine_name, &(session->machine));
+        result = VboxFindMachine(session->vbox, machineName, &(session->machine));
         if (FAILED(result)) {
             print_error_info(session->error_msg, "[VBox] Failed to find machine", result);
             return VBGlue_Fail;
@@ -244,13 +247,13 @@ VBoxFindMachineByNameOrID(VBoxGlue glue, const char* machine_name) {
 }
 
 VBGlueResult
-VBoxCreateMachineByName(VBoxGlue glue, const char* base_folder, const char* machine_name) {
+VBoxCreateMachineByName(VBoxGlue glue, const char* baseFolder, const char* machineName) {
     
     // make sure the pointer passed is not null.
     assert(glue != NULL);
-    assert(machine_name != NULL || strlen(machine_name) != 0);
+    assert(machineName != NULL || strlen(machineName) != 0);
     
-    iVBoxSession* session = toiVBoxSession(glue);
+    ivbox_session* session = toiVBoxSession(glue);
     HRESULT result;
 
     if ( session->machine  != NULL ) {
@@ -259,13 +262,13 @@ VBoxCreateMachineByName(VBoxGlue glue, const char* base_folder, const char* mach
     }
     
     // create machine file name
-    result = VboxComposeMachineFilename(session->vbox, machine_name, "", (char *)base_folder, &(session->setting_file_path));
+    result = VboxComposeMachineFilename(session->vbox, machineName, "", (char *)baseFolder, &(session->setting_file_path));
     if (FAILED(result)) {
         print_error_info(session->error_msg, "[VBox] Failed composing machine name", result);
         return VBGlue_Fail;
     }
     // create machine based on the
-    result = VboxCreateMachine(session->vbox, session->setting_file_path, machine_name, "Linux26_64", "", &(session->machine));
+    result = VboxCreateMachine(session->vbox, session->setting_file_path, machineName, "Linux26_64", "", &(session->machine));
     if (FAILED(result) || session->machine == NULL) {
         print_error_info(session->error_msg, "[VBox] Failed to create machine", result);
         return VBGlue_Fail;
@@ -285,7 +288,7 @@ VBoxReleaseMachine(VBoxGlue glue) {
     // make sure the pointer passed is not null.
     assert(glue != NULL);
 
-    iVBoxSession* session = toiVBoxSession(glue);
+    ivbox_session* session = toiVBoxSession(glue);
 
     // release machine
     if ( session->setting_file_path != NULL ) {
@@ -460,15 +463,15 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
     return NS_OK;
 }
 
-HRESULT
-vbox_machine_add_bridged_network(IMachine* vbox_machine, ISession* vbox_session, const char* host_interface, char* error_message) {
 
+HRESULT
+vbox_machine_add_1st_nat_network(IMachine* vbox_machine, ISession* vbox_session, char* error_message) {
+    
     INetworkAdapter *adapter = NULL;
     
     assert(vbox_machine != NULL);
     assert(vbox_session != NULL);
-    assert(host_interface != NULL && strlen(host_interface) != 0);
-
+    
     //firstly lock the machine
     HRESULT result = VboxLockMachine(vbox_machine, vbox_session, LockType_Write);
     if (FAILED(result)) {
@@ -494,21 +497,102 @@ vbox_machine_add_bridged_network(IMachine* vbox_machine, ISession* vbox_session,
         print_error_info(error_message, "[VBox] Failed to enable network adapter", result);
         return result;
     }
+    // set nat network type
+    result = VboxNetworkAdapterSetAttachmentType(adapter, NetworkAttachmentType_NAT);
+    if (FAILED(result)) {
+        print_error_info(error_message, "[VBox] Failed to set network attachement type", result);
+        return result;
+    }
+    // set adapter type (Virtio-Net)
+    result = VboxNetworkAdapterSetAdapterType(adapter, NetworkAdapterType_Virtio);
+    if (FAILED(result)) {
+        print_error_info(error_message, "[VBox] Failed to set network adapter type", result);
+        return result;
+    }
+    // set cable connected
+    result = VboxNetworkAdapterSetCableConnected(adapter, TRUE);
+    if (FAILED(result)) {
+        print_error_info(error_message, "[VBox] Failed to set cable connected", result);
+        return result;
+    }
+    // save setting
+    result = VboxMachineSaveSettings(mutable_machine);
+    if (FAILED(result)) {
+        print_error_info(error_message, "[VBox] Failed to save machine after attaching hard disk medium", result);
+        return result;
+    }
+    // release the first adapter
+    result = VboxNetworkAdapterRelease(adapter);
+    if (FAILED(result)) {
+        print_error_info(error_message, "[VBox] Failed to release adapter", result);
+        return result;
+    }
+    // then we can safely release the mutable machine
+    if (mutable_machine) {
+        result = VboxIMachineRelease(mutable_machine);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to release locked machine for attaching adapter", result);
+            return result;
+        }
+    }
+    // then unlock machine
+    result = VboxUnlockMachine(vbox_session);
+    if (FAILED(result)) {
+        print_error_info(error_message, "[VBox] Failed to unlock machine for attaching adapter", result);
+        return result;
+    }
+    
+    return NS_OK;
+}
+
+HRESULT
+vbox_machine_add_2nd_bridged_network(IMachine* vbox_machine, ISession* vbox_session, const char* host_interface, char* error_message) {
+
+    INetworkAdapter *adapter = NULL;
+    
+    assert(vbox_machine != NULL);
+    assert(vbox_session != NULL);
+    assert(host_interface != NULL && strlen(host_interface) != 0);
+
+    //firstly lock the machine
+    HRESULT result = VboxLockMachine(vbox_machine, vbox_session, LockType_Write);
+    if (FAILED(result)) {
+        print_error_info(error_message, "[VBox] Failed to lock machine for networking", result);
+        return result;
+    }
+    // get mutable machine
+    IMachine *mutable_machine;
+    result = VboxGetSessionMachine(vbox_session, &mutable_machine);
+    if (FAILED(result) || mutable_machine == NULL) {
+        print_error_info(error_message, "[VBox] Failed to get a mutable copy of a machine for networking", result);
+        return result;
+    }
+    // get network adapter
+    result = VboxMachineGetNetworkAdapter(mutable_machine, 1, &adapter);
+    if (FAILED(result) || adapter == NULL) {
+        print_error_info(error_message, "[VBox] Failed to acquire adapter from slot 0", result);
+        return result;
+    }
+    // enable network adapter
+    result = VboxNetworkAdapterSetEnabled(adapter, TRUE);
+    if (FAILED(result)) {
+        print_error_info(error_message, "[VBox] Failed to enable network adapter", result);
+        return result;
+    }
     // set bridged network type
     result = VboxNetworkAdapterSetAttachmentType(adapter, NetworkAttachmentType_Bridged);
     if (FAILED(result)) {
         print_error_info(error_message, "[VBox] Failed to set network attachement type", result);
         return result;
     }
-
     // set host network adapter this bridge should connect to
     result = VboxNetworkAdapterSetBridgedHostInterface(adapter, host_interface);
     if (FAILED(result)) {
         print_error_info(error_message, "[VBox] Failed to connect to host network interface", result);
         return result;
     }    
-    // set adapter type (AMD PCnet-FAST III, VBox Default)
-    result = VboxNetworkAdapterSetAdapterType(adapter, NetworkAdapterType_Am79C973);
+    // set adapter type (Virtio-Net)
+    result = VboxNetworkAdapterSetAdapterType(adapter, NetworkAdapterType_Virtio);
     if (FAILED(result)) {
         print_error_info(error_message, "[VBox] Failed to set network adapter type", result);
         return result;
@@ -873,12 +957,13 @@ vbox_machine_add_hard_disk(IVirtualBox* virtualbox, IMachine* vbox_machine, ISes
 
 #pragma mark -
 VBoxBuildOption*
-VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* shared, const char* boot, const char* hdd) {
+VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* spath, const char* sname, const char* boot, const char* hdd) {
     VBoxBuildOption* option = (VBoxBuildOption*)calloc(1, sizeof(VBoxBuildOption));
     option->CpuCount      = cpu;
-    option->MemorySize    = mem;
+    option->MemSize       = mem;
     option->HostInterface = host;
-    option->SharedDirPath = shared;
+    option->SharedDirPath = spath;
+    option->SharedDirName = sname;
     option->BootImagePath = boot;
     option->HddImagePath  = hdd;
     return option;
@@ -887,16 +972,69 @@ VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* shared, cons
 VBGlueResult
 VBoxBuildMachine(VBoxGlue glue, VBoxBuildOption* option) {
     
-    assert(glue   != NULL);
+    static const char* STORAGE_CONTROLLER_NAME = "SATA";
+
+    ivbox_session* session = toiVBoxSession(glue);
+    HRESULT result = NS_OK;
+
+    // sanity check
+    assert(session           != NULL);
+    assert(session->vbox     != NULL);
+    assert(session->client   != NULL);
+    assert(session->machine  != NULL);
+    assert(session->vsession != NULL);
+
     assert(option != NULL);
+    assert(0 < option->CpuCount);
+    assert(2048 <= option->MemSize);
+    assert(strlen(option->HostInterface) != 0);
+    assert(strlen(option->SharedDirPath) != 0);
+    assert(strlen(option->SharedDirName) != 0);
+    assert(strlen(option->BootImagePath) != 0);
+    assert(strlen(option->HddImagePath)  != 0);
+
+    // build basic machine with bios & motherboard settings
+    result = vbox_machine_build(session->vbox, session->machine, option->CpuCount, option->MemSize, session->error_msg);
+    if (FAILED(result)) {
+        return VBGlue_Fail;
+    }
+
+    // add nat network
+    result = vbox_machine_add_1st_nat_network(session->machine, session->vsession, session->error_msg);
+    if (FAILED(result)) {
+        return VBGlue_Fail;
+    }
     
-    printf("CPU Count %d", option->CpuCount);
-    printf("MEM Size  %d", option->MemorySize);
-    printf("HostIface %s", option->HostInterface);
-    printf("SharedFdl %s", option->SharedDirPath);
-    printf("BOOT CD   %s", option->BootImagePath);
-    printf("HDD Path  %s", option->HddImagePath);
+    // add bridged network
+    result = vbox_machine_add_2nd_bridged_network(session->machine, session->vsession, option->HostInterface, session->error_msg);
+    if (FAILED(result)) {
+        return VBGlue_Fail;
+    }
+
+    // add shared folder
+    result = vbox_machine_add_shared_folder(session->machine, session->vsession, option->SharedDirName, option->SharedDirPath, session->error_msg);
+    if (FAILED(result)) {
+        return VBGlue_Fail;
+    }
+
+    // add storage controller
+    result = vbox_machine_add_storage_controller(session->machine, session->vsession, STORAGE_CONTROLLER_NAME, session->error_msg);
+    if (FAILED(result)) {
+        return VBGlue_Fail;
+    }
+
+    // add boot image
+    result = vbox_machine_add_boot_image(session->vbox, session->machine, session->vsession, STORAGE_CONTROLLER_NAME, option->BootImagePath, session->error_msg);
+    if (FAILED(result)) {
+        return VBGlue_Fail;
+    }
     
+    // add hard drive
+    result = vbox_machine_add_hard_disk(session->vbox, session->machine, session->vsession, STORAGE_CONTROLLER_NAME, option->HddImagePath, 200000, session->error_msg);
+    if (FAILED(result)) {
+        return VBGlue_Fail;
+    }
+
     return VBGlue_Ok;
 }
 
@@ -906,7 +1044,7 @@ VBoxDestoryMachine(VBoxGlue glue) {
     // make sure the pointer passed is not null.
     assert(glue != NULL);
     
-    iVBoxSession* session = toiVBoxSession(glue);
+    ivbox_session* session = toiVBoxSession(glue);
     HRESULT result;
     ULONG media_count;
     IProgress *progress;
@@ -1024,7 +1162,7 @@ VboxMachineStart(IVirtualBox *virtualBox, ISession *session, IMachine *cmachine,
 
 VBGlueResult
 VBoxTestErrorMessage(VBoxGlue glue) {
-    iVBoxSession* session = toiVBoxSession(glue);
+    ivbox_session* session = toiVBoxSession(glue);
     print_error_info(session->error_msg, "[VBox] VBoxGlue Error Message Test", NS_OK);
     return VBGlue_Fail;
 }
