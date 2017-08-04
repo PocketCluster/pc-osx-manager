@@ -20,6 +20,7 @@
 #include "progress.h"
 #include "storage_controller.h"
 #include "network.h"
+#include "host.h"
 
 #include "libvboxcom.h"
 
@@ -161,6 +162,32 @@ CloseVBoxGlue(VBoxGlue glue) {
     return VBGlue_Ok;
 }
 
+
+#pragma mark host network interface
+VBGlueResult
+VBoxSearchHostNetworkInterfaceByName(VBoxGlue glue, const char* queryName, char** nameFound) {
+
+    assert(glue != NULL);
+    assert(queryName != NULL && strlen(queryName) != 0);
+    
+    ivbox_session* session = toiVBoxSession(glue);
+    IHost* host = NULL;
+    HRESULT result;
+    
+    result = VboxGetHostFromVirtualbox(session->vbox, &host);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] failed to get Host reference", result);
+        return VBGlue_Fail;
+    }
+    
+    result = VboxHostSearchNetworkInterfacesFromList(host, queryName, nameFound);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] failed to find host networkInterface", result);
+        return VBGlue_Fail;
+    }
+    
+    return result;
+}
 
 #pragma mark machine status
 VBGlueResult
@@ -1276,8 +1303,38 @@ VboxGetMachineID(VBoxGlue glue) {
     return toiVBoxSession(glue)->machine_id;
 }
 
-
 # if 0
+VBGlueResult
+VBoxFindHostNetworkInterfaceByName(VBoxGlue glue, const char* queryName, char** fullNameFound) {
+    assert(glue != NULL);
+    
+    IHost* host = NULL;
+    IHostNetworkInterface* hIface = NULL;
+    ivbox_session* session = toiVBoxSession(glue);
+    
+    HRESULT result;
+    
+    result = VboxGetHostFromVirtualbox(session->vbox, &host);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] failed to get Host reference", result);
+        return VBGlue_Fail;
+    }
+    
+    result = VboxHostFindNetworkInterfaceByName(host, queryName, &hIface);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] failed to find HostNetworkInterface", result);
+        return VBGlue_Fail;
+    }
+    
+    result = VboxGetHostNetworkInterfaceName(hIface, fullNameFound);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] failed to get full host network interface name", result);
+    }
+    
+    IHostNetworkInterface_Release(hIface);
+    return result;
+}
+
 /**
  * Register passive event listener for the selected VM.
  *

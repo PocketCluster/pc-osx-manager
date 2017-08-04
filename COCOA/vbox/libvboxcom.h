@@ -41,6 +41,11 @@ CloseVBoxGlue(VBoxGlue glue);
 extern unsigned int VBoxAppVersion(void);
 extern unsigned int VBoxApiVersion(void);
 
+#pragma mark host network interface
+// ** you are resposible for clearing the acquired name string **
+VBGlueResult
+VBoxSearchHostNetworkInterfaceByName(VBoxGlue glue, const char* queryName, char** fullNameFound);
+
 
 #pragma mark machine status
 VBGlueResult

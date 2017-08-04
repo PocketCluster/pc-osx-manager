@@ -62,36 +62,25 @@ HRESULT VboxNetworkAddPortForwardingRule(INetworkAdapter *cAdapter, const char* 
         return result;
     }
 
-    // add port forwarding rule
+    // add port forwarding rule.
+    // Even if this fails we need to go on to free memories
     result = INATEngine_AddRedirect(natEngine, wRuleName, protocol, wHostIp, hostPort, wGuestIp, guestPort);
-    if (FAILED(result)) {
-        return result;
-    }
 
     // the DNS Host Resolver doesn't support SRV records
     // the DNS proxy has performance issues
     // direct DNS pass-through doesn't support roaming laptops well
     // we can't win, so let's go direct and at least get performance
     result = INATEngine_SetDNSProxy(natEngine, PR_FALSE);
-    if (FAILED(result)) {
-        return result;
-    }
     result = INATEngine_SetDNSUseHostResolver(natEngine, PR_FALSE);
-    if (FAILED(result)) {
-        return result;
-    }
     
-    // release NAT engine
-    result = INATEngine_Release(natEngine);
-    if (FAILED(result)) {
-        return result;
-    }
+    // release NAT engine (we'll skip the result to pass important results)
+    INATEngine_Release(natEngine);
 
     g_pVBoxFuncs->pfnUtf16Free(wGuestIp);
     g_pVBoxFuncs->pfnUtf16Free(wHostIp);
     g_pVBoxFuncs->pfnUtf16Free(wRuleName);
     
-    return NS_OK;
+    return result;
 }
 
 HRESULT VboxNetworkAdapterRelease(INetworkAdapter *cAdapter) {

@@ -45,6 +45,23 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
     XCTAssertTrue( 5001 <= VBoxApiVersion(), @"VBox API version should be greater than or equal to  5001");
 }
 
+-(void)test_Search_Host_Interface {
+    char* fullName = NULL;
+    const char* foundName = "en1: Wi-Fi (AirPort)";
+    VBGlueResult result;
+    
+    result = VBoxSearchHostNetworkInterfaceByName(vboxGlue, "en1", &fullName);
+    XCTAssertTrue( VBGlue_Ok == result, @"find network address should not generate error");
+    XCTAssertTrue( strcmp(foundName, fullName) == 0, @"full name should match");
+    
+    if (result == VBGlue_Fail) {
+        NSLog(@"Failure reason %s", VBoxGetErrorMessage(vboxGlue));
+    } else {
+        NSLog(@"Full network interface name | %s", fullName);
+    }
+    free(fullName);
+}
+
 -(void)test_Error_Message {
     XCTAssertTrue( VBGlue_Fail == VBoxTestErrorMessage(vboxGlue),               @"Should generate error");
     NSLog(@"Error Message %s", VBoxGetErrorMessage(vboxGlue));

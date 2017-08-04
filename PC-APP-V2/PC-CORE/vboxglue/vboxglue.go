@@ -145,6 +145,8 @@ func (v *goVoxGlue) BuildMachine() error {
         option            = C.VBoxMakeBuildOption(2, 2048, cHostInterface, cSharedFolderPath, cSharedFolderName, cBootImagePath, cHddImagePath)
     )
 
+    // 'VBoxManage list bridgedifs' shows full interface name
+
     result := C.VBoxBuildMachine(v.cvboxglue, option)
     if result != VBGlue_Ok {
         return errors.Errorf("[ERR] unable to build machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
