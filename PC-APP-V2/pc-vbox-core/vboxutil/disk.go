@@ -16,7 +16,7 @@ import (
 
 const (
     magicString string = "pc-core, please format-me"
-    DefualtCoreDiskName = "pc-core-hdd"
+    DefualtCoreDiskName = "pc-core-hdd.vmdk"
 )
 
 // MachineDisk information.
@@ -46,7 +46,7 @@ func NewMachineDisk(baseFolder, imageName string, diskSize uint, debug bool) *Ma
     return &MachineDisk {
         Debug:               debug,
         DiskSize:            diskSize,
-        DiskImage:           filepath.Join(baseFolder, fmt.Sprintf("%s.vmdk", imageName)),
+        DiskImage:           filepath.Join(baseFolder, imageName),
         VBM:                 "/usr/local/bin/VBoxManage",
     }
 }

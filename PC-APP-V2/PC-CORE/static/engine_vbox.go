@@ -163,6 +163,7 @@ func buildVboxMachine(a *appMainLife) error {
         return errors.WithStack(err)
     }
     hddPath := filepath.Join(vmPath, vboxutil.DefualtCoreDiskName)
+    log.Debugf("[VBOX] %s", hddPath)
 
     builder := &vboxglue.VBoxBuildOption{
         CPUCount:            cpuCount,
