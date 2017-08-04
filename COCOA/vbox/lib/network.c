@@ -16,7 +16,7 @@ HRESULT VboxNetworkAdapterSetBridgedHostInterface(INetworkAdapter *cAdapter, con
     if (FAILED(result)) {
         return result;
     }
-    result = INetworkAdapter_SetBridgedInterface(cAdapter, NULL);
+    result = INetworkAdapter_SetBridgedInterface(cAdapter, wHostInterface);
     g_pVBoxFuncs->pfnUtf16Free(wHostInterface);
     return result;
 }
