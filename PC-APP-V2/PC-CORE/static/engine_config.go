@@ -1,21 +1,17 @@
 package main
 
 import (
-    "os"
-    "path"
-
-    log "github.com/Sirupsen/logrus"
     tefaults "github.com/gravitational/teleport/lib/defaults"
     tervice "github.com/gravitational/teleport/lib/service"
-
     "github.com/coreos/etcd/embed"
+
+    log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
 
-    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/context"
-    "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/extlib/registry"
     "github.com/stkim1/pc-core/extlib/pcssh/sshcfg"
+    "github.com/stkim1/pc-core/model"
 )
 
 type serviceConfig struct {
@@ -27,7 +23,11 @@ type serviceConfig struct {
 func setupServiceConfig() (*serviceConfig, error) {
     // setup context
     ctx := context.SharedHostContext()
-    context.SetupBasePath()
+    err := context.SetupBasePath()
+    if err != nil {
+        // this is critical
+        return nil, errors.WithStack(err)
+    }
 
     // open database
     dataDir, err := ctx.ApplicationUserDataDirectory()
@@ -110,10 +110,9 @@ func setupServiceConfig() (*serviceConfig, error) {
     }
 
     // registry configuration
-    var regPath = path.Join(dataDir, defaults.RepositoryPathPostfix)
-    if _, err := os.Stat(regPath); os.IsNotExist(err) {
-        os.MkdirAll(path.Join(regPath, "docker/registry/v2/repositories"), 0700)
-        os.MkdirAll(path.Join(regPath, "docker/registry/v2/blobs"),        0700)
+    regPath, err := context.SharedHostContext().ApplicationRepositoryDirectory()
+    if err != nil {
+        return nil, errors.WithStack(err)
     }
     regCfg, err := registry.NewPocketRegistryConfig(false, regPath, hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
@@ -125,9 +124,9 @@ func setupServiceConfig() (*serviceConfig, error) {
     }
 
     //etcd configuration
-    var etcdPath = path.Join(dataDir, defaults.StoragePathPostfix)
-    if _, err := os.Stat(etcdPath); os.IsNotExist(err) {
-        os.MkdirAll(etcdPath, 0700)
+    etcdPath, err := context.SharedHostContext().ApplicationStorageDirectory()
+    if err != nil {
+        return nil, errors.WithStack(err)
     }
     // recommended parameter values
     // heartbeat : 500
@@ -136,7 +135,6 @@ func setupServiceConfig() (*serviceConfig, error) {
     // TODO : these parameters need to be dynamically adjusted according to a cluster condition
     etcdCfg, err := embed.NewPocketConfig(etcdPath, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey, 500, 5000, 1000, true)
     if err != nil {
-        // this is critical
         return nil, errors.WithStack(err)
     }
     return &serviceConfig {

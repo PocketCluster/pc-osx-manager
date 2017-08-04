@@ -28,8 +28,8 @@ const (
 )
 
 type VBoxBuildOption struct {
-    CPUCount            int
-    MemSize             int
+    CPUCount            uint
+    MemSize             uint
     BaseDirPath         string
     MachineName         string
     HostInterface       string
@@ -39,8 +39,34 @@ type VBoxBuildOption struct {
     SharedFolderName    string
 }
 
-func ValidateVBoxBuildOption(buildOption *VBoxBuildOption) error {
-
+func ValidateVBoxBuildOption(builder *VBoxBuildOption) error {
+    if builder.CPUCount < 2 || 16 < builder.CPUCount {
+        return errors.Errorf("[ERR] invalid cpu allocation")
+    }
+    if builder.MemSize < 4096 || 16384 < builder.MemSize {
+        return errors.Errorf("[ERR] invalid memory allocation")
+    }
+    if len(builder.BaseDirPath) == 0 {
+        return errors.Errorf("[ERR] invalid base directory")
+    }
+    if len(builder.MachineName) == 0 {
+        return errors.Errorf("[ERR] invalid machine name")
+    }
+    if len(builder.HostInterface) == 0 {
+        return errors.Errorf("[ERR] invalid host interface assignment")
+    }
+    if len(builder.BootImagePath) == 0 {
+        return errors.Errorf("[ERR] invalid boot image path")
+    }
+    if len(builder.HddImagePath) == 0 {
+        return errors.Errorf("[ERR] invalid persistent disk image path")
+    }
+    if len(builder.SharedFolderPath) == 0 {
+        return errors.Errorf("[ERR] invalid shared directory path")
+    }
+    if len(builder.SharedFolderName) == 0 {
+        return errors.Errorf("[ERR] invalid shared directory name")
+    }
     return nil
 }
 

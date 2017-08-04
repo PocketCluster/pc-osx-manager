@@ -219,14 +219,6 @@ func main() {
                     }
 
                     case operation.CmdTeleportRootAdd: {
-                        cid, err := context.SharedHostContext().MasterAgentName()
-                        if err != nil {
-                            log.Debug(err)
-                        }
-                        err = buildVboxCoreDisk(cid, config.teleConfig)
-                        if err != nil {
-                            log.Debug(err)
-                        }
                     }
                     case operation.CmdTeleportUserAdd: {
                         log.Debugf("[OP] %v", e.String())
@@ -235,13 +227,22 @@ func main() {
                     /// DEBUG ///
 
                     case operation.CmdDebug: {
+/*
                         sl := a.ServiceList()
                         for i, _ := range sl {
                             s := sl[i]
                             log.Debugf("[SERVICE] %s, %v", s.Tag(), s.IsRunning())
                         }
-
-                        err := vboxOperation(a)
+*/
+                        cid, err := context.SharedHostContext().MasterAgentName()
+                        if err != nil {
+                            log.Debug(err)
+                        }
+                        err = buildVboxCoreDisk(cid, config.teleConfig)
+                        if err != nil {
+                            log.Debug(err)
+                        }
+                        err = buildVboxMachine(a)
                         if err != nil {
                             log.Debugf("vbox operation error %v", err)
                         }

@@ -3,6 +3,7 @@ package main
 import (
     "net"
     "time"
+    "path/filepath"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -20,6 +21,7 @@ import (
     tervice "github.com/gravitational/teleport/lib/service"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/vboxglue"
+    "github.com/stkim1/pc-core/defaults"
 )
 
 func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
@@ -27,7 +29,6 @@ func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
 
     var (
         authToken          string                = ""
-        dataPath           string                = ""
         userName           string                = ""
         cVpuk, cVprk, mVpuk [] byte              = nil, nil, nil
         eAcrt, eKcrt, ePrk [] byte               = nil, nil, nil
@@ -40,10 +41,6 @@ func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
 
 
     // core user & disk path
-    dataPath, err = context.SharedHostContext().ApplicationUserDataDirectory()
-    if err != nil {
-        return errors.WithStack(err)
-    }
     userName, err = context.SharedHostContext().LoginUserName()
     if err != nil {
         return errors.WithStack(err)
@@ -107,7 +104,11 @@ func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
 
 
     // build disk
-    md = vboxutil.NewMachineDisk(dataPath, vboxutil.DefualtCoreDiskName,20000, true)
+    vmPath, err := context.SharedHostContext().ApplicationVirtualMachineDirectory()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    md = vboxutil.NewMachineDisk(vmPath, vboxutil.DefualtCoreDiskName,36000, true)
     md.ClusterID = clusterID
     md.AuthToken = authToken
     md.UserName = userName
@@ -119,6 +120,73 @@ func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     md.EnginePrivateKey = ePrk
 
     return errors.WithStack(md.BuildCoreDiskImage())
+}
+
+func buildVboxMachine(a *appMainLife) error {
+    vglue, err := vboxglue.NewGOVboxGlue()
+    if err != nil {
+        errors.WithStack(err)
+    }
+    log.Debugf("AppVersion %d, ApiVersion %d", vglue.AppVersion(), vglue.APIVersion())
+
+    cpuCount := context.SharedHostContext().HostProcessorCount()
+    if 16 <= cpuCount {
+        cpuCount = 16
+    }
+
+    // TODO : get the memory size from context
+    //memSize  := ctx.HostPhysicalMemorySize()
+    var memSize uint = 8192
+
+    // base directory
+    baseDir, err := context.SharedHostContext().ApplicationUserDataDirectory()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    // host interface name
+    iname, err := context.SharedHostContext().HostPrimaryInterfaceShortName()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    vbifname, err := vglue.SearchHostNetworkInterfaceByName(iname)
+    if err != nil {
+        errors.WithStack(err)
+    }
+
+    // TODO get this from context
+    bootPath := "/Users/almightykim/Workspace/VBOX-IMAGE/pc-core.iso"
+
+    // hdd path
+    vmPath, err := context.SharedHostContext().ApplicationVirtualMachineDirectory()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    hddPath := filepath.Join(vmPath, vboxutil.DefualtCoreDiskName)
+
+    builder := &vboxglue.VBoxBuildOption{
+        CPUCount:            cpuCount,
+        MemSize:             memSize,
+        BaseDirPath:         baseDir,
+        MachineName:         defaults.PocketClusterCoreName,
+        HostInterface:       vbifname,
+        BootImagePath:       bootPath,
+        HddImagePath:        hddPath,
+        SharedFolderPath:    "/Users/almightykim/temp",
+        SharedFolderName:    "/tmp",
+    }
+
+    err = vboxglue.ValidateVBoxBuildOption(builder)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    err = vglue.BuildMachine(builder)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    return vglue.Close()
 }
 
 func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <- chan struct{}) error {
@@ -329,22 +397,4 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
         service.BindEventWithService(iventVboxCtrlInstanceSpawn, ctrlObjC))
 
     return nil
-}
-
-
-func vboxOperation(a *appMainLife) error {
-    vglue, err := vboxglue.NewGOVboxGlue()
-    if err != nil {
-        errors.WithStack(err)
-    }
-
-    log.Debugf("AppVersion %d, ApiVersion %d", vglue.AppVersion(), vglue.APIVersion())
-    iname, err := vglue.SearchHostNetworkInterfaceByName("en1")
-    if err != nil {
-        errors.WithStack(err)
-    }
-    log.Debugf("Host Iface Found %s", iname)
-
-    log.Debugf(vglue.TestErrorMessage().Error())
-    return vglue.Close()
 }
