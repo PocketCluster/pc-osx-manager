@@ -339,7 +339,12 @@ func vboxOperation(a *appMainLife) error {
     }
 
     log.Debugf("AppVersion %d, ApiVersion %d", vglue.AppVersion(), vglue.APIVersion())
-    vglue.BuildMachine()
+    iname, err := vglue.SearchHostNetworkInterfaceByName("en1")
+    if err != nil {
+        errors.WithStack(err)
+    }
+    log.Debug("Host Iface Found %s", iname)
+
     log.Debugf(vglue.TestErrorMessage().Error())
     return vglue.Close()
 }

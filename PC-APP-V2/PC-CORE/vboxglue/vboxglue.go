@@ -3,8 +3,8 @@
 package vboxglue
 
 /*
-#cgo LDFLAGS: -Wl,-U,_NewVBoxGlue,-U,_CloseVBoxGlue,-U,_VBoxAppVersion,-U,_VBoxApiVersion,-U,_VBoxIsMachineSettingChanged
-#cgo LDFLAGS: -Wl,-U,_VBoxFindMachineByNameOrID,-U,_VBoxCreateMachineByName,-U,_VBoxReleaseMachine
+#cgo LDFLAGS: -Wl,-U,_NewVBoxGlue,-U,_CloseVBoxGlue,-U,_VBoxAppVersion,-U,_VBoxApiVersion,-U,_VBoxSearchHostNetworkInterfaceByName
+#cgo LDFLAGS: -Wl,-U,_VBoxIsMachineSettingChanged,-U,_VBoxFindMachineByNameOrID,-U,_VBoxCreateMachineByName,-U,_VBoxReleaseMachine
 #cgo LDFLAGS: -Wl,-U,_VBoxMakeBuildOption,-U,_VBoxBuildMachine,-U,_VBoxDestoryMachine
 #cgo LDFLAGS: -Wl,-U,_VBoxGetErrorMessage,-U,_VboxGetSettingFilePath,-U,_VboxGetMachineID
 #cgo LDFLAGS: -Wl,-U,_VBoxTestErrorMessage
@@ -32,6 +32,7 @@ type VBoxGlue interface {
 
     AppVersion() uint
     APIVersion() uint
+    SearchHostNetworkInterfaceByName(hostIface string) (string, error)
 
     IsMachineSettingChanged() (bool, error)
 
@@ -79,6 +80,31 @@ func (v *goVoxGlue) AppVersion() uint {
 
 func (v *goVoxGlue) APIVersion() uint {
     return uint(C.VBoxApiVersion())
+}
+
+// 'VBoxManage list bridgedifs' also shows full interface name. Compare if necessary
+func (v *goVoxGlue) SearchHostNetworkInterfaceByName(hostIface string) (string, error) {
+    if len(hostIface) == 0 {
+        return "", errors.Errorf("[ERR] empty host interface input")
+    }
+    var (
+        cHostIface = C.CString(hostIface)
+        cNameFound *C.char = nil
+        nameFound string = ""
+    )
+
+    result := C.VBoxSearchHostNetworkInterfaceByName(v.cvboxglue, cHostIface, &cNameFound)
+    if result != VBGlue_Ok {
+        return "", errors.Errorf("[ERR] unable to host interface for %s. Reason : %v", hostIface, C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
+    }
+
+    nameFound = C.GoString(cNameFound)
+    C.free(unsafe.Pointer(cHostIface))
+    if cNameFound != nil {
+        C.free(unsafe.Pointer(cNameFound))
+    }
+
+    return nameFound, nil
 }
 
 func (v *goVoxGlue) IsMachineSettingChanged() (bool, error) {
@@ -144,8 +170,6 @@ func (v *goVoxGlue) BuildMachine() error {
         cHddImagePath     = C.CString("/Users/almightykim/Workspace/VBOX-IMAGE/pc-core-hdd.vmdk")
         option            = C.VBoxMakeBuildOption(2, 2048, cHostInterface, cSharedFolderPath, cSharedFolderName, cBootImagePath, cHddImagePath)
     )
-
-    // 'VBoxManage list bridgedifs' shows full interface name
 
     result := C.VBoxBuildMachine(v.cvboxglue, option)
     if result != VBGlue_Ok {
