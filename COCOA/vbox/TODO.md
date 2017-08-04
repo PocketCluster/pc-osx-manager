@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] pass appropriate host network interface name  
+- [x] pass appropriate host network interface name  
 - [x] port forwarding host : (127.0.01:3022) <-> guest : (x.x.x.15:3022)
 - [x] sata host cache
 - [x] pass a folder to be shared
