@@ -138,10 +138,11 @@ func (v *goVoxGlue) ReleaseMachine() error {
 func (v *goVoxGlue) BuildMachine() error {
     var (
         cHostInterface    = C.CString("en1: Wi-Fi (AirPort)")
-        cSharedFolderName = C.CString("/Users/almightykim/Workspace/")
+        cSharedFolderPath = C.CString("/Users/almightykim/Workspace/")
+        cSharedFolderName = C.CString("/Workspace")
         cBootImagePath    = C.CString("/Users/almightykim/Workspace/VBOX-IMAGE/pc-core.iso")
         cHddImagePath     = C.CString("/Users/almightykim/Workspace/VBOX-IMAGE/pc-core-hdd.vmdk")
-        option            = C.VBoxMakeBuildOption(2, 2048, cHostInterface, cSharedFolderName, cBootImagePath, cHddImagePath)
+        option            = C.VBoxMakeBuildOption(2, 2048, cHostInterface, cSharedFolderPath, cSharedFolderName, cBootImagePath, cHddImagePath)
     )
 
     result := C.VBoxBuildMachine(v.cvboxglue, option)
@@ -150,6 +151,7 @@ func (v *goVoxGlue) BuildMachine() error {
     }
 
     C.free(unsafe.Pointer(cHostInterface))
+    C.free(unsafe.Pointer(cSharedFolderPath))
     C.free(unsafe.Pointer(cSharedFolderName))
     C.free(unsafe.Pointer(cBootImagePath))
     C.free(unsafe.Pointer(cHddImagePath))
