@@ -22,10 +22,10 @@ typedef struct VBoxBuildOption {
     int            CpuCount;
     int            MemSize;
     const char*    HostInterface;
-    const char*    SharedDirPath;
-    const char*    SharedDirName;
     const char*    BootImagePath;
     const char*    HddImagePath;
+    const char*    SharedDirPath;
+    const char*    SharedDirName;
 } VBoxBuildOption;
 
 
@@ -67,7 +67,7 @@ VBoxReleaseMachine(VBoxGlue glue);
 // option created by this function does not handle deallocation.
 // make sure to dealloc it once done
 VBoxBuildOption*
-VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* spath, const char* sname, const char* boot, const char* hdd);
+VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* boot, const char* hdd, const char* spath, const char* sname);
 
 VBGlueResult
 VBoxBuildMachine(VBoxGlue glue, VBoxBuildOption* option);

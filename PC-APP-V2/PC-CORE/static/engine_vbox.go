@@ -343,7 +343,7 @@ func vboxOperation(a *appMainLife) error {
     if err != nil {
         errors.WithStack(err)
     }
-    log.Debug("Host Iface Found %s", iname)
+    log.Debugf("Host Iface Found %s", iname)
 
     log.Debugf(vglue.TestErrorMessage().Error())
     return vglue.Close()

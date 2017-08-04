@@ -1078,15 +1078,15 @@ vbox_machine_add_hard_disk(IVirtualBox* virtualbox, IMachine* vbox_machine, ISes
 
 #pragma mark -
 VBoxBuildOption*
-VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* spath, const char* sname, const char* boot, const char* hdd) {
+VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* boot, const char* hdd, const char* spath, const char* sname) {
     VBoxBuildOption* option = (VBoxBuildOption*)calloc(1, sizeof(VBoxBuildOption));
     option->CpuCount      = cpu;
     option->MemSize       = mem;
     option->HostInterface = host;
-    option->SharedDirPath = spath;
-    option->SharedDirName = sname;
     option->BootImagePath = boot;
     option->HddImagePath  = hdd;
+    option->SharedDirPath = spath;
+    option->SharedDirName = sname;
     return option;
 }
 

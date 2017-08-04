@@ -27,6 +27,23 @@ const (
     VBGlue_Fail = C.VBGlue_Fail
 )
 
+type VBoxBuildOption struct {
+    CPUCount            int
+    MemSize             int
+    BaseDirPath         string
+    MachineName         string
+    HostInterface       string
+    BootImagePath       string
+    HddImagePath        string
+    SharedFolderPath    string
+    SharedFolderName    string
+}
+
+func ValidateVBoxBuildOption(buildOption *VBoxBuildOption) error {
+
+    return nil
+}
+
 type VBoxGlue interface {
     Close() error
 
@@ -40,7 +57,7 @@ type VBoxGlue interface {
     CreateMachineByName(baseFolder, machineName string) error
     ReleaseMachine() error
 
-    BuildMachine() error
+    BuildMachine(builder *VBoxBuildOption) error
     DestoryMachine() error
 
     TestErrorMessage() error
@@ -161,21 +178,35 @@ func (v *goVoxGlue) ReleaseMachine() error {
     return nil
 }
 
-func (v *goVoxGlue) BuildMachine() error {
+func (v *goVoxGlue) BuildMachine(builder *VBoxBuildOption) error {
+    err := ValidateVBoxBuildOption(builder)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
     var (
-        cHostInterface    = C.CString("en1: Wi-Fi (AirPort)")
-        cSharedFolderPath = C.CString("/Users/almightykim/Workspace/")
-        cSharedFolderName = C.CString("/Workspace")
-        cBootImagePath    = C.CString("/Users/almightykim/Workspace/VBOX-IMAGE/pc-core.iso")
-        cHddImagePath     = C.CString("/Users/almightykim/Workspace/VBOX-IMAGE/pc-core-hdd.vmdk")
-        option            = C.VBoxMakeBuildOption(2, 2048, cHostInterface, cSharedFolderPath, cSharedFolderName, cBootImagePath, cHddImagePath)
+        cBaseDirPath      = C.CString(builder.BaseDirPath)
+        cMachineName      = C.CString(builder.MachineName)
+        cHostInterface    = C.CString(builder.HostInterface)
+        cBootImagePath    = C.CString(builder.BootImagePath)
+        cHddImagePath     = C.CString(builder.HddImagePath)
+        cSharedFolderPath = C.CString(builder.SharedFolderPath)
+        cSharedFolderName = C.CString(builder.SharedFolderName)
+        option            = C.VBoxMakeBuildOption(C.int(builder.CPUCount), C.int(builder.MemSize), cHostInterface, cBootImagePath, cHddImagePath, cSharedFolderPath, cSharedFolderName)
     )
 
-    result := C.VBoxBuildMachine(v.cvboxglue, option)
+    result := C.VBoxCreateMachineByName(v.cvboxglue, cBaseDirPath, cMachineName)
+    if result != VBGlue_Ok {
+        return errors.Errorf("[ERR] unable to create machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
+    }
+
+    result = C.VBoxBuildMachine(v.cvboxglue, option)
     if result != VBGlue_Ok {
         return errors.Errorf("[ERR] unable to build machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
     }
 
+    C.free(unsafe.Pointer(cBaseDirPath))
+    C.free(unsafe.Pointer(cMachineName))
     C.free(unsafe.Pointer(cHostInterface))
     C.free(unsafe.Pointer(cSharedFolderPath))
     C.free(unsafe.Pointer(cSharedFolderName))
