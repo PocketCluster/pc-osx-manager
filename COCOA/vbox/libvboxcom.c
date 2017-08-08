@@ -341,34 +341,34 @@ VBoxReleaseMachine(VBoxGlue glue) {
 
 /*
  typedef enum MachineState {
- MachineState_Null = 0,
- MachineState_PoweredOff = 1,
- MachineState_Saved = 2,
- MachineState_Teleported = 3,
- MachineState_Aborted = 4,
- MachineState_Running = 5,
- MachineState_Paused = 6,
- MachineState_Stuck = 7,
- MachineState_Teleporting = 8,
- MachineState_LiveSnapshotting = 9,
- MachineState_Starting = 10,
- MachineState_Stopping = 11,
- MachineState_Saving = 12,
- MachineState_Restoring = 13,
- MachineState_TeleportingPausedVM = 14,
- MachineState_TeleportingIn = 15,
- MachineState_FaultTolerantSyncing = 16,
- MachineState_DeletingSnapshotOnline = 17,
- MachineState_DeletingSnapshotPaused = 18,
- MachineState_OnlineSnapshotting = 19,
- MachineState_RestoringSnapshot = 20,
- MachineState_DeletingSnapshot = 21,
- MachineState_SettingUp = 22,
- MachineState_Snapshotting = 23,
- MachineState_FirstOnline = 5,
- MachineState_LastOnline = 19,
- MachineState_FirstTransient = 8,
- MachineState_LastTransient = 23
+   MachineState_Null = 0,
+   MachineState_PoweredOff = 1,
+   MachineState_Saved = 2,
+   MachineState_Teleported = 3,
+   MachineState_Aborted = 4,
+   MachineState_Running = 5,
+   MachineState_Paused = 6,
+   MachineState_Stuck = 7,
+   MachineState_Teleporting = 8,
+   MachineState_LiveSnapshotting = 9,
+   MachineState_Starting = 10,
+   MachineState_Stopping = 11,
+   MachineState_Saving = 12,
+   MachineState_Restoring = 13,
+   MachineState_TeleportingPausedVM = 14,
+   MachineState_TeleportingIn = 15,
+   MachineState_FaultTolerantSyncing = 16,
+   MachineState_DeletingSnapshotOnline = 17,
+   MachineState_DeletingSnapshotPaused = 18,
+   MachineState_OnlineSnapshotting = 19,
+   MachineState_RestoringSnapshot = 20,
+   MachineState_DeletingSnapshot = 21,
+   MachineState_SettingUp = 22,
+   MachineState_Snapshotting = 23,
+   MachineState_FirstOnline = 5,
+   MachineState_LastOnline = 19,
+   MachineState_FirstTransient = 8,
+   MachineState_LastTransient = 23
  } MachineState;
  #define MachineState_T PRUint32
  */
@@ -1368,12 +1368,12 @@ VBoxGetErrorMessage(VBoxGlue glue) {
 }
 
 const char*
-VboxGetSettingFilePath(VBoxGlue glue) {
+VBoxGetSettingFilePath(VBoxGlue glue) {
     return toiVBoxSession(glue)->setting_file_path;
 }
 
 const char*
-VboxGetMachineID(VBoxGlue glue) {
+VBoxGetMachineID(VBoxGlue glue) {
     return toiVBoxSession(glue)->machine_id;
 }
 

@@ -73,8 +73,8 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
 
     VBGlueResult result = VBoxCreateMachineByName(vboxGlue, [userhome UTF8String], TEST_MACHINE_NAME);
     XCTAssertTrue( VBGlue_Ok == result, @"Machine creation should return true");
-    NSLog(@"setting file path %s", VboxGetSettingFilePath(vboxGlue));
-    NSLog(@"MachineID Origin %s", VboxGetMachineID(vboxGlue));
+    NSLog(@"setting file path %s", VBoxGetSettingFilePath(vboxGlue));
+    NSLog(@"MachineID Origin %s", VBoxGetMachineID(vboxGlue));
     
     result = VBoxReleaseMachine(vboxGlue);
     XCTAssertTrue( VBGlue_Ok == result, @"Releasing machine should not generate error");
@@ -94,13 +94,13 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
     result = VBoxBuildMachine(vboxGlue, options);
     XCTAssertTrue( VBGlue_Ok == result, @"Machine building should return true");
     if (result == VBGlue_Ok) {
-        NSLog (@"setting file path %s", VboxGetSettingFilePath(vboxGlue));
-        NSLog(@"MachineID Origin %s", VboxGetMachineID(vboxGlue));
+        NSLog (@"setting file path %s", VBoxGetSettingFilePath(vboxGlue));
+        NSLog(@"MachineID Origin %s", VBoxGetMachineID(vboxGlue));
     } else {
         NSLog(@"Failed reason %s", VBoxGetErrorMessage(vboxGlue));
     }
  
-    size_t len = strlen(VboxGetMachineID(vboxGlue));
+    size_t len = strlen(VBoxGetMachineID(vboxGlue));
     XCTAssertTrue( len != 0, @"Machine id should not be zero");
 }
 

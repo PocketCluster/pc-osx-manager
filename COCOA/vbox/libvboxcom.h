@@ -108,9 +108,9 @@ const char*
 VBoxGetErrorMessage(VBoxGlue glue);
 
 const char*
-VboxGetSettingFilePath(VBoxGlue glue);
+VBoxGetSettingFilePath(VBoxGlue glue);
 
 const char*
-VboxGetMachineID(VBoxGlue glue);
+VBoxGetMachineID(VBoxGlue glue);
 
 #endif /* __LIBVBOXCOM_H__ */
