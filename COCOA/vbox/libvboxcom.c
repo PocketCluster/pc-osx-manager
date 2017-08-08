@@ -339,6 +339,71 @@ VBoxReleaseMachine(VBoxGlue glue) {
     return VBGlue_Ok;
 }
 
+/*
+ typedef enum MachineState {
+ MachineState_Null = 0,
+ MachineState_PoweredOff = 1,
+ MachineState_Saved = 2,
+ MachineState_Teleported = 3,
+ MachineState_Aborted = 4,
+ MachineState_Running = 5,
+ MachineState_Paused = 6,
+ MachineState_Stuck = 7,
+ MachineState_Teleporting = 8,
+ MachineState_LiveSnapshotting = 9,
+ MachineState_Starting = 10,
+ MachineState_Stopping = 11,
+ MachineState_Saving = 12,
+ MachineState_Restoring = 13,
+ MachineState_TeleportingPausedVM = 14,
+ MachineState_TeleportingIn = 15,
+ MachineState_FaultTolerantSyncing = 16,
+ MachineState_DeletingSnapshotOnline = 17,
+ MachineState_DeletingSnapshotPaused = 18,
+ MachineState_OnlineSnapshotting = 19,
+ MachineState_RestoringSnapshot = 20,
+ MachineState_DeletingSnapshot = 21,
+ MachineState_SettingUp = 22,
+ MachineState_Snapshotting = 23,
+ MachineState_FirstOnline = 5,
+ MachineState_LastOnline = 19,
+ MachineState_FirstTransient = 8,
+ MachineState_LastTransient = 23
+ } MachineState;
+ #define MachineState_T PRUint32
+ */
+
+VBGlueMachineState
+VboxMachineState(VBoxGlue glue) {
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
+
+    ivbox_session* session = toiVBoxSession(glue);
+    MachineState mState;
+    HRESULT result;
+
+    result = VboxMachineGetState(session->machine, &mState);
+    if (FAILED(result)) {
+        return VBGlueMachine_Illegal;
+    }
+
+    switch (mState) {
+        case MachineState_PoweredOff:
+        case MachineState_Aborted:
+        case MachineState_Running:
+        case MachineState_Paused:
+        case MachineState_Stuck:
+        case MachineState_Starting:
+        case MachineState_Stopping: {
+            return (VBGlueMachineState)mState;
+        }
+        default:
+            return VBGlueMachine_Illegal;
+    }
+
+    return VBGlueMachine_Illegal;
+}
+
 
 #pragma mark build & destroy machine
 HRESULT
@@ -505,7 +570,6 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
             print_error_info(error_message, "[VBox] Failed to enable large page allocation", result);
             return result;
         }
-        
     }
     
     // Acceleration
@@ -553,6 +617,16 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
             return result;
         }
         audio = NULL;
+    }
+
+    // misc settings
+    {
+        // disable teleportation (this cause false "setting changed" flag)
+        result = IMachine_SetTeleporterEnabled(vbox_machine, PR_FALSE);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to disable teleportation", result);
+            return result;
+        }
     }
     
     // SAVE SETTINGS & REGISTER MACHINE BEFORE ATTACH A MEDIUM

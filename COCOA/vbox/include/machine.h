@@ -45,8 +45,6 @@ HRESULT VboxMachineCreateSharedFolder(IMachine *cmachine, const char* cName, con
 
 HRESULT VboxMachineGetNetworkAdapter(IMachine *cmachine, PRUint32 slotNumber, INetworkAdapter **cAdapter);
 
-HRESULT VboxMachineLaunchVMProcess(IMachine* cmachine, ISession* csession, char* cuiType, char* cenvironment, IProgress** cprogress);
-
 HRESULT VboxIMachineRelease(IMachine* cmachine);
 
 HRESULT VboxCreateMachine(IVirtualBox* cbox, char* cSettingsFile, const char* cname, char* cosTypeId, char* cflags, IMachine** cmachine);
@@ -58,5 +56,11 @@ HRESULT VboxFindMachine(IVirtualBox* cbox, const char* cnameOrId, IMachine** cma
 HRESULT VboxGetMachines(IVirtualBox* cbox, IMachine*** cmachines, ULONG* machineCount);
 
 HRESULT VboxRegisterMachine(IVirtualBox* cbox, IMachine* cmachine);
+
+#pragma mark State/Launch
+
+HRESULT VboxMachineGetState(IMachine* cmachine, MachineState *state);
+
+HRESULT VboxMachineLaunchVMProcess(IMachine* cmachine, ISession* csession, char* cuiType, char* cenvironment, IProgress** cprogress);
 
 #endif /* machine_h */

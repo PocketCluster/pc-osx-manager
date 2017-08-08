@@ -62,6 +62,20 @@ VBoxCreateMachineByName(VBoxGlue glue, const char* baseFolder, const char* machi
 VBGlueResult
 VBoxReleaseMachine(VBoxGlue glue);
 
+typedef enum VBGlueMachineState {
+    VBGlueMachine_Illegal       = 0,
+    VBGlueMachine_PoweredOff    = 1,
+    VBGlueMachine_Aborted       = 4,
+    VBGlueMachine_Running       = 5,
+    VBGlueMachine_Paused        = 6,
+    VBGlueMachine_Stuck         = 7,
+    VBGlueMachine_Starting      = 10,
+    VBGlueMachine_Stopping      = 11,
+} VBGlueMachineState;
+
+VBGlueMachineState
+VboxMachineState(VBoxGlue glue);
+
 
 #pragma mark build & destroy machine
 // option created by this function does not handle deallocation.

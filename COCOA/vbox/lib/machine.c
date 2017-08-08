@@ -153,27 +153,6 @@ HRESULT VboxMachineGetNetworkAdapter(IMachine *cmachine, PRUint32 slotNumber, IN
     return IMachine_GetNetworkAdapter(cmachine, slotNumber, cAdapter);
 }
 
-HRESULT VboxMachineLaunchVMProcess(IMachine* cmachine, ISession* csession, char* cuiType, char* cenvironment, IProgress** cprogress) {
-    BSTR wuiType;
-    HRESULT result = g_pVBoxFuncs->pfnUtf8ToUtf16(cuiType, &wuiType);
-    if (FAILED(result)) {
-        return result;
-    }
-
-    BSTR wenvironment;
-    result = g_pVBoxFuncs->pfnUtf8ToUtf16(cenvironment, &wenvironment);
-    if (FAILED(result)) {
-        g_pVBoxFuncs->pfnUtf16Free(wuiType);
-        return result;
-    }
-
-    result = IMachine_LaunchVMProcess(cmachine, csession, wuiType, wenvironment, cprogress);
-    g_pVBoxFuncs->pfnUtf16Free(wenvironment);
-    g_pVBoxFuncs->pfnUtf16Free(wuiType);
-
-    return result;
-}
-
 HRESULT VboxIMachineRelease(IMachine* cmachine) {
     HRESULT result = IMachine_Release(cmachine);
     cmachine = NULL;
@@ -254,3 +233,29 @@ HRESULT VboxRegisterMachine(IVirtualBox* cbox, IMachine* cmachine) {
     return IVirtualBox_RegisterMachine(cbox, cmachine);
 }
 
+#pragma mark State/Launch
+
+HRESULT VboxMachineGetState(IMachine* cmachine, MachineState *state) {
+    return IMachine_GetState(cmachine, state);
+}
+
+HRESULT VboxMachineLaunchVMProcess(IMachine* cmachine, ISession* csession, char* cuiType, char* cenvironment, IProgress** cprogress) {
+    BSTR wuiType;
+    HRESULT result = g_pVBoxFuncs->pfnUtf8ToUtf16(cuiType, &wuiType);
+    if (FAILED(result)) {
+        return result;
+    }
+
+    BSTR wenvironment;
+    result = g_pVBoxFuncs->pfnUtf8ToUtf16(cenvironment, &wenvironment);
+    if (FAILED(result)) {
+        g_pVBoxFuncs->pfnUtf16Free(wuiType);
+        return result;
+    }
+
+    result = IMachine_LaunchVMProcess(cmachine, csession, wuiType, wenvironment, cprogress);
+    g_pVBoxFuncs->pfnUtf16Free(wenvironment);
+    g_pVBoxFuncs->pfnUtf16Free(wuiType);
+
+    return result;
+}
