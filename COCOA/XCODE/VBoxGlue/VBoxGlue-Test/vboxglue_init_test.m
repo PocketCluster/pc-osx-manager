@@ -50,7 +50,7 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
     const char* foundName = "en1: Wi-Fi (AirPort)";
     VBGlueResult result;
     
-    result = VBoxSearchHostNetworkInterfaceByName(vboxGlue, "en1", &fullName);
+    result = VBoxHostSearchNetworkInterfaceByName(vboxGlue, "en1", &fullName);
     XCTAssertTrue( VBGlue_Ok == result, @"find network address should not generate error");
     XCTAssertTrue( strcmp(foundName, fullName) == 0, @"full name should match");
     
@@ -135,8 +135,8 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
     } else {
         NSLog(@"Failed reason %s", VBoxGetErrorMessage(vboxGlue));
     }
-    
-    result = VBoxMachineStop(vboxGlue);
+
+    result = VBoxMachineAcpiDown(vboxGlue);
     XCTAssertTrue( VBGlue_Ok == result, @"machine start should return true");
     if (result == VBGlue_Ok) {
         XCTAssertTrue(VBGlueMachine_PoweredOff == VBoxMachineGetCurrentState(vboxGlue));

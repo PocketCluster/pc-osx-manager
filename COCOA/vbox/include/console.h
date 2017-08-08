@@ -17,7 +17,9 @@ HRESULT VboxGetConsoleMouse(IConsole* cconsole, IMouse** cmouse);
 
 HRESULT VboxGetConsoleMachine(IConsole* cconsole, IMachine** cmachine);
 
-HRESULT VboxConsolePowerDown(IConsole* cconsole, IProgress** cprogress);
+HRESULT VboxConsoleAcpiPowerDown(IConsole* cconsole, IProgress** cprogress);
+
+HRESULT VboxConsoleForceDown(IConsole* cconsole);
 
 HRESULT VboxIConsoleRelease(IConsole* cconsole);
 

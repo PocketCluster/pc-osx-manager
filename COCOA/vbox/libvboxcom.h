@@ -32,10 +32,16 @@ extern unsigned int VBoxAppVersion(void);
 extern unsigned int VBoxApiVersion(void);
 
 
-#pragma mark host network interface
+#pragma mark system properties
 // ** you are resposible for clearing the acquired name string **
 VBGlueResult
-VBoxSearchHostNetworkInterfaceByName(VBoxGlue glue, const char* queryName, char** fullNameFound);
+VBoxHostSearchNetworkInterfaceByName(VBoxGlue glue, const char* queryName, char** fullNameFound);
+
+VBGlueResult
+VBoxHostGetMaxGuestCpuCount(VBoxGlue glue, unsigned int cpuCount);
+
+VBGlueResult
+VBoxHostGetMaxGuestMemSize(VBoxGlue glue, unsigned int memSize);
 
 
 #pragma mark machine status
@@ -94,7 +100,10 @@ VBGlueResult
 VBoxMachineHeadlessStart(VBoxGlue glue);
 
 VBGlueResult
-VBoxMachineStop(VBoxGlue glue);
+VBoxMachineAcpiDown(VBoxGlue glue);
+
+VBGlueResult
+VBoxMachineForceDown(VBoxGlue glue);
 
 
 #pragma mark utils

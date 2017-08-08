@@ -11,16 +11,18 @@
 #include <Block.h>
 
 #include "common.h"
-#include "vbox.h"
-#include "session.h"
-#include "machine.h"
 #include "bios_settings.h"
-#include "medium.h"
-#include "medium_format.h"
-#include "progress.h"
-#include "storage_controller.h"
-#include "network.h"
+#include "console.h"
 #include "host.h"
+#include "machine.h"
+#include "medium_format.h"
+#include "medium.h"
+#include "network.h"
+#include "progress.h"
+#include "session.h"
+#include "storage_controller.h"
+#include "system_properties.h"
+#include "vbox.h"
 
 #include "libvboxcom.h"
 
@@ -163,23 +165,25 @@ CloseVBoxGlue(VBoxGlue glue) {
 }
 
 
-#pragma mark host network interface
+#pragma mark system properties
 VBGlueResult
-VBoxSearchHostNetworkInterfaceByName(VBoxGlue glue, const char* queryName, char** nameFound) {
+VBoxHostSearchNetworkInterfaceByName(VBoxGlue glue, const char* queryName, char** nameFound) {
 
     assert(glue != NULL);
-    assert(queryName != NULL && strlen(queryName) != 0);
     
     ivbox_session* session = toiVBoxSession(glue);
     IHost* host = NULL;
     HRESULT result;
     
+    if (queryName == NULL || strlen(queryName) == 0) {
+        print_error_info(session->error_msg, "[VBox] invalid interface name to search", result);
+        return VBGlue_Fail;
+    }
     result = VboxGetHostFromVirtualbox(session->vbox, &host);
     if (FAILED(result)) {
         print_error_info(session->error_msg, "[VBox] failed to get Host reference", result);
         return VBGlue_Fail;
     }
-    
     result = VboxHostSearchNetworkInterfacesFromList(host, queryName, nameFound);
     if (FAILED(result)) {
         print_error_info(session->error_msg, "[VBox] failed to find host networkInterface", result);
@@ -188,6 +192,53 @@ VBoxSearchHostNetworkInterfaceByName(VBoxGlue glue, const char* queryName, char*
     
     return result;
 }
+
+VBGlueResult
+VBoxHostGetMaxGuestCpuCount(VBoxGlue glue, unsigned int cpuCount) {
+
+    assert(glue != NULL);
+    
+    ivbox_session* session = toiVBoxSession(glue);
+    ISystemProperties *prop = NULL;
+    HRESULT result;
+
+    result = VboxGetSystemProperties(session->vbox, &prop);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] failed to get host properties", result);
+        return VBGlue_Fail;
+    }
+    result = VboxGetSystemPropertiesMaxGuestCpuCount(prop, &cpuCount);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] failed to get guest cpu count", result);
+        return VBGlue_Fail;
+    }
+
+    return VBGlue_Ok;
+}
+
+VBGlueResult
+VBoxHostGetMaxGuestMemSize(VBoxGlue glue, unsigned int memSize) {
+
+    assert(glue != NULL);
+
+    ivbox_session* session = toiVBoxSession(glue);
+    ISystemProperties *prop = NULL;
+    HRESULT result;
+
+    result = VboxGetSystemProperties(session->vbox, &prop);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] failed to get host properties", result);
+        return VBGlue_Fail;
+    }
+    result = VboxGetSystemPropertiesMaxGuestRAM(prop, &memSize);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] failed to get guest cpu count", result);
+        return VBGlue_Fail;
+    }
+
+    return VBGlue_Ok;
+}
+
 
 #pragma mark machine status
 /*
@@ -592,6 +643,12 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
         result = IMachine_SetTeleporterEnabled(vbox_machine, PR_FALSE);
         if (FAILED(result)) {
             print_error_info(error_message, "[VBox] Failed to disable teleportation", result);
+            return result;
+        }
+        // set auto powerdown mode (when machine is shutting down, ACPI shutdown should happen to prevent disk corruption
+        result = IMachine_SetAutostopType(vbox_machine, AutostopType_AcpiShutdown);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to ACPI autostop", result);
             return result;
         }
     }
@@ -1163,11 +1220,11 @@ VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
     }
     
     // option value checks
-    if (option->CpuCount <= 2) {
+    if (option->CpuCount < 2) {
         print_error_info(session->error_msg, "[VBox] insufficient # of cpu", NS_ERROR_INVALID_ARG);
         return VBGlue_Fail;
     }
-    if (option->MemSize <= 4096) {
+    if (option->MemSize < 4096) {
         print_error_info(session->error_msg, "[VBox] insufficient size of memory", NS_ERROR_INVALID_ARG);
         return VBGlue_Fail;
     }
@@ -1272,13 +1329,13 @@ VBoxMachineDestory(VBoxGlue glue) {
 
     // make sure the pointer passed is not null.
     assert(glue != NULL);
-    
+
     ivbox_session* session = toiVBoxSession(glue);
+    IProgress *progress = NULL;
+    IMedium** media = NULL;
     HRESULT result;
     ULONG media_count;
-    IProgress *progress;
-    IMedium** media;
-    
+
     // unregister
     result = VboxMachineUnregister(session->machine, CleanupMode_DetachAllReturnHardDisksOnly, &media, &media_count);
     if (FAILED(result)) {
@@ -1291,7 +1348,7 @@ VBoxMachineDestory(VBoxGlue glue) {
         print_error_info(session->error_msg, "[VBox] Failed to delete medium", result);
         return VBGlue_Fail;
     }
-    // delete progress
+    // delete progress (we'll ignore progress result as further releasing machine is needed)
     VboxProgressWaitForCompletion(progress, 500);
     PRUint32 progress_percent = 0;
     do {
@@ -1299,7 +1356,7 @@ VBoxMachineDestory(VBoxGlue glue) {
         usleep(500000);
     } while (progress_percent < 100);
     VboxProgressRelease(progress);
-    
+
     // free media array
     VboxArrayOutFree(media);
 
@@ -1316,8 +1373,8 @@ VBoxMachineHeadlessStart(VBoxGlue glue) {
     static char* OPT_ENVIRONMENT = "";
 
     ivbox_session* session = toiVBoxSession(glue);
+    IProgress *progress = NULL;
     HRESULT result;
-    IProgress *progress;
     PRInt32 resultCode;
 
     // make sure the pointer passed is not null.
@@ -1347,15 +1404,81 @@ VBoxMachineHeadlessStart(VBoxGlue glue) {
             free(error_message);
         }
     }
-
     VboxProgressRelease(progress);
+
     return (FAILED(result) ? VBGlue_Fail : VBGlue_Ok);
 }
 
 VBGlueResult
-VBoxMachineStop(VBoxGlue glue) {
+VBoxMachineAcpiDown(VBoxGlue glue) {
+
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
+
+    ivbox_session* session = toiVBoxSession(glue);
+    IConsole *console = NULL;
+    IProgress *progress = NULL;
+    HRESULT result;
+    PRInt32 resultCode;
+
+    result = VboxGetSessionConsole(session->vsession, &console);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] failed to acquire console from sesssion", result);
+        return VBGlue_Fail;
+    }
+    result = VboxConsoleAcpiPowerDown(console, &progress);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] failed to acquire acpi shutdown progress", result);
+        return VBGlue_Fail;
+    }
+
+    // wait for acpi shutdown
+    VboxProgressWaitForCompletion(progress, 500);
+    PRUint32 progress_percent = 0;
+    do {
+        VboxProgressGetPercent(progress, &progress_percent);
+        usleep(500000);
+    } while (progress_percent < 100);
+    
+    // get the progress result
+    result = VboxProgressGetResultCode(progress, &resultCode);
+    if (FAILED(result)) {
+        char *error_message = NULL;
+        HRESULT ret = VboxProgressGetResultInfo(progress, &error_message);
+        if (SUCCEEDED(ret)) {
+            strcpy(session->error_msg, error_message);
+            free(error_message);
+        }
+    }
+    VboxProgressRelease(progress);
+
+    return (FAILED(result) ? VBGlue_Fail : VBGlue_Ok);
+}
+
+VBGlueResult
+VBoxMachineForceDown(VBoxGlue glue) {
+
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
+
+    ivbox_session* session = toiVBoxSession(glue);
+    IConsole *console = NULL;
+    HRESULT result;
+
+    result = VboxGetSessionConsole(session->vsession, &console);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] failed to acquire console from sesssion", result);
+        return VBGlue_Fail;
+    }
+    result = VboxConsoleForceDown(console);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] failed to force down", result);
+        return VBGlue_Fail;
+    }
+
     return VBGlue_Ok;
 }
+
 
 #pragma mark - UTILS
 

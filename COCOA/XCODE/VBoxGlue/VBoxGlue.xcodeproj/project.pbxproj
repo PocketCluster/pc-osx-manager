@@ -12,7 +12,6 @@
 		042D03C61F3107A4002FACE8 /* libVBoxGlue.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 042D03B11F31076E002FACE8 /* libVBoxGlue.a */; };
 		042D03F41F31081D002FACE8 /* bios_settings.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03CF1F31081D002FACE8 /* bios_settings.h */; };
 		042D03F51F31081D002FACE8 /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03D01F31081D002FACE8 /* common.h */; };
-		042D03F61F31081D002FACE8 /* consol.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03D11F31081D002FACE8 /* consol.h */; };
 		042D03F71F31081D002FACE8 /* keyboard.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03D21F31081D002FACE8 /* keyboard.h */; };
 		042D03F81F31081D002FACE8 /* machine.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03D31F31081D002FACE8 /* machine.h */; };
 		042D03F91F31081D002FACE8 /* medium.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03D41F31081D002FACE8 /* medium.h */; };
@@ -45,6 +44,7 @@
 		042D04231F31081D002FACE8 /* libvboxcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03F01F31081D002FACE8 /* libvboxcom.c */; };
 		042D04251F31081D002FACE8 /* libvboxcom.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03F11F31081D002FACE8 /* libvboxcom.h */; };
 		042D04321F3120FD002FACE8 /* vboxglue_init_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 042D04311F3120FD002FACE8 /* vboxglue_init_test.m */; };
+		04937E611F3A4BC900128295 /* console.h in Headers */ = {isa = PBXBuildFile; fileRef = 04937E601F3A4BC900128295 /* console.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,7 +65,6 @@
 		042D03C51F3107A4002FACE8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		042D03CF1F31081D002FACE8 /* bios_settings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bios_settings.h; sourceTree = "<group>"; };
 		042D03D01F31081D002FACE8 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
-		042D03D11F31081D002FACE8 /* consol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = consol.h; sourceTree = "<group>"; };
 		042D03D21F31081D002FACE8 /* keyboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = keyboard.h; sourceTree = "<group>"; };
 		042D03D31F31081D002FACE8 /* machine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = machine.h; sourceTree = "<group>"; };
 		042D03D41F31081D002FACE8 /* medium.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = medium.h; sourceTree = "<group>"; };
@@ -104,6 +103,7 @@
 		042D04301F310A06002FACE8 /* VboxCom.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VboxCom.m; sourceTree = "<group>"; };
 		042D04311F3120FD002FACE8 /* vboxglue_init_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = vboxglue_init_test.m; sourceTree = "<group>"; };
 		04937E5F1F3A412B00128295 /* tstCAPIGlue.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = tstCAPIGlue.c; sourceTree = "<group>"; };
+		04937E601F3A4BC900128295 /* console.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = console.h; sourceTree = "<group>"; };
 		04F663481F33B9FA004A418F /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -185,7 +185,7 @@
 			children = (
 				042D03CF1F31081D002FACE8 /* bios_settings.h */,
 				042D03D01F31081D002FACE8 /* common.h */,
-				042D03D11F31081D002FACE8 /* consol.h */,
+				04937E601F3A4BC900128295 /* console.h */,
 				04281A801F3478C70047CDDE /* host.h */,
 				042D03D21F31081D002FACE8 /* keyboard.h */,
 				042D03D31F31081D002FACE8 /* machine.h */,
@@ -235,7 +235,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				042D03F61F31081D002FACE8 /* consol.h in Headers */,
 				042D04041F31081D002FACE8 /* VBoxCAPIGlue.h in Headers */,
 				042D03FF1F31081D002FACE8 /* storage_controller.h in Headers */,
 				042D04011F31081D002FACE8 /* usb_controller.h in Headers */,
@@ -253,6 +252,7 @@
 				042D03F81F31081D002FACE8 /* machine.h in Headers */,
 				042D03FA1F31081D002FACE8 /* medium_format.h in Headers */,
 				042D03F91F31081D002FACE8 /* medium.h in Headers */,
+				04937E611F3A4BC900128295 /* console.h in Headers */,
 				042D03FB1F31081D002FACE8 /* network.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -40,10 +40,10 @@ type VBoxBuildOption struct {
 }
 
 func ValidateVBoxBuildOption(builder *VBoxBuildOption) error {
-    if builder.CPUCount < 2 || 16 < builder.CPUCount {
+    if builder.CPUCount < 2 {
         return errors.Errorf("[ERR] invalid cpu allocation")
     }
-    if builder.MemSize < 4096 || 16384 < builder.MemSize {
+    if builder.MemSize < 4096 {
         return errors.Errorf("[ERR] invalid memory allocation")
     }
     if len(builder.BaseDirPath) == 0 {
