@@ -18,16 +18,6 @@ typedef enum VBGlueResult {
     VBGlue_Fail
 } VBGlueResult;
 
-typedef struct VBoxBuildOption {
-    int            CpuCount;
-    int            MemSize;
-    const char*    HostInterface;
-    const char*    BootImagePath;
-    const char*    HddImagePath;
-    const char*    SharedDirPath;
-    const char*    SharedDirName;
-} VBoxBuildOption;
-
 
 #pragma mark init & close
 VBGlueResult
@@ -41,6 +31,7 @@ CloseVBoxGlue(VBoxGlue glue);
 extern unsigned int VBoxAppVersion(void);
 extern unsigned int VBoxApiVersion(void);
 
+
 #pragma mark host network interface
 // ** you are resposible for clearing the acquired name string **
 VBGlueResult
@@ -48,20 +39,6 @@ VBoxSearchHostNetworkInterfaceByName(VBoxGlue glue, const char* queryName, char*
 
 
 #pragma mark machine status
-VBGlueResult
-VBoxIsMachineSettingChanged(VBoxGlue glue, bool* isMachineChanged);
-
-
-#pragma mark find, create, & release machine
-VBGlueResult
-VBoxFindMachineByNameOrID(VBoxGlue glue, const char* machineName);
-
-VBGlueResult
-VBoxCreateMachineByName(VBoxGlue glue, const char* baseFolder, const char* machineName);
-
-VBGlueResult
-VBoxReleaseMachine(VBoxGlue glue);
-
 typedef enum VBGlueMachineState {
     VBGlueMachine_Illegal       = 0,
     VBGlueMachine_PoweredOff    = 1,
@@ -74,20 +51,42 @@ typedef enum VBGlueMachineState {
 } VBGlueMachineState;
 
 VBGlueMachineState
-VBoxMachineGetState(VBoxGlue glue);
+VBoxMachineGetCurrentState(VBoxGlue glue);
+
+VBGlueResult
+VBoxMachineIsSettingChanged(VBoxGlue glue, bool* isMachineChanged);
 
 
-#pragma mark build & destroy machine
+#pragma mark find, create, build, & release, destroy machine
+VBGlueResult
+VBoxMachineFindByNameOrID(VBoxGlue glue, const char* machineName);
+
+VBGlueResult
+VBoxMachineCreateByName(VBoxGlue glue, const char* baseFolder, const char* machineName);
+
 // option created by this function does not handle deallocation.
 // make sure to dealloc it once done
+typedef struct VBoxBuildOption {
+    int            CpuCount;
+    int            MemSize;
+    const char*    HostInterface;
+    const char*    BootImagePath;
+    const char*    HddImagePath;
+    const char*    SharedDirPath;
+    const char*    SharedDirName;
+} VBoxBuildOption;
+
 VBoxBuildOption*
 VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* boot, const char* hdd, const char* spath, const char* sname);
 
 VBGlueResult
-VBoxBuildMachine(VBoxGlue glue, VBoxBuildOption* option);
+VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option);
 
 VBGlueResult
-VBoxDestoryMachine(VBoxGlue glue);
+VBoxMachineRelease(VBoxGlue glue);
+
+VBGlueResult
+VBoxMachineDestory(VBoxGlue glue);
 
 
 #pragma mark start & stop machine

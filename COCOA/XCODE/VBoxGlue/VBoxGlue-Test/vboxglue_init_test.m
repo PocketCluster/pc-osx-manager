@@ -71,12 +71,12 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
 - (void)test_Create_Release_Machine {
     static const char* TEST_MACHINE_NAME = "TEST_MACHINE_NAME";
 
-    VBGlueResult result = VBoxCreateMachineByName(vboxGlue, [userhome UTF8String], TEST_MACHINE_NAME);
+    VBGlueResult result = VBoxMachineCreateByName(vboxGlue, [userhome UTF8String], TEST_MACHINE_NAME);
     XCTAssertTrue( VBGlue_Ok == result, @"Machine creation should return true");
     NSLog(@"setting file path %s", VBoxGetSettingFilePath(vboxGlue));
     NSLog(@"MachineID Origin %s", VBoxGetMachineID(vboxGlue));
     
-    result = VBoxReleaseMachine(vboxGlue);
+    result = VBoxMachineRelease(vboxGlue);
     XCTAssertTrue( VBGlue_Ok == result, @"Releasing machine should not generate error");
 }
 
@@ -88,15 +88,15 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
                             "/Users/almightykim/Workspace/VBOX-IMAGE/pc-core-hdd.vmdk",
                             "/tmp", "/temp");
 
-    VBGlueResult result = VBoxCreateMachineByName(vboxGlue, [userhome UTF8String], TARGET_MACHINE_NAME);
+    VBGlueResult result = VBoxMachineCreateByName(vboxGlue, [userhome UTF8String], TARGET_MACHINE_NAME);
     XCTAssertTrue( VBGlue_Ok == result, @"Machine creation should return true");
     
-    result = VBoxBuildMachine(vboxGlue, options);
+    result = VBoxMachineBuildWithOption(vboxGlue, options);
     XCTAssertTrue( VBGlue_Ok == result, @"Machine building should return true");
     if (result == VBGlue_Ok) {
         NSLog(@"Setting file path %s", VBoxGetSettingFilePath(vboxGlue));
         NSLog(@"MachineID Origin %s", VBoxGetMachineID(vboxGlue));
-        XCTAssertTrue(VBGlueMachine_PoweredOff == VBoxMachineGetState(vboxGlue));
+        XCTAssertTrue(VBGlueMachine_PoweredOff == VBoxMachineGetCurrentState(vboxGlue));
     } else {
         NSLog(@"Failed reason %s", VBoxGetErrorMessage(vboxGlue));
     }
@@ -106,18 +106,18 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
 }
 
 -(void)test_Destory_Machine {
-    VBGlueResult result = VBoxFindMachineByNameOrID(vboxGlue, TARGET_MACHINE_NAME);
+    VBGlueResult result = VBoxMachineFindByNameOrID(vboxGlue, TARGET_MACHINE_NAME);
     XCTAssertTrue( VBGlue_Ok == result, @"Should be able to find existing machine return true");
     
     bool isChanged = true;
-    result = VBoxIsMachineSettingChanged(vboxGlue, &isChanged);
+    result = VBoxMachineIsSettingChanged(vboxGlue, &isChanged);
     XCTAssertTrue( VBGlue_Ok == result, @"Machine setting checking should return true");
     XCTAssertTrue( !isChanged, @"Machine setting should have not changed");
     
-    result = VBoxDestoryMachine(vboxGlue);
+    result = VBoxMachineDestory(vboxGlue);
     XCTAssertTrue( VBGlue_Ok == result, @"Machine Destruction should go fine");
     
-    result = VBoxReleaseMachine(vboxGlue);
+    result = VBoxMachineRelease(vboxGlue);
     XCTAssertTrue( VBGlue_Ok == result, @"Releasing machine should not generate error");
 }
 

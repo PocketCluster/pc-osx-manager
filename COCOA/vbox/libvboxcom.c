@@ -190,8 +190,73 @@ VBoxSearchHostNetworkInterfaceByName(VBoxGlue glue, const char* queryName, char*
 }
 
 #pragma mark machine status
+/*
+ typedef enum MachineState {
+   MachineState_Null = 0,
+   MachineState_PoweredOff = 1,
+   MachineState_Saved = 2,
+   MachineState_Teleported = 3,
+   MachineState_Aborted = 4,
+   MachineState_Running = 5,
+   MachineState_Paused = 6,
+   MachineState_Stuck = 7,
+   MachineState_Teleporting = 8,
+   MachineState_LiveSnapshotting = 9,
+   MachineState_Starting = 10,
+   MachineState_Stopping = 11,
+   MachineState_Saving = 12,
+   MachineState_Restoring = 13,
+   MachineState_TeleportingPausedVM = 14,
+   MachineState_TeleportingIn = 15,
+   MachineState_FaultTolerantSyncing = 16,
+   MachineState_DeletingSnapshotOnline = 17,
+   MachineState_DeletingSnapshotPaused = 18,
+   MachineState_OnlineSnapshotting = 19,
+   MachineState_RestoringSnapshot = 20,
+   MachineState_DeletingSnapshot = 21,
+   MachineState_SettingUp = 22,
+   MachineState_Snapshotting = 23,
+   MachineState_FirstOnline = 5,
+   MachineState_LastOnline = 19,
+   MachineState_FirstTransient = 8,
+   MachineState_LastTransient = 23
+ } MachineState;
+ #define MachineState_T PRUint32
+ */
+
+VBGlueMachineState
+VBoxMachineGetCurrentState(VBoxGlue glue) {
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
+
+    ivbox_session* session = toiVBoxSession(glue);
+    MachineState mState;
+    HRESULT result;
+
+    result = VboxMachineGetState(session->machine, &mState);
+    if (FAILED(result)) {
+        return VBGlueMachine_Illegal;
+    }
+
+    switch (mState) {
+        case MachineState_PoweredOff:
+        case MachineState_Aborted:
+        case MachineState_Running:
+        case MachineState_Paused:
+        case MachineState_Stuck:
+        case MachineState_Starting:
+        case MachineState_Stopping: {
+            return (VBGlueMachineState)mState;
+        }
+        default:
+            return VBGlueMachine_Illegal;
+    }
+
+    return VBGlueMachine_Illegal;
+}
+
 VBGlueResult
-VBoxIsMachineSettingChanged(VBoxGlue glue, bool* isMachineChanged) {
+VBoxMachineIsSettingChanged(VBoxGlue glue, bool* isMachineChanged) {
     
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -239,9 +304,9 @@ VBoxIsMachineSettingChanged(VBoxGlue glue, bool* isMachineChanged) {
 }
 
 
-#pragma mark find, create, & build machine
+#pragma mark find, create, build, & release, destroy machine
 VBGlueResult
-VBoxFindMachineByNameOrID(VBoxGlue glue, const char* machineName) {
+VBoxMachineFindByNameOrID(VBoxGlue glue, const char* machineName) {
     
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -274,7 +339,7 @@ VBoxFindMachineByNameOrID(VBoxGlue glue, const char* machineName) {
 }
 
 VBGlueResult
-VBoxCreateMachineByName(VBoxGlue glue, const char* baseFolder, const char* machineName) {
+VBoxMachineCreateByName(VBoxGlue glue, const char* baseFolder, const char* machineName) {
     
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -308,102 +373,6 @@ VBoxCreateMachineByName(VBoxGlue glue, const char* baseFolder, const char* machi
 
     return VBGlue_Ok;
 }
-
-VBGlueResult
-VBoxReleaseMachine(VBoxGlue glue) {
-    
-    // make sure the pointer passed is not null.
-    assert(glue != NULL);
-
-    ivbox_session* session = toiVBoxSession(glue);
-
-    // release machine
-    if ( session->setting_file_path != NULL ) {
-        VboxUtf8Free(session->setting_file_path);
-        session->setting_file_path = NULL;
-    }
-    if ( session->machine_id != NULL ) {
-        VboxUtf8Free(session->machine_id);
-        session->machine_id = NULL;
-    }
-    if (session->machine != NULL) {
-        HRESULT result = VboxIMachineRelease(session->machine);
-        if (FAILED(result)) {
-            print_error_info(session->error_msg, "[VBox] Failed to close machine referenece", result);
-            return VBGlue_Fail;
-        } else {
-            session->machine = NULL;
-        }
-    }
-    
-    return VBGlue_Ok;
-}
-
-/*
- typedef enum MachineState {
-   MachineState_Null = 0,
-   MachineState_PoweredOff = 1,
-   MachineState_Saved = 2,
-   MachineState_Teleported = 3,
-   MachineState_Aborted = 4,
-   MachineState_Running = 5,
-   MachineState_Paused = 6,
-   MachineState_Stuck = 7,
-   MachineState_Teleporting = 8,
-   MachineState_LiveSnapshotting = 9,
-   MachineState_Starting = 10,
-   MachineState_Stopping = 11,
-   MachineState_Saving = 12,
-   MachineState_Restoring = 13,
-   MachineState_TeleportingPausedVM = 14,
-   MachineState_TeleportingIn = 15,
-   MachineState_FaultTolerantSyncing = 16,
-   MachineState_DeletingSnapshotOnline = 17,
-   MachineState_DeletingSnapshotPaused = 18,
-   MachineState_OnlineSnapshotting = 19,
-   MachineState_RestoringSnapshot = 20,
-   MachineState_DeletingSnapshot = 21,
-   MachineState_SettingUp = 22,
-   MachineState_Snapshotting = 23,
-   MachineState_FirstOnline = 5,
-   MachineState_LastOnline = 19,
-   MachineState_FirstTransient = 8,
-   MachineState_LastTransient = 23
- } MachineState;
- #define MachineState_T PRUint32
- */
-
-VBGlueMachineState
-VBoxMachineGetState(VBoxGlue glue) {
-    // make sure the pointer passed is not null.
-    assert(glue != NULL);
-
-    ivbox_session* session = toiVBoxSession(glue);
-    MachineState mState;
-    HRESULT result;
-
-    result = VboxMachineGetState(session->machine, &mState);
-    if (FAILED(result)) {
-        return VBGlueMachine_Illegal;
-    }
-
-    switch (mState) {
-        case MachineState_PoweredOff:
-        case MachineState_Aborted:
-        case MachineState_Running:
-        case MachineState_Paused:
-        case MachineState_Stuck:
-        case MachineState_Starting:
-        case MachineState_Stopping: {
-            return (VBGlueMachineState)mState;
-        }
-        default:
-            return VBGlueMachine_Illegal;
-    }
-
-    return VBGlueMachine_Illegal;
-}
-
 
 #pragma mark build & destroy machine
 HRESULT
@@ -1165,7 +1134,7 @@ VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* boot, const 
 }
 
 VBGlueResult
-VBoxBuildMachine(VBoxGlue glue, VBoxBuildOption* option) {
+VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
     
     static const char* STORAGE_CONTROLLER_NAME = "SATA";
 
@@ -1234,7 +1203,37 @@ VBoxBuildMachine(VBoxGlue glue, VBoxBuildOption* option) {
 }
 
 VBGlueResult
-VBoxDestoryMachine(VBoxGlue glue) {
+VBoxMachineRelease(VBoxGlue glue) {
+
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
+
+    ivbox_session* session = toiVBoxSession(glue);
+
+    // release machine
+    if ( session->setting_file_path != NULL ) {
+        VboxUtf8Free(session->setting_file_path);
+        session->setting_file_path = NULL;
+    }
+    if ( session->machine_id != NULL ) {
+        VboxUtf8Free(session->machine_id);
+        session->machine_id = NULL;
+    }
+    if (session->machine != NULL) {
+        HRESULT result = VboxIMachineRelease(session->machine);
+        if (FAILED(result)) {
+            print_error_info(session->error_msg, "[VBox] Failed to close machine referenece", result);
+            return VBGlue_Fail;
+        } else {
+            session->machine = NULL;
+        }
+    }
+
+    return VBGlue_Ok;
+}
+
+VBGlueResult
+VBoxMachineDestory(VBoxGlue glue) {
 
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -1270,7 +1269,7 @@ VBoxDestoryMachine(VBoxGlue glue) {
     VboxArrayOutFree(media);
 
     // release machine
-    return VBoxReleaseMachine(glue);
+    return VBoxMachineRelease(glue);
 }
 
 
