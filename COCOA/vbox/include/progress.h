@@ -11,10 +11,12 @@
 
 HRESULT VboxProgressWaitForCompletion(IProgress* cprogress, int timeout);
 
-HRESULT VboxGetProgressPercent(IProgress* cprogress, PRUint32* cpercent);
+HRESULT VboxProgressGetPercent(IProgress* cprogress, PRUint32* cpercent);
 
-HRESULT VboxGetProgressResultCode(IProgress* cprogress, PRInt32* code);
+HRESULT VboxProgressGetResultCode(IProgress* cprogress, PRInt32* code);
 
-HRESULT VboxIProgressRelease(IProgress* cprogress);
+HRESULT VboxProgressGetResultInfo(IProgress* cprogress, char** cErrorMessage);
+
+HRESULT VboxProgressRelease(IProgress* cprogress);
 
 #endif /* progress_h */

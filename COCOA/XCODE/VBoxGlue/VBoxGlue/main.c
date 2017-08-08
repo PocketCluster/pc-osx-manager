@@ -1342,7 +1342,7 @@ main(int argc, const char * argv[]) {
                 }
                 
                 PRInt32 code;
-                result = VboxGetProgressResultCode(progress, &code);
+                result = VboxProgressGetResultCode(progress, &code);
                 if (FAILED(result) || code != 0) {
                     print_error_info("Actuqired bad storage creation result code", result);
                 }
@@ -1477,7 +1477,7 @@ main(int argc, const char * argv[]) {
         }
         PRUint32 progress_percent = 0;
         do {
-            VboxGetProgressPercent(progress, &progress_percent);
+            VboxProgressGetPercent(progress, &progress_percent);
             printf("\nprogress %d\n",progress_percent);
             usleep(200000);
         } while (progress_percent < 100);

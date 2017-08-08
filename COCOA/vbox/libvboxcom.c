@@ -1041,20 +1041,20 @@ vbox_machine_add_hard_disk(IVirtualBox* virtualbox, IMachine* vbox_machine, ISes
         else {
             PRUint32 progress_percent = 0;
             do {
-                VboxGetProgressPercent(progress, &progress_percent);
+                VboxProgressGetPercent(progress, &progress_percent);
                 usleep(500000);
             } while (progress_percent < 100);
         }
         
         // get completion code
         PRInt32 code;
-        result = VboxGetProgressResultCode(progress, &code);
+        result = VboxProgressGetResultCode(progress, &code);
         if (FAILED(result)|| code != 0) {
             print_error_info(error_message, "[VBox] Failed to actuqire storage creation result code", result);
             return result;
         }
         // release progress
-        VboxIProgressRelease(progress);
+        VboxProgressRelease(progress);
 #endif
         // open medium
         PRBool use_old_uuid = (PRBool)0;
@@ -1260,10 +1260,10 @@ VBoxMachineDestory(VBoxGlue glue) {
     VboxProgressWaitForCompletion(progress, 500);
     PRUint32 progress_percent = 0;
     do {
-        VboxGetProgressPercent(progress, &progress_percent);
+        VboxProgressGetPercent(progress, &progress_percent);
         usleep(500000);
     } while (progress_percent < 100);
-    VboxIProgressRelease(progress);
+    VboxProgressRelease(progress);
     
     // free media array
     VboxArrayOutFree(media);
@@ -1283,53 +1283,38 @@ VBoxMachineHeadlessStart(VBoxGlue glue) {
     ivbox_session* session = toiVBoxSession(glue);
     HRESULT result;
     IProgress *progress;
+    PRInt32 resultCode;
 
     // make sure the pointer passed is not null.
     assert(glue != NULL);
-    
+
     result = VboxMachineLaunchVMProcess(session->machine, session->vsession, OPT_HEADLESS, OPT_ENVIRONMENT, &progress);
     if (FAILED(result)) {
         print_error_info(session->error_msg, "[VBox] Failed to launch virtual machine", result);
         return VBGlue_Fail;
     }
 
-#if 0
-    BOOL completed;
-    LONG resultCode;
-    
-    printf("Waiting for the remote session to open...\n");
-    IProgress_WaitForCompletion(progress, -1);
-    
-    rc = IProgress_get_Completed(progress, &completed);
-    if (FAILED(rc)) {
-        fprintf(stderr, "Error: GetCompleted status failed\n");
-    }
-    
-    IProgress_get_ResultCode(progress, &resultCode);
-    if (FAILED(resultCode)) {
-        IVirtualBoxErrorInfo *errorInfo;
-        BSTR textUtf16;
-        char *text;
-        
-        IProgress_get_ErrorInfo(progress, &errorInfo);
-        IVirtualBoxErrorInfo_get_Text(errorInfo, &textUtf16);
-        g_pVBoxFuncs->pfnUtf16ToUtf8(textUtf16, &text);
-        printf("Error: %s\n", text);
-        
-        g_pVBoxFuncs->pfnComUnallocString(textUtf16);
-        g_pVBoxFuncs->pfnUtf8Free(text);
-        IVirtualBoxErrorInfo_Release(errorInfo);
-    } else {
-        fprintf(stderr, "VM process has been successfully started\n");
-        
-        /* Kick off the event listener demo part, which is quite separate.
-         * Ignore it if you need a more basic sample. */
-        //registerPassiveEventListener(virtualBox, session, id);
-    }
-    IProgress_Release(progress);
-#endif
+    // wait for startup
+    VboxProgressWaitForCompletion(progress, 500);
+    PRUint32 progress_percent = 0;
+    do {
+        VboxProgressGetPercent(progress, &progress_percent);
+        usleep(500000);
+    } while (progress_percent < 100);
 
-    return VBGlue_Ok;
+    // get the progress result
+    result = VboxProgressGetResultCode(progress, &resultCode);
+    if (FAILED(result)) {
+        char *error_message = NULL;
+        HRESULT ret = VboxProgressGetResultInfo(progress, &error_message);
+        if (SUCCEEDED(ret)) {
+            strcpy(session->error_msg, error_message);
+            free(error_message);
+        }
+    }
+
+    VboxProgressRelease(progress);
+    return (FAILED(result) ? VBGlue_Fail : VBGlue_Ok);
 }
 
 VBGlueResult
