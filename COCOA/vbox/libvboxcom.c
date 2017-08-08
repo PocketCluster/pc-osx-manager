@@ -374,7 +374,7 @@ VBoxReleaseMachine(VBoxGlue glue) {
  */
 
 VBGlueMachineState
-VboxMachineState(VBoxGlue glue) {
+VBoxMachineGetState(VBoxGlue glue) {
     // make sure the pointer passed is not null.
     assert(glue != NULL);
 
@@ -1275,82 +1275,67 @@ VBoxDestoryMachine(VBoxGlue glue) {
 
 
 #pragma mark start & stop machine
+VBGlueResult
+VBoxMachineHeadlessStart(VBoxGlue glue) {
 
-HRESULT
-VboxMachineStart(IVirtualBox *virtualBox, ISession *session, IMachine *cmachine, const char* session_type) {
-    HRESULT rc;
-    IMachine  *machine    = NULL;
-    IProgress *progress   = NULL;
-    BSTR env              = NULL;
-    BSTR sessionType;
-    SAFEARRAY *groupsSA = g_pVBoxFuncs->pfnSafeArrayOutParamAlloc();
+    static char* OPT_HEADLESS    = "headless";
+    static char* OPT_ENVIRONMENT = "";
+
+    ivbox_session* session = toiVBoxSession(glue);
+    HRESULT result;
+    IProgress *progress;
+
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
     
-    rc = IMachine_get_Groups(machine, ComSafeArrayAsOutTypeParam(groupsSA, BSTR));
-    if (SUCCEEDED(rc)) {
-        BSTR *groups = NULL;
-        ULONG cbGroups = 0;
-        ULONG i, cGroups;
-        g_pVBoxFuncs->pfnSafeArrayCopyOutParamHelper((void **)&groups, &cbGroups, VT_BSTR, groupsSA);
-        g_pVBoxFuncs->pfnSafeArrayDestroy(groupsSA);
-        cGroups = cbGroups / sizeof(groups[0]);
-        for (i = 0; i < cGroups; ++i) {
-            /* Note that the use of %S might be tempting, but it is not
-             * available on all platforms, and even where it is usable it
-             * may depend on correct compiler options to make wchar_t a
-             * 16 bit number. So better play safe and use UTF-8. */
-            char *group;
-            g_pVBoxFuncs->pfnUtf16ToUtf8(groups[i], &group);
-            g_pVBoxFuncs->pfnUtf8Free(group);
-        }
-        for (i = 0; i < cGroups; ++i) {
-            g_pVBoxFuncs->pfnComUnallocString(groups[i]);
-        }
-        g_pVBoxFuncs->pfnArrayOutFree(groups);
+    result = VboxMachineLaunchVMProcess(session->machine, session->vsession, OPT_HEADLESS, OPT_ENVIRONMENT, &progress);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] Failed to launch virtual machine", result);
+        return VBGlue_Fail;
+    }
+
+#if 0
+    BOOL completed;
+    LONG resultCode;
+    
+    printf("Waiting for the remote session to open...\n");
+    IProgress_WaitForCompletion(progress, -1);
+    
+    rc = IProgress_get_Completed(progress, &completed);
+    if (FAILED(rc)) {
+        fprintf(stderr, "Error: GetCompleted status failed\n");
     }
     
-    g_pVBoxFuncs->pfnUtf8ToUtf16("gui", &sessionType);
-    rc = IMachine_LaunchVMProcess(machine, session, sessionType, env, &progress);
-    g_pVBoxFuncs->pfnUtf16Free(sessionType);
-    if (SUCCEEDED(rc)) {
+    IProgress_get_ResultCode(progress, &resultCode);
+    if (FAILED(resultCode)) {
+        IVirtualBoxErrorInfo *errorInfo;
+        BSTR textUtf16;
+        char *text;
         
-        BOOL completed;
-        LONG resultCode;
+        IProgress_get_ErrorInfo(progress, &errorInfo);
+        IVirtualBoxErrorInfo_get_Text(errorInfo, &textUtf16);
+        g_pVBoxFuncs->pfnUtf16ToUtf8(textUtf16, &text);
+        printf("Error: %s\n", text);
         
-        printf("Waiting for the remote session to open...\n");
-        IProgress_WaitForCompletion(progress, -1);
+        g_pVBoxFuncs->pfnComUnallocString(textUtf16);
+        g_pVBoxFuncs->pfnUtf8Free(text);
+        IVirtualBoxErrorInfo_Release(errorInfo);
+    } else {
+        fprintf(stderr, "VM process has been successfully started\n");
         
-        rc = IProgress_get_Completed(progress, &completed);
-        if (FAILED(rc)) {
-            fprintf(stderr, "Error: GetCompleted status failed\n");
-        }
-        
-        IProgress_get_ResultCode(progress, &resultCode);
-        if (FAILED(resultCode)) {
-            IVirtualBoxErrorInfo *errorInfo;
-            BSTR textUtf16;
-            char *text;
-            
-            IProgress_get_ErrorInfo(progress, &errorInfo);
-            IVirtualBoxErrorInfo_get_Text(errorInfo, &textUtf16);
-            g_pVBoxFuncs->pfnUtf16ToUtf8(textUtf16, &text);
-            printf("Error: %s\n", text);
-            
-            g_pVBoxFuncs->pfnComUnallocString(textUtf16);
-            g_pVBoxFuncs->pfnUtf8Free(text);
-            IVirtualBoxErrorInfo_Release(errorInfo);
-        } else {
-            fprintf(stderr, "VM process has been successfully started\n");
-            
-            /* Kick off the event listener demo part, which is quite separate.
-             * Ignore it if you need a more basic sample. */
-            //registerPassiveEventListener(virtualBox, session, id);
-        }
-        IProgress_Release(progress);
+        /* Kick off the event listener demo part, which is quite separate.
+         * Ignore it if you need a more basic sample. */
+        //registerPassiveEventListener(virtualBox, session, id);
     }
-    
-    /* It's important to always release resources. */
-    //IMachine_Release(machine);
-    return rc;
+    IProgress_Release(progress);
+#endif
+
+    return VBGlue_Ok;
+}
+
+VBGlueResult
+VBoxMachineStop(VBoxGlue glue) {
+    return VBGlue_Ok;
 }
 
 #pragma mark - UTILS
@@ -1376,256 +1361,3 @@ const char*
 VBoxGetMachineID(VBoxGlue glue) {
     return toiVBoxSession(glue)->machine_id;
 }
-
-# if 0
-VBGlueResult
-VBoxFindHostNetworkInterfaceByName(VBoxGlue glue, const char* queryName, char** fullNameFound) {
-    assert(glue != NULL);
-    
-    IHost* host = NULL;
-    IHostNetworkInterface* hIface = NULL;
-    ivbox_session* session = toiVBoxSession(glue);
-    
-    HRESULT result;
-    
-    result = VboxGetHostFromVirtualbox(session->vbox, &host);
-    if (FAILED(result)) {
-        print_error_info(session->error_msg, "[VBox] failed to get Host reference", result);
-        return VBGlue_Fail;
-    }
-    
-    result = VboxHostFindNetworkInterfaceByName(host, queryName, &hIface);
-    if (FAILED(result)) {
-        print_error_info(session->error_msg, "[VBox] failed to find HostNetworkInterface", result);
-        return VBGlue_Fail;
-    }
-    
-    result = VboxGetHostNetworkInterfaceName(hIface, fullNameFound);
-    if (FAILED(result)) {
-        print_error_info(session->error_msg, "[VBox] failed to get full host network interface name", result);
-    }
-    
-    IHostNetworkInterface_Release(hIface);
-    return result;
-}
-
-/**
- * Register passive event listener for the selected VM.
- *
- * @param   virtualBox ptr to IVirtualBox object
- * @param   session    ptr to ISession object
- * @param   id         identifies the machine to start
- */
-static void
-registerPassiveEventListener(IVirtualBox *virtualBox, ISession *session, BSTR machineId) {
-    
-    IConsole *console = NULL;
-    HRESULT rc;
-    
-    rc = ISession_get_Console(session, &console);
-    if ((SUCCEEDED(rc)) && console) {
-        
-        IEventSource *es = NULL;
-        rc = IConsole_get_EventSource(console, &es);
-        
-        if (SUCCEEDED(rc) && es) {
-            static const ULONG interestingEvents[] = {
-                VBoxEventType_OnMousePointerShapeChanged,
-                VBoxEventType_OnMouseCapabilityChanged,
-                VBoxEventType_OnKeyboardLedsChanged,
-                VBoxEventType_OnStateChanged,
-                VBoxEventType_OnAdditionsStateChanged,
-                VBoxEventType_OnNetworkAdapterChanged,
-                VBoxEventType_OnSerialPortChanged,
-                VBoxEventType_OnParallelPortChanged,
-                VBoxEventType_OnStorageControllerChanged,
-                VBoxEventType_OnMediumChanged,
-                VBoxEventType_OnVRDEServerChanged,
-                VBoxEventType_OnUSBControllerChanged,
-                VBoxEventType_OnUSBDeviceStateChanged,
-                VBoxEventType_OnSharedFolderChanged,
-                VBoxEventType_OnRuntimeError,
-                VBoxEventType_OnCanShowWindow,
-                VBoxEventType_OnShowWindow
-            };
-            SAFEARRAY *interestingEventsSA = NULL;
-            IEventListener *consoleListener = NULL;
-            
-            /* The VirtualBox API expects enum values as VT_I4, which in the
-             * future can be hopefully relaxed. */
-            interestingEventsSA = g_pVBoxFuncs->pfnSafeArrayCreateVector(VT_I4, 0, sizeof(interestingEvents) / sizeof(interestingEvents[0]));
-            g_pVBoxFuncs->pfnSafeArrayCopyInParamHelper(interestingEventsSA, &interestingEvents, sizeof(interestingEvents));
-            
-            rc = IEventSource_CreateListener(es, &consoleListener);
-            if (SUCCEEDED(rc) && consoleListener) {
-                rc = IEventSource_RegisterListener(es,
-                                                   consoleListener,
-                                                   ComSafeArrayAsInParam(interestingEventsSA),
-                                                   0 /* passive */);
-                
-                if (SUCCEEDED(rc)) {
-                    
-                    /* Just wait here for events, no easy way to do this better
-                     * as there's not much to do after this completes. */
-                    printf("Entering event loop, PowerOff the machine to exit or press Ctrl-C to terminate\n");
-                    fflush(stdout);
-                    signal(SIGINT, (void (*)(int))ctrlCHandler);
-                    
-                    while (!g_fStop) {
-                        IEvent *ev = NULL;
-                        rc = IEventSource_GetEvent(es, consoleListener, 250, &ev);
-                        if (FAILED(rc)) {
-                            printf("Failed getting event: %#x\n", rc);
-                            g_fStop = 1;
-                            continue;
-                        }
-                        /* handle timeouts, resulting in NULL events */
-                        if (!ev) {
-                            continue;
-                        }
-                        rc = EventListenerDemoProcessEvent(ev);
-                        if (FAILED(rc)) {
-                            printf("Failed processing event: %#x\n", rc);
-                            g_fStop = 1;
-                            /* finish processing the event */
-                        }
-                        rc = IEventSource_EventProcessed(es, consoleListener, ev);
-                        if (FAILED(rc)) {
-                            printf("Failed to mark event as processed: %#x\n", rc);
-                            g_fStop = 1;
-                            /* continue with event release */
-                        }
-                        if (ev) {
-                            IEvent_Release(ev);
-                            ev = NULL;
-                        }
-                    }
-                    signal(SIGINT, SIG_DFL);
-                } else {
-                    printf("Failed to register event listener.\n");
-                }
-                IEventSource_UnregisterListener(es, (IEventListener *)consoleListener);
-                IEventListener_Release(consoleListener);
-            } else {
-                printf("Failed to create an event listener instance.\n");
-            }
-            g_pVBoxFuncs->pfnSafeArrayDestroy(interestingEventsSA);
-            IEventSource_Release(es);
-        } else {
-            printf("Failed to get the event source instance.\n");
-        }
-        IConsole_Release(console);
-    }
-}
-
-/**
- * Print detailed error information if available.
- * @param   pszErrorMsg     string containing the code location specific error message
- * @param   rc              COM/XPCOM result code
- */
-void
-print_error_info(char *message_buffer, const char *pszErrorMsg, HRESULT rc)
-{
-    IErrorInfo *ex;
-    HRESULT rc2 = S_OK;
-    
-    sprintf(message_buffer, "\n--- %s (rc=%#010x) ---\n", pszErrorMsg, (unsigned)rc);
-    rc2 = g_pVBoxFuncs->pfnGetException(&ex);
-    
-    if (SUCCEEDED(rc2) && ex) {
-        
-        IVirtualBoxErrorInfo *ei;
-        rc2 = IErrorInfo_QueryInterface(ex, &IID_IVirtualBoxErrorInfo, (void **)&ei);
-        
-        if (FAILED(rc2)) {
-            ei = NULL;
-        }
-        
-        if (ei) {
-            /* got extended error info, maybe multiple infos */
-            do {
-                LONG resultCode = S_OK;
-                BSTR componentUtf16 = NULL;
-                char *component = NULL;
-                BSTR textUtf16 = NULL;
-                char *text = NULL;
-                IVirtualBoxErrorInfo *ei_next = NULL;
-                sprintf(message_buffer, "Extended error info (IVirtualBoxErrorInfo):\n");
-                
-                IVirtualBoxErrorInfo_get_ResultCode(ei, &resultCode);
-                sprintf(message_buffer, "  resultCode=%#010x\n", (unsigned)resultCode);
-                
-                IVirtualBoxErrorInfo_get_Component(ei, &componentUtf16);
-                g_pVBoxFuncs->pfnUtf16ToUtf8(componentUtf16, &component);
-                g_pVBoxFuncs->pfnComUnallocString(componentUtf16);
-                sprintf(message_buffer, "  component=%s\n", component);
-                g_pVBoxFuncs->pfnUtf8Free(component);
-                
-                IVirtualBoxErrorInfo_get_Text(ei, &textUtf16);
-                g_pVBoxFuncs->pfnUtf16ToUtf8(textUtf16, &text);
-                g_pVBoxFuncs->pfnComUnallocString(textUtf16);
-                sprintf(message_buffer, "  text=%s\n", text);
-                g_pVBoxFuncs->pfnUtf8Free(text);
-                
-                rc2 = IVirtualBoxErrorInfo_get_Next(ei, &ei_next);
-                if (FAILED(rc2))
-                    ei_next = NULL;
-                IVirtualBoxErrorInfo_Release(ei);
-                ei = ei_next;
-            } while (ei);
-        }
-        
-        IErrorInfo_Release(ex);
-        g_pVBoxFuncs->pfnClearException();
-    }
-}
-
-// You must free the result if result is non-NULL.
-static char*
-str_replace(char* orig, const char* rep, const char* with) {
-    char *result;         // the return string
-    char *ins;            // the next insert point
-    char *tmp;            // varies
-    size_t len_rep;       // length of rep
-    size_t len_with;      // length of with
-    size_t len_front;     // distance between rep and end of last rep
-    size_t count;         // number of replacements
-    
-    if (!orig) {
-        return (char *)NULL;
-    }
-    if (!rep) {
-        rep = "";
-    }
-    len_rep = strlen(rep);
-    if (!with) {
-        with = "";
-    }
-    len_with = strlen(with);
-    
-    ins = orig;
-    for (count = 0; (tmp = strstr(ins, rep)); ++count) {
-        ins = tmp + len_rep;
-    }
-    
-    // first time through the loop, all the variable are set correctly
-    // from here on,
-    //    tmp points to the end of the result string
-    //    ins points to the next occurrence of rep in orig
-    //    orig points to the remainder of orig after "end of rep"
-    tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
-    
-    if (!result) {
-        return NULL;
-    }
-    while (count--) {
-        ins = strstr(orig, rep);
-        len_front = ins - orig;
-        tmp = strncpy(tmp, orig, len_front) + len_front;
-        tmp = strcpy(tmp, with) + len_with;
-        orig += len_front + len_rep; // move to next "end of rep"
-    }
-    strcpy(tmp, orig);
-    return result;
-}
-#endif

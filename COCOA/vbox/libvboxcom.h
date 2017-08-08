@@ -74,7 +74,7 @@ typedef enum VBGlueMachineState {
 } VBGlueMachineState;
 
 VBGlueMachineState
-VboxMachineState(VBoxGlue glue);
+VBoxMachineGetState(VBoxGlue glue);
 
 
 #pragma mark build & destroy machine
@@ -90,14 +90,12 @@ VBGlueResult
 VBoxDestoryMachine(VBoxGlue glue);
 
 
-#if 0
 #pragma mark start & stop machine
 VBGlueResult
-VBoxStartMachine(VBoxGlue glue);
+VBoxMachineHeadlessStart(VBoxGlue glue);
 
 VBGlueResult
-VBoxStopMachine(VBoxGlue glue);
-#endif
+VBoxMachineStop(VBoxGlue glue);
 
 
 #pragma mark utils

@@ -94,8 +94,9 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
     result = VBoxBuildMachine(vboxGlue, options);
     XCTAssertTrue( VBGlue_Ok == result, @"Machine building should return true");
     if (result == VBGlue_Ok) {
-        NSLog (@"setting file path %s", VBoxGetSettingFilePath(vboxGlue));
+        NSLog(@"Setting file path %s", VBoxGetSettingFilePath(vboxGlue));
         NSLog(@"MachineID Origin %s", VBoxGetMachineID(vboxGlue));
+        XCTAssertTrue(VBGlueMachine_PoweredOff == VBoxMachineGetState(vboxGlue));
     } else {
         NSLog(@"Failed reason %s", VBoxGetErrorMessage(vboxGlue));
     }
