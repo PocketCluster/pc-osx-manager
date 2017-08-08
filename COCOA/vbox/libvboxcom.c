@@ -26,7 +26,7 @@
 
 #pragma mark - TYPES
 
-#define ERROR_MESSAGE_BUF_SIZE 256
+#define ERROR_MESSAGE_BUF_SIZE 512
 
 typedef struct ivbox_session {
     char                  error_msg[ERROR_MESSAGE_BUF_SIZE];
@@ -251,8 +251,6 @@ VBoxMachineGetCurrentState(VBoxGlue glue) {
         default:
             return VBGlueMachine_Illegal;
     }
-
-    return VBGlueMachine_Illegal;
 }
 
 VBGlueResult
@@ -1142,20 +1140,57 @@ VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
     HRESULT result = NS_OK;
 
     // sanity check
-    assert(session           != NULL);
-    assert(session->vbox     != NULL);
-    assert(session->client   != NULL);
-    assert(session->machine  != NULL);
-    assert(session->vsession != NULL);
-
-    assert(option != NULL);
-    assert(0 < option->CpuCount);
-    assert(2048 <= option->MemSize);
-    assert(strlen(option->HostInterface) != 0);
-    assert(strlen(option->SharedDirPath) != 0);
-    assert(strlen(option->SharedDirName) != 0);
-    assert(strlen(option->BootImagePath) != 0);
-    assert(strlen(option->HddImagePath)  != 0);
+    assert(glue != NULL);
+    if (session->vbox == NULL) {
+        print_error_info(session->error_msg, "[VBox] null virtualbox for building machine", NS_ERROR_INVALID_ARG);
+        return VBGlue_Fail;
+    }
+    if (session->client == NULL) {
+        print_error_info(session->error_msg, "[VBox] null client for building machine", NS_ERROR_INVALID_ARG);
+        return VBGlue_Fail;
+    }
+    if (session->machine == NULL) {
+        print_error_info(session->error_msg, "[VBox] null machine for building machine", NS_ERROR_INVALID_ARG);
+        return VBGlue_Fail;
+    }
+    if (session->vsession == NULL) {
+        print_error_info(session->error_msg, "[VBox] null session for building machine", NS_ERROR_INVALID_ARG);
+        return VBGlue_Fail;
+    }
+    if (option == NULL) {
+        print_error_info(session->error_msg, "[VBox] null build option for building machine", NS_ERROR_INVALID_ARG);
+        return VBGlue_Fail;
+    }
+    
+    // option value checks
+    if (option->CpuCount <= 2) {
+        print_error_info(session->error_msg, "[VBox] insufficient # of cpu", NS_ERROR_INVALID_ARG);
+        return VBGlue_Fail;
+    }
+    if (option->MemSize <= 4096) {
+        print_error_info(session->error_msg, "[VBox] insufficient size of memory", NS_ERROR_INVALID_ARG);
+        return VBGlue_Fail;
+    }
+    if (strlen(option->HostInterface) == 0) {
+        print_error_info(session->error_msg, "[VBox] invalid host interface", NS_ERROR_INVALID_ARG);
+        return VBGlue_Fail;
+    }
+    if (strlen(option->SharedDirPath) == 0) {
+        print_error_info(session->error_msg, "[VBox] invalid shared folder path", NS_ERROR_INVALID_ARG);
+        return VBGlue_Fail;
+    }
+    if (strlen(option->SharedDirName) == 0) {
+        print_error_info(session->error_msg, "[VBox] invalid shared folder name", NS_ERROR_INVALID_ARG);
+        return VBGlue_Fail;
+    }
+    if (strlen(option->BootImagePath) == 0) {
+        print_error_info(session->error_msg, "[VBox] invalid boot image path", NS_ERROR_INVALID_ARG);
+        return VBGlue_Fail;
+    }
+    if (strlen(option->HddImagePath) == 0) {
+        print_error_info(session->error_msg, "[VBox] invalid hdd path", NS_ERROR_INVALID_ARG);
+        return VBGlue_Fail;
+    }
 
     // build basic machine with bios & motherboard settings
     result = vbox_machine_build(session->vbox, session->machine, option->CpuCount, option->MemSize, session->error_msg);
