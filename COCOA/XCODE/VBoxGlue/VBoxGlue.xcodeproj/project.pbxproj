@@ -103,6 +103,7 @@
 		042D042F1F310A06002FACE8 /* VboxCom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VboxCom.h; sourceTree = "<group>"; };
 		042D04301F310A06002FACE8 /* VboxCom.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VboxCom.m; sourceTree = "<group>"; };
 		042D04311F3120FD002FACE8 /* vboxglue_init_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = vboxglue_init_test.m; sourceTree = "<group>"; };
+		04937E5F1F3A412B00128295 /* tstCAPIGlue.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = tstCAPIGlue.c; sourceTree = "<group>"; };
 		04F663481F33B9FA004A418F /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -150,6 +151,7 @@
 				042D042E1F310A06002FACE8 /* GlobalMacro.h */,
 				042D042F1F310A06002FACE8 /* VboxCom.h */,
 				042D04301F310A06002FACE8 /* VboxCom.m */,
+				04937E5F1F3A412B00128295 /* tstCAPIGlue.c */,
 				042D042D1F310948002FACE8 /* main.c */,
 			);
 			path = VBoxGlue;
