@@ -13,8 +13,6 @@
 ### V0.1.4
 - [ ] Repartition logic from Boot2Docker
 - [ ] Disable Docker when there is no TLS certs available
-
-- [ ] Provide `pc-master` DNS for `docker-compose`
 - [ ] Append 'CA' <http://rt.openssl.org/Ticket/History.html?user=guest&pass=guest&id=3979>
 - [ ] Run `dockerd` with script and check conditions there like boot2docker
 - [ ] Combine Docker related stuff in a unified package
@@ -28,6 +26,7 @@
 - [ ] Instant status check on `bounded` (i.e. as soon as master pings slave, master gets response)
 - [ ] `Makefile` to remove all *_test.go and TEST.go
 - [ ] Clean up core node including `vi`
+- [ ] More Test for `pc-vbox-comm`
 - [ ] Pass `uid` to all slave nodes to have them setup the __user__ with the same `uid`
 - [ ] Look carefully `etcd` TLS configuration behave with `docker-compose` connected.
   * At initial, etcd `network/bridged` API point isn't available and dockerd complains. This seems to be normal though.
@@ -43,6 +42,7 @@
 - [ ] _Master_ SQLite encryption
 - [ ] _Master_ Remove unnecessary `const` & `field` in `msagent` package
 - [ ] [_RPI_] cannot acquire proper interface name from netifaces for default gateway
+- [x] Provide `pc-master` DNS for `docker-compose`
 - [x] [_ODROID_] netmask format fix for network/interfaces (`ffffff00` -> `255.255.255.0`)
 - [x] Vagrant Fix Network Interface Order (eth0 : internal/ eth1 : external)
 - [x] Move Docker port to `0.0.0.0:2376` for ssl connection
@@ -55,6 +55,21 @@
 - [-] [_PINE64_] `fdisk` new partition incorrectly begins new partition sector from 2048
 - [-] Use FQDN name for certification and name server ( e.g. `pc-core.Q1oqc1921lq.cluster.pocketcluster.io` )
   * `pc-master` queries to main DNS.
+
+
+#### VirtualBox
+- [ ] get the actual core count
+- [ ] vbox files permissions
+- [ ] vbox machine start stop
+- [ ] vbox disk creation from XPCOM
+- [ ] vbox machine “options”
+  * "VBoxInternal/CPUM/EnableHVP", “1"
+- [ ] multiple shared folder
+- [ ] Discard all snapshots, settings (IMachine::discardSettings())
+  * -> when machine powerdown settings changed! 
+- [ ] Disable snapshot, save, teleport,  restore, fault-tolerant-sync, setting up, (these are illiegal statates)
+- [ ] force get session from running machine to reboot
+
 
 ### V0.1.3
 -
