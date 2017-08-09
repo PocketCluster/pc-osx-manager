@@ -80,14 +80,18 @@ type VBoxGlue interface {
     APIVersion() uint
     SearchHostNetworkInterfaceByName(hostIface string) (string, error)
 
+    CurrentMachineState() VBGlueMachineState
     IsMachineSettingChanged() (bool, error)
 
     FindMachineByNameOrID(machineName string) error
     CreateMachineByName(baseFolder, machineName string) error
-    ReleaseMachine() error
-
     BuildMachine(builder *VBoxBuildOption) error
+    ReleaseMachine() error
     DestoryMachine() error
+
+    StartMachine() error
+    AcpiStopMachine() error
+    ForceStopMachine() error
 
     TestErrorMessage() error
     GetMachineID() (string, error)
@@ -153,6 +157,22 @@ func (v *goVoxGlue) SearchHostNetworkInterfaceByName(hostIface string) (string, 
     return nameFound, nil
 }
 
+type VBGlueMachineState uint
+const (
+    VBGlueMachine_Illegal    = C.VBGlueMachine_Illegal
+    VBGlueMachine_PoweredOff = C.VBGlueMachine_PoweredOff
+    VBGlueMachine_Aborted    = C.VBGlueMachine_Aborted
+    VBGlueMachine_Running    = C.VBGlueMachine_Running
+    VBGlueMachine_Paused     = C.VBGlueMachine_Paused
+    VBGlueMachine_Stuck      = C.VBGlueMachine_Stuck
+    VBGlueMachine_Starting   = C.VBGlueMachine_Starting
+    VBGlueMachine_Stopping   = C.VBGlueMachine_Stopping
+)
+
+func (v *goVoxGlue) CurrentMachineState() VBGlueMachineState {
+    return VBGlueMachineState(C.VBoxMachineGetCurrentState(v.cvboxglue))
+}
+
 func (v *goVoxGlue) IsMachineSettingChanged() (bool, error) {
     var isChanged C.bool
     result := C.VBoxMachineIsSettingChanged(v.cvboxglue, &isChanged)
@@ -199,14 +219,6 @@ func (v *goVoxGlue) CreateMachineByName(baseFolder, machineName string) error {
     return nil
 }
 
-func (v *goVoxGlue) ReleaseMachine() error {
-    result := C.VBoxMachineRelease(v.cvboxglue)
-    if result != VBGlue_Ok {
-        return errors.Errorf("[ERR] unable to release machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
-    }
-    return nil
-}
-
 func (v *goVoxGlue) BuildMachine(builder *VBoxBuildOption) error {
     err := ValidateVBoxBuildOption(builder)
     if err != nil {
@@ -246,10 +258,42 @@ func (v *goVoxGlue) BuildMachine(builder *VBoxBuildOption) error {
     return nil
 }
 
+func (v *goVoxGlue) ReleaseMachine() error {
+    result := C.VBoxMachineRelease(v.cvboxglue)
+    if result != VBGlue_Ok {
+        return errors.Errorf("[ERR] unable to release machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
+    }
+    return nil
+}
+
 func (v *goVoxGlue) DestoryMachine() error {
     result := C.VBoxMachineDestory(v.cvboxglue)
     if result != VBGlue_Ok {
         return errors.Errorf("[ERR] unable to destory machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
+    }
+    return nil
+}
+
+func (v *goVoxGlue) StartMachine() error {
+    result := C.VBoxMachineHeadlessStart(v.cvboxglue)
+    if result != VBGlue_Ok {
+        return errors.Errorf("[ERR] unable to start machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
+    }
+    return nil
+}
+
+func (v *goVoxGlue) AcpiStopMachine() error {
+    result := C.VBoxMachineAcpiDown(v.cvboxglue)
+    if result != VBGlue_Ok {
+        return errors.Errorf("[ERR] unable to stop machine with ACPI %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
+    }
+    return nil
+}
+
+func (v *goVoxGlue) ForceStopMachine() error {
+    result := C.VBoxMachineForceDown(v.cvboxglue)
+    if result != VBGlue_Ok {
+        return errors.Errorf("[ERR] unable to force stop machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
     }
     return nil
 }
