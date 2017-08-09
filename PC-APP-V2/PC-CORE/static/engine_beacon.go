@@ -12,6 +12,7 @@ import (
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/pc-core/beacon"
     "github.com/stkim1/pc-core/event/operation"
+    "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/model"
 )
@@ -67,6 +68,7 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
         beaconC = make(chan service.Event)
         searchC = make(chan service.Event)
         vboxC   = make(chan service.Event)
+        teleC   = make(chan service.Event)
         netC    = make(chan service.Event)
     )
     a.RegisterServiceWithFuncs(
@@ -109,6 +111,9 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
             if err != nil {
                 return errors.WithStack(err)
             }
+
+            // waiting teleport to start
+            <- teleC
 
             log.Debugf("[AGENT] starting agent service...")
             a.BroadcastEvent(service.Event{Name:iventBeaconManagerSpawn, Payload:beaconMan})
@@ -162,6 +167,7 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
         service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
         service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
         service.BindEventWithService(iventVboxCtrlInstanceSpawn,           vboxC),
+        service.BindEventWithService(sshproc.EventPCSSHServerProxyStarted, teleC),
         service.BindEventWithService(iventNetworkAddressChange,            netC))
 
     return nil

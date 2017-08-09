@@ -109,8 +109,6 @@ func main() {
 
                     case operation.CmdBaseServiceStart: {
 
-                        // TODO check all the status before start
-
                         // config should be setup after acquiring ip address on wifi
                         // This should run only once
                         config, err = setupServiceConfig()
@@ -122,75 +120,95 @@ func main() {
                             FeedSend("[LIFE] SUCCESSFULLY INITIATED ENGINE " + config.teleConfig.HostUUID)
                         }
 
+                        // TODO check all the status before start
+
+
+                        // --- acquire informations ---
+                        // get cluster id
                         cid, err := context.SharedHostContext().MasterAgentName()
                         if err != nil {
                             log.Debug(err)
                             return
                         }
-
-                        // name service
-                        err = initPocketNameService(a, cid)
+                        // get primary interface bsd name
+                        iname, err := context.SharedHostContext().HostPrimaryInterfaceShortName()
                         if err != nil {
                             log.Debug(err)
                             return
                         }
 
+                        // --- role service sequence ---
                         // storage service
+                        // (NODEP netchange, NODEP services)
                         err = initStorageServie(a, config.etcdConfig)
                         if err != nil {
                             log.Debug(err)
                             return
                         }
 
-                        // registry
+                        // registry service
+                        // (NODEP netchange, NODEP services)
                         err = initRegistryService(a, config.regConfig)
                         if err != nil {
                             log.Debug(err)
                             return
                         }
 
-                        // teleport service added
-                        // TODO : need to hold teleport instance from GC
-                        _, err = sshproc.NewEmbeddedMasterProcess(a.ServiceSupervisor, config.teleConfig)
-                        if err != nil {
-                            log.Debug(err)
-                            return
-                        }
-
-                        // beacon service added
-                        iname, err := context.SharedHostContext().HostPrimaryInterfaceShortName()
-                        if err != nil {
-                            log.Debug(err)
-                            return
-                        }
+                        // search catcher service
+                        // (DEP netchange, NODEP services)
+                        // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
                         _, err = mcast.NewSearchCatcher(a.ServiceSupervisor, iname)
                         if err != nil {
                             log.Debug(err)
                             return
                         }
-
-                        // TODO : need to hold beacon instance from GC
+                        // beacon locator service
+                        // (NODEP netchange, NODEP service)
+                        // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
                         _, err = ucast.NewBeaconLocator(a.ServiceSupervisor)
                         if err != nil {
                             log.Debug(err)
                             return
                         }
 
+                        // internal name service
+                        // (NODEP netchange, DEP master beacon service)
+                        err = initPocketNameService(a, cid)
+                        if err != nil {
+                            log.Debug(err)
+                            return
+                        }
+
+                        // swarm service
+                        // (NODEP netchange, DEP master beacon service)
                         err = initSwarmService(a)
                         if err != nil {
                             log.Debug(err)
                             return
                         }
 
+                        // master beacon service
+                        // (DEP netchange, DEP vboxcontrol + teleport service)
                         err = initMasterBeaconService(a, cid, config.teleConfig)
                         if err != nil {
                             log.Debug(err)
                             return
                         }
 
+                        // vboxcontrol service
+                        // (DEP netchange, NODEP service)
                         err = initVboxCoreReportService(a, cid)
                         if err != nil {
                             log.Debug(err)
+                        }
+
+                        // teleport service
+                        // (DEP netchange, NODEP services)
+                        // TODO : need to hold teleport instance from GC -> not necessary as it embeds service instance???
+                        _, err = sshproc.NewEmbeddedMasterProcess(a.ServiceSupervisor, config.teleConfig)
+                        if err != nil {
+                            log.Debug(err)
+                            return
                         }
 
                         a.StartServices()
