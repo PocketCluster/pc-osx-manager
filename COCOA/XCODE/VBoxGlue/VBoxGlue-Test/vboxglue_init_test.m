@@ -38,11 +38,31 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
     [super tearDown];
 }
 
--(void)test_App_API_Version {
+-(void)test_Virtualbox_Status {
     NSLog(@"App Version %d", VBoxAppVersion());
     XCTAssertTrue( 5001022 <= VBoxAppVersion(), @"Virtualbox version should be greater than or equal to 5001022");
     NSLog(@"API Version %d", VBoxApiVersion());
     XCTAssertTrue( 5001 <= VBoxApiVersion(), @"VBox API version should be greater than or equal to  5001");
+    
+    unsigned int CPU_COUNT;
+    unsigned int MEMS_SIZE;
+    VBGlueResult result;
+    
+    result = VBoxHostGetMaxGuestCpuCount(vboxGlue, &CPU_COUNT);
+    XCTAssertTrue( result == VBGlue_Ok, @"get cpu count should be ok");
+    if (result != VBGlue_Fail) {
+        NSLog(@"CPU COUNT %d", CPU_COUNT);
+    } else {
+        NSLog(@"Failed reason %s", VBoxGetErrorMessage(vboxGlue));
+    }
+    
+    result = VBoxHostGetMaxGuestMemSize(vboxGlue, &MEMS_SIZE);
+    XCTAssertTrue( result == VBGlue_Ok, @"get cpu count should be ok");
+    if (result != VBGlue_Fail) {
+        NSLog(@"MEMORY SIZE %d", MEMS_SIZE);
+    } else {
+        NSLog(@"Failed reason %s", VBoxGetErrorMessage(vboxGlue));
+    }
 }
 
 -(void)test_Search_Host_Interface {
@@ -82,7 +102,7 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
 
 -(void)test_Build_machine {
     VBoxBuildOption *options =
-        VBoxMakeBuildOption(2, 2048,
+        VBoxMakeBuildOption(2, 4096,
                             "en1: Wi-Fi (AirPort)",
                             "/Users/almightykim/Workspace/VBOX-IMAGE/pc-core.iso",
                             "/Users/almightykim/Workspace/VBOX-IMAGE/pc-core-hdd.vmdk",
@@ -141,7 +161,6 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
     }
 }
 
-
 // we need to preserve session to start & stop
 -(void)test_Start_Foce_Stop_Machine {
     VBGlueResult result = VBoxMachineFindByNameOrID(vboxGlue, TARGET_MACHINE_NAME);
@@ -173,7 +192,6 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
 
     NSLog(@"%d", VBoxMachineGetCurrentState(vboxGlue));
 }
-
 
 -(void)test_Destory_Machine {
     VBGlueResult result = VBoxMachineFindByNameOrID(vboxGlue, TARGET_MACHINE_NAME);

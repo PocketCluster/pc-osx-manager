@@ -38,10 +38,10 @@ VBGlueResult
 VBoxHostSearchNetworkInterfaceByName(VBoxGlue glue, const char* queryName, char** fullNameFound);
 
 VBGlueResult
-VBoxHostGetMaxGuestCpuCount(VBoxGlue glue, unsigned int cpuCount);
+VBoxHostGetMaxGuestCpuCount(VBoxGlue glue, unsigned int* cpuCount);
 
 VBGlueResult
-VBoxHostGetMaxGuestMemSize(VBoxGlue glue, unsigned int memSize);
+VBoxHostGetMaxGuestMemSize(VBoxGlue glue, unsigned int* memSize);
 
 
 #pragma mark machine status

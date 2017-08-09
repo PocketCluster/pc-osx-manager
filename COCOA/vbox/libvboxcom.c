@@ -194,7 +194,7 @@ VBoxHostSearchNetworkInterfaceByName(VBoxGlue glue, const char* queryName, char*
 }
 
 VBGlueResult
-VBoxHostGetMaxGuestCpuCount(VBoxGlue glue, unsigned int cpuCount) {
+VBoxHostGetMaxGuestCpuCount(VBoxGlue glue, unsigned int* cpuCount) {
 
     assert(glue != NULL);
     
@@ -207,7 +207,7 @@ VBoxHostGetMaxGuestCpuCount(VBoxGlue glue, unsigned int cpuCount) {
         print_error_info(session->error_msg, "[VBox] failed to get host properties", result);
         return VBGlue_Fail;
     }
-    result = VboxGetSystemPropertiesMaxGuestCpuCount(prop, &cpuCount);
+    result = VboxGetSystemPropertiesMaxGuestCpuCount(prop, cpuCount);
     if (FAILED(result)) {
         print_error_info(session->error_msg, "[VBox] failed to get guest cpu count", result);
         return VBGlue_Fail;
@@ -217,7 +217,7 @@ VBoxHostGetMaxGuestCpuCount(VBoxGlue glue, unsigned int cpuCount) {
 }
 
 VBGlueResult
-VBoxHostGetMaxGuestMemSize(VBoxGlue glue, unsigned int memSize) {
+VBoxHostGetMaxGuestMemSize(VBoxGlue glue, unsigned int* memSize) {
 
     assert(glue != NULL);
 
@@ -230,7 +230,7 @@ VBoxHostGetMaxGuestMemSize(VBoxGlue glue, unsigned int memSize) {
         print_error_info(session->error_msg, "[VBox] failed to get host properties", result);
         return VBGlue_Fail;
     }
-    result = VboxGetSystemPropertiesMaxGuestRAM(prop, &memSize);
+    result = VboxGetSystemPropertiesMaxGuestRAM(prop, memSize);
     if (FAILED(result)) {
         print_error_info(session->error_msg, "[VBox] failed to get guest cpu count", result);
         return VBGlue_Fail;
