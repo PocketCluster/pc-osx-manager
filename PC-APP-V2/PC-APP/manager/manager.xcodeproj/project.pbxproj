@@ -11,63 +11,34 @@
 		0419FA141E90F61400031628 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0419FA131E90F61400031628 /* libc++.tbd */; };
 		0419FA161E90F61900031628 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0419FA151E90F61900031628 /* libz.tbd */; };
 		041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
-		041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
-		041FB3B91BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
 		0441A3D01BD88DDC00AABD7A /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */; };
 		0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; };
-		0441A3E11BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; };
-		0441A3E21BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; };
 		0441A3E31BD8904100AABD7A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D81BD8904100AABD7A /* main.m */; };
-		0441A3E41BD8904100AABD7A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D81BD8904100AABD7A /* main.m */; };
-		0441A3E51BD8904100AABD7A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D81BD8904100AABD7A /* main.m */; };
 		0441A4021BD8987100AABD7A /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0441A4121BD8BEA200AABD7A /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4111BD8BEA200AABD7A /* CFNetwork.framework */; };
 		0441A4141BD8BEAA00AABD7A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4131BD8BEAA00AABD7A /* SystemConfiguration.framework */; };
 		0441A4151BD8BEF100AABD7A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36411BD791F8004E0946 /* Foundation.framework */; };
 		0441A4171BD8BF3E00AABD7A /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4161BD8BF3E00AABD7A /* CoreServices.framework */; };
 		046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
-		046A35B91BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
-		046A35BA1BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
 		046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
-		046A35D71BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
-		046A35D81BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
 		046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E71BD78AB8004E0946 /* DrawingUtils.m */; };
-		046A36121BD78AB8004E0946 /* DrawingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E71BD78AB8004E0946 /* DrawingUtils.m */; };
-		046A36131BD78AB8004E0946 /* DrawingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E71BD78AB8004E0946 /* DrawingUtils.m */; };
 		046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35EF1BD78AB8004E0946 /* NSDateAdditions.m */; };
-		046A36151BD78AB8004E0946 /* NSDateAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35EF1BD78AB8004E0946 /* NSDateAdditions.m */; };
-		046A36161BD78AB8004E0946 /* NSDateAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35EF1BD78AB8004E0946 /* NSDateAdditions.m */; };
 		046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35F81BD78AB8004E0946 /* NSString+Random.m */; };
-		046A36181BD78AB8004E0946 /* NSString+Random.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35F81BD78AB8004E0946 /* NSString+Random.m */; };
-		046A36191BD78AB8004E0946 /* NSString+Random.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35F81BD78AB8004E0946 /* NSString+Random.m */; };
 		046A361A1BD78AB8004E0946 /* NSString+Encoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FB1BD78AB8004E0946 /* NSString+Encoding.m */; };
-		046A361B1BD78AB8004E0946 /* NSString+Encoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FB1BD78AB8004E0946 /* NSString+Encoding.m */; };
-		046A361C1BD78AB8004E0946 /* NSString+Encoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FB1BD78AB8004E0946 /* NSString+Encoding.m */; };
 		046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FE1BD78AB8004E0946 /* NSString+Contain.m */; };
-		046A361E1BD78AB8004E0946 /* NSString+Contain.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FE1BD78AB8004E0946 /* NSString+Contain.m */; };
-		046A361F1BD78AB8004E0946 /* NSString+Contain.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FE1BD78AB8004E0946 /* NSString+Contain.m */; };
 		046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36011BD78AB8004E0946 /* MSWeakTimer.m */; };
-		046A36211BD78AB8004E0946 /* MSWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36011BD78AB8004E0946 /* MSWeakTimer.m */; };
-		046A36221BD78AB8004E0946 /* MSWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36011BD78AB8004E0946 /* MSWeakTimer.m */; };
 		046A36231BD78AB8004E0946 /* timeutil.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36041BD78AB8004E0946 /* timeutil.m */; };
-		046A36241BD78AB8004E0946 /* timeutil.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36041BD78AB8004E0946 /* timeutil.m */; };
-		046A36251BD78AB8004E0946 /* timeutil.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36041BD78AB8004E0946 /* timeutil.m */; };
 		046A363B1BD7915F004E0946 /* Askpass.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36381BD7915F004E0946 /* Askpass.m */; };
 		046A363C1BD7915F004E0946 /* PasswordHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A363A1BD7915F004E0946 /* PasswordHelper.m */; };
 		046A36401BD791F3004E0946 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A363F1BD791F3004E0946 /* Security.framework */; };
 		046A36421BD791F8004E0946 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36411BD791F8004E0946 /* Foundation.framework */; };
-		046A36431BD79321004E0946 /* Askpass in Resources */ = {isa = PBXBuildFile; fileRef = 046A36301BD78F52004E0946 /* Askpass */; };
 		046A36451BD79343004E0946 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36441BD79343004E0946 /* WebKit.framework */; };
 		046A36461BD7934D004E0946 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A363F1BD791F3004E0946 /* Security.framework */; };
 		046A36481BD79359004E0946 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36471BD79359004E0946 /* Cocoa.framework */; };
 		046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96081BDDBBBC006AA8EE /* BaseWindow.m */; };
-		046F960A1BDDBBBC006AA8EE /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96081BDDBBBC006AA8EE /* BaseWindow.m */; };
-		046F960B1BDDBBBC006AA8EE /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96081BDDBBBC006AA8EE /* BaseWindow.m */; };
 		047F32AC1D8A898E00568210 /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 047F326E1D8A898E00568210 /* NativeMenu.m */; };
 		0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0486780E1BCF5FE20071594B /* Assets.xcassets */; };
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
-		0486781D1BCF5FE20071594B /* managerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0486781C1BCF5FE20071594B /* managerTests.m */; };
-		048678281BCF5FE20071594B /* managerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 048678271BCF5FE20071594B /* managerUITests.m */; };
 		0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */; };
 		04AD71C51E9B749A00DB6AE9 /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C21E9B749A00DB6AE9 /* Util.m */; };
 		04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */; };
@@ -75,8 +46,6 @@
 		04AF2B081E84B19B00F4DF09 /* AppDelegate+EventHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AF2B071E84B19B00F4DF09 /* AppDelegate+EventHandle.m */; };
 		04BC73831E8A2E910079BD77 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04BC73821E8A2E910079BD77 /* AboutWindow.m */; };
 		04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
-		04C585871BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
-		04C585881BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
 		04C6D6061E7F9CEA0004837A /* libstatic-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04C6D6051E7F9CEA0004837A /* libstatic-core.a */; };
 		04C6D6091E7F9D210004837A /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04C6D6071E7F9CFD0004837A /* CoreWLAN.framework */; };
 		04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6D60C1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m */; };
@@ -85,21 +54,12 @@
 		04CB13D91E85075D00F2D6EE /* AppDelegate+Notification.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CB13D81E85075D00F2D6EE /* AppDelegate+Notification.m */; };
 		04D5A48E1E9269AE0057012A /* AppDelegate+Sparkle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */; };
 		04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
-		04E51DC11BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
-		04E51DC21BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
 		04F705701BD7A9B700829651 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04F7056F1BD7A9B700829651 /* IOKit.framework */; };
 		04F705721BD7A9BD00829651 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04F705711BD7A9BD00829651 /* CoreFoundation.framework */; };
 		89580BEF40BDD88F96DECDEE /* Pods_PocketCluster.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C46CEC44F04E5FF247FB7D68 /* Pods_PocketCluster.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		046A363D1BD791B1004E0946 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 048677FD1BCF5FE20071594B /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 046A362F1BD78F52004E0946;
-			remoteInfo = Askpass;
-		};
 		048678191BCF5FE20071594B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 048677FD1BCF5FE20071594B /* Project object */;
@@ -301,13 +261,6 @@
 			path = manager/Application;
 			sourceTree = "<group>";
 		};
-		04552D391E84B8AA0081D3FD /* MessagePack */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = MessagePack;
-			sourceTree = "<group>";
-		};
 		046A35B51BD783CE004E0946 /* WindowController */ = {
 			isa = PBXGroup;
 			children = (
@@ -335,7 +288,6 @@
 			children = (
 				04C6D60A1E7F9EDD0004837A /* Dictionary */,
 				046A35E51BD78AB8004E0946 /* Drawing */,
-				04552D391E84B8AA0081D3FD /* MessagePack */,
 				046A35E81BD78AB8004E0946 /* Macro */,
 				046A35ED1BD78AB8004E0946 /* NSDate */,
 				046A35F01BD78AB8004E0946 /* Protocols */,
@@ -657,7 +609,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				046A363E1BD791B1004E0946 /* PBXTargetDependency */,
 			);
 			name = PocketCluster;
 			productName = manager;
@@ -755,7 +706,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */,
-				046A36431BD79321004E0946 /* Askpass in Resources */,
 				0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */,
 				041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */,
@@ -769,9 +719,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				04E51DC11BDC88E3001F1F22 /* Resources.bundle in Resources */,
-				046A35D71BD7871B004E0946 /* AboutWindow.xib in Resources */,
-				041FB3B81BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -779,9 +726,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				04E51DC21BDC88E3001F1F22 /* Resources.bundle in Resources */,
-				046A35D81BD7871B004E0946 /* AboutWindow.xib in Resources */,
-				041FB3B91BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -891,19 +835,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				046A36241BD78AB8004E0946 /* timeutil.m in Sources */,
-				0441A3E41BD8904100AABD7A /* main.m in Sources */,
-				04C585871BE5BF3B004B2839 /* PCConstants.m in Sources */,
-				046A361B1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
-				0486781D1BCF5FE20071594B /* managerTests.m in Sources */,
-				046A36151BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
-				046A36121BD78AB8004E0946 /* DrawingUtils.m in Sources */,
-				046A36181BD78AB8004E0946 /* NSString+Random.m in Sources */,
-				0441A3E11BD8904100AABD7A /* AppDelegate.m in Sources */,
-				046A36211BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
-				046A361E1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
-				046A35B91BD783CE004E0946 /* BaseWindowController.m in Sources */,
-				046F960A1BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -911,30 +842,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				046A36251BD78AB8004E0946 /* timeutil.m in Sources */,
-				0441A3E51BD8904100AABD7A /* main.m in Sources */,
-				04C585881BE5BF3B004B2839 /* PCConstants.m in Sources */,
-				046A361C1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
-				048678281BCF5FE20071594B /* managerUITests.m in Sources */,
-				046A36161BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
-				046A36131BD78AB8004E0946 /* DrawingUtils.m in Sources */,
-				046A36191BD78AB8004E0946 /* NSString+Random.m in Sources */,
-				0441A3E21BD8904100AABD7A /* AppDelegate.m in Sources */,
-				046A36221BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
-				046A361F1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
-				046A35BA1BD783CE004E0946 /* BaseWindowController.m in Sources */,
-				046F960B1BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		046A363E1BD791B1004E0946 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 046A362F1BD78F52004E0946 /* Askpass */;
-			targetProxy = 046A363D1BD791B1004E0946 /* PBXContainerItemProxy */;
-		};
 		0486781A1BCF5FE20071594B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 048678041BCF5FE20071594B /* PocketCluster */;

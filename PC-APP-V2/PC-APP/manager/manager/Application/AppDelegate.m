@@ -10,10 +10,6 @@
 #import "Sentry.h"
 #import <Sparkle/Sparkle.h>
 
-#ifdef USE_LIBSSH2
-    #import <NMSSH/NMSSH.h>
-#endif
-
 #import "Util.h"
 #import "NativeMenu.h"
 #include "pc-core.h"

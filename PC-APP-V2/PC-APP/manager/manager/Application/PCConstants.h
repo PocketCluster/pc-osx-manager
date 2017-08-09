@@ -7,13 +7,3 @@
 //
 
 #pragma once
-
-#define MAX_TRIAL_NODE_COUNT (6)
-
-// --- MONITORING MANAGEMENT
-typedef enum PCClusterType {
-    PC_CLUSTER_NONE = 0
-    ,PC_CLUTER_VAGRANT
-    ,PC_CLUSTER_RASPBERRY
-    ,PC_CLUSTER_TYPE_SIZE
-} PCClusterType;
