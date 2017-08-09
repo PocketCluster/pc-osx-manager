@@ -652,7 +652,7 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
             return result;
         }
     }
-    
+
     // SAVE SETTINGS & REGISTER MACHINE BEFORE ATTACH A MEDIUM
     {
         // save settings
