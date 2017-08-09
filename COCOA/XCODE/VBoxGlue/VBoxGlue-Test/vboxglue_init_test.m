@@ -106,7 +106,7 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
 }
 
 // we need to preserve session to start & stop
--(void)test_Start_Stop_Machine {
+-(void)test_Start_AcpiStop_Machine {
     VBGlueResult result = VBoxMachineFindByNameOrID(vboxGlue, TARGET_MACHINE_NAME);
     XCTAssertTrue( VBGlue_Ok == result, @"find machine should return true");
     if (result == VBGlue_Ok) {
@@ -118,16 +118,20 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
         return;
     }
 
+    NSLog(@"let's start machine...");
     result = VBoxMachineHeadlessStart(vboxGlue);
     XCTAssertTrue( VBGlue_Ok == result, @"machine start should return true");
+    NSLog(@"machine started.");
     if (result == VBGlue_Ok) {
         XCTAssertTrue(VBGlueMachine_Running == VBoxMachineGetCurrentState(vboxGlue));
     } else {
         NSLog(@"Failed reason %s", VBoxGetErrorMessage(vboxGlue));
     }
-   
+
+    NSLog(@"waiting machine...");
     sleep(30);
 
+    NSLog(@"machine ACPI shutdown.");
     result = VBoxMachineAcpiDown(vboxGlue);
     XCTAssertTrue( VBGlue_Ok == result, @"machine stop should return true");
     if (result == VBGlue_Ok) {
@@ -136,6 +140,40 @@ static const char* TARGET_MACHINE_NAME = "POCKET_VBOX_TEST";
         NSLog(@"Failed reason %s", VBoxGetErrorMessage(vboxGlue));
     }
 }
+
+
+// we need to preserve session to start & stop
+-(void)test_Start_Foce_Stop_Machine {
+    VBGlueResult result = VBoxMachineFindByNameOrID(vboxGlue, TARGET_MACHINE_NAME);
+    XCTAssertTrue( VBGlue_Ok == result, @"find machine should return true");
+    if (result == VBGlue_Ok) {
+        NSLog(@"Setting file path %s", VBoxGetSettingFilePath(vboxGlue));
+        NSLog(@"MachineID Origin %s", VBoxGetMachineID(vboxGlue));
+        XCTAssertTrue(VBGlueMachine_PoweredOff == VBoxMachineGetCurrentState(vboxGlue));
+    } else {
+        NSLog(@"Failed reason %s", VBoxGetErrorMessage(vboxGlue));
+        return;
+    }
+    
+    result = VBoxMachineHeadlessStart(vboxGlue);
+    XCTAssertTrue( VBGlue_Ok == result, @"machine start should return true");
+    if (result == VBGlue_Ok) {
+        XCTAssertTrue(VBGlueMachine_Running == VBoxMachineGetCurrentState(vboxGlue));
+    } else {
+        NSLog(@"Failed reason %s", VBoxGetErrorMessage(vboxGlue));
+    }
+    
+    sleep(30);
+    
+    result = VBoxMachineForceDown(vboxGlue);
+    XCTAssertTrue( VBGlue_Ok == result, @"machine stop should return true");
+    if (result != VBGlue_Ok) {
+        NSLog(@"Failed reason %s", VBoxGetErrorMessage(vboxGlue));
+    }
+
+    NSLog(@"%d", VBoxMachineGetCurrentState(vboxGlue));
+}
+
 
 -(void)test_Destory_Machine {
     VBGlueResult result = VBoxMachineFindByNameOrID(vboxGlue, TARGET_MACHINE_NAME);
