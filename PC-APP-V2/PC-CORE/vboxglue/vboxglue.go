@@ -3,10 +3,13 @@
 package vboxglue
 
 /*
-#cgo LDFLAGS: -Wl,-U,_NewVBoxGlue,-U,_CloseVBoxGlue,-U,_VBoxAppVersion,-U,_VBoxApiVersion,-U,_VBoxSearchHostNetworkInterfaceByName
-#cgo LDFLAGS: -Wl,-U,_VBoxIsMachineSettingChanged,-U,_VBoxFindMachineByNameOrID,-U,_VBoxCreateMachineByName,-U,_VBoxReleaseMachine
-#cgo LDFLAGS: -Wl,-U,_VBoxMakeBuildOption,-U,_VBoxBuildMachine,-U,_VBoxDestoryMachine
-#cgo LDFLAGS: -Wl,-U,_VBoxGetErrorMessage,-U,_VboxGetSettingFilePath,-U,_VboxGetMachineID
+#cgo LDFLAGS: -Wl,-U,_NewVBoxGlue,-U,_CloseVBoxGlue
+#cgo LDFLAGS: -Wl,-U,_VBoxAppVersion,-U,_VBoxApiVersion
+#cgo LDFLAGS: -Wl,-U,_VBoxHostSearchNetworkInterfaceByName,-U,_VBoxHostGetMaxGuestCpuCount,-U,_VBoxHostGetMaxGuestMemSize
+#cgo LDFLAGS: -Wl,-U,_VBoxMachineGetCurrentState,-U,_VBoxMachineIsSettingChanged,-U,_VBoxMachineFindByNameOrID,-U,_VBoxMachineCreateByName
+#cgo LDFLAGS: -Wl,-U,_VBoxMakeBuildOption,-U,_VBoxMachineBuildWithOption,-U,_VBoxMachineRelease,-U,_VBoxMachineDestory
+#cgo LDFLAGS: -Wl,-U,_VBoxMachineHeadlessStart,-U,_VBoxMachineAcpiDown,-U,_VBoxMachineForceDown
+#cgo LDFLAGS: -Wl,-U,_VBoxGetErrorMessage,-U,_VBoxGetSettingFilePath,-U,_VBoxGetMachineID
 #cgo LDFLAGS: -Wl,-U,_VBoxTestErrorMessage
 
 #include <stdbool.h>
@@ -136,7 +139,7 @@ func (v *goVoxGlue) SearchHostNetworkInterfaceByName(hostIface string) (string, 
         nameFound string = ""
     )
 
-    result := C.VBoxSearchHostNetworkInterfaceByName(v.cvboxglue, cHostIface, &cNameFound)
+    result := C.VBoxHostSearchNetworkInterfaceByName(v.cvboxglue, cHostIface, &cNameFound)
     if result != VBGlue_Ok {
         return "", errors.Errorf("[ERR] unable to host interface for %s. Reason : %v", hostIface, C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
     }
@@ -152,7 +155,7 @@ func (v *goVoxGlue) SearchHostNetworkInterfaceByName(hostIface string) (string, 
 
 func (v *goVoxGlue) IsMachineSettingChanged() (bool, error) {
     var isChanged C.bool
-    result := C.VBoxIsMachineSettingChanged(v.cvboxglue, &isChanged)
+    result := C.VBoxMachineIsSettingChanged(v.cvboxglue, &isChanged)
     if result != VBGlue_Ok {
         return false, errors.Errorf("[ERR] unable to acquire machine status %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
     }
@@ -165,7 +168,7 @@ func (v *goVoxGlue) FindMachineByNameOrID(machineName string) error {
         return errors.Errorf("[ERR] machine name should be provided")
     }
     cMachineName := C.CString(machineName)
-    result := C.VBoxFindMachineByNameOrID(v.cvboxglue, cMachineName)
+    result := C.VBoxMachineFindByNameOrID(v.cvboxglue, cMachineName)
     C.free(unsafe.Pointer(cMachineName))
     if result != VBGlue_Ok {
         return errors.Errorf("[ERR] unable to find machine by name %s %v", machineName, C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
@@ -186,7 +189,7 @@ func (v *goVoxGlue) CreateMachineByName(baseFolder, machineName string) error {
         cMachineName = C.CString(machineName)
     )
 
-    result := C.VBoxCreateMachineByName(v.cvboxglue, cBaseFolder, cMachineName)
+    result := C.VBoxMachineCreateByName(v.cvboxglue, cBaseFolder, cMachineName)
     if result != VBGlue_Ok {
         return errors.Errorf("[ERR] unable to create machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
     }
@@ -197,7 +200,7 @@ func (v *goVoxGlue) CreateMachineByName(baseFolder, machineName string) error {
 }
 
 func (v *goVoxGlue) ReleaseMachine() error {
-    result := C.VBoxReleaseMachine(v.cvboxglue)
+    result := C.VBoxMachineRelease(v.cvboxglue)
     if result != VBGlue_Ok {
         return errors.Errorf("[ERR] unable to release machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
     }
@@ -221,12 +224,12 @@ func (v *goVoxGlue) BuildMachine(builder *VBoxBuildOption) error {
         option            = C.VBoxMakeBuildOption(C.int(builder.CPUCount), C.int(builder.MemSize), cHostInterface, cBootImagePath, cHddImagePath, cSharedFolderPath, cSharedFolderName)
     )
 
-    result := C.VBoxCreateMachineByName(v.cvboxglue, cBaseDirPath, cMachineName)
+    result := C.VBoxMachineCreateByName(v.cvboxglue, cBaseDirPath, cMachineName)
     if result != VBGlue_Ok {
         return errors.Errorf("[ERR] unable to create machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
     }
 
-    result = C.VBoxBuildMachine(v.cvboxglue, option)
+    result = C.VBoxMachineBuildWithOption(v.cvboxglue, option)
     if result != VBGlue_Ok {
         return errors.Errorf("[ERR] unable to build machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
     }
@@ -244,7 +247,7 @@ func (v *goVoxGlue) BuildMachine(builder *VBoxBuildOption) error {
 }
 
 func (v *goVoxGlue) DestoryMachine() error {
-    result := C.VBoxDestoryMachine(v.cvboxglue)
+    result := C.VBoxMachineDestory(v.cvboxglue)
     if result != VBGlue_Ok {
         return errors.Errorf("[ERR] unable to destory machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
     }
@@ -261,7 +264,7 @@ func (v *goVoxGlue) TestErrorMessage() error {
 }
 
 func (v *goVoxGlue) GetMachineID() (string, error) {
-    var mid string = C.GoString(C.VboxGetMachineID(v.cvboxglue))
+    var mid string = C.GoString(C.VBoxGetMachineID(v.cvboxglue))
     if len(mid) == 0 {
         return "", errors.Errorf("[ERR] invald machine id")
     }
