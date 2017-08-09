@@ -202,5 +202,5 @@ var TestAESCryptor, _ = NewAESCrypto(TestAESKey)
 var TestMasterRSAEncryptor, _ = NewRsaEncryptorFromKeyData(TestSlavePublicKey(), TestMasterWeakPrivateKey())
 var TestMasterRSADecryptor, _ = NewRsaDecryptorFromKeyData(TestSlavePublicKey(), TestMasterWeakPrivateKey())
 
-var TestSlaveRSAEncryptor, _ = NewRsaEncryptorFromKeyData(TestMasterWeakPublicKey(), TestSlavePrivateKey())
-var TestSlaveRSADecryptor, _ = NewRsaEncryptorFromKeyData(TestMasterWeakPublicKey(), TestSlavePrivateKey())
+var TestSlaveRSAEncryptor, _  = NewRsaEncryptorFromKeyData(TestMasterWeakPublicKey(), TestSlavePrivateKey())
+var TestSlaveRSADecryptor, _  = NewRsaDecryptorFromKeyData(TestMasterWeakPublicKey(), TestSlavePrivateKey())

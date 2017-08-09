@@ -301,7 +301,7 @@ func (s *srvcSupervisor) runService(service Service) {
             srv.setRunning()
             err := srv.serve()
             if err != nil {
-                log.Debug(errors.WithStack(err))
+                log.Errorf("%s\n%s", srv.Tag(), err.Error())
             }
             cleanup(ss, srv)
             srv.setStopped()

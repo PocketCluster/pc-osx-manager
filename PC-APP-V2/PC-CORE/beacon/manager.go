@@ -11,8 +11,12 @@ import (
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
-    "github.com/stkim1/pc-core/model"
+    "github.com/stkim1/pc-vbox-comm/masterctrl"
+    mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
     "github.com/stkim1/pc-node-agent/slagent"
+
+    "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/model"
 )
 import (
     "github.com/davecgh/go-spew/spew"
@@ -26,11 +30,11 @@ type BeaconEventNotification interface {
     BeaconEventShutdown() error
 }
 
-func NewBeaconManagerWithFunc(cid string, noti BeaconEventNotification, comm CommChannelFunc) (BeaconManger, error) {
-    return NewBeaconManager(cid, noti, comm)
+func NewBeaconManagerWithFunc(cid string, vbox masterctrl.VBoxMasterControl, noti BeaconEventNotification, comm CommChannelFunc) (BeaconManger, error) {
+    return NewBeaconManager(cid, vbox, noti, comm)
 }
 
-func NewBeaconManager(cid string, noti BeaconEventNotification, comm CommChannel) (BeaconManger, error) {
+func NewBeaconManager(cid string, vbox masterctrl.VBoxMasterControl, noti BeaconEventNotification, comm CommChannel) (BeaconManger, error) {
     var (
         beacons []MasterBeacon = []MasterBeacon{}
         bm *beaconManger = nil
@@ -47,6 +51,7 @@ func NewBeaconManager(cid string, noti BeaconEventNotification, comm CommChannel
 
     bm = &beaconManger {
         clusterID:       cid,
+        vboxCtrl:        vbox,
         notiReceiver:    noti,
         commChannel:     comm,
     }
@@ -83,14 +88,20 @@ type BeaconManger interface {
     TransitionWithSearchData(searchD mcast.CastPack, ts time.Time) error
     TransitionWithTimestamp(ts time.Time) error
     Shutdown() error
+
     // swarm discovery backend
     discovery.Backend
+
+    // TODO : this need to be a separate interface
+    // dns service name
+    AddressForName(name string) (string, error)
 }
 
 // We might not need a locking mechanism as "select" statement will choose only "one input" at a time.
 type beaconManger struct {
     sync.Mutex
     clusterID         string
+    vboxCtrl          masterctrl.VBoxMasterControl
     notiReceiver      BeaconEventNotification
     commChannel       CommChannel
     beaconList        []MasterBeacon
@@ -233,6 +244,27 @@ func (b *beaconManger) Shutdown() error {
     shutdownMasterBeacons(b)
     b.commChannel = nil
     return nil
+}
+
+// --- Node Name Service Methods --- //
+
+func (b *beaconManger) AddressForName(name string) (string, error) {
+    // TODO refactor this into an appropriate package
+    const (
+        pcmaster string = "pc-master"
+    )
+
+    switch name {
+        case pcmaster: {
+            return context.SharedHostContext().HostPrimaryAddress()
+        }
+        case model.CoreNodeName: {
+            return b.vboxCtrl.GetCoreNode().IP4AddrString()
+        }
+        default: {
+            return findNodeForNameService(b, name)
+        }
+    }
 }
 
 // --- Swarm Discovery Methods --- //
@@ -395,12 +427,10 @@ func findBoundedNodesForSwarm(b *beaconManger) []string {
     defer b.Unlock()
 
     const (
-        dockerPort string = "2375"
+        dockerPort string = "2376"
     )
 
     var (
-        addr string = ""
-        err error = nil
         nodeList []string = []string{}
         bLen int = len(b.beaconList)
     )
@@ -408,14 +438,35 @@ func findBoundedNodesForSwarm(b *beaconManger) []string {
     for i := 0; i < bLen; i++ {
         bc := b.beaconList[i]
         if bc.CurrentState() == MasterBounded {
-            addr, err = bc.SlaveNode().IP4AddrString()
-            if err != nil {
-                continue
-            }
-            nodeList = append(nodeList, fmt.Sprintf("%s:%s", addr, dockerPort))
+            // TODO : should we use FQDN here?
+            nodeName := bc.SlaveNode().NodeName
+            nodeList = append(nodeList, fmt.Sprintf("%s:%s", nodeName, dockerPort))
         }
     }
+
+    // append core node
+    if b.vboxCtrl.CurrentState() == mpkg.VBoxMasterBounded {
+        nodeList = append(nodeList, fmt.Sprintf("%s:%s", model.CoreNodeName, dockerPort))
+    }
+
     return nodeList
+}
+
+func findNodeForNameService(b *beaconManger, name string) (string, error) {
+    b.Lock()
+    defer b.Unlock()
+
+    var (
+        bLen int = len(b.beaconList)
+    )
+
+    for i := 0; i < bLen; i++ {
+        bc := b.beaconList[i]
+        if bc.CurrentState() == MasterBounded && bc.SlaveNode().NodeName == name {
+            return bc.SlaveNode().IP4AddrString()
+        }
+    }
+    return "", errors.Errorf("[ERR] cannot find a node for name %s", name)
 }
 
 func shutdownMasterBeacons(b *beaconManger) {

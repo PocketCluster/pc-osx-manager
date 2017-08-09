@@ -1,11 +1,11 @@
 package dhcp
 
 const (
-    DHCPEventSocketPath = "/var/run/pocketd.sock"
-    DHCPModeAgent       = "dhcpagent"
+    PocketDHCPEventSocketPath string = "/var/run/pocketd.sock"
+    PocketDHCPModeAgent string       = "pocket.dhcp.agent"
 )
 
-type DhcpMeta struct {
+type PocketDhcpMeta struct {
     Reason                          string    `json:"reason, omitempty"                             msgpack:"reason, omitempty"`
     Interface                       string    `json:"interface, omitempty"                          msgpack:"interface, omitempty"`
     Medium                          string    `json:"medium, omitempty"                             msgpack:"medium, omitempty"`
@@ -31,18 +31,18 @@ type DhcpMeta struct {
     Dhcp6NameServers                string    `json:"dhcp6_name_servers, omitempty"                 msgpack:"dhcp6_name_servers, omitempty"`
 }
 
-type DhcpEvent struct {
+type PocketDhcpEvent struct {
     // the env variables without prefix
-    Timestamp    string      `json:"timestamp"             msgpack:"timestamp"`
-    Reason       string      `json:"reason"                msgpack:"reason"`
-    Interface    string      `json:"interface"             msgpack:"interface"`
-    Medium       string      `json:"medium, omitempty"     msgpack:"medium, omitempty"`
+    Timestamp    string          `json:"timestamp"             msgpack:"timestamp"`
+    Reason       string          `json:"reason"                msgpack:"reason"`
+    Interface    string          `json:"interface"             msgpack:"interface"`
+    Medium       string          `json:"medium, omitempty"     msgpack:"medium, omitempty"`
 
     // env meta variables with prefix 'old_', 'cur_', 'new_'
-    Old          DhcpMeta    `json:"old, omitempty"        msgpack:"old, inline, omitempty"`
-    Current      DhcpMeta    `json:"current, omitempty"    msgpack:"current, inline, omitempty"`
-    New          DhcpMeta    `json:"new, omitempty"        msgpack:"new, inline, omitempty"`
+    Old        PocketDhcpMeta    `json:"old, omitempty"        msgpack:"old, inline, omitempty"`
+    Current    PocketDhcpMeta    `json:"current, omitempty"    msgpack:"current, inline, omitempty"`
+    New        PocketDhcpMeta    `json:"new, omitempty"        msgpack:"new, inline, omitempty"`
 
     // dhcp client requested checker
-    Requested    DhcpMeta    `json:"requested, omitempty"  msgpack:"requested, inline, omitempty"`
+    Requested PocketDhcpMeta     `json:"requested, omitempty"  msgpack:"requested, inline, omitempty"`
 }

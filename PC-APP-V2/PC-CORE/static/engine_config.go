@@ -1,20 +1,17 @@
 package main
 
 import (
-    "os"
-    "path"
-
-    log "github.com/Sirupsen/logrus"
     tefaults "github.com/gravitational/teleport/lib/defaults"
     tervice "github.com/gravitational/teleport/lib/service"
-
     "github.com/coreos/etcd/embed"
+
+    log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
 
-    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/context"
-    "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/extlib/registry"
+    "github.com/stkim1/pc-core/extlib/pcssh/sshcfg"
+    "github.com/stkim1/pc-core/model"
 )
 
 type serviceConfig struct {
@@ -26,7 +23,11 @@ type serviceConfig struct {
 func setupServiceConfig() (*serviceConfig, error) {
     // setup context
     ctx := context.SharedHostContext()
-    context.SetupBasePath()
+    err := context.SetupBasePath()
+    if err != nil {
+        // this is critical
+        return nil, errors.WithStack(err)
+    }
 
     // open database
     dataDir, err := ctx.ApplicationUserDataDirectory()
@@ -54,7 +55,7 @@ func setupServiceConfig() (*serviceConfig, error) {
         meta = cluster[0]
     }
     log.Debugf("Cluster ID %v | UUID %v", meta.ClusterID, meta.ClusterUUID)
-    ctx.SetMasterAgentName(meta.ClusterID)
+    ctx.SetClusterMeta(meta)
 
     country, err := ctx.CurrentCountryCode()
     if err != nil {
@@ -86,23 +87,32 @@ func setupServiceConfig() (*serviceConfig, error) {
     }
     ctx.UpdateBeaconCert(beaconBundle)
 
+    // vbox certificate
+    vboxBundle, err := buildVBoxReportCertificate(rec.Certdb(), meta.ClusterUUID)
+    if err != nil {
+        // this is critical
+        return nil, errors.WithStack(err)
+    }
+    ctx.UpdateVBoxCert(vboxBundle)
+
     // make teleport core config
-    teleCfg := tervice.MakeCoreConfig(dataDir, true)
-    teleCfg.AssignHostUUID(meta.ClusterUUID)
-    teleCfg.AssignDatabaseEngine(rec.DataBase())
-    teleCfg.AssignCertStorage(rec.Certdb())
-    teleCfg.AssignCASigner(caBundle.CASigner)
-    teleCfg.AssignHostCertAuth(caBundle.CAPrvKey, caBundle.CASSHChk, meta.ClusterDomain)
-    err = tervice.ValidateCoreConfig(teleCfg)
+    teleCfg, err := sshcfg.MakeMasterConfig(context.SharedHostContext(), true)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+    sshcfg.AssignDatabaseEngine(teleCfg, rec.DataBase())
+    sshcfg.AssignCertStorage(teleCfg, rec.Certdb())
+    sshcfg.AssignCASigner(teleCfg, caBundle.CASigner)
+    sshcfg.AssignHostCertAuth(teleCfg, caBundle.CAPrvKey, caBundle.CASSHChk, meta.ClusterDomain)
+    err = sshcfg.ValidateMasterConfig(teleCfg)
     if err != nil {
         return nil, errors.WithStack(err)
     }
 
     // registry configuration
-    var regPath = path.Join(dataDir, defaults.RepositoryPathPostfix)
-    if _, err := os.Stat(regPath); os.IsNotExist(err) {
-        os.MkdirAll(path.Join(regPath, "docker/registry/v2/repositories"), 0700);
-        os.MkdirAll(path.Join(regPath, "docker/registry/v2/blobs"),        0700);
+    regPath, err := context.SharedHostContext().ApplicationRepositoryDirectory()
+    if err != nil {
+        return nil, errors.WithStack(err)
     }
     regCfg, err := registry.NewPocketRegistryConfig(false, regPath, hostBundle.Certificate, hostBundle.PrivateKey)
     if err != nil {
@@ -114,18 +124,17 @@ func setupServiceConfig() (*serviceConfig, error) {
     }
 
     //etcd configuration
-    var etcdPath = path.Join(dataDir, defaults.StoragePathPostfix)
-    if _, err := os.Stat(etcdPath); os.IsNotExist(err) {
-        os.MkdirAll(etcdPath, 0700);
+    etcdPath, err := context.SharedHostContext().ApplicationStorageDirectory()
+    if err != nil {
+        return nil, errors.WithStack(err)
     }
     // recommended parameter values
     // heartbeat : 500
     // election  : 5000 ( heartbeat * 10 )
     // snapshot  : 1000
     // TODO : these parameters need to be dynamically adjusted according to a cluster condition
-    etcdCfg, err := embed.NewPocketConfig(etcdPath, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey, 500, 5000, 1000)
+    etcdCfg, err := embed.NewPocketConfig(etcdPath, caBundle.CACrtPem, hostBundle.Certificate, hostBundle.PrivateKey, 500, 5000, 1000, true)
     if err != nil {
-        // this is critical
         return nil, errors.WithStack(err)
     }
     return &serviceConfig {

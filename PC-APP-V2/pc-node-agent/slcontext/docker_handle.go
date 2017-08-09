@@ -16,11 +16,6 @@ func DockerEnvironemtPostProcess() error {
         log.Debugf(err.Error())
         return errors.WithStack(err)
     }
-    err = config.SetupDockerAuthorityCert("")
-    if err != nil {
-        log.Debugf(err.Error())
-        return errors.WithStack(err)
-    }
     err = config.AppendAuthCertFowardSystemCertAuthority("")
     if err != nil {
         log.Debugf(err.Error())

@@ -17,18 +17,15 @@ const (
     DOCKER_ENV_PATH string              = "/etc/default/"
     DOCKER_ENV_FILE string              = DOCKER_ENV_PATH + "docker"
 
-    DOCKER_AUTH_CERT_PATH string        = "/etc/docker/certs.d/pc-master/"
-    DOCKER_AUTH_CERT_FILE string        = DOCKER_AUTH_CERT_PATH + "ca" + pcrypto.FileExtCertificate
-
     SYSTEM_AUTH_CERT_NATIVE_FILE string = "/etc/ssl/certs/ca-certificates.crt"
-    SYSTEM_AUTH_CERT_BACKUP_PATH string = slave_config_dir + "backup/"
+    SYSTEM_AUTH_CERT_BACKUP_PATH string = "/etc/pocket/backup/"
     SYSTEM_AUTH_CERT_BACKUP_FILE string = SYSTEM_AUTH_CERT_BACKUP_PATH + "ca-certificates" + pcrypto.FileExtCertificate
 )
 
 func dockerEnvContent() []byte {
     return []byte(`# PocketCluster Docker Upstart and SysVinit configuration file
 
-DOCKER_OPTS="-H tcp://0.0.0.0:2375 --dns 127.0.0.1 --tlsverify --tlscacert=/etc/pocket/pki/pc_cert_auth.crt --tlscert=/etc/pocket/pki/pc_node_engine.crt --tlskey=/etc/pocket/pki/pc_node_engine.pem --cluster-advertise=eth0:2375 --cluster-store=etcd://pc-master:2379 --cluster-store-opt kv.cacertfile=/etc/pocket/pki/pc_cert_auth.crt --cluster-store-opt kv.certfile=/etc/pocket/pki/pc_node_engine.crt --cluster-store-opt kv.keyfile=/etc/pocket/pki/pc_node_engine.pem"`)
+DOCKER_OPTS="-H tcp://0.0.0.0:2376 --dns 127.0.0.1 --tlsverify --tlscacert=/etc/pocket/pki/pc_node_engine.acr --tlscert=/etc/pocket/pki/pc_node_engine.crt --tlskey=/etc/pocket/pki/pc_node_engine.pem --cluster-advertise=eth0:2376 --cluster-store=etcd://pc-master:2379 --cluster-store-opt kv.cacertfile=/etc/pocket/pki/pc_node_engine.acr --cluster-store-opt kv.certfile=/etc/pocket/pki/pc_node_engine.crt --cluster-store-opt kv.keyfile=/etc/pocket/pki/pc_node_engine.pem"`)
 }
 
 func copyFile(src, dst string) error {
@@ -92,46 +89,11 @@ func SetupDockerEnvironement(rootPath string) error {
     return errors.WithStack(err)
 }
 
-func SetupDockerAuthorityCert(rootPath string) error {
-    var (
-        slaveAuthCertFile string  = path.Join(rootPath, SlaveAuthCertFileName)
-        dockerAuthCertPath string = path.Join(rootPath, DOCKER_AUTH_CERT_PATH)
-        dockerAuthCertFile string = path.Join(rootPath, DOCKER_AUTH_CERT_FILE)
-
-        err error = nil
-    )
-    if !path.IsAbs(dockerAuthCertPath) {
-        return errors.Errorf("[ERR] invalid root path")
-    }
-    _, err = os.Stat(slaveAuthCertFile)
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    _, err = os.Stat(dockerAuthCertPath)
-    if err != nil {
-        if os.IsNotExist(err) {
-            os.MkdirAll(dockerAuthCertPath, cert_path_permission);
-        } else {
-            return errors.WithStack(err)
-        }
-    }
-/*
-    TODO : this isn't necessary unless you want to make sure there only is one problem, DNE.
-    _, err = os.Stat(dockerAuthCertFile)
-    if err != nil && !os.IsNotExist(err) {
-        return errors.WithStack(err)
-    }
-*/
-    os.Remove(dockerAuthCertFile)
-
-    return copyFile(slaveAuthCertFile, dockerAuthCertFile)
-}
-
 // Setup system cert for docker to connect registry
 // This function assumes that docker auth certificate exists, and we just need to append it to system certs collection
 func AppendAuthCertFowardSystemCertAuthority(rootPath string) error {
     var (
-        slaveAuthCertFile string        = path.Join(rootPath, SlaveAuthCertFileName)
+        slaveAuthCertFile string        = FilePathSlaveEngineAuthCert(rootPath)
         systemAuthCertNativeFile string = path.Join(rootPath, SYSTEM_AUTH_CERT_NATIVE_FILE)
         systemAuthCertBackupPath string = path.Join(rootPath, SYSTEM_AUTH_CERT_BACKUP_PATH)
         systemAuthCertBackupFile string = path.Join(rootPath, SYSTEM_AUTH_CERT_BACKUP_FILE)

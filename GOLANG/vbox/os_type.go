@@ -1,0 +1,86 @@
+package vbox
+
+/*
+#cgo CFLAGS: -I VirtualBoxSDK/sdk/bindings/c/include
+#cgo CFLAGS: -I VirtualBoxSDK/sdk/bindings/c/glue
+#cgo CFLAGS: -I wrapper/include
+#cgo LDFLAGS: -ldl -lpthread
+
+#include "wrapper/src/os_type.c"
+*/
+import "C"  // cgo's virtual package
+
+import (
+    "reflect"
+    "unsafe"
+)
+
+// The description of a supported guest OS type
+type GuestOsType struct {
+    ctype *C.IGuestOSType
+}
+
+// Initialized returns true if there is VirtualBox data associated with this.
+func (osType *GuestOsType) Initialized() bool {
+    return osType.ctype != nil
+}
+
+// GetId returns the string used to identify this OS type in other API calls.
+// It returns a string and any error encountered.
+func (osType *GuestOsType) GetId() (string, error) {
+    var cid *C.char
+    result := C.VboxGetGuestOSTypeId(osType.ctype, &cid)
+    if C.VboxFAILED(result) != 0 || cid == nil {
+        return "", vboxError("Failed to get IGuestOSType id: %x", result)
+    }
+
+    id := C.GoString(cid)
+    C.VboxUtf8Free(cid)
+    return id, nil
+}
+
+// Release frees up the associated VirtualBox data.
+// After the call, this instance is invalid, and using it will cause errors.
+// It returns any error encountered.
+func (osType *GuestOsType) Release() error {
+    if osType.ctype != nil {
+        result := C.VboxIGuestOSTypeRelease(osType.ctype)
+        if C.VboxFAILED(result) != 0 {
+            return vboxError("Failed to release IGuestOSType: %x", result)
+        }
+        osType.ctype = nil
+    }
+    return nil
+}
+
+// GetGuestOsTypes returns the guest OS types supported by VirtualBox.
+// It returns a slice of GuestOsType instances and any error encountered.
+func GetGuestOsTypes() ([]GuestOsType, error) {
+    if err := Init(); err != nil {
+        return nil, err
+    }
+
+    var ctypesPtr **C.IGuestOSType
+    var typeCount C.ULONG
+
+    result := C.VboxGetGuestOSTypes(cbox, &ctypesPtr, &typeCount)
+    if C.VboxFAILED(result) != 0 || (ctypesPtr == nil && typeCount != 0) {
+        return nil, vboxError("Failed to get IGuestOSType array: %x", result)
+    }
+
+    sliceHeader := reflect.SliceHeader{
+        Data:   uintptr(unsafe.Pointer(ctypesPtr)),
+        Len:    int(typeCount),
+        Cap:    int(typeCount),
+    }
+    ctypesSlice := *(*[]*C.IGuestOSType)(unsafe.Pointer(&sliceHeader))
+
+    var types = make([]GuestOsType, typeCount)
+    for i := range ctypesSlice {
+        types[i] = GuestOsType{ctypesSlice[i]}
+    }
+
+    C.VboxArrayOutFree(unsafe.Pointer(ctypesPtr))
+    return types, nil
+}
+

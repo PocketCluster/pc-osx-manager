@@ -11,7 +11,7 @@ import (
     ps "github.com/mitchellh/go-ps"
 )
 
-func DHCPEventAgent() {
+func PocketDHCPEventAgent() {
     if os.Getuid() != 0 {
         log.Error(errors.WithStack(errors.New("invalid permission")))
         return
@@ -37,7 +37,7 @@ func DHCPEventAgent() {
         return
     }
 
-    event := &DhcpEvent{}
+    event := &PocketDhcpEvent{}
 
     event.Timestamp                               = time.Now().Format(time.RFC3339)
     event.Reason                                  = os.Getenv("reason")
@@ -140,7 +140,7 @@ func DHCPEventAgent() {
     event.Requested.Dhcp6DomainSearch             = os.Getenv("requested_dhcp6_domain_search")
     event.Requested.Dhcp6NameServers              = os.Getenv("requested_dhcp6_name_servers")
 
-    conn, err := net.DialUnix("unix", nil, &net.UnixAddr{DHCPEventSocketPath, "unix"})
+    conn, err := net.DialUnix("unix", nil, &net.UnixAddr{Name: PocketDHCPEventSocketPath, Net: "unix"})
     if err != nil {
         log.Error(errors.WithStack(err))
         return

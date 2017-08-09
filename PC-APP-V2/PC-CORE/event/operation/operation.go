@@ -7,14 +7,18 @@ import (
 type CommandType int32
 
 const(
-    ServiceBeaconCatcher string          = "service.beacon.catcher"
-    ServiceBeaconLocationRead string     = "service.beacon.location.read"
-    ServiceBeaconLocationWrite string    = "service.beacon.location.write"
-    ServiceBeaconMaster string           = "service.beacon.master"
-    ServiceSwarmEmbeddedServer string    = "service.swarm.embedded.server"
-    ServiceSwarmEmbeddedOperation string = "service.swarm.embedded.operation"
-    ServiceStorageProcess string         = "service.storage.process"
-    ServiceContainerRegistry string      = "service.container.registry"
+    ServiceBeaconCatcher             string = "service.beacon.catcher"
+    ServiceBeaconLocationRead        string = "service.beacon.location.read"
+    ServiceBeaconLocationWrite       string = "service.beacon.location.write"
+    ServiceBeaconMaster              string = "service.beacon.master"
+    ServiceSwarmEmbeddedServer       string = "service.swarm.embedded.server"
+    ServiceSwarmEmbeddedOperation    string = "service.swarm.embedded.operation"
+    ServiceStorageProcess            string = "service.storage.process"
+    ServiceContainerRegistry         string = "service.container.registry"
+    ServiceInternalNodeNameServer    string = "service.internal.node.name.server"
+    ServiceInternalNodeNameOperation string = "service.internal.node.name.operation"
+    ServiceVBoxMasterControl         string = "service.vbox.master.control"
+    ServiceVBoxMasterListener        string = "service.vbox.master.listener"
 )
 
 const (

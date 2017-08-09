@@ -39,7 +39,43 @@
 		04259C141E7F869F0071648E /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C131E7F869F0071648E /* CFNetwork.framework */; };
 		04259C161E7F86B20071648E /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C151E7F86B20071648E /* SystemConfiguration.framework */; };
 		04259C181E7F86BE0071648E /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C171E7F86BE0071648E /* CoreWLAN.framework */; };
+		047E41801F34AF4C0044F5DB /* host.h in Headers */ = {isa = PBXBuildFile; fileRef = 047E417F1F34AF4C0044F5DB /* host.h */; };
+		047E41821F34AF560044F5DB /* host.c in Sources */ = {isa = PBXBuildFile; fileRef = 047E41811F34AF560044F5DB /* host.c */; };
+		04937E631F3A4BF000128295 /* console.h in Headers */ = {isa = PBXBuildFile; fileRef = 04937E621F3A4BF000128295 /* console.h */; };
 		04AF2B0B1E84B48B00F4DF09 /* PCEventHandle.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF2B0A1E84B48B00F4DF09 /* PCEventHandle.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		04AF5FD91F3200E1009DBD2B /* bios_settings.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FB51F3200E1009DBD2B /* bios_settings.h */; };
+		04AF5FDA1F3200E1009DBD2B /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FB61F3200E1009DBD2B /* common.h */; };
+		04AF5FDC1F3200E1009DBD2B /* keyboard.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FB81F3200E1009DBD2B /* keyboard.h */; };
+		04AF5FDD1F3200E1009DBD2B /* machine.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FB91F3200E1009DBD2B /* machine.h */; };
+		04AF5FDE1F3200E1009DBD2B /* medium.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FBA1F3200E1009DBD2B /* medium.h */; };
+		04AF5FDF1F3200E1009DBD2B /* medium_format.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FBB1F3200E1009DBD2B /* medium_format.h */; };
+		04AF5FE01F3200E1009DBD2B /* network.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FBC1F3200E1009DBD2B /* network.h */; };
+		04AF5FE11F3200E1009DBD2B /* os_type.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FBD1F3200E1009DBD2B /* os_type.h */; };
+		04AF5FE21F3200E1009DBD2B /* progress.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FBE1F3200E1009DBD2B /* progress.h */; };
+		04AF5FE31F3200E1009DBD2B /* session.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FBF1F3200E1009DBD2B /* session.h */; };
+		04AF5FE41F3200E1009DBD2B /* storage_controller.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FC01F3200E1009DBD2B /* storage_controller.h */; };
+		04AF5FE51F3200E1009DBD2B /* system_properties.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FC11F3200E1009DBD2B /* system_properties.h */; };
+		04AF5FE61F3200E1009DBD2B /* usb_controller.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FC21F3200E1009DBD2B /* usb_controller.h */; };
+		04AF5FE71F3200E1009DBD2B /* vbox.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FC31F3200E1009DBD2B /* vbox.h */; };
+		04AF5FE81F3200E1009DBD2B /* VBoxCAPI_v5_1.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FC41F3200E1009DBD2B /* VBoxCAPI_v5_1.h */; };
+		04AF5FE91F3200E1009DBD2B /* VBoxCAPIGlue.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FC51F3200E1009DBD2B /* VBoxCAPIGlue.h */; };
+		04AF5FEA1F3200E1009DBD2B /* bios_settings.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FC71F3200E1009DBD2B /* bios_settings.c */; };
+		04AF5FEB1F3200E1009DBD2B /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FC81F3200E1009DBD2B /* console.c */; };
+		04AF5FEC1F3200E1009DBD2B /* keyboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FC91F3200E1009DBD2B /* keyboard.c */; };
+		04AF5FED1F3200E1009DBD2B /* machine.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FCA1F3200E1009DBD2B /* machine.c */; };
+		04AF5FEE1F3200E1009DBD2B /* medium.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FCB1F3200E1009DBD2B /* medium.c */; };
+		04AF5FEF1F3200E1009DBD2B /* medium_format.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FCC1F3200E1009DBD2B /* medium_format.c */; };
+		04AF5FF01F3200E1009DBD2B /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FCD1F3200E1009DBD2B /* network.c */; };
+		04AF5FF11F3200E1009DBD2B /* os_type.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FCE1F3200E1009DBD2B /* os_type.c */; };
+		04AF5FF21F3200E1009DBD2B /* progress.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FCF1F3200E1009DBD2B /* progress.c */; };
+		04AF5FF31F3200E1009DBD2B /* session.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FD01F3200E1009DBD2B /* session.c */; };
+		04AF5FF41F3200E1009DBD2B /* storage_controller.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FD11F3200E1009DBD2B /* storage_controller.c */; };
+		04AF5FF51F3200E1009DBD2B /* system_properties.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FD21F3200E1009DBD2B /* system_properties.c */; };
+		04AF5FF61F3200E1009DBD2B /* usb_controller.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FD31F3200E1009DBD2B /* usb_controller.c */; };
+		04AF5FF71F3200E1009DBD2B /* vbox.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FD41F3200E1009DBD2B /* vbox.c */; };
+		04AF5FF81F3200E1009DBD2B /* VBoxCAPIGlue.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FD51F3200E1009DBD2B /* VBoxCAPIGlue.c */; };
+		04AF5FF91F3200E1009DBD2B /* libvboxcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FD61F3200E1009DBD2B /* libvboxcom.c */; };
+		04AF5FFA1F3200E1009DBD2B /* libvboxcom.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FD71F3200E1009DBD2B /* libvboxcom.h */; };
 		04E7301A1E822A8F00BE83DD /* PCLifeCycle.h in Headers */ = {isa = PBXBuildFile; fileRef = 04E730191E822A8F00BE83DD /* PCLifeCycle.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04E7301D1E822BC300BE83DD /* PCNativeThread.c in Sources */ = {isa = PBXBuildFile; fileRef = 04E7301B1E822BC300BE83DD /* PCNativeThread.c */; };
 		04E730221E822D3200BE83DD /* PCNativeThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 04E730201E822D3200BE83DD /* PCNativeThread.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -82,7 +118,44 @@
 		04259C131E7F869F0071648E /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		04259C151E7F86B20071648E /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		04259C171E7F86BE0071648E /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
+		047E417F1F34AF4C0044F5DB /* host.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = host.h; sourceTree = "<group>"; };
+		047E41811F34AF560044F5DB /* host.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = host.c; sourceTree = "<group>"; };
+		04937E621F3A4BF000128295 /* console.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = console.h; sourceTree = "<group>"; };
 		04AF2B0A1E84B48B00F4DF09 /* PCEventHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCEventHandle.h; sourceTree = "<group>"; };
+		04AF5FB51F3200E1009DBD2B /* bios_settings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bios_settings.h; sourceTree = "<group>"; };
+		04AF5FB61F3200E1009DBD2B /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
+		04AF5FB81F3200E1009DBD2B /* keyboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = keyboard.h; sourceTree = "<group>"; };
+		04AF5FB91F3200E1009DBD2B /* machine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = machine.h; sourceTree = "<group>"; };
+		04AF5FBA1F3200E1009DBD2B /* medium.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = medium.h; sourceTree = "<group>"; };
+		04AF5FBB1F3200E1009DBD2B /* medium_format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = medium_format.h; sourceTree = "<group>"; };
+		04AF5FBC1F3200E1009DBD2B /* network.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = network.h; sourceTree = "<group>"; };
+		04AF5FBD1F3200E1009DBD2B /* os_type.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = os_type.h; sourceTree = "<group>"; };
+		04AF5FBE1F3200E1009DBD2B /* progress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = progress.h; sourceTree = "<group>"; };
+		04AF5FBF1F3200E1009DBD2B /* session.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = session.h; sourceTree = "<group>"; };
+		04AF5FC01F3200E1009DBD2B /* storage_controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = storage_controller.h; sourceTree = "<group>"; };
+		04AF5FC11F3200E1009DBD2B /* system_properties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = system_properties.h; sourceTree = "<group>"; };
+		04AF5FC21F3200E1009DBD2B /* usb_controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = usb_controller.h; sourceTree = "<group>"; };
+		04AF5FC31F3200E1009DBD2B /* vbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vbox.h; sourceTree = "<group>"; };
+		04AF5FC41F3200E1009DBD2B /* VBoxCAPI_v5_1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VBoxCAPI_v5_1.h; sourceTree = "<group>"; };
+		04AF5FC51F3200E1009DBD2B /* VBoxCAPIGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VBoxCAPIGlue.h; sourceTree = "<group>"; };
+		04AF5FC71F3200E1009DBD2B /* bios_settings.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bios_settings.c; sourceTree = "<group>"; };
+		04AF5FC81F3200E1009DBD2B /* console.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = console.c; sourceTree = "<group>"; };
+		04AF5FC91F3200E1009DBD2B /* keyboard.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = keyboard.c; sourceTree = "<group>"; };
+		04AF5FCA1F3200E1009DBD2B /* machine.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = machine.c; sourceTree = "<group>"; };
+		04AF5FCB1F3200E1009DBD2B /* medium.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = medium.c; sourceTree = "<group>"; };
+		04AF5FCC1F3200E1009DBD2B /* medium_format.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = medium_format.c; sourceTree = "<group>"; };
+		04AF5FCD1F3200E1009DBD2B /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = network.c; sourceTree = "<group>"; };
+		04AF5FCE1F3200E1009DBD2B /* os_type.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = os_type.c; sourceTree = "<group>"; };
+		04AF5FCF1F3200E1009DBD2B /* progress.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = progress.c; sourceTree = "<group>"; };
+		04AF5FD01F3200E1009DBD2B /* session.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = session.c; sourceTree = "<group>"; };
+		04AF5FD11F3200E1009DBD2B /* storage_controller.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = storage_controller.c; sourceTree = "<group>"; };
+		04AF5FD21F3200E1009DBD2B /* system_properties.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = system_properties.c; sourceTree = "<group>"; };
+		04AF5FD31F3200E1009DBD2B /* usb_controller.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = usb_controller.c; sourceTree = "<group>"; };
+		04AF5FD41F3200E1009DBD2B /* vbox.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vbox.c; sourceTree = "<group>"; };
+		04AF5FD51F3200E1009DBD2B /* VBoxCAPIGlue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VBoxCAPIGlue.c; sourceTree = "<group>"; };
+		04AF5FD61F3200E1009DBD2B /* libvboxcom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = libvboxcom.c; sourceTree = "<group>"; };
+		04AF5FD71F3200E1009DBD2B /* libvboxcom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libvboxcom.h; sourceTree = "<group>"; };
+		04AF5FD81F3200E1009DBD2B /* os-typeid-list.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "os-typeid-list.txt"; sourceTree = "<group>"; };
 		04E730191E822A8F00BE83DD /* PCLifeCycle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCLifeCycle.h; sourceTree = "<group>"; };
 		04E7301B1E822BC300BE83DD /* PCNativeThread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PCNativeThread.c; sourceTree = "<group>"; };
 		04E730201E822D3200BE83DD /* PCNativeThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCNativeThread.h; sourceTree = "<group>"; };
@@ -127,6 +200,7 @@
 				04259BDF1E7F80940071648E /* status */,
 				04259BE01E7F80940071648E /* system */,
 				04259BE41E7F80940071648E /* utility */,
+				04AF5FB31F3200E1009DBD2B /* vbox */,
 				04259B511E7F7E300071648E /* static-core */,
 				04259B501E7F7E300071648E /* Products */,
 			);
@@ -296,6 +370,67 @@
 			path = ../../event;
 			sourceTree = "<group>";
 		};
+		04AF5FB31F3200E1009DBD2B /* vbox */ = {
+			isa = PBXGroup;
+			children = (
+				04AF5FB41F3200E1009DBD2B /* include */,
+				04AF5FC61F3200E1009DBD2B /* lib */,
+				04AF5FD71F3200E1009DBD2B /* libvboxcom.h */,
+				04AF5FD61F3200E1009DBD2B /* libvboxcom.c */,
+				04AF5FD81F3200E1009DBD2B /* os-typeid-list.txt */,
+			);
+			name = vbox;
+			path = ../../vbox;
+			sourceTree = "<group>";
+		};
+		04AF5FB41F3200E1009DBD2B /* include */ = {
+			isa = PBXGroup;
+			children = (
+				04AF5FB51F3200E1009DBD2B /* bios_settings.h */,
+				04AF5FB61F3200E1009DBD2B /* common.h */,
+				04937E621F3A4BF000128295 /* console.h */,
+				047E417F1F34AF4C0044F5DB /* host.h */,
+				04AF5FB81F3200E1009DBD2B /* keyboard.h */,
+				04AF5FB91F3200E1009DBD2B /* machine.h */,
+				04AF5FBB1F3200E1009DBD2B /* medium_format.h */,
+				04AF5FBA1F3200E1009DBD2B /* medium.h */,
+				04AF5FBC1F3200E1009DBD2B /* network.h */,
+				04AF5FBD1F3200E1009DBD2B /* os_type.h */,
+				04AF5FBE1F3200E1009DBD2B /* progress.h */,
+				04AF5FBF1F3200E1009DBD2B /* session.h */,
+				04AF5FC01F3200E1009DBD2B /* storage_controller.h */,
+				04AF5FC11F3200E1009DBD2B /* system_properties.h */,
+				04AF5FC21F3200E1009DBD2B /* usb_controller.h */,
+				04AF5FC31F3200E1009DBD2B /* vbox.h */,
+				04AF5FC41F3200E1009DBD2B /* VBoxCAPI_v5_1.h */,
+				04AF5FC51F3200E1009DBD2B /* VBoxCAPIGlue.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		04AF5FC61F3200E1009DBD2B /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				04AF5FC71F3200E1009DBD2B /* bios_settings.c */,
+				04AF5FC81F3200E1009DBD2B /* console.c */,
+				047E41811F34AF560044F5DB /* host.c */,
+				04AF5FC91F3200E1009DBD2B /* keyboard.c */,
+				04AF5FCA1F3200E1009DBD2B /* machine.c */,
+				04AF5FCC1F3200E1009DBD2B /* medium_format.c */,
+				04AF5FCB1F3200E1009DBD2B /* medium.c */,
+				04AF5FCD1F3200E1009DBD2B /* network.c */,
+				04AF5FCE1F3200E1009DBD2B /* os_type.c */,
+				04AF5FCF1F3200E1009DBD2B /* progress.c */,
+				04AF5FD01F3200E1009DBD2B /* session.c */,
+				04AF5FD11F3200E1009DBD2B /* storage_controller.c */,
+				04AF5FD21F3200E1009DBD2B /* system_properties.c */,
+				04AF5FD31F3200E1009DBD2B /* usb_controller.c */,
+				04AF5FD41F3200E1009DBD2B /* vbox.c */,
+				04AF5FD51F3200E1009DBD2B /* VBoxCAPIGlue.c */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
 		04D6AD811E80DCC700A015FA /* goheader */ = {
 			isa = PBXGroup;
 			children = (
@@ -331,26 +466,45 @@
 			buildActionMask = 2147483647;
 			files = (
 				04259BEB1E7F80940071648E /* NSFileManager+DirectoryLocations.h in Headers */,
+				04AF5FE91F3200E1009DBD2B /* VBoxCAPIGlue.h in Headers */,
+				04AF5FE81F3200E1009DBD2B /* VBoxCAPI_v5_1.h in Headers */,
 				04259BE91E7F80940071648E /* NSBundle+DirectoryPath.h in Headers */,
+				04AF5FE61F3200E1009DBD2B /* usb_controller.h in Headers */,
+				04AF5FE21F3200E1009DBD2B /* progress.h in Headers */,
+				04AF5FE31F3200E1009DBD2B /* session.h in Headers */,
+				04AF5FE41F3200E1009DBD2B /* storage_controller.h in Headers */,
 				04259C001E7F80950071648E /* DeviceSerialNumber.h in Headers */,
+				04AF5FE71F3200E1009DBD2B /* vbox.h in Headers */,
+				047E41801F34AF4C0044F5DB /* host.h in Headers */,
 				04259BED1E7F80940071648E /* NSResourcePath.h in Headers */,
 				04259BFE1E7F80950071648E /* LinkObserver.h in Headers */,
+				04AF5FFA1F3200E1009DBD2B /* libvboxcom.h in Headers */,
 				04259BF01E7F80940071648E /* ARC_HELPER.h in Headers */,
 				04259BF11E7F80940071648E /* GlobalMacro.h in Headers */,
 				04259BE71E7F80940071648E /* PCApplicationPath.h in Headers */,
 				04259C021E7F80950071648E /* PCDeviceSerial.h in Headers */,
+				04937E631F3A4BF000128295 /* console.h in Headers */,
+				04AF5FE01F3200E1009DBD2B /* network.h in Headers */,
 				04259C031E7F80950071648E /* PCSystemInfo.h in Headers */,
 				04259BF61E7F80940071648E /* PCInterfaceTypes.h in Headers */,
 				04259BF41E7F80940071648E /* PCInterfaceStatus.h in Headers */,
 				04259BE81E7F80940071648E /* PCUserEnvironment.h in Headers */,
 				04E730231E822D3200BE83DD /* PCStaticUtility.h in Headers */,
+				04AF5FE11F3200E1009DBD2B /* os_type.h in Headers */,
 				04E730221E822D3200BE83DD /* PCNativeThread.h in Headers */,
 				04E7301A1E822A8F00BE83DD /* PCLifeCycle.h in Headers */,
 				04EFCD541E89F6270058840F /* pc-core.h in Headers */,
+				04AF5FDD1F3200E1009DBD2B /* machine.h in Headers */,
+				04AF5FDA1F3200E1009DBD2B /* common.h in Headers */,
 				04AF2B0B1E84B48B00F4DF09 /* PCEventHandle.h in Headers */,
+				04AF5FDC1F3200E1009DBD2B /* keyboard.h in Headers */,
+				04AF5FDF1F3200E1009DBD2B /* medium_format.h in Headers */,
+				04AF5FD91F3200E1009DBD2B /* bios_settings.h in Headers */,
 				04259BF91E7F80940071648E /* SCNetworkInterfaces.h in Headers */,
 				04259BF71E7F80940071648E /* SCNetworkTypes.h in Headers */,
 				04259C0A1E7F82240071648E /* PrefixHeader.pch in Headers */,
+				04AF5FE51F3200E1009DBD2B /* system_properties.h in Headers */,
+				04AF5FDE1F3200E1009DBD2B /* medium.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -428,17 +582,34 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04AF5FF01F3200E1009DBD2B /* network.c in Sources */,
 				04259BEA1E7F80940071648E /* NSBundle+DirectoryPath.m in Sources */,
+				04AF5FEB1F3200E1009DBD2B /* console.c in Sources */,
+				04AF5FEA1F3200E1009DBD2B /* bios_settings.c in Sources */,
+				04AF5FF31F3200E1009DBD2B /* session.c in Sources */,
+				04AF5FF41F3200E1009DBD2B /* storage_controller.c in Sources */,
 				04E7301D1E822BC300BE83DD /* PCNativeThread.c in Sources */,
 				04259BFF1E7F80950071648E /* LinkObserver.m in Sources */,
+				04AF5FF51F3200E1009DBD2B /* system_properties.c in Sources */,
 				04259BEC1E7F80940071648E /* NSFileManager+DirectoryLocations.m in Sources */,
 				04259C061E7F80950071648E /* PCStaticUtility.m in Sources */,
 				04259BEE1E7F80940071648E /* NSResourcePath.m in Sources */,
 				04259BEF1E7F80940071648E /* NSUserEnvironment.m in Sources */,
 				04259C041E7F80950071648E /* PCSystemInfo.m in Sources */,
+				04AF5FF81F3200E1009DBD2B /* VBoxCAPIGlue.c in Sources */,
+				04AF5FEE1F3200E1009DBD2B /* medium.c in Sources */,
+				04AF5FF21F3200E1009DBD2B /* progress.c in Sources */,
 				04259BF81E7F80940071648E /* SCNetworkInterfaces.c in Sources */,
 				04259C011E7F80950071648E /* DeviceSerialNumber.m in Sources */,
+				04AF5FED1F3200E1009DBD2B /* machine.c in Sources */,
+				04AF5FF91F3200E1009DBD2B /* libvboxcom.c in Sources */,
+				04AF5FEC1F3200E1009DBD2B /* keyboard.c in Sources */,
+				04AF5FF71F3200E1009DBD2B /* vbox.c in Sources */,
+				04AF5FF11F3200E1009DBD2B /* os_type.c in Sources */,
 				04259BF51E7F80940071648E /* PCInterfaceStatus.m in Sources */,
+				047E41821F34AF560044F5DB /* host.c in Sources */,
+				04AF5FF61F3200E1009DBD2B /* usb_controller.c in Sources */,
+				04AF5FEF1F3200E1009DBD2B /* medium_format.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

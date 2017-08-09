@@ -4,22 +4,17 @@ import (
     "time"
 
     log "github.com/Sirupsen/logrus"
-    "github.com/pkg/errors"
     "github.com/coreos/etcd/embed"
-
+    "github.com/pkg/errors"
     "github.com/stkim1/pc-core/beacon"
     "github.com/stkim1/pc-core/context"
-    "github.com/stkim1/pc-core/extlib/registry"
     "github.com/stkim1/pc-core/event/operation"
-    "github.com/stkim1/pc-core/service"
+    "github.com/stkim1/pc-core/extlib/registry"
     swarmemb "github.com/stkim1/pc-core/extlib/swarm"
+    "github.com/stkim1/pc-core/service"
 )
 
-const (
-    iventBeaconManagerSpawn string  = "ivent.beacon.manager.spawn"
-)
-
-func initStorageServie(a *mainLife, config *embed.PocketConfig) error {
+func initStorageServie(a *appMainLife, config *embed.PocketConfig) error {
     a.RegisterServiceWithFuncs(
         operation.ServiceStorageProcess,
         func() error {
@@ -56,7 +51,7 @@ func initStorageServie(a *mainLife, config *embed.PocketConfig) error {
     return nil
 }
 
-func initRegistryService(a *mainLife, config *registry.PocketRegistryConfig) error {
+func initRegistryService(a *appMainLife, config *registry.PocketRegistryConfig) error {
     a.RegisterServiceWithFuncs(
         operation.ServiceContainerRegistry,
         func() error {
@@ -79,7 +74,7 @@ func initRegistryService(a *mainLife, config *registry.PocketRegistryConfig) err
     return nil
 }
 
-func initSwarmService(a *mainLife) error {
+func initSwarmService(a *appMainLife) error {
     const (
         iventSwarmInstanceSpawn string  = "ivent.swarm.instance.spawn"
     )
@@ -97,6 +92,7 @@ func initSwarmService(a *mainLife) error {
                     case se := <- swarmSrvC: {
                         srv, ok := se.Payload.(*swarmemb.SwarmService)
                         if ok {
+                            log.Debugf("[SWARM-CTRL] swarm instance detected...")
                             swarmsrv = srv
                         }
                     }
@@ -144,6 +140,7 @@ func initSwarmService(a *mainLife) error {
                 return errors.WithStack(err)
             }
             a.BroadcastEvent(service.Event{Name:iventSwarmInstanceSpawn, Payload:swarmsrv})
+            log.Debugf("[SWARM] swarm service started...")
             err = swarmsrv.ListenAndServeSingleHost()
             return errors.WithStack(err)
         },

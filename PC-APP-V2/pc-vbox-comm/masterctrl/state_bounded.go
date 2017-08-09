@@ -1,0 +1,57 @@
+package masterctrl
+
+import (
+    "time"
+
+    "github.com/pkg/errors"
+    cpkg "github.com/stkim1/pc-vbox-comm/corereport/pkg"
+    mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
+)
+
+type bounded struct {}
+func stateBounded () vboxController { return &bounded{} }
+
+func (b *bounded) currentState() mpkg.VBoxMasterState {
+    return mpkg.VBoxMasterBounded
+}
+
+func (b *bounded) readCoreReport(master *masterControl, sender interface{}, metaPackage []byte, ts time.Time) (VBoxMasterTransition, error) {
+    var (
+        meta *cpkg.VBoxCoreMeta
+        err error = nil
+    )
+
+    // decrypt & update status package
+    meta, err = cpkg.CoreUnpackingStatus(master.clusterID, metaPackage, master.rsaDecryptor)
+    if err != nil {
+        return VBoxMasterTransitionIdle, errors.WithStack(err)
+    }
+    if meta.CoreStatus.CoreState != cpkg.VBoxCoreBounded {
+        return VBoxMasterTransitionIdle, errors.Errorf("[ERR] core state should be VBoxCoreBounded")
+    }
+    err = master.coreNode.UpdateIPv4WithGW(meta.CoreStatus.ExtIP4AddrSmask, meta.CoreStatus.ExtIP4Gateway)
+    if err != nil {
+        return VBoxMasterTransitionIdle, errors.WithMessage(err,"[ERR] cannot update core node with address and gateway")
+    }
+
+    return VBoxMasterTransitionOk, nil
+}
+
+func (b *bounded) makeMasterAck(master *masterControl, ts time.Time) ([]byte, error) {
+    var (
+        ackpkg []byte = nil
+        err error = nil
+    )
+
+    // send acknowledge packagepackage
+    ackpkg, err = mpkg.MasterPackingBoundedAcknowledge(master.clusterID, master.getMasterIPv4ExternalAddress(), master.rsaEncryptor)
+    return ackpkg, errors.WithStack(err)
+}
+
+func (b *bounded) onStateTranstionSuccess(master *masterControl, ts time.Time) error {
+    return nil
+}
+
+func (b *bounded) onStateTranstionFailure(master *masterControl, ts time.Time) error {
+    return nil
+}

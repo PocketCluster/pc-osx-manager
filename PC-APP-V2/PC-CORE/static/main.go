@@ -3,7 +3,6 @@ package main
 import "C"
 import (
     log "github.com/Sirupsen/logrus"
-    tembed "github.com/gravitational/teleport/embed"
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
 
@@ -12,11 +11,13 @@ import (
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
+    "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
+    "github.com/stkim1/pc-core/service"
 )
 
 func main() {
 
-    mainLifeCycle(func(a *mainLife) {
+    appLifeCycle(func(a *appMainLife) {
 
         var (
             config *serviceConfig = nil
@@ -40,13 +41,6 @@ func main() {
                     switch e.Crosses(lifecycle.StageAlive) {
                         case lifecycle.CrossOn: {
                             log.Debugf("[LIFE] app is now alive %v", e.String())
-                            config, err = setupServiceConfig()
-                            if err != nil {
-                                // TODO send error report
-                                log.Debugf("[LIFE] CRITICAL ERROR %v", err)
-                            } else {
-                                FeedSend("[LIFE] successfully initiated engine ..." + config.teleConfig.HostUUID)
-                            }
                         }
                         case lifecycle.CrossOff: {
                             log.Debugf("[LIFE] app is inactive %v", e.String())
@@ -75,14 +69,21 @@ func main() {
                 case network.Event: {
                     switch e.NetworkEvent {
                         case network.NetworkChangeInterface: {
-                            //log.Debugf(spew.Sdump(e.HostInterfaces))
                             log.Debugf("[NET] %v", e.String())
-                            context.MonitorNetworkInterfaces(e.HostInterfaces)
+
+                            // TODO check if service is running
+                            isSrvRun := len(a.ServiceList()) != 0
+                            updated := context.SharedHostContext().UpdateNetworkInterfaces(e.HostInterfaces)
+
+                            // services should be running before receiving event. Otherwise, service will not start
+                            if isSrvRun && updated {
+                                log.Debugf("[NET] network address change event triggered")
+                                a.BroadcastEvent(service.Event{Name:iventNetworkAddressChange})
+                            }
                         }
                         case network.NetworkChangeGateway: {
-                            //log.Debugf(spew.Sdump(e.HostGateways))
                             log.Debugf("[NET] %v", e.String())
-                            context.MonitorNetworkGateways(e.HostGateways)
+                            context.SharedHostContext().UpdateNetworkGateways(e.HostGateways)
                         }
                     }
                 }
@@ -108,6 +109,32 @@ func main() {
 
                     case operation.CmdBaseServiceStart: {
 
+                        // TODO check all the status before start
+
+                        // config should be setup after acquiring ip address on wifi
+                        // This should run only once
+                        config, err = setupServiceConfig()
+                        if err != nil {
+                            // TODO send error report
+                            log.Debugf("[LIFE] CRITICAL ERROR %v", err)
+                            return
+                        } else {
+                            FeedSend("[LIFE] SUCCESSFULLY INITIATED ENGINE " + config.teleConfig.HostUUID)
+                        }
+
+                        cid, err := context.SharedHostContext().MasterAgentName()
+                        if err != nil {
+                            log.Debug(err)
+                            return
+                        }
+
+                        // name service
+                        err = initPocketNameService(a, cid)
+                        if err != nil {
+                            log.Debug(err)
+                            return
+                        }
+
                         // storage service
                         err = initStorageServie(a, config.etcdConfig)
                         if err != nil {
@@ -124,22 +151,19 @@ func main() {
 
                         // teleport service added
                         // TODO : need to hold teleport instance from GC
-                        _, err = tembed.NewEmbeddedCoreProcess(a.ServiceSupervisor, config.teleConfig)
+                        _, err = sshproc.NewEmbeddedMasterProcess(a.ServiceSupervisor, config.teleConfig)
                         if err != nil {
                             log.Debug(err)
                             return
                         }
 
                         // beacon service added
-                        cid, err := context.SharedHostContext().MasterAgentName()
+                        iname, err := context.SharedHostContext().HostPrimaryInterfaceShortName()
                         if err != nil {
                             log.Debug(err)
                             return
                         }
-
-                        // TODO : use network interface
-                        // TODO : need to catcher instance from GC
-                        _, err = mcast.NewSearchCatcher(a.ServiceSupervisor, "en0")
+                        _, err = mcast.NewSearchCatcher(a.ServiceSupervisor, iname)
                         if err != nil {
                             log.Debug(err)
                             return
@@ -162,6 +186,11 @@ func main() {
                         if err != nil {
                             log.Debug(err)
                             return
+                        }
+
+                        err = initVboxCoreReportService(a, cid)
+                        if err != nil {
+                            log.Debug(err)
                         }
 
                         a.StartServices()
@@ -189,39 +218,35 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
 
-/*
-                    case operation.CmdTeleportNodeAdd: {
-                        clt, err := tembed.OpenAdminClientWithAuthService(config.teleConfig)
-                        if err != nil {
-                            log.Error(err.Error())
-                        }
-                        token, err := tembed.GenerateNodeInviationWithTTL(clt, tembed.MaxInvitationTLL)
-                        if err != nil {
-                            log.Error(err.Error())
-                        }
-                        err = clt.Close()
-                        if err != nil {
-                            log.Error(err.Error())
-                        }
-                        log.Debugf("TELEPORT NODE ADDED FOR TOKEN : %s", token)
-                        log.Debugf("[OP] %v", e.String())
-                    }
-*/
                     case operation.CmdTeleportRootAdd: {
-
                     }
                     case operation.CmdTeleportUserAdd: {
-
+                        log.Debugf("[OP] %v", e.String())
                     }
 
                     /// DEBUG ///
 
                     case operation.CmdDebug: {
+/*
                         sl := a.ServiceList()
                         for i, _ := range sl {
                             s := sl[i]
                             log.Debugf("[SERVICE] %s, %v", s.Tag(), s.IsRunning())
                         }
+*/
+                        cid, err := context.SharedHostContext().MasterAgentName()
+                        if err != nil {
+                            log.Debug(err)
+                        }
+                        err = buildVboxCoreDisk(cid, config.teleConfig)
+                        if err != nil {
+                            log.Debug(err)
+                        }
+                        err = buildVboxMachine(a)
+                        if err != nil {
+                            log.Debugf("vbox operation error %v", err)
+                        }
+
                         log.Debugf("[OP] %v", e.String())
                     }
 

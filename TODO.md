@@ -4,14 +4,33 @@
 - TODO/ + HALF DONE/ * COMPLETED
 ```
 
-###Version 0.1.4
-- [ ] Network Broadcast Form -> 192.168.2.211/24
-- [ ] Slave sends SSH key in cryptocheck to keyexchange of master
+## L.T.G
+
+- [ ] MUSL ARM64 w/ GOLANG
+- [ ] TinyCore ARM64 (from Busybox)
+
+
+### V0.1.4
+- [ ] Repartition logic from Boot2Docker
+- [ ] Disable Docker when there is no TLS certs available
+- [ ] Append 'CA' <http://rt.openssl.org/Ticket/History.html?user=guest&pass=guest&id=3979>
+- [ ] Run `dockerd` with script and check conditions there like boot2docker
+- [ ] Combine Docker related stuff in a unified package
+- [ ] Combine `pc-core` related consts, variable in a unified package
+- [ ] Docker User Namespace Remap
+  * <https://docs.oracle.com/cd/E37670_01/E75728/html/ol-docker-userns-remap.html>
+  * <https://docs.docker.com/edge/engine/reference/commandline/dockerd/#daemon-user-namespace-options>
 - [ ] Singleton lock for it’s property access
 - [ ] UUID for ID (Too long. we will do it when udp packet fragmentation is supported)
 - [ ] Complete Slave node `bounded` state with valid checks
 - [ ] Instant status check on `bounded` (i.e. as soon as master pings slave, master gets response)
 - [ ] `Makefile` to remove all *_test.go and TEST.go
+- [ ] Clean up core node including `vi`
+- [ ] More Test for `pc-vbox-comm`
+- [ ] Pass `uid` to all slave nodes to have them setup the __user__ with the same `uid`
+- [ ] Look carefully `etcd` TLS configuration behave with `docker-compose` connected.
+  * At initial, etcd `network/bridged` API point isn't available and dockerd complains. This seems to be normal though.
+  * <https://dims-devguide.readthedocs.io/en/latest/dockerdatacenter.html>
 - [ ] **Slave** : Remove unnecessary `const` in `slagent` package such as `SLAVE_CLUSTER_MEMBERS`
 - [ ] **Slave** : Remove unnecessary `field` in `PocketSlaveDiscovery` & `PocketSlaveDiscovery` struct
 - [ ] **Slave** : search logic in master `Beacon` package
@@ -20,17 +39,39 @@
 - [ ] **Slave** : config should be able to tell if Slave node is bounded or not by reading config
 - [ ] **Slave** : After changing hostname, please updata `/etc/hosts`
 - [ ] _Master_ interface refresh logic
-- [ ] _Master_ Private/Public/CA
-- [ ] _Master_ teleport bolts -> SQLite
 - [ ] _Master_ SQLite encryption
 - [ ] _Master_ Remove unnecessary `const` & `field` in `msagent` package
 - [ ] [_RPI_] cannot acquire proper interface name from netifaces for default gateway
-- [ ] [_ODROID_] netmask format fix for network/interfaces (`ffffff00` -> `255.255.255.0`)
-- [ ] [_PINE64_] `fdisk` new partition incorrectly begins new partition sector from 2048
+- [x] Provide `pc-master` DNS for `docker-compose`
+- [x] [_ODROID_] netmask format fix for network/interfaces (`ffffff00` -> `255.255.255.0`)
+- [x] Vagrant Fix Network Interface Order (eth0 : internal/ eth1 : external)
+- [x] Move Docker port to `0.0.0.0:2376` for ssl connection
 - [x] AESKEY regeneration when `MasterBeacon` goes to `BindBroken` state
 - [x] Shorten `msgpack` name field to reduce message package size
+- [x] Network Broadcast Form -> 192.168.2.211/24
+- [x] _Master_ Private/Public/CA
+- [x] _Master_ teleport bolts -> SQLite
+- [-] Slave sends SSH key in cryptocheck to keyexchange of master
+- [-] [_PINE64_] `fdisk` new partition incorrectly begins new partition sector from 2048
+- [-] Use FQDN name for certification and name server ( e.g. `pc-core.Q1oqc1921lq.cluster.pocketcluster.io` )
+  * `pc-master` queries to main DNS.
 
-###Version 0.1.3
+
+#### VirtualBox
+- [ ] get the actual core count
+- [ ] vbox files permissions
+- [ ] vbox machine start stop
+- [ ] vbox disk creation from XPCOM
+- [ ] vbox machine “options”
+  * "VBoxInternal/CPUM/EnableHVP", “1"
+- [ ] multiple shared folder
+- [ ] Discard all snapshots, settings (IMachine::discardSettings())
+  * -> when machine powerdown settings changed! 
+- [ ] Disable snapshot, save, teleport,  restore, fault-tolerant-sync, setting up, (these are illiegal statates)
+- [ ] force get session from running machine to reboot
+
+
+### V0.1.3
 -
 ```
 * root permission to create/edit/copy config files  

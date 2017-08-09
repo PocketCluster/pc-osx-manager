@@ -5,7 +5,7 @@ import (
     "strings"
 
     "github.com/pkg/errors"
-    "github.com/stkim1/netifaces"
+    "github.com/stkim1/findgate"
 )
 
 type NetworkInterface struct {
@@ -85,33 +85,25 @@ func ip4AddrsToStringList(iface net.Interface) ([]string, error) {
 func PrimaryNetworkInterface() (NetworkInterface, error) {
     var (
         err error                     = nil
-        gateway *netifaces.Gateway    = nil
+        gateway *findgate.IPv4Gateway = nil
         ifcFound bool                 = false
-        gwaddr, gwiface string
         ipaddrs []string
         ifaces []net.Interface
         priface net.Interface
     )
-    gateway, err = netifaces.FindSystemGateways()
+
+    gateway, err = findgate.DefaultIPv4Gateway()
     if err != nil {
         return NetworkInterface{}, errors.WithStack(err)
-    }
-    defer gateway.Release()
-
-    gwaddr, gwiface, err = gateway.DefaultIP4Gateway()
-    if err != nil {
-        return NetworkInterface{}, err
-    }
-    if len(gwaddr) == 0 || len(gwiface) == 0 {
-        return NetworkInterface{}, errors.Errorf("[ERR] inappropriate gateway address or interface")
     }
 
     // This loop is to fix wrong interface name on RPI "eth0 + random string" issue
     ifaces, err = net.Interfaces()
     for _, i := range ifaces {
-        if strings.HasPrefix(gwiface, i.Name) {
+        if strings.HasPrefix(gateway.Interface, i.Name) {
             priface = i
             ifcFound = true
+            break
         }
     }
     if !ifcFound {
@@ -126,8 +118,7 @@ func PrimaryNetworkInterface() (NetworkInterface, error) {
     return NetworkInterface {
         Interface:       priface,
         HardwareAddr:    priface.HardwareAddr.String(),
-        GatewayAddr:     gwaddr,
-        // (2017-05-15) We'll only take the first ip address for now
+        GatewayAddr:     gateway.Address,
         IP4Address:      ipaddrs,
     }, nil
 }

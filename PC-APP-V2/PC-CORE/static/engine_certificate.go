@@ -222,3 +222,51 @@ func buildBeaconCertificate(certRec certdb.Accessor, clusterUUID string) (*conte
         PublicKey:      pubKey,
     }, nil
 }
+
+// beacon certificate for slaves
+func buildVBoxReportCertificate(certRec certdb.Accessor, clusterUUID string) (*context.VBoxCertBundle, error) {
+    var (
+        prvKey []byte  = nil
+        pubKey []byte  = nil
+        err error      = nil
+
+        prvRec, rerr = certRec.GetCertificate(pcdefaults.MasterVBoxCtrlPrivateKey,  clusterUUID)
+        pubRec, uerr = certRec.GetCertificate(pcdefaults.MasterVBoxCtrlPublicKey,   clusterUUID)
+    )
+
+    if (rerr != nil || uerr != nil) || (len(prvRec) == 0 || len(pubRec) == 0) {
+        pubKey, prvKey, _, err = pcrypto.GenerateStrongKeyPair()
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+        // save private key
+        err = certRec.InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(prvKey),
+            Serial:     pcdefaults.MasterVBoxCtrlPrivateKey,
+            AKI:        clusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+        // save public key
+        err = certRec.InsertCertificate(certdb.CertificateRecord{
+            PEM:        string(pubKey),
+            Serial:     pcdefaults.MasterVBoxCtrlPublicKey,
+            AKI:        clusterUUID,
+            Status:     "good",
+            Reason:     0,
+        })
+        if err != nil {
+            return nil, errors.WithStack(err)
+        }
+    } else {
+        prvKey = []byte(prvRec[0].PEM)
+        pubKey = []byte(pubRec[0].PEM)
+    }
+    return &context.VBoxCertBundle{
+        PrivateKey:     prvKey,
+        PublicKey:      pubKey,
+    }, nil
+}

@@ -39,7 +39,7 @@ type cryptocheck struct{
 func (ls *cryptocheck) transitionActionWithTimestamp(slaveTimestamp time.Time) error {
     slctx := slcontext.SharedSlaveContext()
 
-    masterAgentName, err := slctx.GetMasterAgent()
+    masterAgentName, err := slctx.GetClusterID()
     if err != nil {
         return errors.WithStack(err)
     }
@@ -82,7 +82,7 @@ func (ls *cryptocheck) transitionWithMasterMeta(meta *msagent.PocketMasterAgentM
         // if master is wrong version, It's perhaps from different master. we'll skip and wait for another time
         return SlaveTransitionIdle, errors.Errorf("[ERR] Null or incorrect version of master meta")
     }
-    msAgent, err := slcontext.SharedSlaveContext().GetMasterAgent()
+    msAgent, err := slcontext.SharedSlaveContext().GetClusterID()
     if err != nil {
         return SlaveTransitionFail, errors.WithStack(err)
     }

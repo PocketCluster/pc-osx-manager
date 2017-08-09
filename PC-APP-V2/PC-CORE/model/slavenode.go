@@ -10,7 +10,7 @@ import (
     "github.com/pborman/uuid"
 )
 
-const slaveNodeTable string = `slavenode`
+const slaveNodeTable string = `pc_slavenode`
 
 const SlaveNodeModelVersion = "0.1.4"
 

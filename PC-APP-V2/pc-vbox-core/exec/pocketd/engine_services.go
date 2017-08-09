@@ -1,0 +1,109 @@
+package main
+
+import (
+    "net"
+    "os"
+
+    "gopkg.in/vmihailenco/msgpack.v2"
+    log "github.com/Sirupsen/logrus"
+    "github.com/pkg/errors"
+
+    "github.com/stkim1/pc-node-agent/pcssh/sshproc"
+    "github.com/stkim1/pc-node-agent/service"
+    "github.com/stkim1/pc-node-agent/utils/dhcp"
+    "github.com/stkim1/pc-vbox-core/crcontext"
+    "github.com/stkim1/pc-vbox-core/pcssh/sshcfg"
+)
+
+const (
+    iventNodeDHCPFeedback string    = "ivent.node.dhcp.feedback"
+)
+
+func initDhcpListner(app service.AppSupervisor) error {
+    // firstly clear off previous socket
+    os.Remove(dhcp.PocketDHCPEventSocketPath)
+    dhcpListener, err := net.ListenUnix("unix", &net.UnixAddr{Name:dhcp.PocketDHCPEventSocketPath, Net:"unix"})
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    app.RegisterServiceWithFuncs(
+        func () error {
+            var (
+                buf []byte = make([]byte, 20480)
+                dhcpEvent = &dhcp.PocketDhcpEvent{}
+            )
+
+            log.Debugf("[DHCP] starting dhcp listner...")
+
+            // TODO : how do we stop this?
+            for {
+                conn, err := dhcpListener.AcceptUnix()
+                if err != nil {
+                    log.Error(errors.WithStack(err))
+                    continue
+                }
+                count, err := conn.Read(buf)
+                if err != nil {
+                    log.Error(errors.WithStack(err))
+                    continue
+                }
+                err = msgpack.Unmarshal(buf[0:count], dhcpEvent)
+                if err != nil {
+                    log.Error(errors.WithStack(err))
+                    continue
+                }
+
+                app.BroadcastEvent(service.Event{Name: iventNodeDHCPFeedback, Payload: dhcpEvent})
+
+                err = conn.Close()
+                if err != nil {
+                    log.Error(errors.WithStack(err))
+                    continue
+                }
+            }
+
+            return nil
+        },
+        func(_ func(interface{})) error {
+            dhcpListener.Close()
+            os.Remove(dhcp.PocketDHCPEventSocketPath)
+            log.Debugf("[DHCP] close dhcp listner...")
+            return nil
+        },
+    )
+
+    return nil
+}
+
+func initTeleportNodeService(app service.AppSupervisor) error {
+    app.RegisterServiceWithFuncs(
+        func() error{
+            var (
+                pcsshNode *sshproc.EmbeddedNodeProcess = nil
+                err error = nil
+            )
+            // restart teleport
+            cfg, err := sshcfg.MakeCoreConfig(crcontext.SharedCoreContext(), true)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            pcsshNode, err = sshproc.NewEmbeddedNodeProcess(app, cfg)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+
+            err = pcsshNode.StartNodeSSH()
+            if err != nil {
+                return errors.WithStack(err)
+            }
+            log.Debugf("\n\n(INFO) teleport node started success!\n")
+
+            return nil
+        },
+        func(_ func(interface{})) error {
+            return nil
+        })
+
+    return nil
+}

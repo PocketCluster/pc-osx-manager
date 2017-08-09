@@ -21,7 +21,7 @@ type beaconEventRoute struct {
     *tervice.PocketConfig
 }
 
-func (b *beaconEventRoute) close() error {
+func (b *beaconEventRoute) terminate() error {
     b.ServiceSupervisor = nil
     b.PocketConfig = nil
     return nil
@@ -62,38 +62,50 @@ func (b *beaconEventRoute) BeaconEventShutdown() error {
     return nil
 }
 
-func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.PocketConfig) error {
+func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.PocketConfig) error {
     var (
         beaconC = make(chan service.Event)
         searchC = make(chan service.Event)
+        vboxC   = make(chan service.Event)
+        netC    = make(chan service.Event)
     )
     a.RegisterServiceWithFuncs(
         operation.ServiceBeaconMaster,
         func() error {
             var (
-                timer = time.NewTicker(time.Second)
-
-                beaconRoute *beaconEventRoute = &beaconEventRoute{
+                beaconRoute *beaconEventRoute  = &beaconEventRoute{
                     ServiceSupervisor:a.ServiceSupervisor,
                     PocketConfig: tcfg,
                 }
-
-                beaconMan, err = beacon.NewBeaconManagerWithFunc(
-                    clusterID,
-                    beaconRoute,
-                    func(host string, payload []byte) error {
-                        log.Debugf("[BEACON-TX] [%v] Host %v", time.Now(), host)
-                        a.BroadcastEvent(
-                            service.Event{
-                                Name:       ucast.EventBeaconCoreLocationSend,
-                                Payload:    ucast.BeaconSend{
-                                    Host:       host,
-                                    Payload:    payload,
-                                },
-                            })
-                        return nil
-                    })
+                timer                          = time.NewTicker(time.Second)
+                beaconMan  beacon.BeaconManger = nil
+                err        error               = nil
             )
+            // wait for vbox control
+            vc := <- vboxC
+            vbc, ok := vc.Payload.(vboxCtrlObjBrcst)
+            if !ok {
+                log.Debugf("[AGENT] (ERR) invalid VBoxMasterControl type")
+                return errors.Errorf("[ERR] invalid VBoxMasterControl type")
+            }
+
+            // beacon manager
+            beaconMan, err = beacon.NewBeaconManagerWithFunc(
+                clusterID,
+                vbc.VBoxMasterControl,
+                beaconRoute,
+                func(host string, payload []byte) error {
+                    log.Debugf("[AGENT] BEACON-TX [%v] Host %v", time.Now(), host)
+                    a.BroadcastEvent(
+                        service.Event{
+                            Name:       ucast.EventBeaconCoreLocationSend,
+                            Payload:    ucast.BeaconSend{
+                                Host:       host,
+                                Payload:    payload,
+                            },
+                        })
+                    return nil
+                })
             if err != nil {
                 return errors.WithStack(err)
             }
@@ -108,7 +120,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
                         if err != nil {
                             log.Debug(err.Error())
                         }
-                        err = beaconRoute.close()
+                        err = beaconRoute.terminate()
                         if err != nil {
                             log.Debug(err.Error())
                         }
@@ -120,7 +132,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
                         if ok {
                             err = beaconMan.TransitionWithBeaconData(bp, time.Now())
                             if err != nil {
-                                log.Debugf("[BEACON-RX] Error : %v", err)
+                                log.Debugf("[AGENT] BEACON-RX Error : %v", err)
                             }
                         }
                     }
@@ -129,7 +141,7 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
                         if ok {
                             err = beaconMan.TransitionWithSearchData(cp, time.Now())
                             if err != nil {
-                                log.Debugf("[SEARCH-RX] Error : %v", err)
+                                log.Debugf("[AGENT] SEARCH-RX Error : %v", err)
                             }
                         }
                     }
@@ -139,12 +151,18 @@ func initMasterBeaconService(a *mainLife, clusterID string, tcfg *tervice.Pocket
                             log.Debug(err.Error())
                         }
                     }
+                    case <- netC: {
+                        // TODO update primary address
+                        log.Debugf("[AGENT] Host Address changed")
+                    }
                 }
             }
             return nil
         },
         service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
-        service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC))
+        service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
+        service.BindEventWithService(iventVboxCtrlInstanceSpawn,           vboxC),
+        service.BindEventWithService(iventNetworkAddressChange,            netC))
 
     return nil
 }

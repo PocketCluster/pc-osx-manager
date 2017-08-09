@@ -22,7 +22,7 @@ func Test_BindBroken_Bounded_Transition(t *testing.T) {
         context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
     )
     context.SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey())
-    context.SetMasterAgent(masterAgentName)
+    context.SetClusterID(masterAgentName)
     context.SetSlaveNodeName(slaveNodeName)
 
     sd, err := NewSlaveLocator(SlaveBindBroken, debugComm, debugComm, debugEvent)
@@ -54,7 +54,7 @@ func Test_BindBroken_Bounded_Transition(t *testing.T) {
         return
     }
     // Verification
-    if msName, _ := context.GetMasterAgent(); msName != masterAgentName {
+    if msName, _ := context.GetClusterID(); msName != masterAgentName {
         t.Errorf("[ERR] master node name is setup inappropriately | Current : %s\n", msName)
         return
     }
@@ -81,7 +81,7 @@ func Test_BindBroken_BindBroken_TxActionFail(t *testing.T) {
         context slcontext.PocketSlaveContext = slcontext.SharedSlaveContext()
     )
     context.SetMasterPublicKey(pcrypto.TestMasterWeakPublicKey())
-    context.SetMasterAgent(masterAgentName)
+    context.SetClusterID(masterAgentName)
     context.SetSlaveNodeName(slaveNodeName)
 
     sd, err := NewSlaveLocator(SlaveBindBroken, debugComm, debugComm, debugEvent)

@@ -2,10 +2,12 @@ package context
 
 import (
     "github.com/stkim1/pcrypto"
+    "github.com/stkim1/pc-core/model"
+    "fmt"
 )
 
 const (
-    DEBUG_CLUSTER_ID string = "89d18964-569f-4f47-99c1-6218d4abd8e3"
+    DEBUG_CLUSTER_ID string = "G8815052XYLLWQCK"
 )
 
 var (
@@ -78,7 +80,7 @@ func DebugContextPrepare() (HostContext) {
     // once singleton is assigned, it will not assign again. This is how we invalidate singleton ops singletonContextInstance()
     _once.Do(func(){})
 
-    caSigner, _ := pcrypto.NewCertAuthoritySigner(pcrypto.TestCertPrivateKey(), pcrypto.TestCertPublicAuth(), DEBUG_CLUSTER_ID, "KR")
+    caSigner, _ := pcrypto.NewCertAuthoritySigner(pcrypto.TestCertPrivateKey(), pcrypto.TestCertPublicAuth(), fmt.Sprintf(pcrypto.FormFQDNClusterID, DEBUG_CLUSTER_ID), "KR")
     caBundle    := &CertAuthBundle{
         CASigner:      caSigner,
         CAPubKey:      pcrypto.TestCertPublicAuth(),
@@ -94,40 +96,52 @@ func DebugContextPrepare() (HostContext) {
     }
 
     _context = &hostContext{
-        cocoaHomePath:               "/Users/almightykim",
-        posixHomePath:               "/Users/almightykim",
-        fullUserName:                "Almighty Kim",
-        loginUserName:               "almightykim",
-        userTempPath:                "/var/folders/1s/nn_7b2vd75g6lfs5_vxcgt_c0000gn/T/",
+        ClusterMeta: &model.ClusterMeta {
+            ClusterID:                   DEBUG_CLUSTER_ID,
+            ClusterUUID:                 "89d18964-569f-4f47-99c1-6218d4abd8e3",
+            ClusterDomain:               fmt.Sprintf(pcrypto.FormFQDNClusterID, DEBUG_CLUSTER_ID),
+        },
 
-        applicationSupportPath:      "/Users/almightykim/Library/Application Support/SysUtil",
-        applicationDocumentPath:     "/Users/almightykim/Documents",
-        applicationTempPath:         "/var/folders/1s/nn_7b2vd75g6lfs5_vxcgt_c0000gn/T/",
-        applicationLibCachePath:     "/Users/almightykim/Library/Caches",
-        applicationResourcePath:     "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/Resources",
-        applicationExecutablePath:   "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/MacOS/SysUtil",
+        hostUserEnv: hostUserEnv {
+            cocoaHomePath:               "/Users/almightykim",
+            posixHomePath:               "/Users/almightykim",
+            fullUserName:                "Almighty Kim",
+            loginUserName:               "almightykim",
+            userTempPath:                "/var/folders/1s/nn_7b2vd75g6lfs5_vxcgt_c0000gn/T/",
+        },
 
-        clusterPublicName:           "G8815052XYLLWQCK",
+        hostAppEnv: hostAppEnv {
+            applicationSupportPath:      "/Users/almightykim/Library/Application Support/SysUtil",
+            applicationDocumentPath:     "/Users/almightykim/Documents",
+            applicationTempPath:         "/var/folders/1s/nn_7b2vd75g6lfs5_vxcgt_c0000gn/T/",
+            applicationLibCachePath:     "/Users/almightykim/Library/Caches",
+            applicationResourcePath:     "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/Resources",
+            applicationExecutablePath:   "/Users/almightykim/Library/Developer/Xcode/DerivedData/SysUtil-dsrzjqwmorphavfrktsexyevvird/Build/Products/Debug/SysUtil.app/Contents/MacOS/SysUtil",
 
-        processorCount:              8,
-        activeProcessorCount:        8,
-        physicalMemorySize:          34359738368,
+            currentLanguageCode:         "EN",
+            currentCountryCode:          "KR",
+        },
 
-        currentLanguageCode:         "EN",
-        currentCountryCode:          "KR",
+        hostSysResource: hostSysResource {
+            processorCount:              8,
+            activeProcessorCount:        8,
+            physicalMemorySize:          34359738368,
+        },
 
-        // cert authority
-        caBundle:                    caBundle,
+        hostCertificate: hostCertificate {
+            // cert authority
+            caBundle:                    caBundle,
 
-        // host certificate
-        hostBundle:                  hostBundle,
+            // host certificate
+            hostBundle:                  hostBundle,
 
-        // beacon certificate
-        beaconBundle:                beaconBundle,
+            // beacon certificate
+            beaconBundle:                beaconBundle,
+        },
     }
 
-    _context.refreshNetworkGateways(test_gateways)
-    _context.refreshNetworkInterfaces(test_intefaces)
+    _context.UpdateNetworkGateways(test_gateways)
+    _context.UpdateNetworkInterfaces(test_intefaces)
 
     return _context
 }

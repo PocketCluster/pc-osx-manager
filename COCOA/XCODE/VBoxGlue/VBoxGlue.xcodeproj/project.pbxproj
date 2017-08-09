@@ -1,0 +1,537 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		04281A811F3478C70047CDDE /* host.h in Headers */ = {isa = PBXBuildFile; fileRef = 04281A801F3478C70047CDDE /* host.h */; };
+		04281A831F3478E30047CDDE /* host.c in Sources */ = {isa = PBXBuildFile; fileRef = 04281A821F3478E30047CDDE /* host.c */; };
+		042D03C61F3107A4002FACE8 /* libVBoxGlue.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 042D03B11F31076E002FACE8 /* libVBoxGlue.a */; };
+		042D03F41F31081D002FACE8 /* bios_settings.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03CF1F31081D002FACE8 /* bios_settings.h */; };
+		042D03F51F31081D002FACE8 /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03D01F31081D002FACE8 /* common.h */; };
+		042D03F71F31081D002FACE8 /* keyboard.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03D21F31081D002FACE8 /* keyboard.h */; };
+		042D03F81F31081D002FACE8 /* machine.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03D31F31081D002FACE8 /* machine.h */; };
+		042D03F91F31081D002FACE8 /* medium.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03D41F31081D002FACE8 /* medium.h */; };
+		042D03FA1F31081D002FACE8 /* medium_format.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03D51F31081D002FACE8 /* medium_format.h */; };
+		042D03FB1F31081D002FACE8 /* network.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03D61F31081D002FACE8 /* network.h */; };
+		042D03FC1F31081D002FACE8 /* os_type.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03D71F31081D002FACE8 /* os_type.h */; };
+		042D03FD1F31081D002FACE8 /* progress.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03D81F31081D002FACE8 /* progress.h */; };
+		042D03FE1F31081D002FACE8 /* session.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03D91F31081D002FACE8 /* session.h */; };
+		042D03FF1F31081D002FACE8 /* storage_controller.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03DA1F31081D002FACE8 /* storage_controller.h */; };
+		042D04001F31081D002FACE8 /* system_properties.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03DB1F31081D002FACE8 /* system_properties.h */; };
+		042D04011F31081D002FACE8 /* usb_controller.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03DC1F31081D002FACE8 /* usb_controller.h */; };
+		042D04021F31081D002FACE8 /* vbox.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03DD1F31081D002FACE8 /* vbox.h */; };
+		042D04031F31081D002FACE8 /* VBoxCAPI_v5_1.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03DE1F31081D002FACE8 /* VBoxCAPI_v5_1.h */; };
+		042D04041F31081D002FACE8 /* VBoxCAPIGlue.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03DF1F31081D002FACE8 /* VBoxCAPIGlue.h */; };
+		042D04051F31081D002FACE8 /* bios_settings.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03E11F31081D002FACE8 /* bios_settings.c */; };
+		042D04071F31081D002FACE8 /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03E21F31081D002FACE8 /* console.c */; };
+		042D04091F31081D002FACE8 /* keyboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03E31F31081D002FACE8 /* keyboard.c */; };
+		042D040B1F31081D002FACE8 /* machine.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03E41F31081D002FACE8 /* machine.c */; };
+		042D040D1F31081D002FACE8 /* medium.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03E51F31081D002FACE8 /* medium.c */; };
+		042D040F1F31081D002FACE8 /* medium_format.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03E61F31081D002FACE8 /* medium_format.c */; };
+		042D04111F31081D002FACE8 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03E71F31081D002FACE8 /* network.c */; };
+		042D04131F31081D002FACE8 /* os_type.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03E81F31081D002FACE8 /* os_type.c */; };
+		042D04151F31081D002FACE8 /* progress.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03E91F31081D002FACE8 /* progress.c */; };
+		042D04171F31081D002FACE8 /* session.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03EA1F31081D002FACE8 /* session.c */; };
+		042D04191F31081D002FACE8 /* storage_controller.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03EB1F31081D002FACE8 /* storage_controller.c */; };
+		042D041B1F31081D002FACE8 /* system_properties.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03EC1F31081D002FACE8 /* system_properties.c */; };
+		042D041D1F31081D002FACE8 /* usb_controller.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03ED1F31081D002FACE8 /* usb_controller.c */; };
+		042D041F1F31081D002FACE8 /* vbox.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03EE1F31081D002FACE8 /* vbox.c */; };
+		042D04211F31081D002FACE8 /* VBoxCAPIGlue.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03EF1F31081D002FACE8 /* VBoxCAPIGlue.c */; };
+		042D04231F31081D002FACE8 /* libvboxcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 042D03F01F31081D002FACE8 /* libvboxcom.c */; };
+		042D04251F31081D002FACE8 /* libvboxcom.h in Headers */ = {isa = PBXBuildFile; fileRef = 042D03F11F31081D002FACE8 /* libvboxcom.h */; };
+		042D04321F3120FD002FACE8 /* vboxglue_init_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 042D04311F3120FD002FACE8 /* vboxglue_init_test.m */; };
+		04937E611F3A4BC900128295 /* console.h in Headers */ = {isa = PBXBuildFile; fileRef = 04937E601F3A4BC900128295 /* console.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		042D03C71F3107A4002FACE8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 042D03A91F31076E002FACE8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 042D03B01F31076E002FACE8;
+			remoteInfo = VBoxGlue;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		04281A801F3478C70047CDDE /* host.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = host.h; sourceTree = "<group>"; };
+		04281A821F3478E30047CDDE /* host.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = host.c; sourceTree = "<group>"; };
+		042D03B11F31076E002FACE8 /* libVBoxGlue.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libVBoxGlue.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		042D03C11F3107A4002FACE8 /* VBoxGlue-Test.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "VBoxGlue-Test.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		042D03C51F3107A4002FACE8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		042D03CF1F31081D002FACE8 /* bios_settings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bios_settings.h; sourceTree = "<group>"; };
+		042D03D01F31081D002FACE8 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
+		042D03D21F31081D002FACE8 /* keyboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = keyboard.h; sourceTree = "<group>"; };
+		042D03D31F31081D002FACE8 /* machine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = machine.h; sourceTree = "<group>"; };
+		042D03D41F31081D002FACE8 /* medium.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = medium.h; sourceTree = "<group>"; };
+		042D03D51F31081D002FACE8 /* medium_format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = medium_format.h; sourceTree = "<group>"; };
+		042D03D61F31081D002FACE8 /* network.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = network.h; sourceTree = "<group>"; };
+		042D03D71F31081D002FACE8 /* os_type.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = os_type.h; sourceTree = "<group>"; };
+		042D03D81F31081D002FACE8 /* progress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = progress.h; sourceTree = "<group>"; };
+		042D03D91F31081D002FACE8 /* session.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = session.h; sourceTree = "<group>"; };
+		042D03DA1F31081D002FACE8 /* storage_controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = storage_controller.h; sourceTree = "<group>"; };
+		042D03DB1F31081D002FACE8 /* system_properties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = system_properties.h; sourceTree = "<group>"; };
+		042D03DC1F31081D002FACE8 /* usb_controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = usb_controller.h; sourceTree = "<group>"; };
+		042D03DD1F31081D002FACE8 /* vbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vbox.h; sourceTree = "<group>"; };
+		042D03DE1F31081D002FACE8 /* VBoxCAPI_v5_1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VBoxCAPI_v5_1.h; sourceTree = "<group>"; };
+		042D03DF1F31081D002FACE8 /* VBoxCAPIGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VBoxCAPIGlue.h; sourceTree = "<group>"; };
+		042D03E11F31081D002FACE8 /* bios_settings.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bios_settings.c; sourceTree = "<group>"; };
+		042D03E21F31081D002FACE8 /* console.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = console.c; sourceTree = "<group>"; };
+		042D03E31F31081D002FACE8 /* keyboard.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = keyboard.c; sourceTree = "<group>"; };
+		042D03E41F31081D002FACE8 /* machine.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = machine.c; sourceTree = "<group>"; };
+		042D03E51F31081D002FACE8 /* medium.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = medium.c; sourceTree = "<group>"; };
+		042D03E61F31081D002FACE8 /* medium_format.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = medium_format.c; sourceTree = "<group>"; };
+		042D03E71F31081D002FACE8 /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = network.c; sourceTree = "<group>"; };
+		042D03E81F31081D002FACE8 /* os_type.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = os_type.c; sourceTree = "<group>"; };
+		042D03E91F31081D002FACE8 /* progress.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = progress.c; sourceTree = "<group>"; };
+		042D03EA1F31081D002FACE8 /* session.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = session.c; sourceTree = "<group>"; };
+		042D03EB1F31081D002FACE8 /* storage_controller.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = storage_controller.c; sourceTree = "<group>"; };
+		042D03EC1F31081D002FACE8 /* system_properties.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = system_properties.c; sourceTree = "<group>"; };
+		042D03ED1F31081D002FACE8 /* usb_controller.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = usb_controller.c; sourceTree = "<group>"; };
+		042D03EE1F31081D002FACE8 /* vbox.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vbox.c; sourceTree = "<group>"; };
+		042D03EF1F31081D002FACE8 /* VBoxCAPIGlue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VBoxCAPIGlue.c; sourceTree = "<group>"; };
+		042D03F01F31081D002FACE8 /* libvboxcom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = libvboxcom.c; sourceTree = "<group>"; };
+		042D03F11F31081D002FACE8 /* libvboxcom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libvboxcom.h; path = "/Users/almightykim/Workspace/pc-osx-manager/COCOA/vbox/libvboxcom.h"; sourceTree = "<absolute>"; };
+		042D03F21F31081D002FACE8 /* os-typeid-list.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "os-typeid-list.txt"; sourceTree = "<group>"; };
+		042D042D1F310948002FACE8 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		042D042E1F310A06002FACE8 /* GlobalMacro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GlobalMacro.h; sourceTree = "<group>"; };
+		042D042F1F310A06002FACE8 /* VboxCom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VboxCom.h; sourceTree = "<group>"; };
+		042D04301F310A06002FACE8 /* VboxCom.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VboxCom.m; sourceTree = "<group>"; };
+		042D04311F3120FD002FACE8 /* vboxglue_init_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = vboxglue_init_test.m; sourceTree = "<group>"; };
+		04937E5F1F3A412B00128295 /* tstCAPIGlue.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = tstCAPIGlue.c; sourceTree = "<group>"; };
+		04937E601F3A4BC900128295 /* console.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = console.h; sourceTree = "<group>"; };
+		04F663481F33B9FA004A418F /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		042D03AE1F31076E002FACE8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		042D03BE1F3107A4002FACE8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				042D03C61F3107A4002FACE8 /* libVBoxGlue.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		042D03A81F31076E002FACE8 = {
+			isa = PBXGroup;
+			children = (
+				042D03CC1F31081D002FACE8 /* vbox */,
+				042D03B31F31076E002FACE8 /* VBoxGlue */,
+				042D03C21F3107A4002FACE8 /* VBoxGlue-Test */,
+				042D03B21F31076E002FACE8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		042D03B21F31076E002FACE8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				042D03B11F31076E002FACE8 /* libVBoxGlue.a */,
+				042D03C11F3107A4002FACE8 /* VBoxGlue-Test.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		042D03B31F31076E002FACE8 /* VBoxGlue */ = {
+			isa = PBXGroup;
+			children = (
+				042D042E1F310A06002FACE8 /* GlobalMacro.h */,
+				042D042F1F310A06002FACE8 /* VboxCom.h */,
+				042D04301F310A06002FACE8 /* VboxCom.m */,
+				04937E5F1F3A412B00128295 /* tstCAPIGlue.c */,
+				042D042D1F310948002FACE8 /* main.c */,
+			);
+			path = VBoxGlue;
+			sourceTree = "<group>";
+		};
+		042D03C21F3107A4002FACE8 /* VBoxGlue-Test */ = {
+			isa = PBXGroup;
+			children = (
+				042D03C51F3107A4002FACE8 /* Info.plist */,
+				042D04311F3120FD002FACE8 /* vboxglue_init_test.m */,
+			);
+			path = "VBoxGlue-Test";
+			sourceTree = "<group>";
+		};
+		042D03CC1F31081D002FACE8 /* vbox */ = {
+			isa = PBXGroup;
+			children = (
+				042D03CE1F31081D002FACE8 /* include */,
+				042D03E01F31081D002FACE8 /* lib */,
+				042D03F11F31081D002FACE8 /* libvboxcom.h */,
+				042D03F01F31081D002FACE8 /* libvboxcom.c */,
+				04F663481F33B9FA004A418F /* TODO.md */,
+				042D03F21F31081D002FACE8 /* os-typeid-list.txt */,
+			);
+			name = vbox;
+			path = ../../vbox;
+			sourceTree = "<group>";
+		};
+		042D03CE1F31081D002FACE8 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				042D03CF1F31081D002FACE8 /* bios_settings.h */,
+				042D03D01F31081D002FACE8 /* common.h */,
+				04937E601F3A4BC900128295 /* console.h */,
+				04281A801F3478C70047CDDE /* host.h */,
+				042D03D21F31081D002FACE8 /* keyboard.h */,
+				042D03D31F31081D002FACE8 /* machine.h */,
+				042D03D51F31081D002FACE8 /* medium_format.h */,
+				042D03D41F31081D002FACE8 /* medium.h */,
+				042D03D61F31081D002FACE8 /* network.h */,
+				042D03D71F31081D002FACE8 /* os_type.h */,
+				042D03D81F31081D002FACE8 /* progress.h */,
+				042D03D91F31081D002FACE8 /* session.h */,
+				042D03DA1F31081D002FACE8 /* storage_controller.h */,
+				042D03DB1F31081D002FACE8 /* system_properties.h */,
+				042D03DC1F31081D002FACE8 /* usb_controller.h */,
+				042D03DD1F31081D002FACE8 /* vbox.h */,
+				042D03DE1F31081D002FACE8 /* VBoxCAPI_v5_1.h */,
+				042D03DF1F31081D002FACE8 /* VBoxCAPIGlue.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		042D03E01F31081D002FACE8 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				042D03E11F31081D002FACE8 /* bios_settings.c */,
+				042D03E21F31081D002FACE8 /* console.c */,
+				04281A821F3478E30047CDDE /* host.c */,
+				042D03E31F31081D002FACE8 /* keyboard.c */,
+				042D03E41F31081D002FACE8 /* machine.c */,
+				042D03E61F31081D002FACE8 /* medium_format.c */,
+				042D03E51F31081D002FACE8 /* medium.c */,
+				042D03E71F31081D002FACE8 /* network.c */,
+				042D03E81F31081D002FACE8 /* os_type.c */,
+				042D03E91F31081D002FACE8 /* progress.c */,
+				042D03EA1F31081D002FACE8 /* session.c */,
+				042D03EB1F31081D002FACE8 /* storage_controller.c */,
+				042D03EC1F31081D002FACE8 /* system_properties.c */,
+				042D03ED1F31081D002FACE8 /* usb_controller.c */,
+				042D03EE1F31081D002FACE8 /* vbox.c */,
+				042D03EF1F31081D002FACE8 /* VBoxCAPIGlue.c */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		042D03AF1F31076E002FACE8 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				042D04041F31081D002FACE8 /* VBoxCAPIGlue.h in Headers */,
+				042D03FF1F31081D002FACE8 /* storage_controller.h in Headers */,
+				042D04011F31081D002FACE8 /* usb_controller.h in Headers */,
+				042D03FC1F31081D002FACE8 /* os_type.h in Headers */,
+				042D03F41F31081D002FACE8 /* bios_settings.h in Headers */,
+				042D03F71F31081D002FACE8 /* keyboard.h in Headers */,
+				042D04021F31081D002FACE8 /* vbox.h in Headers */,
+				042D03FD1F31081D002FACE8 /* progress.h in Headers */,
+				042D04001F31081D002FACE8 /* system_properties.h in Headers */,
+				04281A811F3478C70047CDDE /* host.h in Headers */,
+				042D04031F31081D002FACE8 /* VBoxCAPI_v5_1.h in Headers */,
+				042D03F51F31081D002FACE8 /* common.h in Headers */,
+				042D03FE1F31081D002FACE8 /* session.h in Headers */,
+				042D04251F31081D002FACE8 /* libvboxcom.h in Headers */,
+				042D03F81F31081D002FACE8 /* machine.h in Headers */,
+				042D03FA1F31081D002FACE8 /* medium_format.h in Headers */,
+				042D03F91F31081D002FACE8 /* medium.h in Headers */,
+				04937E611F3A4BC900128295 /* console.h in Headers */,
+				042D03FB1F31081D002FACE8 /* network.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		042D03B01F31076E002FACE8 /* VBoxGlue */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 042D03BA1F31076E002FACE8 /* Build configuration list for PBXNativeTarget "VBoxGlue" */;
+			buildPhases = (
+				042D03AD1F31076E002FACE8 /* Sources */,
+				042D03AE1F31076E002FACE8 /* Frameworks */,
+				042D03AF1F31076E002FACE8 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VBoxGlue;
+			productName = VBoxGlue;
+			productReference = 042D03B11F31076E002FACE8 /* libVBoxGlue.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		042D03C01F3107A4002FACE8 /* VBoxGlue-Test */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 042D03C91F3107A4002FACE8 /* Build configuration list for PBXNativeTarget "VBoxGlue-Test" */;
+			buildPhases = (
+				042D03BD1F3107A4002FACE8 /* Sources */,
+				042D03BE1F3107A4002FACE8 /* Frameworks */,
+				042D03BF1F3107A4002FACE8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				042D03C81F3107A4002FACE8 /* PBXTargetDependency */,
+			);
+			name = "VBoxGlue-Test";
+			productName = "VBoxGlue-Test";
+			productReference = 042D03C11F3107A4002FACE8 /* VBoxGlue-Test.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		042D03A91F31076E002FACE8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0720;
+				ORGANIZATIONNAME = PocketCluster;
+				TargetAttributes = {
+					042D03B01F31076E002FACE8 = {
+						CreatedOnToolsVersion = 7.2.1;
+					};
+					042D03C01F3107A4002FACE8 = {
+						CreatedOnToolsVersion = 7.2.1;
+					};
+				};
+			};
+			buildConfigurationList = 042D03AC1F31076E002FACE8 /* Build configuration list for PBXProject "VBoxGlue" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 042D03A81F31076E002FACE8;
+			productRefGroup = 042D03B21F31076E002FACE8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				042D03B01F31076E002FACE8 /* VBoxGlue */,
+				042D03C01F3107A4002FACE8 /* VBoxGlue-Test */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		042D03BF1F3107A4002FACE8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		042D03AD1F31076E002FACE8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				042D041F1F31081D002FACE8 /* vbox.c in Sources */,
+				042D04091F31081D002FACE8 /* keyboard.c in Sources */,
+				042D04071F31081D002FACE8 /* console.c in Sources */,
+				042D04151F31081D002FACE8 /* progress.c in Sources */,
+				042D040B1F31081D002FACE8 /* machine.c in Sources */,
+				042D04111F31081D002FACE8 /* network.c in Sources */,
+				042D040D1F31081D002FACE8 /* medium.c in Sources */,
+				042D04211F31081D002FACE8 /* VBoxCAPIGlue.c in Sources */,
+				042D040F1F31081D002FACE8 /* medium_format.c in Sources */,
+				042D041D1F31081D002FACE8 /* usb_controller.c in Sources */,
+				042D04131F31081D002FACE8 /* os_type.c in Sources */,
+				042D041B1F31081D002FACE8 /* system_properties.c in Sources */,
+				042D04191F31081D002FACE8 /* storage_controller.c in Sources */,
+				042D04171F31081D002FACE8 /* session.c in Sources */,
+				04281A831F3478E30047CDDE /* host.c in Sources */,
+				042D04231F31081D002FACE8 /* libvboxcom.c in Sources */,
+				042D04051F31081D002FACE8 /* bios_settings.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		042D03BD1F3107A4002FACE8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				042D04321F3120FD002FACE8 /* vboxglue_init_test.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		042D03C81F3107A4002FACE8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 042D03B01F31076E002FACE8 /* VBoxGlue */;
+			targetProxy = 042D03C71F3107A4002FACE8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		042D03B81F31076E002FACE8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		042D03B91F31076E002FACE8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		042D03BB1F31076E002FACE8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		042D03BC1F31076E002FACE8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		042D03CA1F3107A4002FACE8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "VBoxGlue-Test/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.pocketcluster.VBoxGlue-Test";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		042D03CB1F3107A4002FACE8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "VBoxGlue-Test/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.pocketcluster.VBoxGlue-Test";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		042D03AC1F31076E002FACE8 /* Build configuration list for PBXProject "VBoxGlue" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				042D03B81F31076E002FACE8 /* Debug */,
+				042D03B91F31076E002FACE8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		042D03BA1F31076E002FACE8 /* Build configuration list for PBXNativeTarget "VBoxGlue" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				042D03BB1F31076E002FACE8 /* Debug */,
+				042D03BC1F31076E002FACE8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		042D03C91F3107A4002FACE8 /* Build configuration list for PBXNativeTarget "VBoxGlue-Test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				042D03CA1F3107A4002FACE8 /* Debug */,
+				042D03CB1F3107A4002FACE8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 042D03A91F31076E002FACE8 /* Project object */;
+}
