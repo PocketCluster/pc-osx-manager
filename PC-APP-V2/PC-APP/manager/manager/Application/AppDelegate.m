@@ -30,7 +30,7 @@
 @property (strong) PCInterfaceStatus *interfaceStatus;
 
 #ifdef DEBUG
-    @property (nonatomic, strong) DebugWindow *debugWindow;
+@property (nonatomic, strong) DebugWindow *debugWindow;
 #endif
 @end
 
@@ -92,7 +92,6 @@
     
     
 #ifdef DEBUG
-    
     self.debugWindow = [[DebugWindow alloc] initWithWindowNibName:@"DebugWindow"];
     [NSApp activateIgnoringOtherApps:YES];
     [self.debugWindow showWindow:nil];

@@ -9,49 +9,56 @@
 #import "Util.h"
 
 @interface NativeMenu()
-@property (nonatomic, strong, readwrite) NSMutableArray *menuItems;
+- (void) initialize;
+
+- (void)menuSelectedAbout:(id)sender;
+- (void)menuSelectedQuit:(id)sender;
 @end
 
 @implementation NativeMenu
 @synthesize aboutWindow = _aboutWindow;
 @synthesize statusItem = _statusItem;
-@synthesize menu = _menu;
 
-- (id)init
-{
+- (id)init {
+
     self = [super init];
-    
+
     if(self) {
-        
-        self.statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
-        self.menu = [[NSMenu alloc] init];
-        [_menu setAutoenablesItems:NO];
-        
-        self.menuItems = [[NSMutableArray alloc] init];
-        
-        self.statusItem.button.image = [NSImage imageNamed:@"status-off"];
-        _statusItem.highlightMode = YES;
-        _statusItem.menu = _menu;
-        
-        // instances here
-        self.bottomMachineSeparator = [NSMenuItem separatorItem];
-        [_menu addItem:_bottomMachineSeparator];
-        
-        NSMenuItem *aboutMenuItem = [[NSMenuItem alloc] initWithTitle:@"About" action:@selector(aboutMenuItemClicked:) keyEquivalent:@""];
-        aboutMenuItem.target = self;
-        [_menu addItem:aboutMenuItem];
-        
-        NSMenuItem *quitMenuItem = [[NSMenuItem alloc] initWithTitle:@"Quit" action:@selector(quitMenuItemClicked:) keyEquivalent:@""];
-        quitMenuItem.target = self;
-        [_menu addItem:quitMenuItem];
+        [self initialize];
     }
 
     return self;
 }
 
+- (void) initialize {
+
+    NSMenu* menuRoot = [[NSMenu alloc] init];
+    [menuRoot setAutoenablesItems:NO];
+
+    // about menu
+    NSMenuItem *menuAbout = [[NSMenuItem alloc] initWithTitle:@"About" action:@selector(menuSelectedAbout:) keyEquivalent:@""];
+    [menuAbout setTarget:self];
+    [menuRoot addItem:menuAbout];
+
+    // separator
+    [menuRoot addItem:[NSMenuItem separatorItem]];
+
+    // quit menu
+    NSMenuItem *menuQuit = [[NSMenuItem alloc] initWithTitle:@"Quit" action:@selector(menuSelectedQuit:) keyEquivalent:@""];
+    [menuQuit setTarget:self];
+    [menuRoot addItem:menuQuit];
+
+    // status
+    NSStatusItem* status = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
+    [status.button setImage:[NSImage imageNamed:@"status-off"]];
+    [status setHighlightMode:YES];
+    [status setMenu:menuRoot];
+    [self setStatusItem:status];
+}
+
 #pragma mark - Notification Handlers
 
-- (void)aboutMenuItemClicked:(id)sender {
+- (void)menuSelectedAbout:(id)sender {
     if(_aboutWindow && !_aboutWindow.isClosed) {
         [NSApp activateIgnoringOtherApps:YES];
         [_aboutWindow showWindow:self];
@@ -63,7 +70,7 @@
     }
 }
 
-- (void)quitMenuItemClicked:(id)sender {
+- (void)menuSelectedQuit:(id)sender {
     [[NSApplication sharedApplication] terminate:self];
 }
 
