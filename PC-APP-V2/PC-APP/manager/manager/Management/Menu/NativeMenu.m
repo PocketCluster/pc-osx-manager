@@ -9,10 +9,14 @@
 #import "Util.h"
 
 @interface NativeMenu()
-- (void) initialize;
+- (void) setupMenuNewCluster;
 
-- (void)menuSelectedAbout:(id)sender;
-- (void)menuSelectedQuit:(id)sender;
+- (void) menuSelectedNewCluster:(id)sender;
+- (void) menuSelectedPref:(id)sender;
+- (void) menuSelectedCheckForUpdates:(id)sender;
+- (void) menuSelectedSlack:(id)sender;
+- (void) menuSelectedAbout:(id)sender;
+- (void) menuSelectedQuit:(id)sender;
 @end
 
 @implementation NativeMenu
@@ -24,30 +28,51 @@
     self = [super init];
 
     if(self) {
-        [self initialize];
+        [self setupMenuNewCluster];
     }
 
     return self;
 }
 
-- (void) initialize {
+- (void) setupMenuNewCluster {
 
     NSMenu* menuRoot = [[NSMenu alloc] init];
     [menuRoot setAutoenablesItems:NO];
 
-    // about menu
-    NSMenuItem *menuAbout = [[NSMenuItem alloc] initWithTitle:@"About" action:@selector(menuSelectedAbout:) keyEquivalent:@""];
-    [menuAbout setTarget:self];
-    [menuRoot addItem:menuAbout];
+    NSMenuItem *mCluster = [[NSMenuItem alloc] initWithTitle:@"New Cluster" action:@selector(menuSelectedNewCluster:) keyEquivalent:@""];
+    [mCluster setTarget:self];
+    [menuRoot addItem:mCluster];
+    [menuRoot addItem:[NSMenuItem separatorItem]];
+    
+    
+    // preference
+    NSMenuItem *mPref = [[NSMenuItem alloc] initWithTitle:@"Preferences" action:@selector(menuSelectedPref:) keyEquivalent:@""];
+    [mPref setTarget:self];
+    [menuRoot addItem:mPref];
 
-    // separator
+    // check for update
+    NSMenuItem *mUpdate = [[NSMenuItem alloc] initWithTitle:@"Check For Updates" action:@selector(menuSelectedCheckForUpdates:) keyEquivalent:@""];
+    [mUpdate setTarget:self];
+    [menuRoot addItem:mUpdate];
     [menuRoot addItem:[NSMenuItem separatorItem]];
 
+    // chat menu
+    NSMenuItem *mSlack = [[NSMenuItem alloc] initWithTitle:@"Slack Chat" action:@selector(menuSelectedSlack:) keyEquivalent:@""];
+    [mSlack setTarget:self];
+    [menuRoot addItem:mSlack];
+
+    // about menu
+    NSMenuItem *mAbout = [[NSMenuItem alloc] initWithTitle:@"About" action:@selector(menuSelectedAbout:) keyEquivalent:@""];
+    [mAbout setTarget:self];
+    [menuRoot addItem:mAbout];
+    [menuRoot addItem:[NSMenuItem separatorItem]];
+    
     // quit menu
     NSMenuItem *menuQuit = [[NSMenuItem alloc] initWithTitle:@"Quit" action:@selector(menuSelectedQuit:) keyEquivalent:@""];
     [menuQuit setTarget:self];
     [menuRoot addItem:menuQuit];
 
+    
     // status
     NSStatusItem* status = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
     [status.button setImage:[NSImage imageNamed:@"status-off"]];
@@ -56,7 +81,18 @@
     [self setStatusItem:status];
 }
 
-#pragma mark - Notification Handlers
+#pragma mark - Selection Handling
+- (void) menuSelectedNewCluster:(id)sender {
+}
+
+- (void) menuSelectedPref:(id)sender {
+}
+
+- (void) menuSelectedCheckForUpdates:(id)sender {
+}
+
+- (void) menuSelectedSlack:(id)sender {
+}
 
 - (void)menuSelectedAbout:(id)sender {
     if(_aboutWindow && !_aboutWindow.isClosed) {

@@ -11,6 +11,9 @@
 		0419FA141E90F61400031628 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0419FA131E90F61400031628 /* libc++.tbd */; };
 		0419FA161E90F61900031628 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0419FA151E90F61900031628 /* libz.tbd */; };
 		041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
+		042670071F3CCC9300CA1967 /* PCPackageMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 042670061F3CCC9300CA1967 /* PCPackageMenuItem.m */; };
+		042670281F3CCFEE00CA1967 /* PCPackageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0426701D1F3CCFEE00CA1967 /* PCPackageManager.m */; };
+		042670291F3CCFEE00CA1967 /* PCPackageMeta.m in Sources */ = {isa = PBXBuildFile; fileRef = 0426701F1F3CCFEE00CA1967 /* PCPackageMeta.m */; };
 		0441A3D01BD88DDC00AABD7A /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */; };
 		0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; };
 		0441A3E31BD8904100AABD7A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D81BD8904100AABD7A /* main.m */; };
@@ -103,6 +106,12 @@
 		0419FA131E90F61400031628 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
 		0419FA151E90F61900031628 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		041FB3B61BD0F3FA0027136F /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
+		042670051F3CCC9300CA1967 /* PCPackageMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPackageMenuItem.h; sourceTree = "<group>"; };
+		042670061F3CCC9300CA1967 /* PCPackageMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPackageMenuItem.m; sourceTree = "<group>"; };
+		0426701C1F3CCFEE00CA1967 /* PCPackageManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPackageManager.h; sourceTree = "<group>"; };
+		0426701D1F3CCFEE00CA1967 /* PCPackageManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPackageManager.m; sourceTree = "<group>"; };
+		0426701E1F3CCFEE00CA1967 /* PCPackageMeta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPackageMeta.h; sourceTree = "<group>"; };
+		0426701F1F3CCFEE00CA1967 /* PCPackageMeta.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPackageMeta.m; sourceTree = "<group>"; };
 		0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = ../Pods/Sparkle/Sparkle.framework; sourceTree = "<group>"; };
 		0441A3D61BD8904100AABD7A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0441A3D71BD8904100AABD7A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -240,6 +249,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		042670191F3CCFEE00CA1967 /* PackageFiles */ = {
+			isa = PBXGroup;
+			children = (
+				0426701C1F3CCFEE00CA1967 /* PCPackageManager.h */,
+				0426701D1F3CCFEE00CA1967 /* PCPackageManager.m */,
+				0426701E1F3CCFEE00CA1967 /* PCPackageMeta.h */,
+				0426701F1F3CCFEE00CA1967 /* PCPackageMeta.m */,
+			);
+			path = PackageFiles;
+			sourceTree = "<group>";
+		};
 		0441A3D51BD8904100AABD7A /* Application */ = {
 			isa = PBXGroup;
 			children = (
@@ -435,6 +455,7 @@
 			isa = PBXGroup;
 			children = (
 				047F32691D8A898E00568210 /* Menu */,
+				042670191F3CCFEE00CA1967 /* PackageFiles */,
 			);
 			name = Management;
 			path = manager/Management;
@@ -445,6 +466,8 @@
 			children = (
 				047F326D1D8A898E00568210 /* NativeMenu.h */,
 				047F326E1D8A898E00568210 /* NativeMenu.m */,
+				042670051F3CCC9300CA1967 /* PCPackageMenuItem.h */,
+				042670061F3CCC9300CA1967 /* PCPackageMenuItem.m */,
 			);
 			path = Menu;
 			sourceTree = "<group>";
@@ -811,7 +834,9 @@
 				0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */,
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				04D5A48E1E9269AE0057012A /* AppDelegate+Sparkle.m in Sources */,
+				042670281F3CCFEE00CA1967 /* PCPackageManager.m in Sources */,
 				047F32AC1D8A898E00568210 /* NativeMenu.m in Sources */,
+				042670291F3CCFEE00CA1967 /* PCPackageMeta.m in Sources */,
 				04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */,
 				04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */,
 				04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */,
@@ -822,6 +847,7 @@
 				046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
+				042670071F3CCC9300CA1967 /* PCPackageMenuItem.m in Sources */,
 				046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				0441A3E31BD8904100AABD7A /* main.m in Sources */,
 				04AD71C51E9B749A00DB6AE9 /* Util.m in Sources */,

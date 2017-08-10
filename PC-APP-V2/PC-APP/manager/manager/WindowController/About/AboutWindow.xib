@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9060" systemVersion="15B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9532" systemVersion="14F2511" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9060"/>
-        <plugIn identifier="com.apple.WebKitIBPlugin" version="9060"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9532"/>
+        <plugIn identifier="com.apple.WebKitIBPlugin" version="9532"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="AboutWindow">
@@ -16,27 +15,33 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <window title="PocketCluster" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" animationBehavior="default" id="1">
             <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
-            <rect key="contentRect" x="196" y="240" width="480" height="240"/>
+            <rect key="contentRect" x="196" y="240" width="480" height="168"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1058"/>
             <view key="contentView" id="2">
-                <rect key="frame" x="0.0" y="0.0" width="480" height="240"/>
+                <rect key="frame" x="0.0" y="0.0" width="480" height="168"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
+                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" id="3R6-FN-rej">
+                        <rect key="frame" x="20" y="20" width="128" height="128"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" image="AppIcon" id="fWy-Ne-dHj"/>
+                    </imageView>
                     <webView id="tYe-WP-fMN">
-                        <rect key="frame" x="20" y="20" width="440" height="200"/>
+                        <rect key="frame" x="168" y="20" width="292" height="128"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <animations/>
                         <webPreferences key="preferences" defaultFontSize="12" defaultFixedFontSize="12">
                             <nil key="identifier"/>
                         </webPreferences>
                     </webView>
                 </subviews>
-                <animations/>
             </view>
             <connections>
                 <outlet property="delegate" destination="-2" id="4"/>
             </connections>
-            <point key="canvasLocation" x="401" y="398"/>
+            <point key="canvasLocation" x="-228" y="127"/>
         </window>
     </objects>
+    <resources>
+        <image name="AppIcon" width="128" height="128"/>
+    </resources>
 </document>
