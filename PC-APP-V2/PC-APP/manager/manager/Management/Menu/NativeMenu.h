@@ -15,4 +15,7 @@
 }
 @property (nonatomic, strong) AboutWindow *aboutWindow;
 @property (nonatomic, strong) NSStatusItem *statusItem;
+
+
+- (void) addCommonMenu:(NSMenu *)menuRoot;
 @end

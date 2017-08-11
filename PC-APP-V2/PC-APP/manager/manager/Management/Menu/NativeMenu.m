@@ -5,13 +5,13 @@
 //  Copyright (c) 2014 Lanayo. All rights reserved.
 //
 
-#import "NativeMenu.h"
 #import "Util.h"
 
-@interface NativeMenu()
-- (void) setupMenuNewCluster;
+#import "NativeMenu.h"
+#import "NativeMenu+NewCluster.h"
+#import "NativeMenu+RunCluster.h"
 
-- (void) menuSelectedNewCluster:(id)sender;
+@interface NativeMenu()
 - (void) menuSelectedPref:(id)sender;
 - (void) menuSelectedCheckForUpdates:(id)sender;
 - (void) menuSelectedSlack:(id)sender;
@@ -28,24 +28,16 @@
     self = [super init];
 
     if(self) {
-        [self setupMenuNewCluster];
+        [self setupMenuRunCluster];
     }
 
     return self;
 }
 
-- (void) setupMenuNewCluster {
-
-    NSMenu* menuRoot = [[NSMenu alloc] init];
-    [menuRoot setAutoenablesItems:NO];
-
-    NSMenuItem *mCluster = [[NSMenuItem alloc] initWithTitle:@"New Cluster" action:@selector(menuSelectedNewCluster:) keyEquivalent:@""];
-    [mCluster setTarget:self];
-    [menuRoot addItem:mCluster];
-    [menuRoot addItem:[NSMenuItem separatorItem]];
-    
-    
+#pragma mark - Basic Menu Handling
+- (void) addCommonMenu:(NSMenu *)menuRoot {
     // preference
+    [menuRoot addItem:[NSMenuItem separatorItem]];
     NSMenuItem *mPref = [[NSMenuItem alloc] initWithTitle:@"Preferences" action:@selector(menuSelectedPref:) keyEquivalent:@""];
     [mPref setTarget:self];
     [menuRoot addItem:mPref];
@@ -57,7 +49,7 @@
     [menuRoot addItem:[NSMenuItem separatorItem]];
 
     // chat menu
-    NSMenuItem *mSlack = [[NSMenuItem alloc] initWithTitle:@"Slack Chat" action:@selector(menuSelectedSlack:) keyEquivalent:@""];
+    NSMenuItem *mSlack = [[NSMenuItem alloc] initWithTitle:@"#PocketCluster (Slack)" action:@selector(menuSelectedSlack:) keyEquivalent:@""];
     [mSlack setTarget:self];
     [menuRoot addItem:mSlack];
 
@@ -66,23 +58,11 @@
     [mAbout setTarget:self];
     [menuRoot addItem:mAbout];
     [menuRoot addItem:[NSMenuItem separatorItem]];
-    
+
     // quit menu
     NSMenuItem *menuQuit = [[NSMenuItem alloc] initWithTitle:@"Quit" action:@selector(menuSelectedQuit:) keyEquivalent:@""];
     [menuQuit setTarget:self];
     [menuRoot addItem:menuQuit];
-
-    
-    // status
-    NSStatusItem* status = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
-    [status.button setImage:[NSImage imageNamed:@"status-off"]];
-    [status setHighlightMode:YES];
-    [status setMenu:menuRoot];
-    [self setStatusItem:status];
-}
-
-#pragma mark - Selection Handling
-- (void) menuSelectedNewCluster:(id)sender {
 }
 
 - (void) menuSelectedPref:(id)sender {
@@ -92,6 +72,7 @@
 }
 
 - (void) menuSelectedSlack:(id)sender {
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://pocketcluster.slack.com/"]];
 }
 
 - (void)menuSelectedAbout:(id)sender {
