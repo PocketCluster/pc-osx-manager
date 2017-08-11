@@ -1,12 +1,12 @@
 //
-//  PCSetup2RPVC.m
+//  PCSetup2VC.m
 //  manager
 //
 //  Created by Almighty Kim on 10/21/15.
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import "PCSetup2RPVC.h"
+#import "PCSetup2VC.h"
 
 #import "PCConstants.h"
 #import "PCSetup3VC.h"
@@ -15,19 +15,11 @@
 //#import "PCTask.h"
 
 
-@interface PCSetup2RPVC ()
+@interface PCSetup2VC ()
 //<PCTaskDelegate, RaspberryAgentDelegate>
 @property (atomic, strong) NSMutableArray *nodeList;
 @property (strong, nonatomic) NSDictionary *progDict;
 @property (strong, nonatomic) NSDictionary *statusDict;
-
-@property (strong, nonatomic) id sudoTask;
-@property (strong, nonatomic) id saltTask;
-@property (strong, nonatomic) id userTask;
-@property (strong, nonatomic) id skeyTask;
-@property (strong, nonatomic) id rpiTask;
-@property (strong, nonatomic) id statusTask;
-@property (nonatomic, strong) id javaTask;
 
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
@@ -51,7 +43,7 @@
 - (void)removeViewControler;
 @end
 
-@implementation PCSetup2RPVC {
+@implementation PCSetup2VC {
     BOOL _allNodesDeteceted;
 }
 @synthesize canContinue;
@@ -66,12 +58,12 @@
         _allNodesDeteceted = NO;
         
         self.nodeList = [NSMutableArray arrayWithCapacity:0];
-        self.progDict = @{@"SUDO_SETUP_STEP_0":@[@"Setting up basic configurations...",@10.0]
-                          ,@"SUDO_SETUP_DONE":@[@"Finishing basic configurations...",@20.0]
-                          ,@"USER_SETUP_STEP_0":@[@"Create config files ...",@30.0]
-                          ,@"USER_SETUP_STEP_1":@[@"Setting up login credential...",@40.0]
-                          ,@"USER_SETUP_STEP_2":@[@"Coalescing Raspberry PI nodes...",@60.0]
-                          ,@"USER_SETUP_DONE":@[@"Installing Java to Raspberry Pi Nodes.",@80.0]};
+        self.progDict = @{@"SUDO_SETUP_STEP_0":     @[@"Setting up basic configurations...",    @10.0]
+                          ,@"SUDO_SETUP_DONE":      @[@"Finishing basic configurations...",     @20.0]
+                          ,@"USER_SETUP_STEP_0":    @[@"Create config files ...",               @30.0]
+                          ,@"USER_SETUP_STEP_1":    @[@"Setting up login credential...",        @40.0]
+                          ,@"USER_SETUP_STEP_2":    @[@"Coalescing Raspberry PI nodes...",      @60.0]
+                          ,@"USER_SETUP_DONE":      @[@"Installing Java to Raspberry Pi Nodes.",@80.0]};
 
         [self resetToInitialState];
 //        [[RaspberryManager sharedManager] addAgentDelegateToQueue:self];
@@ -82,13 +74,6 @@
 }
 
 -(void)viewDidAppear {
-#if 0
-    if ([[RaspberryManager sharedManager] ethernetInterface]){
-        [self.warningLabel setHidden:YES];
-    }else{
-        [self.warningLabel setHidden:NO];
-    }
-#endif
 }
 
 #pragma mark - RaspberryAgentDelegate
@@ -546,7 +531,7 @@
     [[NSNotificationCenter defaultCenter]
      postNotificationName:kDPNotification_deleteViewController
      object:self
-     userInfo:@{kDPNotification_key_viewControllerClass:[PCSetup2RPVC class]}];
+     userInfo:@{kDPNotification_key_viewControllerClass:[PCSetup2VC class]}];
 }
 
 @end

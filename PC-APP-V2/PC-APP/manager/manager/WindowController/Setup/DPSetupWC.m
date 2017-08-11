@@ -12,7 +12,7 @@
 #import "DPSetupWC.h"
 
 #import "PCSetup1VC.h"
-#import "PCSetup2RPVC.h"
+#import "PCSetup2VC.h"
 
 //#import "RaspberryManager.h"
 
@@ -67,7 +67,7 @@
     DPSetupWindow *dsw = (DPSetupWindow *)self.window;
     NSArray *dpwvc = [NSArray arrayWithArray:[dsw viewControllers]];
     for(NSViewController *vc in dpwvc){
-        if([vc isKindOfClass:[PCSetup2RPVC class]]){
+        if([vc isKindOfClass:[PCSetup2VC class]]){
             //[[RaspberryManager sharedManager] removeAgentDelegateFromQueue:vc];
         }
     }

@@ -6,10 +6,10 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import "PCSetup1VC.h"
-#import "PCSetup2RPVC.h"
 #import "PCConstants.h"
 
+#import "PCSetup1VC.h"
+#import "PCSetup2VC.h"
 #import "PCSetup3VC.h"
 
 @interface PCSetup1VC ()
@@ -101,8 +101,8 @@
 #endif
     
     NSViewController *vc2r =
-        [[PCSetup2RPVC alloc]
-         initWithNibName:@"PCSetup2RPVC"
+        [[PCSetup2VC alloc]
+         initWithNibName:@"PCSetup2VC"
          bundle:[NSBundle mainBundle]];
     
     [[NSNotificationCenter defaultCenter]

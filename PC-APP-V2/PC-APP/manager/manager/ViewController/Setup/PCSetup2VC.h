@@ -1,5 +1,5 @@
 //
-//  PCSetup2RPVC.h
+//  PCSetup2VC.h
 //  manager
 //
 //  Created by Almighty Kim on 10/21/15.
@@ -8,11 +8,10 @@
 
 #import "DPSetupWindow.h"
 
-@interface PCSetup2RPVC : NSViewController  <DPSetupWindowStageViewController, NSTableViewDataSource, NSTableViewDelegate>
+@interface PCSetup2VC : NSViewController  <DPSetupWindowStageViewController, NSTableViewDataSource, NSTableViewDelegate>
 
 @property (nonatomic, weak) IBOutlet NSProgressIndicator *circularProgress;
 @property (nonatomic, weak) IBOutlet NSTableView *nodeTable;
-@property (nonatomic, weak) IBOutlet NSTextField *warningLabel;
 @property (nonatomic, weak) IBOutlet NSProgressIndicator *progressBar;
 @property (nonatomic, weak) IBOutlet NSTextField *progressLabel;
 @property (nonatomic, weak) IBOutlet NSButton *buildBtn;
