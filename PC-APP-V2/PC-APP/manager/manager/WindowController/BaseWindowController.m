@@ -1,6 +1,6 @@
 //
 //  BaseWindowController.m
-//  Vagrant Manager
+//  PocketCluster
 //
 //  Copyright (c) 2015 Lanayo. All rights reserved.
 //

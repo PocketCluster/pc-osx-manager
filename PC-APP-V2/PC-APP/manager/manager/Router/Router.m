@@ -1,16 +1,15 @@
 //
 //  RaspberryManager.m
-//  Vagrant Manager
+//  PocketCluster
 //
-//  Copyright (c) 2014 Lanayo. All rights reserved.
+//  Copyright (c) 2015,2017 PocketCluster. All rights reserved.
 //
 
 #include <sys/time.h>
 #import <SystemConfiguration/SCNetworkConfiguration.h>
 
-#import "VagrantManager.h"
 #import "SynthesizeSingleton.h"
-#import "RaspberryManager.h"
+#import "Router.h"
 #import "PCConstants.h"
 #import "BSONSerialization.h"
 #import "DeviceSerialNumber.h"
@@ -19,10 +18,10 @@
 #import "NullStringChecker.h"
 #import "Util.h"
 
-@interface RaspberryManager()
+@interface Router()
 @property (nonatomic, strong) NSMutableArray *clusters;
 @property (nonatomic, strong) GCDAsyncUdpSocket *multSocket;
-@property (nonatomic, strong) NSMutableArray<RaspberryAgentDelegate> *agentDelegates;
+@property (nonatomic, strong) NSMutableArray<RouterDelegate> *agentDelegates;
 @property (nonatomic, strong) NSMutableArray<GCDAsyncUdpSocketDelegate> *multSockDelegates;
 
 @property (nonatomic, strong, readwrite) NSString *hostName;
@@ -38,12 +37,12 @@
 - (void)responseAgentMasterFeedback:(NSDictionary *)anAgentData;
 @end
 
-@implementation RaspberryManager {
+@implementation Router {
     BOOL _isRefreshingRaspberryNodes;
     int queuedRefreshes;
     volatile bool _isMulticastSocketOpen;
 }
-SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
+SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
 
 - (id)init {
     self = [super init];
@@ -112,7 +111,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     dispatch_group_t queryClusterGroup = dispatch_group_create();
     dispatch_queue_t queryClusterQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     
-    for(RaspberryCluster *rpic in clusters) {
+    for(Cluster *rpic in clusters) {
         dispatch_group_async(queryClusterGroup, queryClusterQueue, ^{
             //query instance machines
             [rpic checkRelatedPackage];
@@ -144,7 +143,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
      userInfo:@{kPOCKET_CLUSTER_NODE_COUNT: [NSNumber numberWithUnsignedInteger:[self raspberryCount]]}];
 }
 
-- (void)refreshRaspberryClusters {
+- (void)refreshClusters {
     
     //TODO: fix this. put this to more organized places. More likely, use async notification.
     [self refreshInterface];
@@ -195,7 +194,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
         [NSTimer
          scheduledTimerWithTimeInterval:HEARTBEAT_CHECK_INTERVAL
          target:self
-         selector:@selector(refreshRaspberryClusters)
+         selector:@selector(refreshClusters)
          userInfo:nil
          repeats:YES];
 }
@@ -208,7 +207,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
         [NSTimer
          scheduledTimerWithTimeInterval:1.0
          target:self
-         selector:@selector(refreshRaspberryClusters)
+         selector:@selector(refreshClusters)
          userInfo:nil
          repeats:YES];
 }
@@ -238,7 +237,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 
 - (NSUInteger)liveRaspberryCount {
     NSUInteger totalLiveCount = 0;
-    for (RaspberryCluster *rpic in _clusters) {
+    for (Cluster *rpic in _clusters) {
         totalLiveCount += [rpic liveRaspberryCount];
     }
     return totalLiveCount;
@@ -246,7 +245,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 
 - (NSUInteger)raspberryCount {
     NSUInteger totalCount = 0;
-    for (RaspberryCluster *rpic in _clusters) {
+    for (Cluster *rpic in _clusters) {
         totalCount += [rpic raspberryCount];
     }
     return totalCount;
@@ -256,8 +255,8 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     return [_clusters count];
 }
 
-- (RaspberryCluster *)addCluster:(RaspberryCluster *)aCluster {
-    RaspberryCluster *existing = [self clusterWithId:aCluster.clusterId];
+- (Cluster *)addCluster:(Cluster *)aCluster {
+    Cluster *existing = [self clusterWithId:aCluster.clusterId];
     
     if(existing) {
         return existing;
@@ -286,7 +285,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 }
 
 - (void)removeClusterWithTitle:(NSString*)aTitle {
-    RaspberryCluster *rpic = [self clusterWithTitle:aTitle];
+    Cluster *rpic = [self clusterWithTitle:aTitle];
     if(rpic) {
         @synchronized(_clusters) {
             [_clusters removeObject:aTitle];
@@ -295,7 +294,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 }
 
 - (void)removeClusterWithId:(NSString*)anId {
-    RaspberryCluster *rpic = [self clusterWithId:anId];
+    Cluster *rpic = [self clusterWithId:anId];
     if(rpic) {
         @synchronized(_clusters) {
             [_clusters removeObject:rpic];
@@ -303,9 +302,9 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     }
 }
 
-- (RaspberryCluster *)clusterWithTitle:(NSString*)aTitle {
+- (Cluster *)clusterWithTitle:(NSString*)aTitle {
     @synchronized(_clusters) {
-        for(RaspberryCluster *rpic in _clusters) {
+        for(Cluster *rpic in _clusters) {
             if([rpic.title isEqualToString:aTitle]) {
                 return rpic;
             }
@@ -315,9 +314,9 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     return nil;
 }
 
-- (RaspberryCluster *)clusterWithId:(NSString*)anId {
+- (Cluster *)clusterWithId:(NSString*)anId {
     @synchronized(_clusters) {
-        for(RaspberryCluster *rpic in _clusters) {
+        for(Cluster *rpic in _clusters) {
             if([rpic.clusterId isEqualToString:anId]) {
                 return rpic;
             }
@@ -330,7 +329,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 
 - (int)getIndexOfClusterWithTitle:(NSString*)aTitle {
     for(int i=0; i<_clusters.count; ++i) {
-        RaspberryCluster *rpic = [_clusters objectAtIndex:i];
+        Cluster *rpic = [_clusters objectAtIndex:i];
         if([rpic.title isEqualToString:aTitle]) {
             return i;
         }
@@ -341,7 +340,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 
 - (int)getIndexOfClusterWithId:(NSString*)anId {
     for(int i=0; i<_clusters.count; ++i) {
-        RaspberryCluster *rpic = [_clusters objectAtIndex:i];
+        Cluster *rpic = [_clusters objectAtIndex:i];
         if([rpic.clusterId isEqualToString:anId]) {
             return i;
         }
@@ -380,7 +379,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 
     //TODO: send this only when 1. member address changes, 2. when you fix client.
     NSMutableDictionary *cms = [NSMutableDictionary dictionary];
-    RaspberryCluster *clu = [[self clusters] objectAtIndex:0];
+    Cluster *clu = [[self clusters] objectAtIndex:0];
     for (Raspberry *rpi in [clu getRaspberries]){
         [cms setObject:rpi.address forKey:rpi.slaveNodeName];
     }
@@ -424,7 +423,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
     }
     
     // setup only six nodes
-    RaspberryCluster *rpic = [[RaspberryCluster alloc] initWithTitle:@"Cluster 1"];
+    Cluster *rpic = [[Cluster alloc] initWithTitle:@"Cluster 1"];
     for (NSDictionary *anode in aNodesList){
         
         // fixed node definitions
@@ -603,7 +602,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(RaspberryManager, sharedManager);
 
             // check heartbeat
             @synchronized(_clusters) {
-                [_clusters enumerateObjectsUsingBlock:^(RaspberryCluster*  _Nonnull rpic, NSUInteger idx, BOOL * _Nonnull stop) {
+                [_clusters enumerateObjectsUsingBlock:^(Cluster*  _Nonnull rpic, NSUInteger idx, BOOL * _Nonnull stop) {
                     [rpic updateHeartBeats:sn withSlaveMAC:slaveMac forTS:tv];
                 }];
             }

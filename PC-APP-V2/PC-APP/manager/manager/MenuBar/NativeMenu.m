@@ -1,8 +1,8 @@
 //
 //  NativeMenu.m
-//  Vagrant Manager
+//  PocketCluster
 //
-//  Copyright (c) 2014 Lanayo. All rights reserved.
+//  Copyright (c) 2015,2017 PocketCluster. All rights reserved.
 //
 
 #import "Util.h"

@@ -1,27 +1,26 @@
 //
 //  BookmarkManager.h
-//  Vagrant Manager
+//  PocketCluster
 //
-//  Copyright (c) 2014 Lanayo. All rights reserved.
+//  Copyright (c) 2015,2017 PocketCluster. All rights reserved.
 //
 
-#import "Raspberry.h"
-#import "RaspberryCluster.h"
-#import "GCDAsyncUdpSocket.h"
-#import "LinkInterface.h"
+#import "Node.h"
+#import "Package.h"
+#import "Cluster.h"
 
-@protocol RaspberryAgentDelegate <NSObject>
+@protocol RouterDelegate <NSObject>
 @optional
 - (void)didReceiveUnboundedAgentData:(NSDictionary *)anAgentData;
 - (void)didReceiveBoundedAgentData:(NSDictionary *)anAgentData;
 @end
 
-@interface RaspberryManager : NSObject <GCDAsyncUdpSocketDelegate>
+@interface Router : NSObject
 @property (nonatomic, strong, readonly) NSString *hostName;
 @property (nonatomic, strong, readonly) NSString *deviceSerial;
 @property (nonatomic, strong, readonly) NSString *systemTimeZone;
 
-+ (RaspberryManager *)sharedManager;
++ (Router *)sharedRouter;
 
 - (void)loadClusters;
 - (void)saveClusters;

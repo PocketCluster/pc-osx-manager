@@ -1,13 +1,13 @@
 //
 //  Util.h
-//  Vagrant Manager
+//  PocketCluster
 //
-//  Copyright (c) 2014 Lanayo. All rights reserved.
+//  Copyright (c) 2015,2017 PocketCluster. All rights reserved.
 //
 
 #import "AppDelegate.h"
 
-@class PCPackageMeta;
+@class Package;
 
 @interface Util : NSObject
 + (AppDelegate*)getApp;
@@ -17,5 +17,5 @@
 + (NSString*)getMachineId;
 + (BOOL)shouldSendProfileData;
 + (void)runTerminalCommand:(NSString*)command;
-+ (void)openTerminalCommand:(PCPackageMeta*)aPackage;
++ (void)openTerminalCommand:(Package*)aPackage;
 @end

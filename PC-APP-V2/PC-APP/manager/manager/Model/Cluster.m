@@ -7,8 +7,6 @@
 //
 
 #import "Cluster.h"
-#import "NullStringChecker.h"
-#import "PCPackageManager.h"
 
 @interface Cluster()
 @property (nonatomic, strong, readwrite) NSString *ClusterID;
@@ -16,8 +14,8 @@
 @property (nonatomic, strong, readwrite) NSString* ClusterDomain;
 @property (nonatomic, strong, readwrite) NSString* UserMadeName;
 
-@property (nonatomic, strong, readwrite) NSMutableArray *Nodes;
-@property (nonatomic, strong, readwrite) NSMutableArray *Packages;
+@property (nonatomic, strong, readwrite) NSMutableArray<Node *>* Nodes;
+@property (nonatomic, strong, readwrite) NSMutableArray<Package *>* Packages;
 @end
 
 @implementation Cluster

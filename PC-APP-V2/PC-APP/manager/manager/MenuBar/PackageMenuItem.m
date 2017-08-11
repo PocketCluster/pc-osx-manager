@@ -6,12 +6,12 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import "PCPackageMenuItem.h"
+#import "PackageMenuItem.h"
 #import "PCConstants.h"
 #import "Util.h"
 
 @interface PackageMenuItem()<NSMenuDelegate>
-@property (nonatomic, weak) PCPackageMeta *packageMeta;
+@property (nonatomic, weak) Package *packageMeta;
 
 @property (nonatomic, strong, readwrite) NSMenuItem *packageItem;
 @property (nonatomic, weak) NSMenuItem *packageStart;
@@ -26,13 +26,13 @@
 
 @implementation PackageMenuItem
 
--(instancetype)initWithMetaPackage:(PCPackageMeta *)aMetaPackage {
+-(instancetype)initWithMetaPackage:(Package *)aPackage {
     
     self = [super init];
     if(self){
-        self.packageMeta = aMetaPackage;
+        self.packageMeta = aPackage;
 
-        NSString *pt = [NSString stringWithFormat:@"[%@] %@ %@", aMetaPackage.modeType, aMetaPackage.packageName, aMetaPackage.version];
+        NSString *pt = [NSString stringWithFormat:@"[%@] %@ %@", aPackage.modeType, aPackage.packageName, aPackage.version];
         self.packageItem = [[NSMenuItem alloc] initWithTitle:pt action:nil keyEquivalent:@""];
         [_packageItem setSubmenu:[[NSMenu alloc] init]];
         [_packageItem.submenu setAutoenablesItems:NO];
