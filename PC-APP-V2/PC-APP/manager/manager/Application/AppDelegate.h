@@ -7,14 +7,14 @@
 //
 
 @class NativeMenu;
+@class BaseWindowController;
 
 #import "PCConstants.h"
 
 @interface AppDelegate : NSObject <NSApplicationDelegate> {
-    NSMutableArray* _openWindows;
+    NSMutableArray<BaseWindowController *>* _openWindows;
 }
-@property (nonatomic, strong) NSMutableArray *openWindows;
-@property (readonly) NativeMenu *nativeMenu;
+@property (nonatomic, strong) NSMutableArray<BaseWindowController *>* openWindows;
 
 + (AppDelegate*)sharedDelegate;
 @end

@@ -20,7 +20,6 @@
 @end
 
 @implementation NativeMenu
-@synthesize aboutWindow = _aboutWindow;
 @synthesize statusItem = _statusItem;
 
 - (id)init {
@@ -76,15 +75,7 @@
 }
 
 - (void)menuSelectedAbout:(id)sender {
-    if(_aboutWindow && !_aboutWindow.isClosed) {
-        [NSApp activateIgnoringOtherApps:YES];
-        [_aboutWindow showWindow:self];
-    } else {
-        _aboutWindow = [[AboutWindow alloc] initWithWindowNibName:@"AboutWindow"];
-        [NSApp activateIgnoringOtherApps:YES];
-        [_aboutWindow showWindow:self];
-        [[AppDelegate sharedDelegate] addOpenWindow:_aboutWindow];
-    }
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"AboutWindow" withResponder:self];
 }
 
 - (void)menuSelectedQuit:(id)sender {

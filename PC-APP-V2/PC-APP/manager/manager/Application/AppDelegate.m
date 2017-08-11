@@ -20,16 +20,13 @@
 #import "AppDelegate+Sparkle.h"
 
 #ifdef DEBUG
+#import "AppDelegate+Window.h"
 #import "DebugWindow.h"
 #endif
 
 @interface AppDelegate ()<NSUserNotificationCenterDelegate>
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
 @property (strong) PCInterfaceStatus *interfaceStatus;
-
-#ifdef DEBUG
-@property (nonatomic, strong) DebugWindow *debugWindow;
-#endif
 @end
 
 @implementation AppDelegate
@@ -92,12 +89,9 @@
     // 11. finalize app ready
     lifecycleVisible();
     Log(@"Application Started");
-    
-    
+
 #ifdef DEBUG
-    self.debugWindow = [[DebugWindow alloc] initWithWindowNibName:@"DebugWindow"];
-    [NSApp activateIgnoringOtherApps:YES];
-    [self.debugWindow showWindow:nil];
+    [self activeWindowByClassName:@"DebugWindow" withResponder:nil];
 #endif
 }
 

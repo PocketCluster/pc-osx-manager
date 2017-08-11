@@ -9,6 +9,6 @@
 
 @property BOOL isClosed;
 
-- (void)windowWillClose:(NSNotification *)notification;
-
+- (void) windowWillClose:(NSNotification *)notification;
+- (void) bringToFront;
 @end

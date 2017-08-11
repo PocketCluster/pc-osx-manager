@@ -9,6 +9,7 @@
 #include "AppDelegate.h"
 
 @interface AppDelegate(Window)
+- (NSObject *) activeWindowByClassName:(NSString *)aClassName withResponder:(id)aResponder;
 - (void)addOpenWindow:(id)window;
 - (void)removeOpenWindow:(id)window;
 @end
