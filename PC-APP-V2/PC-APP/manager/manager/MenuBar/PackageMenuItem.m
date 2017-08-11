@@ -10,7 +10,7 @@
 #import "PCConstants.h"
 #import "Util.h"
 
-@interface PCPackageMenuItem()<NSMenuDelegate>
+@interface PackageMenuItem()<NSMenuDelegate>
 @property (nonatomic, weak) PCPackageMeta *packageMeta;
 
 @property (nonatomic, strong, readwrite) NSMenuItem *packageItem;
@@ -24,7 +24,7 @@
 - (void)shell;
 @end
 
-@implementation PCPackageMenuItem
+@implementation PackageMenuItem
 
 -(instancetype)initWithMetaPackage:(PCPackageMeta *)aMetaPackage {
     

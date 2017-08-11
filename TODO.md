@@ -11,6 +11,8 @@
 
 
 ### V0.1.4
+- [ ] `CoreNode`, `SlaveNode` : `LastAlive` data for health check on OSX
+- [ ] Cluster User Defined Name
 - [ ] Repartition logic from Boot2Docker
 - [ ] Disable Docker when there is no TLS certs available
 - [ ] Append 'CA' <http://rt.openssl.org/Ticket/History.html?user=guest&pass=guest&id=3979>

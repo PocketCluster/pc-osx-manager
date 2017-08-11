@@ -7,12 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "PCPackageMeta.h"
+#import "Package.h"
 
-@interface PCPackageMenuItem : NSObject
+@interface PackageMenuItem : NSObject
 @property (nonatomic, strong, readonly) NSMenuItem *packageItem;
 
-- (instancetype)initWithMetaPackage:(PCPackageMeta *)aMetaPackage;
+- (instancetype)initWithMetaPackage:(Package *)aPackage;
 - (void)destoryMenuItem;
 - (void)refreshProcStatus;
 @end

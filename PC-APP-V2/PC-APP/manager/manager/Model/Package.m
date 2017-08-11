@@ -6,7 +6,7 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import "PCPackageMeta.h"
+#import "Package.h"
 #import "PCConstants.h"
 
 NSString * const kPCPackageRelatedCluster                   = @"package-cluster-relation";
@@ -52,7 +52,7 @@ NSString * const kPCPackageVersionProcessCheck              = @"check-process";
 
 static NSString * const kGithubRawFileLinkURL               = @"download_url";
 
-@interface PCPackageMeta()
+@interface Package()
 
 @property (nonatomic, strong, readwrite) NSString *metaVersion;
 @property (nonatomic, strong, readwrite) NSString *packageName;
@@ -94,7 +94,7 @@ static NSString * const kGithubRawFileLinkURL               = @"download_url";
 @end
 
 #pragma mark - PCPACKAGEMETA NSCODING
-@implementation PCPackageMeta (NSCoding)
+@implementation Package(NSCoding)
 - (void)encodeWithCoder:(NSCoder *)aCoder {
     
     [aCoder encodeObject:self.clusterRelation       forKey:kPCPackageRelatedCluster];
@@ -187,7 +187,7 @@ static NSString * const kGithubRawFileLinkURL               = @"download_url";
 }
 @end
 
-@implementation PCPackageMeta
+@implementation Package
 
 - (NSString *)description {
     return [NSString stringWithFormat:@"%@ - %@",[super description], [self packageDescription]];
@@ -209,7 +209,7 @@ static NSString * const kGithubRawFileLinkURL               = @"download_url";
 }
 
 
-+ (void (^)(NSURLSessionDataTask *, id))metaPackageParserWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))metaListBlock {
++ (void (^)(NSURLSessionDataTask *, id))metaPackageParserWithBlock:(void (^)(NSArray<Package *> *packages, NSError *error))metaListBlock {
     
 #if 0
     void (^parser)(NSURLSessionDataTask*, id) = ^(NSURLSessionDataTask* __unused task , id JSON) {
@@ -218,7 +218,7 @@ static NSString * const kGithubRawFileLinkURL               = @"download_url";
 #endif
     
     return [^void(NSURLSessionDataTask* __unused task , id JSON) {
-        NSMutableArray<PCPackageMeta *> *metaList = [NSMutableArray arrayWithCapacity:0];
+        NSMutableArray<Package *> *metaList = [NSMutableArray arrayWithCapacity:0];
         NSArray *parray = (NSArray *)JSON;
         for (NSDictionary *pi in parray){
             
@@ -236,7 +236,7 @@ static NSString * const kGithubRawFileLinkURL               = @"download_url";
                 NSArray *vModes = [version objectForKey:kPCPackageVersionModes];
                 for (NSDictionary *mode in vModes){
                     
-                    PCPackageMeta *meta = [[PCPackageMeta alloc] init];
+                    Package *meta = [[Package alloc] init];
                     
                     meta.clusterRelation        = @"";
                     
@@ -290,7 +290,7 @@ static NSString * const kGithubRawFileLinkURL               = @"download_url";
     
 }
 
-+ (NSURLSessionDataTask *)metaPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block {
++ (NSURLSessionDataTask *)metaPackageListWithBlock:(void (^)(NSArray<Package *> *packages, NSError *error))block {
     return nil;
 }
 

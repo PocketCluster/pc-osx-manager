@@ -43,7 +43,7 @@ extern NSString * const kPCPackageVersionCmdScript;
 
 extern NSString * const kPCPackageVersionProcessCheck;
 
-@interface PCPackageMeta : NSObject
+@interface Package : NSObject
 
 //TODO : fix this with installed package checking
 @property (nonatomic, readwrite, getter=isInstalled) BOOL installed;
@@ -88,7 +88,7 @@ extern NSString * const kPCPackageVersionProcessCheck;
 
 @property (nonatomic, readonly) NSArray<NSString *> *processCheck;
 
-+ (NSURLSessionDataTask *)metaPackageListWithBlock:(void (^)(NSArray<PCPackageMeta *> *packages, NSError *error))block;
++ (NSURLSessionDataTask *)metaPackageListWithBlock:(void (^)(NSArray<Package *> *packages, NSError *error))block;
 + (NSURLSessionDataTask *)packageFileListOn:(NSString *)aPath WithBlock:(void (^)(NSArray<NSString *> *fileList, NSError *error))block;
 + (BOOL)makeIntermediateDirectories:(NSString *)aPath;
 + (void)downloadFileFromURL:(NSString *)URL
@@ -111,5 +111,5 @@ extern NSString * const kPCPackageVersionProcessCheck;
 
 @end
 
-@interface PCPackageMeta (NSCoding) <NSCoding>
+@interface Package(NSCoding) <NSCoding>
 @end
