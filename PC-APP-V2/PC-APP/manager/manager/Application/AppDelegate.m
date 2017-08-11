@@ -19,11 +19,6 @@
 #import "AppDelegate+Notification.h"
 #import "AppDelegate+Sparkle.h"
 
-#ifdef DEBUG
-#import "AppDelegate+Window.h"
-#import "DebugWindow.h"
-#endif
-
 @interface AppDelegate ()<NSUserNotificationCenterDelegate>
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
 @property (strong) PCInterfaceStatus *interfaceStatus;
@@ -89,10 +84,6 @@
     // 11. finalize app ready
     lifecycleVisible();
     Log(@"Application Started");
-
-#ifdef DEBUG
-    [self activeWindowByClassName:@"DebugWindow" withResponder:nil];
-#endif
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {

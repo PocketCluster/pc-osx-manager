@@ -57,7 +57,15 @@
     [mAbout setTarget:self];
     [menuRoot addItem:mAbout];
     [menuRoot addItem:[NSMenuItem separatorItem]];
-
+    
+#ifdef DEBUG
+    // debug menu
+    NSMenuItem *mDebug = [[NSMenuItem alloc] initWithTitle:@"-- [DEBUG] --" action:@selector(menuSelectedDebug:) keyEquivalent:@""];
+    [mDebug setTarget:self];
+    [menuRoot addItem:mDebug];
+    [menuRoot addItem:[NSMenuItem separatorItem]];
+#endif
+    
     // quit menu
     NSMenuItem *menuQuit = [[NSMenuItem alloc] initWithTitle:@"Quit" action:@selector(menuSelectedQuit:) keyEquivalent:@""];
     [menuQuit setTarget:self];
@@ -81,5 +89,11 @@
 - (void)menuSelectedQuit:(id)sender {
     [[NSApplication sharedApplication] terminate:self];
 }
+
+#ifdef DEBUG
+- (void)menuSelectedDebug:(id)sender {
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"DebugWindow" withResponder:nil];
+}
+#endif
 
 @end

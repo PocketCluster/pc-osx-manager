@@ -10,6 +10,7 @@
 
 #import "DPSetupWindow.h"
 #import "DPSetupWC.h"
+
 #import "PCSetup1VC.h"
 #import "PCSetup2RPVC.h"
 
@@ -59,10 +60,6 @@
 
 -(void)resetSetupStage {
     [(DPSetupWindow *)self.window resetToZeroStage];
-}
-
--(void)bringToFront {
-    [self.window makeKeyAndOrderFront:[AppDelegate sharedDelegate]];
 }
 
 -(void)windowWillClose:(NSNotification *)notification {

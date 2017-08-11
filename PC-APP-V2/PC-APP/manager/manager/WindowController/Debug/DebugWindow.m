@@ -7,6 +7,7 @@
 //
 
 #import "DebugWindow.h"
+#import "AppDelegate+Window.h"
 #import "pc-core.h"
 
 @interface DebugWindow ()
@@ -47,5 +48,14 @@
 - (IBAction)opsCmdDebug:(id)sender {
     OpsCmdDebug();
 }
+
+- (IBAction)openInstallWindow:(id)sender {
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"PCPkgInstallWC" withResponder:nil];
+}
+
+- (IBAction)openSetupWindow:(id)sender {
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"DPSetupWC" withResponder:nil];
+}
+
 
 @end

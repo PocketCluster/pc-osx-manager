@@ -10,5 +10,4 @@
 
 @interface DPSetupWC : BaseWindowController
 -(void)resetSetupStage;
--(void)bringToFront;
 @end

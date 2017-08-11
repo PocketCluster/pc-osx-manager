@@ -591,8 +591,8 @@
 			isa = PBXGroup;
 			children = (
 				046A35D91BD78AB8004E0946 /* Common */,
-				046F95EF1BDD9AA9006AA8EE /* Window */,
 				046D31121F3D346B0081CC3E /* ViewController */,
+				046F95EF1BDD9AA9006AA8EE /* Window */,
 				046A35B51BD783CE004E0946 /* WindowController */,
 				04030F771F3D5C1E00EA793D /* MenuBar */,
 				04030F5D1F3D5B6500EA793D /* Model */,
