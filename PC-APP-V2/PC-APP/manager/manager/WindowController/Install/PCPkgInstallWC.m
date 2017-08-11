@@ -8,29 +8,30 @@
 
 #import "PCPkgInstallWC.h"
 #import "PCConstants.h"
-#import "PCPackageManager.h"
-#import "PCTask.h"
+//#import "PCPackageManager.h"
+//#import "PCTask.h"
 #import "Util.h"
 
-#import "RaspberryManager.h"
-#import "VagrantManager.h"
+#import "Package.h"
+#import "Router.h"
 
 #define BASE_PROGRESS_PERCENTAGE  (30.0)
 #define TOTAL_PROGRESS_DURATION  (60.0)
 
-@interface PCPkgInstallWC ()<PCTaskDelegate>
-@property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
+@interface PCPkgInstallWC ()
+//<PCTaskDelegate>
+@property (nonatomic, strong) NSMutableArray<Package *> *packageList;
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
 
-@property (nonatomic, strong) PCTask *saltMasterInstallTask;
-@property (nonatomic, strong) PCTask *saltSecondInstallTask;
-@property (nonatomic, strong) PCTask *saltNodeInstallTask;
+@property (nonatomic, strong) id saltMasterInstallTask;
+@property (nonatomic, strong) id saltSecondInstallTask;
+@property (nonatomic, strong) id saltNodeInstallTask;
 
-@property (nonatomic, strong) PCTask *saltMasterCompleteTask;
-@property (nonatomic, strong) PCTask *saltSecondCompleteTask;
-@property (nonatomic, strong) PCTask *saltNodeCompleteTask;
+@property (nonatomic, strong) id saltMasterCompleteTask;
+@property (nonatomic, strong) id saltSecondCompleteTask;
+@property (nonatomic, strong) id saltNodeCompleteTask;
 
-@property (nonatomic, strong) PCTask *saltJobTask;
+@property (nonatomic, strong) id saltJobTask;
 
 - (NSUInteger)getNodeCount;
 - (double)getDeltaProgress:(double)aProgressMark;
@@ -80,7 +81,8 @@
         _isJobStillRunning = NO;
         _target_package_index = 0;
         [self resetToInitialState];
-        
+
+#if 0
         // TODO move this process to package manager or somewhere to make it more formalized
         WEAK_SELF(self);
         [PCPackageMeta metaPackageListWithBlock:^(NSArray<PCPackageMeta *> *packages, NSError *error) {
@@ -98,6 +100,7 @@
                 [belf.packageTable reloadData];
             }
         }];
+#endif
     }
     return self;
 }
@@ -113,7 +116,8 @@
 
 #pragma mark - NSTableViewDelegate
 -(NSView *)tableView:(NSTableView *)aTableView viewForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row{
-    PCPackageMeta *meta = [self.packageList objectAtIndex:row];
+#if 0
+    Package *meta = [self.packageList objectAtIndex:row];
     NSTableCellView *nv = [aTableView makeViewWithIdentifier:@"packageview" owner:self];
     [nv.textField setStringValue:[meta packageDescription]];
 
@@ -124,6 +128,9 @@
     }
 
     return nv;
+#endif
+
+    return [aTableView makeViewWithIdentifier:@"packageview" owner:self];
 }
 
 - (BOOL)selectionShouldChangeInTableView:(NSTableView *)tableView {
@@ -134,6 +141,7 @@
     return NO;
 }
 
+#if 0
 #pragma mark - PCTaskDelegate
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
     
@@ -397,10 +405,14 @@
 -(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
     return NO;
 }
+#endif
+
 #pragma mark - Utils
 
 -(NSUInteger)getNodeCount {
     NSUInteger nc = 3;
+
+#if 0
     PCClusterType t = [[Util getApp] loadClusterType];
     switch (t) {
         case PC_CLUTER_VAGRANT:{
@@ -416,7 +428,8 @@
             nc = 0;
             break;
     }
-    
+#endif
+
     return nc;
 }
 
@@ -448,7 +461,7 @@
 }
 
 -(void)setToNextStage {
-    
+#if 0
     PCClusterType t = [[Util getApp] loadClusterType];
     switch (t) {
         case PC_CLUTER_VAGRANT:{
@@ -463,7 +476,7 @@
         default:
             break;
     }
-    
+#endif
     [self setProgMessage:@"Installation completed!" value:100.0];
     [self.installBtn setEnabled:NO];
     [self.circularProgress stopAnimation:nil];
@@ -480,24 +493,25 @@
 - (void)checkLiveSaltJob {
     
     _isJobStillRunning = NO;
-    
+#if 0
     PCTask *clsjt = [PCTask new];
     clsjt.taskCommand = @"salt-run jobs.active";
     clsjt.delegate = self;
     self.saltJobTask = clsjt;
     
     [clsjt performSelector:@selector(launchTask) withObject:nil afterDelay:5.0];
+#endif
 }
 
 //FIXME: introducing an intermediate function stage could cause hineous bug.
 // Be very careful and monitor closely
 -(void)proceedTargetStage {
     Log(@"%s",__PRETTY_FUNCTION__);
-    
+#if 0
     BOOL foundTarget = NO;
     
     for (NSUInteger i = 0; i < [self.packageList count]; ++i){
-        
+
         PCPackageMeta *meta = [self.packageList objectAtIndex:i];
         if(meta.isInstalled){
             continue;
@@ -517,10 +531,11 @@
     }else{
         [self setToNextStage];
     }
+#endif
 }
 
 -(void)startInstallProcessForMaster {
-
+#if 0
     [self setProgMessage:@"Setting up master node..." value:[self getDeltaProgress:0.167]];
 
     NSUInteger nc = [self getNodeCount];
@@ -533,10 +548,11 @@
     self.saltMasterInstallTask = smt;
     
     [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+#endif
 }
 
 -(void)startInstallProcessForSecondary {
-    
+#if 0
     [self setProgMessage:@"Setting up secondary node..." value:[self getDeltaProgress:0.334]];
     
     NSUInteger nc = [self getNodeCount];
@@ -549,10 +565,11 @@
     self.saltSecondInstallTask = smt;
 
     [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+#endif
 }
 
 - (void)startInstallProcessForNode:(NSUInteger)aStartNode {
-    
+#if 0
     [self setProgMessage:@"Setting up slave nodes..." value:[self getDeltaProgress:0.5]];
     
     NSUInteger nc = [self getNodeCount];
@@ -564,12 +581,13 @@
     snt.delegate = self;
     self.saltNodeInstallTask = snt;
     [snt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+#endif
 }
 
 #pragma mark - COMPLETION FLOW CONTROL
 
 - (void)startCompletionForMaster {
-
+#if 0
     [self setProgMessage:@"Finishing master node..." value:[self getDeltaProgress:0.668]];
     
     NSUInteger nc = [self getNodeCount];
@@ -581,11 +599,11 @@
     smc.delegate = self;
     self.saltMasterCompleteTask = smc;
     [smc performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
-    
+#endif
 }
 
 - (void)startCompletionForSecondary {
-
+#if 0
     [self setProgMessage:@"Finishing Secondary node..." value:[self getDeltaProgress:0.835]];
     
     NSUInteger nc = [self getNodeCount];
@@ -597,10 +615,11 @@
     ssc.delegate = self;
     self.saltMasterCompleteTask = ssc;
     [ssc performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+#endif
 }
 
 - (void)startCompletionForNode:(NSUInteger)aStartNode {
-    
+#if 0
     [self setProgMessage:@"Finishing Rest of Node..." value:[self getDeltaProgress:1.0]];
     
     NSUInteger nc = [self getNodeCount];
@@ -612,10 +631,11 @@
     snc.delegate = self;
     self.saltMasterCompleteTask = snc;
     [snc performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+#endif
 }
 
 -(void)finalizeInstallProcess {
-    
+#if 0
     //TODO: this needs to be fixed. the UUID or id should come from cluster itself
     PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
     meta.installed = YES;
@@ -657,10 +677,11 @@
 
     // go back to the head of iteration cycle
     [self proceedTargetStage];
+#endif
 }
 
 - (void)downloadMetaFiles {
-    
+#if 0
     WEAK_SELF(self);
     [self setProgMessage:@"Downloading a meta package..." value:20.0];
     
@@ -808,6 +829,7 @@
               }
          }];
      }];
+#endif
 }
 
 #pragma mark - IBACTION

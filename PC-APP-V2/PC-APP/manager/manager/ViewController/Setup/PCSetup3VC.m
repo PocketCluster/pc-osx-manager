@@ -7,22 +7,23 @@
 //
 
 #import "PCSetup3VC.h"
-
+#import "Package.h"
 #import "PCConstants.h"
-#import "PCPackageManager.h"
-#import "PCTask.h"
+//#import "PCPackageManager.h"
+//#import "PCTask.h"
 #import "Util.h"
 
-#import "RaspberryManager.h"
-#import "VagrantManager.h"
+//#import "RaspberryManager.h"
+//#import "VagrantManager.h"
 
 #define BASE_PROGRESS_PERCENTAGE  (30.0)
 #define TOTAL_PROGRESS_DURATION  (60.0)
 
-@interface PCSetup3VC()<PCTaskDelegate>
-@property (nonatomic, strong) NSMutableArray<PCPackageMeta *> *packageList;
+@interface PCSetup3VC()
+@property (nonatomic, strong) NSMutableArray<Package *> *packageList;
 @property (nonatomic, strong) NSMutableArray<NSString *> *downloadFileList;
 
+#if 0
 @property (nonatomic, strong) PCTask *saltMasterInstallTask;
 @property (nonatomic, strong) PCTask *saltSecondInstallTask;
 @property (nonatomic, strong) PCTask *saltNodeInstallTask;
@@ -32,6 +33,7 @@
 @property (nonatomic, strong) PCTask *saltNodeCompleteTask;
 
 @property (nonatomic, strong) PCTask *saltJobTask;
+#endif
 
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
@@ -83,7 +85,7 @@
         
         // TODO move this process to package manager or somewhere to make it more formalized
         WEAK_SELF(self);
-        [PCPackageMeta metaPackageListWithBlock:^(NSArray<PCPackageMeta *> *packages, NSError *error) {
+        [Package metaPackageListWithBlock:^(NSArray<Package *> *packages, NSError *error) {
             if(belf != nil){
                 [belf.packageList addObjectsFromArray:packages];
                 [belf.packageTable reloadData];
@@ -104,7 +106,7 @@
 
 #pragma mark - NSTableViewDelegate
 -(NSView *)tableView:(NSTableView *)aTableView viewForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row{
-    PCPackageMeta *meta = [self.packageList objectAtIndex:row];
+    Package *meta = [self.packageList objectAtIndex:row];
     NSTableCellView *nv = [aTableView makeViewWithIdentifier:@"packageview" owner:self];
     [nv.textField setStringValue:[meta packageDescription]];
     return nv;
@@ -119,6 +121,7 @@
 }
 
 #pragma mark - PCTaskDelegate
+#if 0
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
     
     //FIXME: should always check active job status
@@ -381,9 +384,12 @@
 -(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {
     return NO;
 }
+#endif
+
 #pragma mark - Utils
 -(NSUInteger)getNodeCount {
     NSUInteger nc = 3;
+#if 0
     PCClusterType t = [[Util getApp] loadClusterType];
     switch (t) {
         case PC_CLUTER_VAGRANT:{
@@ -399,7 +405,7 @@
             nc = 0;
             break;
     }
-    
+#endif
     return nc;
 }
 
@@ -440,7 +446,7 @@
 }
 
 -(void)setToNextStage {
-    
+#if 0
     PCClusterType t = [[Util getApp] loadClusterType];
     switch (t) {
         case PC_CLUTER_VAGRANT:{
@@ -462,7 +468,7 @@
     [self setProgMessage:@"Installation completed!" value:100.0];
     [self.installBtn setEnabled:NO];
     [self.circularProgress stopAnimation:nil];
-
+#endif
 }
 
 -(void)setProgMessage:(NSString *)aMessage value:(double)aValue {
@@ -476,7 +482,7 @@
 
 #pragma mark - INSTALL FLOW CONTROL
 - (void)checkLiveSaltJob {
-    
+#if 0
     _isJobStillRunning = NO;
     
     PCTask *clsjt = [PCTask new];
@@ -485,6 +491,7 @@
     self.saltJobTask = clsjt;
     
     [clsjt performSelector:@selector(launchTask) withObject:nil afterDelay:5.0];
+#endif
 }
 
 //FIXME: introducing an intermediate function stage could cause hineous bug.
@@ -496,7 +503,7 @@
     
     for (NSUInteger i = 0; i < [self.packageList count]; ++i){
         
-        PCPackageMeta *meta = [self.packageList objectAtIndex:i];
+        Package *meta = [self.packageList objectAtIndex:i];
         if(meta.isInstalled){
             continue;
         }
@@ -518,104 +525,109 @@
 }
 
 -(void)startInstallProcessForMaster {
-    
+#if 0
     [self setProgMessage:@"Setting up master node..." value:[self getDeltaProgress:0.167]];
     
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
-    
-    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
+
+    Package *meta = [self.packageList objectAtIndex:_target_package_index];
     PCTask *smt = [PCTask new];
     smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-master\' state.sls %@ pillar=\'{numnodes: %ld}\'",[meta.masterInstallPath objectAtIndex:0],nc];
     smt.delegate = self;
     self.saltMasterInstallTask = smt;
     
     [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+#endif
 }
 
 -(void)startInstallProcessForSecondary {
-    
+#if 0
     [self setProgMessage:@"Setting up secondary node..." value:[self getDeltaProgress:0.334]];
     
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
     
-    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
+    Package *meta = [self.packageList objectAtIndex:_target_package_index];
     PCTask *smt = [PCTask new];
     smt.taskCommand = [NSString stringWithFormat:@"salt \'pc-node1\' state.sls %@ pillar=\'{numnodes: %ld}\'",[meta.secondaryInstallPath objectAtIndex:0],nc];
     smt.delegate = self;
     self.saltSecondInstallTask = smt;
     
     [smt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+#endif
 }
 
 - (void)startInstallProcessForNode:(NSUInteger)aStartNode {
-    
+#if 0
     [self setProgMessage:@"Setting up slave nodes..." value:[self getDeltaProgress:0.5]];
     
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
     
-    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
+    Package *meta = [self.packageList objectAtIndex:_target_package_index];
     PCTask *snt = [PCTask new];
     snt.taskCommand = [NSString stringWithFormat:@"salt \'pc-node[%ld-%ld]\' state.sls %@ pillar=\'{numnodes: %ld}\'",aStartNode,nc,[meta.nodeInstallPath objectAtIndex:0],nc];
     snt.delegate = self;
     self.saltNodeInstallTask = snt;
     [snt performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+#endif
 }
 
 #pragma mark - COMPLETION FLOW CONTROL
 
 - (void)startCompletionForMaster {
-    
+#if 0
     [self setProgMessage:@"Finishing master node..." value:[self getDeltaProgress:0.668]];
     
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
     
-    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
+    Package *meta = [self.packageList objectAtIndex:_target_package_index];
     PCTask *smc = [PCTask new];
     smc.taskCommand = [NSString stringWithFormat:@"salt \'pc-master\' state.sls %@ pillar=\'{numnodes: %ld}\'", [meta.masterCompletePath objectAtIndex:0], nc];
     smc.delegate = self;
     self.saltMasterCompleteTask = smc;
     [smc performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
-    
+#endif
 }
 
 - (void)startCompletionForSecondary {
-    
+#if 0
     [self setProgMessage:@"Finishing Secondary node..." value:[self getDeltaProgress:0.835]];
     
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
     
-    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
+    Package *meta = [self.packageList objectAtIndex:_target_package_index];
     PCTask *ssc = [PCTask new];
     ssc.taskCommand = [NSString stringWithFormat:@"salt \'pc-node1\' state.sls %@ pillar=\'{numnodes: %ld}\'", [meta.secondaryCompletePath objectAtIndex:0], nc];
     ssc.delegate = self;
     self.saltMasterCompleteTask = ssc;
     [ssc performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+#endif
 }
 
 - (void)startCompletionForNode:(NSUInteger)aStartNode {
-    
+#if 0
     [self setProgMessage:@"Finishing Rest of Node..." value:[self getDeltaProgress:1.0]];
     
     NSUInteger nc = [self getNodeCount];
     if(nc == 0){return;}
     
-    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
+    Package *meta = [self.packageList objectAtIndex:_target_package_index];
     PCTask *snc = [PCTask new];
     snc.taskCommand = [NSString stringWithFormat:@"salt \'pc-node[%ld-%ld]\' state.sls %@ pillar=\'{numnodes: %ld}\'",aStartNode, nc, [meta.nodeCompletePath objectAtIndex:0], nc];
     snc.delegate = self;
     self.saltMasterCompleteTask = snc;
     [snc performSelector:@selector(launchTask) withObject:nil afterDelay:1.0];
+#endif
 }
 
 -(void)finalizeInstallProcess {
-    
+#if 0
     //TODO: this needs to be fixed. the UUID or id should come from cluster itself
-    PCPackageMeta *meta = [self.packageList objectAtIndex:_target_package_index];
+    Package *meta = [self.packageList objectAtIndex:_target_package_index];
     meta.installed = YES;
     
     PCClusterType t = [[Util getApp] loadClusterType];
@@ -653,6 +665,7 @@
     
     // go back to the head of iteration cycle
     [self proceedTargetStage];
+#endif
 }
 
 - (void)downloadMetaFiles {
@@ -664,7 +677,7 @@
     __block NSMutableArray *dllst = [NSMutableArray array];
     __block BOOL hasDownloadEverFailed = NO;
     
-    for(PCPackageMeta *meta in self.packageList){
+    for(Package *meta in self.packageList){
         
         if (meta.isInstalled){
             continue;
@@ -672,14 +685,14 @@
         
         NSString *mpath = [meta.masterDownloadPath objectAtIndex:0];
         NSString *mBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,mpath];
-        [PCPackageMeta makeIntermediateDirectories:mBasePath];
+        [Package makeIntermediateDirectories:mBasePath];
         
-        id mop = [PCPackageMeta packageFileListOperation:mpath withSucess:^(NSArray<NSString *> *fileList) {
+        id mop = [Package packageFileListOperation:mpath withSucess:^(NSArray<NSString *> *fileList) {
             
             Log(@"meta files \n%@",fileList);
             
             for (NSString *furl in fileList){
-                id dop = [PCPackageMeta
+                id dop = [Package
                           packageFileDownloadOperation:furl
                           detinationPath:mBasePath
                           completion:^(NSString *URL, NSURL *filePath) {
@@ -711,14 +724,14 @@
             
             spath = [meta.secondaryDownloadPath objectAtIndex:0];
             sBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,spath];
-            [PCPackageMeta makeIntermediateDirectories:sBasePath];
+            [Package makeIntermediateDirectories:sBasePath];
             
-            id sop = [PCPackageMeta packageFileListOperation:spath withSucess:^(NSArray<NSString *> *fileList) {
+            id sop = [Package packageFileListOperation:spath withSucess:^(NSArray<NSString *> *fileList) {
                 
                 Log(@"meta files \n%@",fileList);
                 
                 for (NSString *furl in fileList){
-                    id dop = [PCPackageMeta
+                    id dop = [Package
                               packageFileDownloadOperation:furl
                               detinationPath:sBasePath
                               completion:^(NSString *URL, NSURL *filePath) {
@@ -753,14 +766,14 @@
             
             npath = [meta.nodeDownloadPath objectAtIndex:0];
             nBasePath = [NSString stringWithFormat:@"%@/%@",kPOCKET_CLUSTER_SALT_STATE_PATH ,npath];
-            [PCPackageMeta makeIntermediateDirectories:nBasePath];
+            [Package makeIntermediateDirectories:nBasePath];
             
-            id nop = [PCPackageMeta packageFileListOperation:npath withSucess:^(NSArray<NSString *> *fileList) {
+            id nop = [Package packageFileListOperation:npath withSucess:^(NSArray<NSString *> *fileList) {
                 
                 Log(@"meta files \n%@",fileList);
                 
                 for (NSString *furl in fileList){
-                    id dop = [PCPackageMeta
+                    id dop = [Package
                               packageFileDownloadOperation:furl
                               detinationPath:nBasePath
                               completion:^(NSString *URL, NSURL *filePath) {
@@ -786,12 +799,12 @@
         }
     }
     
-    [PCPackageMeta
+    [Package
      batchDownloadOperation:mtlst
      progressBlock:^(NSUInteger numberOfFinishedOperations, NSUInteger totalNumberOfOperations){}
      completionBlock:^(NSArray *operations) {
       
-      [PCPackageMeta
+      [Package
        batchDownloadOperation:dllst
        progressBlock:^(NSUInteger numberOfFinishedOperations, NSUInteger totalNumberOfOperations){}
        completionBlock:^(NSArray *operations) {

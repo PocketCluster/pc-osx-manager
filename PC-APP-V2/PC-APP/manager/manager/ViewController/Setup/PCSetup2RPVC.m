@@ -10,24 +10,25 @@
 
 #import "PCConstants.h"
 #import "PCSetup3VC.h"
-#import "RaspberryManager.h"
-#import "PCProcManager.h"
-#import "PCTask.h"
+//#import "RaspberryManager.h"
+//#import "PCProcManager.h"
+//#import "PCTask.h"
 #import "Util.h"
 
 
-@interface PCSetup2RPVC ()<PCTaskDelegate, RaspberryAgentDelegate>
+@interface PCSetup2RPVC ()
+//<PCTaskDelegate, RaspberryAgentDelegate>
 @property (atomic, strong) NSMutableArray *nodeList;
 @property (strong, nonatomic) NSDictionary *progDict;
 @property (strong, nonatomic) NSDictionary *statusDict;
 
-@property (strong, nonatomic) PCTask *sudoTask;
-@property (strong, nonatomic) PCTask *saltTask;
-@property (strong, nonatomic) PCTask *userTask;
-@property (strong, nonatomic) PCTask *skeyTask;
-@property (strong, nonatomic) PCTask *rpiTask;
-@property (strong, nonatomic) PCTask *statusTask;
-@property (nonatomic, strong) PCTask *javaTask;
+@property (strong, nonatomic) id sudoTask;
+@property (strong, nonatomic) id saltTask;
+@property (strong, nonatomic) id userTask;
+@property (strong, nonatomic) id skeyTask;
+@property (strong, nonatomic) id rpiTask;
+@property (strong, nonatomic) id statusTask;
+@property (nonatomic, strong) id javaTask;
 
 @property (readwrite, nonatomic) BOOL canContinue;
 @property (readwrite, nonatomic) BOOL canGoBack;
@@ -74,19 +75,21 @@
                           ,@"USER_SETUP_DONE":@[@"Installing Java to Raspberry Pi Nodes.",@80.0]};
 
         [self resetToInitialState];
-        [[RaspberryManager sharedManager] addAgentDelegateToQueue:self];
-        [[RaspberryManager sharedManager] refreshInterface];
+//        [[RaspberryManager sharedManager] addAgentDelegateToQueue:self];
+//        [[RaspberryManager sharedManager] refreshInterface];
     }
     
     return self;
 }
 
 -(void)viewDidAppear {
+#if 0
     if ([[RaspberryManager sharedManager] ethernetInterface]){
         [self.warningLabel setHidden:YES];
     }else{
         [self.warningLabel setHidden:NO];
     }
+#endif
 }
 
 #pragma mark - RaspberryAgentDelegate
@@ -150,6 +153,8 @@
 }
 
 #pragma mark - PCTaskDelegate
+
+#if 0
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
 
     
@@ -284,8 +289,6 @@
 
         self.javaTask = nil;
     }
-    
-    
 }
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {
@@ -340,7 +343,6 @@
     return NO;
 }
 
-
 #pragma mark - Raspberry Management Methods
 - (void)startConfigWithSudoTask {
     
@@ -360,7 +362,8 @@
          stringWithFormat:@"%@/setup/raspberry_sudo_setup.sh %@ %@ %@",
          basePath,
          basePath,
-         [[RaspberryManager sharedManager] ethernetInterface].ip4Address,
+         //[[RaspberryManager sharedManager] ethernetInterface].ip4Address,
+         @"",
          nodeip];
     
     PCTask *sudoTask = [PCTask new];
@@ -405,7 +408,7 @@
 
 #pragma mark - Monitoring W/ Notification
 - (void)stopMonitoringForSetup {
-    [[RaspberryManager sharedManager] haltRefreshTimer];
+//    [[RaspberryManager sharedManager] haltRefreshTimer];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
     [self startConfigWithSudoTask];
 }
@@ -420,13 +423,13 @@
 }
 
 - (void)startRapidClusterMonitoringForSetup {
-    [[[RaspberryManager sharedManager] clusters] makeObjectsPerformSelector:@selector(resetNodeHeartbeat)];
-    [[RaspberryManager sharedManager] rapidRefreshTimerState];
+//    [[[RaspberryManager sharedManager] clusters] makeObjectsPerformSelector:@selector(resetNodeHeartbeat)];
+//    [[RaspberryManager sharedManager] rapidRefreshTimerState];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryUpdateRunningNodeCountForSetup:) name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
 }
 
 - (void)stopMonitoringForJAVA {
-    [[RaspberryManager sharedManager] haltRefreshTimer];
+//    [[RaspberryManager sharedManager] haltRefreshTimer];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
     
     [self startSaltStatusTask];
@@ -446,13 +449,16 @@
     [[RaspberryManager sharedManager] rapidRefreshTimerState];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(raspberryUpdateRunningNodeCountForJAVA:) name:kRASPBERRY_MANAGER_UPDATE_LIVE_NODE_COUNT object:nil];
 }
+#endif
+
 
 #pragma mark - IBACTION
 -(IBAction)build:(id)sender {
 
     // update interface status
-    [[RaspberryManager sharedManager] refreshInterface];
-    
+//    [[RaspberryManager sharedManager] refreshInterface];
+
+#if 0
     // if there is no Ethernet, do not proceed.
     if ([[RaspberryManager sharedManager] ethernetInterface]){
         [self.warningLabel setHidden:YES];
@@ -461,6 +467,7 @@
         [self.warningLabel setHidden:NO];
         return;
     }
+#endif
 
     // return if there is no node
     NSUInteger nodeCount = MIN([self.nodeList count], MAX_TRIAL_RASP_NODE_COUNT);
@@ -477,7 +484,7 @@
     [self.progressBar displayIfNeeded];
 
     // setup actual raspberry nodes
-    [[RaspberryManager sharedManager] setupRaspberryNodes:self.nodeList];
+//    [[RaspberryManager sharedManager] setupRaspberryNodes:self.nodeList];
     
     sleep(2);
     [self startRapidClusterMonitoringForSetup];
@@ -510,7 +517,7 @@
     [self.progressBar displayIfNeeded];
     [self.buildBtn setEnabled:NO];
     
-    [[Util getApp] setClusterType:PC_CLUSTER_RASPBERRY];
+//    [[Util getApp] setClusterType:PC_CLUSTER_RASPBERRY];
     
     NSViewController *vc3 = [[PCSetup3VC alloc] initWithNibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]];
     [[NSNotificationCenter defaultCenter]
@@ -527,7 +534,7 @@
 
 - (void)didRevertToPreviousStage {
     WEAK_SELF(self);
-    [[RaspberryManager sharedManager] removeAgentDelegateFromQueue:self];
+//    [[RaspberryManager sharedManager] removeAgentDelegateFromQueue:self];
     [[NSOperationQueue mainQueue]
      addOperationWithBlock:^{
          if(belf){

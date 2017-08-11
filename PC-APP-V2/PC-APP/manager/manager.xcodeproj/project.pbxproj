@@ -53,8 +53,6 @@
 		046D31251F3D346B0081CC3E /* PCSetup1VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D31161F3D346B0081CC3E /* PCSetup1VC.xib */; };
 		046D31261F3D346B0081CC3E /* PCSetup2RPVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D31181F3D346B0081CC3E /* PCSetup2RPVC.m */; };
 		046D31271F3D346B0081CC3E /* PCSetup2RPVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D31191F3D346B0081CC3E /* PCSetup2RPVC.xib */; };
-		046D31281F3D346B0081CC3E /* PCSetup2VVVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D311B1F3D346B0081CC3E /* PCSetup2VVVC.m */; };
-		046D31291F3D346B0081CC3E /* PCSetup2VVVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D311C1F3D346B0081CC3E /* PCSetup2VVVC.xib */; };
 		046D312A1F3D346B0081CC3E /* PCSetup3VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D311E1F3D346B0081CC3E /* PCSetup3VC.m */; };
 		046D312B1F3D346B0081CC3E /* PCSetup3VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D311F1F3D346B0081CC3E /* PCSetup3VC.xib */; };
 		046D31311F3D34D60081CC3E /* DPSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D31301F3D34D60081CC3E /* DPSetupWindow.m */; };
@@ -197,9 +195,6 @@
 		046D31171F3D346B0081CC3E /* PCSetup2RPVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup2RPVC.h; sourceTree = "<group>"; };
 		046D31181F3D346B0081CC3E /* PCSetup2RPVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetup2RPVC.m; sourceTree = "<group>"; };
 		046D31191F3D346B0081CC3E /* PCSetup2RPVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCSetup2RPVC.xib; sourceTree = "<group>"; };
-		046D311A1F3D346B0081CC3E /* PCSetup2VVVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup2VVVC.h; sourceTree = "<group>"; };
-		046D311B1F3D346B0081CC3E /* PCSetup2VVVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetup2VVVC.m; sourceTree = "<group>"; };
-		046D311C1F3D346B0081CC3E /* PCSetup2VVVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCSetup2VVVC.xib; sourceTree = "<group>"; };
 		046D311D1F3D346B0081CC3E /* PCSetup3VC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup3VC.h; sourceTree = "<group>"; };
 		046D311E1F3D346B0081CC3E /* PCSetup3VC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetup3VC.m; sourceTree = "<group>"; };
 		046D311F1F3D346B0081CC3E /* PCSetup3VC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCSetup3VC.xib; sourceTree = "<group>"; };
@@ -563,9 +558,6 @@
 				046D31171F3D346B0081CC3E /* PCSetup2RPVC.h */,
 				046D31181F3D346B0081CC3E /* PCSetup2RPVC.m */,
 				046D31191F3D346B0081CC3E /* PCSetup2RPVC.xib */,
-				046D311A1F3D346B0081CC3E /* PCSetup2VVVC.h */,
-				046D311B1F3D346B0081CC3E /* PCSetup2VVVC.m */,
-				046D311C1F3D346B0081CC3E /* PCSetup2VVVC.xib */,
 				046D311D1F3D346B0081CC3E /* PCSetup3VC.h */,
 				046D311E1F3D346B0081CC3E /* PCSetup3VC.m */,
 				046D311F1F3D346B0081CC3E /* PCSetup3VC.xib */,
@@ -863,7 +855,6 @@
 				048678121BCF5FE20071594B /* MainMenu.xib in Resources */,
 				04CAE2E81E9B8A4900B23B22 /* DebugWindow.xib in Resources */,
 				046D310F1F3D32440081CC3E /* PCPkgInstallWC.xib in Resources */,
-				046D31291F3D346B0081CC3E /* PCSetup2VVVC.xib in Resources */,
 				046D31051F3D310C0081CC3E /* PCPrefWC.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -994,7 +985,6 @@
 				04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */,
 				046D31241F3D346B0081CC3E /* PCSetup1VC.m in Sources */,
 				04AF2B081E84B19B00F4DF09 /* AppDelegate+EventHandle.m in Sources */,
-				046D31281F3D346B0081CC3E /* PCSetup2VVVC.m in Sources */,
 				046D310E1F3D32440081CC3E /* PCPkgInstallWC.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

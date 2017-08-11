@@ -7,18 +7,17 @@
 //
 
 #import "PCSetup1VC.h"
-#import "PCSetup2VVVC.h"
 #import "PCSetup2RPVC.h"
-#import "PCTask.h"
 #import "PCConstants.h"
 
 #import "PCSetup3VC.h"
 
-@interface PCSetup1VC ()<PCTaskDelegate>
+@interface PCSetup1VC ()
+//<PCTaskDelegate>
 @property (readwrite, nonatomic) BOOL hideContinue;
 @property (readwrite, nonatomic) BOOL hideGoBack;
 
-@property (nonatomic, strong) PCTask *taskLibChecker;
+@property (nonatomic, strong) id taskLibChecker;
 @property (nonatomic, readwrite) int libraryCheckupResult;
 
 - (void)warnLibraryDeficiency;
@@ -34,14 +33,15 @@
     if(self){
         [self setHideContinue:YES];
         [self setHideGoBack:YES];
-        
+    
+#if 0
         // check basic libary status
         PCTask *lc = [[PCTask alloc] init];
         lc.taskCommand = [NSString stringWithFormat:@"bash %@/setup/check_vagrant_library.sh",[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Resources.bundle/"]];
         lc.delegate = self;
         self.taskLibChecker = lc;
         [lc launchTask];
-
+#endif
     }
     return self;
 }
@@ -71,7 +71,6 @@
      userInfo:@{kDPNotification_key_viewController:vc3c}];
     
     return;
-#endif
     
     NSViewController *vc2v =
         [[PCSetup2VVVC alloc]
@@ -82,6 +81,7 @@
      postNotificationName:kDPNotification_addNextViewControllerAndProceed
      object:self
      userInfo:@{kDPNotification_key_viewController:vc2v}];
+#endif
 }
 
 - (IBAction)setupRaspberryCluster:(id)sender {
@@ -141,6 +141,7 @@
     }
 }
 
+#if 0
 #pragma mark - PCTaskDelegate
 -(void)task:(PCTask *)aPCTask taskCompletion:(NSTask *)aTask {
     int term = [aTask terminationStatus];
@@ -150,5 +151,6 @@
 
 -(void)task:(PCTask *)aPCTask recievedOutput:(NSFileHandle *)aFileHandler {}
 -(BOOL)task:(PCTask *)aPCTask isOutputClosed:(id<PCTaskDelegate>)aDelegate {return NO;}
+#endif
 
 @end

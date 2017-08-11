@@ -9,6 +9,9 @@
 #import "Package.h"
 #import "Cluster.h"
 
+#define HEARTBEAT_CHECK_INTERVAL (30.0)
+
+
 @protocol RouterDelegate <NSObject>
 @optional
 - (void)didReceiveUnboundedAgentData:(NSDictionary *)anAgentData;
@@ -26,32 +29,34 @@
 - (void)saveClusters;
 - (void)clearClusters;
 
-- (void)refreshRaspberryClusters;
+- (void)refreshClusters;
 - (void)haltRefreshTimer;
 - (void)refreshTimerState;
 - (void)rapidRefreshTimerState;
 - (void)refreshInterface;
-- (LinkInterface *)ethernetInterface;
 
 - (NSUInteger)liveRaspberryCount;
 - (NSUInteger)raspberryCount;
 - (NSUInteger)clusterCount;
-- (RaspberryCluster *)addCluster:(RaspberryCluster *)aCluster;
+- (Cluster *)addCluster:(Cluster *)aCluster;
 - (NSMutableArray *)clusters;
 - (void)removeClusterWithTitle:(NSString*)aTitle;
 - (void)removeClusterWithId:(NSString*)anId;
-- (RaspberryCluster *)clusterWithTitle:(NSString*)aTitle;
-- (RaspberryCluster *)clusterWithId:(NSString*)anId;
+- (Cluster *)clusterWithTitle:(NSString*)aTitle;
+- (Cluster *)clusterWithId:(NSString*)anId;
 - (int)getIndexOfClusterWithTitle:(NSString*)aTitle;
 - (int)getIndexOfClusterWithId:(NSString*)anId;
 
+#if 0
 - (void)addMultDelegateToQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
 - (void)removeMultDelegateFromQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate;
 
 - (void)addAgentDelegateToQueue:(id<RaspberryAgentDelegate>)aDelegate;
 - (void)removeAgentDelegateFromQueue:(id<RaspberryAgentDelegate>)aDelegate;
+#endif
 
 - (void)setupRaspberryNodes:(NSArray<NSDictionary *> *) aNodesList;
+
 
 - (void)startMulticastSocket;
 - (void)stopMulticastSocket;

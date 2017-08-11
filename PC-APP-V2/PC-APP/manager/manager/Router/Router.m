@@ -11,23 +11,22 @@
 #import "SynthesizeSingleton.h"
 #import "Router.h"
 #import "PCConstants.h"
-#import "BSONSerialization.h"
 #import "DeviceSerialNumber.h"
-#import "PCInterfaceList.h"
+//#import "PCInterfaceList.h"
 
 #import "NullStringChecker.h"
 #import "Util.h"
 
 @interface Router()
 @property (nonatomic, strong) NSMutableArray *clusters;
-@property (nonatomic, strong) GCDAsyncUdpSocket *multSocket;
+//@property (nonatomic, strong) GCDAsyncUdpSocket *multSocket;
 @property (nonatomic, strong) NSMutableArray<RouterDelegate> *agentDelegates;
-@property (nonatomic, strong) NSMutableArray<GCDAsyncUdpSocketDelegate> *multSockDelegates;
+//@property (nonatomic, strong) NSMutableArray<GCDAsyncUdpSocketDelegate> *multSockDelegates;
 
 @property (nonatomic, strong, readwrite) NSString *hostName;
 @property (nonatomic, strong, readwrite) NSString *deviceSerial;
 @property (nonatomic, strong, readwrite) NSString *systemTimeZone;
-@property (nonatomic, strong, readwrite) LinkInterface *interface;
+//@property (nonatomic, strong, readwrite) LinkInterface *interface;
 
 @property (nonatomic, strong) NSTimer *refreshTimer;
 
@@ -52,18 +51,18 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
         _isMulticastSocketOpen = NO;
         
         self.clusters = [[NSMutableArray alloc] init];
-        self.multSockDelegates = [NSMutableArray<GCDAsyncUdpSocketDelegate> arrayWithCapacity:0];
-        self.agentDelegates = [NSMutableArray<RaspberryAgentDelegate> arrayWithCapacity:0];
+//        self.multSockDelegates = [NSMutableArray<GCDAsyncUdpSocketDelegate> arrayWithCapacity:0];
+//        self.agentDelegates = [NSMutableArray<RaspberryAgentDelegate> arrayWithCapacity:0];
         
         self.deviceSerial = [[DeviceSerialNumber deviceSerialNumber] lowercaseString];
         self.systemTimeZone = [[NSTimeZone systemTimeZone] name];
         self.hostName = [[[NSHost currentHost] localizedName] lowercaseString];
 
-        self.interface = nil;
+//        self.interface = nil;
         [self refreshInterface];
 
-        self.multSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
-        [self.multSocket setIPv6Enabled:NO];
+//        self.multSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
+//        [self.multSocket setIPv6Enabled:NO];
     }
 
     return self;
@@ -114,7 +113,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
     for(Cluster *rpic in clusters) {
         dispatch_group_async(queryClusterGroup, queryClusterQueue, ^{
             //query instance machines
-            [rpic checkRelatedPackage];
+//            [rpic checkRelatedPackage];
 
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[NSNotificationCenter defaultCenter]
@@ -143,7 +142,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
      userInfo:@{kPOCKET_CLUSTER_NODE_COUNT: [NSNumber numberWithUnsignedInteger:[self raspberryCount]]}];
 }
 
-- (void)refreshClusters {
+- (void)refreshRaspberryClusters {
     
     //TODO: fix this. put this to more organized places. More likely, use async notification.
     [self refreshInterface];
@@ -214,6 +213,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
 
 
 -(void)refreshInterface {
+#if 0
     @synchronized(self) {
         self.interface = nil;
         for (LinkInterface *iface in [PCInterfaceList all]){
@@ -223,14 +223,11 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
             }
         }
     }
+#endif
 }
 
-- (LinkInterface *)ethernetInterface {
-    __weak LinkInterface* eth = nil;
-    @synchronized(self) {
-        eth = self.interface;
-    }
-    return eth;
+- (id)ethernetInterface {
+    return nil;
 }
 
 #pragma mark - MANAGING RAPSBERRY NODES
@@ -238,7 +235,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
 - (NSUInteger)liveRaspberryCount {
     NSUInteger totalLiveCount = 0;
     for (Cluster *rpic in _clusters) {
-        totalLiveCount += [rpic liveRaspberryCount];
+        //totalLiveCount += [rpic liveRaspberryCount];
     }
     return totalLiveCount;
 }
@@ -246,7 +243,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
 - (NSUInteger)raspberryCount {
     NSUInteger totalCount = 0;
     for (Cluster *rpic in _clusters) {
-        totalCount += [rpic raspberryCount];
+        //totalCount += [rpic raspberryCount];
     }
     return totalCount;
 }
@@ -256,7 +253,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
 }
 
 - (Cluster *)addCluster:(Cluster *)aCluster {
-    Cluster *existing = [self clusterWithId:aCluster.clusterId];
+    Cluster *existing = [self clusterWithId:aCluster.ClusterID];
     
     if(existing) {
         return existing;
@@ -305,7 +302,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
 - (Cluster *)clusterWithTitle:(NSString*)aTitle {
     @synchronized(_clusters) {
         for(Cluster *rpic in _clusters) {
-            if([rpic.title isEqualToString:aTitle]) {
+            if([rpic.UserMadeName isEqualToString:aTitle]) {
                 return rpic;
             }
         }
@@ -317,7 +314,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
 - (Cluster *)clusterWithId:(NSString*)anId {
     @synchronized(_clusters) {
         for(Cluster *rpic in _clusters) {
-            if([rpic.clusterId isEqualToString:anId]) {
+            if([rpic.ClusterID isEqualToString:anId]) {
                 return rpic;
             }
         }
@@ -330,7 +327,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
 - (int)getIndexOfClusterWithTitle:(NSString*)aTitle {
     for(int i=0; i<_clusters.count; ++i) {
         Cluster *rpic = [_clusters objectAtIndex:i];
-        if([rpic.title isEqualToString:aTitle]) {
+        if([rpic.UserMadeName isEqualToString:aTitle]) {
             return i;
         }
     }
@@ -341,7 +338,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
 - (int)getIndexOfClusterWithId:(NSString*)anId {
     for(int i=0; i<_clusters.count; ++i) {
         Cluster *rpic = [_clusters objectAtIndex:i];
-        if([rpic.clusterId isEqualToString:anId]) {
+        if([rpic.ClusterID isEqualToString:anId]) {
             return i;
         }
     }
@@ -349,6 +346,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
     return -1;
 }
 
+#if 0
 #pragma mark - RaspberryAgentDelegate 
 - (void)addAgentDelegateToQueue:(id<RaspberryAgentDelegate>)aDelegate {
     @synchronized(self.agentDelegates) {
@@ -400,6 +398,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
         [belf multicastData:[n BSONRepresentation]];
     }];
 }
+#endif
 
 #pragma mark - Raspberry Nodes Management
 - (void)setupRaspberryNodes:(NSArray<NSDictionary *> *) aNodesList {
@@ -413,7 +412,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
     
     NSString *sn = self.deviceSerial;
     NSString *hn = self.hostName;
-    NSString *ia = [[self ethernetInterface] ip4Address];
+    NSString *ia = [[self ethernetInterface] IP4Address];
     NSString *tz = self.systemTimeZone;
     
     // build cluster member
@@ -423,7 +422,8 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
     }
     
     // setup only six nodes
-    Cluster *rpic = [[Cluster alloc] initWithTitle:@"Cluster 1"];
+    //Cluster *rpic = [[Cluster alloc] init:@"Cluster 1"];
+    Cluster *rpic = nil;
     for (NSDictionary *anode in aNodesList){
         
         // fixed node definitions
@@ -438,17 +438,17 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
           MASTER_IP6_ADDRESS:@"",
           SLAVE_CLUSTER_MEMBERS:cms}];
 
-        [rpic addRaspberry:[[Raspberry alloc] initWithDictionary:fn]];
+//        [rpic addRaspberry:[[Node alloc] initWithDictionary:fn]];
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            [belf multicastData:[fn BSONRepresentation]];
+//            [belf multicastData:[fn BSONRepresentation]];
         }];
     }
 
-    [[RaspberryManager sharedManager] addCluster:rpic];
-    [[RaspberryManager sharedManager] saveClusters];
+//    [[RaspberryManager sharedManager] addCluster:rpic];
+//    [[RaspberryManager sharedManager] saveClusters];
 }
 
-
+#if 0
 #pragma mark - GCDAsyncUdpSocket MANAGEMENT
 - (void)addMultDelegateToQueue:(id<GCDAsyncUdpSocketDelegate>)aDelegate {
     @synchronized(self.multSockDelegates) {
@@ -642,6 +642,8 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(Router, sharedRouter);
         }];
     }
 }
+#endif
+
 
 #pragma mark - MISC
 -(void)debugOutput {
