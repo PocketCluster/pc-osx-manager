@@ -46,6 +46,18 @@
 		046D310F1F3D32440081CC3E /* PCPkgInstallWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D31091F3D32440081CC3E /* PCPkgInstallWC.xib */; };
 		046D31101F3D32440081CC3E /* DPSetupWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D310C1F3D32440081CC3E /* DPSetupWC.m */; };
 		046D31111F3D32440081CC3E /* DPSetupWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D310D1F3D32440081CC3E /* DPSetupWC.xib */; };
+		046D31241F3D346B0081CC3E /* PCSetup1VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D31151F3D346B0081CC3E /* PCSetup1VC.m */; };
+		046D31251F3D346B0081CC3E /* PCSetup1VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D31161F3D346B0081CC3E /* PCSetup1VC.xib */; };
+		046D31261F3D346B0081CC3E /* PCSetup2RPVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D31181F3D346B0081CC3E /* PCSetup2RPVC.m */; };
+		046D31271F3D346B0081CC3E /* PCSetup2RPVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D31191F3D346B0081CC3E /* PCSetup2RPVC.xib */; };
+		046D31281F3D346B0081CC3E /* PCSetup2VVVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D311B1F3D346B0081CC3E /* PCSetup2VVVC.m */; };
+		046D31291F3D346B0081CC3E /* PCSetup2VVVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D311C1F3D346B0081CC3E /* PCSetup2VVVC.xib */; };
+		046D312A1F3D346B0081CC3E /* PCSetup3VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D311E1F3D346B0081CC3E /* PCSetup3VC.m */; };
+		046D312B1F3D346B0081CC3E /* PCSetup3VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D311F1F3D346B0081CC3E /* PCSetup3VC.xib */; };
+		046D31311F3D34D60081CC3E /* DPSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D31301F3D34D60081CC3E /* DPSetupWindow.m */; };
+		046D31391F3D38250081CC3E /* Raspberry.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D31341F3D38250081CC3E /* Raspberry.m */; };
+		046D313A1F3D38250081CC3E /* RaspberryCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D31361F3D38250081CC3E /* RaspberryCluster.m */; };
+		046D313B1F3D38250081CC3E /* RaspberryManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D31381F3D38250081CC3E /* RaspberryManager.m */; };
 		046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96081BDDBBBC006AA8EE /* BaseWindow.m */; };
 		047F32AC1D8A898E00568210 /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 047F326E1D8A898E00568210 /* NativeMenu.m */; };
 		0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0486780E1BCF5FE20071594B /* Assets.xcassets */; };
@@ -174,6 +186,26 @@
 		046D310B1F3D32440081CC3E /* DPSetupWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DPSetupWC.h; sourceTree = "<group>"; };
 		046D310C1F3D32440081CC3E /* DPSetupWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DPSetupWC.m; sourceTree = "<group>"; };
 		046D310D1F3D32440081CC3E /* DPSetupWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DPSetupWC.xib; sourceTree = "<group>"; };
+		046D31141F3D346B0081CC3E /* PCSetup1VC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup1VC.h; sourceTree = "<group>"; };
+		046D31151F3D346B0081CC3E /* PCSetup1VC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetup1VC.m; sourceTree = "<group>"; };
+		046D31161F3D346B0081CC3E /* PCSetup1VC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCSetup1VC.xib; sourceTree = "<group>"; };
+		046D31171F3D346B0081CC3E /* PCSetup2RPVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup2RPVC.h; sourceTree = "<group>"; };
+		046D31181F3D346B0081CC3E /* PCSetup2RPVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetup2RPVC.m; sourceTree = "<group>"; };
+		046D31191F3D346B0081CC3E /* PCSetup2RPVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCSetup2RPVC.xib; sourceTree = "<group>"; };
+		046D311A1F3D346B0081CC3E /* PCSetup2VVVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup2VVVC.h; sourceTree = "<group>"; };
+		046D311B1F3D346B0081CC3E /* PCSetup2VVVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetup2VVVC.m; sourceTree = "<group>"; };
+		046D311C1F3D346B0081CC3E /* PCSetup2VVVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCSetup2VVVC.xib; sourceTree = "<group>"; };
+		046D311D1F3D346B0081CC3E /* PCSetup3VC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup3VC.h; sourceTree = "<group>"; };
+		046D311E1F3D346B0081CC3E /* PCSetup3VC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetup3VC.m; sourceTree = "<group>"; };
+		046D311F1F3D346B0081CC3E /* PCSetup3VC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCSetup3VC.xib; sourceTree = "<group>"; };
+		046D312F1F3D34D60081CC3E /* DPSetupWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DPSetupWindow.h; sourceTree = "<group>"; };
+		046D31301F3D34D60081CC3E /* DPSetupWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DPSetupWindow.m; sourceTree = "<group>"; };
+		046D31331F3D38250081CC3E /* Raspberry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Raspberry.h; sourceTree = "<group>"; };
+		046D31341F3D38250081CC3E /* Raspberry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Raspberry.m; sourceTree = "<group>"; };
+		046D31351F3D38250081CC3E /* RaspberryCluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaspberryCluster.h; sourceTree = "<group>"; };
+		046D31361F3D38250081CC3E /* RaspberryCluster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RaspberryCluster.m; sourceTree = "<group>"; };
+		046D31371F3D38250081CC3E /* RaspberryManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaspberryManager.h; sourceTree = "<group>"; };
+		046D31381F3D38250081CC3E /* RaspberryManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RaspberryManager.m; sourceTree = "<group>"; };
 		046F96071BDDBBBC006AA8EE /* BaseWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseWindow.h; sourceTree = "<group>"; };
 		046F96081BDDBBBC006AA8EE /* BaseWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseWindow.m; sourceTree = "<group>"; };
 		047F326D1D8A898E00568210 /* NativeMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NativeMenu.h; sourceTree = "<group>"; };
@@ -457,14 +489,6 @@
 			path = Askpass;
 			sourceTree = "<group>";
 		};
-		046A36491BD793BB004E0946 /* ViewController */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = ViewController;
-			path = manager/ViewController;
-			sourceTree = SOURCE_ROOT;
-		};
 		046D31001F3D310C0081CC3E /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
@@ -495,11 +519,62 @@
 			path = Setup;
 			sourceTree = "<group>";
 		};
+		046D31121F3D346B0081CC3E /* ViewController */ = {
+			isa = PBXGroup;
+			children = (
+				046D31131F3D346B0081CC3E /* Setup */,
+			);
+			name = ViewController;
+			path = manager/ViewController;
+			sourceTree = "<group>";
+		};
+		046D31131F3D346B0081CC3E /* Setup */ = {
+			isa = PBXGroup;
+			children = (
+				046D31141F3D346B0081CC3E /* PCSetup1VC.h */,
+				046D31151F3D346B0081CC3E /* PCSetup1VC.m */,
+				046D31161F3D346B0081CC3E /* PCSetup1VC.xib */,
+				046D31171F3D346B0081CC3E /* PCSetup2RPVC.h */,
+				046D31181F3D346B0081CC3E /* PCSetup2RPVC.m */,
+				046D31191F3D346B0081CC3E /* PCSetup2RPVC.xib */,
+				046D311A1F3D346B0081CC3E /* PCSetup2VVVC.h */,
+				046D311B1F3D346B0081CC3E /* PCSetup2VVVC.m */,
+				046D311C1F3D346B0081CC3E /* PCSetup2VVVC.xib */,
+				046D311D1F3D346B0081CC3E /* PCSetup3VC.h */,
+				046D311E1F3D346B0081CC3E /* PCSetup3VC.m */,
+				046D311F1F3D346B0081CC3E /* PCSetup3VC.xib */,
+			);
+			path = Setup;
+			sourceTree = "<group>";
+		};
+		046D312E1F3D34D60081CC3E /* DPSetupWindow */ = {
+			isa = PBXGroup;
+			children = (
+				046D312F1F3D34D60081CC3E /* DPSetupWindow.h */,
+				046D31301F3D34D60081CC3E /* DPSetupWindow.m */,
+			);
+			path = DPSetupWindow;
+			sourceTree = "<group>";
+		};
+		046D31321F3D38250081CC3E /* Raspberry */ = {
+			isa = PBXGroup;
+			children = (
+				046D31331F3D38250081CC3E /* Raspberry.h */,
+				046D31341F3D38250081CC3E /* Raspberry.m */,
+				046D31351F3D38250081CC3E /* RaspberryCluster.h */,
+				046D31361F3D38250081CC3E /* RaspberryCluster.m */,
+				046D31371F3D38250081CC3E /* RaspberryManager.h */,
+				046D31381F3D38250081CC3E /* RaspberryManager.m */,
+			);
+			path = Raspberry;
+			sourceTree = "<group>";
+		};
 		046F95EF1BDD9AA9006AA8EE /* Window */ = {
 			isa = PBXGroup;
 			children = (
 				046F96071BDDBBBC006AA8EE /* BaseWindow.h */,
 				046F96081BDDBBBC006AA8EE /* BaseWindow.m */,
+				046D312E1F3D34D60081CC3E /* DPSetupWindow */,
 			);
 			name = Window;
 			path = manager/Window;
@@ -510,6 +585,7 @@
 			children = (
 				047F32691D8A898E00568210 /* Menu */,
 				042670191F3CCFEE00CA1967 /* PackageFiles */,
+				046D31321F3D38250081CC3E /* Raspberry */,
 			);
 			name = Management;
 			path = manager/Management;
@@ -535,7 +611,7 @@
 			children = (
 				046A35D91BD78AB8004E0946 /* Common */,
 				046F95EF1BDD9AA9006AA8EE /* Window */,
-				046A36491BD793BB004E0946 /* ViewController */,
+				046D31121F3D346B0081CC3E /* ViewController */,
 				046A35B51BD783CE004E0946 /* WindowController */,
 				047F325E1D8A898E00568210 /* Management */,
 				0441A3D51BD8904100AABD7A /* Application */,
@@ -789,12 +865,16 @@
 				0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */,
 				046D31111F3D32440081CC3E /* DPSetupWC.xib in Resources */,
 				0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */,
+				046D312B1F3D346B0081CC3E /* PCSetup3VC.xib in Resources */,
 				041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */,
+				046D31251F3D346B0081CC3E /* PCSetup1VC.xib in Resources */,
 				046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */,
+				046D31271F3D346B0081CC3E /* PCSetup2RPVC.xib in Resources */,
 				04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */,
 				048678121BCF5FE20071594B /* MainMenu.xib in Resources */,
 				04CAE2E81E9B8A4900B23B22 /* DebugWindow.xib in Resources */,
 				046D310F1F3D32440081CC3E /* PCPkgInstallWC.xib in Resources */,
+				046D31291F3D346B0081CC3E /* PCSetup2VVVC.xib in Resources */,
 				046D31051F3D310C0081CC3E /* PCPrefWC.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -900,7 +980,9 @@
 				047F32AC1D8A898E00568210 /* NativeMenu.m in Sources */,
 				042670291F3CCFEE00CA1967 /* PCPackageMeta.m in Sources */,
 				04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */,
+				046D31311F3D34D60081CC3E /* DPSetupWindow.m in Sources */,
 				04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */,
+				046D31391F3D38250081CC3E /* Raspberry.m in Sources */,
 				04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */,
 				0426702C1F3CFB8700CA1967 /* NativeMenu+NewCluster.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
@@ -909,16 +991,22 @@
 				046D30FF1F3D18010081CC3E /* NativeMenu+RunCluster.m in Sources */,
 				046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
 				046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */,
+				046D312A1F3D346B0081CC3E /* PCSetup3VC.m in Sources */,
 				046D31101F3D32440081CC3E /* DPSetupWC.m in Sources */,
 				046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
+				046D313B1F3D38250081CC3E /* RaspberryManager.m in Sources */,
 				046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
 				042670071F3CCC9300CA1967 /* PCPackageMenuItem.m in Sources */,
 				046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				0441A3E31BD8904100AABD7A /* main.m in Sources */,
 				04AD71C51E9B749A00DB6AE9 /* Util.m in Sources */,
+				046D31261F3D346B0081CC3E /* PCSetup2RPVC.m in Sources */,
 				04CAE2E71E9B8A4900B23B22 /* DebugWindow.m in Sources */,
 				04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */,
+				046D313A1F3D38250081CC3E /* RaspberryCluster.m in Sources */,
+				046D31241F3D346B0081CC3E /* PCSetup1VC.m in Sources */,
 				04AF2B081E84B19B00F4DF09 /* AppDelegate+EventHandle.m in Sources */,
+				046D31281F3D346B0081CC3E /* PCSetup2VVVC.m in Sources */,
 				046D310E1F3D32440081CC3E /* PCPkgInstallWC.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

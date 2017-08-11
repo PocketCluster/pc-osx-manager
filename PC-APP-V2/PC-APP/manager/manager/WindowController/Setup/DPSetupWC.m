@@ -6,12 +6,14 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
+#import "Util.h"
+
 #import "DPSetupWindow.h"
 #import "DPSetupWC.h"
 #import "PCSetup1VC.h"
-#import "Util.h"
 #import "PCSetup2RPVC.h"
-#import "RaspberryManager.h"
+
+//#import "RaspberryManager.h"
 
 @implementation DPSetupWC
 
@@ -69,7 +71,7 @@
     NSArray *dpwvc = [NSArray arrayWithArray:[dsw viewControllers]];
     for(NSViewController *vc in dpwvc){
         if([vc isKindOfClass:[PCSetup2RPVC class]]){
-            [[RaspberryManager sharedManager] removeAgentDelegateFromQueue:vc];
+            //[[RaspberryManager sharedManager] removeAgentDelegateFromQueue:vc];
         }
     }
     [dsw removeNotifications];

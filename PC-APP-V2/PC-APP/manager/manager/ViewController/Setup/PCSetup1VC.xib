@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9059" systemVersion="15B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9059"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="PCSetup1VC">
+            <connections>
+                <outlet property="view" destination="zcl-mb-VEB" id="RXm-C0-ugI"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="zcl-mb-VEB">
+            <rect key="frame" x="0.0" y="0.0" width="400" height="330"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="O1E-8s-KwF">
+                    <rect key="frame" x="191" y="275" width="179" height="25"/>
+                    <animations/>
+                    <buttonCell key="cell" type="roundTextured" title="Vagrant Cluster" bezelStyle="texturedRounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="l9h-QV-Qrx">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="setupVagrantCluster:" target="-2" id="Ibs-gA-x7W"/>
+                    </connections>
+                </button>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="01q-zu-gu5">
+                    <rect key="frame" x="20" y="20" width="128" height="128"/>
+                    <animations/>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="raspberry" id="IWU-0V-nOV"/>
+                </imageView>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0Xi-wK-Vyb">
+                    <rect key="frame" x="191" y="113" width="179" height="25"/>
+                    <animations/>
+                    <buttonCell key="cell" type="roundTextured" title="Raspberry PI Cluster" bezelStyle="texturedRounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="h2t-JQ-oxj">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="setupRaspberryCluster:" target="-2" id="xVb-dh-UQe"/>
+                    </connections>
+                </button>
+                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ANj-lX-ave">
+                    <rect key="frame" x="189" y="194" width="183" height="75"/>
+                    <animations/>
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Build a 3-nodes Vagrant cluster." placeholderString="" id="HUa-Gf-xot">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4Es-Nc-GRF">
+                    <rect key="frame" x="189" y="32" width="183" height="75"/>
+                    <animations/>
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Setup a Raspberry Pi 2 cluster of up to 6-nodes." id="Cwg-Qb-AJ8">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YKj-q1-JHU">
+                    <rect key="frame" x="20" y="182" width="128" height="128"/>
+                    <animations/>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="vagrant" id="4qi-CS-jta"/>
+                </imageView>
+            </subviews>
+            <animations/>
+            <point key="canvasLocation" x="-30" y="288"/>
+        </customView>
+    </objects>
+    <resources>
+        <image name="raspberry" width="100" height="128"/>
+        <image name="vagrant" width="127" height="128"/>
+    </resources>
+</document>
