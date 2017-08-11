@@ -10,6 +10,4 @@
 
 @interface NativeMenu(RunCluster)
 - (void) setupMenuRunCluster;
-
-- (void) menuSelectedStopCluster:(id)sender;
 @end

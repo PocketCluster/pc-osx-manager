@@ -5,7 +5,7 @@
 //  Copyright (c) 2015,2017 PocketCluster. All rights reserved.
 //
 
-#import "Util.h"
+#import "AppDelegate+Window.h"
 
 #import "NativeMenu.h"
 #import "NativeMenu+NewCluster.h"
@@ -83,7 +83,7 @@
         _aboutWindow = [[AboutWindow alloc] initWithWindowNibName:@"AboutWindow"];
         [NSApp activateIgnoringOtherApps:YES];
         [_aboutWindow showWindow:self];
-        [[Util getApp] addOpenWindow:_aboutWindow];
+        [[AppDelegate sharedDelegate] addOpenWindow:_aboutWindow];
     }
 }
 

@@ -6,7 +6,7 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import "Util.h"
+#import "AppDelegate+Window.h"
 
 #import "DPSetupWindow.h"
 #import "DPSetupWC.h"
@@ -62,7 +62,7 @@
 }
 
 -(void)bringToFront {
-    [self.window makeKeyAndOrderFront:[Util getApp]];
+    [self.window makeKeyAndOrderFront:[AppDelegate sharedDelegate]];
 }
 
 -(void)windowWillClose:(NSNotification *)notification {

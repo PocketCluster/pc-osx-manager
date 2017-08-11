@@ -6,12 +6,12 @@
 //
 
 #import "BaseWindowController.h"
-#import "Util.h"
+#import "AppDelegate+Window.h"
 
 @implementation BaseWindowController
 
 - (void)windowWillClose:(NSNotification *)notification {
-    [[Util getApp] removeOpenWindow:self];
+    [[AppDelegate sharedDelegate] removeOpenWindow:self];
     [[NSApplication sharedApplication] endSheet:self.window returnCode:0];
     self.isClosed = YES;
 }

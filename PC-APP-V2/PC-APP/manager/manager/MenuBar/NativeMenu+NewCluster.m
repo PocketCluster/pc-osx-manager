@@ -8,7 +8,11 @@
 
 #import "NativeMenu+NewCluster.h"
 
-@implementation NativeMenu (NewCluster)
+@interface NativeMenu(NewClusterPrivate)
+- (void) menuSelectedNewCluster:(id)sender;
+@end
+
+@implementation NativeMenu(NewCluster)
 
 - (void) setupMenuNewCluster {
     NSMenu* menuRoot = [[NSMenu alloc] init];

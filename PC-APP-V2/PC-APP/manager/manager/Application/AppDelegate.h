@@ -10,9 +10,12 @@
 
 #import "PCConstants.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+@interface AppDelegate : NSObject <NSApplicationDelegate> {
+    NSMutableArray* _openWindows;
+}
+@property (nonatomic, strong) NSMutableArray *openWindows;
 @property (readonly) NativeMenu *nativeMenu;
-- (void)addOpenWindow:(id)window;
-- (void)removeOpenWindow:(id)window;
+
++ (AppDelegate*)sharedDelegate;
 @end
 

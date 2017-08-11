@@ -8,7 +8,6 @@
 
 #import "PackageMenuItem.h"
 #import "PCConstants.h"
-#import "Util.h"
 
 @interface PackageMenuItem()<NSMenuDelegate>
 @property (nonatomic, weak) Package *packageMeta;
@@ -135,7 +134,6 @@
 - (void)shell {
     
     //[Util runTerminalCommand:[self.packageMeta.cmdScript objectAtIndex:0]];
-    [Util openTerminalCommand:self.packageMeta];
     
 }
 @end

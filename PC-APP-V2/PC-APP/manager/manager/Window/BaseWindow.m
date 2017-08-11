@@ -55,7 +55,7 @@
         [self.actionDelegate windowWillClose:notification];
     }
 
-    [[Util getApp] removeOpenWindow:self];
+    [[AppDelegate sharedDelegate] removeOpenWindow:self];
 }
 
 @end

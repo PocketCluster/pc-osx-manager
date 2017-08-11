@@ -8,6 +8,10 @@
 
 #import "NativeMenu+RunCluster.h"
 
+@interface NativeMenu(RunClusterPrivate)
+- (void) menuSelectedStopCluster:(id)sender;
+@end
+
 @implementation NativeMenu(RunCluster)
 
 - (void) setupMenuRunCluster {

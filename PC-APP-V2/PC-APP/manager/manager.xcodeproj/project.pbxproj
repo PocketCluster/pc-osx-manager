@@ -18,6 +18,7 @@
 		0419FA141E90F61400031628 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0419FA131E90F61400031628 /* libc++.tbd */; };
 		0419FA161E90F61900031628 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0419FA151E90F61900031628 /* libz.tbd */; };
 		041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
+		043F47131F3E0C730078A0C1 /* AppDelegate+Window.m in Sources */ = {isa = PBXBuildFile; fileRef = 043F47121F3E0C730078A0C1 /* AppDelegate+Window.m */; };
 		0441A3D01BD88DDC00AABD7A /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */; };
 		0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D71BD8904100AABD7A /* AppDelegate.m */; };
 		0441A3E31BD8904100AABD7A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0441A3D81BD8904100AABD7A /* main.m */; };
@@ -60,7 +61,6 @@
 		0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0486780E1BCF5FE20071594B /* Assets.xcassets */; };
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
 		0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */; };
-		04AD71C51E9B749A00DB6AE9 /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C21E9B749A00DB6AE9 /* Util.m */; };
 		04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */; };
 		04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */; };
 		04AF2B081E84B19B00F4DF09 /* AppDelegate+EventHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AF2B071E84B19B00F4DF09 /* AppDelegate+EventHandle.m */; };
@@ -137,6 +137,8 @@
 		0419FA131E90F61400031628 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
 		0419FA151E90F61900031628 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		041FB3B61BD0F3FA0027136F /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
+		043F47111F3E0C730078A0C1 /* AppDelegate+Window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Window.h"; sourceTree = "<group>"; };
+		043F47121F3E0C730078A0C1 /* AppDelegate+Window.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Window.m"; sourceTree = "<group>"; };
 		0441A3CF1BD88DDC00AABD7A /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = ../Pods/Sparkle/Sparkle.framework; sourceTree = "<group>"; };
 		0441A3D61BD8904100AABD7A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0441A3D71BD8904100AABD7A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -213,8 +215,6 @@
 		048678271BCF5FE20071594B /* managerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = managerUITests.m; sourceTree = "<group>"; };
 		048678291BCF5FE20071594B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
-		04AD71C11E9B749A00DB6AE9 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Util.h; sourceTree = "<group>"; };
-		04AD71C21E9B749A00DB6AE9 /* Util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Util.m; sourceTree = "<group>"; };
 		04AD71C31E9B749A00DB6AE9 /* VersionComparison.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VersionComparison.h; sourceTree = "<group>"; };
 		04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionComparison.m; sourceTree = "<group>"; };
 		04AD71C71E9B74E600DB6AE9 /* AppDelegate+Netmonitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Netmonitor.h"; sourceTree = "<group>"; };
@@ -334,12 +334,14 @@
 				0441A3D71BD8904100AABD7A /* AppDelegate.m */,
 				04AF2B061E84B19B00F4DF09 /* AppDelegate+EventHandle.h */,
 				04AF2B071E84B19B00F4DF09 /* AppDelegate+EventHandle.m */,
+				04AD71C71E9B74E600DB6AE9 /* AppDelegate+Netmonitor.h */,
+				04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */,
 				04CB13D71E85075D00F2D6EE /* AppDelegate+Notification.h */,
 				04CB13D81E85075D00F2D6EE /* AppDelegate+Notification.m */,
 				04D5A48C1E9269AE0057012A /* AppDelegate+Sparkle.h */,
 				04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */,
-				04AD71C71E9B74E600DB6AE9 /* AppDelegate+Netmonitor.h */,
-				04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */,
+				043F47111F3E0C730078A0C1 /* AppDelegate+Window.h */,
+				043F47121F3E0C730078A0C1 /* AppDelegate+Window.m */,
 			);
 			name = Application;
 			path = manager/Application;
@@ -652,8 +654,6 @@
 		04AD71C01E9B749A00DB6AE9 /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				04AD71C11E9B749A00DB6AE9 /* Util.h */,
-				04AD71C21E9B749A00DB6AE9 /* Util.m */,
 				04AD71C31E9B749A00DB6AE9 /* VersionComparison.h */,
 				04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */,
 			);
@@ -978,9 +978,9 @@
 				046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				0441A3E31BD8904100AABD7A /* main.m in Sources */,
 				04030F671F3D5B6500EA793D /* Node.m in Sources */,
-				04AD71C51E9B749A00DB6AE9 /* Util.m in Sources */,
 				046D31261F3D346B0081CC3E /* PCSetup2RPVC.m in Sources */,
 				04030F801F3D5C1E00EA793D /* NativeMenu+NewCluster.m in Sources */,
+				043F47131F3E0C730078A0C1 /* AppDelegate+Window.m in Sources */,
 				04CAE2E71E9B8A4900B23B22 /* DebugWindow.m in Sources */,
 				04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */,
 				046D31241F3D346B0081CC3E /* PCSetup1VC.m in Sources */,

@@ -6,7 +6,7 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import "Util.h"
+#import "AppDelegate+Window.h"
 
 @class BaseWindow;
 

@@ -10,6 +10,4 @@
 
 @interface NativeMenu(NewCluster)
 - (void) setupMenuNewCluster;
-
-- (void) menuSelectedNewCluster:(id)sender;
 @end

@@ -5,7 +5,6 @@
 //  Copyright (c) 2015,2017 PocketCluster. All rights reserved.
 //
 
-#import "Util.h"
 #import "AboutWindow.h"
 
 @interface NativeMenu : NSObject <NSMenuDelegate>{
@@ -15,7 +14,6 @@
 }
 @property (nonatomic, strong) AboutWindow *aboutWindow;
 @property (nonatomic, strong) NSStatusItem *statusItem;
-
 
 - (void) addCommonMenu:(NSMenu *)menuRoot;
 @end

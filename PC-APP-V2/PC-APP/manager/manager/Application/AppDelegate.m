@@ -10,7 +10,6 @@
 #import "Sentry.h"
 #import <Sparkle/Sparkle.h>
 
-#import "Util.h"
 #import "NativeMenu.h"
 #include "pc-core.h"
 
@@ -26,7 +25,6 @@
 
 @interface AppDelegate ()<NSUserNotificationCenterDelegate>
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
-@property (nonatomic, strong) NSMutableArray *openWindows;
 @property (strong) PCInterfaceStatus *interfaceStatus;
 
 #ifdef DEBUG
@@ -35,6 +33,11 @@
 @end
 
 @implementation AppDelegate
+@synthesize openWindows = _openWindows;
+
++ (AppDelegate*) sharedDelegate {
+    return (AppDelegate*)[[NSApplication sharedApplication] delegate];
+}
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // 1. install crash reporter
@@ -125,13 +128,6 @@
 }
 
 - (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
-}
-
-#pragma mark - WINDOW MANAGEMENT
-- (void)addOpenWindow:(id)window {
-}
-
-- (void)removeOpenWindow:(id)window {
 }
 
 @end
