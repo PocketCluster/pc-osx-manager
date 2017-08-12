@@ -11,6 +11,8 @@ import (
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
+    "github.com/stkim1/pc-core/event/route"
+//    "github.com/stkim1/pc-core/event/route/routepath"
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/service"
 )
@@ -97,6 +99,15 @@ func main() {
                         }
                         default:
                             log.Printf("crash! %v", e.String())
+                    }
+                }
+
+                // OPERATIONAL ROUTE //
+
+                case route.Event: {
+                    err := a.Dispatch(e)
+                    if err != nil {
+                        log.Debugf("[ROUTE] ERROR %v", err)
                     }
                 }
 

@@ -76,6 +76,8 @@
 		04AF5FF81F3200E1009DBD2B /* VBoxCAPIGlue.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FD51F3200E1009DBD2B /* VBoxCAPIGlue.c */; };
 		04AF5FF91F3200E1009DBD2B /* libvboxcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FD61F3200E1009DBD2B /* libvboxcom.c */; };
 		04AF5FFA1F3200E1009DBD2B /* libvboxcom.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FD71F3200E1009DBD2B /* libvboxcom.h */; };
+		04BD57F21F3FA0AB00D7F110 /* routepath.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BD57F01F3FA0AB00D7F110 /* routepath.c */; };
+		04BD57F31F3FA0AB00D7F110 /* routepath.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BD57F11F3FA0AB00D7F110 /* routepath.h */; };
 		04E7301A1E822A8F00BE83DD /* PCLifeCycle.h in Headers */ = {isa = PBXBuildFile; fileRef = 04E730191E822A8F00BE83DD /* PCLifeCycle.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04E7301D1E822BC300BE83DD /* PCNativeThread.c in Sources */ = {isa = PBXBuildFile; fileRef = 04E7301B1E822BC300BE83DD /* PCNativeThread.c */; };
 		04E730221E822D3200BE83DD /* PCNativeThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 04E730201E822D3200BE83DD /* PCNativeThread.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -156,6 +158,8 @@
 		04AF5FD61F3200E1009DBD2B /* libvboxcom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = libvboxcom.c; sourceTree = "<group>"; };
 		04AF5FD71F3200E1009DBD2B /* libvboxcom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libvboxcom.h; sourceTree = "<group>"; };
 		04AF5FD81F3200E1009DBD2B /* os-typeid-list.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "os-typeid-list.txt"; sourceTree = "<group>"; };
+		04BD57F01F3FA0AB00D7F110 /* routepath.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = routepath.c; sourceTree = "<group>"; };
+		04BD57F11F3FA0AB00D7F110 /* routepath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = routepath.h; sourceTree = "<group>"; };
 		04E730191E822A8F00BE83DD /* PCLifeCycle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCLifeCycle.h; sourceTree = "<group>"; };
 		04E7301B1E822BC300BE83DD /* PCNativeThread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PCNativeThread.c; sourceTree = "<group>"; };
 		04E730201E822D3200BE83DD /* PCNativeThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCNativeThread.h; sourceTree = "<group>"; };
@@ -196,6 +200,7 @@
 				04E730181E822A6700BE83DD /* lifecycle */,
 				04259BC41E7F80940071648E /* macro */,
 				04259BC91E7F80940071648E /* network */,
+				04BD57EF1F3FA0AB00D7F110 /* routepath */,
 				04259BDA1E7F80940071648E /* serial */,
 				04259BDF1E7F80940071648E /* status */,
 				04259BE01E7F80940071648E /* system */,
@@ -431,6 +436,16 @@
 			path = lib;
 			sourceTree = "<group>";
 		};
+		04BD57EF1F3FA0AB00D7F110 /* routepath */ = {
+			isa = PBXGroup;
+			children = (
+				04BD57F01F3FA0AB00D7F110 /* routepath.c */,
+				04BD57F11F3FA0AB00D7F110 /* routepath.h */,
+			);
+			name = routepath;
+			path = ../../routepath;
+			sourceTree = "<group>";
+		};
 		04D6AD811E80DCC700A015FA /* goheader */ = {
 			isa = PBXGroup;
 			children = (
@@ -487,6 +502,7 @@
 				04AF5FE01F3200E1009DBD2B /* network.h in Headers */,
 				04259C031E7F80950071648E /* PCSystemInfo.h in Headers */,
 				04259BF61E7F80940071648E /* PCInterfaceTypes.h in Headers */,
+				04BD57F31F3FA0AB00D7F110 /* routepath.h in Headers */,
 				04259BF41E7F80940071648E /* PCInterfaceStatus.h in Headers */,
 				04259BE81E7F80940071648E /* PCUserEnvironment.h in Headers */,
 				04E730231E822D3200BE83DD /* PCStaticUtility.h in Headers */,
@@ -583,6 +599,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				04AF5FF01F3200E1009DBD2B /* network.c in Sources */,
+				04BD57F21F3FA0AB00D7F110 /* routepath.c in Sources */,
 				04259BEA1E7F80940071648E /* NSBundle+DirectoryPath.m in Sources */,
 				04AF5FEB1F3200E1009DBD2B /* console.c in Sources */,
 				04AF5FEA1F3200E1009DBD2B /* bios_settings.c in Sources */,

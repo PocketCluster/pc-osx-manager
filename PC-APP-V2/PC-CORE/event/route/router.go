@@ -1,7 +1,6 @@
-package router
+package route
 
 import (
-    "net/http"
     "strings"
 
     "github.com/pkg/errors"
@@ -17,7 +16,7 @@ const (
 )
 
 // Handle is just like "net/http" Handlers, only takes params.
-type Handle func() error
+type Handle func(payload string) error
 
 // Router name says it all.
 type Router struct {
@@ -73,11 +72,11 @@ func (r *Router) DELETE(path string, handler Handle) error {
 }
 
 // Needed by "net/http" to handle http requests and be a mux to http.ListenAndServe.
-func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) error {
-    node, _ := r.tree.traverse(strings.Split(req.URL.Path, "/")[1:])
-    if handler := node.methods[req.Method]; handler != nil {
-        return handler()
+func (r *Router) Dispatch(event Event) error {
+    node, _ := r.tree.traverse(strings.Split(event.path, "/")[1:])
+    if handler := node.methods[event.method]; handler != nil {
+        return handler(event.payload)
     }
 
-    return r.rootHandler()
+    return r.rootHandler(event.payload)
 }

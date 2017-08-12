@@ -40,6 +40,11 @@
 
 
 
+#line 3 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_route.go"
+
+
+
+
 
 /* End of preamble from import "C" comments.  */
 
@@ -123,6 +128,14 @@ extern void engineDebugOutput(int p0);
 extern void NetworkChangeNotificationInterface(PCNetworkInterface** p0, unsigned int p1);
 
 extern void NetworkChangeNotificationGateway(SCNIGateway** p0, unsigned int p1);
+
+extern void RouteEventGet(char* p0);
+
+extern void RouteEventPost(char* p0, char* p1);
+
+extern void RouteEventPut(char* p0, char* p1);
+
+extern void RouteEventDelete(char* p0);
 
 #ifdef __cplusplus
 }
