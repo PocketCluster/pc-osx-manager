@@ -11,7 +11,8 @@
 
 
 ### V0.1.4
-- [ ] `CoreNode`, `SlaveNode` : `LastAlive` data for health check on OSX
+- [ ] `CoreNode`, `SlaveNode` : `LastAlive` data for health check on OSX. Save the last alive time to report in OSX.
+- [ ] `CoreNode` set `SlaveID` with `MachineID`.
 - [ ] Cluster User Defined Name
 - [ ] Repartition logic from Boot2Docker
 - [ ] Disable Docker when there is no TLS certs available

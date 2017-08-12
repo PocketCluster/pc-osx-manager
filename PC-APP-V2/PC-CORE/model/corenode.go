@@ -23,6 +23,8 @@ type CoreNode struct {
     LastAlive       time.Time    `gorm:"column:last_alive;type:DATETIME"`
 
     ModelVersion    string       `gorm:"column:model_version;type:VARCHAR(8)"`
+    // machine uuid from Vbox
+    SlaveID         string       `gorm:"column:slave_id;type:VARCHAR(36)"`
     NodeName        string       `gorm:"column:node_name;type:VARCHAR(64)"`
     AuthToken       string       `gorm:"column:auth_token;type:VARCHAR(64)"`
 
