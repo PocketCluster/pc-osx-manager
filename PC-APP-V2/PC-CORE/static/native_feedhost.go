@@ -3,22 +3,30 @@ package main
 
 /*
 #cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -Wl,-U,_PCEventHandle
+#cgo LDFLAGS: -Wl,-U,_PCEventFeedGet,-U,_PCEventFeedPost,-U,_PCEventFeedPut,-U,_PCEventFeedDelete
 
 #include "PCEventHandle.h"
-
 */
 import "C"
 import (
-    "encoding/json"
     "runtime"
+
+    "github.com/pkg/errors"
 )
 
+type feedMethodType int
 const (
-    FeedType    string = "feed_type"
-    FeedResult  string = "feed_ret"
-    FeedMessage string = "feed_msg"
+    feedMethodGet       feedMethodType = iota
+    feedMethodPost
+    feedMethodPut
+    feedMethodDelete
 )
+
+type feedMessage struct {
+    method    feedMethodType
+    path      string
+    payload   string
+}
 
 type stopFeed struct{}
 
@@ -35,20 +43,32 @@ func (h *feeder) feedLoop() {
     runtime.LockOSThread()
     for f := range h.feedPipe {
         switch feed := f.(type) {
-        // stop feeding back to cocoa side
-        case stopFeed: {
-            runtime.UnlockOSThread()
-            return
-        }
-        case string:
-            // TODO : sort out f with detailed category
-            data, err := json.Marshal(map[string]string{
-                FeedType:   "api-feed",
-                FeedResult: "api-success",
-                FeedMessage: feed,
-            })
-            if err == nil {
-                C.PCEventHandle(C.CString(string(data)))
+            // stop feeding back to cocoa side
+            case stopFeed: {
+                runtime.UnlockOSThread()
+                return
+            }
+            case feedMessage: {
+                switch feed.method {
+                    case feedMethodGet: {
+                        var (
+                            cPath = C.CString(feed.path)
+                        )
+                        C.PCEventFeedGet(cPath)
+                        // these strings will be freed on cocoa side to reduce performance degrade
+                        //C.free(unsafe.Pointer(cPath))
+                    }
+                    case feedMethodPost: {
+                        var (
+                            cPath    = C.CString(feed.path)
+                            cPayload = C.CString(feed.payload)
+                        )
+                        C.PCEventFeedPost(cPath, cPayload)
+                        // these strings will be freed on cocoa side to reduce performance degrade
+                        //C.free(unsafe.Pointer(cPath))
+                        //C.free(unsafe.Pointer(cPayload))
+                    }
+                }
             }
         }
     }
@@ -68,6 +88,25 @@ func FeedStop() {
     theFeeder.feedPipe <- stopFeed{}
 }
 
-func FeedSend(message string) {
-    theFeeder.feedPipe <- message
+func EventFeedGet(path string) error {
+    if len(path) == 0 {
+        return errors.Errorf("[ERR] invalid feed path")
+    }
+    theFeeder.feedPipe <- feedMessage {
+        method:     feedMethodGet,
+        path:       path,
+    }
+    return nil
+}
+
+func EventFeedPost(path, payload string) error {
+    if len(path) == 0 {
+        return errors.Errorf("[ERR] invalid feed path")
+    }
+    theFeeder.feedPipe <- feedMessage {
+        method:     feedMethodPost,
+        path:       path,
+        payload:    payload,
+    }
+    return nil
 }

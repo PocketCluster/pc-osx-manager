@@ -14,42 +14,79 @@
  * Default mode to display sucess and failure message to UI in seqeunce
  */
 
+static NSString * const RPATH_EVENT_METHOD_GET    = @"GET";
+static NSString * const RPATH_EVENT_METHOD_POST   = @"POST";
+static NSString * const RPATH_EVENT_METHOD_PUT    = @"PUT";
+static NSString * const RPATH_EVENT_METHOD_DELETE = @"DELETE";
+
+static void
+eventHandle(NSString* method, const char* path, const char* payload);
+
 void
-PCEventHandle(const char* engineMessage) {
+PCEventFeedGet(char* path) {
+    eventHandle(RPATH_EVENT_METHOD_GET, (const char*)path, NULL);
+}
+
+void
+PCEventFeedPost(char* path, char* payload) {
+    eventHandle(RPATH_EVENT_METHOD_POST, (const char*)path, (const char*)payload);
+}
+
+void
+PCEventFeedPut(char* path, char* payload) {
+    eventHandle(RPATH_EVENT_METHOD_PUT, (const char*)path, (const char*)payload);
+}
+
+void
+PCEventFeedDelete(char* path) {
+    eventHandle(RPATH_EVENT_METHOD_DELETE, (const char*)path, NULL);
+}
+
+void
+eventHandle(NSString* eventMethod, const char* path, const char* payload) {
+
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+
+        NSString *eventPath = \
+            [[NSString alloc]
+             initWithBytesNoCopy:(void *)path
+             length:strlen((const char*)path)
+             encoding:NSUTF8StringEncoding
+             freeWhenDone:YES];
+
         // Parse in the background
-        NSData *msgData = \
+        NSData *payloadData = \
             [[NSData alloc]
-                 initWithBytesNoCopy:(void *)engineMessage
-                 length:strlen((const char*)engineMessage)
+                 initWithBytesNoCopy:(void *)payload
+                 length:strlen((const char*)payload)
                  freeWhenDone:YES];
-        
+
         NSError *error = nil;
-        NSDictionary* msgDict = \
+        NSDictionary* eventPayload = \
             [NSJSONSerialization
-                 JSONObjectWithData:msgData
+                 JSONObjectWithData:payloadData
                  options:NSJSONReadingMutableContainers
                  error:&error];
-
         if (error != nil) {
             Log(@"%@", [error description]);
             return;
         }
 
         dispatch_async(dispatch_get_main_queue(), ^{
-            [(AppDelegate *)[[NSApplication sharedApplication] delegate]
-                 performSelectorOnMainThread:@selector(HandleEventMessage:)
-                 withObject:msgDict
-                 waitUntilDone:NO];
+            [[AppDelegate sharedDelegate]
+             HandleEventForMethod:eventMethod
+             onPath:eventPath
+             withPayload:eventPayload];
         });
     });
 }
 
 @implementation AppDelegate (EventHandle)
 
-- (void)HandleEventMessage:(NSDictionary *)message {
-    Log(@"message %@", message);
-    
+- (void)HandleEventForMethod:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aPayload {
+    Log(@"%@ -> %@ | %@", aMethod, aPath, aPayload);
+
+/*
     NSAlert *alert = [[NSAlert alloc] init];
     [alert addButtonWithTitle:@"OK"];
     [alert addButtonWithTitle:@"Cancel"];
@@ -57,6 +94,7 @@ PCEventHandle(const char* engineMessage) {
     [alert setInformativeText:@"Deleted records cannot be restored."];
     [alert setAlertStyle:NSWarningAlertStyle];
     [alert runModal];
+*/
 }
 
 @end

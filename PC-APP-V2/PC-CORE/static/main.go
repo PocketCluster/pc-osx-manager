@@ -129,12 +129,9 @@ func main() {
                             // TODO send error report
                             log.Debugf("[LIFE] CRITICAL ERROR %v", err)
                             return
-                        } else {
-                            FeedSend("[LIFE] SUCCESSFULLY INITIATED ENGINE " + config.teleConfig.HostUUID)
                         }
 
                         // TODO check all the status before start
-
 
                         // --- acquire informations ---
                         // get cluster id

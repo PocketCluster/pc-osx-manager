@@ -10,5 +10,5 @@
 #import "AppDelegate.h"
 
 @interface AppDelegate (EventHandle)
-- (void)HandleEventMessage:(id)message;
+- (void)HandleEventForMethod:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aPayload;
 @end

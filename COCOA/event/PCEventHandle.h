@@ -10,6 +10,15 @@
 #define __PCEVENTHANDLE_H__
 
 extern void
-PCEventHandle(const char*);
+PCEventFeedGet(char* path);
+
+extern void
+PCEventFeedPost(char* path, char* payload);
+
+extern void
+PCEventFeedPut(char* path, char* payload);
+
+extern void
+PCEventFeedDelete(char* path);
 
 #endif // __PCEVENTHANDLE_H__
