@@ -10,12 +10,12 @@
 
 
 
-#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_feedhost.go"
+#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_feedresponse.go"
 
 
 
 
-#include "PCEventHandle.h"
+#include "PCResponseHandle.h"
 
 
 #line 13 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_lifecycle.go"

@@ -7,8 +7,8 @@ import (
 
 func initRoutePathService() {
 
-    theApp.GET(routepath.RpathSystemReadiness(), func(_, _, _ string) error {
-        EventFeedPost("/v1/error/message","[ROUTE] system is ready to run")
+    theApp.GET(routepath.RpathSystemReadiness(), func(_, path, _ string) error {
+        FeedResponseForGet(path,"[ROUTE] system is ready to run")
         /* inline json marshalling
         data, err := json.Marshal(map[string]string{
             FeedType:   "api-feed",
@@ -19,13 +19,13 @@ func initRoutePathService() {
         return nil
     })
 
-    theApp.GET(routepath.RpathAppExpired(), func(_, _, _ string) error {
-        EventFeedPost("/v1/error/message","[ROUTE] app is not expired")
+    theApp.GET(routepath.RpathAppExpired(), func(_, path, _ string) error {
+        FeedResponseForGet(path,"[ROUTE] app is not expired")
         return nil
     })
 
-    theApp.GET(routepath.RpathSystemIsFirstRun(), func(_, _, _ string) error {
-        EventFeedPost("/v1/error/message","[ROUTE] this is not the first run")
+    theApp.GET(routepath.RpathSystemIsFirstRun(), func(_, path, _ string) error {
+        FeedResponseForGet(path,"[ROUTE] this is not the first run")
         return nil
     })
 

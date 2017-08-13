@@ -13,11 +13,11 @@
 @interface PCRouteTrie() {
     __strong NSMutableArray<PCRouteTrie* >* _children;
     __strong NSString* _component;
-    __strong NSMutableDictionary<NSString*, ResponseHandler>* _methods;
+    __strong NSMutableDictionary<NSString*, NSMutableArray*>* _methods;
 }
 @property (nonatomic, strong, readonly) NSMutableArray<PCRouteTrie* >* children;
 @property (nonatomic, strong, readonly) NSString* component;
-@property (nonatomic, strong, readonly) NSMutableDictionary<NSString*, ResponseHandler>* methods;
+@property (nonatomic, strong, readonly) NSMutableDictionary<NSString*, NSMutableArray*>* methods;
 
 // - (void) addNode:(NSString*)aMethod forPath:(NSString*)aPath withHandlerBlock:(ResponseHandler)aHandler;
 - (PCRouteTrie *) _findOrAddNodeForPath:(NSString*)aPath;
@@ -32,21 +32,21 @@
 - (instancetype) initWithPathComponent:(NSString *)aComponent {
     self = [super init];
     if (self != nil) {
-        _children = [NSMutableArray new];
+        _children = [NSMutableArray<PCRouteTrie*> new];
         _component = aComponent;
-        _methods = [NSMutableDictionary new];
+        _methods = [NSMutableDictionary<NSString*, NSMutableArray*> new];
     }
     return self;
 }
 
 - (void)dealloc {
     _component = nil;
-    
-    [_children removeAllObjects];
-    _children = nil;
 
     [_methods removeAllObjects];
     _methods = nil;
+    
+    [_children removeAllObjects];
+    _children = nil;
 }
 
 - (NSString *)description {
@@ -144,11 +144,35 @@
 }
 
 - (void) addRequest:(NSObject<PCRouteRequest> *)aRequest forMethod:(NSString*)aMethod onPath:(NSString*)aPath {
-    
+    PCRouteTrie *node = [self _findOrAddNodeForPath:aPath];
+    NSMutableArray *reqList = [node.methods objectForKey:aMethod];
+    if (reqList == nil) {
+        reqList = [NSMutableArray new];
+        [node.methods setValue:reqList forKey:aMethod];
+    }
+    [reqList addObject:aRequest];
 }
 
 - (void) delRequest:(NSObject<PCRouteRequest> *)aRequest forMethod:(NSString*)aMethod onPath:(NSString*)aPath {
-    
+    PCRouteTrie *node = [self _findOrAddNodeForPath:aPath];
+    NSMutableArray *reqList = [node.methods objectForKey:aMethod];
+    // nothing to delete
+    if (reqList == nil) {
+        return;
+    }
+    [reqList removeObject:aRequest];
+}
+
+// this always returns the last object
+- (NSObject<PCRouteRequest> *)findRequestForMethod:(NSString*)aMethod onPath:(NSString*)aPath {
+    PCRouteTrie *node = [self _findOrAddNodeForPath:aPath];
+    NSMutableArray *reqList = [node.methods objectForKey:aMethod];
+    return [reqList lastObject];
+}
+
+- (NSArray *)findAllRequestForMethod:(NSString*)aMethod onPath:(NSString*)aPath {
+    PCRouteTrie *node = [self _findOrAddNodeForPath:aPath];
+    return [node.methods objectForKey:aMethod];
 }
 
 @end

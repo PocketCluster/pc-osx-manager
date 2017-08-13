@@ -6,7 +6,9 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
-#import "AppDelegate+EventHandle.h"
+#import "AppDelegate+ResponseHandle.h"
+#import "PCRoutePathConst.h"
+#import "PCRouter.h"
 
 /*
  * Event message from engine is most likely a feedback for api call
@@ -14,36 +16,31 @@
  * Default mode to display sucess and failure message to UI in seqeunce
  */
 
-static NSString * const RPATH_EVENT_METHOD_GET    = @"GET";
-static NSString * const RPATH_EVENT_METHOD_POST   = @"POST";
-static NSString * const RPATH_EVENT_METHOD_PUT    = @"PUT";
-static NSString * const RPATH_EVENT_METHOD_DELETE = @"DELETE";
-
 static void
-eventHandle(NSString* method, const char* path, const char* payload);
+handleResponse(NSString* method, const char* path, const char* payload);
 
 void
-PCEventFeedGet(char* path) {
-    eventHandle(RPATH_EVENT_METHOD_GET, (const char*)path, NULL);
+PCFeedResponseForGet(char* path, char* payload) {
+    handleResponse(RPATH_EVENT_METHOD_GET, (const char*)path, (const char*)payload);
 }
 
 void
-PCEventFeedPost(char* path, char* payload) {
-    eventHandle(RPATH_EVENT_METHOD_POST, (const char*)path, (const char*)payload);
+PCFeedResponseForPost(char* path, char* payload) {
+    handleResponse(RPATH_EVENT_METHOD_POST, (const char*)path, (const char*)payload);
 }
 
 void
-PCEventFeedPut(char* path, char* payload) {
-    eventHandle(RPATH_EVENT_METHOD_PUT, (const char*)path, (const char*)payload);
+PCFeedResponseForPut(char* path, char* payload) {
+    handleResponse(RPATH_EVENT_METHOD_PUT, (const char*)path, (const char*)payload);
 }
 
 void
-PCEventFeedDelete(char* path) {
-    eventHandle(RPATH_EVENT_METHOD_DELETE, (const char*)path, NULL);
+PCFeedResponseForDelete(char* path, char* payload) {
+    handleResponse(RPATH_EVENT_METHOD_DELETE, (const char*)path, (const char*)payload);
 }
 
 void
-eventHandle(NSString* eventMethod, const char* path, const char* payload) {
+handleResponse(NSString* eventMethod, const char* path, const char* payload) {
 
     // parse in the background
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -78,17 +75,17 @@ eventHandle(NSString* eventMethod, const char* path, const char* payload) {
 
         dispatch_async(dispatch_get_main_queue(), ^{
             [[AppDelegate sharedDelegate]
-             HandleEventForMethod:eventMethod
+             HandleResponseForMethod:eventMethod
              onPath:eventPath
              withPayload:eventPayload];
         });
     });
 }
 
-@implementation AppDelegate (EventHandle)
+@implementation AppDelegate (ResponseHandle)
 
-- (void)HandleEventForMethod:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aPayload {
-    Log(@"%@ -> %@ | %@", aMethod, aPath, aPayload);
+- (void)HandleResponseForMethod:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aPayload {
+    [[PCRouter sharedRouter] responseFor:aMethod onPath:aPath withPayload:aPayload];
 
 /*
     NSAlert *alert = [[NSAlert alloc] init];

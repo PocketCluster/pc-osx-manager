@@ -61,7 +61,7 @@
 		0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */; };
 		04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */; };
 		04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */; };
-		04AF2B081E84B19B00F4DF09 /* AppDelegate+EventHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AF2B071E84B19B00F4DF09 /* AppDelegate+EventHandle.m */; };
+		04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B3FB8D1F41133600A72834 /* AppDelegate+ResponseHandle.m */; };
 		04BC73831E8A2E910079BD77 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04BC73821E8A2E910079BD77 /* AboutWindow.m */; };
 		04BD309E1F3E4B2D00509B21 /* PCSetup2VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04BD309C1F3E4B2D00509B21 /* PCSetup2VC.m */; };
 		04BD309F1F3E4B2D00509B21 /* PCSetup2VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04BD309D1F3E4B2D00509B21 /* PCSetup2VC.xib */; };
@@ -74,6 +74,8 @@
 		04CAE2E81E9B8A4900B23B22 /* DebugWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04CAE2E61E9B8A4900B23B22 /* DebugWindow.xib */; };
 		04CB13D91E85075D00F2D6EE /* AppDelegate+Notification.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CB13D81E85075D00F2D6EE /* AppDelegate+Notification.m */; };
 		04D5A48E1E9269AE0057012A /* AppDelegate+Sparkle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */; };
+		04DD160C1F40FD190080D025 /* PCRouter.m in Sources */ = {isa = PBXBuildFile; fileRef = 04DD160B1F40FD190080D025 /* PCRouter.m */; };
+		04DD160F1F4100570080D025 /* PCRoutePathConst.m in Sources */ = {isa = PBXBuildFile; fileRef = 04DD160E1F4100570080D025 /* PCRoutePathConst.m */; };
 		04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
 		04F705701BD7A9B700829651 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04F7056F1BD7A9B700829651 /* IOKit.framework */; };
 		04F705721BD7A9BD00829651 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04F705711BD7A9BD00829651 /* CoreFoundation.framework */; };
@@ -218,8 +220,8 @@
 		04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionComparison.m; sourceTree = "<group>"; };
 		04AD71C71E9B74E600DB6AE9 /* AppDelegate+Netmonitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Netmonitor.h"; sourceTree = "<group>"; };
 		04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Netmonitor.m"; sourceTree = "<group>"; };
-		04AF2B061E84B19B00F4DF09 /* AppDelegate+EventHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+EventHandle.h"; sourceTree = "<group>"; };
-		04AF2B071E84B19B00F4DF09 /* AppDelegate+EventHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+EventHandle.m"; sourceTree = "<group>"; };
+		04B3FB8C1F41133600A72834 /* AppDelegate+ResponseHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+ResponseHandle.h"; sourceTree = "<group>"; };
+		04B3FB8D1F41133600A72834 /* AppDelegate+ResponseHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+ResponseHandle.m"; sourceTree = "<group>"; };
 		04BC73811E8A2E910079BD77 /* AboutWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutWindow.h; sourceTree = "<group>"; };
 		04BC73821E8A2E910079BD77 /* AboutWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AboutWindow.m; sourceTree = "<group>"; };
 		04BD309B1F3E4B2D00509B21 /* PCSetup2VC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup2VC.h; sourceTree = "<group>"; };
@@ -240,6 +242,10 @@
 		04CB13D81E85075D00F2D6EE /* AppDelegate+Notification.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Notification.m"; sourceTree = "<group>"; };
 		04D5A48C1E9269AE0057012A /* AppDelegate+Sparkle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Sparkle.h"; sourceTree = "<group>"; };
 		04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Sparkle.m"; sourceTree = "<group>"; };
+		04DD160A1F40FD190080D025 /* PCRouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCRouter.h; sourceTree = "<group>"; };
+		04DD160B1F40FD190080D025 /* PCRouter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCRouter.m; sourceTree = "<group>"; };
+		04DD160D1F41000A0080D025 /* PCRoutePathConst.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCRoutePathConst.h; sourceTree = "<group>"; };
+		04DD160E1F4100570080D025 /* PCRoutePathConst.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCRoutePathConst.m; sourceTree = "<group>"; };
 		04E51DBF1BDC88E3001F1F22 /* Resources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Resources.bundle; sourceTree = "<group>"; };
 		04F7056F1BD7A9B700829651 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		04F705711BD7A9BD00829651 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
@@ -336,8 +342,8 @@
 				04C585851BE5BF3B004B2839 /* PCConstants.m */,
 				0441A3D61BD8904100AABD7A /* AppDelegate.h */,
 				0441A3D71BD8904100AABD7A /* AppDelegate.m */,
-				04AF2B061E84B19B00F4DF09 /* AppDelegate+EventHandle.h */,
-				04AF2B071E84B19B00F4DF09 /* AppDelegate+EventHandle.m */,
+				04B3FB8C1F41133600A72834 /* AppDelegate+ResponseHandle.h */,
+				04B3FB8D1F41133600A72834 /* AppDelegate+ResponseHandle.m */,
 				04AD71C71E9B74E600DB6AE9 /* AppDelegate+Netmonitor.h */,
 				04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */,
 				04CB13D71E85075D00F2D6EE /* AppDelegate+Notification.h */,
@@ -356,9 +362,13 @@
 			children = (
 				0464AD4A1F3DE445000D323C /* Router.h */,
 				0464AD4B1F3DE445000D323C /* Router.m */,
+				04570BB01F40E3440047CCF9 /* PCRouteRequest.h */,
+				04DD160A1F40FD190080D025 /* PCRouter.h */,
+				04DD160B1F40FD190080D025 /* PCRouter.m */,
 				04BEEEAD1F40832E008426A7 /* PCRouteTrie.h */,
 				04BEEEAE1F40832E008426A7 /* PCRouteTrie.m */,
-				04570BB01F40E3440047CCF9 /* PCRouteRequest.h */,
+				04DD160D1F41000A0080D025 /* PCRoutePathConst.h */,
+				04DD160E1F4100570080D025 /* PCRoutePathConst.m */,
 			);
 			name = Router;
 			path = manager/Router;
@@ -960,6 +970,7 @@
 				04030F811F3D5C1E00EA793D /* NativeMenu+RunCluster.m in Sources */,
 				04030F661F3D5B6500EA793D /* Cluster.m in Sources */,
 				04030F861F3D5CD500EA793D /* PackageMenuItem.m in Sources */,
+				04DD160C1F40FD190080D025 /* PCRouter.m in Sources */,
 				04BC73831E8A2E910079BD77 /* AboutWindow.m in Sources */,
 				046A361A1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */,
@@ -973,12 +984,14 @@
 				04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */,
 				04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
+				04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */,
 				04CB13D91E85075D00F2D6EE /* AppDelegate+Notification.m in Sources */,
 				046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
 				04030F681F3D5B6500EA793D /* Package.m in Sources */,
 				046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				046D312A1F3D346B0081CC3E /* PCSetup3VC.m in Sources */,
+				04DD160F1F4100570080D025 /* PCRoutePathConst.m in Sources */,
 				046D31101F3D32440081CC3E /* DPSetupWC.m in Sources */,
 				046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
@@ -991,7 +1004,6 @@
 				04CAE2E71E9B8A4900B23B22 /* DebugWindow.m in Sources */,
 				04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */,
 				046D31241F3D346B0081CC3E /* PCSetup1VC.m in Sources */,
-				04AF2B081E84B19B00F4DF09 /* AppDelegate+EventHandle.m in Sources */,
 				04BD309E1F3E4B2D00509B21 /* PCSetup2VC.m in Sources */,
 				046D310E1F3D32440081CC3E /* PCPkgInstallWC.m in Sources */,
 			);

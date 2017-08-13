@@ -3,9 +3,9 @@ package main
 
 /*
 #cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -Wl,-U,_PCEventFeedGet,-U,_PCEventFeedPost,-U,_PCEventFeedPut,-U,_PCEventFeedDelete
+#cgo LDFLAGS: -Wl,-U,_PCFeedResponseForGet,-U,_PCFeedResponseForPost,-U,_PCFeedResponseForPut,-U,_PCFeedResponseForDelete
 
-#include "PCEventHandle.h"
+#include "PCResponseHandle.h"
 */
 import "C"
 import (
@@ -16,10 +16,10 @@ import (
 
 type feedMethodType int
 const (
-    feedMethodGet       feedMethodType = iota
-    feedMethodPost
-    feedMethodPut
-    feedMethodDelete
+    feedReponseGet       feedMethodType = iota
+    feedResponsePost
+    feedResponsePut
+    feedResponseDelete
 )
 
 type feedMessage struct {
@@ -50,20 +50,22 @@ func (h *feeder) feedLoop() {
             }
             case feedMessage: {
                 switch feed.method {
-                    case feedMethodGet: {
+                    case feedReponseGet: {
                         var (
                             cPath = C.CString(feed.path)
+                            cPayload = C.CString(feed.payload)
                         )
-                        C.PCEventFeedGet(cPath)
+                        C.PCFeedResponseForGet(cPath, cPayload)
                         // these strings will be freed on cocoa side to reduce performance degrade
                         //C.free(unsafe.Pointer(cPath))
+                        //C.free(unsafe.Pointer(cPayload))
                     }
-                    case feedMethodPost: {
+                    case feedResponsePost: {
                         var (
                             cPath    = C.CString(feed.path)
                             cPayload = C.CString(feed.payload)
                         )
-                        C.PCEventFeedPost(cPath, cPayload)
+                        C.PCFeedResponseForPost(cPath, cPayload)
                         // these strings will be freed on cocoa side to reduce performance degrade
                         //C.free(unsafe.Pointer(cPath))
                         //C.free(unsafe.Pointer(cPayload))
@@ -88,23 +90,25 @@ func FeedStop() {
     theFeeder.feedPipe <- stopFeed{}
 }
 
-func EventFeedGet(path string) error {
+func FeedResponseForGet(path, payload string) error {
     if len(path) == 0 {
         return errors.Errorf("[ERR] invalid feed path")
     }
     theFeeder.feedPipe <- feedMessage {
-        method:     feedMethodGet,
+        method:     feedReponseGet,
         path:       path,
+        payload:    payload,
+
     }
     return nil
 }
 
-func EventFeedPost(path, payload string) error {
+func FeedResponseForPost(path, payload string) error {
     if len(path) == 0 {
         return errors.Errorf("[ERR] invalid feed path")
     }
     theFeeder.feedPipe <- feedMessage {
-        method:     feedMethodPost,
+        method:     feedResponsePost,
         path:       path,
         payload:    payload,
     }
