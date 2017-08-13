@@ -12,12 +12,14 @@ import (
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/event/route"
-//    "github.com/stkim1/pc-core/event/route/routepath"
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/service"
 )
 
 func main() {
+
+    // this needs to be initialized before service loop initiated
+    initRoutePathService()
 
     appLifeCycle(func(a *appMainLife) {
 

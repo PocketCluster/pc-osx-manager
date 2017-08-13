@@ -9,6 +9,7 @@
 #import "DebugWindow.h"
 #import "AppDelegate+Window.h"
 #import "pc-core.h"
+#import "routepath.h"
 
 @interface DebugWindow ()
 @end
@@ -49,6 +50,7 @@
     OpsCmdDebug();
 }
 
+#pragma mark - WINDOW
 - (IBAction)openInstallWindow:(id)sender {
     [[AppDelegate sharedDelegate] activeWindowByClassName:@"PCPkgInstallWC" withResponder:nil];
 }
@@ -56,6 +58,21 @@
 - (IBAction)openSetupWindow:(id)sender {
     [[AppDelegate sharedDelegate] activeWindowByClassName:@"DPSetupWC" withResponder:nil];
 }
+
+
+#pragma mark - ROUTEPATH
+- (IBAction)route_01:(id)sender {
+    RouteEventGet(RPATH_SYSTEM_READINESS);
+}
+
+- (IBAction)route_02:(id)sender {
+    RouteEventGet(RPATH_SYSTEM_IS_FIRST_RUN);
+}
+
+- (IBAction)route_03:(id)sender {
+    RouteEventGet(RPATH_APP_EXPIRED);
+}
+
 
 
 @end

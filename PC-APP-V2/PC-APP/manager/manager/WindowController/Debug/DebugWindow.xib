@@ -112,6 +112,36 @@
                             <action selector="openInstallWindow:" target="-2" id="MtG-mm-ooO"/>
                         </connections>
                     </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EHR-gA-Cvs">
+                        <rect key="frame" x="233" y="185" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[RT] system ready" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="wlI-oW-3f2">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="route_01:" target="-2" id="zq5-6W-VR5"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="svL-Va-Iy6">
+                        <rect key="frame" x="233" y="152" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[RT] first time" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="D0a-AF-MF0">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="route_02:" target="-2" id="WOw-8Y-Uon"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QvO-BA-tEz">
+                        <rect key="frame" x="233" y="119" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[RT] app expired" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="dJR-Fe-HGG">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="route_03:" target="-2" id="AtD-BW-Ozz"/>
+                        </connections>
+                    </button>
                 </subviews>
             </view>
             <connections>
