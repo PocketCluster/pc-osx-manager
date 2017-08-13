@@ -24,10 +24,38 @@
     [super tearDown];
 }
 
-- (void)testExample {
-    // This is an example of a functional test case.
-    // Use XCTAssert and related functions to verify your tests produce the correct results.
-}
+- (void)test_PCTrieNode {
+    NSString *path = @"/v1/system/monitor/status/battery";
+    NSArray *components = [path componentsSeparatedByString:@"/"];
+    
+    @try {
+        [@[] objectAtIndex:0];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"empty[0] %@", [exception description]);
+    }
+    @finally {
+    }
+    
+    NSLog(@"components(full) %@", components);
+    NSLog(@"components[0, 1] %@", [components subarrayWithRange:NSMakeRange(0, 1)]);
+    NSLog(@"components[1, 0] %@", [components subarrayWithRange:NSMakeRange(1, 0)]);
+    NSLog(@"components[2, 0] %@", [components subarrayWithRange:NSMakeRange(2, 0)]);
+    NSLog(@"components[1, 1] %@", [components subarrayWithRange:NSMakeRange(1, 1)]);
+    NSLog(@"components[1, last(lenth - 1)] %@", [components subarrayWithRange:NSMakeRange(1, [components count] - 1)]);
+    
+    
+    PCRouteTrie *trie = [[PCRouteTrie alloc] initWithPathComponent:@"/"];
+    [trie addNode:@"GET" forPath:@"/v1/system/monitor/battery" withHandlerBlock:^(NSDictionary *payload) {
+        NSLog(@"new Handler");
+    }];
+    
+    PCRouteTrie *node = nil;
+    NSString *component;
+    [trie traseverse:[@"v1/system/monitor/battery" componentsSeparatedByString:@"/"] toNode:&node forComponent:&component];
+    NSLog(@"node %@ component %@",[node description], component);
+    [trie traseverse:[@"v1/system/monitor" componentsSeparatedByString:@"/"] toNode:&node forComponent:&component];
+    NSLog(@"node %@ component %@",[node description], component);}
 
 - (void)testPerformanceExample {
     // This is an example of a performance test case.

@@ -65,6 +65,7 @@
 		04BC73831E8A2E910079BD77 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04BC73821E8A2E910079BD77 /* AboutWindow.m */; };
 		04BD309E1F3E4B2D00509B21 /* PCSetup2VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04BD309C1F3E4B2D00509B21 /* PCSetup2VC.m */; };
 		04BD309F1F3E4B2D00509B21 /* PCSetup2VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04BD309D1F3E4B2D00509B21 /* PCSetup2VC.xib */; };
+		04BEEEAF1F40832E008426A7 /* PCRouteTrie.m in Sources */ = {isa = PBXBuildFile; fileRef = 04BEEEAE1F40832E008426A7 /* PCRouteTrie.m */; };
 		04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C585851BE5BF3B004B2839 /* PCConstants.m */; };
 		04C6D6061E7F9CEA0004837A /* libstatic-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04C6D6051E7F9CEA0004837A /* libstatic-core.a */; };
 		04C6D6091E7F9D210004837A /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04C6D6071E7F9CFD0004837A /* CoreWLAN.framework */; };
@@ -223,6 +224,8 @@
 		04BD309B1F3E4B2D00509B21 /* PCSetup2VC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup2VC.h; sourceTree = "<group>"; };
 		04BD309C1F3E4B2D00509B21 /* PCSetup2VC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetup2VC.m; sourceTree = "<group>"; };
 		04BD309D1F3E4B2D00509B21 /* PCSetup2VC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCSetup2VC.xib; sourceTree = "<group>"; };
+		04BEEEAD1F40832E008426A7 /* PCRouteTrie.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCRouteTrie.h; sourceTree = "<group>"; };
+		04BEEEAE1F40832E008426A7 /* PCRouteTrie.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCRouteTrie.m; sourceTree = "<group>"; };
 		04C585841BE5BF3B004B2839 /* PCConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCConstants.h; sourceTree = "<group>"; };
 		04C585851BE5BF3B004B2839 /* PCConstants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCConstants.m; sourceTree = "<group>"; };
 		04C6D6051E7F9CEA0004837A /* libstatic-core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libstatic-core.a"; path = "../../../COCOA/XCODE/static-core/build/Debug/libstatic-core.a"; sourceTree = "<group>"; };
@@ -352,6 +355,8 @@
 			children = (
 				0464AD4A1F3DE445000D323C /* Router.h */,
 				0464AD4B1F3DE445000D323C /* Router.m */,
+				04BEEEAD1F40832E008426A7 /* PCRouteTrie.h */,
+				04BEEEAE1F40832E008426A7 /* PCRouteTrie.m */,
 			);
 			name = Router;
 			path = manager/Router;
@@ -962,6 +967,7 @@
 				04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */,
 				046D31311F3D34D60081CC3E /* DPSetupWindow.m in Sources */,
 				0464AD4C1F3DE445000D323C /* Router.m in Sources */,
+				04BEEEAF1F40832E008426A7 /* PCRouteTrie.m in Sources */,
 				04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */,
 				04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
