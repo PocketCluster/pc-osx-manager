@@ -24,6 +24,18 @@
         Log(@"cannot find class from invalid string");
         return nil;
     }
+    
+    // if this isn't main thread and gets called, re-invoke it in main thread.
+    if (![NSThread isMainThread]) {
+        WEAK_SELF(self);
+        [[NSOperationQueue mainQueue]
+         addOperationWithBlock:^{
+             if(belf){
+                 [belf activeWindowByClassName:aClassName withResponder:aResponder];
+             }
+         }];
+        return nil;
+    }
 
     @synchronized(_openWindows) {
 
@@ -71,6 +83,19 @@
 }
 
 - (void)addOpenWindow:(id)window {
+
+    // if this isn't main thread and gets called, re-invoke it in main thread.
+    if (![NSThread isMainThread]) {
+        WEAK_SELF(self);
+        [[NSOperationQueue mainQueue]
+         addOperationWithBlock:^{
+             if(belf){
+                 [belf addOpenWindow:window];
+             }
+         }];
+        return;
+    }
+
     if (![[window class] isSubclassOfClass:[BaseWindowController class]]) {
         Log(@"Unable to add a non-child class of BaseWindowController: %@", [window className]);
         return;
@@ -83,6 +108,19 @@
 }
 
 - (void)removeOpenWindow:(id)window {
+
+    // if this isn't main thread and gets called, re-invoke it in main thread.
+    if (![NSThread isMainThread]) {
+        WEAK_SELF(self);
+        [[NSOperationQueue mainQueue]
+         addOperationWithBlock:^{
+             if(belf){
+                 [belf removeOpenWindow:window];
+             }
+         }];
+        return;
+    }
+    
     @synchronized(_openWindows) {
         [_openWindows removeObject:window];
         [self updateProcessType];
