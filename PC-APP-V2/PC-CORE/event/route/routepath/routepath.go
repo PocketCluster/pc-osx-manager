@@ -8,13 +8,30 @@ package routepath
 */
 import "C"
 
-var (
-    RpathSystemReadiness            string = C.GoString(C.RPATH_SYSTEM_READINESS)
-    RpathAppExpired                 string = C.GoString(C.RPATH_APP_EXPIRED)
-    RpathUserAuthed                 string = C.GoString(C.RPATH_USER_AUTHED)
-    RpathSystemIsFirstRun           string = C.GoString(C.RPATH_SYSTEM_IS_FIRST_RUN)
-    RpathCmdServiceStart            string = C.GoString(C.RPATH_CMD_SERVICE_START)
+func RpathSystemReadiness() string {
+    return C.GoString(C.RPATH_SYSTEM_READINESS)
+}
 
-    RpathMonitorNodeBounded         string = C.GoString(C.RPATH_MONITOR_NODE_BOUNDED)
-    RpathMonitorNodeUnbounded       string = C.GoString(C.RPATH_MONITOR_NODE_UNBOUNDED)
-)
+func RpathAppExpired() string {
+    return C.GoString(C.RPATH_APP_EXPIRED)
+}
+
+func RpathUserAuthed() string {
+    return C.GoString(C.RPATH_USER_AUTHED)
+}
+
+func RpathSystemIsFirstRun() string {
+    return C.GoString(C.RPATH_SYSTEM_IS_FIRST_RUN)
+}
+
+func RpathCmdServiceStart() string {
+    return C.GoString(C.RPATH_CMD_SERVICE_START)
+}
+
+func RpathMonitorNodeBounded() string {
+    return C.GoString(C.RPATH_MONITOR_NODE_BOUNDED)
+}
+
+func RpathMonitorNodeUnbounded() string {
+    return C.GoString(C.RPATH_MONITOR_NODE_UNBOUNDED)
+}

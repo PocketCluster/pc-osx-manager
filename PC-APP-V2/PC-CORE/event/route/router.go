@@ -16,7 +16,7 @@ const (
 )
 
 // Handle is just like "net/http" Handlers, only takes params.
-type Handle func(payload string) error
+type Handle func(method, path, payload string) error
 
 // Router name says it all.
 type Router struct {
@@ -75,8 +75,8 @@ func (r *Router) DELETE(path string, handler Handle) error {
 func (r *Router) Dispatch(event Event) error {
     node, _ := r.tree.traverse(strings.Split(event.path, "/")[1:])
     if handler := node.methods[event.method]; handler != nil {
-        return handler(event.payload)
+        return handler(event.method, event.path, event.payload)
     }
 
-    return r.rootHandler(event.payload)
+    return r.rootHandler(event.method, event.path, event.payload)
 }

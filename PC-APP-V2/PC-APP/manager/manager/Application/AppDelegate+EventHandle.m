@@ -45,31 +45,35 @@ PCEventFeedDelete(char* path) {
 void
 eventHandle(NSString* eventMethod, const char* path, const char* payload) {
 
+    // parse in the background
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
         NSString *eventPath = \
             [[NSString alloc]
-             initWithBytesNoCopy:(void *)path
-             length:strlen((const char*)path)
-             encoding:NSUTF8StringEncoding
-             freeWhenDone:YES];
+                 initWithBytesNoCopy:(void *)path
+                 length:strlen((const char*)path)
+                 encoding:NSUTF8StringEncoding
+                 freeWhenDone:YES];
 
-        // Parse in the background
-        NSData *payloadData = \
-            [[NSData alloc]
+        NSDictionary* eventPayload = nil;
+        if (payload != NULL) {
+
+            NSData *payloadData = \
+                [[NSData alloc]
                  initWithBytesNoCopy:(void *)payload
                  length:strlen((const char*)payload)
                  freeWhenDone:YES];
 
-        NSError *error = nil;
-        NSDictionary* eventPayload = \
-            [NSJSONSerialization
-                 JSONObjectWithData:payloadData
-                 options:NSJSONReadingMutableContainers
-                 error:&error];
-        if (error != nil) {
-            Log(@"%@", [error description]);
-            return;
+            NSError *error = nil;
+            eventPayload = \
+                [NSJSONSerialization
+                     JSONObjectWithData:payloadData
+                     options:NSJSONReadingMutableContainers
+                     error:&error];
+            if (error != nil) {
+                Log(@"%@", [error description]);
+                return;
+            }
         }
 
         dispatch_async(dispatch_get_main_queue(), ^{

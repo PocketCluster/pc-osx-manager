@@ -7,11 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "PCRouteRequest.h"
 
 typedef void (^ResponseHandler)(NSDictionary *payload);
 
 @interface PCRouteTrie : NSObject
 - (instancetype) initWithPathComponent:(NSString *)aComponent;
-- (void) addNode:(NSString*)aMethod forPath:(NSString*)aPath withHandlerBlock:(ResponseHandler)aHandler;
-- (void) traseverse:(NSArray<NSString *>*)components toNode:(PCRouteTrie **)toNode forComponent:(NSString **)toComponent;
+
+- (void) addRequest:(NSObject<PCRouteRequest> *)aRequest forMethod:(NSString*)aMethod onPath:(NSString*)aPath;
+- (void) delRequest:(NSObject<PCRouteRequest> *)aRequest forMethod:(NSString*)aMethod onPath:(NSString*)aPath;
 @end

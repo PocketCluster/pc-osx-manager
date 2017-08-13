@@ -44,7 +44,7 @@ var (
             eventsOut:      make(chan interface{}),
             lifecycleStage: lifecycle.StageDead,
         },
-        Router: route.NewRouter(func(payload string) error {
+        Router: route.NewRouter(func(_, _, _ string) error {
             return errors.Errorf("invalid path root (/)")
         }),
         ServiceSupervisor: service.NewServiceSupervisor(),

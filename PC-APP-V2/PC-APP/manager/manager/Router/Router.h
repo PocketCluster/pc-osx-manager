@@ -11,7 +11,6 @@
 
 #define HEARTBEAT_CHECK_INTERVAL (30.0)
 
-
 @protocol RouterDelegate <NSObject>
 @optional
 - (void)didReceiveUnboundedAgentData:(NSDictionary *)anAgentData;
