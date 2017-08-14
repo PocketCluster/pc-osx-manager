@@ -3,7 +3,7 @@ package context
 
 /*
 #cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -Wl,-U,_PCSystemProcessorCount,-U,_PCSystemActiveProcessorCount,-U,_PCSystemPhysicalMemorySize
+#cgo LDFLAGS: -Wl,-U,_PCSystemProcessorCount,-U,_PCSystemActiveProcessorCount,-U,_PCSystemPhysicalMemorySize,-U,_PCSystemPhysicalCoreCount
 
 #include "PCSystemInfo.h"
 
@@ -20,4 +20,8 @@ func findSystemActiveProcessorCount() uint {
 
 func findSystemPhysicalMemorySize() uint64 {
     return uint64(C.PCSystemPhysicalMemorySize())
+}
+
+func findSystemPhysicalCoreCount() uint {
+    return uint(C.PCSystemPhysicalCoreCount())
 }

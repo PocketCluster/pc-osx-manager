@@ -19,6 +19,7 @@ import (
 func main() {
 
     // this needs to be initialized before service loop initiated
+    context.SharedHostContext()
     initRoutePathService()
 
     appLifeCycle(func(a *appMainLife) {

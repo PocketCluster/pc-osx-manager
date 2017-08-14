@@ -1,37 +1,58 @@
 package context
 
 import (
+    "math"
+
+    "github.com/pkg/errors"
     "github.com/ricochet2200/go-disk-usage/du"
+)
+
+const (
+    HostMinResourceCpuCount     uint = 2
+    HostMinResourceMemSize      uint = 4096
+    HostMinResourceDiskSize     uint = 48
+
+    HostMaxResourceCpuCount     uint = 8
+    HostMaxResourceMemSize      uint = 8192
 )
 
 type HostContextSysResource interface {
     HostProcessorCount() uint
     HostActiveProcessorCount() uint
-    HostPhysicalMemorySize() uint64
-    HostStorageSpaceStatus() (total uint64, available uint64)
+    HostPhysicalMemorySize() uint
+    HostPhysicalCoreCount() uint
+    HostStorageSpaceStatus() (total uint, available uint)
+    CheckHostSuitability() error
 }
 
 type hostSysResource struct {
-    processorCount               uint
-    activeProcessorCount         uint
-    physicalMemorySize           uint64
+    processorCount          uint
+    activeProcessorCount    uint
+    physicalMemorySize      uint64
+    physicalCoreCount       uint
 }
 
-func (ctx *hostContext) HostProcessorCount() uint {
+func (ctx *hostSysResource) HostProcessorCount() uint {
     return ctx.processorCount
 }
 
-func (ctx *hostContext) HostActiveProcessorCount() uint {
+func (ctx *hostSysResource) HostActiveProcessorCount() uint {
     return ctx.activeProcessorCount
 }
 
-func (ctx *hostContext) HostPhysicalMemorySize() uint64 {
-    var MB = uint64(1024 * 1024)
-    return uint64(ctx.physicalMemorySize / MB)
+// size in MegaByte (MB)
+func (ctx *hostSysResource) HostPhysicalMemorySize() uint {
+    var MB = uint64(math.Exp2(20.0))
+    return uint(ctx.physicalMemorySize / MB)
 }
 
-func (ctx *hostContext) HostStorageSpaceStatus() (total uint64, available uint64) {
-    var MB = uint64(1024 * 1024)
+func (ctx *hostSysResource) HostPhysicalCoreCount() uint {
+    return ctx.physicalCoreCount
+}
+
+// size in GigaByte (GB)
+func (ctx *hostSysResource) HostStorageSpaceStatus() (total uint, available uint) {
+    var GB = uint64(math.Exp2(30.0))
     usage := du.NewDiskUsage("/")
 
 /*
@@ -42,8 +63,27 @@ func (ctx *hostContext) HostStorageSpaceStatus() (total uint64, available uint64
     fmt.Println("Usage:", usage.Usage()*100, "%")
 */
 
-    total = uint64(usage.Size()/(MB))
-    available = uint64(usage.Available()/(MB))
+    total = uint(usage.Size() / GB)
+    available = uint(usage.Available() / GB)
     return
 }
 
+func (ctx *hostSysResource) CheckHostSuitability() error {
+
+    cpuCount := ctx.HostPhysicalCoreCount()
+    if cpuCount < HostMinResourceCpuCount {
+        return errors.Errorf("Insufficient number of core count. Need at least 2 CPU cores")
+    }
+
+    memSize := ctx.HostPhysicalMemorySize()
+    if memSize < HostMinResourceMemSize {
+        return errors.Errorf("Insufficient size of system memory. Need at least 4GB memory")
+    }
+
+    _, avail := ctx.HostStorageSpaceStatus()
+    if avail < HostMinResourceDiskSize {
+        return errors.Errorf("Insufficient size of storage space. Need at least 48 GB free space")
+    }
+
+    return nil
+}

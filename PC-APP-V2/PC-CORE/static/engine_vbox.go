@@ -108,7 +108,7 @@ func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     if err != nil {
         return errors.WithStack(err)
     }
-    md = vboxutil.NewMachineDisk(vmPath, vboxutil.DefualtCoreDiskName,36000, true)
+    md = vboxutil.NewMachineDisk(vmPath, vboxutil.DefualtCoreDiskName,vboxutil.DefualtCoreDiskSize, true)
     md.ClusterID = clusterID
     md.AuthToken = authToken
     md.UserName = userName
@@ -129,14 +129,15 @@ func buildVboxMachine(a *appMainLife) error {
     }
     log.Debugf("AppVersion %d, ApiVersion %d", vglue.AppVersion(), vglue.APIVersion())
 
-    cpuCount := context.SharedHostContext().HostProcessorCount()
-    if 16 <= cpuCount {
-        cpuCount = 16
+    cpuCount := context.SharedHostContext().HostPhysicalCoreCount()
+    if context.HostMaxResourceCpuCount < cpuCount {
+        cpuCount = context.HostMaxResourceCpuCount
     }
 
-    // TODO : get the memory size from context
-    //memSize  := ctx.HostPhysicalMemorySize()
-    var memSize uint = 8192
+    memSize  := context.SharedHostContext().HostPhysicalMemorySize()
+    if context.HostMaxResourceMemSize < memSize {
+        memSize = context.HostMaxResourceMemSize
+    }
 
     // base directory
     baseDir, err := context.SharedHostContext().ApplicationUserDataDirectory()
