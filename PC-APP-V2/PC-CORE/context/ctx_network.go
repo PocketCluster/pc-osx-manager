@@ -6,6 +6,7 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/davecgh/go-spew/spew"
+    "sync"
 )
 
 type HostContextNetwork interface {
@@ -47,6 +48,8 @@ type HostNetworkGateway struct {
 }
 
 type hostNetwork struct {
+    sync.Mutex
+
     hostInterfaces               *[]*HostNetworkInterface
     hostGateways                 *[]*HostNetworkGateway
 
@@ -55,7 +58,7 @@ type hostNetwork struct {
     primaryGateway               *HostNetworkGateway
 }
 
-func (ctx *hostContext) HostPrimaryAddress() (string, error) {
+func (ctx *hostNetwork) HostPrimaryAddress() (string, error) {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -67,7 +70,7 @@ func (ctx *hostContext) HostPrimaryAddress() (string, error) {
     return addr.Address, nil
 }
 
-func (ctx *hostContext) HostPrimaryInterfaceShortName() (string, error) {
+func (ctx *hostNetwork) HostPrimaryInterfaceShortName() (string, error) {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -78,7 +81,7 @@ func (ctx *hostContext) HostPrimaryInterfaceShortName() (string, error) {
     return iface.BsdName, nil
 }
 
-func (ctx *hostContext) HostPrimaryInterfaceFullName() (string, error) {
+func (ctx *hostNetwork) HostPrimaryInterfaceFullName() (string, error) {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -89,7 +92,7 @@ func (ctx *hostContext) HostPrimaryInterfaceFullName() (string, error) {
     return iface.DisplayName, nil
 }
 
-func (ctx *hostContext) HostDefaultGatewayAddress() (string, error) {
+func (ctx *hostNetwork) HostDefaultGatewayAddress() (string, error) {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -102,7 +105,7 @@ func (ctx *hostContext) HostDefaultGatewayAddress() (string, error) {
 }
 
 // take network interfaces
-func (ctx *hostContext) UpdateNetworkInterfaces(interfaces []*HostNetworkInterface) bool {
+func (ctx *hostNetwork) UpdateNetworkInterfaces(interfaces []*HostNetworkInterface) bool {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -160,7 +163,7 @@ func (ctx *hostContext) UpdateNetworkInterfaces(interfaces []*HostNetworkInterfa
     return !reflect.DeepEqual(addr, ctx.primaryAddress)
 }
 
-func (ctx *hostContext) UpdateNetworkGateways(gateways []*HostNetworkGateway) {
+func (ctx *hostNetwork) UpdateNetworkGateways(gateways []*HostNetworkGateway) {
     ctx.Lock()
     defer ctx.Unlock()
 

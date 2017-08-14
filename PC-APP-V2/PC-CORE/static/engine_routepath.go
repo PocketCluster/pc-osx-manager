@@ -7,40 +7,74 @@ import (
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/event/route/routepath"
+    "github.com/stkim1/pc-core/vboxglue"
 )
+
+type ReponseMessage map[string]map[string]interface{}
 
 func initRoutePathService() {
 
     // check if this system is suitable to run
     theApp.GET(routepath.RpathSystemReadiness(), func(_, path, _ string) error {
+        var (
+            syserr, nerr, vlerr, vererr error = nil, nil, nil, nil
+            vbox vboxglue.VBoxGlue = nil
+            data []byte = nil
+            response ReponseMessage = nil
+        )
 
-        cpu := context.SharedHostContext().HostPhysicalCoreCount()
-        mem := context.SharedHostContext().HostPhysicalMemorySize()
-        _, avail := context.SharedHostContext().HostStorageSpaceStatus()
+        syserr = context.SharedHostContext().CheckHostSuitability()
+        if syserr == nil {
+
+            _, nerr = context.SharedHostContext().HostPrimaryAddress()
+            if nerr == nil {
+
+                vbox, vlerr = vboxglue.NewGOVboxGlue()
+                defer vbox.Close()
+                if vlerr == nil {
+
+                    vererr = vbox.CheckVBoxSuitability()
+                    if vererr == nil {
+
+                        response = ReponseMessage{"syscheck": {"status": true}}
+                    } else {
+                        response = ReponseMessage{
+                            "syscheck": {
+                                "status": false,
+                                "error": vererr.Error(),
+                            },
+                        }
+                    }
+
+                } else {
+                    response = ReponseMessage{
+                        "syscheck": {
+                            "status": false,
+                            "error": errors.WithMessage(vlerr, "Loading Virtualbox causes an error. Please install latest VirtualBox"),
+                        },
+                    }
+                }
+
+            } else {
+                response = ReponseMessage{
+                    "syscheck": {
+                        "status": false,
+                        "error": errors.WithMessage(nerr, "Unable to detect Wi-Fi network. Please enable Wi-Fi"),
+                    },
+                }
+            }
+
+        } else {
+            response = ReponseMessage{
+                "syscheck": {
+                    "status": false,
+                    "error": syserr.Error(),
+                },
+            }
+        }
 
         // inline json marshalling
-        data, err := json.Marshal(map[string]map[string]interface{}{
-            "cpu": {
-                "status": true,
-                "count": cpu,
-            },
-            "mem": {
-                "status": false,
-                "size": mem,
-                "error": "Insufficient memory is present in system",
-            },
-            "hdd": {
-                "status": false,
-                "size": avail,
-                "error": "Insufficient hdd space is present in system",
-            },
-            "net": {
-                "status": true,
-            },
-            "vbox": {
-                "status": true,
-            },
-        })
+        data, err := json.Marshal(response)
         if err != nil {
             log.Debugf(err.Error())
             return errors.WithStack(err)

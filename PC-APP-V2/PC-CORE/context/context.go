@@ -11,8 +11,9 @@ type HostContext interface {
     RefreshStatus() error
 
     HostContextClusterMeta
-    HostContextApplicationEnv
     HostContextUserEnv
+    HostContextApplicationEnv
+    HostContextCompositeEnv
     HostContextSysResource
     HostContextNetwork
     HostContextCertificate

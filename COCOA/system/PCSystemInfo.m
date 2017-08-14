@@ -70,7 +70,10 @@ PCSystemPhysicalCoreCount(void) {
 }
 
 // https://stackoverflow.com/questions/150355/programmatically-find-the-number-of-cores-on-a-machine
-// https://stackoverflow.com/questions/2901694/programmatically-detect-number-of-physical-processors-cores-or-if-hyper-threadin/2921632
+// https://stackoverflow.com/questions/2901694/programmatically-detect-number-of-physical-processors-cores-or-if-hyper-threadin
+// https://stackoverflow.com/questions/4586405/get-number-of-cpus-in-linux-using-c
+// https://stackoverflow.com/questions/5650659/obtaining-cpu-descriptions-on-mac-os-x
+// https://www.cocoawithlove.com/blog/2016/03/08/swift-wrapper-for-sysctl.html
 #ifdef SYSTEM_AGONISTIC
     #ifdef _WIN32
     #include <windows.h>
