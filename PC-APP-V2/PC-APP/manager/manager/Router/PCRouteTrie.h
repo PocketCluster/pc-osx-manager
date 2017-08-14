@@ -9,11 +9,16 @@
 #import <Foundation/Foundation.h>
 #import "PCRouteRequest.h"
 
+@interface PCRequestHolder : NSObject
+@property (nonatomic, strong, readonly) NSObject<PCRouteRequest>* request;
+@property (nonatomic, strong, readonly) ResponseHandler handler;
+@end
+
 @interface PCRouteTrie : NSObject
 - (instancetype) initWithPathComponent:(NSString *)aComponent;
 
-- (void) addRequest:(NSObject<PCRouteRequest> *)aRequest forMethod:(NSString*)aMethod onPath:(NSString*)aPath;
-- (void) delRequest:(NSObject<PCRouteRequest> *)aRequest forMethod:(NSString*)aMethod onPath:(NSString*)aPath;
-- (NSObject<PCRouteRequest> *)findRequestForMethod:(NSString*)aMethod onPath:(NSString*)aPath;
-- (NSArray *)findAllRequestForMethod:(NSString*)aMethod onPath:(NSString*)aPath;
+- (void) addRequest:(NSObject<PCRouteRequest> *)aRequest forMethod:(NSString *)aMethod onPath:(NSString *)aPath withHandler:(ResponseHandler)aHandler;
+- (void) delRequest:(NSObject<PCRouteRequest> *)aRequest forMethod:(NSString *)aMethod onPath:(NSString *)aPath;
+- (PCRequestHolder *)findRequestForMethod:(NSString *)aMethod onPath:(NSString *)aPath;
+- (NSArray<PCRequestHolder *> *)findAllRequestForMethod:(NSString*)aMethod onPath:(NSString*)aPath;
 @end

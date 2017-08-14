@@ -86,16 +86,6 @@ handleResponse(NSString* eventMethod, const char* path, const char* payload) {
 
 - (void)HandleResponseForMethod:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aPayload {
     [[PCRouter sharedRouter] responseFor:aMethod onPath:aPath withPayload:aPayload];
-
-/*
-    NSAlert *alert = [[NSAlert alloc] init];
-    [alert addButtonWithTitle:@"OK"];
-    [alert addButtonWithTitle:@"Cancel"];
-    [alert setMessageText:[message valueForKey:@"feed_msg"]];
-    [alert setInformativeText:@"Deleted records cannot be restored."];
-    [alert setAlertStyle:NSWarningAlertStyle];
-    [alert runModal];
-*/
 }
 
 @end

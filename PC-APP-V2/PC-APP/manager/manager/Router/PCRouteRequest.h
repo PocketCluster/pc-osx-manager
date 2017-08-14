@@ -6,9 +6,7 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
-typedef void (^ResponseHandler)(NSDictionary *payload);
+typedef void (^ResponseHandler)(NSString *method, NSString *path, NSDictionary *payload);
 
 @protocol PCRouteRequest <NSObject>
-@required
--(void)responseFor:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aPayload;
 @end

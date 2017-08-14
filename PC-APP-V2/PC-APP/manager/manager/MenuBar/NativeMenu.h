@@ -5,7 +5,9 @@
 //  Copyright (c) 2015,2017 PocketCluster. All rights reserved.
 //
 
-@interface NativeMenu : NSObject <NSMenuDelegate>{
+#import "PCRouteRequest.h"
+
+@interface NativeMenu : NSObject <NSMenuDelegate, PCRouteRequest>{
 @private
     NSStatusItem     *_statusItem;
 }

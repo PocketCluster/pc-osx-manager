@@ -10,14 +10,27 @@
 
 #import "PCRouteTrie.h"
 
+@interface PCRequestHolder()
+@property (nonatomic, strong, readwrite) NSObject<PCRouteRequest>* request;
+@property (nonatomic, strong, readwrite) ResponseHandler handler;
+@end
+
+@implementation PCRequestHolder
+-(void) dealloc {
+    self.request = nil;
+    self.handler = nil;
+}
+@end
+
+
 @interface PCRouteTrie() {
     __strong NSMutableArray<PCRouteTrie* >* _children;
     __strong NSString* _component;
-    __strong NSMutableDictionary<NSString*, NSMutableArray*>* _methods;
+    __strong NSMutableDictionary<NSString*, NSMutableArray<PCRequestHolder *>*>* _methods;
 }
 @property (nonatomic, strong, readonly) NSMutableArray<PCRouteTrie* >* children;
 @property (nonatomic, strong, readonly) NSString* component;
-@property (nonatomic, strong, readonly) NSMutableDictionary<NSString*, NSMutableArray*>* methods;
+@property (nonatomic, strong, readonly) NSMutableDictionary<NSString*, NSMutableArray<PCRequestHolder *>*>* methods;
 
 // - (void) addNode:(NSString*)aMethod forPath:(NSString*)aPath withHandlerBlock:(ResponseHandler)aHandler;
 - (PCRouteTrie *) _findOrAddNodeForPath:(NSString*)aPath;
@@ -34,7 +47,7 @@
     if (self != nil) {
         _children = [NSMutableArray<PCRouteTrie*> new];
         _component = aComponent;
-        _methods = [NSMutableDictionary<NSString*, NSMutableArray*> new];
+        _methods = [NSMutableDictionary<NSString*, NSMutableArray<PCRequestHolder *>*> new];
     }
     return self;
 }
@@ -143,34 +156,50 @@
     return;
 }
 
-- (void) addRequest:(NSObject<PCRouteRequest> *)aRequest forMethod:(NSString*)aMethod onPath:(NSString*)aPath {
+- (void) addRequest:(NSObject<PCRouteRequest> *)aRequest forMethod:(NSString *)aMethod onPath:(NSString *)aPath withHandler:(ResponseHandler)aHandler {
     PCRouteTrie *node = [self _findOrAddNodeForPath:aPath];
-    NSMutableArray *reqList = [node.methods objectForKey:aMethod];
+    NSMutableArray<PCRequestHolder *> *reqList = [node.methods objectForKey:aMethod];
     if (reqList == nil) {
-        reqList = [NSMutableArray new];
+        reqList = [NSMutableArray<PCRequestHolder *> new];
         [node.methods setValue:reqList forKey:aMethod];
     }
-    [reqList addObject:aRequest];
+    PCRequestHolder *holder = [PCRequestHolder new];
+    [holder setRequest:aRequest];
+    [holder setHandler:aHandler];
+    [reqList addObject:holder];
 }
 
-- (void) delRequest:(NSObject<PCRouteRequest> *)aRequest forMethod:(NSString*)aMethod onPath:(NSString*)aPath {
+- (void) delRequest:(NSObject<PCRouteRequest> *)aRequest forMethod:(NSString *)aMethod onPath:(NSString *)aPath {
     PCRouteTrie *node = [self _findOrAddNodeForPath:aPath];
-    NSMutableArray *reqList = [node.methods objectForKey:aMethod];
+    NSMutableArray<PCRequestHolder *> *reqList = [node.methods objectForKey:aMethod];
     // nothing to delete
     if (reqList == nil) {
         return;
     }
-    [reqList removeObject:aRequest];
+    
+    __weak PCRequestHolder *holder = nil;
+    for (PCRequestHolder *h in reqList) {
+        if (h.request == aRequest) {
+            holder = h;
+            break;
+        }
+    }
+
+    if (holder != nil) {
+        Log(@"b4 removal length %ld", [reqList count]);
+        [reqList removeObject:holder];
+        Log(@"a4 removal length %ld", [reqList count]);
+    }
 }
 
 // this always returns the last object
-- (NSObject<PCRouteRequest> *)findRequestForMethod:(NSString*)aMethod onPath:(NSString*)aPath {
+- (PCRequestHolder *)findRequestForMethod:(NSString *)aMethod onPath:(NSString *)aPath {
     PCRouteTrie *node = [self _findOrAddNodeForPath:aPath];
-    NSMutableArray *reqList = [node.methods objectForKey:aMethod];
+    NSMutableArray<PCRequestHolder *> *reqList = [node.methods objectForKey:aMethod];
     return [reqList lastObject];
 }
 
-- (NSArray *)findAllRequestForMethod:(NSString*)aMethod onPath:(NSString*)aPath {
+- (NSArray<PCRequestHolder *> *)findAllRequestForMethod:(NSString*)aMethod onPath:(NSString*)aPath {
     PCRouteTrie *node = [self _findOrAddNodeForPath:aPath];
     return [node.methods objectForKey:aMethod];
 }
