@@ -88,7 +88,7 @@ func initRoutePathService() {
 
     // check if app is expired
     theApp.GET(routepath.RpathAppExpired(), func(_, path, _ string) error {
-        data, err := json.Marshal(map[string]map[string]interface{}{
+        data, err := json.Marshal(ReponseMessage{
             "expired": {
                 "status": true,
                 "error": "expired by 2017/09/11",
@@ -107,10 +107,9 @@ func initRoutePathService() {
 
     // check if user is authenticated
     theApp.GET(routepath.RpathUserAuthed(), func(_, path, _ string) error {
-        data, err := json.Marshal(map[string]map[string]interface{}{
+        data, err := json.Marshal(ReponseMessage{
             "user-auth": {
-                "status": false,
-                "error": "please check your invitation code",
+                "status": true,
             },
         })
         if err != nil {
@@ -126,7 +125,7 @@ func initRoutePathService() {
 
     // check if this is the first time run
     theApp.GET(routepath.RpathSystemIsFirstRun(), func(_, path, _ string) error {
-        data, err := json.Marshal(map[string]map[string]interface{}{
+        data, err := json.Marshal(ReponseMessage{
             "user-auth": {
                 "status": false,
                 "error": "please check your invitation code",
