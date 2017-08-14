@@ -34,7 +34,7 @@ PCSystemPhysicalMemorySize(void) {
 #ifdef USE_NSPROCESSINFO
     return [[NSProcessInfo processInfo] physicalMemory];
 #else
-    unsigned long long size;
+    unsigned long long size = 0;
     size_t size_len = sizeof(size);
     sysctlbyname("hw.memsize", &size, &size_len, NULL, 0);
     return size;
@@ -63,11 +63,9 @@ PCSystemPhysicalMemorySize(void) {
 
 unsigned long
 PCSystemPhysicalCoreCount(void) {
-    unsigned long count;
+    unsigned long count = 0;
     size_t count_len = sizeof(count);
     sysctlbyname("hw.physicalcpu_max", &count, &count_len, NULL, 0);
-
-    printf("hw.physicalcpu_max %ld", count);
     return count;
 }
 
