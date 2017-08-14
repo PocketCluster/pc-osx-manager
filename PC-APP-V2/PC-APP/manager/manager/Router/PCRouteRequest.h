@@ -6,6 +6,8 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
+#import "routepath.h"
+
 typedef void (^ResponseHandler)(NSString *method, NSString *path, NSDictionary *payload);
 
 @protocol PCRouteRequest <NSObject>

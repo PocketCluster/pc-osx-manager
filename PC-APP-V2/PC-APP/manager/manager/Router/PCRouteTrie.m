@@ -127,7 +127,7 @@
 
 #ifdef DEBUG
     if (target == nil) {
-        Log(@"PCRouteTrie [%s] -> %@ target node is null. This should never happen! ", __PRETTY_FUNCTION__, aPath);
+        Log(@"%s -> %@ | target node is null. This should never happen! ", __PRETTY_FUNCTION__, aPath);
     }
 #endif
     return target;

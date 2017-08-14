@@ -18,7 +18,6 @@
 #import "PCRouteTrie.h"
 #import "PCRouter.h"
 
-
 @interface PCRouter() {
     __strong PCRouteTrie *_rootNode;
 }
@@ -58,7 +57,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCRouter, sharedRouter);
 }
 
 - (void) responseFor:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aPayload {
-    PCRequestHolder *holder = [self.rootNode findRequestForMethod:aMethod onPath:aMethod];
+    PCRequestHolder *holder = [self.rootNode findRequestForMethod:aMethod onPath:aPath];
     if (holder != nil) {
         holder.handler(aMethod, aPath, aPayload);
     }

@@ -9,9 +9,9 @@
 #import "DebugWindow.h"
 #import "AppDelegate+Window.h"
 #import "pc-core.h"
-#import "routepath.h"
+#import "PCRouter.h"
 
-@interface DebugWindow ()
+@interface DebugWindow ()<PCRouteRequest>
 @end
 
 @implementation DebugWindow
@@ -19,7 +19,12 @@
 - (void)windowDidLoad {
     [super windowDidLoad];
     
-    // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:[NSString stringWithUTF8String:RPATH_SYSTEM_READINESS]
+     withHandler:^(NSString *method, NSString *path, NSDictionary *payload) {
+         Log(@"Payload for %@ | %@", [self className], [payload description]);
+     }];
 }
 
 - (IBAction)opsCmdBaseServiceStart:(id)sender {
