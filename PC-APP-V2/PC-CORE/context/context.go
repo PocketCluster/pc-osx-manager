@@ -13,18 +13,21 @@ type HostContext interface {
     HostContextClusterMeta
     HostContextUserEnv
     HostContextApplicationEnv
-    HostContextCompositeEnv
     HostContextSysResource
     HostContextNetwork
     HostContextCertificate
+
+    // composite interfaces
+    HostContextCompositeEnv
+    HostContextCheckup
 }
 
 type hostContext struct {
     sync.Mutex
 
     *model.ClusterMeta
-    hostAppEnv
     hostUserEnv
+    hostAppEnv
     hostSysResource
     hostNetwork
     hostCertificate

@@ -139,11 +139,11 @@ func initRoutePathService() {
         return nil
     })
 
-    // check if user is authenticated
-    theApp.GET(routepath.RpathUserAuthed(), func(_, path, _ string) error {
+    // check if this is the first time run
+    theApp.GET(routepath.RpathSystemIsFirstRun(), func(_, path, _ string) error {
         data, err := json.Marshal(ReponseMessage{
-            "user-auth": {
-                "status": true,
+            "firsttime": {
+                "status" : context.SharedHostContext().CheckIsFistTimeExecution(),
             },
         })
         if err != nil {
@@ -157,8 +157,8 @@ func initRoutePathService() {
         return nil
     })
 
-    // check if this is the first time run
-    theApp.GET(routepath.RpathSystemIsFirstRun(), func(_, path, _ string) error {
+    // check if user is authenticated
+    theApp.GET(routepath.RpathUserAuthed(), func(_, path, _ string) error {
         data, err := json.Marshal(ReponseMessage{
             "user-auth": {
                 "status": false,
@@ -175,7 +175,6 @@ func initRoutePathService() {
         }
         return nil
     })
-
 
     theApp.GET(routepath.RpathCmdServiceStart(), func(_, _, _ string) error {
         return nil

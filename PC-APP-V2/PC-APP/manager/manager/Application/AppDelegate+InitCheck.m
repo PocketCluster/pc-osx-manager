@@ -53,7 +53,8 @@
                  //[[response objectForKey:@"expired"] objectForKey:@"warning"]
              }
 
-             RouteEventGet(RPATH_USER_AUTHED);
+             RouteEventGet(RPATH_SYSTEM_IS_FIRST_RUN);
+
          } else {
              // alert and set result. Do not proceed
          }
@@ -63,25 +64,30 @@
     
     [[PCRouter sharedRouter]
      addGetRequest:self
-     onPath:pathUserAuthed
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-
-         Log(@"%@ %@", path, response);
-
-         RouteEventGet(RPATH_SYSTEM_IS_FIRST_RUN);
-         [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
-     }];
-    
-    [[PCRouter sharedRouter]
-     addGetRequest:self
      onPath:pathIsFirstRun
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
          Log(@"%@ %@", path, response);
+         if (![[[response objectForKey:@"firsttime"] objectForKey:@"status"] boolValue]) {
+             
+              RouteEventGet(RPATH_USER_AUTHED);
+         } else {
+             
+         }
 
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathIsFirstRun];
      }];
 
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:pathUserAuthed
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         
+         Log(@"%@ %@", path, response);
+         
+         [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
+     }];
+    
     RouteEventGet(RPATH_SYSTEM_READINESS);
 }
 @end

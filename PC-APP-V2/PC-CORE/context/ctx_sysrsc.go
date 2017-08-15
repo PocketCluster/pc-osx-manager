@@ -3,7 +3,6 @@ package context
 import (
     "math"
 
-    "github.com/pkg/errors"
     "github.com/ricochet2200/go-disk-usage/du"
 )
 
@@ -22,7 +21,6 @@ type HostContextSysResource interface {
     HostPhysicalMemorySize() uint
     HostPhysicalCoreCount() uint
     HostStorageSpaceStatus() (total uint, available uint)
-    CheckHostSuitability() error
 }
 
 type hostSysResource struct {
@@ -66,24 +64,4 @@ func (ctx *hostSysResource) HostStorageSpaceStatus() (total uint, available uint
     total = uint(usage.Size() / GB)
     available = uint(usage.Available() / GB)
     return
-}
-
-func (ctx *hostSysResource) CheckHostSuitability() error {
-
-    cpuCount := ctx.HostPhysicalCoreCount()
-    if cpuCount < HostMinResourceCpuCount {
-        return errors.Errorf("Insufficient number of core count. Need at least 2 CPU cores")
-    }
-
-    memSize := ctx.HostPhysicalMemorySize()
-    if memSize < HostMinResourceMemSize {
-        return errors.Errorf("Insufficient size of system memory. Need at least 4GB memory")
-    }
-
-    _, avail := ctx.HostStorageSpaceStatus()
-    if avail < HostMinResourceDiskSize {
-        return errors.Errorf("Insufficient size of storage space. Need at least 48 GB free space")
-    }
-
-    return nil
 }
