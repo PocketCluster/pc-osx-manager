@@ -5,6 +5,12 @@ import (
 )
 
 const (
+    ApplicationVersion         string = "0.1.4"
+
+    ApplicationExpirationDate  string = "2017/12/31 23:55:59 -0000"
+)
+
+const (
     ClusterCertAuthPrivateKey  string = "pc_cert_auth"   + pcrypto.FileExtPrivateKey
 
     ClusterCertAuthPublicKey   string = "pc_cert_auth"   + pcrypto.FileExtPublicKey
@@ -49,7 +55,7 @@ const (
 )
 
 const (
-    VBoxDefualtCoreDiskName        string = "pc-core-hdd.vmdk"
+    VBoxDefualtCoreDiskName    string = "pc-core-hdd.vmdk"
     // 128 GB
-    VBoxDefualtCoreDiskSize        uint   = 128000
+    VBoxDefualtCoreDiskSize    uint   = 128000
 )

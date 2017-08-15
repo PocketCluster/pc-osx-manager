@@ -31,7 +31,7 @@
 
          Log(@"%@ %@", path, response);
 
-         if ([[response objectForKey:@"syscheck"] boolValue]) {
+         if ([[[response objectForKey:@"syscheck"] objectForKey:@"status"] boolValue]) {
              RouteEventGet(RPATH_APP_EXPIRED);
          } else {
              // alert and set result
