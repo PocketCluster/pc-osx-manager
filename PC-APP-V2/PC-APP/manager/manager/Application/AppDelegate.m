@@ -121,11 +121,7 @@
     lifecycleDead();
 }
 
-- (void)windowWillClose:(NSNotification *)notification {
-    Log(@"%s", __PRETTY_FUNCTION__);
-    lifecycleAlive();
-}
-
+// Sent to the delegate when a running application receives a remote notification.
 - (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
 }
 

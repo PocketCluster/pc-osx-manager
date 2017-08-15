@@ -9,6 +9,7 @@
 #import "AppDelegate+Window.h"
 #import "BaseWindowController.h"
 #import "NullStringChecker.h"
+#include "pc-core.h"
 
 @interface AppDelegate(WindowPrivate)
 - (void)updateProcessType;
@@ -127,8 +128,19 @@
     }
 }
 
+/*
+ * lifecycleAlive(); should have been called in 'windowWillClose' of 
+ * BaseWindowController or AppDelegate. But, we need to handle more windows 
+ * than 1, and it is most appropriate to place the call here in updateProcessType
+ *
+ * - (void)windowWillClose:(NSNotification *)notification {
+ *     Log(@"%s", __PRETTY_FUNCTION__);
+ *     lifecycleAlive();
+ * }
+ */
 - (void)updateProcessType {
     if([_openWindows count] == 0) {
+        lifecycleAlive();
         ProcessSerialNumber psn = { 0, kCurrentProcess };
         TransformProcessType(&psn, kProcessTransformToBackgroundApplication);
     } else {

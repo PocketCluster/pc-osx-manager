@@ -44,11 +44,12 @@ func main() {
                             // this should happen only once in the lifetime of an application.
                             // so we'll initialize our context here to have safe operation
 
+                            log.Debugf("[LIFE] initialize ApplicationContext...")
                             // this needs to be initialized before service loop initiated
                             context.SharedHostContext()
                             initRoutePathService()
 
-                            log.Debugf("[LIFE] app is now alive %v", e.String())
+                            log.Debugf("[LIFE] app is now created, fully initialized %v", e.String())
                         }
                         case lifecycle.CrossOff: {
                             log.Debugf("[LIFE] app is inactive %v", e.String())

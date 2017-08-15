@@ -18,6 +18,7 @@
 
 - (void) windowDidResignKey:(NSNotification *)notification {
     if (![NSApp isHidden]) {
+        Log(@"Application is not hidden!");
         lifecycleVisible();
     }
 }
