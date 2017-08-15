@@ -46,8 +46,18 @@
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
          Log(@"%@ %@", path, response);
+         if (![[[response objectForKey:@"expired"] objectForKey:@"status"] boolValue]) {
+             
+             if ([[response objectForKey:@"expired"] objectForKey:@"warning"]) {
+                 // alert warning
+                 //[[response objectForKey:@"expired"] objectForKey:@"warning"]
+             }
 
-         RouteEventGet(RPATH_USER_AUTHED);
+             RouteEventGet(RPATH_USER_AUTHED);
+         } else {
+             // alert and set result. Do not proceed
+         }
+
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathAppExpired];
      }];
     

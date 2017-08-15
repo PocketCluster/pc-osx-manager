@@ -2,6 +2,7 @@ package main
 
 import (
     "encoding/json"
+    "fmt"
     "time"
 
     log "github.com/Sirupsen/logrus"
@@ -10,7 +11,6 @@ import (
     "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/event/route/routepath"
     "github.com/stkim1/pc-core/vboxglue"
-    "fmt"
 )
 
 type ReponseMessage map[string]map[string]interface{}
