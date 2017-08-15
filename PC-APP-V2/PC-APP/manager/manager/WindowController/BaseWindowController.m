@@ -7,8 +7,20 @@
 
 #import "BaseWindowController.h"
 #import "AppDelegate+Window.h"
+#import "pc-core.h"
 
 @implementation BaseWindowController
+
+#pragma mark - NSWindowDelegate methods
+- (void) windowDidBecomeKey:(NSNotification *)notification {
+	lifecycleFocused();
+}
+
+- (void) windowDidResignKey:(NSNotification *)notification {
+    if (![NSApp isHidden]) {
+        lifecycleVisible();
+    }
+}
 
 - (void)windowWillClose:(NSNotification *)notification {
     

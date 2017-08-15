@@ -73,7 +73,6 @@
 		04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6D60C1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m */; };
 		04CAE2E71E9B8A4900B23B22 /* DebugWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CAE2E51E9B8A4900B23B22 /* DebugWindow.m */; };
 		04CAE2E81E9B8A4900B23B22 /* DebugWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04CAE2E61E9B8A4900B23B22 /* DebugWindow.xib */; };
-		04CB13D91E85075D00F2D6EE /* AppDelegate+Notification.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CB13D81E85075D00F2D6EE /* AppDelegate+Notification.m */; };
 		04D5A48E1E9269AE0057012A /* AppDelegate+Sparkle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */; };
 		04DD160C1F40FD190080D025 /* PCRouter.m in Sources */ = {isa = PBXBuildFile; fileRef = 04DD160B1F40FD190080D025 /* PCRouter.m */; };
 		04DD160F1F4100570080D025 /* PCRoutePathConst.m in Sources */ = {isa = PBXBuildFile; fileRef = 04DD160E1F4100570080D025 /* PCRoutePathConst.m */; };
@@ -241,8 +240,6 @@
 		04CAE2E41E9B8A4900B23B22 /* DebugWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DebugWindow.h; sourceTree = "<group>"; };
 		04CAE2E51E9B8A4900B23B22 /* DebugWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DebugWindow.m; sourceTree = "<group>"; };
 		04CAE2E61E9B8A4900B23B22 /* DebugWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DebugWindow.xib; sourceTree = "<group>"; };
-		04CB13D71E85075D00F2D6EE /* AppDelegate+Notification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Notification.h"; sourceTree = "<group>"; };
-		04CB13D81E85075D00F2D6EE /* AppDelegate+Notification.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Notification.m"; sourceTree = "<group>"; };
 		04D5A48C1E9269AE0057012A /* AppDelegate+Sparkle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Sparkle.h"; sourceTree = "<group>"; };
 		04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Sparkle.m"; sourceTree = "<group>"; };
 		04DD160A1F40FD190080D025 /* PCRouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCRouter.h; sourceTree = "<group>"; };
@@ -349,8 +346,6 @@
 				04B3FB8D1F41133600A72834 /* AppDelegate+ResponseHandle.m */,
 				04AD71C71E9B74E600DB6AE9 /* AppDelegate+Netmonitor.h */,
 				04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */,
-				04CB13D71E85075D00F2D6EE /* AppDelegate+Notification.h */,
-				04CB13D81E85075D00F2D6EE /* AppDelegate+Notification.m */,
 				04D5A48C1E9269AE0057012A /* AppDelegate+Sparkle.h */,
 				04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */,
 				043F47111F3E0C730078A0C1 /* AppDelegate+Window.h */,
@@ -990,7 +985,6 @@
 				04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
 				04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */,
-				04CB13D91E85075D00F2D6EE /* AppDelegate+Notification.m in Sources */,
 				045292A01F42755800E72348 /* AppDelegate+InitCheck.m in Sources */,
 				046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */,

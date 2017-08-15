@@ -16,13 +16,17 @@
 #import "AppDelegate.h"
 #import "AppDelegate+Netmonitor.h"
 #import "AppDelegate+ResponseHandle.h"
-#import "AppDelegate+Notification.h"
 #import "AppDelegate+Sparkle.h"
 #import "AppDelegate+InitCheck.h"
 
 @interface AppDelegate ()<NSUserNotificationCenterDelegate>
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
 @property (strong) PCInterfaceStatus *interfaceStatus;
+
+- (void) receiveSleepNote: (NSNotification*) notification;
+- (void) receiveWakeNote: (NSNotification*) notification;
+- (void) addSleepNotifications;
+- (void) removeSleepNotifications;
 @end
 
 @implementation AppDelegate
@@ -48,7 +52,7 @@
     engineDebugOutput(0);
 #endif
 
-    // 4. make golang context
+    // 4. make golang context (Golang side SharedContext should be init'ed now)
     lifecycleAlive();
     
     // 5. bind feed to host
@@ -57,55 +61,42 @@
     // 6. register awake/sleep notification
     [self addSleepNotifications];
     
-    // 7.UI
-    // a. opened window list
-    self.openWindows = [[NSMutableArray alloc] init];
-    // b. create popup and status menu item
-    self.nativeMenu = [[NativeMenu alloc] init];
-
-    // 8. setup application mode
-    [[NSRunningApplication currentApplication] activateWithOptions:(NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps)];
-    //[self.window makeKeyAndOrderFront:self];
-
-    /// --- now, system base notifications are all set --- ///
-    
-    // 9. initialize updates
-    [[SUUpdater sharedUpdater] setDelegate:self];
-    [[SUUpdater sharedUpdater] setSendsSystemProfile:NO];
-    [[SUUpdater sharedUpdater] checkForUpdateInformation];
-    
-    // 10. refresh network status -> this might update OSX side as well, so we need UI to be working beforehand.
-    // Plus, it delayed execution give a room to golang to be initialized
+    // 7. very first, initial network status refresh ->
+    //   a. This has to be done after 'lifecycleAlive()' is called to get golang context inited
+    //   b. UI element should *NOT* be concerned as warning, error will be *SAFELY* ignored if there is no UI element to receive.
     Log(@"\n[NET] REFRESHING INTERFACE...\n");
     interface_status_with_callback(&PCUpdateInterfaceList);
     gateway_status_with_callback(&PCUpdateGatewayList);
     // now let interface to be updated
     [self.interfaceStatus startMonitoring];
 
+    // 8.UI
+    //   a. opened window list
+    self.openWindows = [[NSMutableArray alloc] init];
+    //   b. create popup and status menu item
+    self.nativeMenu = [[NativeMenu alloc] init];
+
+    // 9. setup application mode
+    [[NSRunningApplication currentApplication] activateWithOptions:(NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps)];
+    //[self.window makeKeyAndOrderFront:self];
+
+    /// --- now, system base notifications are all set --- ///
+    
+    // 10. initialize updates
+    // !!!(we might need to do after init check)
+    [[SUUpdater sharedUpdater] setDelegate:self];
+    [[SUUpdater sharedUpdater] setSendsSystemProfile:NO];
+    [[SUUpdater sharedUpdater] checkForUpdateInformation];
+
     // 11. finalize app ready
     lifecycleVisible();
     Log(@"Application Started");
 
-    
-    
-    
-    
-    //Log(@"Initial Check Begin...");
-    //[self initCheck];
-}
-
-- (void)applicationWillTerminate:(NSNotification *)aNotification {
-    [self.interfaceStatus stopMonitoring];
-    self.interfaceStatus = nil;
-
-    // Stop host feed
-    StopResponseFeed();
-    
-    // stop sleep notification
-    [self removeSleepNotifications];
-    
-    // stop lifecycle
-    lifecycleDead();
+    // 12. begin app ready sequence
+    // this might update OSX side as well, so we need UI to be working beforehand.
+    // Plus, it delayed execution give a room to golang to be initialized
+    Log(@"Initial Check Begin...");
+    [self initCheck];
 }
 
 - (void)applicationDidHide:(NSNotification *)aNotification {
@@ -116,11 +107,64 @@
     lifecycleVisible();
 }
 
+- (void)applicationWillTerminate:(NSNotification *)aNotification {
+    [self.interfaceStatus stopMonitoring];
+    self.interfaceStatus = nil;
+    
+    // stop sleep notification
+    [self removeSleepNotifications];
+    
+    // Stop host feed
+    StopResponseFeed();
+    
+    // stop lifecycle
+    lifecycleDead();
+}
+
 - (void)windowWillClose:(NSNotification *)notification {
+    Log(@"%s", __PRETTY_FUNCTION__);
     lifecycleAlive();
 }
 
 - (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
 }
 
+#pragma mark - Sleep Notification
+- (void) receiveSleepNote: (NSNotification*) notification {
+    Log(@"receiveSleepNote: %@", [notification name]);
+    lifecycleSleep();
+}
+
+- (void) receiveWakeNote: (NSNotification*) notification {
+    Log(@"receiveWakeNote: %@", [notification name]);
+    lifecycleAwaken();
+}
+
+- (void) addSleepNotifications {
+    // These notifications are filed on NSWorkspace's notification center, not
+    // the default notification center. You will not receive sleep/wake
+    // notifications if you file with the default notification center.
+    [[[NSWorkspace sharedWorkspace] notificationCenter]
+     addObserver: self
+     selector: @selector(receiveSleepNote:)
+     name: NSWorkspaceWillSleepNotification object: NULL];
+    
+    [[[NSWorkspace sharedWorkspace] notificationCenter]
+     addObserver: self
+     selector: @selector(receiveWakeNote:)
+     name: NSWorkspaceDidWakeNotification object: NULL];
+}
+
+- (void) removeSleepNotifications {
+    // These notifications are filed on NSWorkspace's notification center, not
+    // the default notification center. You will not receive sleep/wake
+    // notifications if you file with the default notification center.
+    [[[NSWorkspace sharedWorkspace] notificationCenter]
+     removeObserver:self
+     name:NSWorkspaceWillSleepNotification object:NULL];
+    
+    [[[NSWorkspace sharedWorkspace] notificationCenter]
+     removeObserver:self
+     name:NSWorkspaceDidWakeNotification object:NULL];
+}
 @end

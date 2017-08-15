@@ -18,10 +18,6 @@ import (
 
 func main() {
 
-    // this needs to be initialized before service loop initiated
-    context.SharedHostContext()
-    initRoutePathService()
-
     appLifeCycle(func(a *appMainLife) {
 
         var (
@@ -45,6 +41,13 @@ func main() {
                     }
                     switch e.Crosses(lifecycle.StageAlive) {
                         case lifecycle.CrossOn: {
+                            // this should happen only once in the lifetime of an application.
+                            // so we'll initialize our context here to have safe operation
+
+                            // this needs to be initialized before service loop initiated
+                            context.SharedHostContext()
+                            initRoutePathService()
+
                             log.Debugf("[LIFE] app is now alive %v", e.String())
                         }
                         case lifecycle.CrossOff: {
