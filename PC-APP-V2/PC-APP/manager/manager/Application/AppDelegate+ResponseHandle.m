@@ -74,8 +74,8 @@ handleResponse(NSString* eventMethod, const char* path, const char* response) {
         }
 
         dispatch_async(dispatch_get_main_queue(), ^{
-            [[AppDelegate sharedDelegate]
-             HandleResponseForMethod:eventMethod
+            [[PCRouter sharedRouter]
+             responseFor:eventMethod
              onPath:eventPath
              withPayload:eventResponse];
         });
@@ -84,6 +84,10 @@ handleResponse(NSString* eventMethod, const char* path, const char* response) {
 
 @implementation AppDelegate (ResponseHandle)
 
+// (2017/08/16)
+// We don't need to unnecessarily call another just to have singleton point on *main thread* !
+// Nonetheless, without a valid method, this category might be eradicated by compiler.
+// So... let's just leave it here, but it won't be used.
 - (void)HandleResponseForMethod:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aResponse {
     [[PCRouter sharedRouter] responseFor:aMethod onPath:aPath withPayload:aResponse];
 }

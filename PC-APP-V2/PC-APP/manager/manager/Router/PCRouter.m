@@ -41,22 +41,32 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCRouter, sharedRouter);
 }
 
 - (void) addGetRequest:(NSObject<PCRouteRequest> *)aRequest onPath:(NSString*)aPath withHandler:(ResponseHandler)aHandler {
+    NSAssert([NSThread isMainThread], @"Request should only be added in Main Thread!");
+
     [self.rootNode addRequest:aRequest forMethod:RPATH_EVENT_METHOD_GET onPath:aPath withHandler:aHandler];
 }
 
 - (void) delGetRequest:(NSObject<PCRouteRequest> *)aRequest onPath:(NSString*)aPath {
+    NSAssert([NSThread isMainThread], @"Request should only be removed in Main Thread!");
+
     [self.rootNode delRequest:aRequest forMethod:RPATH_EVENT_METHOD_GET onPath:aPath];
 }
 
 - (void) addPostRequest:(NSObject<PCRouteRequest> *)aRequest onPath:(NSString*)aPath withHandler:(ResponseHandler)aHandler {
+    NSAssert([NSThread isMainThread], @"Request should only be added in Main Thread!");
+
     [self.rootNode addRequest:aRequest forMethod:RPATH_EVENT_METHOD_POST onPath:aPath withHandler:aHandler];
 }
 
 - (void) delPostRequest:(NSObject<PCRouteRequest> *)aRequest onPath:(NSString*)aPath {
+    NSAssert([NSThread isMainThread], @"Request should only be removed in Main Thread!");
+
     [self.rootNode delRequest:aRequest forMethod:RPATH_EVENT_METHOD_POST onPath:aPath];
 }
 
 - (void) responseFor:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aResponse {
+    NSAssert([NSThread isMainThread], @"Reponse should only be received and handled in Main Thread!");
+
     PCRequestHolder *holder = [self.rootNode findRequestForMethod:aMethod onPath:aPath];
     if (holder != nil) {
         holder.handler(aMethod, aPath, aResponse);

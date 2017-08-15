@@ -10,6 +10,7 @@
 #import "AppDelegate+Window.h"
 #import "pc-core.h"
 #import "PCRouter.h"
+#import "ShowAlert.h"
 
 @interface DebugWindow ()<PCRouteRequest>
 @end
@@ -67,17 +68,18 @@
 
 #pragma mark - ROUTEPATH
 - (IBAction)route_01:(id)sender {
-    RouteEventGet(RPATH_SYSTEM_READINESS);
 }
 
 - (IBAction)route_02:(id)sender {
-    RouteEventGet(RPATH_SYSTEM_IS_FIRST_RUN);
 }
 
 - (IBAction)route_03:(id)sender {
-    RouteEventGet(RPATH_APP_EXPIRED);
 }
 
+- (IBAction)alert_test:(id)sender {
+    [ShowAlert
+     showWarningAlertFromMeta:@{ALRT_MESSAGE_TEXT:@"Text",
+                                ALRT_INFORMATIVE_TEXT:@"Informative Text"}];
 
-
+}
 @end

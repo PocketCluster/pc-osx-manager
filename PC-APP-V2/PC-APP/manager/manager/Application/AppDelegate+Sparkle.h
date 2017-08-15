@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#include <Sparkle/Sparkle.h>
+#import <Sparkle/Sparkle.h>
 #import "AppDelegate.h"
 
 @interface AppDelegate(Sparkle)<SUUpdaterDelegate>

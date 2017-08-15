@@ -9,6 +9,7 @@
 #import "AppDelegate+InitCheck.h"
 #import "pc-core.h"
 #import "PCRouter.h"
+#import "ShowAlert.h"
 
 @interface AppDelegate(InitCheckPrivate)<PCRouteRequest>
 @end
@@ -31,10 +32,15 @@
 
          Log(@"%@ %@", path, response);
 
-         if ([[[response objectForKey:@"syscheck"] objectForKey:@"status"] boolValue]) {
-             RouteEventGet(RPATH_APP_EXPIRED);
+         BOOL isSystemReady = [[[response objectForKey:@"syscheck"] objectForKey:@"status"] boolValue];
+         _isSystemReady = isSystemReady;
+         
+         if (isSystemReady) {
+             RouteRequestGet((char *)RPATH_APP_EXPIRED);
          } else {
-             // alert and set result
+             [ShowAlert
+              showWarningAlertFromMeta:@{ALRT_MESSAGE_TEXT:@"Unable to run PocketCluster",
+                                         ALRT_INFORMATIVE_TEXT:[[response objectForKey:@"syscheck"] objectForKey:@"error"]}];
          }
          
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathSystemReady];
@@ -46,17 +52,23 @@
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
          Log(@"%@ %@", path, response);
-         if (![[[response objectForKey:@"expired"] objectForKey:@"status"] boolValue]) {
-             
-             if ([[response objectForKey:@"expired"] objectForKey:@"warning"]) {
-                 // alert warning
-                 //[[response objectForKey:@"expired"] objectForKey:@"warning"]
+         
+         BOOL isAppExpired = [[[response objectForKey:@"expired"] objectForKey:@"status"] boolValue];
+         _isAppExpired = isAppExpired;
+         
+         if (!isAppExpired) {
+             NSString *warning = [[response objectForKey:@"expired"] objectForKey:@"warning"];
+             if (warning != nil) {
+                 [ShowAlert
+                  showWarningAlertFromMeta:@{ALRT_MESSAGE_TEXT:@"PocketCluster Expiration",
+                                             ALRT_INFORMATIVE_TEXT:warning}];
              }
-
-             RouteEventGet(RPATH_SYSTEM_IS_FIRST_RUN);
-
+             RouteRequestGet((char *)RPATH_SYSTEM_IS_FIRST_RUN);
          } else {
              // alert and set result. Do not proceed
+             [ShowAlert
+              showWarningAlertFromMeta:@{ALRT_MESSAGE_TEXT:@"PocketCluster Expiration",
+                                         ALRT_INFORMATIVE_TEXT:[[response objectForKey:@"expired"] objectForKey:@"warning"]}];
          }
 
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathAppExpired];
@@ -68,9 +80,12 @@
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
          Log(@"%@ %@", path, response);
-         if (![[[response objectForKey:@"firsttime"] objectForKey:@"status"] boolValue]) {
-             
-              RouteEventGet(RPATH_USER_AUTHED);
+
+         BOOL isFirstRun = [[[response objectForKey:@"firsttime"] objectForKey:@"status"] boolValue];
+         _isFirstTime = isFirstRun;
+
+         if (!isFirstRun) {
+             RouteRequestGet((char *)RPATH_USER_AUTHED);
          } else {
              
          }
@@ -82,12 +97,12 @@
      addGetRequest:self
      onPath:pathUserAuthed
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         
-         Log(@"%@ %@", path, response);
-         
+
+          Log(@"%@ %@", path, response);
+
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
      }];
-    
-    RouteEventGet(RPATH_SYSTEM_READINESS);
+
+    RouteRequestGet((char *)RPATH_SYSTEM_READINESS);
 }
 @end

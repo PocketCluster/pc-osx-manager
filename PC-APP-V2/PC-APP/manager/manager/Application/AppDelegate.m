@@ -8,7 +8,6 @@
 
 #import <KSCrash/KSCrash.h>
 #import "Sentry.h"
-#import <Sparkle/Sparkle.h>
 
 #import "NativeMenu.h"
 #include "pc-core.h"
@@ -31,6 +30,10 @@
 
 @implementation AppDelegate
 @synthesize openWindows = _openWindows;
+@synthesize isSystemReady = _isSystemReady;
+@synthesize isAppExpired = _isAppExpired;
+@synthesize isFirstTime = _isFirstTime;
+@synthesize isUserAuthed = _isUserAuthed;
 
 + (AppDelegate*) sharedDelegate {
     return (AppDelegate*)[[NSApplication sharedApplication] delegate];

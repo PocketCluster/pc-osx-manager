@@ -8,22 +8,22 @@ import (
     "github.com/stkim1/pc-core/event/route"
 )
 
-//export RouteEventGet
-func RouteEventGet(path *C.char) {
-    theApp.eventsIn <- route.RouteRequestEventGet(C.GoString(path))
+//export RouteRequestGet
+func RouteRequestGet(path *C.char) {
+    theApp.eventsIn <- route.RouteRequestGet(C.GoString(path))
 }
 
-//export RouteEventPost
-func RouteEventPost(path, payload *C.char) {
-    theApp.eventsIn <- route.RouteRequestEventPost(C.GoString(path), C.GoString(payload))
+//export RouteRequestPost
+func RouteRequestPost(path, request *C.char) {
+    theApp.eventsIn <- route.RouteRequestPost(C.GoString(path), C.GoString(request))
 }
 
-//export RouteEventPut
-func RouteEventPut(path, payload *C.char) {
-    theApp.eventsIn <- route.RouteRequestEventPut(C.GoString(path), C.GoString(payload))
+//export RouteRequestPut
+func RouteRequestPut(path, request *C.char) {
+    theApp.eventsIn <- route.RouteRequestPut(C.GoString(path), C.GoString(request))
 }
 
-//export RouteEventDelete
-func RouteEventDelete(path *C.char) {
-    theApp.eventsIn <- route.RouteRequestEventDelete(C.GoString(path))
+//export RouteRequestDelete
+func RouteRequestDelete(path *C.char) {
+    theApp.eventsIn <- route.RouteRequestDelete(C.GoString(path))
 }

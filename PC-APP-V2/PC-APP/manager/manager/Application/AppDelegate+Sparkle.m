@@ -69,4 +69,56 @@
 - (void)updater:(SUUpdater *)updater willInstallUpdateOnQuit:(SUAppcastItem *)item immediateInstallationInvocation:(NSInvocation *)invocation {
     Log(@"%s",__PRETTY_FUNCTION__);    
 }
+
+
+#pragma mark - SPARKLE UPDATER DELEGATE
+
+// from v0.1.3
+#if 0
+- (NSArray*)feedParametersForUpdater:(SUUpdater *)updater sendingSystemProfile:(BOOL)sendingProfile {
+    NSMutableArray *data = [[NSMutableArray alloc] init];
+    [data addObject:@{@"key": @"machineid", @"value": [Util getMachineId]}];
+    [data addObject:@{@"key": @"appversion", @"value": [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]}];
+    if(sendingProfile) {
+        [data addObject:@{@"key": @"profile", @"value": @"1"}];
+    }
+    
+    return data;
+}
+
+- (void)updater:(SUUpdater *)updater didFindValidUpdate:(SUAppcastItem *)update {
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kPOCKET_CLUSTER_UPDATE_AVAILABLE
+     object:nil
+     userInfo:@{kPOCKET_CLUSTER_UPDATE_VALUE: @(YES)}];
+}
+
+- (void)updaterDidNotFindUpdate:(SUUpdater *)update {
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:kPOCKET_CLUSTER_UPDATE_AVAILABLE
+     object:nil
+     userInfo:@{kPOCKET_CLUSTER_UPDATE_VALUE: @(NO)}];
+}
+
+- (id<SUVersionComparison>)versionComparatorForUpdater:(SUUpdater *)updater {
+    return [[VersionComparison alloc] init];
+}
+
+- (SUAppcastItem *)bestValidUpdateInAppcast:(SUAppcast *)appcast forUpdater:(SUUpdater *)bundle {
+    SUAppcastItem *bestItem = nil;
+    
+    NSString *appVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+    
+    for(SUAppcastItem *item in [appcast items]) {
+        if([appVersion compare:item.versionString options:NSNumericSearch] == NSOrderedAscending) {
+            if(!bestItem || [bestItem.versionString compare:item.versionString options:NSNumericSearch] == NSOrderedAscending) {
+                bestItem = item;
+            }
+        }
+    }
+    
+    return bestItem;
+}
+#endif
+
 @end
