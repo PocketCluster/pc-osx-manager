@@ -52,7 +52,7 @@
     lifecycleAlive();
     
     // 5. bind feed to host
-    FeedStart();
+    StartResponseFeed();
     
     // 6. register awake/sleep notification
     [self addSleepNotifications];
@@ -90,8 +90,8 @@
     
     
     
-    Log(@"Initial Check Begin...");
-    [self initCheck];
+    //Log(@"Initial Check Begin...");
+    //[self initCheck];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -99,7 +99,7 @@
     self.interfaceStatus = nil;
 
     // Stop host feed
-    FeedStop();
+    StopResponseFeed();
     
     // stop sleep notification
     [self removeSleepNotifications];

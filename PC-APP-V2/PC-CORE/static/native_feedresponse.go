@@ -80,13 +80,13 @@ var theFeeder = &feeder{
     feedPipe: make(chan interface{}),
 }
 
-//export FeedStart
-func FeedStart() {
+//export StartResponseFeed
+func StartResponseFeed() {
     go theFeeder.feedLoop()
 }
 
-//export FeedStop
-func FeedStop() {
+//export StopResponseFeed
+func StopResponseFeed() {
     theFeeder.feedPipe <- stopFeed{}
 }
 

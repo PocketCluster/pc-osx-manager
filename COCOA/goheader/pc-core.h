@@ -104,9 +104,9 @@ extern void OpsCmdTeleportUserAdd();
 
 extern void OpsCmdDebug();
 
-extern void FeedStart();
+extern void StartResponseFeed();
 
-extern void FeedStop();
+extern void StopResponseFeed();
 
 extern void lifecycleDead();
 
