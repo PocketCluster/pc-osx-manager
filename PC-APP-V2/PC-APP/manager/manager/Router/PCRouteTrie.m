@@ -162,11 +162,32 @@
     if (reqList == nil) {
         reqList = [NSMutableArray<PCRequestHolder *> new];
         [node.methods setValue:reqList forKey:aMethod];
+
+        PCRequestHolder *holder = [PCRequestHolder new];
+        [holder setRequest:aRequest];
+        [holder setHandler:aHandler];
+        [reqList addObject:holder];
+        return;
     }
+
+    // check if request exists
+    __weak PCRequestHolder *prevHolder = nil;
+    for (PCRequestHolder *h in reqList) {
+        if (h.request == aRequest) {
+            prevHolder = h;
+            break;
+        }
+    }
+    // when the same request exists...
+    if (prevHolder != nil) {
+        return;
+    }
+    // otherwise add it to the list
     PCRequestHolder *holder = [PCRequestHolder new];
     [holder setRequest:aRequest];
     [holder setHandler:aHandler];
     [reqList addObject:holder];
+    return;
 }
 
 - (void) delRequest:(NSObject<PCRouteRequest> *)aRequest forMethod:(NSString *)aMethod onPath:(NSString *)aPath {
