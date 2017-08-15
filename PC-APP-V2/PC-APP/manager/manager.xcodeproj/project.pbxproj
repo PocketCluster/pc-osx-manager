@@ -27,6 +27,7 @@
 		0441A4141BD8BEAA00AABD7A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4131BD8BEAA00AABD7A /* SystemConfiguration.framework */; };
 		0441A4151BD8BEF100AABD7A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36411BD791F8004E0946 /* Foundation.framework */; };
 		0441A4171BD8BF3E00AABD7A /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4161BD8BF3E00AABD7A /* CoreServices.framework */; };
+		045292A01F42755800E72348 /* AppDelegate+InitCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = 0452929F1F42755800E72348 /* AppDelegate+InitCheck.m */; };
 		0464AD4C1F3DE445000D323C /* Router.m in Sources */ = {isa = PBXBuildFile; fileRef = 0464AD4B1F3DE445000D323C /* Router.m */; };
 		046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
 		046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
@@ -150,6 +151,8 @@
 		0441A4111BD8BEA200AABD7A /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		0441A4131BD8BEAA00AABD7A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		0441A4161BD8BF3E00AABD7A /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
+		0452929E1F42755800E72348 /* AppDelegate+InitCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+InitCheck.h"; sourceTree = "<group>"; };
+		0452929F1F42755800E72348 /* AppDelegate+InitCheck.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+InitCheck.m"; sourceTree = "<group>"; };
 		04570BB01F40E3440047CCF9 /* PCRouteRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCRouteRequest.h; sourceTree = "<group>"; };
 		0464AD4A1F3DE445000D323C /* Router.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Router.h; sourceTree = "<group>"; };
 		0464AD4B1F3DE445000D323C /* Router.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Router.m; sourceTree = "<group>"; };
@@ -352,6 +355,8 @@
 				04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */,
 				043F47111F3E0C730078A0C1 /* AppDelegate+Window.h */,
 				043F47121F3E0C730078A0C1 /* AppDelegate+Window.m */,
+				0452929E1F42755800E72348 /* AppDelegate+InitCheck.h */,
+				0452929F1F42755800E72348 /* AppDelegate+InitCheck.m */,
 			);
 			name = Application;
 			path = manager/Application;
@@ -986,6 +991,7 @@
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
 				04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */,
 				04CB13D91E85075D00F2D6EE /* AppDelegate+Notification.m in Sources */,
+				045292A01F42755800E72348 /* AppDelegate+InitCheck.m in Sources */,
 				046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
 				04030F681F3D5B6500EA793D /* Package.m in Sources */,

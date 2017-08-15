@@ -18,6 +18,7 @@
 #import "AppDelegate+ResponseHandle.h"
 #import "AppDelegate+Notification.h"
 #import "AppDelegate+Sparkle.h"
+#import "AppDelegate+InitCheck.h"
 
 @interface AppDelegate ()<NSUserNotificationCenterDelegate>
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
@@ -84,6 +85,13 @@
     // 11. finalize app ready
     lifecycleVisible();
     Log(@"Application Started");
+
+    
+    
+    
+    
+    Log(@"Initial Check Begin...");
+    [self initCheck];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
