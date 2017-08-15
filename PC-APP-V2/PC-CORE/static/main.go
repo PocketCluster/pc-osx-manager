@@ -111,7 +111,7 @@ func main() {
 
                 // OPERATIONAL ROUTE //
 
-                case route.Event: {
+                case route.Request: {
                     err := a.Dispatch(e)
                     if err != nil {
                         log.Debugf("[ROUTE] ERROR %v", err)

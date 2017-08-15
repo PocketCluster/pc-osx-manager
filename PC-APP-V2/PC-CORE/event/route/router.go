@@ -16,7 +16,7 @@ const (
 )
 
 // Handle is just like "net/http" Handlers, only takes params.
-type Handle func(method, path, payload string) error
+type Handle func(method, path, request string) error
 
 // Router name says it all.
 type Router struct {
@@ -72,11 +72,11 @@ func (r *Router) DELETE(path string, handler Handle) error {
 }
 
 // Needed by "net/http" to handle http requests and be a mux to http.ListenAndServe.
-func (r *Router) Dispatch(event Event) error {
+func (r *Router) Dispatch(event Request) error {
     node, _ := r.tree.traverse(strings.Split(event.path, "/")[1:])
     if handler := node.methods[event.method]; handler != nil {
-        return handler(event.method, event.path, event.payload)
+        return handler(event.method, event.path, event.request)
     }
 
-    return r.rootHandler(event.method, event.path, event.payload)
+    return r.rootHandler(event.method, event.path, event.request)
 }

@@ -17,30 +17,30 @@
  */
 
 static void
-handleResponse(NSString* method, const char* path, const char* payload);
+handleResponse(NSString* method, const char* path, const char* response);
 
 void
-PCFeedResponseForGet(char* path, char* payload) {
-    handleResponse(RPATH_EVENT_METHOD_GET, (const char*)path, (const char*)payload);
+PCFeedResponseForGet(char* path, char* response) {
+    handleResponse(RPATH_EVENT_METHOD_GET, (const char*)path, (const char*)response);
 }
 
 void
-PCFeedResponseForPost(char* path, char* payload) {
-    handleResponse(RPATH_EVENT_METHOD_POST, (const char*)path, (const char*)payload);
+PCFeedResponseForPost(char* path, char* response) {
+    handleResponse(RPATH_EVENT_METHOD_POST, (const char*)path, (const char*)response);
 }
 
 void
-PCFeedResponseForPut(char* path, char* payload) {
-    handleResponse(RPATH_EVENT_METHOD_PUT, (const char*)path, (const char*)payload);
+PCFeedResponseForPut(char* path, char* response) {
+    handleResponse(RPATH_EVENT_METHOD_PUT, (const char*)path, (const char*)response);
 }
 
 void
-PCFeedResponseForDelete(char* path, char* payload) {
-    handleResponse(RPATH_EVENT_METHOD_DELETE, (const char*)path, (const char*)payload);
+PCFeedResponseForDelete(char* path, char* response) {
+    handleResponse(RPATH_EVENT_METHOD_DELETE, (const char*)path, (const char*)response);
 }
 
 void
-handleResponse(NSString* eventMethod, const char* path, const char* payload) {
+handleResponse(NSString* eventMethod, const char* path, const char* response) {
 
     // parse in the background
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -52,17 +52,17 @@ handleResponse(NSString* eventMethod, const char* path, const char* payload) {
                  encoding:NSUTF8StringEncoding
                  freeWhenDone:YES];
 
-        NSDictionary* eventPayload = nil;
-        if (payload != NULL) {
+        NSDictionary* eventResponse = nil;
+        if (response != NULL) {
 
             NSData *payloadData = \
                 [[NSData alloc]
-                 initWithBytesNoCopy:(void *)payload
-                 length:strlen((const char*)payload)
+                 initWithBytesNoCopy:(void *)response
+                 length:strlen((const char*)response)
                  freeWhenDone:YES];
 
             NSError *error = nil;
-            eventPayload = \
+            eventResponse = \
                 [NSJSONSerialization
                      JSONObjectWithData:payloadData
                      options:NSJSONReadingMutableContainers
@@ -77,15 +77,15 @@ handleResponse(NSString* eventMethod, const char* path, const char* payload) {
             [[AppDelegate sharedDelegate]
              HandleResponseForMethod:eventMethod
              onPath:eventPath
-             withPayload:eventPayload];
+             withPayload:eventResponse];
         });
     });
 }
 
 @implementation AppDelegate (ResponseHandle)
 
-- (void)HandleResponseForMethod:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aPayload {
-    [[PCRouter sharedRouter] responseFor:aMethod onPath:aPath withPayload:aPayload];
+- (void)HandleResponseForMethod:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aResponse {
+    [[PCRouter sharedRouter] responseFor:aMethod onPath:aPath withPayload:aResponse];
 }
 
 @end

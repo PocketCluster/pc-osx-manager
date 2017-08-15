@@ -10,20 +10,20 @@ import (
 
 //export RouteEventGet
 func RouteEventGet(path *C.char) {
-    theApp.eventsIn <- route.RouteEventGet(C.GoString(path))
+    theApp.eventsIn <- route.RouteRequestEventGet(C.GoString(path))
 }
 
 //export RouteEventPost
 func RouteEventPost(path, payload *C.char) {
-    theApp.eventsIn <- route.RouteEventPost(C.GoString(path), C.GoString(payload))
+    theApp.eventsIn <- route.RouteRequestEventPost(C.GoString(path), C.GoString(payload))
 }
 
 //export RouteEventPut
 func RouteEventPut(path, payload *C.char) {
-    theApp.eventsIn <- route.RouteEventPut(C.GoString(path), C.GoString(payload))
+    theApp.eventsIn <- route.RouteRequestEventPut(C.GoString(path), C.GoString(payload))
 }
 
 //export RouteEventDelete
 func RouteEventDelete(path *C.char) {
-    theApp.eventsIn <- route.RouteEventDelete(C.GoString(path))
+    theApp.eventsIn <- route.RouteRequestEventDelete(C.GoString(path))
 }

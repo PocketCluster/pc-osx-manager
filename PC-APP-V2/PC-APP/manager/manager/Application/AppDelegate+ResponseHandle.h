@@ -10,5 +10,5 @@
 #import "AppDelegate.h"
 
 @interface AppDelegate (ResponseHandle)
-- (void)HandleResponseForMethod:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aPayload;
+- (void)HandleResponseForMethod:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aResponse;
 @end

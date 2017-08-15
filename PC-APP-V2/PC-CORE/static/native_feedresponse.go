@@ -22,10 +22,10 @@ const (
     feedResponseDelete
 )
 
-type feedMessage struct {
-    method    feedMethodType
-    path      string
-    payload   string
+type feedResponse struct {
+    method      feedMethodType
+    path        string
+    response    string
 }
 
 type stopFeed struct{}
@@ -48,24 +48,24 @@ func (h *feeder) feedLoop() {
                 runtime.UnlockOSThread()
                 return
             }
-            case feedMessage: {
+            case feedResponse: {
                 switch feed.method {
                     case feedReponseGet: {
                         var (
                             cPath = C.CString(feed.path)
-                            cPayload = C.CString(feed.payload)
+                            cResponse = C.CString(feed.response)
                         )
-                        C.PCFeedResponseForGet(cPath, cPayload)
+                        C.PCFeedResponseForGet(cPath, cResponse)
                         // these strings will be freed on cocoa side to reduce performance degrade
                         //C.free(unsafe.Pointer(cPath))
                         //C.free(unsafe.Pointer(cPayload))
                     }
                     case feedResponsePost: {
                         var (
-                            cPath    = C.CString(feed.path)
-                            cPayload = C.CString(feed.payload)
+                            cPath = C.CString(feed.path)
+                            cResponse = C.CString(feed.response)
                         )
-                        C.PCFeedResponseForPost(cPath, cPayload)
+                        C.PCFeedResponseForPost(cPath, cResponse)
                         // these strings will be freed on cocoa side to reduce performance degrade
                         //C.free(unsafe.Pointer(cPath))
                         //C.free(unsafe.Pointer(cPayload))
@@ -94,10 +94,10 @@ func FeedResponseForGet(path, payload string) error {
     if len(path) == 0 {
         return errors.Errorf("[ERR] invalid feed path")
     }
-    theFeeder.feedPipe <- feedMessage {
-        method:     feedReponseGet,
-        path:       path,
-        payload:    payload,
+    theFeeder.feedPipe <- feedResponse {
+        method:      feedReponseGet,
+        path:        path,
+        response:    payload,
 
     }
     return nil
@@ -107,10 +107,10 @@ func FeedResponseForPost(path, payload string) error {
     if len(path) == 0 {
         return errors.Errorf("[ERR] invalid feed path")
     }
-    theFeeder.feedPipe <- feedMessage {
-        method:     feedResponsePost,
-        path:       path,
-        payload:    payload,
+    theFeeder.feedPipe <- feedResponse {
+        method:      feedResponsePost,
+        path:        path,
+        response:    payload,
     }
     return nil
 }

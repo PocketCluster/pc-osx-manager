@@ -1,37 +1,37 @@
 package route
 
 // route event
-type Event struct {
+type Request struct {
     method     string
     path       string
-    payload    string
+    request    string
 }
 
-func RouteEventGet(path string) Event {
-    return Event{
+func RouteRequestEventGet(path string) Request {
+    return Request {
         method:     get,
         path:       path,
     }
 }
 
-func RouteEventPost(path, payload string) Event {
-    return Event{
+func RouteRequestEventPost(path, payload string) Request {
+    return Request {
         method:     post,
         path:       path,
-        payload:    payload,
+        request:    payload,
     }
 }
 
-func RouteEventPut(path, payload string) Event {
-    return Event{
+func RouteRequestEventPut(path, payload string) Request {
+    return Request {
         method:     put,
         path:       path,
-        payload:    payload,
+        request:    payload,
     }
 }
 
-func RouteEventDelete(path string) Event {
-    return Event{
+func RouteRequestEventDelete(path string) Request {
+    return Request {
         method:     deleteh,
         path:       path,
     }

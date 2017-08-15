@@ -56,10 +56,10 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCRouter, sharedRouter);
     [self.rootNode delRequest:aRequest forMethod:RPATH_EVENT_METHOD_POST onPath:aPath];
 }
 
-- (void) responseFor:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aPayload {
+- (void) responseFor:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aResponse {
     PCRequestHolder *holder = [self.rootNode findRequestForMethod:aMethod onPath:aPath];
     if (holder != nil) {
-        holder.handler(aMethod, aPath, aPayload);
+        holder.handler(aMethod, aPath, aResponse);
     }
 }
 

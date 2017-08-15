@@ -25,7 +25,7 @@ func (s *RouterSuite) TearDownSuite(c *C) {
 
 func (s *RouterSuite) SetUpTest(c *C) {
     log.Debugf("--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---")
-    s.router = NewRouter(func(payload string) error {
+    s.router = NewRouter(func(_, _, _ string) error {
         return errors.Errorf("/ path should not be accessed")
     })
 }
@@ -40,7 +40,7 @@ func (s *RouterSuite) Test_GetBasicTest(c *C) {
     var (
         handleVar = ""
     )
-    s.router.GET("/v1/system/monitor", func(payload string) error {
+    s.router.GET("/v1/system/monitor", func(_, _, _ string) error {
         handleVar = "test"
         return nil
     })

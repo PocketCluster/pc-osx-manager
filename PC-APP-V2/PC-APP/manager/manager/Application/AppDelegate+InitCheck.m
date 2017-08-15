@@ -27,20 +27,25 @@
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:pathSystemReady
-     withHandler:^(NSString *method, NSString *path, NSDictionary *payload) {
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         Log(@"%@ %@", path, payload);
+         Log(@"%@ %@", path, response);
 
-         RouteEventGet(RPATH_APP_EXPIRED);
+         if ([[response objectForKey:@"syscheck"] boolValue]) {
+             RouteEventGet(RPATH_APP_EXPIRED);
+         } else {
+             // alert and set result
+         }
+         
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathSystemReady];
      }];
     
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:pathAppExpired
-     withHandler:^(NSString *method, NSString *path, NSDictionary *payload) {
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         Log(@"%@ %@", path, payload);
+         Log(@"%@ %@", path, response);
 
          RouteEventGet(RPATH_USER_AUTHED);
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathAppExpired];
@@ -49,9 +54,9 @@
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:pathUserAuthed
-     withHandler:^(NSString *method, NSString *path, NSDictionary *payload) {
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         Log(@"%@ %@", path, payload);
+         Log(@"%@ %@", path, response);
 
          RouteEventGet(RPATH_SYSTEM_IS_FIRST_RUN);
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
@@ -60,9 +65,9 @@
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:pathIsFirstRun
-     withHandler:^(NSString *method, NSString *path, NSDictionary *payload) {
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         Log(@"%@ %@", path, payload);
+         Log(@"%@ %@", path, response);
 
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathIsFirstRun];
      }];

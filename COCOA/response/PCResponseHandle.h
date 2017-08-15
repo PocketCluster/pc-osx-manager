@@ -10,15 +10,15 @@
 #define __PC_RESPONSE_HANDLE_H__
 
 extern void
-PCFeedResponseForGet(char* path, char* payload);
+PCFeedResponseForGet(char* path, char* response);
 
 extern void
-PCFeedResponseForPost(char* path, char* payload);
+PCFeedResponseForPost(char* path, char* response);
 
 extern void
-PCFeedResponseForPut(char* path, char* payload);
+PCFeedResponseForPut(char* path, char* response);
 
 extern void
-PCFeedResponseForDelete(char* path, char* payload);
+PCFeedResponseForDelete(char* path, char* response);
 
 #endif // __PC_RESPONSE_HANDLE_H__
