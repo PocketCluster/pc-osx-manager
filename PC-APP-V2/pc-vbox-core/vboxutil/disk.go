@@ -16,9 +16,6 @@ import (
 
 const (
     magicString         string = "pc-core, please format-me"
-    DefualtCoreDiskName string = "pc-core-hdd.vmdk"
-    // 128 GB
-    DefualtCoreDiskSize uint   = 128000
 )
 
 // MachineDisk information.

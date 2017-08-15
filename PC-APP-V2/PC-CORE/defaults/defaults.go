@@ -47,3 +47,9 @@ const (
 const (
     PocketClusterCoreName      string = "pc-core"
 )
+
+const (
+    VBoxDefualtCoreDiskName        string = "pc-core-hdd.vmdk"
+    // 128 GB
+    VBoxDefualtCoreDiskSize        uint   = 128000
+)
