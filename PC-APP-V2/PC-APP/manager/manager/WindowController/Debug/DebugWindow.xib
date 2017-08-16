@@ -152,6 +152,16 @@
                             <action selector="alert_test:" target="-2" id="4nn-yj-bYL"/>
                         </connections>
                     </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MBN-Fm-0Uz">
+                        <rect key="frame" x="233" y="32" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Agreement" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="s0s-jO-vop">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="agreement:" target="-2" id="xol-xR-30r"/>
+                        </connections>
+                    </button>
                 </subviews>
             </view>
             <connections>

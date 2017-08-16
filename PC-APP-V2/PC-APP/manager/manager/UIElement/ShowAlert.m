@@ -25,7 +25,7 @@ NSString * const ALRT_INFORMATIVE_TEXT = @"alrt_informative_text";
 
     NSAlert *alert = [[NSAlert alloc] init];
     [alert addButtonWithTitle:@"OK"];
-    [alert addButtonWithTitle:@"Cancel"];
+    //[alert addButtonWithTitle:@"Cancel"];
     [alert setMessageText:[aMeta objectForKey:ALRT_MESSAGE_TEXT]];
     [alert setInformativeText:[aMeta objectForKey:ALRT_INFORMATIVE_TEXT]];
     [alert setAlertStyle:NSWarningAlertStyle];

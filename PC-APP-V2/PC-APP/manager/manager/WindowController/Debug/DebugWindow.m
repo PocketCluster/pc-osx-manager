@@ -77,9 +77,10 @@
 }
 
 - (IBAction)alert_test:(id)sender {
-    [ShowAlert
-     showWarningAlertFromMeta:@{ALRT_MESSAGE_TEXT:@"Text",
-                                ALRT_INFORMATIVE_TEXT:@"Informative Text"}];
+    [ShowAlert showWarningAlertFromMeta:@{ALRT_MESSAGE_TEXT:@"Text", ALRT_INFORMATIVE_TEXT:@"Informative Text"}];
+}
 
+- (IBAction)agreement:(id)sender {
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"AgreementWC" withResponder:nil];    
 }
 @end

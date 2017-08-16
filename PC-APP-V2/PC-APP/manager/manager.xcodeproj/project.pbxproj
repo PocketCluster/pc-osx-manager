@@ -72,6 +72,13 @@
 		04C6D6061E7F9CEA0004837A /* libstatic-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04C6D6051E7F9CEA0004837A /* libstatic-core.a */; };
 		04C6D6091E7F9D210004837A /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04C6D6071E7F9CFD0004837A /* CoreWLAN.framework */; };
 		04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C6D60C1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m */; };
+		04CA54A61F447B1700A7AF48 /* AgreementWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CA54A41F447B1700A7AF48 /* AgreementWC.m */; };
+		04CA54A71F447B1700A7AF48 /* AgreementWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04CA54A51F447B1700A7AF48 /* AgreementWC.xib */; };
+		04CA54A91F44900F00A7AF48 /* EULA.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 04CA54A81F44900F00A7AF48 /* EULA.rtf */; };
+		04CA54AE1F44AFF700A7AF48 /* AgreementVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CA54AC1F44AFF700A7AF48 /* AgreementVC.m */; };
+		04CA54AF1F44AFF700A7AF48 /* AgreementVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04CA54AD1F44AFF700A7AF48 /* AgreementVC.xib */; };
+		04CA54B31F44B10400A7AF48 /* UserCheckVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CA54B11F44B10400A7AF48 /* UserCheckVC.m */; };
+		04CA54B41F44B10400A7AF48 /* UserCheckVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04CA54B21F44B10400A7AF48 /* UserCheckVC.xib */; };
 		04CAE2E71E9B8A4900B23B22 /* DebugWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CAE2E51E9B8A4900B23B22 /* DebugWindow.m */; };
 		04CAE2E81E9B8A4900B23B22 /* DebugWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04CAE2E61E9B8A4900B23B22 /* DebugWindow.xib */; };
 		04D5A48E1E9269AE0057012A /* AppDelegate+Sparkle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */; };
@@ -240,6 +247,16 @@
 		04C6D6071E7F9CFD0004837A /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
 		04C6D60B1E7F9EDD0004837A /* NSDictionary+HTTPAddition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+HTTPAddition.h"; sourceTree = "<group>"; };
 		04C6D60C1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+HTTPAddition.m"; sourceTree = "<group>"; };
+		04CA54A31F447B1700A7AF48 /* AgreementWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AgreementWC.h; sourceTree = "<group>"; };
+		04CA54A41F447B1700A7AF48 /* AgreementWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AgreementWC.m; sourceTree = "<group>"; };
+		04CA54A51F447B1700A7AF48 /* AgreementWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AgreementWC.xib; sourceTree = "<group>"; };
+		04CA54A81F44900F00A7AF48 /* EULA.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = EULA.rtf; sourceTree = "<group>"; };
+		04CA54AB1F44AFF700A7AF48 /* AgreementVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AgreementVC.h; sourceTree = "<group>"; };
+		04CA54AC1F44AFF700A7AF48 /* AgreementVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AgreementVC.m; sourceTree = "<group>"; };
+		04CA54AD1F44AFF700A7AF48 /* AgreementVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AgreementVC.xib; sourceTree = "<group>"; };
+		04CA54B01F44B10400A7AF48 /* UserCheckVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserCheckVC.h; sourceTree = "<group>"; };
+		04CA54B11F44B10400A7AF48 /* UserCheckVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserCheckVC.m; sourceTree = "<group>"; };
+		04CA54B21F44B10400A7AF48 /* UserCheckVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserCheckVC.xib; sourceTree = "<group>"; };
 		04CAE2E41E9B8A4900B23B22 /* DebugWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DebugWindow.h; sourceTree = "<group>"; };
 		04CAE2E51E9B8A4900B23B22 /* DebugWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DebugWindow.m; sourceTree = "<group>"; };
 		04CAE2E61E9B8A4900B23B22 /* DebugWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DebugWindow.xib; sourceTree = "<group>"; };
@@ -383,6 +400,7 @@
 				046A35B61BD783CE004E0946 /* BaseWindowController.h */,
 				046A35B71BD783CE004E0946 /* BaseWindowController.m */,
 				046A35C31BD7871B004E0946 /* About */,
+				04CA54A21F4479F300A7AF48 /* Agreement */,
 				04CAE2E31E9B8A2A00B23B22 /* Debug */,
 				046D31061F3D32440081CC3E /* Install */,
 				046D31001F3D310C0081CC3E /* Preferences */,
@@ -565,6 +583,7 @@
 		046D31121F3D346B0081CC3E /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
+				04CA54AA1F44AFD100A7AF48 /* Agreement */,
 				046D31131F3D346B0081CC3E /* Setup */,
 			);
 			name = ViewController;
@@ -643,6 +662,7 @@
 		048678071BCF5FE20071594B /* manager */ = {
 			isa = PBXGroup;
 			children = (
+				04CA54A81F44900F00A7AF48 /* EULA.rtf */,
 				0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */,
 				04E51DBF1BDC88E3001F1F22 /* Resources.bundle */,
 				0486780E1BCF5FE20071594B /* Assets.xcassets */,
@@ -698,6 +718,29 @@
 				04C6D60C1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m */,
 			);
 			path = Dictionary;
+			sourceTree = "<group>";
+		};
+		04CA54A21F4479F300A7AF48 /* Agreement */ = {
+			isa = PBXGroup;
+			children = (
+				04CA54A31F447B1700A7AF48 /* AgreementWC.h */,
+				04CA54A41F447B1700A7AF48 /* AgreementWC.m */,
+				04CA54A51F447B1700A7AF48 /* AgreementWC.xib */,
+			);
+			path = Agreement;
+			sourceTree = "<group>";
+		};
+		04CA54AA1F44AFD100A7AF48 /* Agreement */ = {
+			isa = PBXGroup;
+			children = (
+				04CA54AB1F44AFF700A7AF48 /* AgreementVC.h */,
+				04CA54AC1F44AFF700A7AF48 /* AgreementVC.m */,
+				04CA54AD1F44AFF700A7AF48 /* AgreementVC.xib */,
+				04CA54B01F44B10400A7AF48 /* UserCheckVC.h */,
+				04CA54B11F44B10400A7AF48 /* UserCheckVC.m */,
+				04CA54B21F44B10400A7AF48 /* UserCheckVC.xib */,
+			);
+			path = Agreement;
 			sourceTree = "<group>";
 		};
 		04CAE2E31E9B8A2A00B23B22 /* Debug */ = {
@@ -875,10 +918,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */,
+				04CA54AF1F44AFF700A7AF48 /* AgreementVC.xib in Resources */,
 				046D31111F3D32440081CC3E /* DPSetupWC.xib in Resources */,
+				04CA54B41F44B10400A7AF48 /* UserCheckVC.xib in Resources */,
 				0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */,
 				046D312B1F3D346B0081CC3E /* PCSetup3VC.xib in Resources */,
 				041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */,
+				04CA54A91F44900F00A7AF48 /* EULA.rtf in Resources */,
 				046D31251F3D346B0081CC3E /* PCSetup1VC.xib in Resources */,
 				046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				04BD309F1F3E4B2D00509B21 /* PCSetup2VC.xib in Resources */,
@@ -886,6 +932,7 @@
 				048678121BCF5FE20071594B /* MainMenu.xib in Resources */,
 				04CAE2E81E9B8A4900B23B22 /* DebugWindow.xib in Resources */,
 				046D310F1F3D32440081CC3E /* PCPkgInstallWC.xib in Resources */,
+				04CA54A71F447B1700A7AF48 /* AgreementWC.xib in Resources */,
 				046D31051F3D310C0081CC3E /* PCPrefWC.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1011,6 +1058,7 @@
 				04BEEEAF1F40832E008426A7 /* PCRouteTrie.m in Sources */,
 				04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */,
 				04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */,
+				04CA54B31F44B10400A7AF48 /* UserCheckVC.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
 				04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */,
 				046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
@@ -1028,6 +1076,8 @@
 				04030F671F3D5B6500EA793D /* Node.m in Sources */,
 				04030F801F3D5C1E00EA793D /* NativeMenu+NewCluster.m in Sources */,
 				043F47131F3E0C730078A0C1 /* AppDelegate+Window.m in Sources */,
+				04CA54AE1F44AFF700A7AF48 /* AgreementVC.m in Sources */,
+				04CA54A61F447B1700A7AF48 /* AgreementWC.m in Sources */,
 				04CAE2E71E9B8A4900B23B22 /* DebugWindow.m in Sources */,
 				04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */,
 				046D31241F3D346B0081CC3E /* PCSetup1VC.m in Sources */,
