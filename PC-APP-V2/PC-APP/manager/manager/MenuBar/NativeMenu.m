@@ -27,7 +27,7 @@
     self = [super init];
 
     if(self) {
-        [self setupMenuRunCluster];
+        [self setupMenuInitCheck];
     }
 
     return self;
@@ -70,6 +70,26 @@
     NSMenuItem *menuQuit = [[NSMenuItem alloc] initWithTitle:@"Quit" action:@selector(menuSelectedQuit:) keyEquivalent:@""];
     [menuQuit setTarget:self];
     [menuRoot addItem:menuQuit];
+}
+
+- (void) addInitCommonMenu:(NSMenu *)menuRoot {
+    // chat menu
+    [menuRoot addItem:[NSMenuItem separatorItem]];
+    NSMenuItem *mSlack = [[NSMenuItem alloc] initWithTitle:@"#PocketCluster (Slack)" action:@selector(menuSelectedSlack:) keyEquivalent:@""];
+    [mSlack setTarget:self];
+    [menuRoot addItem:mSlack];
+
+    // about menu
+    NSMenuItem *mAbout = [[NSMenuItem alloc] initWithTitle:@"About" action:@selector(menuSelectedAbout:) keyEquivalent:@""];
+    [mAbout setTarget:self];
+    [menuRoot addItem:mAbout];
+
+#ifdef DEBUG
+    // debug menu
+    NSMenuItem *mDebug = [[NSMenuItem alloc] initWithTitle:@"-- [DEBUG] --" action:@selector(menuSelectedDebug:) keyEquivalent:@""];
+    [mDebug setTarget:self];
+    [menuRoot addItem:mDebug];
+#endif
 }
 
 - (void) menuSelectedPref:(id)sender {

@@ -6,15 +6,17 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
-#import "AppDelegate+InitCheck.h"
 #import "pc-core.h"
 #import "PCRouter.h"
 #import "ShowAlert.h"
+#import "NativeMenu+NewCluster.h"
 
-@interface AppDelegate(InitCheckPrivate)<PCRouteRequest>
+#import "AppDelegate+AppCheck.h"
+
+@interface AppDelegate(AppCheckPrivate)<PCRouteRequest>
 @end
 
-@implementation AppDelegate(InitCheck)
+@implementation AppDelegate(AppCheck)
 
 - (void) initCheck {
 
@@ -100,6 +102,8 @@
 
           Log(@"%@ %@", path, response);
 
+         [belf.nativeMenu setupMenuNewCluster];
+         
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
      }];
 

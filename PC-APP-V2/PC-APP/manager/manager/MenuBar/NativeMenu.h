@@ -14,4 +14,5 @@
 @property (nonatomic, strong) NSStatusItem *statusItem;
 
 - (void) addCommonMenu:(NSMenu *)menuRoot;
+- (void) addInitCommonMenu:(NSMenu *)menuRoot;
 @end

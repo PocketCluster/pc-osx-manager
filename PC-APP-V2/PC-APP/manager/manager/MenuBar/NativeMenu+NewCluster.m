@@ -14,6 +14,25 @@
 
 @implementation NativeMenu(NewCluster)
 
+- (void) setupMenuInitCheck {
+    NSMenu* menuRoot = [[NSMenu alloc] init];
+    [menuRoot setAutoenablesItems:NO];
+
+    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Checking..." action:@selector(menuSelectedNewCluster:) keyEquivalent:@""];
+    [mChecking setEnabled:NO];
+    [menuRoot addItem:mChecking];
+
+    // add common bottom menus
+    [self addInitCommonMenu:menuRoot];
+    
+    // status
+    NSStatusItem* status = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
+    [status.button setImage:[NSImage imageNamed:@"status-off"]];
+    [status setHighlightMode:YES];
+    [status setMenu:menuRoot];
+    [self setStatusItem:status];
+}
+
 - (void) setupMenuNewCluster {
     NSMenu* menuRoot = [[NSMenu alloc] init];
     [menuRoot setAutoenablesItems:NO];

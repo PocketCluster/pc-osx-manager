@@ -9,5 +9,7 @@
 #import "NativeMenu.h"
 
 @interface NativeMenu(NewCluster)
+- (void) setupMenuInitCheck;
+
 - (void) setupMenuNewCluster;
 @end

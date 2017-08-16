@@ -1,5 +1,5 @@
 //
-//  AppDelegate+InitCheck.h
+//  AppDelegate+AppCheck.h
 //  manager
 //
 //  Created by Almighty Kim on 8/15/17.
@@ -9,6 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "AppDelegate.h"
 
-@interface AppDelegate(InitCheck)
+@interface AppDelegate(AppCheck)
 - (void) initCheck;
 @end

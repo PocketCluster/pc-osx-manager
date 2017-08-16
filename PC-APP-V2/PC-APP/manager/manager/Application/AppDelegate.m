@@ -16,7 +16,7 @@
 #import "AppDelegate+Netmonitor.h"
 #import "AppDelegate+ResponseHandle.h"
 #import "AppDelegate+Sparkle.h"
-#import "AppDelegate+InitCheck.h"
+#import "AppDelegate+AppCheck.h"
 
 @interface AppDelegate ()<NSUserNotificationCenterDelegate>
 @property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
@@ -93,12 +93,11 @@
 
     // 11. finalize app ready
     lifecycleVisible();
-    Log(@"Application Started");
+    Log(@"Application Started. Let's begin initial check");
 
     // 12. begin app ready sequence
     // this might update OSX side as well, so we need UI to be working beforehand.
     // Plus, it delayed execution give a room to golang to be initialized
-    Log(@"Initial Check Begin...");
     [self initCheck];
 }
 

@@ -27,7 +27,6 @@
 		0441A4141BD8BEAA00AABD7A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4131BD8BEAA00AABD7A /* SystemConfiguration.framework */; };
 		0441A4151BD8BEF100AABD7A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36411BD791F8004E0946 /* Foundation.framework */; };
 		0441A4171BD8BF3E00AABD7A /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4161BD8BF3E00AABD7A /* CoreServices.framework */; };
-		045292A01F42755800E72348 /* AppDelegate+InitCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = 0452929F1F42755800E72348 /* AppDelegate+InitCheck.m */; };
 		0464AD4C1F3DE445000D323C /* Router.m in Sources */ = {isa = PBXBuildFile; fileRef = 0464AD4B1F3DE445000D323C /* Router.m */; };
 		046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
 		046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
@@ -59,6 +58,7 @@
 		046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96081BDDBBBC006AA8EE /* BaseWindow.m */; };
 		0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0486780E1BCF5FE20071594B /* Assets.xcassets */; };
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
+		048EF4B31F43C2C8003BEEF0 /* AppDelegate+AppCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = 048EF4B21F43C2C8003BEEF0 /* AppDelegate+AppCheck.m */; };
 		0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */; };
 		04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */; };
 		04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */; };
@@ -151,8 +151,6 @@
 		0441A4111BD8BEA200AABD7A /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		0441A4131BD8BEAA00AABD7A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		0441A4161BD8BF3E00AABD7A /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
-		0452929E1F42755800E72348 /* AppDelegate+InitCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+InitCheck.h"; sourceTree = "<group>"; };
-		0452929F1F42755800E72348 /* AppDelegate+InitCheck.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+InitCheck.m"; sourceTree = "<group>"; };
 		04570BB01F40E3440047CCF9 /* PCRouteRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCRouteRequest.h; sourceTree = "<group>"; };
 		0464AD4A1F3DE445000D323C /* Router.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Router.h; sourceTree = "<group>"; };
 		0464AD4B1F3DE445000D323C /* Router.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Router.m; sourceTree = "<group>"; };
@@ -218,6 +216,8 @@
 		048678231BCF5FE20071594B /* managerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = managerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		048678271BCF5FE20071594B /* managerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = managerUITests.m; sourceTree = "<group>"; };
 		048678291BCF5FE20071594B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		048EF4B11F43C2C8003BEEF0 /* AppDelegate+AppCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+AppCheck.h"; sourceTree = "<group>"; };
+		048EF4B21F43C2C8003BEEF0 /* AppDelegate+AppCheck.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+AppCheck.m"; sourceTree = "<group>"; };
 		0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		04AD71C31E9B749A00DB6AE9 /* VersionComparison.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VersionComparison.h; sourceTree = "<group>"; };
 		04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionComparison.m; sourceTree = "<group>"; };
@@ -353,8 +353,8 @@
 				04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */,
 				043F47111F3E0C730078A0C1 /* AppDelegate+Window.h */,
 				043F47121F3E0C730078A0C1 /* AppDelegate+Window.m */,
-				0452929E1F42755800E72348 /* AppDelegate+InitCheck.h */,
-				0452929F1F42755800E72348 /* AppDelegate+InitCheck.m */,
+				048EF4B11F43C2C8003BEEF0 /* AppDelegate+AppCheck.h */,
+				048EF4B21F43C2C8003BEEF0 /* AppDelegate+AppCheck.m */,
 			);
 			name = Application;
 			path = manager/Application;
@@ -988,6 +988,7 @@
 				04BC73831E8A2E910079BD77 /* AboutWindow.m in Sources */,
 				046A361A1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */,
+				048EF4B31F43C2C8003BEEF0 /* AppDelegate+AppCheck.m in Sources */,
 				04B7B8B11F43B18B00FD0907 /* ShowAlert.m in Sources */,
 				046D31041F3D310C0081CC3E /* PCPrefWC.m in Sources */,
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
@@ -1000,7 +1001,6 @@
 				04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
 				04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */,
-				045292A01F42755800E72348 /* AppDelegate+InitCheck.m in Sources */,
 				046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
 				04030F681F3D5B6500EA793D /* Package.m in Sources */,
