@@ -9,8 +9,7 @@
 #import "BaseWindow.h"
 
 @implementation BaseWindow
--(instancetype)initWithNibName:(NSString *)aNibName bundle:(NSBundle *)aNibBundle
-{    
+-(instancetype)initWithNibName:(NSString *)aNibName bundle:(NSBundle *)aNibBundle {
     @autoreleasepool {
         __autoreleasing NSArray *nibContent;
 
@@ -31,31 +30,13 @@
             }
         }
     }
-    
-    if(self)
-    {
+
+    if(self != nil) {
         [self finishConstruction];
     }
-    
     return self;
 }
 
-- (void)finishConstruction
-{
+- (void)finishConstruction {
 }
-
-- (void)awakeFromNib
-{
-    [super awakeFromNib];
-}
-
-- (void)windowWillClose:(NSNotification *)notification {
-    
-    if(CHECK_DELEGATE_EXECUTION(self.actionDelegate, @protocol(PCWindowDelegate), @selector(windowWillClose:))){
-        [self.actionDelegate windowWillClose:notification];
-    }
-
-    [[AppDelegate sharedDelegate] removeOpenWindow:self];
-}
-
 @end

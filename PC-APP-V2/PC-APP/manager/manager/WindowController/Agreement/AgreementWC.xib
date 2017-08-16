@@ -11,14 +11,14 @@
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
-        <window title="PocketCluster User Agreement" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" animationBehavior="default" id="F0z-JX-Cv5">
+        <window allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" animationBehavior="default" id="F0z-JX-Cv5">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
-            <rect key="contentRect" x="196" y="240" width="728" height="480"/>
+            <rect key="contentRect" x="196" y="240" width="580" height="420"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
-            <value key="minSize" type="size" width="728" height="480"/>
-            <value key="maxSize" type="size" width="728" height="480"/>
+            <value key="minSize" type="size" width="580" height="420"/>
+            <value key="maxSize" type="size" width="580" height="420"/>
             <view key="contentView" id="se5-gp-TjO">
-                <rect key="frame" x="0.0" y="0.0" width="728" height="480"/>
+                <rect key="frame" x="0.0" y="0.0" width="580" height="420"/>
                 <autoresizingMask key="autoresizingMask"/>
             </view>
             <connections>

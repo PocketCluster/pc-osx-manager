@@ -7,6 +7,7 @@
 //
 
 #import "AgreementVC.h"
+#import "BaseBrandView.h"
 
 @interface AgreementVC ()
 
@@ -14,9 +15,20 @@
 
 @implementation AgreementVC
 
+- (instancetype) initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self != nil) {
+        [self setTitle:@"PocketCluster User Agreement"];
+    }
+    return self;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+
+    [[((BaseBrandView *)self.view) contentBox] removeFromSuperview];
+    ((BaseBrandView *)self.view).contentBox = nil;
+
     [self.agreement setVerticallyResizable:YES];
     [self.agreement setHorizontallyResizable:NO];
     [self.agreement setEditable:NO];

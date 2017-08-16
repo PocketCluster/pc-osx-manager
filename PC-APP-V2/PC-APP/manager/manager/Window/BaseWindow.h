@@ -10,11 +10,7 @@
 
 @class BaseWindow;
 
-@protocol PCWindowDelegate <NSWindowDelegate>
-@end
-
 @interface BaseWindow : NSWindow <NSWindowDelegate>
-@property (weak, nonatomic) id<PCWindowDelegate> actionDelegate;
 -(instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil;
 - (void)finishConstruction;
 @end
