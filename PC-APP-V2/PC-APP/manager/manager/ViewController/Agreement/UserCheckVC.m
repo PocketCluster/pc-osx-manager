@@ -10,6 +10,8 @@
 #import "BaseBrandView.h"
 
 @interface UserCheckVC ()
+-(void)_enableControls;
+-(void)_disableControls;
 @end
 
 @implementation UserCheckVC
@@ -30,12 +32,21 @@
     ((BaseBrandView *)self.view).contentBox = nil;
 }
 
+- (void)viewDidAppear {
+    [super viewDidAppear];
+
+    [self.fieldEmail becomeFirstResponder];
+    [self.fieldEmail selectText:self];
+    [[self.fieldEmail currentEditor] setSelectedRange:NSMakeRange([[self.fieldEmail stringValue] length], 0)];
+}
+
 -(IBAction)check:(id)sender {
-    [self.stageControl shouldControlProgressFrom:self withParam:nil];
+    //[self.stageControl shouldControlProgressFrom:self withParam:nil];
 }
 
 -(IBAction)cancel:(id)sender {
     [self.stageControl shouldControlRevertFrom:self withParam:nil];
+    [self _disableControls];
 }
 
 #pragma mark - StageStep
@@ -52,4 +63,20 @@
         return;
     }
 }
+
+#pragma mark - Controls
+-(void)_enableControls {
+    [self.progress setHidden:YES];
+    [self.progress stopAnimation:nil];
+    [self.btnCancel setEnabled:YES];
+    [self.btnCheck setEnabled:YES];
+}
+
+-(void)_disableControls {
+    [self.progress setHidden:NO];
+    [self.progress startAnimation:nil];
+    [self.btnCancel setEnabled:NO];
+    [self.btnCheck setEnabled:NO];
+}
+
 @end

@@ -6,7 +6,6 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
-#import "pc-core.h"
 #import "PCRouter.h"
 #import "ShowAlert.h"
 #import "NativeMenu+NewCluster.h"
@@ -38,7 +37,7 @@
          _isSystemReady = isSystemReady;
          
          if (isSystemReady) {
-             RouteRequestGet((char *)RPATH_APP_EXPIRED);
+             [PCRouter routeRequestGetOnPath:RPATH_APP_EXPIRED];
          } else {
              [ShowAlert
               showWarningAlertFromMeta:@{ALRT_MESSAGE_TEXT:@"Unable to run PocketCluster",
@@ -65,7 +64,7 @@
                   showWarningAlertFromMeta:@{ALRT_MESSAGE_TEXT:@"PocketCluster Expiration",
                                              ALRT_INFORMATIVE_TEXT:warning}];
              }
-             RouteRequestGet((char *)RPATH_SYSTEM_IS_FIRST_RUN);
+             [PCRouter routeRequestGetOnPath:RPATH_SYSTEM_IS_FIRST_RUN];
          } else {
              // alert and set result. Do not proceed
              [ShowAlert
@@ -87,7 +86,7 @@
          _isFirstTime = isFirstRun;
 
          if (!isFirstRun) {
-             RouteRequestGet((char *)RPATH_USER_AUTHED);
+             [PCRouter routeRequestGetOnPath:RPATH_USER_AUTHED];
          } else {
              
          }
@@ -107,6 +106,6 @@
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
      }];
 
-    RouteRequestGet((char *)RPATH_SYSTEM_READINESS);
+    [PCRouter routeRequestGetOnPath:RPATH_SYSTEM_READINESS];
 }
 @end

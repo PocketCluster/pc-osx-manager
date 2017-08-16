@@ -6,6 +6,10 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="UserCheckVC">
             <connections>
+                <outlet property="btnCancel" destination="Zqd-Ii-xR0" id="nIA-nQ-iyG"/>
+                <outlet property="btnCheck" destination="WFc-OQ-Mbr" id="Xky-39-bGW"/>
+                <outlet property="fieldCode" destination="gOj-0w-Sga" id="81O-3z-ipP"/>
+                <outlet property="fieldEmail" destination="d86-Ad-YDH" id="ZX4-Et-BVv"/>
                 <outlet property="progress" destination="c76-MG-BX9" id="zNJ-l6-CLW"/>
                 <outlet property="view" destination="8A6-lY-FJk" id="afI-cu-1Qp"/>
             </connections>
@@ -16,12 +20,12 @@
             <rect key="frame" x="0.0" y="0.0" width="580" height="420"/>
             <autoresizingMask key="autoresizingMask"/>
             <subviews>
-                <progressIndicator horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="c76-MG-BX9">
+                <progressIndicator hidden="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="c76-MG-BX9">
                     <rect key="frame" x="20" y="20" width="16" height="16"/>
                 </progressIndicator>
                 <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="d86-Ad-YDH">
                     <rect key="frame" x="20" y="269" width="540" height="22"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="LJF-VK-ibT">
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="left" usesSingleLineMode="YES" id="LJF-VK-ibT">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -45,7 +49,7 @@
                 </textField>
                 <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gOj-0w-Sga">
                     <rect key="frame" x="20" y="195" width="540" height="22"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="gDk-ql-OH9">
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="left" usesSingleLineMode="YES" id="gDk-ql-OH9">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>

@@ -15,12 +15,8 @@
             <rect key="frame" x="0.0" y="0.0" width="400" height="330"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="01q-zu-gu5">
-                    <rect key="frame" x="27" y="125" width="128" height="128"/>
-                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="raspberry" id="IWU-0V-nOV"/>
-                </imageView>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0Xi-wK-Vyb">
-                    <rect key="frame" x="186" y="218" width="179" height="25"/>
+                    <rect key="frame" x="73" y="98" width="255" height="25"/>
                     <buttonCell key="cell" type="roundTextured" title="Raspberry PI Cluster" bezelStyle="texturedRounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="h2t-JQ-oxj">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="system"/>
@@ -30,13 +26,17 @@
                     </connections>
                 </button>
                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4Es-Nc-GRF">
-                    <rect key="frame" x="184" y="137" width="183" height="75"/>
-                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Setup a Raspberry Pi 3 cluster of up to 4-nodes." id="Cwg-Qb-AJ8">
+                    <rect key="frame" x="100" y="11" width="201" height="62"/>
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="center" title="Setup a Raspberry Pi 3 cluster with up to 4-nodes." id="Cwg-Qb-AJ8">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="01q-zu-gu5">
+                    <rect key="frame" x="136" y="169" width="128" height="128"/>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="raspberry" id="IWU-0V-nOV"/>
+                </imageView>
             </subviews>
             <point key="canvasLocation" x="-30" y="288"/>
         </customView>

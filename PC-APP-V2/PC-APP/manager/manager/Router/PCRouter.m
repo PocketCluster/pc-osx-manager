@@ -17,6 +17,7 @@
 #import "PCRoutePathConst.h"
 #import "PCRouteTrie.h"
 #import "PCRouter.h"
+#import "pc-core.h"
 
 @interface PCRouter() {
     __strong PCRouteTrie *_rootNode;
@@ -71,6 +72,17 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCRouter, sharedRouter);
     if (holder != nil) {
         holder.handler(aMethod, aPath, aResponse);
     }
+}
+
++ (void) routeRequestGetOnPath:(const char*)aPath {
+    NSAssert([NSThread isMainThread], @"Request should only be made in Main Thread!");
+    RouteRequestGet((char *)aPath);
+}
+
++ (void) routeRequestPostOnPath:(const char*)aPath withRequestBody:(NSDictionary *)aRequestBody {
+    NSAssert([NSThread isMainThread], @"Request should only be made in Main Thread!");
+
+    //RouteRequestPost(<#char *p0#>, <#char *p1#>)((char *)aPath);
 }
 
 @end
