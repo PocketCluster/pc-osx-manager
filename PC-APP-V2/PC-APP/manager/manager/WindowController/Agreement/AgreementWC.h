@@ -7,6 +7,7 @@
 //
 
 #import "BaseWindowController.h"
+#import "StepStage.h"
 
-@interface AgreementWC : BaseWindowController
+@interface AgreementWC : BaseWindowController <StepControl>
 @end

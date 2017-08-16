@@ -7,9 +7,13 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "StepStage.h"
 
-@interface UserCheckVC : NSViewController
+@interface UserCheckVC : NSViewController<StageStep>
+@property (nonatomic, weak) NSObject<StepControl> *stageControl;
 @property (nonatomic, weak) IBOutlet NSProgressIndicator *progress;
+
+-(instancetype) initWithStageControl:(NSObject<StepControl> *)aControl nibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil;
 
 -(IBAction)check:(id)sender;
 -(IBAction)cancel:(id)sender;

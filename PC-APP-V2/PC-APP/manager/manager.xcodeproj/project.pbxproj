@@ -260,6 +260,7 @@
 		04CA54B71F44D47E00A7AF48 /* ShowAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShowAlert.m; sourceTree = "<group>"; };
 		04CA54BA1F44D49500A7AF48 /* BaseBrandView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseBrandView.h; sourceTree = "<group>"; };
 		04CA54BB1F44D49500A7AF48 /* BaseBrandView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseBrandView.m; sourceTree = "<group>"; };
+		04CA54BF1F44E37F00A7AF48 /* StepStage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StepStage.h; sourceTree = "<group>"; };
 		04CAE2E41E9B8A4900B23B22 /* DebugWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DebugWindow.h; sourceTree = "<group>"; };
 		04CAE2E51E9B8A4900B23B22 /* DebugWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DebugWindow.m; sourceTree = "<group>"; };
 		04CAE2E61E9B8A4900B23B22 /* DebugWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DebugWindow.xib; sourceTree = "<group>"; };
@@ -709,6 +710,7 @@
 			children = (
 				04CA54B51F44D47E00A7AF48 /* Alert */,
 				04CA54B81F44D47E00A7AF48 /* BaseBrandView */,
+				04CA54BE1F44E36A00A7AF48 /* StepStages */,
 			);
 			name = UIElement;
 			path = manager/UIElement;
@@ -762,6 +764,14 @@
 				04CA54BB1F44D49500A7AF48 /* BaseBrandView.m */,
 			);
 			path = BaseBrandView;
+			sourceTree = "<group>";
+		};
+		04CA54BE1F44E36A00A7AF48 /* StepStages */ = {
+			isa = PBXGroup;
+			children = (
+				04CA54BF1F44E37F00A7AF48 /* StepStage.h */,
+			);
+			path = StepStages;
 			sourceTree = "<group>";
 		};
 		04CAE2E31E9B8A2A00B23B22 /* Debug */ = {

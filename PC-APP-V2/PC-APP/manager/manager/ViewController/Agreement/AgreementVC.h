@@ -7,10 +7,13 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "StepStage.h"
 
-@interface AgreementVC : NSViewController
+@interface AgreementVC : NSViewController<StageStep>
+@property (nonatomic, weak) NSObject<StepControl> *stageControl;
 @property (nonatomic, assign) IBOutlet NSTextView *agreement;
 
+- (instancetype) initWithStageControl:(NSObject<StepControl> *)aControl nibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil;
 -(IBAction)agreed:(id)sender;
 -(IBAction)declined:(id)sender;
 @end
