@@ -21,7 +21,7 @@
 
 - (void) responseFor:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aResponse;
 
-+ (void) routeRequestGetOnPath:(const char*)aPath;
-+ (void) routeRequestPostOnPath:(const char*)aPath withRequestBody:(NSDictionary *)aRequestBody;
++ (void) routeRequestGet:(const char*)aPath;
++ (void) routeRequestPost:(const char*)aPath withRequestBody:(NSDictionary *)aRequestBody;
 
 @end

@@ -37,7 +37,7 @@
          _isSystemReady = isSystemReady;
          
          if (isSystemReady) {
-             [PCRouter routeRequestGetOnPath:RPATH_APP_EXPIRED];
+             [PCRouter routeRequestGet:RPATH_APP_EXPIRED];
          } else {
              [ShowAlert
               showWarningAlertFromMeta:@{ALRT_MESSAGE_TEXT:@"Unable to run PocketCluster",
@@ -64,7 +64,7 @@
                   showWarningAlertFromMeta:@{ALRT_MESSAGE_TEXT:@"PocketCluster Expiration",
                                              ALRT_INFORMATIVE_TEXT:warning}];
              }
-             [PCRouter routeRequestGetOnPath:RPATH_SYSTEM_IS_FIRST_RUN];
+             [PCRouter routeRequestGet:RPATH_SYSTEM_IS_FIRST_RUN];
          } else {
              // alert and set result. Do not proceed
              [ShowAlert
@@ -86,7 +86,7 @@
          _isFirstTime = isFirstRun;
 
          if (!isFirstRun) {
-             [PCRouter routeRequestGetOnPath:RPATH_USER_AUTHED];
+             [PCRouter routeRequestGet:RPATH_USER_AUTHED];
          } else {
              
          }
@@ -106,6 +106,6 @@
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
      }];
 
-    [PCRouter routeRequestGetOnPath:RPATH_SYSTEM_READINESS];
+    [PCRouter routeRequestGet:RPATH_SYSTEM_READINESS];
 }
 @end

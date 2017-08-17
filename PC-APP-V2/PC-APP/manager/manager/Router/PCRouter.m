@@ -74,12 +74,12 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCRouter, sharedRouter);
     }
 }
 
-+ (void) routeRequestGetOnPath:(const char*)aPath {
++ (void) routeRequestGet:(const char*)aPath {
     NSAssert([NSThread isMainThread], @"Request should only be made in Main Thread!");
     RouteRequestGet((char *)aPath);
 }
 
-+ (void) routeRequestPostOnPath:(const char*)aPath withRequestBody:(NSDictionary *)aRequestBody {
++ (void) routeRequestPost:(const char*)aPath withRequestBody:(NSDictionary *)aRequestBody {
     NSAssert([NSThread isMainThread], @"Request should only be made in Main Thread!");
 
     //RouteRequestPost(<#char *p0#>, <#char *p1#>)((char *)aPath);
