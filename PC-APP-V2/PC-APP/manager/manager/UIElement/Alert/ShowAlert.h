@@ -8,9 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-extern NSString * const ALRT_MESSAGE_TEXT;
-extern NSString * const ALRT_INFORMATIVE_TEXT;;
-
 @interface ShowAlert : NSObject
-+ (void) showWarningAlertFromMeta:(NSDictionary *)aMeta;
++ (void) showWarningAlertWithTitle:(NSString *)aTitle message:(NSString *)aMessage;
 @end

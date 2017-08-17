@@ -40,8 +40,8 @@
              [PCRouter routeRequestGet:RPATH_APP_EXPIRED];
          } else {
              [ShowAlert
-              showWarningAlertFromMeta:@{ALRT_MESSAGE_TEXT:@"Unable to run PocketCluster",
-                                         ALRT_INFORMATIVE_TEXT:[[response objectForKey:@"syscheck"] objectForKey:@"error"]}];
+              showWarningAlertWithTitle:@"Unable to run PocketCluster"
+              message:[[response objectForKey:@"syscheck"] objectForKey:@"error"]];
          }
          
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathSystemReady];
@@ -61,15 +61,14 @@
              NSString *warning = [[response objectForKey:@"expired"] objectForKey:@"warning"];
              if (warning != nil) {
                  [ShowAlert
-                  showWarningAlertFromMeta:@{ALRT_MESSAGE_TEXT:@"PocketCluster Expiration",
-                                             ALRT_INFORMATIVE_TEXT:warning}];
+                  showWarningAlertWithTitle:@"PocketCluster Expiration"
+                  message:warning];
              }
              [PCRouter routeRequestGet:RPATH_SYSTEM_IS_FIRST_RUN];
          } else {
-             // alert and set result. Do not proceed
              [ShowAlert
-              showWarningAlertFromMeta:@{ALRT_MESSAGE_TEXT:@"PocketCluster Expiration",
-                                         ALRT_INFORMATIVE_TEXT:[[response objectForKey:@"expired"] objectForKey:@"warning"]}];
+              showWarningAlertWithTitle:@"PocketCluster Expiration"
+              message:[[response objectForKey:@"expired"] objectForKey:@"error"]];
          }
 
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathAppExpired];
