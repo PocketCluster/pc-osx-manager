@@ -6,6 +6,7 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
+#import "DebugWindow+Route.h"
 #import "DebugWindow.h"
 #import "AppDelegate+Window.h"
 #import "pc-core.h"
@@ -68,6 +69,7 @@
 
 #pragma mark - ROUTEPATH
 - (IBAction)route_01:(id)sender {
+    [self initCheckTest];
 }
 
 - (IBAction)route_02:(id)sender {
