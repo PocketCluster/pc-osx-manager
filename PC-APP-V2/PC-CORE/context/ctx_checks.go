@@ -115,7 +115,7 @@ func (ctx *hostContext) CheckIsApplicationExpired() (expired bool, warn error, e
         return
     }
 
-    // Let's handle warning condition. is app to be expired within week?
+    // Let's handle warning condition. is the app to be expired within a week?
     timeLeft = expDate.Sub(nowDate)
     if timeLeft < time.Duration(time.Hour * 24 * 7) {
         expired = false
