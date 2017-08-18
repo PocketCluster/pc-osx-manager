@@ -97,7 +97,7 @@
          _isFirstTime = isFirstRun;
 
          if (isFirstRun) {
-             [self activeWindowByClassName:@"AgreementWC" withResponder:self];
+             [belf activeWindowByClassName:@"AgreementWC" withResponder:nil];
              [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
          } else {
              [PCRouter routeRequestGet:RPATH_USER_AUTHED];
@@ -123,7 +123,7 @@
              [belf.nativeMenu setupMenuNewCluster];
          } else {
              [ShowAlert
-              showWarningAlertWithTitle:@"Check your invitation, please."
+              showWarningAlertWithTitle:@"Your invitation is not valid"
               message:[[response objectForKey:@"user-auth"] objectForKey:@"error"]];
          }
          

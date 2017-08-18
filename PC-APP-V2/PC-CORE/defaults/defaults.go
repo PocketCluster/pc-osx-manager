@@ -9,7 +9,7 @@ import (
 const (
     ApplicationVersion         string = "0.1.4"
 
-    ApplicationExpirationDate  string = "2017/12/31 23:55:59 -0000"
+    ApplicationExpirationDate  string = "2018/01/01 00:00:00 -0000"
 )
 
 const (

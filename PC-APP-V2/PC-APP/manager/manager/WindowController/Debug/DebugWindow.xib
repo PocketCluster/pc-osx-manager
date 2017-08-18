@@ -133,8 +133,8 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AuB-cT-teD">
-                        <rect key="frame" x="233" y="204" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="Alert Test" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="loe-39-GvN">
+                        <rect key="frame" x="233" y="185" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Agreement" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="loe-39-GvN">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
@@ -161,6 +161,13 @@
                         <connections>
                             <action selector="route_03:" target="-2" id="VSG-5V-dea"/>
                         </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7ki-2u-eul">
+                        <rect key="frame" x="233" y="152" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="New Cluster" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="zl0-Nk-FeD">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
                     </button>
                 </subviews>
             </view>

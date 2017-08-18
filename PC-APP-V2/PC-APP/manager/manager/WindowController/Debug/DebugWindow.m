@@ -61,6 +61,7 @@
 }
 
 - (IBAction)alert_test:(id)sender {
+     [[AppDelegate sharedDelegate] activeWindowByClassName:@"AgreementWC" withResponder:nil];
 }
 
 #pragma mark - ROUTEPATH
