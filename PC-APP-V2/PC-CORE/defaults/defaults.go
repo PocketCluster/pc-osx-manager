@@ -4,6 +4,8 @@ import (
     "github.com/stkim1/pcrypto"
 )
 
+// PLACE ONLY *CONSTANT* VALUES W/O DEPENDENCY IN THIS PACKAGE, !!!PLEASE!!!
+
 const (
     ApplicationVersion         string = "0.1.4"
 

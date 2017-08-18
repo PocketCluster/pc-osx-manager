@@ -10,6 +10,7 @@
 #import "ShowAlert.h"
 #import "NativeMenu+NewCluster.h"
 
+#import "AppDelegate+Window.h"
 #import "AppDelegate+AppCheck.h"
 
 @interface AppDelegate(AppCheckPrivate)<PCRouteRequest>
@@ -26,6 +27,7 @@
     NSString *pathUserAuthed  = [NSString stringWithUTF8String:RPATH_USER_AUTHED];
     NSString *pathIsFirstRun  = [NSString stringWithUTF8String:RPATH_SYSTEM_IS_FIRST_RUN];
     
+    /*** checking system readiness ***/
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:pathSystemReady
@@ -35,10 +37,14 @@
 
          BOOL isSystemReady = [[[response objectForKey:@"syscheck"] objectForKey:@"status"] boolValue];
          _isSystemReady = isSystemReady;
-         
+
          if (isSystemReady) {
              [PCRouter routeRequestGet:RPATH_APP_EXPIRED];
          } else {
+             [[PCRouter sharedRouter] delGetRequest:belf onPath:pathAppExpired];
+             [[PCRouter sharedRouter] delGetRequest:belf onPath:pathIsFirstRun];
+             [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
+
              [ShowAlert
               showWarningAlertWithTitle:@"Unable to run PocketCluster"
               message:[[response objectForKey:@"syscheck"] objectForKey:@"error"]];
@@ -46,7 +52,8 @@
          
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathSystemReady];
      }];
-    
+
+    /*** checking app expired ***/
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:pathAppExpired
@@ -64,8 +71,12 @@
                   showWarningAlertWithTitle:@"PocketCluster Expiration"
                   message:warning];
              }
+
              [PCRouter routeRequestGet:RPATH_SYSTEM_IS_FIRST_RUN];
          } else {
+             [[PCRouter sharedRouter] delGetRequest:belf onPath:pathIsFirstRun];
+             [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
+
              [ShowAlert
               showWarningAlertWithTitle:@"PocketCluster Expiration"
               message:[[response objectForKey:@"expired"] objectForKey:@"error"]];
@@ -73,7 +84,8 @@
 
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathAppExpired];
      }];
-    
+
+    /*** checking if first time ***/
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:pathIsFirstRun
@@ -84,23 +96,36 @@
          BOOL isFirstRun = [[[response objectForKey:@"firsttime"] objectForKey:@"status"] boolValue];
          _isFirstTime = isFirstRun;
 
-         if (!isFirstRun) {
-             [PCRouter routeRequestGet:RPATH_USER_AUTHED];
+         if (isFirstRun) {
+             [self activeWindowByClassName:@"AgreementWC" withResponder:self];
+             [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
          } else {
-             
+             [PCRouter routeRequestGet:RPATH_USER_AUTHED];
+
          }
 
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathIsFirstRun];
      }];
 
+    /*** checking user authed ***/
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:pathUserAuthed
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-          Log(@"%@ %@", path, response);
+         Log(@"%@ %@", path, response);
 
-         [belf.nativeMenu setupMenuNewCluster];
+         BOOL isUserAuthed = [[[response objectForKey:@"user-auth"] objectForKey:@"status"] boolValue];
+         _isUserAuthed = isUserAuthed;
+
+         if (_isUserAuthed) {
+             // TODO : choose appropriate menu
+             [belf.nativeMenu setupMenuNewCluster];
+         } else {
+             [ShowAlert
+              showWarningAlertWithTitle:@"Check your invitation, please."
+              message:[[response objectForKey:@"user-auth"] objectForKey:@"error"]];
+         }
          
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
      }];

@@ -113,37 +113,27 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EHR-gA-Cvs">
-                        <rect key="frame" x="233" y="185" width="182" height="32"/>
+                        <rect key="frame" x="233" y="114" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="[RT] system ready" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="wlI-oW-3f2">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="route_01:" target="-2" id="zq5-6W-VR5"/>
-                        </connections>
-                    </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="svL-Va-Iy6">
-                        <rect key="frame" x="233" y="152" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="[RT] first time" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="D0a-AF-MF0">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="route_02:" target="-2" id="WOw-8Y-Uon"/>
+                            <action selector="route_01:" target="-2" id="fNU-5U-Eqb"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QvO-BA-tEz">
-                        <rect key="frame" x="233" y="119" width="182" height="32"/>
+                        <rect key="frame" x="233" y="81" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="[RT] app expired" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="dJR-Fe-HGG">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="route_03:" target="-2" id="AtD-BW-Ozz"/>
+                            <action selector="route_02:" target="-2" id="C83-w0-NTW"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AuB-cT-teD">
-                        <rect key="frame" x="233" y="65" width="182" height="32"/>
+                        <rect key="frame" x="233" y="204" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Alert Test" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="loe-39-GvN">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -153,13 +143,23 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MBN-Fm-0Uz">
-                        <rect key="frame" x="233" y="32" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="Agreement" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="s0s-jO-vop">
+                        <rect key="frame" x="233" y="15" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[RT] user authed" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="s0s-jO-vop">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="agreement:" target="-2" id="xol-xR-30r"/>
+                            <action selector="route_04:" target="-2" id="0vB-82-4T5"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="svL-Va-Iy6">
+                        <rect key="frame" x="233" y="48" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[RT] first time" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="D0a-AF-MF0">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="route_03:" target="-2" id="VSG-5V-dea"/>
                         </connections>
                     </button>
                 </subviews>

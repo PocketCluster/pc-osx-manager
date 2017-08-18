@@ -1,7 +1,10 @@
 package context
 
 import (
+    "time"
+
     "github.com/pkg/errors"
+    "github.com/stkim1/pc-core/defaults"
 )
 
 type HostContextApplicationEnv interface {
@@ -11,6 +14,8 @@ type HostContextApplicationEnv interface {
     ApplicationLibraryCacheDirectory() (string, error)
     ApplicationResourceDirectory() (string, error)
     ApplicationExecutableDirectory() (string, error)
+    ApplicationBundleVersion() (string, error)
+    ApplicationBundleExpirationDate() (time.Time, error)
 
     CurrentCountryCode() (string, error)
     CurrentLanguageCode() (string, error)
@@ -23,6 +28,8 @@ type hostAppEnv struct {
     applicationLibCachePath      string
     applicationResourcePath      string
     applicationExecutablePath    string
+    applicationBundleVersion     string
+    applicationBundleExpiration  string
 
     currentCountryCode           string
     currentLanguageCode          string
@@ -68,6 +75,20 @@ func (c *hostAppEnv) ApplicationExecutableDirectory() (string, error) {
         return "", errors.Errorf("[ERR] invalid app exec directory")
     }
     return c.applicationExecutablePath, nil
+}
+
+func (c *hostAppEnv) ApplicationBundleVersion() (string, error) {
+    if len(c.applicationBundleVersion) == 0 {
+        return "", errors.Errorf("[ERR] invalid app bundle version")
+    }
+    return c.applicationBundleVersion, nil
+}
+
+func (c *hostAppEnv) ApplicationBundleExpirationDate() (time.Time, error) {
+    if len(c.applicationBundleExpiration) == 0 {
+        return time.Time{}, errors.Errorf("[ERR] invalid app expiration date")
+    }
+    return time.Parse(defaults.PocketTimeDateFormat, c.applicationBundleExpiration)
 }
 
 func (c *hostAppEnv) CurrentCountryCode() (string, error) {

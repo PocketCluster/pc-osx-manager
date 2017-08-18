@@ -39,6 +39,8 @@
 		04259C141E7F869F0071648E /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C131E7F869F0071648E /* CFNetwork.framework */; };
 		04259C161E7F86B20071648E /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C151E7F86B20071648E /* SystemConfiguration.framework */; };
 		04259C181E7F86BE0071648E /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04259C171E7F86BE0071648E /* CoreWLAN.framework */; };
+		0444AD851F4787F000F79CA7 /* PCBundleInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 0444AD831F4787F000F79CA7 /* PCBundleInfo.h */; };
+		0444AD861F4787F000F79CA7 /* PCBundleInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 0444AD841F4787F000F79CA7 /* PCBundleInfo.m */; };
 		047E41801F34AF4C0044F5DB /* host.h in Headers */ = {isa = PBXBuildFile; fileRef = 047E417F1F34AF4C0044F5DB /* host.h */; };
 		047E41821F34AF560044F5DB /* host.c in Sources */ = {isa = PBXBuildFile; fileRef = 047E41811F34AF560044F5DB /* host.c */; };
 		04937E631F3A4BF000128295 /* console.h in Headers */ = {isa = PBXBuildFile; fileRef = 04937E621F3A4BF000128295 /* console.h */; };
@@ -119,6 +121,8 @@
 		04259C131E7F869F0071648E /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		04259C151E7F86B20071648E /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		04259C171E7F86BE0071648E /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
+		0444AD831F4787F000F79CA7 /* PCBundleInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCBundleInfo.h; sourceTree = "<group>"; };
+		0444AD841F4787F000F79CA7 /* PCBundleInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCBundleInfo.m; sourceTree = "<group>"; };
 		047E417F1F34AF4C0044F5DB /* host.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = host.h; sourceTree = "<group>"; };
 		047E41811F34AF560044F5DB /* host.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = host.c; sourceTree = "<group>"; };
 		04937E621F3A4BF000128295 /* console.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = console.h; sourceTree = "<group>"; };
@@ -192,6 +196,7 @@
 				04259C0B1E7F82E10071648E /* Foundation.framework */,
 				04259C091E7F82240071648E /* PrefixHeader.pch */,
 				04259BB31E7F7F9C0071648E /* go-setup.sh */,
+				0444AD811F4787F000F79CA7 /* bundleinfo */,
 				04259BB91E7F80940071648E /* directory */,
 				04D6AD811E80DCC700A015FA /* goheader */,
 				04E730181E822A6700BE83DD /* lifecycle */,
@@ -200,7 +205,6 @@
 				04B3FB8F1F41151400A72834 /* response */,
 				04BD57FA1F3FD7A900D7F110 /* routepath */,
 				04259BDA1E7F80940071648E /* serial */,
-				04259BDF1E7F80940071648E /* status */,
 				04259BE01E7F80940071648E /* system */,
 				04259BE41E7F80940071648E /* utility */,
 				04AF5FB31F3200E1009DBD2B /* vbox */,
@@ -327,14 +331,6 @@
 			path = header;
 			sourceTree = "<group>";
 		};
-		04259BDF1E7F80940071648E /* status */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = status;
-			path = ../../status;
-			sourceTree = "<group>";
-		};
 		04259BE01E7F80940071648E /* system */ = {
 			isa = PBXGroup;
 			children = (
@@ -362,6 +358,24 @@
 			);
 			name = utility;
 			path = ../../utility;
+			sourceTree = "<group>";
+		};
+		0444AD811F4787F000F79CA7 /* bundleinfo */ = {
+			isa = PBXGroup;
+			children = (
+				0444AD821F4787F000F79CA7 /* header */,
+				0444AD841F4787F000F79CA7 /* PCBundleInfo.m */,
+			);
+			name = bundleinfo;
+			path = ../../bundleinfo;
+			sourceTree = "<group>";
+		};
+		0444AD821F4787F000F79CA7 /* header */ = {
+			isa = PBXGroup;
+			children = (
+				0444AD831F4787F000F79CA7 /* PCBundleInfo.h */,
+			);
+			path = header;
 			sourceTree = "<group>";
 		};
 		04AF5FB31F3200E1009DBD2B /* vbox */ = {
@@ -510,6 +524,7 @@
 				04EFCD541E89F6270058840F /* pc-core.h in Headers */,
 				04AF5FDD1F3200E1009DBD2B /* machine.h in Headers */,
 				04AF5FDA1F3200E1009DBD2B /* common.h in Headers */,
+				0444AD851F4787F000F79CA7 /* PCBundleInfo.h in Headers */,
 				04AF5FDC1F3200E1009DBD2B /* keyboard.h in Headers */,
 				04AF5FDF1F3200E1009DBD2B /* medium_format.h in Headers */,
 				04AF5FD91F3200E1009DBD2B /* bios_settings.h in Headers */,
@@ -600,6 +615,7 @@
 				04AF5FEB1F3200E1009DBD2B /* console.c in Sources */,
 				04AF5FEA1F3200E1009DBD2B /* bios_settings.c in Sources */,
 				04AF5FF31F3200E1009DBD2B /* session.c in Sources */,
+				0444AD861F4787F000F79CA7 /* PCBundleInfo.m in Sources */,
 				04AF5FF41F3200E1009DBD2B /* storage_controller.c in Sources */,
 				04E7301D1E822BC300BE83DD /* PCNativeThread.c in Sources */,
 				04259BFF1E7F80950071648E /* LinkObserver.m in Sources */,

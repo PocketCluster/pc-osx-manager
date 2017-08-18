@@ -17,6 +17,8 @@ func (ctx *hostContext) RefreshStatus() error {
     ctx.applicationLibCachePath     = findApplicationLibraryCacheDirectory()
     ctx.applicationResourcePath     = findApplicationResourceDirectory()
     ctx.applicationExecutablePath   = findApplicationExecutableDirectory()
+    ctx.applicationBundleVersion    = findApplicationBundleVersionString()
+    ctx.applicationBundleExpiration = findApplicationBundleExpirationString()
 
     ctx.processorCount              = findSystemProcessorCount()
     ctx.activeProcessorCount        = findSystemActiveProcessorCount()

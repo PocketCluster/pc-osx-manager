@@ -2,13 +2,10 @@ package main
 
 import (
     "encoding/json"
-    "fmt"
-    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/context"
-    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/event/route/routepath"
     "github.com/stkim1/pc-core/vboxglue"
 )
@@ -92,37 +89,27 @@ func initRoutePathService() {
     // check if app is expired
     theApp.GET(routepath.RpathAppExpired(), func(_, path, _ string) error {
         var (
+            expired, warn, err = context.SharedHostContext().CheckIsApplicationExpired()
             response ReponseMessage = nil
-            nowDate = time.Now()
-            expDate, err = time.Parse(defaults.PocketTimeDateFormat, defaults.ApplicationExpirationDate)
         )
         if err != nil {
-            log.Debugf("parse error %v", err.Error())
-        }
-
-        // check if exp date exceed today
-        if expDate.After(nowDate) {
-            timeLeft := expDate.Sub(nowDate)
-            if timeLeft < time.Duration(time.Hour * 24 * 7) {
-                response = ReponseMessage {
-                    "expired" : {
-                        "status" : false,
-                        "warning" : fmt.Sprintf("Version %v will be expired within %d days", defaults.ApplicationVersion, int(timeLeft / time.Duration(time.Hour * 24))),
-                    },
-                }
-            } else {
-                response = ReponseMessage {
-                    "expired" : {
-                        "status" : false,
-                    },
-                }
-            }
-        } else {
-            eYear, eMonth, eDay := expDate.Date()
             response = ReponseMessage {
                 "expired" : {
-                    "status" : true,
-                    "error"  : fmt.Sprintf("Version %v is expired on %d/%d/%d", defaults.ApplicationVersion, eYear, eMonth, eDay),
+                    "status" : expired,
+                    "error"  : err.Error(),
+                },
+            }
+        } else if warn != nil {
+            response = ReponseMessage {
+                "expired" : {
+                    "status" : expired,
+                    "warning" : warn.Error(),
+                },
+            }
+        } else {
+            response = ReponseMessage {
+                "expired" : {
+                    "status" : expired,
                 },
             }
         }

@@ -63,7 +63,6 @@
 		04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */; };
 		04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */; };
 		04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B3FB8D1F41133600A72834 /* AppDelegate+ResponseHandle.m */; };
-		04B7D5E71F46665C002F2DE5 /* DebugWindow+Route.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B7D5E61F46665C002F2DE5 /* DebugWindow+Route.m */; };
 		04BC73831E8A2E910079BD77 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04BC73821E8A2E910079BD77 /* AboutWindow.m */; };
 		04BD309E1F3E4B2D00509B21 /* PCSetup2VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04BD309C1F3E4B2D00509B21 /* PCSetup2VC.m */; };
 		04BD309F1F3E4B2D00509B21 /* PCSetup2VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04BD309D1F3E4B2D00509B21 /* PCSetup2VC.xib */; };
@@ -234,8 +233,6 @@
 		04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Netmonitor.m"; sourceTree = "<group>"; };
 		04B3FB8C1F41133600A72834 /* AppDelegate+ResponseHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+ResponseHandle.h"; sourceTree = "<group>"; };
 		04B3FB8D1F41133600A72834 /* AppDelegate+ResponseHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+ResponseHandle.m"; sourceTree = "<group>"; };
-		04B7D5E51F46665C002F2DE5 /* DebugWindow+Route.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DebugWindow+Route.h"; sourceTree = "<group>"; };
-		04B7D5E61F46665C002F2DE5 /* DebugWindow+Route.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "DebugWindow+Route.m"; sourceTree = "<group>"; };
 		04BC73811E8A2E910079BD77 /* AboutWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutWindow.h; sourceTree = "<group>"; };
 		04BC73821E8A2E910079BD77 /* AboutWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AboutWindow.m; sourceTree = "<group>"; };
 		04BD309B1F3E4B2D00509B21 /* PCSetup2VC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup2VC.h; sourceTree = "<group>"; };
@@ -783,8 +780,6 @@
 				04CAE2E41E9B8A4900B23B22 /* DebugWindow.h */,
 				04CAE2E51E9B8A4900B23B22 /* DebugWindow.m */,
 				04CAE2E61E9B8A4900B23B22 /* DebugWindow.xib */,
-				04B7D5E51F46665C002F2DE5 /* DebugWindow+Route.h */,
-				04B7D5E61F46665C002F2DE5 /* DebugWindow+Route.m */,
 			);
 			path = Debug;
 			sourceTree = "<group>";
@@ -1087,7 +1082,6 @@
 				046D31041F3D310C0081CC3E /* PCPrefWC.m in Sources */,
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				04D5A48E1E9269AE0057012A /* AppDelegate+Sparkle.m in Sources */,
-				04B7D5E71F46665C002F2DE5 /* DebugWindow+Route.m in Sources */,
 				04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */,
 				046D31311F3D34D60081CC3E /* DPSetupWindow.m in Sources */,
 				0464AD4C1F3DE445000D323C /* Router.m in Sources */,

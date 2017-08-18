@@ -2,13 +2,16 @@ package context
 
 import (
     "os"
+    "time"
 
     "github.com/pkg/errors"
+    "github.com/stkim1/pc-core/defaults"
 )
 
 type HostContextCheckup interface {
     CheckHostSuitability() error
     CheckIsFistTimeExecution() bool
+    CheckIsApplicationExpired() (bool, error, error)
 }
 
 func (ctx *hostContext) CheckHostSuitability() error {
@@ -70,4 +73,57 @@ func (ctx *hostContext) CheckIsFistTimeExecution() bool {
     }
 
     return false
+}
+
+func (ctx *hostContext) CheckIsApplicationExpired() (expired bool, warn error, err error) {
+    var (
+        nowDate time.Time = time.Now()
+        appExp, expDate time.Time
+        timeLeft time.Duration
+        appVer string
+    )
+    // start with assumption that app is expired
+    expired = true
+
+    // then checks version and expiration
+    appVer, err = ctx.ApplicationBundleVersion()
+    if err != nil {
+        return
+    }
+    if appVer != defaults.ApplicationVersion {
+        err = errors.Errorf("Mistaching version info between application bundle and engine")
+        return
+    }
+    appExp, err = ctx.ApplicationBundleExpirationDate()
+    if err != nil {
+        return
+    }
+    expDate, err = time.Parse(defaults.PocketTimeDateFormat, defaults.ApplicationExpirationDate)
+    if err != nil {
+        return
+    }
+    if !appExp.Equal(expDate) {
+        err = errors.Errorf("Mismatching expiration date between application bundle and engine")
+        return
+    }
+
+    // app is expired. by this all error conditions are sorted out
+    if expDate.Before(nowDate) {
+        eYear, eMonth, eDay := expDate.Date()
+        expired = true
+        err = errors.Errorf("Version %v is expired on %d/%d/%d", defaults.ApplicationVersion, eYear, eMonth, eDay)
+        return
+    }
+
+    // Let's handle warning condition. is app to be expired within week?
+    timeLeft = expDate.Sub(nowDate)
+    if timeLeft < time.Duration(time.Hour * 24 * 7) {
+        expired = false
+        warn = errors.Errorf("Version %v will be expired within %d days", defaults.ApplicationVersion, int(timeLeft / time.Duration(time.Hour * 24)))
+        return
+    }
+
+    // everything seems to be ok.
+    expired = false
+    return
 }

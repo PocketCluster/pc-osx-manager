@@ -6,12 +6,13 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
-#import "DebugWindow+Route.h"
 #import "DebugWindow.h"
-#import "AppDelegate+Window.h"
+
 #import "pc-core.h"
-#import "PCRouter.h"
+#import "AppDelegate+Window.h"
 #import "ShowAlert.h"
+#import "PCRouter.h"
+#import "PCRoutePathConst.h"
 
 @interface DebugWindow ()<PCRouteRequest>
 @end
@@ -20,13 +21,6 @@
 
 - (void)windowDidLoad {
     [super windowDidLoad];
-    
-    [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:[NSString stringWithUTF8String:RPATH_SYSTEM_READINESS]
-     withHandler:^(NSString *method, NSString *path, NSDictionary *payload) {
-         Log(@"Payload for %@ | %@", [self className], [payload description]);
-     }];
 }
 
 - (IBAction)opsCmdBaseServiceStart:(id)sender {
@@ -66,25 +60,45 @@
     [[AppDelegate sharedDelegate] activeWindowByClassName:@"DPSetupWC" withResponder:nil];
 }
 
+- (IBAction)alert_test:(id)sender {
+}
 
 #pragma mark - ROUTEPATH
 - (IBAction)route_01:(id)sender {
-    [self initCheckTest];
+    [[PCRouter sharedRouter]
+     responseFor:RPATH_EVENT_METHOD_GET
+     onPath:[NSString stringWithUTF8String:RPATH_SYSTEM_READINESS]
+     withPayload:
+     @{@"syscheck":
+           @{@"status": @NO,
+             @"error" : @"no primary interface"}}];
 }
 
 - (IBAction)route_02:(id)sender {
+    [[PCRouter sharedRouter]
+     responseFor:RPATH_EVENT_METHOD_GET
+     onPath:[NSString stringWithUTF8String:RPATH_APP_EXPIRED]
+     withPayload:
+     @{@"expired":
+           @{@"status": @NO,
+             @"warning" : @"this will be expired within 5 days"}}];
 }
 
 - (IBAction)route_03:(id)sender {
+    [[PCRouter sharedRouter]
+     responseFor:RPATH_EVENT_METHOD_GET
+     onPath:[NSString stringWithUTF8String:RPATH_SYSTEM_IS_FIRST_RUN]
+     withPayload:@{@"firsttime":@{@"status": @YES}}];
 }
 
-- (IBAction)alert_test:(id)sender {
-    [ShowAlert
-     showWarningAlertWithTitle:@"Title"
-     message:@"Message Body"];
+- (IBAction)route_04:(id)sender {
+    [[PCRouter sharedRouter]
+     responseFor:RPATH_EVENT_METHOD_GET
+     onPath:[NSString stringWithUTF8String:RPATH_USER_AUTHED]
+     withPayload:
+     @{@"user-auth":
+           @{@"status": @NO,
+             @"error" : @"need inviation code check"}}];
 }
 
-- (IBAction)agreement:(id)sender {
-    [[AppDelegate sharedDelegate] activeWindowByClassName:@"AgreementWC" withResponder:nil];
-}
 @end
