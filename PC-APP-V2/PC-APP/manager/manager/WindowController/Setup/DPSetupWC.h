@@ -7,7 +7,7 @@
 //
 
 #import "BaseWindowController.h"
+#import "StepStage.h"
 
-@interface DPSetupWC : BaseWindowController
--(void)resetSetupStage;
+@interface DPSetupWC : BaseWindowController <StepControl>
 @end

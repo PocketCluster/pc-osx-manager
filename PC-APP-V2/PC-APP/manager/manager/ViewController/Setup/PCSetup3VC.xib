@@ -6,12 +6,14 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="PCSetup3VC">
             <connections>
-                <outlet property="circularProgress" destination="yJ8-o0-95a" id="aTX-Oo-Hmf"/>
-                <outlet property="installBtn" destination="Xon-Xe-TcG" id="K7q-yn-Yay"/>
+                <outlet property="btnCancel" destination="thl-ld-VP8" id="ceg-9q-QYZ"/>
+                <outlet property="btnInstall" destination="Fps-Vf-vrR" id="jcp-gv-FTk"/>
+                <outlet property="circularProgress" destination="NVT-gd-dSG" id="O6Q-0q-rgl"/>
                 <outlet property="packageTable" destination="AYe-3s-L1Q" id="Di6-2b-prT"/>
+                <outlet property="pannel" destination="3Rc-Cp-oah" id="no9-RR-1Tv"/>
                 <outlet property="progressBar" destination="3rn-uc-5rZ" id="hQd-ZQ-XGv"/>
-                <outlet property="progressLabel" destination="rnA-nZ-9Nb" id="YvG-GV-Mu0"/>
-                <outlet property="view" destination="3Rc-Cp-oah" id="6xm-Mq-tN3"/>
+                <outlet property="progressLabel" destination="t8x-N2-LCV" id="mnZ-sv-s8p"/>
+                <outlet property="view" destination="6sv-mg-Jqm" id="kOg-7P-4rP"/>
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
@@ -20,32 +22,17 @@
             <rect key="frame" x="0.0" y="0.0" width="415" height="345"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Xon-Xe-TcG">
-                    <rect key="frame" x="166" y="13" width="82" height="32"/>
-                    <buttonCell key="cell" type="push" title="Install" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="dXY-kS-Aaf">
-                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="system"/>
-                    </buttonCell>
-                    <connections>
-                        <action selector="install:" target="-2" id="x5Y-sa-9UD"/>
-                    </connections>
-                </button>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oCB-6x-ZaN">
-                    <rect key="frame" x="52" y="292" width="311" height="44"/>
-                    <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" title="Package Installation" id="SbM-ms-Wzn">
-                        <font key="font" size="32" name=".HelveticaNeueDeskInterface-MediumP4"/>
-                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                </textField>
+                <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="3rn-uc-5rZ">
+                    <rect key="frame" x="20" y="27" width="375" height="20"/>
+                </progressIndicator>
                 <scrollView fixedFrame="YES" borderType="none" autohidesScrollers="YES" horizontalLineScroll="42" horizontalPageScroll="10" verticalLineScroll="42" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4rB-Bg-mK2">
-                    <rect key="frame" x="20" y="80" width="375" height="141"/>
+                    <rect key="frame" x="20" y="49" width="375" height="162"/>
                     <clipView key="contentView" ambiguous="YES" id="H5i-6F-7WS">
-                        <rect key="frame" x="0.0" y="23" width="375" height="118"/>
+                        <rect key="frame" x="0.0" y="23" width="375" height="139"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="40" rowSizeStyle="automatic" headerView="Jb8-Vy-3hW" viewBased="YES" id="AYe-3s-L1Q">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="118"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="139"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <size key="intercellSpacing" width="3" height="2"/>
                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -105,32 +92,67 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </tableHeaderView>
                 </scrollView>
-                <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="3rn-uc-5rZ">
-                    <rect key="frame" x="20" y="42" width="375" height="20"/>
-                </progressIndicator>
-                <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="yJ8-o0-95a">
-                    <rect key="frame" x="20" y="59" width="16" height="16"/>
-                </progressIndicator>
-                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aEF-mV-1R2">
-                    <rect key="frame" x="18" y="229" width="379" height="68"/>
-                    <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" id="s7S-NT-fXD">
-                        <font key="font" metaFont="system"/>
-                        <string key="title">Following packages will be installed.
-
-This process will take some time. Please be patient and do not cancel during installation.</string>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" preferredMaxLayoutWidth="415" translatesAutoresizingMaskIntoConstraints="NO" id="oCB-6x-ZaN">
+                    <rect key="frame" x="0.0" y="281" width="415" height="44"/>
+                    <textFieldCell key="cell" controlSize="mini" enabled="NO" sendsActionOnEndEditing="YES" alignment="center" title="Install Package" id="SbM-ms-Wzn">
+                        <font key="font" size="32" name=".HelveticaNeueDeskInterface-MediumP4"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rnA-nZ-9Nb">
-                    <rect key="frame" x="40" y="57" width="357" height="20"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" id="5p7-G6-JsK">
-                        <font key="font" size="14" name=".HelveticaNeueDeskInterface-MediumP4"/>
-                        <color key="textColor" red="0.29803922770000002" green="0.29803922770000002" blue="0.29803922770000002" alpha="1" colorSpace="calibratedRGB"/>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="t8x-N2-LCV">
+                    <rect key="frame" x="18" y="8" width="379" height="20"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" id="wLW-dL-Ssn">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlShadowColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" preferredMaxLayoutWidth="415" translatesAutoresizingMaskIntoConstraints="NO" id="aEF-mV-1R2">
+                    <rect key="frame" x="-2" y="219" width="419" height="51"/>
+                    <textFieldCell key="cell" controlSize="mini" enabled="NO" sendsActionOnEndEditing="YES" alignment="center" id="s7S-NT-fXD">
+                        <font key="font" metaFont="system"/>
+                        <string key="title">This process will take some time. 
+Please be patient and do not exit during installation.</string>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
             </subviews>
+            <point key="canvasLocation" x="716.5" y="438.5"/>
+        </customView>
+        <customView id="6sv-mg-Jqm" customClass="BaseBrandView">
+            <rect key="frame" x="0.0" y="0.0" width="580" height="420"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <progressIndicator hidden="YES" wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="NVT-gd-dSG">
+                    <rect key="frame" x="20" y="20" width="16" height="16"/>
+                </progressIndicator>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Fps-Vf-vrR">
+                    <rect key="frame" x="492" y="13" width="77" height="32"/>
+                    <buttonCell key="cell" type="push" title="Install" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="zX0-aG-BVF">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="install:" target="-2" id="GKw-zu-Iij"/>
+                    </connections>
+                </button>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="thl-ld-VP8">
+                    <rect key="frame" x="409" y="13" width="83" height="32"/>
+                    <buttonCell key="cell" type="push" title="Cancel" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="tNv-oC-Q5S">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                        <string key="keyEquivalent" base64-UTF8="YES">
+Gw
+</string>
+                    </buttonCell>
+                    <connections>
+                        <action selector="cancel:" target="-2" id="M5T-hQ-fCP"/>
+                    </connections>
+                </button>
+            </subviews>
+            <point key="canvasLocation" x="634" y="-12"/>
         </customView>
     </objects>
 </document>

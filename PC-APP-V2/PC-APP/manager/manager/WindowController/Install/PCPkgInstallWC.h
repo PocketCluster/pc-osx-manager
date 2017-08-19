@@ -7,16 +7,7 @@
 //
 
 #import "BaseWindowController.h"
+#import "StepStage.h"
 
-@interface PCPkgInstallWC : BaseWindowController <NSTableViewDataSource, NSTableViewDelegate>
-
-@property (nonatomic, weak) IBOutlet NSProgressIndicator *circularProgress;
-@property (nonatomic, weak) IBOutlet NSProgressIndicator *progressBar;
-@property (nonatomic, weak) IBOutlet NSTableView *packageTable;
-@property (nonatomic, weak) IBOutlet NSTextField *progressLabel;
-@property (nonatomic, weak) IBOutlet NSButton *installBtn;
-@property (nonatomic, weak) IBOutlet NSButton *closeBtn;
-
-- (IBAction)install:(id)sender;
-
+@interface PCPkgInstallWC : BaseWindowController <StepControl>
 @end

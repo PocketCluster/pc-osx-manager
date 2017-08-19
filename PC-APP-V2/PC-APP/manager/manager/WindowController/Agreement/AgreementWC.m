@@ -10,6 +10,7 @@
 #import "UserCheckVC.h"
 #import "PCSetup1VC.h"
 #import "PCSetup2VC.h"
+#import "PCSetup3VC.h"
 
 #import "AgreementWC.h"
 
@@ -26,7 +27,8 @@
             @[[[AgreementVC alloc] initWithStageControl:self nibName:@"AgreementVC" bundle:[NSBundle mainBundle]],
               [[UserCheckVC alloc] initWithStageControl:self nibName:@"UserCheckVC" bundle:[NSBundle mainBundle]],
               [[PCSetup1VC alloc] initWithStageControl:self nibName:@"PCSetup1VC" bundle:[NSBundle mainBundle]],
-              [[PCSetup2VC alloc] initWithStageControl:self nibName:@"PCSetup2VC" bundle:[NSBundle mainBundle]]];
+              [[PCSetup2VC alloc] initWithStageControl:self nibName:@"PCSetup2VC" bundle:[NSBundle mainBundle]],
+              [[PCSetup3VC alloc] initWithStageControl:self nibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]]];
     }
     return self;
 }

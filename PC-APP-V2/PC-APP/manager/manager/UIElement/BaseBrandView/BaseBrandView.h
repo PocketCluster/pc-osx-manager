@@ -8,6 +8,8 @@
 
 #define DEFAULT_BRANDVIEW_FRAME ((NSRect){{0,0},{580,420}})
 
+#define DEFAULT_BRAND_BOX_FRAME ((NSRect){{148,57},{415,345}})
+
 @interface BaseBrandView : NSView {
     NSImageView *_imageView;
     NSBox *_contentBox;

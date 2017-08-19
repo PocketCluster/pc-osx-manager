@@ -119,16 +119,16 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </tableHeaderView>
                 </scrollView>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4q5-4H-kzc">
-                    <rect key="frame" x="52" y="281" width="311" height="44"/>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" preferredMaxLayoutWidth="415" translatesAutoresizingMaskIntoConstraints="NO" id="4q5-4H-kzc">
+                    <rect key="frame" x="0.0" y="281" width="415" height="44"/>
                     <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" title="Build Cluster" id="fZV-PK-kPP">
                         <font key="font" size="32" name=".HelveticaNeueDeskInterface-MediumP4"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oVy-pZ-aHc">
-                    <rect key="frame" x="62" y="202" width="291" height="68"/>
+                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" preferredMaxLayoutWidth="415" translatesAutoresizingMaskIntoConstraints="NO" id="oVy-pZ-aHc">
+                    <rect key="frame" x="-2" y="202" width="419" height="68"/>
                     <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" id="fYy-n7-At6">
                         <font key="font" metaFont="system"/>
                         <string key="title">Power up Raspberry Pi nodes. 

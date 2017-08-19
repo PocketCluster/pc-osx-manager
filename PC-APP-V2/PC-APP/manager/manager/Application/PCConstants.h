@@ -10,10 +10,6 @@
 
 #define MAX_TRIAL_RASP_NODE_COUNT (4)
 
-//# ------ VERSION ------
-extern NSString * const PC_PROTO;
-extern NSString * const VERSION;
-
 //------ network interfaces ------
 extern NSString * const ADDRESS;
 extern NSString * const NETMASK;
@@ -49,35 +45,8 @@ extern NSString * const SLAVE_NODE_NAME;
 extern NSString * const SLAVE_TIMEZONE;
 extern NSString * const SLAVE_CLUSTER_MEMBERS;
 
-//------ network configuration ------
-extern NSString * const POCKETCAST_GROUP;
-extern const NSUInteger PAGENT_SEND_PORT;
-extern const NSUInteger PAGENT_RECV_PORT;
-extern const double UNBOUNDED_TIMEOUT;
-extern const double BOUNDED_TIMEOUT;
-
-//------ Webserver path
-
 //NSUserDefault KEYS
 extern NSString * const kPCPrefDefaultTerm;
-extern NSString * const kPCClusterType;
-
-extern NSString * const kRaspberryCollection;
-extern NSString * const kRaspberryClusterArray;
-extern NSString * const kRaspberryClusterId;
-extern NSString * const kRaspberryClusterTitle;
-extern NSString * const kRaspberryClusterSwapOn;
-
-extern NSString * const kPCVagrantNetInterface;
-extern NSString * const kPCInstalledPackageCollection;
-
-// --- MONITORING MANAGEMENT
-typedef enum PCClusterType {
-    PC_CLUSTER_NONE = 0
-    ,PC_CLUTER_VAGRANT
-    ,PC_CLUSTER_RASPBERRY
-    ,PC_CLUSTER_TYPE_SIZE
-} PCClusterType;
 
 //Notfication Key
 extern NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE;
@@ -99,20 +68,3 @@ extern NSString * const kRASPBERRY_MANAGER_NODE_UPDATED;
 extern NSString * const kPOCKET_CLUSTER_PACKAGE_PROCESS_STATUS;
 extern NSString * const kPOCKET_CLUSTER_PACKAGE_PROCESS_ISALIVE;
 extern NSString * const kPOCKET_CLUSTER_PACKAGE_IDENTIFICATION;
-
-//Master Salt State Directory
-extern NSString * const kPOCKET_CLUSTER_SALT_STATE_PATH;
-
-typedef enum PKG_INSTALL_PROGRESS {
-    
-    PI_INIT_JOB_CHECKER = 0,
-    PI_MASTER_INSTALL,
-    PI_SECONDARY_INSTALL,
-    PI_NODE_INSTALL,
-    PI_MASTER_COMPLETE,
-    PI_SECONDARY_COMPLETE,
-    PI_NODE_COMPLETE,
-    PI_FINALIZE_INSTALL
-
-} PKG_INSTALL_PROGRESS;
-

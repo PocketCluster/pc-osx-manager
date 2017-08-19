@@ -6,73 +6,79 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import "AppDelegate+Window.h"
-
-#import "DPSetupWindow.h"
-#import "DPSetupWC.h"
-
 #import "PCSetup1VC.h"
 #import "PCSetup2VC.h"
 
-//#import "RaspberryManager.h"
+#import "DPSetupWC.h"
+
+@interface DPSetupWC()
+@property (nonatomic, strong) NSArray<NSViewController<StageStep> *>* viewControllers;
+@end
 
 @implementation DPSetupWC
+
+- (instancetype) initWithWindowNibName:(NSString *)windowNibName {
+    self = [super initWithWindowNibName:windowNibName];
+    if (self != nil) {
+        self.viewControllers =
+            @[[[PCSetup1VC alloc] initWithStageControl:self nibName:@"PCSetup1VC" bundle:[NSBundle mainBundle]],
+              [[PCSetup2VC alloc] initWithStageControl:self nibName:@"PCSetup2VC" bundle:[NSBundle mainBundle]]];
+    }
+    return self;
+}
+
+- (void) dealloc {
+    self.viewControllers = nil;
+}
 
 - (void)windowDidLoad {
     [super windowDidLoad];
     
-    WEAK_SELF(self);
-    
-    DPSetupWindow *setupFlow = (DPSetupWindow *)[self window];
-    [setupFlow setTitle:@"New Cluster"];
+    [self.window setTitle:[[self.viewControllers objectAtIndex:0] title]];
+    [[self.window contentView] addSubview:[[self.viewControllers objectAtIndex:0] view]];
+}
 
-    if (setupFlow == nil || ![setupFlow isKindOfClass:[DPSetupWindow class]]){
+#pragma mark - Stage Control
+-(void)shouldControlProgressFrom:(NSObject<StageStep> *)aStep withParam:(NSDictionary *)aParam {
+    
+    NSViewController<StageStep> *prevStep = (NSViewController<StageStep> *)aStep;
+    NSUInteger prevIndex = [self.viewControllers indexOfObject:prevStep];
+    NSUInteger nextIndex = 0;
+    
+    if (prevIndex < ([self.viewControllers count] - 1)) {
+        nextIndex = prevIndex + 1;
+    } else {
+        Log(@"end of control");
         return;
     }
     
-    NSViewController *vc1 =
-        [[PCSetup1VC alloc]
-         initWithNibName:@"PCSetup1VC"
-         bundle:[NSBundle mainBundle]];
+    [[[self.viewControllers objectAtIndex:prevIndex] view] removeFromSuperview];
+    [self.window setTitle:[[self.viewControllers objectAtIndex:nextIndex] title]];
+    [[self.window contentView] addSubview:[[self.viewControllers objectAtIndex:nextIndex] view]];
     
-    [setupFlow
-     initWithViewControllers:@[vc1]
-     completionHandler:^(BOOL completed) {
-
-#if 0
-         if (!completed) {
-             Log(@"Cancelled setup process");
-         } else {
-             Log(@"Completed setup process");
-         }
-#endif
-
-         [setupFlow orderOut:belf];
-         [belf close];
-     }];
-
-    [setupFlow setBackgroundImage:[NSImage imageNamed:@"AppIcon"]];
-    
-    [setupFlow resetToZeroStage];
-    [setupFlow makeKeyAndOrderFront:self];
-
+    [[self.viewControllers objectAtIndex:prevIndex] didControl:self progressFrom:aStep withResult:nil];
 }
 
--(void)resetSetupStage {
-    [(DPSetupWindow *)self.window resetToZeroStage];
-}
-
--(void)windowWillClose:(NSNotification *)notification {
-
-    DPSetupWindow *dsw = (DPSetupWindow *)self.window;
-    NSArray *dpwvc = [NSArray arrayWithArray:[dsw viewControllers]];
-    for(NSViewController *vc in dpwvc){
-        if([vc isKindOfClass:[PCSetup2VC class]]){
-            //[[RaspberryManager sharedManager] removeAgentDelegateFromQueue:vc];
-        }
+-(void)shouldControlRevertFrom:(NSObject<StageStep> *)aStep withParam:(NSDictionary *)aParam {
+    
+    NSViewController<StageStep> *prevStep = (NSViewController<StageStep> *)aStep;
+    NSUInteger prevIndex = [self.viewControllers indexOfObject:prevStep];
+    NSUInteger nextIndex = 0;
+    
+    if (1 <= prevIndex) {
+        nextIndex = prevIndex - 1;
+    } else {
+        Log(@"end of control");
+        return;
     }
-    [dsw removeNotifications];
-    [super windowWillClose:notification];
+    
+    // this can safe current view states including cursor. but, that's not necessary.
+    //[[[self.viewControllers objectAtIndex:prevIndex] view] removeFromSuperviewWithoutNeedingDisplay];
+    [[[self.viewControllers objectAtIndex:prevIndex] view] removeFromSuperview];
+    [self.window setTitle:[[self.viewControllers objectAtIndex:nextIndex] title]];
+    [[self.window contentView] addSubview:[[self.viewControllers objectAtIndex:nextIndex] view]];
+    
+    [[self.viewControllers objectAtIndex:prevIndex] didControl:self progressFrom:aStep withResult:nil];
 }
 
 @end

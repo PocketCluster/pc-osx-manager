@@ -28,7 +28,6 @@
 		0441A4151BD8BEF100AABD7A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36411BD791F8004E0946 /* Foundation.framework */; };
 		0441A4171BD8BF3E00AABD7A /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4161BD8BF3E00AABD7A /* CoreServices.framework */; };
 		0447CABB1F47AD28003BB069 /* BaseSetupVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 0447CABA1F47AD28003BB069 /* BaseSetupVC.m */; };
-		0464AD4C1F3DE445000D323C /* Router.m in Sources */ = {isa = PBXBuildFile; fileRef = 0464AD4B1F3DE445000D323C /* Router.m */; };
 		046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
 		046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
 		046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E71BD78AB8004E0946 /* DrawingUtils.m */; };
@@ -38,10 +37,6 @@
 		046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FE1BD78AB8004E0946 /* NSString+Contain.m */; };
 		046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36011BD78AB8004E0946 /* MSWeakTimer.m */; };
 		046A36231BD78AB8004E0946 /* timeutil.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36041BD78AB8004E0946 /* timeutil.m */; };
-		046A363B1BD7915F004E0946 /* Askpass.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36381BD7915F004E0946 /* Askpass.m */; };
-		046A363C1BD7915F004E0946 /* PasswordHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A363A1BD7915F004E0946 /* PasswordHelper.m */; };
-		046A36401BD791F3004E0946 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A363F1BD791F3004E0946 /* Security.framework */; };
-		046A36421BD791F8004E0946 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36411BD791F8004E0946 /* Foundation.framework */; };
 		046A36451BD79343004E0946 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36441BD79343004E0946 /* WebKit.framework */; };
 		046A36461BD7934D004E0946 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A363F1BD791F3004E0946 /* Security.framework */; };
 		046A36481BD79359004E0946 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36471BD79359004E0946 /* Cocoa.framework */; };
@@ -55,14 +50,13 @@
 		046D31251F3D346B0081CC3E /* PCSetup1VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D31161F3D346B0081CC3E /* PCSetup1VC.xib */; };
 		046D312A1F3D346B0081CC3E /* PCSetup3VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D311E1F3D346B0081CC3E /* PCSetup3VC.m */; };
 		046D312B1F3D346B0081CC3E /* PCSetup3VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D311F1F3D346B0081CC3E /* PCSetup3VC.xib */; };
-		046D31311F3D34D60081CC3E /* DPSetupWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D31301F3D34D60081CC3E /* DPSetupWindow.m */; };
-		046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 046F96081BDDBBBC006AA8EE /* BaseWindow.m */; };
 		0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0486780E1BCF5FE20071594B /* Assets.xcassets */; };
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
 		048EF4B31F43C2C8003BEEF0 /* AppDelegate+AppCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = 048EF4B21F43C2C8003BEEF0 /* AppDelegate+AppCheck.m */; };
 		0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */; };
 		04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */; };
 		04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */; };
+		04B379731F48C60B0080DBEA /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B379721F48C60B0080DBEA /* BaseWindow.m */; };
 		04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B3FB8D1F41133600A72834 /* AppDelegate+ResponseHandle.m */; };
 		04BC73831E8A2E910079BD77 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04BC73821E8A2E910079BD77 /* AboutWindow.m */; };
 		04BD309E1F3E4B2D00509B21 /* PCSetup2VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04BD309C1F3E4B2D00509B21 /* PCSetup2VC.m */; };
@@ -120,15 +114,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		046A362E1BD78F52004E0946 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -164,8 +149,6 @@
 		0447CABA1F47AD28003BB069 /* BaseSetupVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseSetupVC.m; sourceTree = "<group>"; };
 		0447CABD1F47B1F6003BB069 /* NSGeometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSGeometry.h; sourceTree = "<group>"; };
 		04570BB01F40E3440047CCF9 /* PCRouteRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCRouteRequest.h; sourceTree = "<group>"; };
-		0464AD4A1F3DE445000D323C /* Router.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Router.h; sourceTree = "<group>"; };
-		0464AD4B1F3DE445000D323C /* Router.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Router.m; sourceTree = "<group>"; };
 		046A35B61BD783CE004E0946 /* BaseWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseWindowController.h; sourceTree = "<group>"; };
 		046A35B71BD783CE004E0946 /* BaseWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseWindowController.m; sourceTree = "<group>"; };
 		046A35C61BD7871B004E0946 /* AboutWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AboutWindow.xib; sourceTree = "<group>"; };
@@ -190,11 +173,6 @@
 		046A36021BD78AB8004E0946 /* time_converter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = time_converter.h; sourceTree = "<group>"; };
 		046A36031BD78AB8004E0946 /* timeutil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timeutil.h; sourceTree = "<group>"; };
 		046A36041BD78AB8004E0946 /* timeutil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = timeutil.m; sourceTree = "<group>"; };
-		046A36301BD78F52004E0946 /* Askpass */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Askpass; sourceTree = BUILT_PRODUCTS_DIR; };
-		046A36371BD7915F004E0946 /* Askpass-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Askpass-Prefix.pch"; sourceTree = "<group>"; };
-		046A36381BD7915F004E0946 /* Askpass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Askpass.m; sourceTree = "<group>"; };
-		046A36391BD7915F004E0946 /* PasswordHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PasswordHelper.h; sourceTree = "<group>"; };
-		046A363A1BD7915F004E0946 /* PasswordHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PasswordHelper.m; sourceTree = "<group>"; };
 		046A363F1BD791F3004E0946 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		046A36411BD791F8004E0946 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		046A36441BD79343004E0946 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -214,10 +192,6 @@
 		046D311D1F3D346B0081CC3E /* PCSetup3VC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup3VC.h; sourceTree = "<group>"; };
 		046D311E1F3D346B0081CC3E /* PCSetup3VC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetup3VC.m; sourceTree = "<group>"; };
 		046D311F1F3D346B0081CC3E /* PCSetup3VC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCSetup3VC.xib; sourceTree = "<group>"; };
-		046D312F1F3D34D60081CC3E /* DPSetupWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DPSetupWindow.h; sourceTree = "<group>"; };
-		046D31301F3D34D60081CC3E /* DPSetupWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DPSetupWindow.m; sourceTree = "<group>"; };
-		046F96071BDDBBBC006AA8EE /* BaseWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseWindow.h; sourceTree = "<group>"; };
-		046F96081BDDBBBC006AA8EE /* BaseWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseWindow.m; sourceTree = "<group>"; };
 		048678051BCF5FE20071594B /* PocketCluster.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PocketCluster.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0486780E1BCF5FE20071594B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		048678111BCF5FE20071594B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -235,6 +209,8 @@
 		04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionComparison.m; sourceTree = "<group>"; };
 		04AD71C71E9B74E600DB6AE9 /* AppDelegate+Netmonitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Netmonitor.h"; sourceTree = "<group>"; };
 		04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Netmonitor.m"; sourceTree = "<group>"; };
+		04B379711F48C60B0080DBEA /* BaseWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseWindow.h; sourceTree = "<group>"; };
+		04B379721F48C60B0080DBEA /* BaseWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseWindow.m; sourceTree = "<group>"; };
 		04B3FB8C1F41133600A72834 /* AppDelegate+ResponseHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+ResponseHandle.h"; sourceTree = "<group>"; };
 		04B3FB8D1F41133600A72834 /* AppDelegate+ResponseHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+ResponseHandle.m"; sourceTree = "<group>"; };
 		04BC73811E8A2E910079BD77 /* AboutWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutWindow.h; sourceTree = "<group>"; };
@@ -283,15 +259,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		046A362D1BD78F52004E0946 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				046A36421BD791F8004E0946 /* Foundation.framework in Frameworks */,
-				046A36401BD791F3004E0946 /* Security.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		048678021BCF5FE20071594B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -396,8 +363,6 @@
 		0464AD491F3DE445000D323C /* Router */ = {
 			isa = PBXGroup;
 			children = (
-				0464AD4A1F3DE445000D323C /* Router.h */,
-				0464AD4B1F3DE445000D323C /* Router.m */,
 				04570BB01F40E3440047CCF9 /* PCRouteRequest.h */,
 				04DD160A1F40FD190080D025 /* PCRouter.h */,
 				04DD160B1F40FD190080D025 /* PCRouter.m */,
@@ -556,17 +521,6 @@
 			path = Time;
 			sourceTree = "<group>";
 		};
-		046A36311BD78F52004E0946 /* Askpass */ = {
-			isa = PBXGroup;
-			children = (
-				046A36371BD7915F004E0946 /* Askpass-Prefix.pch */,
-				046A36381BD7915F004E0946 /* Askpass.m */,
-				046A36391BD7915F004E0946 /* PasswordHelper.h */,
-				046A363A1BD7915F004E0946 /* PasswordHelper.m */,
-			);
-			path = Askpass;
-			sourceTree = "<group>";
-		};
 		046D31001F3D310C0081CC3E /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
@@ -625,33 +579,12 @@
 			path = Setup;
 			sourceTree = "<group>";
 		};
-		046D312E1F3D34D60081CC3E /* DPSetupWindow */ = {
-			isa = PBXGroup;
-			children = (
-				046D312F1F3D34D60081CC3E /* DPSetupWindow.h */,
-				046D31301F3D34D60081CC3E /* DPSetupWindow.m */,
-			);
-			path = DPSetupWindow;
-			sourceTree = "<group>";
-		};
-		046F95EF1BDD9AA9006AA8EE /* Window */ = {
-			isa = PBXGroup;
-			children = (
-				046F96071BDDBBBC006AA8EE /* BaseWindow.h */,
-				046F96081BDDBBBC006AA8EE /* BaseWindow.m */,
-				046D312E1F3D34D60081CC3E /* DPSetupWindow */,
-			);
-			name = Window;
-			path = manager/Window;
-			sourceTree = "<group>";
-		};
 		048677FC1BCF5FE20071594B = {
 			isa = PBXGroup;
 			children = (
 				046A35D91BD78AB8004E0946 /* Common */,
 				04B7B8AB1F43AF0300FD0907 /* UIElement */,
 				046D31121F3D346B0081CC3E /* ViewController */,
-				046F95EF1BDD9AA9006AA8EE /* Window */,
 				046A35B51BD783CE004E0946 /* WindowController */,
 				04030F771F3D5C1E00EA793D /* MenuBar */,
 				04030F5D1F3D5B6500EA793D /* Model */,
@@ -660,7 +593,6 @@
 				048678071BCF5FE20071594B /* manager */,
 				0486781B1BCF5FE20071594B /* managerTests */,
 				048678261BCF5FE20071594B /* managerUITests */,
-				046A36311BD78F52004E0946 /* Askpass */,
 				048678061BCF5FE20071594B /* Products */,
 				3A1EA7B4E3AB3B354460F41A /* Frameworks */,
 				59FF71622F807624A0AC0907 /* Pods */,
@@ -673,7 +605,6 @@
 				048678051BCF5FE20071594B /* PocketCluster.app */,
 				048678181BCF5FE20071594B /* managerTests.xctest */,
 				048678231BCF5FE20071594B /* managerUITests.xctest */,
-				046A36301BD78F52004E0946 /* Askpass */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -720,12 +651,22 @@
 			path = Util;
 			sourceTree = "<group>";
 		};
+		04B379701F48C60B0080DBEA /* Window */ = {
+			isa = PBXGroup;
+			children = (
+				04B379711F48C60B0080DBEA /* BaseWindow.h */,
+				04B379721F48C60B0080DBEA /* BaseWindow.m */,
+			);
+			path = Window;
+			sourceTree = "<group>";
+		};
 		04B7B8AB1F43AF0300FD0907 /* UIElement */ = {
 			isa = PBXGroup;
 			children = (
 				04CA54B51F44D47E00A7AF48 /* Alert */,
 				04CA54B81F44D47E00A7AF48 /* BaseBrandView */,
 				04CA54BE1F44E36A00A7AF48 /* StepStages */,
+				04B379701F48C60B0080DBEA /* Window */,
 			);
 			name = UIElement;
 			path = manager/UIElement;
@@ -834,23 +775,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		046A362F1BD78F52004E0946 /* Askpass */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 046A36341BD78F52004E0946 /* Build configuration list for PBXNativeTarget "Askpass" */;
-			buildPhases = (
-				046A362C1BD78F52004E0946 /* Sources */,
-				046A362D1BD78F52004E0946 /* Frameworks */,
-				046A362E1BD78F52004E0946 /* CopyFiles */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = Askpass;
-			productName = Askpass;
-			productReference = 046A36301BD78F52004E0946 /* Askpass */;
-			productType = "com.apple.product-type.tool";
-		};
 		048678041BCF5FE20071594B /* PocketCluster */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0486782C1BCF5FE20071594B /* Build configuration list for PBXNativeTarget "PocketCluster" */;
@@ -919,10 +843,6 @@
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = io.pocketcluster;
 				TargetAttributes = {
-					046A362F1BD78F52004E0946 = {
-						CreatedOnToolsVersion = 7.0.1;
-						DevelopmentTeam = J3S642BSV5;
-					};
 					048678041BCF5FE20071594B = {
 						CreatedOnToolsVersion = 7.0.1;
 						DevelopmentTeam = NWE35T42PK;
@@ -953,7 +873,6 @@
 				048678041BCF5FE20071594B /* PocketCluster */,
 				048678171BCF5FE20071594B /* managerTests */,
 				048678221BCF5FE20071594B /* managerUITests */,
-				046A362F1BD78F52004E0946 /* Askpass */,
 			);
 		};
 /* End PBXProject section */
@@ -1073,15 +992,6 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		046A362C1BD78F52004E0946 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				046A363B1BD7915F004E0946 /* Askpass.m in Sources */,
-				046A363C1BD7915F004E0946 /* PasswordHelper.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		048678011BCF5FE20071594B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1099,15 +1009,12 @@
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				04D5A48E1E9269AE0057012A /* AppDelegate+Sparkle.m in Sources */,
 				04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */,
-				046D31311F3D34D60081CC3E /* DPSetupWindow.m in Sources */,
-				0464AD4C1F3DE445000D323C /* Router.m in Sources */,
 				04BEEEAF1F40832E008426A7 /* PCRouteTrie.m in Sources */,
 				04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */,
 				04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */,
 				04CA54B31F44B10400A7AF48 /* UserCheckVC.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
 				04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */,
-				046F96091BDDBBBC006AA8EE /* BaseWindow.m in Sources */,
 				046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
 				04030F681F3D5B6500EA793D /* Package.m in Sources */,
 				046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */,
@@ -1119,6 +1026,7 @@
 				04030F821F3D5C1E00EA793D /* NativeMenu.m in Sources */,
 				046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				0441A3E31BD8904100AABD7A /* main.m in Sources */,
+				04B379731F48C60B0080DBEA /* BaseWindow.m in Sources */,
 				04030F671F3D5B6500EA793D /* Node.m in Sources */,
 				04030F801F3D5C1E00EA793D /* NativeMenu+NewCluster.m in Sources */,
 				043F47131F3E0C730078A0C1 /* AppDelegate+Window.m in Sources */,
@@ -1175,28 +1083,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		046A36351BD78F52004E0946 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "";
-				GCC_PREFIX_HEADER = "Askpass/Askpass-Prefix.pch";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-			};
-			name = Debug;
-		};
-		046A36361BD78F52004E0946 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "";
-				GCC_PREFIX_HEADER = "Askpass/Askpass-Prefix.pch";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-			};
-			name = Release;
-		};
 		0486782A1BCF5FE20071594B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1448,15 +1334,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		046A36341BD78F52004E0946 /* Build configuration list for PBXNativeTarget "Askpass" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				046A36351BD78F52004E0946 /* Debug */,
-				046A36361BD78F52004E0946 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		048678001BCF5FE20071594B /* Build configuration list for PBXProject "manager" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -8,7 +8,7 @@
 
 #import "BaseSetupVC.h"
 
-@interface PCSetup2VC : BaseSetupVC
+@interface PCSetup2VC : BaseSetupVC <NSTableViewDataSource, NSTableViewDelegate>
 @property (nonatomic, strong) IBOutlet NSView *pannel;
 @property (nonatomic, weak) IBOutlet NSProgressIndicator *progress;
 @property (nonatomic, weak) IBOutlet NSTableView *nodeTable;

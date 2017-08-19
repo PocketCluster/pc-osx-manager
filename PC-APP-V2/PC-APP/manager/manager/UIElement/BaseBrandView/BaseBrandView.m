@@ -43,8 +43,8 @@
     //[_imageView setImage:[[NSApplication sharedApplication] applicationIconImage]];
     [_imageView setImage:[NSImage imageNamed:@"AppIcon"]];
     [self addSubview:_imageView];
-    
-    self.contentBox = [[NSBox alloc] initWithFrame:NSMakeRect(148, 57, 415, 345)];
+
+    self.contentBox = [[NSBox alloc] initWithFrame:DEFAULT_BRAND_BOX_FRAME];
     [_contentBox setTitlePosition:(NSNoTitle)];
     [self addSubview:_contentBox];
 }

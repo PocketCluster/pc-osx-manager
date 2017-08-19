@@ -11,8 +11,6 @@
 #pragma mark - PROTOCOL KEYS
 
 //# ------ VERSION ------
-NSString * const PC_PROTO            = @"pc_ver";
-NSString * const VERSION             = @"1.0.0";
 
 //------ network interfaces ------
 NSString * const ADDRESS             = @"address";
@@ -50,29 +48,9 @@ NSString * const SLAVE_NODE_NAME     = @"pc_sl_nm";
 NSString * const SLAVE_TIMEZONE      = @"pc_sl_tz";
 NSString * const SLAVE_CLUSTER_MEMBERS = @"pc_sl_cl";
 
-//------ network configuration ------
-NSString * const POCKETCAST_GROUP    = @"239.193.127.127";
-const NSUInteger PAGENT_SEND_PORT    = 10060;
-const NSUInteger PAGENT_RECV_PORT    = 10061;
-const double UNBOUNDED_TIMEOUT       = 3.0;
-const double BOUNDED_TIMEOUT         = 10.0;
-
-//------ Webserver path
-NSString * const WEB_SERVER_ROOT_PATH = @"/bigpkg/archive";
-const int WEB_SERVER_PORT             = 10120;
-
 #pragma mark - NSUserDefaults KEYS
 //Raspberry collection
 NSString * const kPCPrefDefaultTerm     = @"default_terminal";
-NSString * const kPCClusterType         = @"pocketcluster.cluster-type";
-
-NSString * const kRaspberryCollection   = @"raspberries";
-NSString * const kRaspberryClusterArray = @"raspberryclusterArray";
-NSString * const kRaspberryClusterId    = @"raspberryclusterId";
-NSString * const kRaspberryClusterTitle = @"raspberryclusterTitle";
-NSString * const kRaspberryClusterSwapOn = @"raspberryclusterSwapOn";
-
-NSString * const kPCInstalledPackageCollection = @"installed-package-collection";
 
 #pragma mark - NOTIFICATION KEY (APPLICATION)
 NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE                    = @"pocketcluster.update-available";
@@ -96,5 +74,3 @@ NSString * const kRASPBERRY_MANAGER_NODE_UPDATED                     = @"raspber
 NSString * const kPOCKET_CLUSTER_PACKAGE_PROCESS_STATUS              = @"pocketcluster.package-process-status";
 NSString * const kPOCKET_CLUSTER_PACKAGE_PROCESS_ISALIVE             = @"pocketcluster.package-process-isalive";
 NSString * const kPOCKET_CLUSTER_PACKAGE_IDENTIFICATION              = @"pocketcluster.package-identification";
-
-NSString * const kPOCKET_CLUSTER_SALT_STATE_PATH                     = @"/pocket/salt/states";
