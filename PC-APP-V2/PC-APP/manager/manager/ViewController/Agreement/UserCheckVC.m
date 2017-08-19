@@ -7,7 +7,6 @@
 //
 
 #import "UserCheckVC.h"
-#import "BaseBrandView.h"
 
 @interface UserCheckVC ()
 -(void)_enableControls;
@@ -16,13 +15,9 @@
 
 @implementation UserCheckVC
 
-- (instancetype) initWithStageControl:(NSObject<StepControl> *)aControl nibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self != nil) {
-        [self setTitle:@"Inviatation Check"];
-        self.stageControl = aControl;
-    }
-    return self;
+-(void) finishConstruction {
+    [super finishConstruction];
+    [self setTitle:@"Invitation Check"];
 }
 
 - (void)viewDidLoad {
@@ -41,12 +36,13 @@
 }
 
 -(IBAction)check:(id)sender {
-    //[self.stageControl shouldControlProgressFrom:self withParam:nil];
+    [self.stageControl shouldControlProgressFrom:self withParam:nil];
+    
+//    [self _disableControls];
 }
 
 -(IBAction)cancel:(id)sender {
     [self.stageControl shouldControlRevertFrom:self withParam:nil];
-    [self _disableControls];
 }
 
 #pragma mark - StageStep

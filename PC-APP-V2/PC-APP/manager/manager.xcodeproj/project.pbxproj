@@ -27,6 +27,7 @@
 		0441A4141BD8BEAA00AABD7A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4131BD8BEAA00AABD7A /* SystemConfiguration.framework */; };
 		0441A4151BD8BEF100AABD7A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36411BD791F8004E0946 /* Foundation.framework */; };
 		0441A4171BD8BF3E00AABD7A /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4161BD8BF3E00AABD7A /* CoreServices.framework */; };
+		0447CABB1F47AD28003BB069 /* BaseSetupVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 0447CABA1F47AD28003BB069 /* BaseSetupVC.m */; };
 		0464AD4C1F3DE445000D323C /* Router.m in Sources */ = {isa = PBXBuildFile; fileRef = 0464AD4B1F3DE445000D323C /* Router.m */; };
 		046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
 		046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
@@ -159,6 +160,9 @@
 		0441A4111BD8BEA200AABD7A /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		0441A4131BD8BEAA00AABD7A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		0441A4161BD8BF3E00AABD7A /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
+		0447CAB91F47AD28003BB069 /* BaseSetupVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseSetupVC.h; sourceTree = "<group>"; };
+		0447CABA1F47AD28003BB069 /* BaseSetupVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseSetupVC.m; sourceTree = "<group>"; };
+		0447CABD1F47B1F6003BB069 /* NSGeometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSGeometry.h; sourceTree = "<group>"; };
 		04570BB01F40E3440047CCF9 /* PCRouteRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCRouteRequest.h; sourceTree = "<group>"; };
 		0464AD4A1F3DE445000D323C /* Router.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Router.h; sourceTree = "<group>"; };
 		0464AD4B1F3DE445000D323C /* Router.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Router.m; sourceTree = "<group>"; };
@@ -381,6 +385,14 @@
 			path = manager/Application;
 			sourceTree = "<group>";
 		};
+		0447CABC1F47B1E4003BB069 /* Geometry */ = {
+			isa = PBXGroup;
+			children = (
+				0447CABD1F47B1F6003BB069 /* NSGeometry.h */,
+			);
+			path = Geometry;
+			sourceTree = "<group>";
+		};
 		0464AD491F3DE445000D323C /* Router */ = {
 			isa = PBXGroup;
 			children = (
@@ -429,6 +441,7 @@
 			children = (
 				04C6D60A1E7F9EDD0004837A /* Dictionary */,
 				046A35E51BD78AB8004E0946 /* Drawing */,
+				0447CABC1F47B1E4003BB069 /* Geometry */,
 				046A35E81BD78AB8004E0946 /* Macro */,
 				046A35ED1BD78AB8004E0946 /* NSDate */,
 				046A35F01BD78AB8004E0946 /* Protocols */,
@@ -587,6 +600,8 @@
 		046D31121F3D346B0081CC3E /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
+				0447CAB91F47AD28003BB069 /* BaseSetupVC.h */,
+				0447CABA1F47AD28003BB069 /* BaseSetupVC.m */,
 				04CA54AA1F44AFD100A7AF48 /* Agreement */,
 				046D31131F3D346B0081CC3E /* Setup */,
 			);
@@ -1076,6 +1091,7 @@
 				04030F861F3D5CD500EA793D /* PackageMenuItem.m in Sources */,
 				04DD160C1F40FD190080D025 /* PCRouter.m in Sources */,
 				04BC73831E8A2E910079BD77 /* AboutWindow.m in Sources */,
+				0447CABB1F47AD28003BB069 /* BaseSetupVC.m in Sources */,
 				046A361A1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */,
 				048EF4B31F43C2C8003BEEF0 /* AppDelegate+AppCheck.m in Sources */,

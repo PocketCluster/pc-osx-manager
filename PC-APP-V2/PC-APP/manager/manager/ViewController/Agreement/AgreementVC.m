@@ -7,20 +7,12 @@
 //
 
 #import "AgreementVC.h"
-#import "BaseBrandView.h"
-
-@interface AgreementVC ()
-@end
 
 @implementation AgreementVC
 
-- (instancetype) initWithStageControl:(NSObject<StepControl> *)aControl nibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self != nil) {
-        [self setTitle:@"PocketCluster User Agreement"];
-        self.stageControl = aControl;
-    }
-    return self;
+- (void)finishConstruction {
+    [super finishConstruction];
+    [self setTitle:@"PocketCluster User Agreement"];
 }
 
 - (void)viewDidLoad {

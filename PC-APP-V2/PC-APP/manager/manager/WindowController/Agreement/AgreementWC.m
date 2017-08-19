@@ -6,9 +6,11 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
-#import "AgreementWC.h"
 #import "AgreementVC.h"
 #import "UserCheckVC.h"
+#import "PCSetup1VC.h"
+
+#import "AgreementWC.h"
 
 @interface AgreementWC ()
 @property (nonatomic, strong) NSArray<NSViewController<StageStep> *>* viewControllers;
@@ -21,7 +23,8 @@
     if (self != nil) {
         self.viewControllers =
             @[[[AgreementVC alloc] initWithStageControl:self nibName:@"AgreementVC" bundle:[NSBundle mainBundle]],
-              [[UserCheckVC alloc] initWithStageControl:self nibName:@"UserCheckVC" bundle:[NSBundle mainBundle]]];
+              [[UserCheckVC alloc] initWithStageControl:self nibName:@"UserCheckVC" bundle:[NSBundle mainBundle]],
+              [[PCSetup1VC alloc] initWithStageControl:self nibName:@"PCSetup1VC" bundle:[NSBundle mainBundle]]];
     }
     return self;
 }

@@ -6,9 +6,10 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import "DPSetupWindow.h"
+#import "BaseSetupVC.h"
 
-@interface PCSetup1VC : NSViewController  <DPSetupWindowStageViewController>
-- (IBAction)setupVagrantCluster:(id)sender;
-- (IBAction)setupRaspberryCluster:(id)sender;
+@interface PCSetup1VC : BaseSetupVC
+@property (nonatomic, strong) IBOutlet NSView *pannel;
+- (IBAction)setup:(id)sender;
+- (IBAction)cancel:(id)sender;
 @end

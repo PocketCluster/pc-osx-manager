@@ -6,8 +6,6 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
-
 #define DEFAULT_BRANDVIEW_FRAME ((NSRect){{0,0},{580,420}})
 
 @interface BaseBrandView : NSView {
