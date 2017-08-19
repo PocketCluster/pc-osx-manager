@@ -49,8 +49,6 @@ extern NSString * const SLAVE_CLUSTER_MEMBERS;
 extern NSString * const kPCPrefDefaultTerm;
 
 //Notfication Key
-extern NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE;
-extern NSString * const kPOCKET_CLUSTER_UPDATE_VALUE;
 extern NSString * const kPOCKET_CLUSTER_NODE_COUNT;
 extern NSString * const kPOCKET_CLUSTER_LIVE_NODE_COUNT;
 

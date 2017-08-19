@@ -13,6 +13,9 @@
 #import "ShowAlert.h"
 #import "PCRouter.h"
 #import "PCRoutePathConst.h"
+#import "NativeMenu+NewCluster.h"
+#import "NativeMenu+RunCluster.h"
+
 
 @interface DebugWindow ()<PCRouteRequest>
 @end
@@ -101,6 +104,26 @@
      @{@"user-auth":
            @{@"status": @NO,
              @"error" : @"need inviation code check"}}];
+}
+
+- (IBAction)menu_01:(id)sender {
+    [[[AppDelegate sharedDelegate] mainMenu] setupMenuInitCheck];
+}
+
+- (IBAction)menu_02:(id)sender {
+    [[[AppDelegate sharedDelegate] mainMenu] setupMenuNewCluster];
+}
+
+- (IBAction)menu_03:(id)sender {
+    [[[AppDelegate sharedDelegate] mainMenu] setupMenuRunCluster];
+}
+
+- (IBAction)menu_04:(id)sender {
+    
+}
+
+- (IBAction)menu_05:(id)sender {
+    [[[AppDelegate sharedDelegate] mainMenu] updateNewVersionAvailability:YES];
 }
 
 @end

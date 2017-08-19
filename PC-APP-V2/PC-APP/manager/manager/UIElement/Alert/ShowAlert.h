@@ -6,8 +6,6 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-
 @interface ShowAlert : NSObject
 + (void) showWarningAlertWithTitle:(NSString *)aTitle message:(NSString *)aMessage;
 @end

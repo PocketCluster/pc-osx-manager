@@ -6,6 +6,7 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
+#import "NativeMenu.h"
 #import "AppDelegate+Sparkle.h"
 
 @implementation AppDelegate(Sparkle)
@@ -18,13 +19,13 @@
 // Called when a valid update is found by the update driver.
 - (void)updater:(SUUpdater *)updater didFindValidUpdate:(SUAppcastItem *)item {
     Log(@"%s %@",__PRETTY_FUNCTION__, item.fileURL.description);
-    //TODO : make sure when didFindValudUpdate or updaterDidNotFindUpdate gets called before execute engine
+    [[self mainMenu] updateNewVersionAvailability:YES];
 }
 
 // Called when a valid update is not found.
 - (void)updaterDidNotFindUpdate:(SUUpdater *)updater {
     Log(@"%s",__PRETTY_FUNCTION__);
-    //TODO : make sure when didFindValudUpdate or updaterDidNotFindUpdate gets called before execute engine
+    [[self mainMenu] updateNewVersionAvailability:NO];
 }
 
 //  Called immediately before downloading the specified update.
@@ -70,10 +71,8 @@
     Log(@"%s",__PRETTY_FUNCTION__);    
 }
 
+#pragma mark - SPARKLE DELEGATE FROM v0.1.3
 
-#pragma mark - SPARKLE UPDATER DELEGATE
-
-// from v0.1.3
 #if 0
 - (NSArray*)feedParametersForUpdater:(SUUpdater *)updater sendingSystemProfile:(BOOL)sendingProfile {
     NSMutableArray *data = [[NSMutableArray alloc] init];
@@ -84,20 +83,6 @@
     }
     
     return data;
-}
-
-- (void)updater:(SUUpdater *)updater didFindValidUpdate:(SUAppcastItem *)update {
-    [[NSNotificationCenter defaultCenter]
-     postNotificationName:kPOCKET_CLUSTER_UPDATE_AVAILABLE
-     object:nil
-     userInfo:@{kPOCKET_CLUSTER_UPDATE_VALUE: @(YES)}];
-}
-
-- (void)updaterDidNotFindUpdate:(SUUpdater *)update {
-    [[NSNotificationCenter defaultCenter]
-     postNotificationName:kPOCKET_CLUSTER_UPDATE_AVAILABLE
-     object:nil
-     userInfo:@{kPOCKET_CLUSTER_UPDATE_VALUE: @(NO)}];
 }
 
 - (id<SUVersionComparison>)versionComparatorForUpdater:(SUUpdater *)updater {

@@ -53,8 +53,6 @@ NSString * const SLAVE_CLUSTER_MEMBERS = @"pc_sl_cl";
 NSString * const kPCPrefDefaultTerm     = @"default_terminal";
 
 #pragma mark - NOTIFICATION KEY (APPLICATION)
-NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE                    = @"pocketcluster.update-available";
-NSString * const kPOCKET_CLUSTER_UPDATE_VALUE                        = @"pocketcluster.is_update_available";
 NSString * const kPOCKET_CLUSTER_NODE_COUNT                          = @"pocketcluster.node-count";
 NSString * const kPOCKET_CLUSTER_LIVE_NODE_COUNT                     = @"pocketcluster.live-node-count";
 

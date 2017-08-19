@@ -6,7 +6,6 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
 #import "AppDelegate.h"
 
 @interface AppDelegate (ResponseHandle)

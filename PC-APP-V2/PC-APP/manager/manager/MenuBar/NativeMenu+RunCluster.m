@@ -36,12 +36,8 @@
     // add common bottom menus
     [self addCommonMenu:menuRoot];
     
-    // status
-    NSStatusItem* status = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
-    [status.button setImage:[NSImage imageNamed:@"status-off"]];
-    [status setHighlightMode:YES];
-    [status setMenu:menuRoot];
-    [self setStatusItem:status];
+    // set status
+    [self.statusItem setMenu:menuRoot];
 }
 
 - (void) menuSelectedStopCluster:(id)sender {

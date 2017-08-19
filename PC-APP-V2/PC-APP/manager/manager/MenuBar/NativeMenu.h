@@ -13,6 +13,11 @@
 }
 @property (nonatomic, strong) NSStatusItem *statusItem;
 
+- (void) clusterStatusOn;
+- (void) clusterStatusOff;
+
+- (void) updateNewVersionAvailability:(BOOL)IsAvailable;
+
 - (void) addCommonMenu:(NSMenu *)menuRoot;
 - (void) addInitCommonMenu:(NSMenu *)menuRoot;
 @end

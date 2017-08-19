@@ -15,6 +15,8 @@
 		04030F821F3D5C1E00EA793D /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 04030F7D1F3D5C1E00EA793D /* NativeMenu.m */; };
 		04030F861F3D5CD500EA793D /* PackageMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 04030F851F3D5CD500EA793D /* PackageMenuItem.m */; };
 		041023ED1BE434290083D62E /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 041023EC1BE434290083D62E /* AppKit.framework */; };
+		0416326C1F48EA850057BE5D /* SSSelectableToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 041632681F48EA850057BE5D /* SSSelectableToolbar.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		0416326D1F48EA850057BE5D /* SSSelectableToolbarItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0416326A1F48EA850057BE5D /* SSSelectableToolbarItem.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		0419FA141E90F61400031628 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0419FA131E90F61400031628 /* libc++.tbd */; };
 		0419FA161E90F61900031628 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0419FA151E90F61900031628 /* libz.tbd */; };
 		041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 041FB3B61BD0F3FA0027136F /* InfoPlist.strings */; };
@@ -132,6 +134,10 @@
 		04030F841F3D5CD500EA793D /* PackageMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PackageMenuItem.h; sourceTree = "<group>"; };
 		04030F851F3D5CD500EA793D /* PackageMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PackageMenuItem.m; sourceTree = "<group>"; };
 		041023EC1BE434290083D62E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		041632671F48EA850057BE5D /* SSSelectableToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSSelectableToolbar.h; sourceTree = "<group>"; };
+		041632681F48EA850057BE5D /* SSSelectableToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSSelectableToolbar.m; sourceTree = "<group>"; };
+		041632691F48EA850057BE5D /* SSSelectableToolbarItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSSelectableToolbarItem.h; sourceTree = "<group>"; };
+		0416326A1F48EA850057BE5D /* SSSelectableToolbarItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSSelectableToolbarItem.m; sourceTree = "<group>"; };
 		0419FA131E90F61400031628 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
 		0419FA151E90F61900031628 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		041FB3B61BD0F3FA0027136F /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
@@ -327,6 +333,26 @@
 			);
 			name = MenuBar;
 			path = manager/MenuBar;
+			sourceTree = "<group>";
+		};
+		041632641F48EA850057BE5D /* Vendors */ = {
+			isa = PBXGroup;
+			children = (
+				041632651F48EA850057BE5D /* SSSelectableToolbar */,
+			);
+			name = Vendors;
+			path = manager/Vendors;
+			sourceTree = "<group>";
+		};
+		041632651F48EA850057BE5D /* SSSelectableToolbar */ = {
+			isa = PBXGroup;
+			children = (
+				041632671F48EA850057BE5D /* SSSelectableToolbar.h */,
+				041632681F48EA850057BE5D /* SSSelectableToolbar.m */,
+				041632691F48EA850057BE5D /* SSSelectableToolbarItem.h */,
+				0416326A1F48EA850057BE5D /* SSSelectableToolbarItem.m */,
+			);
+			path = SSSelectableToolbar;
 			sourceTree = "<group>";
 		};
 		0441A3D51BD8904100AABD7A /* Application */ = {
@@ -582,6 +608,7 @@
 		048677FC1BCF5FE20071594B = {
 			isa = PBXGroup;
 			children = (
+				041632641F48EA850057BE5D /* Vendors */,
 				046A35D91BD78AB8004E0946 /* Common */,
 				04B7B8AB1F43AF0300FD0907 /* UIElement */,
 				046D31121F3D346B0081CC3E /* ViewController */,
@@ -1025,10 +1052,12 @@
 				046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
 				04030F821F3D5C1E00EA793D /* NativeMenu.m in Sources */,
 				046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */,
+				0416326C1F48EA850057BE5D /* SSSelectableToolbar.m in Sources */,
 				0441A3E31BD8904100AABD7A /* main.m in Sources */,
 				04B379731F48C60B0080DBEA /* BaseWindow.m in Sources */,
 				04030F671F3D5B6500EA793D /* Node.m in Sources */,
 				04030F801F3D5C1E00EA793D /* NativeMenu+NewCluster.m in Sources */,
+				0416326D1F48EA850057BE5D /* SSSelectableToolbarItem.m in Sources */,
 				043F47131F3E0C730078A0C1 /* AppDelegate+Window.m in Sources */,
 				04CA54BC1F44D49500A7AF48 /* BaseBrandView.m in Sources */,
 				04CA54AE1F44AFF700A7AF48 /* AgreementVC.m in Sources */,

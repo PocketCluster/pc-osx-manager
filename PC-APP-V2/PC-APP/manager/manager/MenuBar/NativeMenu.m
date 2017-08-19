@@ -27,19 +27,42 @@
     self = [super init];
 
     if(self) {
+        // status
+        NSStatusItem* status = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
+
+        [status setHighlightMode:YES];
+        [self setStatusItem:status];
+
+        [self clusterStatusOff];
         [self setupMenuInitCheck];
     }
 
     return self;
 }
 
+- (void) clusterStatusOn {
+    [self.statusItem.button setImage:[NSImage imageNamed:@"status-on"]];
+}
+
+- (void) clusterStatusOff {
+    [self.statusItem.button setImage:[NSImage imageNamed:@"status-off"]];
+}
+
+- (void) updateNewVersionAvailability:(BOOL)IsAvailable {
+
+}
+
 #pragma mark - Basic Menu Handling
 - (void) addCommonMenu:(NSMenu *)menuRoot {
-    // preference
+
     [menuRoot addItem:[NSMenuItem separatorItem]];
+
+#ifdef USE_PRE_PANNEL
+    // preference
     NSMenuItem *mPref = [[NSMenuItem alloc] initWithTitle:@"Preferences" action:@selector(menuSelectedPref:) keyEquivalent:@""];
     [mPref setTarget:self];
     [menuRoot addItem:mPref];
+#endif
 
     // check for update
     NSMenuItem *mUpdate = [[NSMenuItem alloc] initWithTitle:@"Check For Updates" action:@selector(menuSelectedCheckForUpdates:) keyEquivalent:@""];
@@ -93,6 +116,7 @@
 }
 
 - (void) menuSelectedPref:(id)sender {
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"PCPrefWC" withResponder:self];
 }
 
 - (void) menuSelectedCheckForUpdates:(id)sender {

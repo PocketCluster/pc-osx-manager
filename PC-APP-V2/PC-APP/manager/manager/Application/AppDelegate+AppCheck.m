@@ -120,7 +120,7 @@
 
          if (_isUserAuthed) {
              // TODO : choose appropriate menu
-             [belf.nativeMenu setupMenuNewCluster];
+             [belf.mainMenu setupMenuNewCluster];
          } else {
              [ShowAlert
               showWarningAlertWithTitle:@"Your invitation is not valid"

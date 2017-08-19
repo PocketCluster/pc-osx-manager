@@ -19,7 +19,7 @@
 #import "AppDelegate+AppCheck.h"
 
 @interface AppDelegate ()<NSUserNotificationCenterDelegate>
-@property (nonatomic, strong, readwrite) NativeMenu *nativeMenu;
+@property (nonatomic, strong, readwrite) NativeMenu *mainMenu;
 @property (strong) PCInterfaceStatus *interfaceStatus;
 
 - (void) receiveSleepNote: (NSNotification*) notification;
@@ -77,7 +77,7 @@
     //   a. opened window list
     self.openWindows = [[NSMutableArray alloc] init];
     //   b. create popup and status menu item
-    self.nativeMenu = [[NativeMenu alloc] init];
+    self.mainMenu = [[NativeMenu alloc] init];
 
     // 9. setup application mode
     [[NSRunningApplication currentApplication] activateWithOptions:(NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps)];
