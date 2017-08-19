@@ -5,11 +5,12 @@
 //  Copyright (c) 2015,2017 PocketCluster. All rights reserved.
 //
 
-#import "AppDelegate+Window.h"
-
 #import "NativeMenu.h"
 #import "NativeMenu+NewCluster.h"
 #import "NativeMenu+RunCluster.h"
+
+#import <Sparkle/Sparkle.h>
+#import "AppDelegate+Window.h"
 
 @interface NativeMenu()
 - (void) menuSelectedPref:(id)sender;
@@ -120,6 +121,7 @@
 }
 
 - (void) menuSelectedCheckForUpdates:(id)sender {
+    [[SUUpdater sharedUpdater] checkForUpdates:self];
 }
 
 - (void) menuSelectedSlack:(id)sender {
