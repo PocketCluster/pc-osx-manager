@@ -72,7 +72,6 @@ NSString * const kRaspberryClusterId    = @"raspberryclusterId";
 NSString * const kRaspberryClusterTitle = @"raspberryclusterTitle";
 NSString * const kRaspberryClusterSwapOn = @"raspberryclusterSwapOn";
 
-NSString * const kPCVagrantNetInterface = @"vagrant-net-interface";
 NSString * const kPCInstalledPackageCollection = @"installed-package-collection";
 
 #pragma mark - NOTIFICATION KEY (APPLICATION)
@@ -80,19 +79,6 @@ NSString * const kPOCKET_CLUSTER_UPDATE_AVAILABLE                    = @"pocketc
 NSString * const kPOCKET_CLUSTER_UPDATE_VALUE                        = @"pocketcluster.is_update_available";
 NSString * const kPOCKET_CLUSTER_NODE_COUNT                          = @"pocketcluster.node-count";
 NSString * const kPOCKET_CLUSTER_LIVE_NODE_COUNT                     = @"pocketcluster.live-node-count";
-
-#pragma mark - NOTIFICATION KEY (VAGRANT)
-NSString * const kVAGRANT_MANAGER_NOTIFICATION_PREFERENCE_CHANGED    = @"vagrant-manager.notification-preference-changed";
-NSString * const kVAGRANT_MANAGER_INSTANCE                           = @"vagrant-manager.instance";
-NSString * const kVAGRANT_MANAGER_INSTANCE_OLD                       = @"vagrant-manager.instance.old";
-NSString * const kVAGRANT_MANAGER_INSTANCE_NEW                       = @"vagrant-manager.instance.new";
-NSString * const kVAGRANT_MANAGER_INSTANCE_ADDED                     = @"vagrant-manager.instance-added";
-NSString * const kVAGRANT_MANAGER_INSTANCE_REMOVED                   = @"vagrant-manager.instance-removed";
-NSString * const kVAGRANT_MANAGER_INSTANCE_UPDATED                   = @"vagrant-manager.instance-updated";
-NSString * const kVAGRANT_MANAGER_REFRESHING_STARTED                 = @"vagrant-manager.refreshing-started";
-NSString * const kVAGRANT_MANAGER_REFRESHING_ENDED                   = @"vagrant-manager.refreshing-ended";
-NSString * const kVAGRANT_MANAGER_UPDATE_RUNNING_VM_COUNT            = @"vagrant-manager.update-running-vm-count";
-NSString * const kVAGRANT_MANAGER_UPDATE_INSTANCES_COUNT             = @"vagrant-manager.update-instances-count";
 
 #pragma mark - NOTIFICATION KEY (RASPBERRY)
 NSString * const kRASPBERRY_MANAGER_NOTIFICATION_PREFERENCE_CHANGED  = @"raspberry-manager.notification-preference-changed";

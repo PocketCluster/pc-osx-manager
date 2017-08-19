@@ -6,15 +6,15 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
-#import "DPSetupWindow.h"
+#import "BaseSetupVC.h"
 
-@interface PCSetup2VC : NSViewController  <DPSetupWindowStageViewController, NSTableViewDataSource, NSTableViewDelegate>
-
-@property (nonatomic, weak) IBOutlet NSProgressIndicator *circularProgress;
+@interface PCSetup2VC : BaseSetupVC
+@property (nonatomic, strong) IBOutlet NSView *pannel;
+@property (nonatomic, weak) IBOutlet NSProgressIndicator *progress;
 @property (nonatomic, weak) IBOutlet NSTableView *nodeTable;
-@property (nonatomic, weak) IBOutlet NSProgressIndicator *progressBar;
-@property (nonatomic, weak) IBOutlet NSTextField *progressLabel;
-@property (nonatomic, weak) IBOutlet NSButton *buildBtn;
+@property (nonatomic, weak) IBOutlet NSButton *btnBuild;
+@property (nonatomic, weak) IBOutlet NSButton *btnCancel;
 
 -(IBAction)build:(id)sender;
+-(IBAction)cancel:(id)sender;
 @end

@@ -6,12 +6,12 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="PCSetup2VC">
             <connections>
-                <outlet property="buildBtn" destination="fgx-9I-dxe" id="MB4-Pz-6Dh"/>
-                <outlet property="circularProgress" destination="vGt-Iu-aSJ" id="Wo7-TE-hFO"/>
+                <outlet property="btnBuild" destination="yT6-R3-esf" id="kiG-SY-vCR"/>
+                <outlet property="btnCancel" destination="VQa-v5-2dg" id="r2H-79-68q"/>
                 <outlet property="nodeTable" destination="FgY-4m-zjw" id="bqI-TW-87s"/>
-                <outlet property="progressBar" destination="t6E-yx-PXz" id="YBU-5O-8Q8"/>
-                <outlet property="progressLabel" destination="MKz-Wm-kOt" id="EAp-cI-gqT"/>
-                <outlet property="view" destination="1QC-ha-GCj" id="Mhm-Kx-GEo"/>
+                <outlet property="pannel" destination="1QC-ha-GCj" id="pbY-MD-o32"/>
+                <outlet property="progress" destination="vGt-Iu-aSJ" id="RGr-Y8-4b3"/>
+                <outlet property="view" destination="2mz-iW-yjX" id="7X8-jb-mJ2"/>
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
@@ -21,13 +21,13 @@
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <scrollView fixedFrame="YES" borderType="none" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ctH-Dy-Lxn">
-                    <rect key="frame" x="20" y="90" width="375" height="140"/>
+                    <rect key="frame" x="20" y="20" width="375" height="174"/>
                     <clipView key="contentView" ambiguous="YES" id="vCA-oM-Tkz">
-                        <rect key="frame" x="0.0" y="23" width="375" height="117"/>
+                        <rect key="frame" x="0.0" y="17" width="375" height="157"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="jxa-Ax-Pl7" viewBased="YES" id="FgY-4m-zjw">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="117"/>
+                            <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="SIo-1f-USp" viewBased="YES" id="FgY-4m-zjw">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="157"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <size key="intercellSpacing" width="3" height="2"/>
                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -107,62 +107,72 @@
                         <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </clipView>
                     <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="vhs-ua-dWZ">
-                        <rect key="frame" x="0.0" y="7" width="0.0" height="16"/>
+                        <rect key="frame" x="0.0" y="1" width="0.0" height="16"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                     <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="1f8-Gf-AEP">
                         <rect key="frame" x="224" y="17" width="15" height="102"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
-                    <tableHeaderView key="headerView" id="jxa-Ax-Pl7">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="23"/>
+                    <tableHeaderView key="headerView" id="SIo-1f-USp">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="17"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </tableHeaderView>
                 </scrollView>
-                <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="t6E-yx-PXz">
-                    <rect key="frame" x="20" y="43" width="375" height="20"/>
-                </progressIndicator>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fgx-9I-dxe">
-                    <rect key="frame" x="167" y="13" width="81" height="32"/>
-                    <buttonCell key="cell" type="push" title="Build" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="73h-45-Ug1">
-                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="system"/>
-                    </buttonCell>
-                    <connections>
-                        <action selector="build:" target="-2" id="Pb2-xK-owV"/>
-                    </connections>
-                </button>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4q5-4H-kzc">
-                    <rect key="frame" x="52" y="296" width="311" height="44"/>
-                    <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" title="Raspberry Cluster" id="fZV-PK-kPP">
+                    <rect key="frame" x="52" y="281" width="311" height="44"/>
+                    <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" title="Build Cluster" id="fZV-PK-kPP">
                         <font key="font" size="32" name=".HelveticaNeueDeskInterface-MediumP4"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="vGt-Iu-aSJ">
-                    <rect key="frame" x="20" y="61" width="16" height="16"/>
-                </progressIndicator>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MKz-Wm-kOt">
-                    <rect key="frame" x="40" y="59" width="357" height="20"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" id="MAB-rP-ENF">
-                        <font key="font" size="14" name=".HelveticaNeueDeskInterface-MediumP4"/>
-                        <color key="textColor" red="0.29803922770000002" green="0.29803922770000002" blue="0.29803922770000002" alpha="1" colorSpace="calibratedRGB"/>
-                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                </textField>
                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oVy-pZ-aHc">
-                    <rect key="frame" x="18" y="244" width="379" height="51"/>
+                    <rect key="frame" x="62" y="202" width="291" height="68"/>
                     <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" alignment="center" id="fYy-n7-At6">
                         <font key="font" metaFont="system"/>
-                        <string key="title">This step creates a Raspberry Pi 3 cluster up to 4 nodes. 
-Please power up Raspberry Pis and connect an Ethernet cables. Then click Build when the nodes appear.</string>
+                        <string key="title">Power up Raspberry Pi nodes. 
+Connect network cables. 
+Click Build when the nodes appear.</string>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
             </subviews>
-            <point key="canvasLocation" x="486.5" y="229.5"/>
+            <point key="canvasLocation" x="-21.5" y="296.5"/>
+        </customView>
+        <customView id="2mz-iW-yjX" customClass="BaseBrandView">
+            <rect key="frame" x="0.0" y="0.0" width="580" height="420"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <progressIndicator hidden="YES" wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="vGt-Iu-aSJ">
+                    <rect key="frame" x="20" y="20" width="16" height="16"/>
+                </progressIndicator>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yT6-R3-esf">
+                    <rect key="frame" x="494" y="13" width="72" height="32"/>
+                    <buttonCell key="cell" type="push" title="Build" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="1Ap-lH-oUT">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="build:" target="-2" id="dmU-ga-QW7"/>
+                    </connections>
+                </button>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VQa-v5-2dg">
+                    <rect key="frame" x="411" y="13" width="83" height="32"/>
+                    <buttonCell key="cell" type="push" title="Cancel" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="LR7-O5-ldp">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                        <string key="keyEquivalent" base64-UTF8="YES">
+Gw
+</string>
+                    </buttonCell>
+                    <connections>
+                        <action selector="cancel:" target="-2" id="HTI-fI-2aQ"/>
+                    </connections>
+                </button>
+            </subviews>
+            <point key="canvasLocation" x="-95" y="-141"/>
         </customView>
     </objects>
 </document>

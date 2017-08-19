@@ -8,7 +8,7 @@
 
 #pragma once
 
-#define MAX_TRIAL_RASP_NODE_COUNT (6)
+#define MAX_TRIAL_RASP_NODE_COUNT (4)
 
 //# ------ VERSION ------
 extern NSString * const PC_PROTO;
@@ -57,8 +57,6 @@ extern const double UNBOUNDED_TIMEOUT;
 extern const double BOUNDED_TIMEOUT;
 
 //------ Webserver path
-extern NSString * const WEB_SERVER_ROOT_PATH;
-extern const int WEB_SERVER_PORT;
 
 //NSUserDefault KEYS
 extern NSString * const kPCPrefDefaultTerm;
@@ -87,18 +85,6 @@ extern NSString * const kPOCKET_CLUSTER_UPDATE_VALUE;
 extern NSString * const kPOCKET_CLUSTER_NODE_COUNT;
 extern NSString * const kPOCKET_CLUSTER_LIVE_NODE_COUNT;
 
-extern NSString * const kVAGRANT_MANAGER_NOTIFICATION_PREFERENCE_CHANGED;
-extern NSString * const kVAGRANT_MANAGER_INSTANCE;
-extern NSString * const kVAGRANT_MANAGER_INSTANCE_OLD;
-extern NSString * const kVAGRANT_MANAGER_INSTANCE_NEW;
-extern NSString * const kVAGRANT_MANAGER_INSTANCE_ADDED;
-extern NSString * const kVAGRANT_MANAGER_INSTANCE_REMOVED;
-extern NSString * const kVAGRANT_MANAGER_INSTANCE_UPDATED;
-extern NSString * const kVAGRANT_MANAGER_REFRESHING_STARTED;
-extern NSString * const kVAGRANT_MANAGER_REFRESHING_ENDED;
-extern NSString * const kVAGRANT_MANAGER_UPDATE_RUNNING_VM_COUNT;
-extern NSString * const kVAGRANT_MANAGER_UPDATE_INSTANCES_COUNT;
-
 extern NSString * const kRASPBERRY_MANAGER_NOTIFICATION_PREFERENCE_CHANGED;
 extern NSString * const kRASPBERRY_MANAGER_REFRESHING_STARTED;
 extern NSString * const kRASPBERRY_MANAGER_REFRESHING_ENDED;
@@ -116,15 +102,6 @@ extern NSString * const kPOCKET_CLUSTER_PACKAGE_IDENTIFICATION;
 
 //Master Salt State Directory
 extern NSString * const kPOCKET_CLUSTER_SALT_STATE_PATH;
-
-typedef enum PCLibraryError {
-    PC_LIB_JAVA = 25
-    ,PC_LIB_BREW
-    ,PC_LIB_VIRTUABOX
-    ,PC_LIB_VAGRANT
-} PCLibraryError;
-
-#define PROCESS_REFRESH_TIME_INTERVAL (5.0)
 
 typedef enum PKG_INSTALL_PROGRESS {
     

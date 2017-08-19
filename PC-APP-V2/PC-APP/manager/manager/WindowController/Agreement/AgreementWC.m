@@ -9,6 +9,7 @@
 #import "AgreementVC.h"
 #import "UserCheckVC.h"
 #import "PCSetup1VC.h"
+#import "PCSetup2VC.h"
 
 #import "AgreementWC.h"
 
@@ -24,7 +25,8 @@
         self.viewControllers =
             @[[[AgreementVC alloc] initWithStageControl:self nibName:@"AgreementVC" bundle:[NSBundle mainBundle]],
               [[UserCheckVC alloc] initWithStageControl:self nibName:@"UserCheckVC" bundle:[NSBundle mainBundle]],
-              [[PCSetup1VC alloc] initWithStageControl:self nibName:@"PCSetup1VC" bundle:[NSBundle mainBundle]]];
+              [[PCSetup1VC alloc] initWithStageControl:self nibName:@"PCSetup1VC" bundle:[NSBundle mainBundle]],
+              [[PCSetup2VC alloc] initWithStageControl:self nibName:@"PCSetup2VC" bundle:[NSBundle mainBundle]]];
     }
     return self;
 }

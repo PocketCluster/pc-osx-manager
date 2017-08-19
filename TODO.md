@@ -30,7 +30,8 @@
 - [ ] `Makefile` to remove all *_test.go and TEST.go
 - [ ] Clean up core node including `vi`
 - [ ] More Test for `pc-vbox-comm`
-- [ ] Pass `uid` to all slave nodes to have them setup the __user__ with the same `uid`
+- [ ] Pass `uid` to all slave nodes to have them setup the __user__ with the same `uid` 
+  * Look `Resources.bundle/setup/raspberry_user_setup.sh` and extract essential tasks
 - [ ] Look carefully `etcd` TLS configuration behave with `docker-compose` connected.
   * At initial, etcd `network/bridged` API point isn't available and dockerd complains. This seems to be normal though.
   * <https://dims-devguide.readthedocs.io/en/latest/dockerdatacenter.html>
