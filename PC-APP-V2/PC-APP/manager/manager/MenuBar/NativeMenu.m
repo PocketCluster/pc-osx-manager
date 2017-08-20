@@ -12,7 +12,12 @@
 #import <Sparkle/Sparkle.h>
 #import "AppDelegate+Window.h"
 
+static NSString * const UPDATE_TITLE_CHECK_IN_PROGRESS = @"Checking New Updates...";
+static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
+
 @interface NativeMenu()
+@property (nonatomic, strong, readwrite) NSStatusItem *statusItem;
+@property (nonatomic, strong, readwrite) NSMenuItem *updateAvail;
 - (void) menuSelectedPref:(id)sender;
 - (void) menuSelectedCheckForUpdates:(id)sender;
 - (void) menuSelectedSlack:(id)sender;
@@ -22,6 +27,7 @@
 
 @implementation NativeMenu
 @synthesize statusItem = _statusItem;
+@synthesize updateAvail = _updateAvail;
 
 - (id)init {
 
@@ -30,10 +36,16 @@
     if(self) {
         // status
         NSStatusItem* status = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
-
         [status setHighlightMode:YES];
         [self setStatusItem:status];
+        
+        // update menu
+        NSMenuItem *mUpdate = [[NSMenuItem alloc] initWithTitle:UPDATE_TITLE_CHECK_IN_PROGRESS action:@selector(menuSelectedCheckForUpdates:) keyEquivalent:@""];
+        [mUpdate setTarget:self];
+        [mUpdate setEnabled:NO];
+        self.updateAvail = mUpdate;
 
+        // setup for very initial menu state
         [self clusterStatusOff];
         [self setupMenuInitCheck];
     }
@@ -50,7 +62,14 @@
 }
 
 - (void) updateNewVersionAvailability:(BOOL)IsAvailable {
+    [self.updateAvail setTitle:UPDATE_TITLE_INITIATE_CHECKING];
+    [self.updateAvail setEnabled:YES];
 
+    if (IsAvailable) {
+        [self.updateAvail setImage:[NSImage imageNamed:@"status_icon_problem"]];
+    } else {
+        [self.updateAvail setImage:nil];
+    }
 }
 
 #pragma mark - Basic Menu Handling
@@ -66,9 +85,7 @@
 #endif
 
     // check for update
-    NSMenuItem *mUpdate = [[NSMenuItem alloc] initWithTitle:@"Check For Updates" action:@selector(menuSelectedCheckForUpdates:) keyEquivalent:@""];
-    [mUpdate setTarget:self];
-    [menuRoot addItem:mUpdate];
+    [menuRoot addItem:[self updateAvail]];
     [menuRoot addItem:[NSMenuItem separatorItem]];
 
     // chat menu
@@ -121,6 +138,9 @@
 }
 
 - (void) menuSelectedCheckForUpdates:(id)sender {
+    [self.updateAvail setTitle:UPDATE_TITLE_CHECK_IN_PROGRESS];
+    [self.updateAvail setEnabled:NO];
+
     [[SUUpdater sharedUpdater] checkForUpdates:self];
 }
 

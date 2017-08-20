@@ -10,8 +10,10 @@
 @interface NativeMenu : NSObject <NSMenuDelegate, PCRouteRequest>{
 @private
     NSStatusItem     *_statusItem;
+    NSMenuItem       *_updateAvail;
 }
-@property (nonatomic, strong) NSStatusItem *statusItem;
+@property (nonatomic, strong, readonly) NSStatusItem *statusItem;
+@property (nonatomic, strong, readonly) NSMenuItem *updateAvail;
 
 - (void) clusterStatusOn;
 - (void) clusterStatusOff;
