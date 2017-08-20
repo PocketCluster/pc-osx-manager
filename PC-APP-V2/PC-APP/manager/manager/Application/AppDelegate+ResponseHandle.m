@@ -52,7 +52,7 @@ handleResponse(NSString* eventMethod, const char* path, const char* response) {
                  encoding:NSUTF8StringEncoding
                  freeWhenDone:YES];
 
-        NSObject* eventResponse = nil;
+        NSDictionary* eventResponse = nil;
         if (response != NULL) {
 
             NSData *payloadData = \
@@ -88,7 +88,7 @@ handleResponse(NSString* eventMethod, const char* path, const char* response) {
 // We don't need to unnecessarily call another just to have singleton point on *main thread* !
 // Nonetheless, without a valid method, this category might be eradicated by compiler.
 // So... let's just leave it here, but it won't be used.
-- (void)HandleResponseForMethod:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSObject *)aResponse {
+- (void)HandleResponseForMethod:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aResponse {
     [[PCRouter sharedRouter] responseFor:aMethod onPath:aPath withPayload:aResponse];
 }
 

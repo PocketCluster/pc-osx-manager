@@ -84,7 +84,7 @@ func initSwarmService(appLife *appMainLife) error {
         swarmSrvC = make(chan service.Event)
     )
     appLife.RegisterServiceWithFuncs(
-        operation.ServiceSwarmEmbeddedOperation,
+        operation.ServiceOrchestrationOperation,
         func() error {
             var (
                 swarmsrv *swarmemb.SwarmService = nil
@@ -113,7 +113,7 @@ func initSwarmService(appLife *appMainLife) error {
 
     beaconManC := make(chan service.Event)
     appLife.RegisterServiceWithFuncs(
-        operation.ServiceSwarmEmbeddedServer,
+        operation.ServiceOrchestrationServer,
         func() error {
             be := <- beaconManC
             beaconMan, ok := be.Payload.(beacon.BeaconManger)
@@ -156,7 +156,7 @@ func initSystemHealthMonitor(appLife *appMainLife) error {
         operation.ServiceMonitorSystemHealth,
         func() error {
 
-            type MonitorSystemHealth []map[string]interface{}
+            type MonitorSystemHealth map[string]interface{}
 
             var (
                 timer = time.NewTicker(time.Second)
@@ -181,13 +181,17 @@ func initSystemHealthMonitor(appLife *appMainLife) error {
                     }
                     case <- timer.C: {
                         // report services status
-                        var response = MonitorSystemHealth{}
-                        response = append(response, map[string]interface{}{})
+                        var (
+                            response = MonitorSystemHealth{}
+                            srvStatus = map[string]bool{}
+                        )
+
                         sl := appLife.ServiceList()
                         for i, _ := range sl {
                             s := sl[i]
-                            response[0][s.Tag()] = s.IsRunning()
+                            srvStatus[s.Tag()] = s.IsRunning()
                         }
+                        response["services"] = srvStatus
                         data, err := json.Marshal(response)
                         if err != nil {
                             log.Debugf(err.Error())

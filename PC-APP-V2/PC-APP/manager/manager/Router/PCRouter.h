@@ -19,7 +19,7 @@
 - (void) addPostRequest:(NSObject<PCRouteRequest> *)aRequest onPath:(NSString*)aPath withHandler:(ResponseHandler)aHandler;
 - (void) delPostRequest:(NSObject<PCRouteRequest> *)aRequest onPath:(NSString*)aPath;
 
-- (void) responseFor:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSObject *)aResponse;
+- (void) responseFor:(NSString *)aMethod onPath:(NSString *)aPath withPayload:(NSDictionary *)aResponse;
 
 + (void) routeRequestGet:(const char*)aPath;
 + (void) routeRequestPost:(const char*)aPath withRequestBody:(NSDictionary *)aRequestBody;
