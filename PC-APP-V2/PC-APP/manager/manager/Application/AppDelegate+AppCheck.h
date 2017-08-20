@@ -10,4 +10,5 @@
 
 @interface AppDelegate(AppCheck)
 - (void) initCheck;
+- (void) systemMon;
 @end

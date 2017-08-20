@@ -8,7 +8,7 @@
 
 #import "routepath.h"
 
-typedef void (^ResponseHandler)(NSString *method, NSString *path, NSDictionary *response);
+typedef void (^ResponseHandler)(NSString *method, NSString *path, NSObject *response);
 
 @protocol PCRouteRequest <NSObject>
 @end

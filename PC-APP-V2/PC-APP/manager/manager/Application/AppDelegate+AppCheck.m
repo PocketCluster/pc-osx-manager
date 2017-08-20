@@ -31,11 +31,11 @@
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:pathSystemReady
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+     withHandler:^(NSString *method, NSString *path, NSObject *response) {
+         NSDictionary *theResponse = (NSDictionary *)response;
+         Log(@"%@ %@", path, theResponse);
 
-         Log(@"%@ %@", path, response);
-
-         BOOL isSystemReady = [[[response objectForKey:@"syscheck"] objectForKey:@"status"] boolValue];
+         BOOL isSystemReady = [[[theResponse objectForKey:@"syscheck"] objectForKey:@"status"] boolValue];
          _isSystemReady = isSystemReady;
 
          if (isSystemReady) {
@@ -47,7 +47,7 @@
 
              [ShowAlert
               showWarningAlertWithTitle:@"Unable to run PocketCluster"
-              message:[[response objectForKey:@"syscheck"] objectForKey:@"error"]];
+              message:[[theResponse objectForKey:@"syscheck"] objectForKey:@"error"]];
          }
          
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathSystemReady];
@@ -57,15 +57,15 @@
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:pathAppExpired
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-
+     withHandler:^(NSString *method, NSString *path, NSObject *response) {
+         NSDictionary *theResponse = (NSDictionary *)response;
          Log(@"%@ %@", path, response);
          
-         BOOL isAppExpired = [[[response objectForKey:@"expired"] objectForKey:@"status"] boolValue];
+         BOOL isAppExpired = [[[theResponse objectForKey:@"expired"] objectForKey:@"status"] boolValue];
          _isAppExpired = isAppExpired;
          
          if (!isAppExpired) {
-             NSString *warning = [[response objectForKey:@"expired"] objectForKey:@"warning"];
+             NSString *warning = [[theResponse objectForKey:@"expired"] objectForKey:@"warning"];
              if (warning != nil) {
                  [ShowAlert
                   showWarningAlertWithTitle:@"PocketCluster Expiration"
@@ -79,7 +79,7 @@
 
              [ShowAlert
               showWarningAlertWithTitle:@"PocketCluster Expiration"
-              message:[[response objectForKey:@"expired"] objectForKey:@"error"]];
+              message:[[theResponse objectForKey:@"expired"] objectForKey:@"error"]];
          }
 
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathAppExpired];
@@ -89,11 +89,11 @@
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:pathIsFirstRun
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+     withHandler:^(NSString *method, NSString *path, NSObject *response) {
+         NSDictionary *theResponse = (NSDictionary *)response;
+         Log(@"%@ %@", path, theResponse);
 
-         Log(@"%@ %@", path, response);
-
-         BOOL isFirstRun = [[[response objectForKey:@"firsttime"] objectForKey:@"status"] boolValue];
+         BOOL isFirstRun = [[[theResponse objectForKey:@"firsttime"] objectForKey:@"status"] boolValue];
          _isFirstTime = isFirstRun;
 
          if (isFirstRun) {
@@ -111,11 +111,11 @@
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:pathUserAuthed
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-
+     withHandler:^(NSString *method, NSString *path, NSObject *response) {
+         NSDictionary *theResponse = (NSDictionary *)response;
          Log(@"%@ %@", path, response);
 
-         BOOL isUserAuthed = [[[response objectForKey:@"user-auth"] objectForKey:@"status"] boolValue];
+         BOOL isUserAuthed = [[[theResponse objectForKey:@"user-auth"] objectForKey:@"status"] boolValue];
          _isUserAuthed = isUserAuthed;
 
          if (_isUserAuthed) {
@@ -124,12 +124,44 @@
          } else {
              [ShowAlert
               showWarningAlertWithTitle:@"Your invitation is not valid"
-              message:[[response objectForKey:@"user-auth"] objectForKey:@"error"]];
+              message:[[theResponse objectForKey:@"user-auth"] objectForKey:@"error"]];
          }
          
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
      }];
 
     [PCRouter routeRequestGet:RPATH_SYSTEM_READINESS];
+}
+
+- (void) systemMon {
+//    WEAK_SELF(self);
+    
+    NSString *pathMonNodeBounded = [NSString stringWithUTF8String:RPATH_MONITOR_NODE_BOUNDED];
+    NSString *pathMonNodeUnbound = [NSString stringWithUTF8String:RPATH_MONITOR_NODE_UNBOUNDED];
+    NSString *pathMonSrvcStatus = [NSString stringWithUTF8String:RPATH_MONITOR_SERVICE_STATUS];
+
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:pathMonNodeBounded
+     withHandler:^(NSString *method, NSString *path, NSObject *response) {
+         NSArray *theResponse = (NSArray *)response;
+         Log(@"%@ %@", path, theResponse);
+     }];
+
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:pathMonNodeUnbound
+     withHandler:^(NSString *method, NSString *path, NSObject *response) {
+         NSArray *theResponse = (NSArray *)response;
+         Log(@"%@ %@", path, theResponse);
+     }];
+
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:pathMonSrvcStatus
+     withHandler:^(NSString *method, NSString *path, NSObject *response) {
+         //NSArray *theResponse = (NSArray *)response;
+         //Log(@"%@ %@", path, theResponse);
+     }];
 }
 @end

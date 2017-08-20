@@ -1,6 +1,7 @@
 package main
 
 import (
+    "encoding/json"
     "time"
 
     log "github.com/Sirupsen/logrus"
@@ -154,6 +155,9 @@ func initSystemHealthMonitor(appLife *appMainLife) error {
     appLife.RegisterServiceWithFuncs(
         operation.ServiceMonitorSystemHealth,
         func() error {
+
+            type MonitorSystemHealth []map[string]interface{}
+
             var (
                 timer = time.NewTicker(time.Second)
                 rpUnbound = routepath.RpathMonitorNodeUnbounded()
@@ -161,6 +165,14 @@ func initSystemHealthMonitor(appLife *appMainLife) error {
                 rpSrvStat = routepath.RpathMonitorServiceStatus()
                 err error = nil
             )
+            err = FeedResponseForGet(rpUnbound, "{}")
+            if err != nil {
+                log.Debugf(err.Error())
+            }
+            err = FeedResponseForGet(rpBounded, "{}")
+            if err != nil {
+                log.Debugf(err.Error())
+            }
 
             for {
                 select {
@@ -168,26 +180,22 @@ func initSystemHealthMonitor(appLife *appMainLife) error {
                         return nil
                     }
                     case <- timer.C: {
-                        err = FeedResponseForGet(rpUnbound, "{}")
-                        if err != nil {
-                            log.Debugf(err.Error())
-                        }
-                        err = FeedResponseForGet(rpBounded, "{}")
-                        if err != nil {
-                            log.Debugf(err.Error())
-                        }
-                        err = FeedResponseForGet(rpSrvStat, "{}")
-                        if err != nil {
-                            log.Debugf(err.Error())
-                        }
-
-/*
+                        // report services status
+                        var response = MonitorSystemHealth{}
+                        response = append(response, map[string]interface{}{})
                         sl := appLife.ServiceList()
                         for i, _ := range sl {
                             s := sl[i]
-                            log.Debugf("[SERVICE] %s, %v", s.Tag(), s.IsRunning())
+                            response[0][s.Tag()] = s.IsRunning()
                         }
-*/
+                        data, err := json.Marshal(response)
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                        err = FeedResponseForGet(rpSrvStat, string(data))
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
                     }
                 }
             }

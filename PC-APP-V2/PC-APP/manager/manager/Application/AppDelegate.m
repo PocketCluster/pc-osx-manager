@@ -95,7 +95,10 @@
     lifecycleVisible();
     Log(@"Application Started. Let's begin initial check");
 
-    // 12. begin app ready sequence
+    // 12. Monitor system health
+    [self systemMon];
+
+    // 13. begin app ready sequence
     // this might update OSX side as well, so we need UI to be working beforehand.
     // Plus, it delayed execution give a room to golang to be initialized
     [self initCheck];
