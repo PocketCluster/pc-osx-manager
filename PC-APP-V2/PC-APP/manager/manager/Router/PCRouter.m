@@ -84,22 +84,6 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCRouter, sharedRouter);
     RouteRequestGet((char *)aPath);
 }
 
-#if 0
-+ (NSDictionary*) _percentEncodeDictionayValues:(NSDictionary*) dict {
-    NSMutableDictionary* edict=[NSMutableDictionary dictionaryWithDictionary:dict];
-    
-    NSMutableCharacterSet* URLQueryPartAllowedCharacterSet = [[NSCharacterSet URLQueryAllowedCharacterSet] mutableCopy];
-    [URLQueryPartAllowedCharacterSet removeCharactersInString:@"?&=@+/'"];
-    
-    for(NSString* key in [dict allKeys]) {
-        if([dict[key] isKindOfClass:[NSString class]]) {
-            edict[key] = [dict[key] stringByAddingPercentEncodingWithAllowedCharacters:URLQueryPartAllowedCharacterSet];
-        }
-    }
-    return edict;
-}
-#endif
-
 + (void) routeRequestPost:(const char*)aPath withRequestBody:(NSDictionary *)aRequestBody {
     NSAssert([NSThread isMainThread], @"Request should only be made in Main Thread!");
 

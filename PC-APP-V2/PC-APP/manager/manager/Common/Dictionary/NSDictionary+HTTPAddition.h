@@ -12,5 +12,6 @@ NSString*
 StringByAddingPercentEscapesForURLArgument(NSString *string);
 
 @interface NSDictionary(HTTPAddition)
--(NSString*)HTTPArgumentsString;
+- (NSString *) HTTPArgumentsString;
+- (NSDictionary *) percentEncodeDictionayValues;
 @end
