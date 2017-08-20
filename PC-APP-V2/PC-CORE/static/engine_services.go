@@ -152,6 +152,10 @@ func initSwarmService(appLife *appMainLife) error {
 }
 
 func initSystemHealthMonitor(appLife *appMainLife) error {
+    var (
+        unregNodeC = make(chan service.Event)
+        regNodeC = make(chan service.Event)
+    )
     appLife.RegisterServiceWithFuncs(
         operation.ServiceMonitorSystemHealth,
         func() error {
@@ -160,25 +164,52 @@ func initSystemHealthMonitor(appLife *appMainLife) error {
 
             var (
                 timer = time.NewTicker(time.Second)
-                rpUnbound = routepath.RpathMonitorNodeUnbounded()
-                rpBounded = routepath.RpathMonitorNodeBounded()
+                rpUnregNode = routepath.RpathMonitorNodeUnregistered()
+                rpRegNode = routepath.RpathMonitorNodeRegistered()
                 rpSrvStat = routepath.RpathMonitorServiceStatus()
-                err error = nil
             )
-            err = FeedResponseForGet(rpUnbound, "{}")
-            if err != nil {
-                log.Debugf(err.Error())
-            }
-            err = FeedResponseForGet(rpBounded, "{}")
-            if err != nil {
-                log.Debugf(err.Error())
-            }
 
             for {
                 select {
                     case <- appLife.StopChannel(): {
+                        timer.Stop()
                         return nil
                     }
+                    // monitoring unregistered nodes
+                    case re := <- unregNodeC: {
+                        nodes, ok := re.Payload.([]map[string]string)
+                        if !ok {
+                            log.Debugf("[ERR] invalid unregistered node list type")
+                            continue
+                        }
+                        data, err := json.Marshal(map[string]interface{} {"unregistered" : nodes})
+                        if err != nil {
+                            log.Debugf(err.Error())
+                            continue
+                        }
+                        err = FeedResponseForGet(rpUnregNode, string(data))
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                    }
+                    // monitoring registered nodes
+                    case re := <- regNodeC: {
+                        nodes, ok := re.Payload.([]map[string]string)
+                        if !ok {
+                            log.Debugf("[ERR] invalid registered node list type")
+                            continue
+                        }
+                        data, err := json.Marshal(map[string]interface{} {"registered" : nodes})
+                        if err != nil {
+                            log.Debugf(err.Error())
+                            continue
+                        }
+                        err = FeedResponseForGet(rpRegNode, string(data))
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                    }
+                    // service report
                     case <- timer.C: {
                         // report services status
                         var (
@@ -205,7 +236,9 @@ func initSystemHealthMonitor(appLife *appMainLife) error {
             }
 
             return nil
-        })
+        },
+        service.BindEventWithService(iventMonitorUnregisteredNode, unregNodeC),
+        service.BindEventWithService(iventMonitorRegisteredNode,   regNodeC))
 
     return nil
 }

@@ -13,6 +13,6 @@ const char* RPATH_APP_EXPIRED            = "/v1/inquiry/app/expired";
 const char* RPATH_USER_AUTHED            = "/v1/inquiry/user/authed";
 const char* RPATH_SYSTEM_IS_FIRST_RUN    = "/v1/inquiry/system/is-first-run";
 
-const char* RPATH_MONITOR_NODE_BOUNDED   = "/v1/monitor/node/bounded";
-const char* RPATH_MONITOR_NODE_UNBOUNDED = "/v1/monitor/node/unbounded";
-const char* RPATH_MONITOR_SERVICE_STATUS = "/v1/monitor/service/status";
+const char* RPATH_MONITOR_NODE_REGISTERED   = "/v1/monitor/node/registered";
+const char* RPATH_MONITOR_NODE_UNREGISTERED = "/v1/monitor/node/unregistered";
+const char* RPATH_MONITOR_SERVICE_STATUS    = "/v1/monitor/service/status";

@@ -134,29 +134,29 @@
 }
 
 - (void) systemMon {
-    //    WEAK_SELF(self);
+//    WEAK_SELF(self);
 
-    NSString *pathMonNodeBounded = [NSString stringWithUTF8String:RPATH_MONITOR_NODE_BOUNDED];
-    NSString *pathMonNodeUnbound = [NSString stringWithUTF8String:RPATH_MONITOR_NODE_UNBOUNDED];
-    NSString *pathMonSrvcStatus = [NSString stringWithUTF8String:RPATH_MONITOR_SERVICE_STATUS];
+    NSString *rpUnregNodes = [NSString stringWithUTF8String:RPATH_MONITOR_NODE_UNREGISTERED];
+    NSString *rpRegNodes   = [NSString stringWithUTF8String:RPATH_MONITOR_NODE_REGISTERED];
+    NSString *rpSrvStat    = [NSString stringWithUTF8String:RPATH_MONITOR_SERVICE_STATUS];
 
     [[PCRouter sharedRouter]
      addGetRequest:self
-     onPath:pathMonNodeBounded
+     onPath:rpUnregNodes
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          Log(@"%@ %@", path, response);
      }];
 
     [[PCRouter sharedRouter]
      addGetRequest:self
-     onPath:pathMonNodeUnbound
+     onPath:rpRegNodes
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          Log(@"%@ %@", path, response);
      }];
 
     [[PCRouter sharedRouter]
      addGetRequest:self
-     onPath:pathMonSrvcStatus
+     onPath:rpSrvStat
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) { 
  /*
         Log(@"%@ %@", path, response);

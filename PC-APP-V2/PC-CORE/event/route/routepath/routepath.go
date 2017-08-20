@@ -24,12 +24,12 @@ func RpathSystemIsFirstRun() string {
     return C.GoString(C.RPATH_SYSTEM_IS_FIRST_RUN)
 }
 
-func RpathMonitorNodeBounded() string {
-    return C.GoString(C.RPATH_MONITOR_NODE_BOUNDED)
+func RpathMonitorNodeRegistered() string {
+    return C.GoString(C.RPATH_MONITOR_NODE_REGISTERED)
 }
 
-func RpathMonitorNodeUnbounded() string {
-    return C.GoString(C.RPATH_MONITOR_NODE_UNBOUNDED)
+func RpathMonitorNodeUnregistered() string {
+    return C.GoString(C.RPATH_MONITOR_NODE_UNREGISTERED)
 }
 
 func RpathMonitorServiceStatus() string {

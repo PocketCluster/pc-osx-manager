@@ -155,6 +155,8 @@ func initMasterBeaconService(appLife *appMainLife, clusterID string, tcfg *tervi
                         if err != nil {
                             log.Debug(err.Error())
                         }
+                        regNodes := beaconMan.RegisteredNodesList()
+                        appLife.BroadcastEvent(service.Event{Name:iventMonitorRegisteredNode, Payload:regNodes})
                     }
                     case <- netC: {
                         // TODO update primary address
