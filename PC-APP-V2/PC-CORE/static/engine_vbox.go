@@ -122,7 +122,7 @@ func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     return errors.WithStack(md.BuildCoreDiskImage())
 }
 
-func buildVboxMachine(a *appMainLife) error {
+func buildVboxMachine(appLife *appMainLife) error {
     vglue, err := vboxglue.NewGOVboxGlue()
     if err != nil {
         errors.WithStack(err)
@@ -267,13 +267,13 @@ type vboxCtrlObjBrcst struct {
     net.Listener
 }
 
-func initVboxCoreReportService(a *appMainLife, clusterID string) error {
+func initVboxCoreReportService(appLife *appMainLife, clusterID string) error {
     var (
         ctrlObjC  = make(chan service.Event)
         netC      = make(chan service.Event)
     )
 
-    a.RegisterServiceWithFuncs(
+    appLife.RegisterServiceWithFuncs(
         operation.ServiceVBoxMasterControl,
         func() error {
             var (
@@ -317,7 +317,7 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
             }
 
             // broadcase the two
-            a.BroadcastEvent(service.Event{
+            appLife.BroadcastEvent(service.Event{
                 Name:iventVboxCtrlInstanceSpawn,
                 Payload: vboxCtrlObjBrcst{
                     Listener:          listen,
@@ -327,7 +327,7 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
             log.Debugf("[VBOXCTRL] VBox Core Control service started... %s", ctrl.CurrentState().String())
             for {
                 select {
-                    case <- a.StopChannel(): {
+                    case <- appLife.StopChannel(): {
                         log.Debugf("[VBOXCTRL] VBox Core Control shutdown...")
                         return errors.WithStack(listen.Close())
                     }
@@ -352,7 +352,7 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
         },
         service.BindEventWithService(iventNetworkAddressChange, netC))
 
-    a.RegisterServiceWithFuncs(
+    appLife.RegisterServiceWithFuncs(
         operation.ServiceVBoxMasterListener,
         func() error {
             var (
@@ -375,7 +375,7 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
             log.Debugf("[VBOXLSTN] VBox Core Listener service started... %s", ctrl.CurrentState().String())
             for {
                 select {
-                    case <- a.StopChannel(): {
+                    case <- appLife.StopChannel(): {
                         log.Debugf("[VBOXLSTN] VBox Core listener shutdown...")
                         return nil
                     }
@@ -386,7 +386,7 @@ func initVboxCoreReportService(a *appMainLife, clusterID string) error {
                             time.Sleep(masterctrl.BoundedTimeout)
                         } else {
                             log.Debugf("[VBOXLSTN] new connection opens")
-                            err = handleConnection(ctrl, conn, a.StopChannel())
+                            err = handleConnection(ctrl, conn, appLife.StopChannel())
                             if err != nil {
                                 log.Debugf("[VBOXLSTN] connection handle error (%v)", err.Error())
                             }

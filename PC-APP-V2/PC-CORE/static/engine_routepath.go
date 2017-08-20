@@ -148,8 +148,7 @@ func initRoutePathService() {
     theApp.GET(routepath.RpathUserAuthed(), func(_, path, _ string) error {
         data, err := json.Marshal(ReponseMessage{
             "user-auth": {
-                "status": false,
-                "error": "please check your invitation code",
+                "status": true,
             },
         })
         if err != nil {
@@ -162,9 +161,4 @@ func initRoutePathService() {
         }
         return nil
     })
-
-    theApp.GET(routepath.RpathCmdServiceStart(), func(_, _, _ string) error {
-        return nil
-    })
-
 }

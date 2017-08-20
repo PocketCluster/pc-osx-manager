@@ -12,10 +12,11 @@ import (
     "github.com/stkim1/pc-core/extlib/registry"
     swarmemb "github.com/stkim1/pc-core/extlib/swarm"
     "github.com/stkim1/pc-core/service"
+    "github.com/stkim1/pc-core/event/route/routepath"
 )
 
-func initStorageServie(a *appMainLife, config *embed.PocketConfig) error {
-    a.RegisterServiceWithFuncs(
+func initStorageServie(appLife *appMainLife, config *embed.PocketConfig) error {
+    appLife.RegisterServiceWithFuncs(
         operation.ServiceStorageProcess,
         func() error {
             etcd, err := embed.StartPocketEtcd(config)
@@ -38,7 +39,7 @@ func initStorageServie(a *appMainLife, config *embed.PocketConfig) error {
                     case err = <-etcd.Err(): {
                         log.Debugf("[ETCD] error : %v", err)
                     }
-                    case <- a.StopChannel(): {
+                    case <- appLife.StopChannel(): {
                         etcd.Close()
                         log.Debugf("[ETCD] server shuts down")
                         return nil
@@ -51,8 +52,8 @@ func initStorageServie(a *appMainLife, config *embed.PocketConfig) error {
     return nil
 }
 
-func initRegistryService(a *appMainLife, config *registry.PocketRegistryConfig) error {
-    a.RegisterServiceWithFuncs(
+func initRegistryService(appLife *appMainLife, config *registry.PocketRegistryConfig) error {
+    appLife.RegisterServiceWithFuncs(
         operation.ServiceContainerRegistry,
         func() error {
             reg, err := registry.NewPocketRegistry(config)
@@ -66,7 +67,7 @@ func initRegistryService(a *appMainLife, config *registry.PocketRegistryConfig) 
             log.Debugf("[REGISTRY] server start successful")
 
             // wait for service to stop
-            <- a.StopChannel()
+            <- appLife.StopChannel()
             err = reg.Stop(time.Second)
             log.Debugf("[REGISTRY] server exit. Error : %v", err)
             return errors.WithStack(err)
@@ -74,14 +75,14 @@ func initRegistryService(a *appMainLife, config *registry.PocketRegistryConfig) 
     return nil
 }
 
-func initSwarmService(a *appMainLife) error {
+func initSwarmService(appLife *appMainLife) error {
     const (
         iventSwarmInstanceSpawn string  = "ivent.swarm.instance.spawn"
     )
     var (
         swarmSrvC = make(chan service.Event)
     )
-    a.RegisterServiceWithFuncs(
+    appLife.RegisterServiceWithFuncs(
         operation.ServiceSwarmEmbeddedOperation,
         func() error {
             var (
@@ -96,7 +97,7 @@ func initSwarmService(a *appMainLife) error {
                             swarmsrv = srv
                         }
                     }
-                    case <- a.StopChannel(): {
+                    case <- appLife.StopChannel(): {
                         if swarmsrv != nil {
                             err := swarmsrv.Close()
                             return errors.WithStack(err)
@@ -110,7 +111,7 @@ func initSwarmService(a *appMainLife) error {
         service.BindEventWithService(iventSwarmInstanceSpawn, swarmSrvC))
 
     beaconManC := make(chan service.Event)
-    a.RegisterServiceWithFuncs(
+    appLife.RegisterServiceWithFuncs(
         operation.ServiceSwarmEmbeddedServer,
         func() error {
             be := <- beaconManC
@@ -139,12 +140,60 @@ func initSwarmService(a *appMainLife) error {
             if err != nil {
                 return errors.WithStack(err)
             }
-            a.BroadcastEvent(service.Event{Name:iventSwarmInstanceSpawn, Payload:swarmsrv})
+            appLife.BroadcastEvent(service.Event{Name:iventSwarmInstanceSpawn, Payload:swarmsrv})
             log.Debugf("[SWARM] swarm service started...")
             err = swarmsrv.ListenAndServeSingleHost()
             return errors.WithStack(err)
         },
         service.BindEventWithService(iventBeaconManagerSpawn, beaconManC))
+
+    return nil
+}
+
+func initSystemHealthMonitor(appLife *appMainLife) error {
+    appLife.RegisterServiceWithFuncs(
+        operation.ServiceMonitorSystemHealth,
+        func() error {
+            var (
+                timer = time.NewTicker(time.Second)
+                rpUnbound = routepath.RpathMonitorNodeUnbounded()
+                rpBounded = routepath.RpathMonitorNodeBounded()
+                rpSrvStat = routepath.RpathMonitorServiceStatus()
+                err error = nil
+            )
+
+            for {
+                select {
+                    case <- appLife.StopChannel(): {
+                        return nil
+                    }
+                    case <- timer.C: {
+                        err = FeedResponseForGet(rpUnbound, "{}")
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                        err = FeedResponseForGet(rpBounded, "{}")
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                        err = FeedResponseForGet(rpSrvStat, "{}")
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+
+/*
+                        sl := appLife.ServiceList()
+                        for i, _ := range sl {
+                            s := sl[i]
+                            log.Debugf("[SERVICE] %s, %v", s.Tag(), s.IsRunning())
+                        }
+*/
+                    }
+                }
+            }
+
+            return nil
+        })
 
     return nil
 }

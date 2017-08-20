@@ -63,7 +63,7 @@ func (b *beaconEventRoute) BeaconEventShutdown() error {
     return nil
 }
 
-func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.PocketConfig) error {
+func initMasterBeaconService(appLife *appMainLife, clusterID string, tcfg *tervice.PocketConfig) error {
     var (
         beaconC = make(chan service.Event)
         searchC = make(chan service.Event)
@@ -71,13 +71,13 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
         teleC   = make(chan service.Event)
         netC    = make(chan service.Event)
     )
-    a.RegisterServiceWithFuncs(
+    appLife.RegisterServiceWithFuncs(
         operation.ServiceBeaconMaster,
         func() error {
             var (
                 beaconRoute *beaconEventRoute  = &beaconEventRoute{
-                    ServiceSupervisor:a.ServiceSupervisor,
-                    PocketConfig: tcfg,
+                    ServiceSupervisor: appLife.ServiceSupervisor,
+                    PocketConfig:      tcfg,
                 }
                 timer                          = time.NewTicker(time.Second)
                 beaconMan  beacon.BeaconManger = nil
@@ -98,7 +98,7 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
                 beaconRoute,
                 func(host string, payload []byte) error {
                     log.Debugf("[AGENT] BEACON-TX [%v] Host %v", time.Now(), host)
-                    a.BroadcastEvent(
+                    appLife.BroadcastEvent(
                         service.Event{
                             Name:       ucast.EventBeaconCoreLocationSend,
                             Payload:    ucast.BeaconSend{
@@ -116,10 +116,10 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
             <- teleC
 
             log.Debugf("[AGENT] starting agent service...")
-            a.BroadcastEvent(service.Event{Name:iventBeaconManagerSpawn, Payload:beaconMan})
+            appLife.BroadcastEvent(service.Event{Name:iventBeaconManagerSpawn, Payload:beaconMan})
             for {
                 select {
-                    case <-a.StopChannel(): {
+                    case <-appLife.StopChannel(): {
                         timer.Stop()
                         err = beaconMan.Shutdown()
                         if err != nil {

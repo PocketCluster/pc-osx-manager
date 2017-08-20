@@ -19,6 +19,7 @@ const(
     ServiceInternalNodeNameOperation string = "service.internal.node.name.operation"
     ServiceVBoxMasterControl         string = "service.vbox.master.control"
     ServiceVBoxMasterListener        string = "service.vbox.master.listener"
+    ServiceMonitorSystemHealth       string = "service.monitor.system.health"
 )
 
 const (
