@@ -9,8 +9,7 @@
 #import "NSDictionary+HTTPAddition.h"
 
 NSString*
-StringByAddingPercentEscapesForURLArgument(NSString *string)
-{
+StringByAddingPercentEscapesForURLArgument(NSString *string) {
 	NSString *escapedString = \
 	(__bridge NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
 																 (CFStringRef)string,
@@ -22,20 +21,32 @@ StringByAddingPercentEscapesForURLArgument(NSString *string)
 }
 
 @implementation NSDictionary(HTTPAddition)
--(NSString*)HTTPArgumentsString
-{
+-(NSString *)HTTPArgumentsString {
 	NSMutableArray *arguments = [NSMutableArray array];
     
-	for (NSString *key in self)
-	{
+	for (NSString *key in self) {
 		NSString *parameter = \
-		[NSString
-		 stringWithFormat:@"%@=%@"
-		 ,key
-		 ,StringByAddingPercentEscapesForURLArgument([self objectForKey:key])];
+            [NSString
+             stringWithFormat:@"%@=%@"
+             ,key
+             ,StringByAddingPercentEscapesForURLArgument([self objectForKey:key])];
 		[arguments addObject:parameter];
 	}
 	
 	return [arguments componentsJoinedByString:@"&"];
+}
+
+- (NSDictionary *) percentEncodeDictionayValues {
+    NSMutableDictionary* edict=[NSMutableDictionary dictionaryWithDictionary:self];
+    
+    NSMutableCharacterSet* URLQueryPartAllowedCharacterSet = [[NSCharacterSet URLQueryAllowedCharacterSet] mutableCopy];
+    [URLQueryPartAllowedCharacterSet removeCharactersInString:@"?&=@+/'"];
+    
+    for(NSString* key in [self allKeys]) {
+        if([self[key] isKindOfClass:[NSString class]]) {
+            edict[key] = [self[key] stringByAddingPercentEncodingWithAllowedCharacters:URLQueryPartAllowedCharacterSet];
+        }
+    }
+    return edict;
 }
 @end

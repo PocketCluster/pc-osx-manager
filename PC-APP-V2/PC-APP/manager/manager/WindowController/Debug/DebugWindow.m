@@ -7,17 +7,23 @@
 //
 
 #import "DebugWindow.h"
-#import "pc-core.h"
 
-@interface DebugWindow ()
+#import "pc-core.h"
+#import "AppDelegate+Window.h"
+#import "ShowAlert.h"
+#import "PCRouter.h"
+#import "PCRoutePathConst.h"
+#import "NativeMenu+NewCluster.h"
+#import "NativeMenu+RunCluster.h"
+
+
+@interface DebugWindow ()<PCRouteRequest>
 @end
 
 @implementation DebugWindow
 
 - (void)windowDidLoad {
     [super windowDidLoad];
-    
-    // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 }
 
 - (IBAction)opsCmdBaseServiceStart:(id)sender {
@@ -46,6 +52,78 @@
 
 - (IBAction)opsCmdDebug:(id)sender {
     OpsCmdDebug();
+}
+
+#pragma mark - WINDOW
+- (IBAction)setup_01:(id)sender {
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"AgreementWC" withResponder:nil];
+}
+
+- (IBAction)setup_02:(id)sender {
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"DPSetupWC" withResponder:nil];
+}
+
+- (IBAction)setup_03:(id)sender {
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"PCPkgInstallWC" withResponder:nil];
+}
+
+
+#pragma mark - ROUTEPATH
+- (IBAction)route_01:(id)sender {
+    [[PCRouter sharedRouter]
+     responseFor:RPATH_EVENT_METHOD_GET
+     onPath:[NSString stringWithUTF8String:RPATH_SYSTEM_READINESS]
+     withPayload:
+     @{@"syscheck":
+           @{@"status": @NO,
+             @"error" : @"no primary interface"}}];
+}
+
+- (IBAction)route_02:(id)sender {
+    [[PCRouter sharedRouter]
+     responseFor:RPATH_EVENT_METHOD_GET
+     onPath:[NSString stringWithUTF8String:RPATH_APP_EXPIRED]
+     withPayload:
+     @{@"expired":
+           @{@"status": @NO,
+             @"warning" : @"this will be expired within 5 days"}}];
+}
+
+- (IBAction)route_03:(id)sender {
+    [[PCRouter sharedRouter]
+     responseFor:RPATH_EVENT_METHOD_GET
+     onPath:[NSString stringWithUTF8String:RPATH_SYSTEM_IS_FIRST_RUN]
+     withPayload:@{@"firsttime":@{@"status": @YES}}];
+}
+
+- (IBAction)route_04:(id)sender {
+    [[PCRouter sharedRouter]
+     responseFor:RPATH_EVENT_METHOD_GET
+     onPath:[NSString stringWithUTF8String:RPATH_USER_AUTHED]
+     withPayload:
+     @{@"user-auth":
+           @{@"status": @NO,
+             @"error" : @"need inviation code check"}}];
+}
+
+- (IBAction)menu_01:(id)sender {
+    [[[AppDelegate sharedDelegate] mainMenu] setupMenuInitCheck];
+}
+
+- (IBAction)menu_02:(id)sender {
+    [[[AppDelegate sharedDelegate] mainMenu] setupMenuNewCluster];
+}
+
+- (IBAction)menu_03:(id)sender {
+    [[[AppDelegate sharedDelegate] mainMenu] setupMenuRunCluster];
+}
+
+- (IBAction)menu_04:(id)sender {
+    
+}
+
+- (IBAction)menu_05:(id)sender {
+    [[[AppDelegate sharedDelegate] mainMenu] updateNewVersionAvailability:YES];
 }
 
 @end

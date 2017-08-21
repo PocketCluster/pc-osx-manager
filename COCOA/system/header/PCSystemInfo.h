@@ -19,4 +19,7 @@ PCSystemActiveProcessorCount(void);
 extern unsigned long long
 PCSystemPhysicalMemorySize(void);
 
+extern unsigned long
+PCSystemPhysicalCoreCount(void);
+
 #endif /* __PCSYSTEMINFO_H__ */

@@ -11,19 +11,23 @@ type HostContext interface {
     RefreshStatus() error
 
     HostContextClusterMeta
-    HostContextApplicationEnv
     HostContextUserEnv
+    HostContextApplicationEnv
     HostContextSysResource
     HostContextNetwork
     HostContextCertificate
+
+    // composite interfaces
+    HostContextCompositeEnv
+    HostContextCheckup
 }
 
 type hostContext struct {
     sync.Mutex
 
     *model.ClusterMeta
-    hostAppEnv
     hostUserEnv
+    hostAppEnv
     hostSysResource
     hostNetwork
     hostCertificate

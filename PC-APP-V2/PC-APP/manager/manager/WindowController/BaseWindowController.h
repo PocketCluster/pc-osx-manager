@@ -1,14 +1,15 @@
 //
 //  BaseWindowController.h
-//  Vagrant Manager
+//  PocketCluster
 //
 //  Copyright (c) 2015 Lanayo. All rights reserved.
 //
 
-@interface BaseWindowController : NSWindowController
+@interface BaseWindowController : NSWindowController <NSWindowDelegate>
 
 @property BOOL isClosed;
-
-- (void)windowWillClose:(NSNotification *)notification;
-
+- (void) windowDidBecomeKey:(NSNotification *)notification;
+- (void) windowDidResignKey:(NSNotification *)notification;
+- (void) windowWillClose:(NSNotification *)notification;
+- (void) bringToFront;
 @end

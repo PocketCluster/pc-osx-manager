@@ -6,6 +6,7 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
+#import "NativeMenu.h"
 #import "AppDelegate+Sparkle.h"
 
 @implementation AppDelegate(Sparkle)
@@ -18,13 +19,13 @@
 // Called when a valid update is found by the update driver.
 - (void)updater:(SUUpdater *)updater didFindValidUpdate:(SUAppcastItem *)item {
     Log(@"%s %@",__PRETTY_FUNCTION__, item.fileURL.description);
-    //TODO : make sure when didFindValudUpdate or updaterDidNotFindUpdate gets called before execute engine
+    [[self mainMenu] updateNewVersionAvailability:YES];
 }
 
 // Called when a valid update is not found.
 - (void)updaterDidNotFindUpdate:(SUUpdater *)updater {
     Log(@"%s",__PRETTY_FUNCTION__);
-    //TODO : make sure when didFindValudUpdate or updaterDidNotFindUpdate gets called before execute engine
+    [[self mainMenu] updateNewVersionAvailability:NO];
 }
 
 //  Called immediately before downloading the specified update.
@@ -69,4 +70,40 @@
 - (void)updater:(SUUpdater *)updater willInstallUpdateOnQuit:(SUAppcastItem *)item immediateInstallationInvocation:(NSInvocation *)invocation {
     Log(@"%s",__PRETTY_FUNCTION__);    
 }
+
+#pragma mark - SPARKLE DELEGATE FROM v0.1.3
+
+#if 0
+- (NSArray*)feedParametersForUpdater:(SUUpdater *)updater sendingSystemProfile:(BOOL)sendingProfile {
+    NSMutableArray *data = [[NSMutableArray alloc] init];
+    [data addObject:@{@"key": @"machineid", @"value": [Util getMachineId]}];
+    [data addObject:@{@"key": @"appversion", @"value": [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]}];
+    if(sendingProfile) {
+        [data addObject:@{@"key": @"profile", @"value": @"1"}];
+    }
+    
+    return data;
+}
+
+- (id<SUVersionComparison>)versionComparatorForUpdater:(SUUpdater *)updater {
+    return [[VersionComparison alloc] init];
+}
+
+- (SUAppcastItem *)bestValidUpdateInAppcast:(SUAppcast *)appcast forUpdater:(SUUpdater *)bundle {
+    SUAppcastItem *bestItem = nil;
+    
+    NSString *appVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+    
+    for(SUAppcastItem *item in [appcast items]) {
+        if([appVersion compare:item.versionString options:NSNumericSearch] == NSOrderedAscending) {
+            if(!bestItem || [bestItem.versionString compare:item.versionString options:NSNumericSearch] == NSOrderedAscending) {
+                bestItem = item;
+            }
+        }
+    }
+    
+    return bestItem;
+}
+#endif
+
 @end

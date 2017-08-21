@@ -14,11 +14,13 @@ import (
 type ClusterMeta struct {
     gorm.Model
     // this is short id
-    ClusterID        string
+    ClusterID        string    `gorm:"column:cluster_id;type:VARCHAR(16)"`
     // this is for teleport and other things
-    ClusterUUID      string
+    ClusterUUID      string    `gorm:"column:cluster_uuid;type:VARCHAR(36)"`
     // Cluster Domain name
-    ClusterDomain    string
+    ClusterDomain    string    `gorm:"column:cluster_domain;type:VARCHAR(42)"`
+    // User defined Name
+    UserMadeName     string    `gorm:"column:user_made_name;type:VARCHAR(255)"`
 }
 
 func NewClusterMeta() (*ClusterMeta) {
@@ -62,5 +64,19 @@ func UpsertClusterMeta(meta *ClusterMeta) (error) {
         return errors.Errorf("[ERR] invalid cluster domain name")
     }
     SharedRecordGate().Session().Create(meta)
+    return nil
+}
+
+func (c *ClusterMeta) Update() (error) {
+    if len(c.ClusterID) == 0 {
+        return errors.Errorf("[ERR] invalid cluster group id")
+    }
+    if len(c.ClusterUUID) == 0 {
+        return errors.Errorf("[ERR] invalid cluster UUID")
+    }
+    if len(c.ClusterDomain) == 0 {
+        return errors.Errorf("[ERR] invalid cluster domain name")
+    }
+    SharedRecordGate().Session().Save(c)
     return nil
 }

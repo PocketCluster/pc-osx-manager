@@ -7,12 +7,26 @@
 //
 
 @class NativeMenu;
+@class BaseWindowController;
 
-#import "PCConstants.h"
+@interface AppDelegate : NSObject <NSApplicationDelegate> {
+    NSMutableArray<BaseWindowController *>* _openWindows;
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
-@property (readonly) NativeMenu *nativeMenu;
-- (void)addOpenWindow:(id)window;
-- (void)removeOpenWindow:(id)window;
+@private
+    BOOL _isSystemReady;
+    BOOL _isAppExpired;
+    BOOL _isFirstTime;
+    BOOL _isUserAuthed;
+}
++ (AppDelegate*)sharedDelegate;
+
+@property (nonatomic, strong) NSMutableArray<BaseWindowController *>* openWindows;
+@property (nonatomic, strong, readonly) NativeMenu *mainMenu;
+
+@property (nonatomic, readonly) BOOL isSystemReady;
+@property (nonatomic, readonly) BOOL isAppExpired;
+@property (nonatomic, readonly) BOOL isFirstTime;
+@property (nonatomic, readonly) BOOL isUserAuthed;
+
 @end
 

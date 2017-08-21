@@ -3,10 +3,12 @@ package context
 
 /*
 #cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -Wl,-U,_PCApplicationSupportDirectory,-U,_PCApplicationDocumentsDirectory,-U,_PCApplicationTemporaryDirectory,-U,_PCApplicationLibraryCacheDirectory,-U,_PCApplicationResourceDirectory,-U,_PCApplicationExecutableDirectory
+#cgo LDFLAGS: -Wl,-U,_PCApplicationSupportDirectory,-U,_PCApplicationDocumentsDirectory,-U,_PCApplicationTemporaryDirectory
+#cgo LDFLAGS: -Wl,-U,_PCApplicationLibraryCacheDirectory,-U,_PCApplicationResourceDirectory,-U,_PCApplicationExecutableDirectory
+#cgo LDFLAGS: -Wl,-U,_PCBundleVersionString,-U,_PCBundleExpirationString
 
 #include "PCApplicationPath.h"
-
+#include "PCBundleInfo.h"
 */
 import "C"
 
@@ -32,4 +34,12 @@ func findApplicationResourceDirectory() string {
 
 func findApplicationExecutableDirectory() string {
     return C.GoString(C.PCApplicationExecutableDirectory())
+}
+
+func findApplicationBundleVersionString() string {
+    return C.GoString(C.PCBundleVersionString())
+}
+
+func findApplicationBundleExpirationString() string {
+    return C.GoString(C.PCBundleExpirationString())
 }

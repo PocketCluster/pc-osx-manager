@@ -20,35 +20,35 @@ type hostUserEnv struct {
     userTempPath                 string
 }
 
-func (ctx *hostContext) CocoaHomeDirectory() (string, error) {
+func (ctx *hostUserEnv) CocoaHomeDirectory() (string, error) {
     if len(ctx.cocoaHomePath) == 0 {
         return "", errors.Errorf("[ERR] invalid cocoa home directory")
     }
     return ctx.cocoaHomePath, nil
 }
 
-func (ctx *hostContext) PosixHomeDirectory() (string, error) {
+func (ctx *hostUserEnv) PosixHomeDirectory() (string, error) {
     if len(ctx.posixHomePath) == 0 {
         return "", errors.Errorf("[ERR] invalid posix home directory")
     }
     return ctx.posixHomePath, nil
 }
 
-func (ctx *hostContext) FullUserName() (string, error) {
+func (ctx *hostUserEnv) FullUserName() (string, error) {
     if len(ctx.fullUserName) == 0 {
         return "", errors.Errorf("[ERR] invalid full username")
     }
     return ctx.fullUserName, nil
 }
 
-func (ctx *hostContext) LoginUserName() (string, error) {
+func (ctx *hostUserEnv) LoginUserName() (string, error) {
     if len(ctx.loginUserName) == 0 {
         return "", errors.Errorf("[ERR] invalid login user name")
     }
     return ctx.loginUserName, nil
 }
 
-func (ctx *hostContext) UserTemporaryDirectory() (string, error) {
+func (ctx *hostUserEnv) UserTemporaryDirectory() (string, error) {
     if len(ctx.userTempPath) == 0 {
         return "", errors.Errorf("[ERR] invalid user temp directory")
     }

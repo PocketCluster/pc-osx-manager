@@ -1,6 +1,7 @@
 package main
 
 import (
+    "encoding/json"
     "time"
 
     log "github.com/Sirupsen/logrus"
@@ -12,10 +13,11 @@ import (
     "github.com/stkim1/pc-core/extlib/registry"
     swarmemb "github.com/stkim1/pc-core/extlib/swarm"
     "github.com/stkim1/pc-core/service"
+    "github.com/stkim1/pc-core/event/route/routepath"
 )
 
-func initStorageServie(a *appMainLife, config *embed.PocketConfig) error {
-    a.RegisterServiceWithFuncs(
+func initStorageServie(appLife *appMainLife, config *embed.PocketConfig) error {
+    appLife.RegisterServiceWithFuncs(
         operation.ServiceStorageProcess,
         func() error {
             etcd, err := embed.StartPocketEtcd(config)
@@ -38,7 +40,7 @@ func initStorageServie(a *appMainLife, config *embed.PocketConfig) error {
                     case err = <-etcd.Err(): {
                         log.Debugf("[ETCD] error : %v", err)
                     }
-                    case <- a.StopChannel(): {
+                    case <- appLife.StopChannel(): {
                         etcd.Close()
                         log.Debugf("[ETCD] server shuts down")
                         return nil
@@ -51,8 +53,8 @@ func initStorageServie(a *appMainLife, config *embed.PocketConfig) error {
     return nil
 }
 
-func initRegistryService(a *appMainLife, config *registry.PocketRegistryConfig) error {
-    a.RegisterServiceWithFuncs(
+func initRegistryService(appLife *appMainLife, config *registry.PocketRegistryConfig) error {
+    appLife.RegisterServiceWithFuncs(
         operation.ServiceContainerRegistry,
         func() error {
             reg, err := registry.NewPocketRegistry(config)
@@ -66,7 +68,7 @@ func initRegistryService(a *appMainLife, config *registry.PocketRegistryConfig) 
             log.Debugf("[REGISTRY] server start successful")
 
             // wait for service to stop
-            <- a.StopChannel()
+            <- appLife.StopChannel()
             err = reg.Stop(time.Second)
             log.Debugf("[REGISTRY] server exit. Error : %v", err)
             return errors.WithStack(err)
@@ -74,15 +76,15 @@ func initRegistryService(a *appMainLife, config *registry.PocketRegistryConfig) 
     return nil
 }
 
-func initSwarmService(a *appMainLife) error {
+func initSwarmService(appLife *appMainLife) error {
     const (
         iventSwarmInstanceSpawn string  = "ivent.swarm.instance.spawn"
     )
     var (
         swarmSrvC = make(chan service.Event)
     )
-    a.RegisterServiceWithFuncs(
-        operation.ServiceSwarmEmbeddedOperation,
+    appLife.RegisterServiceWithFuncs(
+        operation.ServiceOrchestrationOperation,
         func() error {
             var (
                 swarmsrv *swarmemb.SwarmService = nil
@@ -96,7 +98,7 @@ func initSwarmService(a *appMainLife) error {
                             swarmsrv = srv
                         }
                     }
-                    case <- a.StopChannel(): {
+                    case <- appLife.StopChannel(): {
                         if swarmsrv != nil {
                             err := swarmsrv.Close()
                             return errors.WithStack(err)
@@ -110,8 +112,8 @@ func initSwarmService(a *appMainLife) error {
         service.BindEventWithService(iventSwarmInstanceSpawn, swarmSrvC))
 
     beaconManC := make(chan service.Event)
-    a.RegisterServiceWithFuncs(
-        operation.ServiceSwarmEmbeddedServer,
+    appLife.RegisterServiceWithFuncs(
+        operation.ServiceOrchestrationServer,
         func() error {
             be := <- beaconManC
             beaconMan, ok := be.Payload.(beacon.BeaconManger)
@@ -139,12 +141,104 @@ func initSwarmService(a *appMainLife) error {
             if err != nil {
                 return errors.WithStack(err)
             }
-            a.BroadcastEvent(service.Event{Name:iventSwarmInstanceSpawn, Payload:swarmsrv})
+            appLife.BroadcastEvent(service.Event{Name:iventSwarmInstanceSpawn, Payload:swarmsrv})
             log.Debugf("[SWARM] swarm service started...")
             err = swarmsrv.ListenAndServeSingleHost()
             return errors.WithStack(err)
         },
         service.BindEventWithService(iventBeaconManagerSpawn, beaconManC))
+
+    return nil
+}
+
+func initSystemHealthMonitor(appLife *appMainLife) error {
+    var (
+        unregNodeC = make(chan service.Event)
+        regNodeC = make(chan service.Event)
+    )
+    appLife.RegisterServiceWithFuncs(
+        operation.ServiceMonitorSystemHealth,
+        func() error {
+
+            type MonitorSystemHealth map[string]interface{}
+
+            var (
+                timer = time.NewTicker(time.Second)
+                rpUnregNode = routepath.RpathMonitorNodeUnregistered()
+                rpRegNode = routepath.RpathMonitorNodeRegistered()
+                rpSrvStat = routepath.RpathMonitorServiceStatus()
+            )
+
+            for {
+                select {
+                    case <- appLife.StopChannel(): {
+                        timer.Stop()
+                        return nil
+                    }
+                    // monitoring unregistered nodes
+                    case re := <- unregNodeC: {
+                        nodes, ok := re.Payload.([]map[string]string)
+                        if !ok {
+                            log.Debugf("[ERR] invalid unregistered node list type")
+                            continue
+                        }
+                        data, err := json.Marshal(map[string]interface{} {"unregistered" : nodes})
+                        if err != nil {
+                            log.Debugf(err.Error())
+                            continue
+                        }
+                        err = FeedResponseForGet(rpUnregNode, string(data))
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                    }
+                    // monitoring registered nodes
+                    case re := <- regNodeC: {
+                        nodes, ok := re.Payload.([]map[string]string)
+                        if !ok {
+                            log.Debugf("[ERR] invalid registered node list type")
+                            continue
+                        }
+                        data, err := json.Marshal(map[string]interface{} {"registered" : nodes})
+                        if err != nil {
+                            log.Debugf(err.Error())
+                            continue
+                        }
+                        err = FeedResponseForGet(rpRegNode, string(data))
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                    }
+                    // service report
+                    case <- timer.C: {
+                        // report services status
+                        var (
+                            response = MonitorSystemHealth{}
+                            srvStatus = map[string]bool{}
+                        )
+
+                        sl := appLife.ServiceList()
+                        for i, _ := range sl {
+                            s := sl[i]
+                            srvStatus[s.Tag()] = s.IsRunning()
+                        }
+                        response["services"] = srvStatus
+                        data, err := json.Marshal(response)
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                        err = FeedResponseForGet(rpSrvStat, string(data))
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                    }
+                }
+            }
+
+            return nil
+        },
+        service.BindEventWithService(iventMonitorUnregisteredNode, unregNodeC),
+        service.BindEventWithService(iventMonitorRegisteredNode,   regNodeC))
 
     return nil
 }

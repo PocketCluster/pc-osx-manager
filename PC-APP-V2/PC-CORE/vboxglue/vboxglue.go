@@ -78,6 +78,7 @@ type VBoxGlue interface {
 
     AppVersion() uint
     APIVersion() uint
+    CheckVBoxSuitability() error
     SearchHostNetworkInterfaceByName(hostIface string) (string, error)
 
     CurrentMachineState() VBGlueMachineState
@@ -130,6 +131,13 @@ func (v *goVoxGlue) AppVersion() uint {
 
 func (v *goVoxGlue) APIVersion() uint {
     return uint(C.VBoxApiVersion())
+}
+
+func (v *goVoxGlue) CheckVBoxSuitability() error {
+    if v.AppVersion() < 5001022 || v.APIVersion() < 5001 {
+        return errors.Errorf("Please install the latest VirtualBox. v5.1.22 or greater is required.")
+    }
+    return nil
 }
 
 // 'VBoxManage list bridgedifs' also shows full interface name. Compare if necessary

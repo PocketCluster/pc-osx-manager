@@ -82,13 +82,13 @@ func locaNodeName(beaconMan beacon.BeaconManger, w dns.ResponseWriter, req *dns.
     w.WriteMsg(m)
 }
 
-func initPocketNameService(a *appMainLife, clusterID string) error {
+func initPocketNameService(appLife *appMainLife, clusterID string) error {
     const (
         iventNameServerInstanceSpawn string = "ivent.name.server.instance.spawn"
     )
 
     nameServerC := make(chan service.Event)
-    a.RegisterServiceWithFuncs(
+    appLife.RegisterServiceWithFuncs(
         operation.ServiceInternalNodeNameServer,
         func() error {
             ne := <- nameServerC
@@ -102,7 +102,7 @@ func initPocketNameService(a *appMainLife, clusterID string) error {
         service.BindEventWithService(iventNameServerInstanceSpawn, nameServerC))
 
     beaconManC := make(chan service.Event)
-    a.RegisterServiceWithFuncs(
+    appLife.RegisterServiceWithFuncs(
         operation.ServiceInternalNodeNameOperation,
         func() error {
             var (
@@ -136,10 +136,10 @@ func initPocketNameService(a *appMainLife, clusterID string) error {
             udpServer.PacketConn = udpPacketConn
 
             // send udp server to operation
-            a.BroadcastEvent(service.Event{Name:iventNameServerInstanceSpawn, Payload: udpServer})
+            appLife.BroadcastEvent(service.Event{Name:iventNameServerInstanceSpawn, Payload: udpServer})
 
             // wait for stop event
-            <- a.StopChannel()
+            <- appLife.StopChannel()
             log.Debugf("[NAME-SERVICE] service shutting down")
             err = udpServer.Shutdown()
             udpServer = nil

@@ -12,6 +12,7 @@ import (
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/pc-core/beacon"
     "github.com/stkim1/pc-core/event/operation"
+    "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/model"
 )
@@ -62,20 +63,21 @@ func (b *beaconEventRoute) BeaconEventShutdown() error {
     return nil
 }
 
-func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.PocketConfig) error {
+func initMasterBeaconService(appLife *appMainLife, clusterID string, tcfg *tervice.PocketConfig) error {
     var (
         beaconC = make(chan service.Event)
         searchC = make(chan service.Event)
         vboxC   = make(chan service.Event)
+        teleC   = make(chan service.Event)
         netC    = make(chan service.Event)
     )
-    a.RegisterServiceWithFuncs(
+    appLife.RegisterServiceWithFuncs(
         operation.ServiceBeaconMaster,
         func() error {
             var (
                 beaconRoute *beaconEventRoute  = &beaconEventRoute{
-                    ServiceSupervisor:a.ServiceSupervisor,
-                    PocketConfig: tcfg,
+                    ServiceSupervisor: appLife.ServiceSupervisor,
+                    PocketConfig:      tcfg,
                 }
                 timer                          = time.NewTicker(time.Second)
                 beaconMan  beacon.BeaconManger = nil
@@ -96,7 +98,7 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
                 beaconRoute,
                 func(host string, payload []byte) error {
                     log.Debugf("[AGENT] BEACON-TX [%v] Host %v", time.Now(), host)
-                    a.BroadcastEvent(
+                    appLife.BroadcastEvent(
                         service.Event{
                             Name:       ucast.EventBeaconCoreLocationSend,
                             Payload:    ucast.BeaconSend{
@@ -110,11 +112,14 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
                 return errors.WithStack(err)
             }
 
+            // waiting teleport to start
+            <- teleC
+
             log.Debugf("[AGENT] starting agent service...")
-            a.BroadcastEvent(service.Event{Name:iventBeaconManagerSpawn, Payload:beaconMan})
+            appLife.BroadcastEvent(service.Event{Name:iventBeaconManagerSpawn, Payload:beaconMan})
             for {
                 select {
-                    case <-a.StopChannel(): {
+                    case <-appLife.StopChannel(): {
                         timer.Stop()
                         err = beaconMan.Shutdown()
                         if err != nil {
@@ -150,6 +155,8 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
                         if err != nil {
                             log.Debug(err.Error())
                         }
+                        regNodes := beaconMan.RegisteredNodesList()
+                        appLife.BroadcastEvent(service.Event{Name:iventMonitorRegisteredNode, Payload:regNodes})
                     }
                     case <- netC: {
                         // TODO update primary address
@@ -162,6 +169,7 @@ func initMasterBeaconService(a *appMainLife, clusterID string, tcfg *tervice.Poc
         service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
         service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
         service.BindEventWithService(iventVboxCtrlInstanceSpawn,           vboxC),
+        service.BindEventWithService(sshproc.EventPCSSHServerProxyStarted, teleC),
         service.BindEventWithService(iventNetworkAddressChange,            netC))
 
     return nil

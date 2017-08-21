@@ -1,8 +1,8 @@
 //
 //  AboutWindowController.m
-//  Vagrant Manager
+//  PocketCluster
 //
-//  Copyright (c) 2014 Lanayo. All rights reserved.
+//  Copyright (c) 2015,2017 PocketCluster. All rights reserved.
 //
 
 #import "AboutWindow.h"
@@ -21,16 +21,20 @@
 
 - (void)windowDidLoad {
     [super windowDidLoad];
+    
+    [self.window setBackgroundColor:[NSColor whiteColor]];
+    [self.window setTitleVisibility:NSWindowTitleHidden];
+    [self.window setTitlebarAppearsTransparent:YES];
+    self.window.styleMask |= NSFullSizeContentViewWindowMask;
 
-    NSString *str = @"<div style=\"text-align:center;font-family:Arial;font-size:13px\">Copyright &copy;{YEAR} Sung-Taek, Kim<br><br>PocketCluster {VERSION}<br><br>For more information visit:<br><a href=\"{URL}\">{URL}</a><br><br>or check us out on GitHub:<br><a href=\"{GITHUB_URL}\">{GITHUB_URL}</a></div>";
+    NSString *str = @"<div style=\"text-align:left;font-family:'Helvetica Neue';font-weight:100;font-size:38px;\">PocketCluster</div><div style=\"text-align:left;font-family:Arial;font-size:13px\">Version {VERSION}<br/><br/>Copyright &copy;2015,{YEAR} PocketCluster<br/><a href=\"{URL}\">{URL}</a></div>";
 
     NSString *dateString = [NSString stringWithCString:__DATE__ encoding:NSASCIIStringEncoding];
     NSString *yearString = [dateString substringWithRange:NSMakeRange([dateString length] - 4, 4)];
     
     str = [str stringByReplacingOccurrencesOfString:@"{YEAR}" withString:yearString];
     str = [str stringByReplacingOccurrencesOfString:@"{VERSION}" withString:[[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleShortVersionString"]];
-    str = [str stringByReplacingOccurrencesOfString:@"{URL}" withString:@"https://pocketcluster.wordpress.com"];
-    str = [str stringByReplacingOccurrencesOfString:@"{GITHUB_URL}" withString:@"https://github.com/stkim1/pocketcluster"];
+    str = [str stringByReplacingOccurrencesOfString:@"{URL}" withString:@"https://github.com/pocketcluster/pocketcluster"];
     str = [str stringByReplacingOccurrencesOfString:@"\n" withString:@"<br>"];
     
     self.webView.policyDelegate = self;

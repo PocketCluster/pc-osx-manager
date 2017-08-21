@@ -11,6 +11,9 @@
 
 
 ### V0.1.4
+- [ ] `CoreNode`, `SlaveNode` : `LastAlive` data for health check on OSX. Save the last alive time to report in OSX.
+- [ ] `CoreNode` set `SlaveID` with `MachineID`.
+- [ ] Cluster User Defined Name
 - [ ] Repartition logic from Boot2Docker
 - [ ] Disable Docker when there is no TLS certs available
 - [ ] Append 'CA' <http://rt.openssl.org/Ticket/History.html?user=guest&pass=guest&id=3979>
@@ -27,7 +30,8 @@
 - [ ] `Makefile` to remove all *_test.go and TEST.go
 - [ ] Clean up core node including `vi`
 - [ ] More Test for `pc-vbox-comm`
-- [ ] Pass `uid` to all slave nodes to have them setup the __user__ with the same `uid`
+- [ ] Pass `uid` to all slave nodes to have them setup the __user__ with the same `uid` 
+  * Look `Resources.bundle/setup/raspberry_user_setup.sh` and extract essential tasks
 - [ ] Look carefully `etcd` TLS configuration behave with `docker-compose` connected.
   * At initial, etcd `network/bridged` API point isn't available and dockerd complains. This seems to be normal though.
   * <https://dims-devguide.readthedocs.io/en/latest/dockerdatacenter.html>

@@ -16,6 +16,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
 
     "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/model"
 )
 import (
@@ -95,6 +96,9 @@ type BeaconManger interface {
     // TODO : this need to be a separate interface
     // dns service name
     AddressForName(name string) (string, error)
+
+    // For reporting to UI layer
+    RegisteredNodesList() []map[string]string
 }
 
 // We might not need a locking mechanism as "select" statement will choose only "one input" at a time.
@@ -265,6 +269,11 @@ func (b *beaconManger) AddressForName(name string) (string, error) {
             return findNodeForNameService(b, name)
         }
     }
+}
+
+// --- UI Layer Report --- //
+func (b *beaconManger) RegisteredNodesList() []map[string]string {
+    return fundRegisterdNodeStatus(b)
 }
 
 // --- Swarm Discovery Methods --- //
@@ -488,4 +497,67 @@ func shutdownMasterBeacons(b *beaconManger) {
     // ignore error for now
     b.notiReceiver.BeaconEventShutdown()
     b.notiReceiver = nil
+}
+
+func fundRegisterdNodeStatus(b *beaconManger) []map[string]string {
+    b.Lock()
+    defer b.Unlock()
+
+    var (
+        regedNodes = []map[string]string{}
+        bLen int = len(b.beaconList)
+    )
+
+    for i := 0; i < bLen; i++ {
+        var (
+            bc = b.beaconList[i]
+            node = bc.SlaveNode()
+        )
+        nState := map[string]string{
+            "hardware":      node.Hardware,
+            "nodename":      node.NodeName,
+            "ip4_gate":      node.IP4Gateway,
+            "user_name":     node.UserMadeName,
+            "last_alive":    node.LastAlive.Format(defaults.PocketTimeDateFormat),
+        }
+        if bc.CurrentState() == MasterBounded {
+            nState["status"] = "bounded"
+        } else {
+            nState["status"] = "unbounded"
+        }
+        ip4, err := node.IP4AddrString()
+        if err != nil {
+            nState["ip4_addr"] = ""
+        } else {
+            nState["ip4_addr"] = ip4
+        }
+        regedNodes = append(regedNodes, nState)
+    }
+
+    // finally add core node
+    cNode := b.vboxCtrl.GetCoreNode()
+    if cNode != nil {
+        cState := map[string]string{
+            "hardware":      "x86_64",
+            "nodename":      cNode.NodeName,
+            "ip4_gate":      cNode.IP4Gateway,
+            "user_name":     cNode.UserMadeName,
+            "last_alive":    cNode.LastAlive.Format(defaults.PocketTimeDateFormat),
+        }
+
+        if b.vboxCtrl.CurrentState() == mpkg.VBoxMasterBounded {
+            cState["status"] = "bounded"
+        } else {
+            cState["status"] = "unbounded"
+        }
+        ip4, err := cNode.IP4AddrString()
+        if err != nil {
+            cState["ip4_addr"] = ""
+        } else {
+            cState["ip4_addr"] = ip4
+        }
+        regedNodes = append(regedNodes, cState)
+    }
+
+    return regedNodes
 }

@@ -24,24 +24,29 @@ import (
     "runtime"
 
     log "github.com/Sirupsen/logrus"
+    "github.com/pkg/errors"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/crash"
+    "github.com/stkim1/pc-core/event/route"
 )
 
 type appMainLife struct {
     *app
+    *route.Router
     service.ServiceSupervisor
 }
 
 var (
     initThreadID uint64
-
     theApp = &appMainLife{
         app:&app{
             eventsOut:      make(chan interface{}),
             lifecycleStage: lifecycle.StageDead,
         },
+        Router: route.NewRouter(func(_, _, _ string) error {
+            return errors.Errorf("invalid path root (/)")
+        }),
         ServiceSupervisor: service.NewServiceSupervisor(),
     }
 )

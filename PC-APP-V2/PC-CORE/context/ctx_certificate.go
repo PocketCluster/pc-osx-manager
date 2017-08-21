@@ -1,6 +1,8 @@
 package context
 
 import (
+    "sync"
+
     "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
 )
@@ -30,6 +32,8 @@ type HostContextCertificate interface {
 }
 
 type hostCertificate struct {
+    sync.Mutex
+
     // certificate authority
     caBundle                     *CertAuthBundle
     // host certificate
@@ -49,14 +53,14 @@ type CertAuthBundle struct {
     CASSHChk []byte
 }
 
-func (ctx *hostContext) UpdateCertAuth(bundle *CertAuthBundle) {
+func (ctx *hostCertificate) UpdateCertAuth(bundle *CertAuthBundle) {
     ctx.Lock()
     defer ctx.Unlock()
 
     ctx.caBundle = bundle
 }
 
-func (ctx *hostContext) CertAuthSigner() (*pcrypto.CaSigner, error) {
+func (ctx *hostCertificate) CertAuthSigner() (*pcrypto.CaSigner, error) {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -66,7 +70,7 @@ func (ctx *hostContext) CertAuthSigner() (*pcrypto.CaSigner, error) {
     return ctx.caBundle.CASigner, nil
 }
 
-func (ctx *hostContext) CertAuthPublicKey() ([]byte, error) {
+func (ctx *hostCertificate) CertAuthPublicKey() ([]byte, error) {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -76,7 +80,7 @@ func (ctx *hostContext) CertAuthPublicKey() ([]byte, error) {
     return ctx.caBundle.CAPubKey, nil
 }
 
-func (ctx *hostContext) CertAuthCertificate() ([]byte, error) {
+func (ctx *hostCertificate) CertAuthCertificate() ([]byte, error) {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -94,14 +98,14 @@ type HostCertBundle struct {
     Certificate    []byte
 }
 
-func (ctx *hostContext) UpdateHostCert(bundle *HostCertBundle) {
+func (ctx *hostCertificate) UpdateHostCert(bundle *HostCertBundle) {
     ctx.Lock()
     defer ctx.Unlock()
 
     ctx.hostBundle = bundle
 }
 
-func (ctx *hostContext) MasterHostPublicKey() ([]byte, error) {
+func (ctx *hostCertificate) MasterHostPublicKey() ([]byte, error) {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -111,7 +115,7 @@ func (ctx *hostContext) MasterHostPublicKey() ([]byte, error) {
     return ctx.hostBundle.PublicKey, nil
 }
 
-func (ctx *hostContext) MasterHostPrivateKey() ([]byte, error) {
+func (ctx *hostCertificate) MasterHostPrivateKey() ([]byte, error) {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -121,7 +125,7 @@ func (ctx *hostContext) MasterHostPrivateKey() ([]byte, error) {
     return ctx.hostBundle.PrivateKey, nil
 }
 
-func (ctx *hostContext) MasterHostCertificate() ([]byte, error) {
+func (ctx *hostCertificate) MasterHostCertificate() ([]byte, error) {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -137,14 +141,14 @@ type BeaconCertBundle struct {
     PublicKey      []byte
 }
 
-func (ctx *hostContext) UpdateBeaconCert(bundle *BeaconCertBundle) {
+func (ctx *hostCertificate) UpdateBeaconCert(bundle *BeaconCertBundle) {
     ctx.Lock()
     defer ctx.Unlock()
 
     ctx.beaconBundle = bundle
 }
 
-func (ctx *hostContext) MasterBeaconPublicKey() ([]byte, error) {
+func (ctx *hostCertificate) MasterBeaconPublicKey() ([]byte, error) {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -154,7 +158,7 @@ func (ctx *hostContext) MasterBeaconPublicKey() ([]byte, error) {
     return ctx.beaconBundle.PublicKey, nil
 }
 
-func (ctx *hostContext) MasterBeaconPrivateKey() ([]byte, error) {
+func (ctx *hostCertificate) MasterBeaconPrivateKey() ([]byte, error) {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -169,14 +173,14 @@ type VBoxCertBundle struct {
     PublicKey      []byte
 }
 
-func (ctx *hostContext) UpdateVBoxCert(bundle *VBoxCertBundle) {
+func (ctx *hostCertificate) UpdateVBoxCert(bundle *VBoxCertBundle) {
     ctx.Lock()
     defer ctx.Unlock()
 
     ctx.vboxBundle = bundle
 }
 
-func (ctx *hostContext) MasterVBoxCtrlPrivateKey() ([]byte, error) {
+func (ctx *hostCertificate) MasterVBoxCtrlPrivateKey() ([]byte, error) {
     ctx.Lock()
     defer ctx.Unlock()
 
@@ -186,7 +190,7 @@ func (ctx *hostContext) MasterVBoxCtrlPrivateKey() ([]byte, error) {
     return ctx.vboxBundle.PrivateKey, nil
 }
 
-func (ctx *hostContext) MasterVBoxCtrlPublicKey() ([]byte, error) {
+func (ctx *hostCertificate) MasterVBoxCtrlPublicKey() ([]byte, error) {
     ctx.Lock()
     defer ctx.Unlock()
 

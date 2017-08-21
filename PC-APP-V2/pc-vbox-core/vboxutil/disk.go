@@ -15,8 +15,7 @@ import (
 )
 
 const (
-    magicString string = "pc-core, please format-me"
-    DefualtCoreDiskName = "pc-core-hdd.vmdk"
+    magicString         string = "pc-core, please format-me"
 )
 
 // MachineDisk information.

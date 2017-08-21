@@ -4,6 +4,14 @@ import (
     "github.com/stkim1/pcrypto"
 )
 
+// PLACE ONLY *CONSTANT* VALUES W/O DEPENDENCY IN THIS PACKAGE, !!!PLEASE!!!
+
+const (
+    ApplicationVersion         string = "0.1.4"
+
+    ApplicationExpirationDate  string = "2018/01/01 00:00:00 -0000"
+)
+
 const (
     ClusterCertAuthPrivateKey  string = "pc_cert_auth"   + pcrypto.FileExtPrivateKey
 
@@ -46,4 +54,10 @@ const (
 
 const (
     PocketClusterCoreName      string = "pc-core"
+)
+
+const (
+    VBoxDefualtCoreDiskName    string = "pc-core-hdd.vmdk"
+    // 128 GB
+    VBoxDefualtCoreDiskSize    uint   = 128000
 )

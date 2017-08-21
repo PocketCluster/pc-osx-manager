@@ -1,7 +1,7 @@
 package context
 
 import (
-    "path/filepath"
+    "time"
 
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/defaults"
@@ -14,10 +14,8 @@ type HostContextApplicationEnv interface {
     ApplicationLibraryCacheDirectory() (string, error)
     ApplicationResourceDirectory() (string, error)
     ApplicationExecutableDirectory() (string, error)
-    ApplicationUserDataDirectory() (string, error)
-    ApplicationRepositoryDirectory() (string, error)
-    ApplicationStorageDirectory() (string, error)
-    ApplicationVirtualMachineDirectory() (string, error)
+    ApplicationBundleVersion() (string, error)
+    ApplicationBundleExpirationDate() (time.Time, error)
 
     CurrentCountryCode() (string, error)
     CurrentLanguageCode() (string, error)
@@ -30,98 +28,77 @@ type hostAppEnv struct {
     applicationLibCachePath      string
     applicationResourcePath      string
     applicationExecutablePath    string
+    applicationBundleVersion     string
+    applicationBundleExpiration  string
 
     currentCountryCode           string
     currentLanguageCode          string
 }
 
-func (c *hostContext) ApplicationSupportDirectory() (string, error) {
+func (c *hostAppEnv) ApplicationSupportDirectory() (string, error) {
     if len(c.applicationSupportPath) == 0 {
         return "", errors.Errorf("[ERR] invalid app support directory")
     }
     return c.applicationSupportPath, nil
 }
 
-func (c *hostContext) ApplicationDocumentsDirectoru() (string, error) {
+func (c *hostAppEnv) ApplicationDocumentsDirectoru() (string, error) {
     if len(c.applicationDocumentPath) == 0 {
         return "", errors.Errorf("[ERR] invalid app doc directory")
     }
     return c.applicationDocumentPath, nil
 }
 
-func (c *hostContext) ApplicationTemporaryDirectory() (string, error) {
+func (c *hostAppEnv) ApplicationTemporaryDirectory() (string, error) {
     if len(c.applicationTempPath) == 0 {
         return "", errors.Errorf("[ERR] invalid app temp directory")
     }
     return c.applicationTempPath, nil
 }
 
-func (c *hostContext) ApplicationLibraryCacheDirectory() (string, error) {
+func (c *hostAppEnv) ApplicationLibraryCacheDirectory() (string, error) {
     if len(c.applicationLibCachePath) == 0 {
         return "", errors.Errorf("[ERR] invalid app lib cache directory")
     }
     return c.applicationLibCachePath, nil
 }
 
-func (c *hostContext) ApplicationResourceDirectory() (string, error) {
+func (c *hostAppEnv) ApplicationResourceDirectory() (string, error) {
     if len(c.applicationResourcePath) == 0 {
         return "", errors.Errorf("[ERR] invalid app resource directory")
     }
     return c.applicationResourcePath, nil
 }
 
-func (c *hostContext) ApplicationExecutableDirectory() (string, error) {
+func (c *hostAppEnv) ApplicationExecutableDirectory() (string, error) {
     if len(c.applicationExecutablePath) == 0 {
         return "", errors.Errorf("[ERR] invalid app exec directory")
     }
     return c.applicationExecutablePath, nil
 }
 
-func (c *hostContext) ApplicationUserDataDirectory() (string, error) {
-    home, err := c.PosixHomeDirectory()
-    if err != nil {
-        return "", errors.WithMessage(err, "[ERR] invalid application data path")
+func (c *hostAppEnv) ApplicationBundleVersion() (string, error) {
+    if len(c.applicationBundleVersion) == 0 {
+        return "", errors.Errorf("[ERR] invalid app bundle version")
     }
-
-    return filepath.Join(home, defaults.UserDataPath), nil
+    return c.applicationBundleVersion, nil
 }
 
-func (c *hostContext) ApplicationRepositoryDirectory() (string, error) {
-    dataDir, err := c.ApplicationUserDataDirectory()
-    if err != nil {
-        return "", errors.WithMessage(err, "[ERR] invalid application repository path")
+func (c *hostAppEnv) ApplicationBundleExpirationDate() (time.Time, error) {
+    if len(c.applicationBundleExpiration) == 0 {
+        return time.Time{}, errors.Errorf("[ERR] invalid app expiration date")
     }
-
-    return filepath.Join(dataDir, defaults.RepositoryPathPostfix), nil
+    return time.Parse(defaults.PocketTimeDateFormat, c.applicationBundleExpiration)
 }
 
-func (c *hostContext) ApplicationStorageDirectory() (string, error) {
-    dataDir, err := c.ApplicationUserDataDirectory()
-    if err != nil {
-        return "", errors.WithMessage(err, "[ERR] invalid application storage path")
-    }
-
-    return filepath.Join(dataDir, defaults.StoragePathPostfix), nil
-}
-
-func (c *hostContext) ApplicationVirtualMachineDirectory() (string, error) {
-    dataDir, err := c.ApplicationUserDataDirectory()
-    if err != nil {
-        return "", errors.WithMessage(err, "[ERR] invalid application virtual machine path")
-    }
-
-    return filepath.Join(dataDir, defaults.VirtualMachinePath), nil
-}
-
-
-func (c *hostContext) CurrentCountryCode() (string, error) {
+func (c *hostAppEnv) CurrentCountryCode() (string, error) {
     if len(c.currentCountryCode) == 0 {
         return "", errors.Errorf("[ERR] invalid country code")
     }
     return c.currentCountryCode, nil
 }
 
-func (c *hostContext) CurrentLanguageCode() (string, error) {
+func (c *hostAppEnv) CurrentLanguageCode() (string, error) {
     if len(c.currentLanguageCode) == 0 {
         return "", errors.Errorf("[ERR] invalid language code")
     }

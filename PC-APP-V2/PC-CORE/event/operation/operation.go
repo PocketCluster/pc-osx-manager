@@ -11,14 +11,15 @@ const(
     ServiceBeaconLocationRead        string = "service.beacon.location.read"
     ServiceBeaconLocationWrite       string = "service.beacon.location.write"
     ServiceBeaconMaster              string = "service.beacon.master"
-    ServiceSwarmEmbeddedServer       string = "service.swarm.embedded.server"
-    ServiceSwarmEmbeddedOperation    string = "service.swarm.embedded.operation"
+    ServiceOrchestrationServer       string = "service.orchestration.server"
+    ServiceOrchestrationOperation    string = "service.orchestration.operation"
     ServiceStorageProcess            string = "service.storage.process"
     ServiceContainerRegistry         string = "service.container.registry"
     ServiceInternalNodeNameServer    string = "service.internal.node.name.server"
     ServiceInternalNodeNameOperation string = "service.internal.node.name.operation"
     ServiceVBoxMasterControl         string = "service.vbox.master.control"
     ServiceVBoxMasterListener        string = "service.vbox.master.listener"
+    ServiceMonitorSystemHealth       string = "service.monitor.system.health"
 )
 
 const (

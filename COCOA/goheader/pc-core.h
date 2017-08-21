@@ -10,13 +10,12 @@
 
 
 
-#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_feedhost.go"
+#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_feedresponse.go"
 
 
 
 
-#include "PCEventHandle.h"
-
+#include "PCResponseHandle.h"
 
 
 #line 13 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_lifecycle.go"
@@ -37,6 +36,11 @@
 
 #include "SCNetworkTypes.h"
 #include "PCInterfaceTypes.h"
+
+
+
+#line 3 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_route.go"
+
 
 
 
@@ -100,9 +104,9 @@ extern void OpsCmdTeleportUserAdd();
 
 extern void OpsCmdDebug();
 
-extern void FeedStart();
+extern void StartResponseFeed();
 
-extern void FeedStop();
+extern void StopResponseFeed();
 
 extern void lifecycleDead();
 
@@ -123,6 +127,14 @@ extern void engineDebugOutput(int p0);
 extern void NetworkChangeNotificationInterface(PCNetworkInterface** p0, unsigned int p1);
 
 extern void NetworkChangeNotificationGateway(SCNIGateway** p0, unsigned int p1);
+
+extern void RouteRequestGet(char* p0);
+
+extern void RouteRequestPost(char* p0, char* p1);
+
+extern void RouteRequestPut(char* p0, char* p1);
+
+extern void RouteRequestDelete(char* p0);
 
 #ifdef __cplusplus
 }

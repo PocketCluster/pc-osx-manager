@@ -9,7 +9,7 @@ func TestSearchPrimaryIPCandidate(t *testing.T) {
     DebugContextPrepare()
     defer DebugContextDestroy()
 
-    singletonContextInstance().RefreshNetworkInterfaces(test_intefaces)
+    singletonContextInstance().UpdateNetworkInterfaces(test_intefaces)
 
     addr, err := SharedHostContext().HostPrimaryAddress()
     if err != nil {
@@ -24,7 +24,7 @@ func TestDefaultGateway(t *testing.T) {
     DebugContextPrepare()
     defer DebugContextDestroy()
 
-    singletonContextInstance().RefreshNetworkGateways(test_gateways)
+    singletonContextInstance().UpdateNetworkGateways(test_gateways)
 
     addr, err := SharedHostContext().HostDefaultGatewayAddress()
     if err != nil {

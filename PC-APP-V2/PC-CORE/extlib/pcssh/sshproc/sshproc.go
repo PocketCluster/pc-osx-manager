@@ -42,6 +42,8 @@ const (
     ServicePCSSHConnProxy string    = "service.pcssh.conn.proxy"
     ServicePCSSHServerProxy string  = "service.pcssh.server.proxy"
 
+    // external event telling waiters that proxy instance is up and running
+    EventPCSSHServerProxyStarted string  = "event.pcssh.server.proxy.started"
 )
 
 // IsConnectionProblem returns whether this error is of ConnectionProblemError. This is originated from teleport trace
@@ -471,6 +473,7 @@ func (p *EmbeddedMasterProcess) initProxy() error {
             }
             err = SSHProxy.Start()
             log.Debugf("[PROXY] SSH proxy service is starting on %v. Error : %v", cfg.Proxy.SSHAddr.Addr, err)
+            p.BroadcastEvent(pervice.Event{Name:EventPCSSHServerProxyStarted})
 
             // wait for exit
             <- p.StopChannel()
