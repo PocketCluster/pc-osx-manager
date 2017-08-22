@@ -8,8 +8,9 @@
 
 #import "Package.h"
 #import "PCSetup3VC.h"
+#import "PCRouter.h"
 
-@interface PCSetup3VC()
+@interface PCSetup3VC()<PCRouteRequest>
 @property (nonatomic, strong) NSMutableArray<Package *> *packageList;
 @end
 
@@ -18,7 +19,21 @@
 - (void) finishConstruction {
     [super finishConstruction];
     [self setTitle:@"Install Package"];
-    self.packageList = [NSMutableArray arrayWithCapacity:0];
+    self.packageList = [NSMutableArray<Package *> arrayWithCapacity:0];
+    
+    /*** checking user authed ***/
+    WEAK_SELF(self);
+    NSString *rpPkgList = [NSString stringWithUTF8String:RPATH_PACKAGE_LIST];
+    
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:rpPkgList
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         
+         Log(@"%@ %@", path, response);
+
+         [[PCRouter sharedRouter] delGetRequest:belf onPath:rpPkgList];
+     }];
 }
 
 - (void) viewDidLoad {
@@ -26,6 +41,12 @@
     
     [[((BaseBrandView *)self.view) contentBox] addSubview:self.pannel];
     self.pannel = nil;
+}
+
+- (void) viewDidAppear {
+    [super viewDidAppear];
+
+    [PCRouter routeRequestGet:RPATH_PACKAGE_LIST];
 }
 
 #pragma mark - NSTableViewDataSourceDelegate

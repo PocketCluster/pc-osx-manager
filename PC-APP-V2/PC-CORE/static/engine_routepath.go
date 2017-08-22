@@ -2,6 +2,8 @@ package main
 
 import (
     "encoding/json"
+    "net/http"
+    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -161,4 +163,51 @@ func initRoutePathService() {
         }
         return nil
     })
+
+    // get the list of available packages
+    theApp.GET(routepath.RpathPackageList(), func(_, path, _ string) error {
+
+        req, err :=  http.NewRequest("GET", "https://api.pocketcluster.io/service/v014/package/list", nil)
+        if err != nil {
+            log.Debugf(errors.WithStack(err).Error())
+            return errors.WithStack(err)
+        }
+        req.Header.Add("Authorization", "auth_token=\"XXXXXXX\"")
+        req.Header.Add("User-Agent", "PocketCluster/0.1.4 (OSX)")
+        req.Header.Set("Content-Type", " application/json; charset=utf-8")
+        client := &http.Client{
+            Timeout: 10 * time.Second,
+        }
+        resp, err := client.Do(req)
+        if err != nil {
+            log.Debugf(errors.WithStack(err).Error())
+            return errors.WithStack(err)
+        }
+        defer resp.Body.Close()
+
+        var body = []map[string]interface{}{}
+        err = json.NewDecoder(resp.Body).Decode(&body)
+        if err != nil {
+            log.Debugf(errors.WithStack(err).Error())
+            return errors.WithStack(err)
+        }
+
+        log.Debugf("response code %d \n body %v", resp.StatusCode, body)
+
+        data, err := json.Marshal(ReponseMessage{
+            "package-list": {
+                "status": true,
+            },
+        })
+        if err != nil {
+            log.Debugf(err.Error())
+            return errors.WithStack(err)
+        }
+        err = FeedResponseForGet(path, string(data))
+        if err != nil {
+            return errors.WithStack(err)
+        }
+        return nil
+    })
+
 }
