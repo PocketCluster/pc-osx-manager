@@ -113,23 +113,31 @@ func OpenRecordGate(dataDir, recordFile string) (RecordGate, error) {
         return nil, errors.WithStack(err)
     }
 
+    // TODO : disable when release
+    sess.LogMode(true)
+
     if !sess.HasTable(&ClusterMeta{}) {
         sess.CreateTable(&ClusterMeta{})
     } else {
-        // Migrate the schema
-        sess.AutoMigrate(&ClusterMeta{});
+        sess.AutoMigrate(&ClusterMeta{})
     }
 
     if !sess.HasTable(&SlaveNode{}) {
         sess.CreateTable(&SlaveNode{})
     } else {
-        sess.AutoMigrate(&SlaveNode{});
+        sess.AutoMigrate(&SlaveNode{})
     }
 
     if !sess.HasTable(&CoreNode{}) {
         sess.CreateTable(&CoreNode{})
     } else {
-        sess.AutoMigrate(&CoreNode{});
+        sess.AutoMigrate(&CoreNode{})
+    }
+
+    if !sess.HasTable(&Package{}) {
+        sess.CreateTable(&Package{})
+    } else {
+        sess.AutoMigrate(&Package{})
     }
 
     gate = &dbGate{

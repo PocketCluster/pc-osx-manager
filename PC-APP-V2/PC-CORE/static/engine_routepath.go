@@ -9,6 +9,7 @@ import (
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/event/route/routepath"
+    "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/vboxglue"
 )
 
@@ -185,14 +186,18 @@ func initRoutePathService() {
         }
         defer resp.Body.Close()
 
-        var body = []map[string]interface{}{}
-        err = json.NewDecoder(resp.Body).Decode(&body)
+        var pkgs = []*model.Package{}
+        err = json.NewDecoder(resp.Body).Decode(&pkgs)
         if err != nil {
             log.Debugf(errors.WithStack(err).Error())
             return errors.WithStack(err)
         }
-
-        log.Debugf("response code %d \n body %v", resp.StatusCode, body)
+        if len(pkgs) != 0 {
+            err = model.SavePackages(pkgs)
+            if err != nil {
+                log.Debugf(errors.WithStack(err).Error())
+            }
+        }
 
         data, err := json.Marshal(ReponseMessage{
             "package-list": {

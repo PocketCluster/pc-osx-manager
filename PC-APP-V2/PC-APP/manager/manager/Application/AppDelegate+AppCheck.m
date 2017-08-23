@@ -144,14 +144,14 @@
      addGetRequest:self
      onPath:rpUnregNodes
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         Log(@"%@ %@", path, response);
+//         Log(@"%@ %@", path, response);
      }];
 
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:rpRegNodes
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         Log(@"%@ %@", path, response);
+//         Log(@"%@ %@", path, response);
      }];
 
     [[PCRouter sharedRouter]
