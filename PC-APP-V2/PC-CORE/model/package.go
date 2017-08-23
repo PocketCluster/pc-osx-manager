@@ -57,6 +57,8 @@ func UpdatePackages(pkgs []*Package) (error) {
     updatelp: for i, _ := range pkgs {
         for p, _ := range ppkgs {
             if pkgs[i].PkgID == ppkgs[p].PkgID {
+                // make this gorm.Model w/ PID identical to update otherwise update will fail
+                pkgs[i].Model = ppkgs[p].Model
                 SharedRecordGate().Session().Save(pkgs[i])
                 continue updatelp
             }
