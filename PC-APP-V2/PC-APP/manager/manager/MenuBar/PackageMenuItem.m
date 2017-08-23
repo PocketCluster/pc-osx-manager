@@ -31,8 +31,8 @@
     if(self){
         self.packageMeta = aPackage;
 
-        NSString *pt = [NSString stringWithFormat:@"[%@] %@ %@", aPackage.modeType, aPackage.packageName, aPackage.version];
-        self.packageItem = [[NSMenuItem alloc] initWithTitle:pt action:nil keyEquivalent:@""];
+        //NSString *pt = [NSString stringWithFormat:@"[%@] %@ %@", aPackage.modeType, aPackage.packageName, aPackage.version];
+        self.packageItem = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
         [_packageItem setSubmenu:[[NSMenu alloc] init]];
         [_packageItem.submenu setAutoenablesItems:NO];
         _packageItem.submenu.delegate = self;
@@ -103,7 +103,7 @@
     BOOL isAlive = [[infoDict objectForKey:kPOCKET_CLUSTER_PACKAGE_PROCESS_ISALIVE] boolValue];
     NSString *pid = [infoDict objectForKey:kPOCKET_CLUSTER_PACKAGE_IDENTIFICATION];
 
-    if (![self.packageMeta.packageId isEqualToString:pid]){
+    if (![self.packageMeta.packageID isEqualToString:pid]){
         return;
     }
     

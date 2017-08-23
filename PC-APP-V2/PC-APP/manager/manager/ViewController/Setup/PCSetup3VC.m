@@ -9,6 +9,7 @@
 #import "Package.h"
 #import "PCSetup3VC.h"
 #import "PCRouter.h"
+#import "ShowAlert.h"
 
 @interface PCSetup3VC()<PCRouteRequest>
 @property (nonatomic, strong) NSMutableArray<Package *> *packageList;
@@ -20,20 +21,6 @@
     [super finishConstruction];
     [self setTitle:@"Install Package"];
     self.packageList = [NSMutableArray<Package *> arrayWithCapacity:0];
-    
-    /*** checking user authed ***/
-    WEAK_SELF(self);
-    NSString *rpPkgList = [NSString stringWithUTF8String:RPATH_PACKAGE_LIST];
-    
-    [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:rpPkgList
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         
-         Log(@"%@ %@", path, response);
-
-         [[PCRouter sharedRouter] delGetRequest:belf onPath:rpPkgList];
-     }];
 }
 
 - (void) viewDidLoad {
@@ -45,7 +32,38 @@
 
 - (void) viewDidAppear {
     [super viewDidAppear];
+    
+    /*** checking user authed ***/
+    WEAK_SELF(self);
+    NSString *rpPkgList = [NSString stringWithUTF8String:RPATH_PACKAGE_LIST];
+    
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:rpPkgList
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         
+         if ([[response valueForKeyPath:@"package-list.status"] boolValue]) {
+             NSArray<Package *> *list = [Package packagesFromList:[response valueForKeyPath:@"package-list.list"]];
+             if (list != nil) {
+                 [self.packageList addObjectsFromArray:list];
+                 [self.packageTable reloadData];
+             } else {
+                 [ShowAlert
+                  showWarningAlertWithTitle:@"Temporarily Unavailable"
+                  message:@"Unable to retrieve available packages. Please try a bit later."];
+             }
+             
+         } else {
+             [ShowAlert
+              showWarningAlertWithTitle:@"Temporarily Unavailable"
+              message:[response valueForKeyPath:@"package-list.error"]];
+         }
 
+         [self _enableControls];
+         [[PCRouter sharedRouter] delGetRequest:belf onPath:rpPkgList];
+     }];
+    
+    [self _disableControls];
     [PCRouter routeRequestGet:RPATH_PACKAGE_LIST];
 }
 
@@ -67,26 +85,36 @@
 }
 
 - (BOOL)selectionShouldChangeInTableView:(NSTableView *)tableView {
-    return NO;
+    return YES;
 }
 
 - (BOOL)tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row {
-    return NO;
+    return (![self.packageList objectAtIndex:(NSUInteger)row].installed);
 }
 
 #pragma mark - Setup UI states
-- (void)_setUIToProceedState {
-    [self.btnInstall setEnabled:NO];
-    [self.circularProgress startAnimation:nil];
-}
-
 -(void)_enableControls {
     [self.btnInstall setEnabled:YES];
     [self.btnCancel setEnabled:YES];
-    [self.progressLabel setStringValue:@"Installation Error. Please try again."];
+    [self.progressLabel setStringValue:@""];
+    [self.circularProgress setHidden:YES];
     [self.circularProgress stopAnimation:nil];
+    [self.progressBar displayIfNeeded];
+}
+
+-(void)_disableControls {
+    [self.btnInstall setEnabled:NO];
+    [self.btnCancel setEnabled:NO];
+    [self.progressLabel setStringValue:@""];
+    [self.circularProgress setHidden:NO];
+    [self.circularProgress startAnimation:nil];
     [self.progressBar setDoubleValue:0.0];
     [self.progressBar displayIfNeeded];
+}
+
+- (void)_setUIToProceedState {
+    [self.btnInstall setEnabled:NO];
+    [self.circularProgress startAnimation:nil];
 }
 
 -(void)_setProgressMessage:(NSString *)aMessage value:(double)aValue {

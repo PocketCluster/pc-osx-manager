@@ -222,8 +222,8 @@ func initRoutePathService() {
 
         for i, _ := range pkgs {
             pkgList = append(pkgList, map[string]interface{} {
+                "package-id" : pkgs[i].PkgID,
                 "description": pkgs[i].Description,
-                "id" : pkgs[i].PkgID,
                 "installed": false,
             })
         }
