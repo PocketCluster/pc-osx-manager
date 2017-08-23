@@ -27,7 +27,8 @@ func (ctx *hostContext) CheckHostSuitability() error {
     }
 
     _, avail := ctx.HostStorageSpaceStatus()
-    diskNeed := uint(defaults.VBoxDefualtCoreDiskSize / 1000)
+    // need vbox disk + 10GB for images etc
+    diskNeed := uint(defaults.VBoxDefualtCoreDiskSize / 1000 + 10)
     if avail < diskNeed {
         return errors.Errorf("Insufficient size of storage space. Need at least %d GB free space", diskNeed)
     }
