@@ -15,7 +15,7 @@ type Package struct {
     // Application specific ID
     AppVer          string    `gorm:"column:app_ver;type:VARCHAR(16)"           json:"app-ver"`
     // Package unique id
-    PkgID           string    `gorm:"column:pkg_id;type:VARCHAR(36) UNIQUE"     json:"pkg-id"`
+    PkgID           string    `gorm:"column:pkg_id;type:VARCHAR(36) UNIQUE" sql:"index" json:"pkg-id"`
     // Package revision
     PkgVer          int       `gorm:"column:pkg_ver;type:INT"                   json:"pkg-ver"`
     // package name
@@ -47,25 +47,21 @@ func FindPackage(query interface{}, args ...interface{}) ([]Package, error) {
     return pkgs, nil
 }
 
-func SavePackages(pkgs []*Package) (error) {
-    if pkgs == nil || len(pkgs) == 0 {
-        return errors.Errorf("[ERR] no packages to save")
-    }
-    for i, _ := range pkgs {
-        SharedRecordGate().Session().Create(pkgs[i])
-    }
-    return nil
-}
-
 func UpdatePackages(pkgs []*Package) (error) {
     if pkgs == nil || len(pkgs) == 0 {
         return errors.Errorf("[ERR] no packages to update")
     }
-//    var existing []Package = nil
-//    SharedRecordGate().Session().Find(&existing)
+    var ppkgs []*Package = nil
+    SharedRecordGate().Session().Find(&ppkgs)
 
-    for i, _ := range pkgs {
-        SharedRecordGate().Session().Update(pkgs[i])
+    updatelp: for i, _ := range pkgs {
+        for p, _ := range ppkgs {
+            if pkgs[i].PkgID == ppkgs[p].PkgID {
+                SharedRecordGate().Session().Save(pkgs[i])
+                continue updatelp
+            }
+        }
+        SharedRecordGate().Session().Create(pkgs[i])
     }
     return nil
 }

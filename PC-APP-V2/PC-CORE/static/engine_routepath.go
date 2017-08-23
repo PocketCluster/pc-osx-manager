@@ -193,7 +193,7 @@ func initRoutePathService() {
             return errors.WithStack(err)
         }
         if len(pkgs) != 0 {
-            err = model.SavePackages(pkgs)
+            err = model.UpdatePackages(pkgs)
             if err != nil {
                 log.Debugf(errors.WithStack(err).Error())
             }
