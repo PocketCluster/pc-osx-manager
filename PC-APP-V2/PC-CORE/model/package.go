@@ -11,28 +11,41 @@ const packageTable string = `pc_package`
 const PackageModelVersion = "0.1.4"
 
 type Package struct {
-    gorm.Model
+    gorm.Model                `json:"-"`
     // Application specific ID
     AppVer          string    `gorm:"column:app_ver;type:VARCHAR(16)"           json:"app-ver"`
     // Package unique id
     PkgID           string    `gorm:"column:pkg_id;type:VARCHAR(36) UNIQUE" sql:"index" json:"pkg-id"`
-    // Package revision
-    PkgVer          int       `gorm:"column:pkg_ver;type:INT"                   json:"pkg-ver"`
     // package name
     Name            string    `gorm:"column:name;type:VARCHAR(255)"             json:"name"`
-    // User defined Name
+    // Package Family
     Family          string    `gorm:"column:family;type:VARCHAR(255)"           json:"family"`
-    // User defined Name
+    // Description
     Description     string    `gorm:"column:description;type:VARCHAR(255)"      json:"description"`
-    // User defined Name
+    // Package revision
+    PkgVer          string    `gorm:"column:pkg_ver;type:VARCHAR(32)"           json:"pkg-ver"`
+
+    // Package Meta URL
     MetaURL         string    `gorm:"column:meta_url;type:VARCHAR(255)"         json:"meta-url"`
-    // User defined Name
+    // Package Meta Checksum
+    MetaChksum      string    `gorm:"column:meta_chksum;type:VARCHAR(32)"       json:"meta-chksum"`
+
+    // Core Node architecture
     CoreArch        string    `gorm:"column:core_arch;type:VARCHAR(32)"         json:"core-arch"`
-    // User defined Name
+    // Core Image Checksum
+    CoreImageChksum string    `gorm:"column:core_image_chksum;type:VARCHAR(32)" json:"core-image-chksum"`
+    // Core Image Sync
+    CoreImageSync   string    `gorm:"column:core_image_sync;type:VARCHAR(255)"  json:"core-image-sync"`
+    // Core Image URL
     CoreImageURL    string    `gorm:"column:core_image_url;type:VARCHAR(255)"   json:"core-image-url"`
-    // User defined Name
+
+    // Node Architecture
     NodeArch        string    `gorm:"column:node_arch;type:VARCHAR(32)"         json:"node-arch"`
-    // User defined Name
+    // Node Image Checksum
+    NodeImageChksum string    `gorm:"column:node_image_chksum;type:VARCHAR(32)" json:"node-image-chksum"`
+    // Node Image Sync
+    NodeImageSync   string    `gorm:"column:node_image_sync;type:VARCHAR(255)"  json:"node-image-sync"`
+    // Node Image URL
     NodeImageURL    string    `gorm:"column:node_image_url;type:VARCHAR(255)"   json:"node-image-url"`
 }
 
