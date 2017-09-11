@@ -28,6 +28,10 @@ func RpathPackageList() string {
     return C.GoString(C.RPATH_PACKAGE_LIST)
 }
 
+func RpathPackageInstall() string {
+    return C.GoString(C.RPATH_PACKAGE_INSTALL)
+}
+
 func RpathMonitorNodeRegistered() string {
     return C.GoString(C.RPATH_MONITOR_NODE_REGISTERED)
 }

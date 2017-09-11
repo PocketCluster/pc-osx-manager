@@ -15,7 +15,9 @@
 @property (nonatomic, strong) NSMutableArray<Package *> *packageList;
 @end
 
-@implementation PCSetup3VC
+@implementation PCSetup3VC {
+    NSInteger _selectedIndex;
+}
 
 - (void) finishConstruction {
     [super finishConstruction];
@@ -32,6 +34,9 @@
 
 - (void) viewDidAppear {
     [super viewDidAppear];
+    
+    // reset selected index
+    _selectedIndex = -1;
     
     /*** checking user authed ***/
     WEAK_SELF(self);
@@ -77,19 +82,36 @@
 }
 
 #pragma mark - NSTableViewDelegate
--(NSView *)tableView:(NSTableView *)aTableView viewForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row{
+-(NSView *)tableView:(NSTableView *)aTableView viewForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row {
     Package *meta = [self.packageList objectAtIndex:row];
     NSTableCellView *nv = [aTableView makeViewWithIdentifier:@"packageview" owner:self];
     [nv.textField setStringValue:[meta packageDescription]];
     return nv;
 }
 
+// disable table row text editing
+- (BOOL)tableView:(NSTableView *)tableView
+shouldEditTableColumn:(NSTableColumn *)tableColumn
+              row:(NSInteger)row {
+    return NO;
+}
+
+// enable table row selection
 - (BOOL)selectionShouldChangeInTableView:(NSTableView *)tableView {
     return YES;
 }
 
 - (BOOL)tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row {
     return (![self.packageList objectAtIndex:(NSUInteger)row].installed);
+}
+
+- (NSIndexSet *)tableView:(NSTableView *)aTableView
+selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
+    NSInteger row = (NSInteger)anIndex.firstIndex;
+    if (![self.packageList objectAtIndex:(NSUInteger)row].installed) {
+        _selectedIndex = row;
+    }
+    return anIndex;
 }
 
 #pragma mark - Setup UI states
@@ -139,7 +161,36 @@
 
 #pragma mark - IBACTION
 -(IBAction)install:(id)sender {
-    [self.stageControl shouldControlProgressFrom:self withParam:nil];
+    //[self.stageControl shouldControlProgressFrom:self withParam:nil];
+
+    if (_selectedIndex == -1 || (NSInteger)[self.packageList count] <= _selectedIndex ) {
+        return;
+    }
+    
+    /*** checking user authed ***/
+    WEAK_SELF(self);
+    NSString *rpPkgInst = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL];
+    
+    [[PCRouter sharedRouter]
+     addPostRequest:self
+     onPath:rpPkgInst
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         
+         if ([[response valueForKeyPath:@"package-install.status"] boolValue]) {
+         } else {
+             [ShowAlert
+              showWarningAlertWithTitle:@"Temporarily Unavailable"
+              message:[response valueForKeyPath:@"package-install.error"]];
+         }
+         
+         [self _enableControls];
+         [[PCRouter sharedRouter] delGetRequest:belf onPath:rpPkgInst];
+     }];
+    
+    [self _disableControls];
+    [PCRouter
+     routeRequestPost:RPATH_PACKAGE_INSTALL
+     withRequestBody:@{@"package-id":[self.packageList objectAtIndex:(NSUInteger)_selectedIndex].packageID}];
 }
 
 -(IBAction)cancel:(id)sender {
