@@ -2,6 +2,7 @@ package main
 
 import (
     "encoding/json"
+    "fmt"
     "net/http"
     "time"
 
@@ -110,9 +111,24 @@ func initInstallRoutePath() {
                 err = FeedResponseForPost(path, string(data))
                 return errors.WithStack(err)
             }
+            pkgID string = ""
         )
+        err := json.Unmarshal([]byte(payload), &struct {
+            PkgID *string `json:"pkg-id"`
+        }{&pkgID})
+        if err != nil {
+            feedError(errors.WithStack(err).Error())
+            return err
+        }
 
-        feedError("this is test error")
+        pkgs, _ := model.FindPackage("pkg_id = ?", pkgID)
+        if len(pkgs) == 0 {
+            errMsg := fmt.Sprintf("selected package %s is not available", pkgID)
+            feedError(errMsg)
+            return errors.Errorf(errMsg)
+        }
+
+        feedError("This is test error")
         return nil
     })
 }

@@ -190,7 +190,7 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
     [self _disableControls];
     [PCRouter
      routeRequestPost:RPATH_PACKAGE_INSTALL
-     withRequestBody:@{@"package-id":[self.packageList objectAtIndex:(NSUInteger)_selectedIndex].packageID}];
+     withRequestBody:@{@"pkg-id":[self.packageList objectAtIndex:(NSUInteger)_selectedIndex].packageID}];
 }
 
 -(IBAction)cancel:(id)sender {
