@@ -47,10 +47,6 @@ type Package struct {
     NodeImageSync   string    `gorm:"column:node_image_sync;type:VARCHAR(255)"  json:"node-image-sync"`
     // Node Image URL
     NodeImageURL    string    `gorm:"column:node_image_url;type:VARCHAR(255)"   json:"node-image-url"`
-
-    // image repositories
-    Repositories    []string  `gorm:"-"                                         json:"repositories"`
-
 }
 
 // instance methods
