@@ -3,6 +3,7 @@ package main
 import (
     "encoding/json"
     "fmt"
+    "io/ioutil"
     "net/http"
     "time"
 
@@ -14,9 +15,48 @@ import (
 )
 
 func initInstallRoutePath() {
+    const (
+        timeout = time.Duration(10 * time.Second)
+    )
+    var (
+        newRequest = func(url string, isBinaryReq bool) (*http.Request, error) {
+            req, err :=  http.NewRequest("GET", url, nil)
+            if err != nil {
+                return nil, errors.WithStack(err)
+            }
+            //req.Header.Add("Authorization", "auth_token=\"XXXXXXX\"")
+            req.Header.Add("User-Agent", "PocketCluster/0.1.4 (OSX)")
+            if isBinaryReq {
+                req.Header.Set("Content-Type", "application/octet-stream")
+            } else {
+                req.Header.Set("Content-Type", "application/json; charset=utf-8")
+            }
+            req.ProtoAtLeast(1, 1)
+            return req, nil
+        }
+        newClient = func(timeout time.Duration, noCompress bool) *http.Client {
+            return &http.Client {
+                Timeout: timeout,
+                Transport: &http.Transport {
+                    DisableCompression: noCompress,
+                },
+            }
+        }
+        readRequest = func(req *http.Request, client *http.Client) ([]byte, error) {
+            resp, err := client.Do(req)
+            if err != nil {
+                return nil, errors.WithStack(err)
+            }
+            defer resp.Body.Close()
+            if resp.StatusCode != 200 {
+                return nil, errors.Errorf("protocol status : %d", resp.StatusCode)
+            }
+            return ioutil.ReadAll(resp.Body)
+        }
+    )
 
     // get the list of available packages
-    theApp.GET(routepath.RpathPackageList(), func(_, path, _ string) error {
+    theApp.GET(routepath.RpathPackageList(), func(_, rpath, _ string) error {
         var (
             feedError = func(errMsg string) error {
                 data, err := json.Marshal(ReponseMessage{
@@ -29,24 +69,19 @@ func initInstallRoutePath() {
                     log.Debugf(err.Error())
                     return errors.WithStack(err)
                 }
-                err = FeedResponseForGet(path, string(data))
+                err = FeedResponseForGet(rpath, string(data))
                 return errors.WithStack(err)
             }
 
             pkgList = []map[string]interface{}{}
         )
 
-        req, err :=  http.NewRequest("GET", "https://api.pocketcluster.io/service/v014/package/list", nil)
+        req, err :=  newRequest("https://api.pocketcluster.io/service/v014/package/list", false)
         if err != nil {
             log.Debugf(errors.WithStack(err).Error())
             return feedError("Unable to access package list. Reason : " + errors.WithStack(err).Error())
         }
-        //req.Header.Add("Authorization", "auth_token=\"XXXXXXX\"")
-        req.Header.Add("User-Agent", "PocketCluster/0.1.4 (OSX)")
-        req.Header.Set("Content-Type", " application/json; charset=utf-8")
-        client := &http.Client{
-            Timeout: 10 * time.Second,
-        }
+        client := newClient(timeout, true)
         resp, err := client.Do(req)
         if err != nil {
             log.Debugf(errors.WithStack(err).Error())
@@ -87,7 +122,7 @@ func initInstallRoutePath() {
             log.Debugf(err.Error())
             return errors.WithStack(err)
         }
-        err = FeedResponseForGet(path, string(data))
+        err = FeedResponseForGet(rpath, string(data))
         if err != nil {
             return errors.WithStack(err)
         }
@@ -95,7 +130,7 @@ func initInstallRoutePath() {
     })
 
     // install a package
-    theApp.POST(routepath.RpathPackageInstall(), func(_, path, payload string) error {
+    theApp.POST(routepath.RpathPackageInstall(), func(_, rpath, payload string) error {
         var (
             feedError = func(errMsg string) error {
                 data, err := json.Marshal(ReponseMessage{
@@ -108,9 +143,11 @@ func initInstallRoutePath() {
                     log.Debugf(err.Error())
                     return errors.WithStack(err)
                 }
-                err = FeedResponseForPost(path, string(data))
+                err = FeedResponseForPost(rpath, string(data))
                 return errors.WithStack(err)
             }
+            client = newClient(timeout, false)
+            repoList = []string{}
             pkgID string = ""
         )
         err := json.Unmarshal([]byte(payload), &struct {
@@ -127,6 +164,39 @@ func initInstallRoutePath() {
             feedError(errMsg)
             return errors.Errorf(errMsg)
         }
+        // pick up the right package
+        pkg := pkgs[0]
+
+        // --- --- --- --- --- download meta first --- --- --- --- ---
+        metaReq, err := newRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.MetaURL), false)
+        if err != nil {
+            log.Debugf(errors.WithStack(err).Error())
+            return feedError("Unable to access package meta data. Reason : " + errors.WithStack(err).Error())
+        }
+        _, err = readRequest(metaReq, client)
+        if err != nil {
+            log.Debugf(errors.WithStack(err).Error())
+            return feedError("Unable to parse package meta data. Reason : " + errors.WithStack(err).Error())
+        }
+
+        //  --- --- --- --- --- download repo list --- --- --- --- ---
+        repoReq, err := newRequest("https://api.pocketcluster.io/service/v014/package/repo", false)
+        if err != nil {
+            log.Debugf(errors.WithStack(err).Error())
+            return feedError("Unable to access repository list. Reason : " + errors.WithStack(err).Error())
+        }
+        repoData, err := readRequest(repoReq, client)
+        if err != nil {
+            log.Debugf(errors.WithStack(err).Error())
+            return feedError("Unable to parse repository list. Reason : " + errors.WithStack(err).Error())
+        }
+        err = json.Unmarshal(repoData, &repoList)
+        if err != nil {
+            log.Debugf(err.Error())
+            return feedError("Unable to parse repository list. Reason : " + errors.WithStack(err).Error())
+        }
+        log.Debugf("repo %v", repoList)
+
 
         feedError("This is test error")
         return nil
