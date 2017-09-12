@@ -3,6 +3,7 @@ package main
 import (
     "archive/tar"
     "bytes"
+    "encoding/base64"
     "encoding/binary"
     "encoding/json"
     "fmt"
@@ -31,6 +32,42 @@ import (
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/service"
 )
+
+func newRequest(url string, isBinaryReq bool) (*http.Request, error) {
+    req, err :=  http.NewRequest("GET", url, nil)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+    //req.Header.Add("Authorization", "auth_token=\"XXXXXXX\"")
+    req.Header.Add("User-Agent", "PocketCluster/0.1.4 (OSX)")
+    if isBinaryReq {
+        req.Header.Set("Content-Type", "application/octet-stream")
+    } else {
+        req.Header.Set("Content-Type", "application/json; charset=utf-8")
+    }
+    req.ProtoAtLeast(1, 1)
+    return req, nil
+}
+func newClient(timeout time.Duration, noCompress bool) *http.Client {
+    return &http.Client {
+        Timeout: timeout,
+        Transport: &http.Transport {
+            DisableCompression: noCompress,
+        },
+    }
+}
+
+func readRequest(req *http.Request, client *http.Client) ([]byte, error) {
+    resp, err := client.Do(req)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+    defer resp.Body.Close()
+    if resp.StatusCode != 200 {
+        return nil, errors.Errorf("protocol status : %d", resp.StatusCode)
+    }
+    return ioutil.ReadAll(resp.Body)
+}
 
 // reads the file headers and checks the magic string, then the semantic versioning
 // return : in order of 'filesize', 'blocksize', 'blockcount', 'rootHash', 'error'
@@ -81,6 +118,42 @@ func readHeadersAndCheck(r io.Reader) (int64, uint32, uint32, []byte, error) {
     return filesize, blocksize, blockcount, rootHash, nil
 }
 
+func checkMetaChksum(data []byte, refData string) error {
+    if len(data) == 0 {
+        return errors.Errorf("invalid data to check")
+    }
+    if len(refData) == 0 {
+        return errors.Errorf("invalid length of reference checksum")
+    }
+    refChksum, err := base64.URLEncoding.DecodeString(refData)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    hasher := filechecksum.DefaultStrongHashGenerator()
+    hasher.Write(data)
+    if bytes.Compare(hasher.Sum(nil), refChksum) != 0 {
+        return errors.Errorf("invalid checksum value")
+    }
+    return nil
+}
+
+func isTwoChksumSame(chksum []byte, refData string) error {
+    if len(chksum) == 0 {
+        return errors.Errorf("invalid length of checksum to compare")
+    }
+    if len(refData) == 0 {
+        return errors.Errorf("invalid length of reference checksum to compare")
+    }
+    refChksum, err := base64.URLEncoding.DecodeString(refData)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    if bytes.Compare(chksum, refChksum) != 0 {
+        return errors.Errorf("invalid checksum value")
+    }
+    return nil
+}
+
 func readIndex(rd io.Reader, blocksize, blockcount uint, rootHash []byte) (*index.ChecksumIndex, error) {
     var (
         generator    = filechecksum.NewFileChecksumGenerator(blocksize)
@@ -109,43 +182,7 @@ func readIndex(rd io.Reader, blocksize, blockcount uint, rootHash []byte) (*inde
     return idx, nil
 }
 
-func newRequest(url string, isBinaryReq bool) (*http.Request, error) {
-    req, err :=  http.NewRequest("GET", url, nil)
-    if err != nil {
-        return nil, errors.WithStack(err)
-    }
-    //req.Header.Add("Authorization", "auth_token=\"XXXXXXX\"")
-    req.Header.Add("User-Agent", "PocketCluster/0.1.4 (OSX)")
-    if isBinaryReq {
-        req.Header.Set("Content-Type", "application/octet-stream")
-    } else {
-        req.Header.Set("Content-Type", "application/json; charset=utf-8")
-    }
-    req.ProtoAtLeast(1, 1)
-    return req, nil
-}
-func newClient(timeout time.Duration, noCompress bool) *http.Client {
-    return &http.Client {
-        Timeout: timeout,
-        Transport: &http.Transport {
-            DisableCompression: noCompress,
-        },
-    }
-}
-
-func readRequest(req *http.Request, client *http.Client) ([]byte, error) {
-    resp, err := client.Do(req)
-    if err != nil {
-        return nil, errors.WithStack(err)
-    }
-    defer resp.Body.Close()
-    if resp.StatusCode != 200 {
-        return nil, errors.Errorf("protocol status : %d", resp.StatusCode)
-    }
-    return ioutil.ReadAll(resp.Body)
-}
-
-func xzUncompresser(archiveReader io.Reader, uncompPath string) error {
+func xzUncompressor(archiveReader io.Reader, uncompPath string) error {
     var (
         xreader   *xz.Reader
         unarchive *tar.Reader
@@ -202,48 +239,42 @@ func initInstallRoutePath() {
     // get the list of available packages
     theApp.GET(routepath.RpathPackageList(), func(_, rpath, _ string) error {
         var (
-            feedError = func(errMsg string) error {
-                data, err := json.Marshal(ReponseMessage{
+            feedError = func(irr error) error {
+                data, frr := json.Marshal(ReponseMessage{
                     "package-list": {
                         "status": false,
-                        "error" : errMsg,
+                        "error" : irr.Error(),
                     },
                 })
-                if err != nil {
-                    log.Debugf(err.Error())
-                    return errors.WithStack(err)
+                if frr != nil {
+                    log.Debugf(frr.Error())
                 }
-                err = FeedResponseForGet(rpath, string(data))
-                return errors.WithStack(err)
+                frr = FeedResponseForGet(rpath, string(data))
+                if frr != nil {
+                    log.Debugf(frr.Error())
+                }
+                return errors.WithStack(irr)
             }
 
             pkgList = []map[string]interface{}{}
+            pkgs    = []*model.Package{}
         )
 
         req, err :=  newRequest("https://api.pocketcluster.io/service/v014/package/list", false)
         if err != nil {
-            log.Debugf(errors.WithStack(err).Error())
-            return feedError("Unable to access package list. Reason : " + errors.WithStack(err).Error())
+            return feedError(errors.WithMessage(err, "Unable to access package list"))
         }
         client := newClient(timeout, true)
-        resp, err := client.Do(req)
+        resp, err := readRequest(req, client)
         if err != nil {
-            log.Debugf(errors.WithStack(err).Error())
-            return feedError("Unable to access package list. Reason : " + errors.WithStack(err).Error())
+            return feedError(errors.WithMessage(err, "Unable to access package list"))
         }
-        defer resp.Body.Close()
-
-        if resp.StatusCode != 200 {
-            return feedError(errors.Errorf("Service unavailable. Status : %d", resp.StatusCode).Error())
-        }
-        var pkgs = []*model.Package{}
-        err = json.NewDecoder(resp.Body).Decode(&pkgs)
+        err = json.Unmarshal(resp, &pkgs)
         if err != nil {
-            log.Debugf(errors.WithStack(err).Error())
-            return feedError("Unable to access package list. Reason : " + errors.WithStack(err).Error())
+            return feedError(errors.WithMessage(err, "Unable to access package list"))
         }
         if len(pkgs) == 0 {
-            return feedError("No package avaiable. Contact us at Slack channel.")
+            return feedError(errors.Errorf("No package avaiable. Contact us at Slack channel."))
         } else {
             // update package doesn't return error when there is packages to update.
             model.UpdatePackages(pkgs)
@@ -263,8 +294,7 @@ func initInstallRoutePath() {
             },
         })
         if err != nil {
-            log.Debugf(err.Error())
-            return errors.WithStack(err)
+            return feedError(errors.WithMessage(err, "Unable to access package list"))
         }
         err = FeedResponseForGet(rpath, string(data))
         if err != nil {
@@ -343,10 +373,15 @@ func initInstallRoutePath() {
                 if err != nil {
                     return feedError(errors.WithMessage(err, "Unable to access package meta data"))
                 }
-                _, err = readRequest(metaReq, client)
+                metaData, err := readRequest(metaReq, client)
                 if err != nil {
                     return feedError(errors.WithMessage(err, "Unable to access package meta data"))
                 }
+                err = checkMetaChksum(metaData, pkg.MetaChksum)
+                if err != nil {
+                    return feedError(errors.WithMessage(err, "Unable to access package meta data"))
+                }
+                // TODO : save meta
 
                 //  --- --- --- --- --- download repo list --- --- --- --- ---
                 repoReq, err := newRequest("https://api.pocketcluster.io/service/v014/package/repo", false)
@@ -374,22 +409,25 @@ func initInstallRoutePath() {
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync core image"))
                 }
-                filesize, blocksize, blockcount, rootHash, err := readHeadersAndCheck(bytes.NewBuffer(cSyncData))
+                cFilesize, cBlocksize, cBlockcount, cRootHash, err := readHeadersAndCheck(bytes.NewBuffer(cSyncData))
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync core image"))
                 }
-                cChksumIdx, err := readIndex(bytes.NewBuffer(cSyncData), uint(blocksize), uint(blockcount), rootHash)
+                err = isTwoChksumSame(cRootHash, pkg.CoreImageChksum)
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync core image"))
                 }
-                log.Debugf("FileSize %v | BlockSize %v | BlockCount %v | RootHash %v ", filesize, blocksize, blockcount, rootHash)
+                cChksumIdx, err := readIndex(bytes.NewBuffer(cSyncData), uint(cBlocksize), uint(cBlockcount), cRootHash)
+                if err != nil {
+                    return feedError(errors.WithMessage(err, "unable to sync core image"))
+                }
 
                 var (
-                    cReader, cWriter, cRprtr = showpipe.PipeWithReport(uint64(filesize))
-                    cResolver                = blockrepository.MakeKnownFileSizedBlockResolver(int64(blocksize), filesize)
+                    cReader, cWriter, cRprtr = showpipe.PipeWithReport(uint64(cFilesize))
+                    cResolver                = blockrepository.MakeKnownFileSizedBlockResolver(int64(cBlocksize), cFilesize)
                     cVerifier                = &filechecksum.HashVerifier{
                         Hash:                filechecksum.DefaultStrongHashGenerator(),
-                        BlockSize:           uint(blocksize),
+                        BlockSize:           uint(cBlocksize),
                         BlockChecksumGetter: cChksumIdx,
                     }
                     cRepoList []patcher.BlockRepository = nil
@@ -426,22 +464,21 @@ func initInstallRoutePath() {
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync node image"))
                 }
-                filesize, blocksize, blockcount, rootHash, err = readHeadersAndCheck(bytes.NewBuffer(nSyncData))
+                nFilesize, nBlocksize, nBlockcount, nRootHash, err := readHeadersAndCheck(bytes.NewBuffer(nSyncData))
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync node image"))
                 }
-                nChksumIdx, err := readIndex(bytes.NewBuffer(cSyncData), uint(blocksize), uint(blockcount), rootHash)
+                nChksumIdx, err := readIndex(bytes.NewBuffer(nSyncData), uint(nBlocksize), uint(nBlockcount), nRootHash)
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync node image"))
                 }
-                log.Debugf("FileSize %v | BlockSize %v | BlockCount %v | RootHash %v ", filesize, blocksize, blockcount, rootHash)
 
                 var (
-                    nReader, nWriter, nRprtr = showpipe.PipeWithReport(uint64(filesize))
-                    nResolver                = blockrepository.MakeKnownFileSizedBlockResolver(int64(blocksize), filesize)
+                    nReader, nWriter, nRprtr = showpipe.PipeWithReport(uint64(nFilesize))
+                    nResolver                = blockrepository.MakeKnownFileSizedBlockResolver(int64(nBlocksize), nFilesize)
                     nVerifier                = &filechecksum.HashVerifier{
                         Hash:                filechecksum.DefaultStrongHashGenerator(),
-                        BlockSize:           uint(blocksize),
+                        BlockSize:           uint(nBlocksize),
                         BlockChecksumGetter: nChksumIdx,
                     }
                     nRepoList []patcher.BlockRepository = nil
