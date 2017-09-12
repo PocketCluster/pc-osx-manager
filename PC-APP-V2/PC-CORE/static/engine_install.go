@@ -118,25 +118,6 @@ func readHeadersAndCheck(r io.Reader) (int64, uint32, uint32, []byte, error) {
     return filesize, blocksize, blockcount, rootHash, nil
 }
 
-func checkMetaChksum(data []byte, refData string) error {
-    if len(data) == 0 {
-        return errors.Errorf("invalid data to check")
-    }
-    if len(refData) == 0 {
-        return errors.Errorf("invalid length of reference checksum")
-    }
-    refChksum, err := base64.URLEncoding.DecodeString(refData)
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    hasher := filechecksum.DefaultStrongHashGenerator()
-    hasher.Write(data)
-    if bytes.Compare(hasher.Sum(nil), refChksum) != 0 {
-        return errors.Errorf("invalid checksum value")
-    }
-    return nil
-}
-
 func isTwoChksumSame(chksum []byte, refData string) error {
     if len(chksum) == 0 {
         return errors.Errorf("invalid length of checksum to compare")
@@ -311,10 +292,11 @@ func initInstallRoutePath() {
             iventPackageSyncReportCore  string = "ivent.package.sync.report.core"
             iventPackageSyncReportNode  string = "ivent.package.sync.report.node"
         )
-        type rptPack struct {
+        type patchActionPack struct {
             reader    io.Reader
-            msrc      *multisources.MultiSourcePatcher
+            writer    io.Writer
             report    chan showpipe.PipeProgress
+            msync     *multisources.MultiSourcePatcher
         }
         var (
             feedError = func(irr error) error {
@@ -334,6 +316,68 @@ func initInstallRoutePath() {
                     log.Error(frr.Error())
                 }
                 return irr
+            }
+
+            checkMetaChksum = func(data []byte, refData string) error {
+                if len(data) == 0 {
+                    return errors.Errorf("invalid data to check")
+                }
+                if len(refData) == 0 {
+                    return errors.Errorf("invalid length of reference checksum")
+                }
+                refChksum, err := base64.URLEncoding.DecodeString(refData)
+                if err != nil {
+                    return errors.WithStack(err)
+                }
+                hasher := filechecksum.DefaultStrongHashGenerator()
+                hasher.Write(data)
+                if bytes.Compare(hasher.Sum(nil), refChksum) != 0 {
+                    return errors.Errorf("invalid checksum value")
+                }
+                return nil
+            }
+
+            prepSync = func(repoList []string, syncData []byte, refChksum, imageURL string) (*patchActionPack, error) {
+                filesize, blocksize, blockcount, rootHash, err := readHeadersAndCheck(bytes.NewBuffer(syncData))
+                if err != nil {
+                    return nil, errors.WithStack(err)
+                }
+                err = isTwoChksumSame(rootHash, refChksum)
+                if err != nil {
+                    return nil, errors.WithStack(err)
+                }
+                chksumIdx, err := readIndex(bytes.NewBuffer(syncData), uint(blocksize), uint(blockcount), rootHash)
+                if err != nil {
+                    return nil, errors.WithStack(err)
+                }
+                var (
+                    reader, writer, report = showpipe.PipeWithReport(uint64(filesize))
+                    resolver                = blockrepository.MakeKnownFileSizedBlockResolver(int64(blocksize), filesize)
+                    verifier                = &filechecksum.HashVerifier{
+                        Hash:                filechecksum.DefaultStrongHashGenerator(),
+                        BlockSize:           uint(blocksize),
+                        BlockChecksumGetter: chksumIdx,
+                    }
+                    repoSrcList []patcher.BlockRepository = nil
+                )
+                for rID, r := range repoList {
+                    repoSrcList = append(repoSrcList,
+                        blockrepository.NewBlockRepositoryBase(
+                            uint(rID),
+                            blocksources.NewRequesterWithTimeout(fmt.Sprintf("https://%s%s", r, imageURL), "PocketCluster/0.1.4 (OSX)", true, timeout),
+                            resolver,
+                            verifier))
+                }
+                msync, err := multisources.NewMultiSourcePatcher(writer, repoSrcList, chksumIdx)
+                if err != nil {
+                    return nil, errors.WithStack(err)
+                }
+                return &patchActionPack {
+                    reader: reader,
+                    writer: writer,
+                    report: report,
+                    msync:  msync,
+                }, nil
             }
 
             pkgID string = ""
@@ -383,6 +427,7 @@ func initInstallRoutePath() {
                 }
                 // TODO : save meta
 
+
                 //  --- --- --- --- --- download repo list --- --- --- --- ---
                 repoReq, err := newRequest("https://api.pocketcluster.io/service/v014/package/repo", false)
                 if err != nil {
@@ -400,6 +445,7 @@ func initInstallRoutePath() {
                     return feedError(errors.WithMessage(err, "Unable to access repository list"))
                 }
 
+
                 //  --- --- --- --- --- download core sync --- --- --- --- ---
                 cSyncReq, err := newRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.CoreImageSync), true)
                 if err != nil {
@@ -409,50 +455,11 @@ func initInstallRoutePath() {
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync core image"))
                 }
-                cFilesize, cBlocksize, cBlockcount, cRootHash, err := readHeadersAndCheck(bytes.NewBuffer(cSyncData))
+                cActionPack, err := prepSync(repoList, cSyncData, pkg.CoreImageChksum, pkg.CoreImageURL)
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync core image"))
                 }
-                err = isTwoChksumSame(cRootHash, pkg.CoreImageChksum)
-                if err != nil {
-                    return feedError(errors.WithMessage(err, "unable to sync core image"))
-                }
-                cChksumIdx, err := readIndex(bytes.NewBuffer(cSyncData), uint(cBlocksize), uint(cBlockcount), cRootHash)
-                if err != nil {
-                    return feedError(errors.WithMessage(err, "unable to sync core image"))
-                }
-
-                var (
-                    cReader, cWriter, cRprtr = showpipe.PipeWithReport(uint64(cFilesize))
-                    cResolver                = blockrepository.MakeKnownFileSizedBlockResolver(int64(cBlocksize), cFilesize)
-                    cVerifier                = &filechecksum.HashVerifier{
-                        Hash:                filechecksum.DefaultStrongHashGenerator(),
-                        BlockSize:           uint(cBlocksize),
-                        BlockChecksumGetter: cChksumIdx,
-                    }
-                    cRepoList []patcher.BlockRepository = nil
-                )
-                for rID, r := range repoList {
-                    cRepoList = append(cRepoList,
-                        blockrepository.NewBlockRepositoryBase(
-                            uint(rID),
-                            blocksources.NewRequesterWithTimeout(fmt.Sprintf("https://%s%s", r, pkg.CoreImageURL), "PocketCluster/0.1.4 (OSX)", true, timeout),
-                            cResolver,
-                            cVerifier))
-                }
-                cSync, err := multisources.NewMultiSourcePatcher(cWriter, cRepoList, cChksumIdx)
-                theApp.BroadcastEvent(service.Event{
-                    Name:iventPackageSyncReportCore,
-                    Payload: rptPack{
-                            reader: cReader,
-                            msrc:   cSync,
-                            report: cRprtr,
-                    }})
-
-                err = cSync.Patch()
-                if err != nil {
-                    return feedError(errors.WithMessage(err, "unable to sync core image"))
-                }
+                theApp.BroadcastEvent(service.Event{Name:iventPackageSyncReportCore, Payload: cActionPack})
 
 
                 //  --- --- --- --- --- download node sync --- --- --- --- ---
@@ -464,46 +471,11 @@ func initInstallRoutePath() {
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync node image"))
                 }
-                nFilesize, nBlocksize, nBlockcount, nRootHash, err := readHeadersAndCheck(bytes.NewBuffer(nSyncData))
+                nActionPack, err := prepSync(repoList, nSyncData, pkg.NodeImageChksum, pkg.NodeImageURL)
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync node image"))
                 }
-                nChksumIdx, err := readIndex(bytes.NewBuffer(nSyncData), uint(nBlocksize), uint(nBlockcount), nRootHash)
-                if err != nil {
-                    return feedError(errors.WithMessage(err, "unable to sync node image"))
-                }
-
-                var (
-                    nReader, nWriter, nRprtr = showpipe.PipeWithReport(uint64(nFilesize))
-                    nResolver                = blockrepository.MakeKnownFileSizedBlockResolver(int64(nBlocksize), nFilesize)
-                    nVerifier                = &filechecksum.HashVerifier{
-                        Hash:                filechecksum.DefaultStrongHashGenerator(),
-                        BlockSize:           uint(nBlocksize),
-                        BlockChecksumGetter: nChksumIdx,
-                    }
-                    nRepoList []patcher.BlockRepository = nil
-                )
-                for rID, r := range repoList {
-                    nRepoList = append(nRepoList,
-                        blockrepository.NewBlockRepositoryBase(
-                            uint(rID),
-                            blocksources.NewRequesterWithTimeout(fmt.Sprintf("https://%s%s", r, pkg.NodeImageURL), "PocketCluster/0.1.4 (OSX)", true, timeout),
-                            nResolver,
-                            nVerifier))
-                }
-                nSync, err := multisources.NewMultiSourcePatcher(nWriter, nRepoList, nChksumIdx)
-                theApp.BroadcastEvent(service.Event{
-                    Name:iventPackageSyncReportNode,
-                    Payload: rptPack{
-                        reader: nReader,
-                        msrc:   nSync,
-                        report: nRprtr,
-                    }})
-
-                err = nSync.Patch()
-                if err != nil {
-                    return feedError(errors.WithMessage(err, "unable to sync node image"))
-                }
+                theApp.BroadcastEvent(service.Event{Name:iventPackageSyncReportNode, Payload: nActionPack})
 
                 return nil
             })
