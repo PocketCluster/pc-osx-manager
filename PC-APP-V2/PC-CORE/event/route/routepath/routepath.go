@@ -32,6 +32,10 @@ func RpathPackageInstall() string {
     return C.GoString(C.RPATH_PACKAGE_INSTALL)
 }
 
+func RpathPackageInstallProgress() string {
+    return C.GoString(C.RPATH_PACKAGE_INSTALL_PROGRESS)
+}
+
 func RpathMonitorNodeRegistered() string {
     return C.GoString(C.RPATH_MONITOR_NODE_REGISTERED)
 }

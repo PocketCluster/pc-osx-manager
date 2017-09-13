@@ -12,6 +12,7 @@ import (
     "net/http"
     "os"
     "path/filepath"
+    "sync"
     "time"
 
     log "github.com/Sirupsen/logrus"
@@ -27,7 +28,7 @@ import (
     "github.com/Redundancy/go-sync/showpipe"
     "xi2.org/x/xz"
 
-    //"github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/event/route/routepath"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/service"
@@ -212,13 +213,13 @@ func xzUncompressor(archiveReader io.Reader, uncompPath string) error {
     return nil
 }
 
-func initInstallRoutePath() {
+func initInstallRoutePath(appLife *appMainLife) {
     const (
         timeout = time.Duration(10 * time.Second)
     )
 
     // get the list of available packages
-    theApp.GET(routepath.RpathPackageList(), func(_, rpath, _ string) error {
+    appLife.GET(routepath.RpathPackageList(), func(_, rpath, _ string) error {
         var (
             feedError = func(irr error) error {
                 data, frr := json.Marshal(ReponseMessage{
@@ -285,12 +286,10 @@ func initInstallRoutePath() {
     })
 
     // install a package
-    theApp.POST(routepath.RpathPackageInstall(), func(_, rpath, payload string) error {
+    appLife.POST(routepath.RpathPackageInstall(), func(_, rpath, payload string) error {
         const (
-            irvicePackageSyncPatch      string = "irvice.package.sync.patch"
-            irvicePackageSyncControl    string = "irvice.package.sync.control"
-            iventPackageSyncReportCore  string = "ivent.package.sync.report.core"
-            iventPackageSyncReportNode  string = "ivent.package.sync.report.node"
+            irvicePackageSyncPatch string = "irvice.package.sync.patch"
+            iventPackageSyncStop   string = "ivent.package.sync.stop"
         )
         type patchActionPack struct {
             reader    io.Reader
@@ -380,8 +379,10 @@ func initInstallRoutePath() {
                 }, nil
             }
 
+            rpathPkgInstProgress string = routepath.RpathPackageInstallProgress()
             pkgID string = ""
             pkg model.Package
+            stopC = make(chan service.Event)
         )
 
         // 1. parse input package id
@@ -404,12 +405,14 @@ func initInstallRoutePath() {
         pkg = pkgs[0]
 
         // register service to run
-        theApp.RegisterServiceWithFuncs(
+        appLife.RegisterServiceWithFuncs(
             irvicePackageSyncPatch,
             func() error {
                 var (
-                    client = newClient(timeout, false)
-                    repoList = []string{}
+                    client                      = newClient(timeout, false)
+                    repoList                    = []string{}
+                    cSyncWaiter *sync.WaitGroup = new(sync.WaitGroup)
+                    nSyncWaiter *sync.WaitGroup = new(sync.WaitGroup)
                 )
 
                 // --- --- --- --- --- download meta first --- --- --- --- ---
@@ -459,7 +462,62 @@ func initInstallRoutePath() {
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync core image"))
                 }
-                theApp.BroadcastEvent(service.Event{Name:iventPackageSyncReportCore, Payload: cActionPack})
+                // unarchive core sync
+                cSyncWaiter.Add(1)
+                go func() {
+                    defer cSyncWaiter.Done()
+                    rDir, xrr := context.SharedHostContext().ApplicationRepositoryDirectory()
+                    if xrr != nil {
+                        log.Debugf(xrr.Error())
+                        return
+                    }
+                    xrr = xzUncompressor(cActionPack.reader, rDir)
+                    if xrr != nil {
+                        log.Debugf(xrr.Error())
+                    }
+                }()
+                // patch core image
+                cSyncWaiter.Add(1)
+                go func() {
+                    defer cSyncWaiter.Done()
+                    prr := cActionPack.msync.Patch()
+                    if prr != nil {
+                        log.Debugf(prr.Error())
+                    }
+                }()
+
+                for {
+                    select {
+                        case <- appLife.StopChannel(): {
+                            cActionPack.msync.Close()
+                            cSyncWaiter.Wait()
+                            return feedError(errors.Errorf("unable to sync core image"))
+                        }
+                        case <- stopC: {
+                            cActionPack.msync.Close()
+                            cSyncWaiter.Wait()
+                            return feedError(errors.Errorf("unable to sync core image"))
+                        }
+                        case rpt := <- cActionPack.report: {
+                            data, err := json.Marshal(ReponseMessage{
+                                "package-progress": {
+                                    "total-size":   rpt.TotalSize,
+                                    "received":     rpt.Received,
+                                    "remaining":    rpt.Remaining,
+                                    "speed":        rpt.Speed,
+                                    "done-percent": rpt.DonePercent,
+                                },
+                            })
+                            if err != nil {
+                                return feedError(errors.WithMessage(err, "Unable to access package list"))
+                            }
+                            err = FeedResponseForPost(rpathPkgInstProgress, string(data))
+                            if err != nil {
+                                return errors.WithStack(err)
+                            }
+                        }
+                    }
+                }
 
 
                 //  --- --- --- --- --- download node sync --- --- --- --- ---
@@ -475,10 +533,11 @@ func initInstallRoutePath() {
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync node image"))
                 }
-                theApp.BroadcastEvent(service.Event{Name:iventPackageSyncReportNode, Payload: nActionPack})
+
 
                 return nil
-            })
+            },
+            service.BindEventWithService(iventPackageSyncStop, stopC))
 
         return nil
     })

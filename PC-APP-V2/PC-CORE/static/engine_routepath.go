@@ -12,10 +12,10 @@ import (
 
 type ReponseMessage map[string]map[string]interface{}
 
-func initRoutePathServices() {
+func initRoutePathServices(appLife *appMainLife) {
 
     // check if this system is suitable to run
-    theApp.GET(routepath.RpathSystemReadiness(), func(_, path, _ string) error {
+    appLife.GET(routepath.RpathSystemReadiness(), func(_, path, _ string) error {
         var (
             syserr, nerr, vlerr, vererr error = nil, nil, nil, nil
             vbox vboxglue.VBoxGlue = nil
@@ -87,7 +87,7 @@ func initRoutePathServices() {
     })
 
     // check if app is expired
-    theApp.GET(routepath.RpathAppExpired(), func(_, path, _ string) error {
+    appLife.GET(routepath.RpathAppExpired(), func(_, path, _ string) error {
         var (
             expired, warn, err = context.SharedHostContext().CheckIsApplicationExpired()
             response ReponseMessage = nil
@@ -127,7 +127,7 @@ func initRoutePathServices() {
     })
 
     // check if this is the first time run
-    theApp.GET(routepath.RpathSystemIsFirstRun(), func(_, path, _ string) error {
+    appLife.GET(routepath.RpathSystemIsFirstRun(), func(_, path, _ string) error {
         data, err := json.Marshal(ReponseMessage{
             "firsttime": {
                 "status" : context.SharedHostContext().CheckIsFistTimeExecution(),
@@ -145,7 +145,7 @@ func initRoutePathServices() {
     })
 
     // check if user is authenticated
-    theApp.GET(routepath.RpathUserAuthed(), func(_, path, _ string) error {
+    appLife.GET(routepath.RpathUserAuthed(), func(_, path, _ string) error {
         data, err := json.Marshal(ReponseMessage{
             "user-auth": {
                 "status": true,

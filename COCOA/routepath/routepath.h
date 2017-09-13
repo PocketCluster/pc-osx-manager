@@ -15,6 +15,7 @@ extern const char* RPATH_USER_AUTHED;
 extern const char* RPATH_SYSTEM_IS_FIRST_RUN;
 extern const char* RPATH_PACKAGE_LIST;
 extern const char* RPATH_PACKAGE_INSTALL;
+extern const char* RPATH_PACKAGE_INSTALL_PROGRESS;
 
 extern const char* RPATH_MONITOR_NODE_REGISTERED;
 extern const char* RPATH_MONITOR_NODE_UNREGISTERED;
