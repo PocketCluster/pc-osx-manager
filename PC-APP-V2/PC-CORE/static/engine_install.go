@@ -287,16 +287,18 @@ func initInstallRoutePath(appLife *appMainLife) {
     // install a package
     appLife.POST(routepath.RpathPackageInstall(), func(_, rpath, payload string) error {
         const (
-            irvicePackageSyncPatch string = "irvice.package.sync.patch"
-            iventPackageSyncStop   string = "ivent.package.sync.stop"
+            irvicePackageSyncPatch   string = "irvice.package.sync.patch"
+            irvicePackageSyncMonitor string = "irvice.package.sync.monitor"
+            irvicePackageSyncUnarch  string = "irvice.package.sync.unarch"
+            iventPackageSyncStop     string = "ivent.package.sync.stop"
+            iventPackageSyncError    string = "ivent.package.sync.error"
+            iventSyncActionPackage   string = "ivent.sync.action.package"
         )
         type patchActionPack struct {
             reader     io.ReadCloser
             writer     io.WriteCloser
             report     chan showpipe.PipeProgress
             msync      *multisources.MultiSourcePatcher
-            unarchErrC chan error
-            patchErrC  chan error
         }
         var (
 
@@ -378,101 +380,23 @@ func initInstallRoutePath(appLife *appMainLife) {
                     writer:     writer,
                     report:     report,
                     msync:      msync,
-                    unarchErrC: make(chan error),
-                    patchErrC:  make(chan error),
                 }, nil
             }
 
-            patchImage = func(action *patchActionPack, stopC chan service.Event, reportPath string) error {
-                var (
-                    patchDone = false
-                    unarchDone = false
-                )
-
-                defer func(act *patchActionPack) {
-                    act.reader.Close()
-                    act.writer.Close()
-                    act.msync.Close()
-                }(action)
-
-                // unarchive core sync
-                go func(act *patchActionPack) {
-                    defer close(act.unarchErrC)
-                    rDir, xrr := context.SharedHostContext().ApplicationRepositoryDirectory()
-                    if xrr != nil {
-                        action.unarchErrC <- xrr
-                        return
-                    }
-                    act.unarchErrC <- xzUncompressor(act.reader, rDir)
-                }(action)
-
-                // patch core image
-                go func(act *patchActionPack) {
-                    defer close(act.patchErrC)
-                    act.patchErrC <- act.msync.Patch()
-                }(action)
-
-                for {
-                    select {
-                        case <- appLife.StopChannel(): {
-                            return errors.Errorf("sync core image stopped")
-                        }
-                        case <- stopC: {
-                            return errors.Errorf("sync core image stopped")
-                        }
-                        case err := <- action.patchErrC: {
-                            // succesful case of exit
-                            if err == nil {
-                                if unarchDone {
-                                    return nil
-                                }
-                                // otherwise
-                                patchDone = true
-                            } else {
-                                // where there is error
-                                return err
-                            }
-                        }
-                        case err := <- action.unarchErrC: {
-                            if err == nil {
-                                if patchDone {
-                                    return nil
-                                }
-                                // otherwise
-                                unarchDone = true
-                            } else {
-                                // when there is error
-                                return err
-                            }
-                        }
-                        case rpt := <- action.report: {
-                            data, err := json.Marshal(ReponseMessage{
-                                "package-progress": {
-                                    "total-size":   rpt.TotalSize,
-                                    "received":     rpt.Received,
-                                    "remaining":    rpt.Remaining,
-                                    "speed":        rpt.Speed,
-                                    "done-percent": rpt.DonePercent,
-                                },
-                            })
-                            if err != nil {
-                                log.Errorf(err.Error())
-                                continue
-                            }
-                            err = FeedResponseForPost(reportPath, string(data))
-                            if err != nil {
-                                log.Errorf(err.Error())
-                                continue
-                            }
-                        }
-                    }
-                }
+            closeAction = func(act *patchActionPack) {
+                act.msync.Close()
+                act.writer.Close()
+                act.reader.Close()
             }
 
             rpathPkgInstProgress string = routepath.RpathPackageInstallProgress()
             pkgID string = ""
             pkg model.Package
-            stopC = make(chan service.Event)
+
+            unarchC  = make(chan service.Event)
+            monitorC = make(chan service.Event)
+            errorC   = make(chan service.Event)
+            stopC    = make(chan service.Event)
         )
 
         // 1. parse input package id
@@ -493,6 +417,85 @@ func initInstallRoutePath(appLife *appMainLife) {
 
         // 4. pick up the first package & we are ready to patch.
         pkg = pkgs[0]
+
+
+        // unarch func
+        appLife.RegisterServiceWithFuncs(
+            irvicePackageSyncUnarch,
+            func() error {
+                ae := <-unarchC
+                action, ok := ae.Payload.(*patchActionPack)
+                if !ok {
+                    return errors.Errorf("[ERR] invalid patchActionPack type")
+                }
+
+                rDir, err := context.SharedHostContext().ApplicationRepositoryDirectory()
+                if err != nil {
+                    return err
+                }
+                err = xzUncompressor(action.reader, rDir)
+
+                return nil
+            },
+            service.BindEventWithService(iventSyncActionPackage, unarchC))
+
+        // monitor func
+        appLife.RegisterServiceWithFuncs(
+            irvicePackageSyncMonitor,
+            func() error {
+
+                ae := <-monitorC
+                action, ok := ae.Payload.(*patchActionPack)
+                if !ok {
+                    return errors.Errorf("[ERR] invalid patchActionPack type")
+                }
+
+                for {
+                    select {
+                        case <- appLife.StopChannel(): {
+                            closeAction(action)
+                            feedError(errors.Errorf("core image sync halt"))
+                            return nil
+                        }
+                        case <- stopC: {
+                            closeAction(action)
+                            feedError(errors.Errorf("core image sync halt"))
+                            return nil
+                        }
+                        case e := <- errorC: {
+                            if e.Payload != nil {
+                                closeAction(action)
+                            }
+                            return nil
+                        }
+                        case rpt := <- action.report: {
+                            data, err := json.Marshal(ReponseMessage{
+                                "package-progress": {
+                                    "total-size":   rpt.TotalSize,
+                                    "received":     rpt.Received,
+                                    "remaining":    rpt.Remaining,
+                                    "speed":        rpt.Speed,
+                                    "done-percent": rpt.DonePercent,
+                                },
+                            })
+                            if err != nil {
+                                log.Errorf(err.Error())
+                                continue
+                            }
+                            err = FeedResponseForPost(rpathPkgInstProgress, string(data))
+                            if err != nil {
+                                log.Errorf(err.Error())
+                                continue
+                            }
+                        }
+                    }
+                }
+
+                return nil
+            },
+            service.BindEventWithService(iventSyncActionPackage, monitorC),
+            service.BindEventWithService(iventPackageSyncError,  errorC),
+            service.BindEventWithService(iventPackageSyncStop,   stopC))
 
         // register service to run
         appLife.RegisterServiceWithFuncs(
@@ -550,11 +553,19 @@ func initInstallRoutePath(appLife *appMainLife) {
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync core image"))
                 }
-                err = patchImage(cActionPack, stopC, rpathPkgInstProgress)
-                if err != nil {
-                    return feedError(errors.WithMessage(err, "unable to sync core image"))
-                }
+                appLife.BroadcastEvent(service.Event{
+                    Name:iventSyncActionPackage,
+                    Payload:cActionPack})
 
+                cAerr := cActionPack.msync.Patch()
+                appLife.BroadcastEvent(service.Event{Name:iventPackageSyncError, Payload:cAerr})
+                if cAerr != nil {
+                    return feedError(errors.WithMessage(cAerr, "unable to sync core image"))
+                }
+                // FIXME: what if this is closed by user? no error means we cannot classify!
+                closeAction(cActionPack)
+
+/*
                 //  --- --- --- --- --- download node sync --- --- --- --- ---
                 nSyncReq, err := newRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.NodeImageSync), true)
                 if err != nil {
@@ -568,14 +579,13 @@ func initInstallRoutePath(appLife *appMainLife) {
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync node image"))
                 }
-                err = patchImage(nActionPack, stopC, rpathPkgInstProgress)
+                err = execSync(nActionPack, stopC, rpathPkgInstProgress)
                 if err != nil {
                     return feedError(errors.WithMessage(err, "unable to sync core image"))
                 }
-
+*/
                 return nil
-            },
-            service.BindEventWithService(iventPackageSyncStop, stopC))
+            })
 
         return nil
     })
