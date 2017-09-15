@@ -9,30 +9,30 @@ type Request struct {
 
 func RouteRequestGet(path string) Request {
     return Request {
-        method:     get,
-        path:       path,
+        method: RouteMethodGet,
+        path:   path,
     }
 }
 
 func RouteRequestPost(path, request string) Request {
     return Request {
-        method:     post,
-        path:       path,
-        request:    request,
+        method:  RouteMethodPost,
+        path:    path,
+        request: request,
     }
 }
 
 func RouteRequestPut(path, request string) Request {
     return Request {
-        method:     put,
-        path:       path,
-        request:    request,
+        method:  RouteMethodPut,
+        path:    path,
+        request: request,
     }
 }
 
 func RouteRequestDelete(path string) Request {
     return Request {
-        method:     deleteh,
-        path:       path,
+        method: RouteMethodDeleteh,
+        path:   path,
     }
 }

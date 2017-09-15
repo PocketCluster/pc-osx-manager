@@ -7,12 +7,12 @@ import (
 )
 
 const (
-    get     = "GET"
-    head    = "HEAD"
-    post    = "POST"
-    put     = "PUT"
-    patch   = "PATCH"
-    deleteh = "DELETE"
+    RouteMethodGet     string = "GET"
+    RouteMethodHead    string = "HEAD"
+    RouteMethodPost    string = "POST"
+    RouteMethodPut     string = "PUT"
+    RouteMethodPatch   string = "PATCH"
+    RouteMethodDeleteh string = "DELETE"
 )
 
 // Handle is just like "net/http" Handlers, only takes params.
@@ -53,32 +53,32 @@ func (r *router) addHandleForPath(method, path string, handler Handle) error {
 
 // GET same as Handle only the method is already implied.
 func (r *router) GET(path string, handler Handle) error {
-    return r.addHandleForPath(get, path, handler)
+    return r.addHandleForPath(RouteMethodGet, path, handler)
 }
 
 // HEAD same as Handle only the method is already implied.
 func (r *router) HEAD(path string, handler Handle) error {
-    return r.addHandleForPath(head, path, handler)
+    return r.addHandleForPath(RouteMethodHead, path, handler)
 }
 
 // POST same as Handle only the method is already implied.
 func (r *router) POST(path string, handler Handle) error {
-    return r.addHandleForPath(post, path, handler)
+    return r.addHandleForPath(RouteMethodPost, path, handler)
 }
 
 // PUT same as Handle only the method is already implied.
 func (r *router) PUT(path string, handler Handle) error {
-    return r.addHandleForPath(put, path, handler)
+    return r.addHandleForPath(RouteMethodPut, path, handler)
 }
 
 // PATCH same as Handle only the method is already implied.
-func (r *router) PATCH(path string, handler Handle) error { // might make this and put one.
-    return r.addHandleForPath(patch, path, handler)
+func (r *router) PATCH(path string, handler Handle) error {
+    return r.addHandleForPath(RouteMethodPatch, path, handler)
 }
 
 // DELETE same as Handle only the method is already implied.
 func (r *router) DELETE(path string, handler Handle) error {
-    return r.addHandleForPath(deleteh, path, handler)
+    return r.addHandleForPath(RouteMethodDeleteh, path, handler)
 }
 
 // Needed by "net/http" to handle http requests and be a mux to http.ListenAndServe.

@@ -213,7 +213,7 @@ func xzUncompressor(archiveReader io.Reader, uncompPath string) error {
     return nil
 }
 
-func InitInstallRoutePath(appLife route.Router) {
+func InitInstallRoutePath(appLife route.Router, feeder route.ResponseFeeder) {
     const (
         timeout = time.Duration(10 * time.Second)
     )
@@ -231,7 +231,7 @@ func InitInstallRoutePath(appLife route.Router) {
                 if frr != nil {
                     log.Debugf(frr.Error())
                 }
-                frr = FeedResponseForGet(rpath, string(data))
+                frr = feeder.FeedResponseForGet(rpath, string(data))
                 if frr != nil {
                     log.Debugf(frr.Error())
                 }
@@ -278,7 +278,7 @@ func InitInstallRoutePath(appLife route.Router) {
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access package list"))
         }
-        err = FeedResponseForGet(rpath, string(data))
+        err = feeder.FeedResponseForGet(rpath, string(data))
         if err != nil {
             return errors.WithStack(err)
         }
@@ -315,7 +315,7 @@ func InitInstallRoutePath(appLife route.Router) {
                 if frr != nil {
                     log.Error(frr.Error())
                 }
-                frr = FeedResponseForPost(rpath, string(data))
+                frr = feeder.FeedResponseForPost(rpath, string(data))
                 if frr != nil {
                     log.Error(frr.Error())
                 }
@@ -483,7 +483,7 @@ func InitInstallRoutePath(appLife route.Router) {
                                 log.Errorf(err.Error())
                                 continue
                             }
-                            err = FeedResponseForPost(rpathPkgInstProgress, string(data))
+                            err = feeder.FeedResponseForPost(rpathPkgInstProgress, string(data))
                             if err != nil {
                                 log.Errorf(err.Error())
                                 continue

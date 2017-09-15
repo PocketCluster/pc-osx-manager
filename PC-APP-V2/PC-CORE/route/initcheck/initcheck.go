@@ -13,7 +13,7 @@ import (
 
 type ReponseMessage map[string]map[string]interface{}
 
-func InitRoutePathServices(appLife route.Router) {
+func InitRoutePathServices(appLife route.Router, feeder route.ResponseFeeder) {
 
     // check if this system is suitable to run
     appLife.GET(routepath.RpathSystemReadiness(), func(_, path, _ string) error {
@@ -80,7 +80,7 @@ func InitRoutePathServices(appLife route.Router) {
             log.Debugf(err.Error())
             return errors.WithStack(err)
         }
-        err = FeedResponseForGet(path, string(data))
+        err = feeder.FeedResponseForGet(path, string(data))
         if err != nil {
             return errors.WithStack(err)
         }
@@ -120,7 +120,7 @@ func InitRoutePathServices(appLife route.Router) {
             log.Debugf(err.Error())
             return errors.WithStack(err)
         }
-        err = FeedResponseForGet(path, string(data))
+        err = feeder.FeedResponseForGet(path, string(data))
         if err != nil {
             return errors.WithStack(err)
         }
@@ -138,7 +138,7 @@ func InitRoutePathServices(appLife route.Router) {
             log.Debugf(err.Error())
             return errors.WithStack(err)
         }
-        err = FeedResponseForGet(path, string(data))
+        err = feeder.FeedResponseForGet(path, string(data))
         if err != nil {
             return errors.WithStack(err)
         }
@@ -156,7 +156,7 @@ func InitRoutePathServices(appLife route.Router) {
             log.Debugf(err.Error())
             return errors.WithStack(err)
         }
-        err = FeedResponseForGet(path, string(data))
+        err = feeder.FeedResponseForGet(path, string(data))
         if err != nil {
             return errors.WithStack(err)
         }

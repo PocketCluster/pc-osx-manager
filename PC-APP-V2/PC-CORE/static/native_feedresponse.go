@@ -11,19 +11,12 @@ import "C"
 import (
     "runtime"
 
+    "github.com/stkim1/pc-core/route"
     "github.com/pkg/errors"
 )
 
-type feedMethodType int
-const (
-    feedReponseGet       feedMethodType = iota
-    feedResponsePost
-    feedResponsePut
-    feedResponseDelete
-)
-
 type feedResponse struct {
-    method      feedMethodType
+    method      string
     path        string
     response    string
 }
@@ -41,6 +34,7 @@ type feeder struct {
 // to an OS thread for delivering message to the same thread
 func (h *feeder) feedLoop() {
     runtime.LockOSThread()
+
     for f := range h.feedPipe {
         switch feed := f.(type) {
             // stop feeding back to cocoa side
@@ -49,26 +43,25 @@ func (h *feeder) feedLoop() {
                 return
             }
             case feedResponse: {
+                var (
+                    cPath     *C.char = C.CString(feed.path)
+                    cResponse *C.char = C.CString(feed.response)
+                    // these strings will be freed on cocoa side to reduce performance degrade
+                    //C.free(unsafe.Pointer(cPath))
+                    //C.free(unsafe.Pointer(cPayload))
+                )
                 switch feed.method {
-                    case feedReponseGet: {
-                        var (
-                            cPath = C.CString(feed.path)
-                            cResponse = C.CString(feed.response)
-                        )
+                    case route.RouteMethodGet: {
                         C.PCFeedResponseForGet(cPath, cResponse)
-                        // these strings will be freed on cocoa side to reduce performance degrade
-                        //C.free(unsafe.Pointer(cPath))
-                        //C.free(unsafe.Pointer(cPayload))
                     }
-                    case feedResponsePost: {
-                        var (
-                            cPath = C.CString(feed.path)
-                            cResponse = C.CString(feed.response)
-                        )
+                    case route.RouteMethodPost: {
                         C.PCFeedResponseForPost(cPath, cResponse)
-                        // these strings will be freed on cocoa side to reduce performance degrade
-                        //C.free(unsafe.Pointer(cPath))
-                        //C.free(unsafe.Pointer(cPayload))
+                    }
+                    case route.RouteMethodPut: {
+                        C.PCFeedResponseForPut(cPath, cResponse)
+                    }
+                    case route.RouteMethodDeleteh: {
+                        C.PCFeedResponseForDelete(cPath, cResponse)
                     }
                 }
             }
@@ -90,12 +83,12 @@ func StopResponseFeed() {
     theFeeder.feedPipe <- stopFeed{}
 }
 
-func FeedResponseForGet(path, payload string) error {
+func (f *feeder) FeedResponseForGet(path, payload string) error {
     if len(path) == 0 {
         return errors.Errorf("[ERR] invalid feed path")
     }
-    theFeeder.feedPipe <- feedResponse {
-        method:      feedReponseGet,
+    f.feedPipe <- feedResponse {
+        method:      route.RouteMethodGet,
         path:        path,
         response:    payload,
 
@@ -103,12 +96,36 @@ func FeedResponseForGet(path, payload string) error {
     return nil
 }
 
-func FeedResponseForPost(path, payload string) error {
+func (f *feeder) FeedResponseForPost(path, payload string) error {
     if len(path) == 0 {
         return errors.Errorf("[ERR] invalid feed path")
     }
-    theFeeder.feedPipe <- feedResponse {
-        method:      feedResponsePost,
+    f.feedPipe <- feedResponse {
+        method:      route.RouteMethodPost,
+        path:        path,
+        response:    payload,
+    }
+    return nil
+}
+
+func (f *feeder) FeedResponseForPut(path, payload string) error {
+    if len(path) == 0 {
+        return errors.Errorf("[ERR] invalid feed path")
+    }
+    f.feedPipe <- feedResponse {
+        method:      route.RouteMethodPut,
+        path:        path,
+        response:    payload,
+    }
+    return nil
+}
+
+func (f *feeder) FeedResponseForDelete(path, payload string) error {
+    if len(path) == 0 {
+        return errors.Errorf("[ERR] invalid feed path")
+    }
+    f.feedPipe <- feedResponse {
+        method:      route.RouteMethodDeleteh,
         path:        path,
         response:    payload,
     }
