@@ -11,8 +11,6 @@ import (
     "github.com/stkim1/pc-core/vboxglue"
 )
 
-type ReponseMessage map[string]map[string]interface{}
-
 func InitRoutePathServices(appLife route.Router, feeder route.ResponseFeeder) {
 
     // check if this system is suitable to run
@@ -21,7 +19,7 @@ func InitRoutePathServices(appLife route.Router, feeder route.ResponseFeeder) {
             syserr, nerr, vlerr, vererr error = nil, nil, nil, nil
             vbox vboxglue.VBoxGlue = nil
             data []byte = nil
-            response ReponseMessage = nil
+            response route.ReponseMessage = nil
         )
 
         syserr = context.SharedHostContext().CheckHostSuitability()
@@ -37,9 +35,9 @@ func InitRoutePathServices(appLife route.Router, feeder route.ResponseFeeder) {
                     vererr = vbox.CheckVBoxSuitability()
                     if vererr == nil {
 
-                        response = ReponseMessage{"syscheck": {"status": true}}
+                        response = route.ReponseMessage{"syscheck": {"status": true}}
                     } else {
-                        response = ReponseMessage{
+                        response = route.ReponseMessage{
                             "syscheck": {
                                 "status": false,
                                 "error": vererr.Error(),
@@ -48,7 +46,7 @@ func InitRoutePathServices(appLife route.Router, feeder route.ResponseFeeder) {
                     }
 
                 } else {
-                    response = ReponseMessage{
+                    response = route.ReponseMessage{
                         "syscheck": {
                             "status": false,
                             "error": errors.WithMessage(vlerr, "Loading Virtualbox causes an error. Please install latest VirtualBox"),
@@ -57,7 +55,7 @@ func InitRoutePathServices(appLife route.Router, feeder route.ResponseFeeder) {
                 }
 
             } else {
-                response = ReponseMessage{
+                response = route.ReponseMessage{
                     "syscheck": {
                         "status": false,
                         "error": errors.WithMessage(nerr, "Unable to detect Wi-Fi network. Please enable Wi-Fi"),
@@ -66,7 +64,7 @@ func InitRoutePathServices(appLife route.Router, feeder route.ResponseFeeder) {
             }
 
         } else {
-            response = ReponseMessage{
+            response = route.ReponseMessage{
                 "syscheck": {
                     "status": false,
                     "error": syserr.Error(),
@@ -91,24 +89,24 @@ func InitRoutePathServices(appLife route.Router, feeder route.ResponseFeeder) {
     appLife.GET(routepath.RpathAppExpired(), func(_, path, _ string) error {
         var (
             expired, warn, err = context.SharedHostContext().CheckIsApplicationExpired()
-            response ReponseMessage = nil
+            response route.ReponseMessage = nil
         )
         if err != nil {
-            response = ReponseMessage {
+            response = route.ReponseMessage {
                 "expired" : {
                     "status" : expired,
                     "error"  : err.Error(),
                 },
             }
         } else if warn != nil {
-            response = ReponseMessage {
+            response = route.ReponseMessage {
                 "expired" : {
                     "status" : expired,
                     "warning" : warn.Error(),
                 },
             }
         } else {
-            response = ReponseMessage {
+            response = route.ReponseMessage {
                 "expired" : {
                     "status" : expired,
                 },
@@ -129,7 +127,7 @@ func InitRoutePathServices(appLife route.Router, feeder route.ResponseFeeder) {
 
     // check if this is the first time run
     appLife.GET(routepath.RpathSystemIsFirstRun(), func(_, path, _ string) error {
-        data, err := json.Marshal(ReponseMessage{
+        data, err := json.Marshal(route.ReponseMessage{
             "firsttime": {
                 "status" : context.SharedHostContext().CheckIsFistTimeExecution(),
             },
@@ -147,7 +145,7 @@ func InitRoutePathServices(appLife route.Router, feeder route.ResponseFeeder) {
 
     // check if user is authenticated
     appLife.GET(routepath.RpathUserAuthed(), func(_, path, _ string) error {
-        data, err := json.Marshal(ReponseMessage{
+        data, err := json.Marshal(route.ReponseMessage{
             "user-auth": {
                 "status": true,
             },
