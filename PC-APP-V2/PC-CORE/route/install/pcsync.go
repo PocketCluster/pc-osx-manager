@@ -100,20 +100,20 @@ func readIndex(rd io.Reader, blocksize, blockcount uint, rootHash []byte) (*inde
     return idx, nil
 }
 
-type patchActionPack struct {
+type syncActionPack struct {
     reader     io.ReadCloser
     writer     io.WriteCloser
     report     chan showpipe.PipeProgress
     msync      *multisources.MultiSourcePatcher
 }
 
-func (p *patchActionPack) close() {
+func (p *syncActionPack) close() {
     p.msync.Close()
     p.writer.Close()
     p.reader.Close()
 }
 
-func prepSync(repoList []string, syncData []byte, refChksum, imageURL string) (*patchActionPack, error) {
+func prepSync(repoList []string, syncData []byte, refChksum, imageURL string) (*syncActionPack, error) {
     filesize, blocksize, blockcount, rootHash, err := readHeadersAndCheck(bytes.NewBuffer(syncData))
     if err != nil {
         return nil, errors.WithStack(err)
@@ -148,21 +148,20 @@ func prepSync(repoList []string, syncData []byte, refChksum, imageURL string) (*
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    return &patchActionPack {
-        reader:     reader,
-        writer:     writer,
-        report:     report,
-        msync:      msync,
+    return &syncActionPack{
+        reader:    reader,
+        writer:    writer,
+        report:    report,
+        msync:     msync,
     }, nil
 }
 
-
-func execSync(feeder route.ResponseFeeder, action *patchActionPack, exitC chan struct{}, rpPath, uaPath string) error {
+func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan struct{}, rpPath, uaPath string) error {
     var (
         uerrC = make(chan error)
         perrC = make(chan error)
     )
-    go func(act *patchActionPack, errC chan error, rDir string) {
+    go func(act *syncActionPack, errC chan error, rDir string) {
         defer close(errC)
 
         err := xzUncompressor(action.reader, rDir)
@@ -171,7 +170,7 @@ func execSync(feeder route.ResponseFeeder, action *patchActionPack, exitC chan s
         }
     }(action, uerrC, uaPath)
 
-    go func(act *patchActionPack, errC chan error) {
+    go func(act *syncActionPack, errC chan error) {
         defer close(errC)
 
         errC <- act.msync.Patch()
@@ -184,7 +183,7 @@ func execSync(feeder route.ResponseFeeder, action *patchActionPack, exitC chan s
     for {
         select {
             // close everythign
-            case <- exitC: {
+            case <-stopC: {
                 action.close()
                 return errors.Errorf("core image sync halt")
             }

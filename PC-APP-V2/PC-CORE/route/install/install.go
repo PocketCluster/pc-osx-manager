@@ -55,7 +55,7 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
         }
 
         // 1. parse input package id
-        err := json.Unmarshal([]byte(payload), &struct {
+        err = json.Unmarshal([]byte(payload), &struct {
             PkgID *string `json:"pkg-id"`
         }{&pkgID})
         if err != nil {
