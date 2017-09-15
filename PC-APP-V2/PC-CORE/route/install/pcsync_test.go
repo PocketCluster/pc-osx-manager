@@ -6,6 +6,8 @@ import (
     "io/ioutil"
     "testing"
     "os"
+    "path/filepath"
+    "runtime"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -35,7 +37,9 @@ var (
 )
 
 func setup() {
-    data, err := ioutil.ReadFile("test.txt.tz")
+    _, testfile, _, _ := runtime.Caller(0)
+    archfile := filepath.Join(filepath.Dir(testfile), "test.txt.tar.xz")
+    data, err := ioutil.ReadFile(archfile)
     if err != nil {
         log.Panic(err.Error())
     }
@@ -208,6 +212,7 @@ func testActionPack() (*syncActionPack, error) {
 
 func Test_ExecSync_Normal(t *testing.T) {
     log.SetLevel(log.DebugLevel)
+    setup()
     var (
         stopC = make(chan struct{})
         tmpdir = os.TempDir()
@@ -215,6 +220,7 @@ func Test_ExecSync_Normal(t *testing.T) {
     )
     defer func() {
         close(stopC)
+        clean()
     }()
     act, err := testActionPack()
     if err != nil {
