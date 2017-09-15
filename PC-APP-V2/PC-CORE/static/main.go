@@ -47,7 +47,8 @@ func main() {
                             log.Debugf("[LIFE] initialize ApplicationContext...")
                             // this needs to be initialized before service loop initiated
                             context.SharedHostContext()
-                            initRoutePathService()
+                            initRoutePathServices(appLife)
+                            initInstallRoutePath(appLife)
 
                             log.Debugf("[LIFE] app is now created, fully initialized %v", e.String())
                         }

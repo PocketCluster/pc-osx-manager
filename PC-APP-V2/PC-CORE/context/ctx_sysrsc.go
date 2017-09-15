@@ -9,7 +9,6 @@ import (
 const (
     HostMinResourceCpuCount     uint = 2
     HostMinResourceMemSize      uint = 4096
-    HostMinResourceDiskSize     uint = 48
 
     HostMaxResourceCpuCount     uint = 8
     HostMaxResourceMemSize      uint = 8192

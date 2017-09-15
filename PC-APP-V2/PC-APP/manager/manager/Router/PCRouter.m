@@ -100,6 +100,8 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCRouter, sharedRouter);
         Log(@"%@", [error description]);
         return;
     }
+    // count data length prevent invalid character to be appended at the end of [data bytes]
+    [data length];
 
     Log(@"routeRequestPost aPath[%s], aRequestBody[%s]\n", aPath, (char *)[data bytes]);
 

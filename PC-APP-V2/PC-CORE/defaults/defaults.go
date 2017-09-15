@@ -58,6 +58,7 @@ const (
 
 const (
     VBoxDefualtCoreDiskName    string = "pc-core-hdd.vmdk"
-    // 128 GB
-    VBoxDefualtCoreDiskSize    uint   = 128000
+    // 46 GB
+    //VBoxDefualtCoreDiskSize    uint   = 128000
+    VBoxDefualtCoreDiskSize    uint   = 46000
 )
