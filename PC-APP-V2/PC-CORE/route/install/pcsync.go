@@ -1,10 +1,14 @@
 package install
 
 import (
+    "encoding/json"
     "bytes"
     "encoding/binary"
     "fmt"
     "io"
+
+    log "github.com/Sirupsen/logrus"
+    "github.com/pkg/errors"
 
     "github.com/Redundancy/go-sync"
     "github.com/Redundancy/go-sync/blockrepository"
@@ -15,7 +19,9 @@ import (
     "github.com/Redundancy/go-sync/patcher"
     "github.com/Redundancy/go-sync/patcher/multisources"
     "github.com/Redundancy/go-sync/showpipe"
-    "github.com/pkg/errors"
+
+    "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/route"
 )
 
 // reads the file headers and checks the magic string, then the semantic versioning
@@ -102,6 +108,12 @@ type patchActionPack struct {
     msync      *multisources.MultiSourcePatcher
 }
 
+func (p *patchActionPack) close() {
+    p.msync.Close()
+    p.writer.Close()
+    p.reader.Close()
+}
+
 func prepSync(repoList []string, syncData []byte, refChksum, imageURL string) (*patchActionPack, error) {
     filesize, blocksize, blockcount, rootHash, err := readHeadersAndCheck(bytes.NewBuffer(syncData))
     if err != nil {
@@ -143,4 +155,72 @@ func prepSync(repoList []string, syncData []byte, refChksum, imageURL string) (*
         report:     report,
         msync:      msync,
     }, nil
+}
+
+
+func execSync(feeder route.ResponseFeeder, action *patchActionPack, rpath string, exitC chan struct{}) error {
+    var (
+        uerrC = make(chan error)
+        perrC = make(chan error)
+    )
+    go func(act *patchActionPack, errC chan error) {
+        defer close(errC)
+
+        rDir, err := context.SharedHostContext().ApplicationRepositoryDirectory()
+        if err != nil {
+            errC <- err
+            return
+        }
+        err = xzUncompressor(action.reader, rDir)
+        if err != nil {
+            errC <- err
+        }
+    }(action, uerrC)
+
+    go func(act *patchActionPack, errC chan error) {
+        defer close(errC)
+
+        errC <- act.msync.Patch()
+    }(action, perrC)
+
+    for {
+        select {
+        // close everythign
+        case <- exitC: {
+            action.close()
+            return errors.Errorf("core image sync halt")
+        }
+
+        case err := <- perrC: {
+            return errors.WithStack(err)
+        }
+
+            // this is emergency as unarchiving fails
+        case err := <- uerrC: {
+            return errors.WithStack(err)
+        }
+
+            // report progress
+        case rpt := <- action.report: {
+            data, err := json.Marshal(route.ReponseMessage{
+                "package-progress": {
+                    "total-size":   rpt.TotalSize,
+                    "received":     rpt.Received,
+                    "remaining":    rpt.Remaining,
+                    "speed":        rpt.Speed,
+                    "done-percent": rpt.DonePercent,
+                },
+            })
+            if err != nil {
+                log.Errorf(err.Error())
+                continue
+            }
+            err = feeder.FeedResponseForPost(rpath, string(data))
+            if err != nil {
+                log.Errorf(err.Error())
+                continue
+            }
+        }
+        }
+    }
 }
