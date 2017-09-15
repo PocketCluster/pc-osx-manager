@@ -8,12 +8,14 @@ import (
     "os"
     "path/filepath"
     "runtime"
+    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
-    "golang.org/x/crypto/ripemd160"
     "github.com/Redundancy/go-sync/chunks"
     "github.com/Redundancy/go-sync/blockrepository"
+    "github.com/Redundancy/go-sync/blocksources"
+    "github.com/Redundancy/go-sync/filechecksum"
     "github.com/Redundancy/go-sync/merkle"
     "github.com/Redundancy/go-sync/patcher"
     "github.com/Redundancy/go-sync/patcher/multisources"
@@ -27,13 +29,13 @@ const (
 )
 
 var (
-    REFERENCE_BUFFER []byte        = nil
-    REFERENCE_BLOCKS [][]byte      = nil
-    REFERENCE_HASHES [][]byte      = nil
-    REFERENCE_RTHASH []byte        = nil
+    REFERENCE_BUFFER []byte                        = nil
+    REFERENCE_BLOCKS [][]byte                      = nil
+    REFERENCE_HASHES [][]byte                      = nil
+    REFERENCE_RTHASH []byte                        = nil
     REFERENCE_CHKSEQ chunks.SequentialChecksumList = nil
-    REFERENCE_BUFSIZ int           = 0
-    BLOCK_COUNT      int           = 0
+    REFERENCE_BUFFSZ int                           = 0
+    BLOCK_COUNT      int                           = 0
 )
 
 func setup() {
@@ -48,9 +50,9 @@ func setup() {
     REFERENCE_BLOCKS = [][]byte{}
     REFERENCE_HASHES = [][]byte{}
     BLOCK_COUNT      = 0
-    REFERENCE_BUFSIZ = len(data)
+    REFERENCE_BUFFSZ = len(data)
     maxLen          := len(data)
-    m               := ripemd160.New()
+    m               := filechecksum.DefaultStrongHashGenerator()
 
     for i := 0; i < maxLen; i += BLOCKSIZE {
         last := i + BLOCKSIZE
@@ -178,21 +180,9 @@ func (t *testFeed) FeedResponseForDelete(path, payload string) error {
 }
 
 // --- test action pack ---
-func testActionPack() (*syncActionPack, error) {
+func testActionPack(repos []patcher.BlockRepository) (*syncActionPack, error) {
     var (
-        reader, writer, report = showpipe.PipeWithReport(uint64(REFERENCE_BUFSIZ))
-        repos = []patcher.BlockRepository{
-            blockrepository.NewReadSeekerBlockRepository(
-                0,
-                byteToReadSeeker(),
-                blockrepository.MakeNullUniformSizeResolver(BLOCKSIZE),
-                blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
-                    m := ripemd160.New()
-                    m.Write(data)
-                    return m.Sum(nil), nil
-                }),
-            ),
-        }
+        reader, writer, report = showpipe.PipeWithReport(uint64(REFERENCE_BUFFSZ))
     )
     msync, err := multisources.NewMultiSourcePatcher(
         writer,
@@ -210,24 +200,146 @@ func testActionPack() (*syncActionPack, error) {
     }, nil
 }
 
-func Test_ExecSync_Normal(t *testing.T) {
+func Test_ExecSyncSuccess_Normal(t *testing.T) {
     log.SetLevel(log.DebugLevel)
     setup()
     var (
         stopC = make(chan struct{})
         tmpdir = os.TempDir()
         tFeeder = &testFeed{}
+        repos = []patcher.BlockRepository{
+            blockrepository.NewReadSeekerBlockRepository(
+                0,
+                byteToReadSeeker(),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
+                    m := filechecksum.DefaultStrongHashGenerator()
+                    m.Write(data)
+                    return m.Sum(nil), nil
+                }),
+            ),
+        }
     )
     defer func() {
         close(stopC)
         clean()
     }()
-    act, err := testActionPack()
+    act, err := testActionPack(repos)
     if err != nil {
         t.Fatal(err.Error())
     }
     err = execSync(tFeeder, act, stopC, testRoutPath, tmpdir)
     if err != nil {
         t.Fatal(err.Error())
+    }
+}
+
+func Test_ExecSyncFail_With_SingleRepo(t *testing.T) {
+    log.SetLevel(log.DebugLevel)
+    setup()
+    var (
+        stopC = make(chan struct{})
+        tmpdir = os.TempDir()
+        tFeeder = &testFeed{}
+        repos = []patcher.BlockRepository{
+            blockrepository.NewBlockRepositoryBase(
+                0,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    if start < 40 {
+                        return REFERENCE_BUFFER[start:end], nil
+                    }
+                    return nil, &blocksources.TestError{}
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
+                    m := filechecksum.DefaultStrongHashGenerator()
+                    m.Write(data)
+                    return m.Sum(nil), nil
+                }),
+            ),
+        }
+    )
+    defer func() {
+        close(stopC)
+        clean()
+    }()
+    act, err := testActionPack(repos)
+    if err != nil {
+        t.Fatal(err.Error())
+    }
+    err = execSync(tFeeder, act, stopC, testRoutPath, tmpdir)
+    if err == nil {
+        t.Fatal(err.Error())
+    }
+    // err should not be nil
+    t.Log(err.Error())
+}
+
+func Test_ExecSyncFail_With_UserStop(t *testing.T) {
+    log.SetLevel(log.DebugLevel)
+    setup()
+    var (
+        stopC = make(chan struct{})
+        progC = make(chan int64)
+        ctrlC = make(chan bool)
+        errC  = make(chan error)
+
+        tmpdir = os.TempDir()
+        tFeeder = &testFeed{}
+        repos = []patcher.BlockRepository{
+            blockrepository.NewBlockRepositoryBase(
+                0,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    progC <- start
+                    <- ctrlC
+                    log.Debugf("let's hand over data for (%v)[%v:%v]", REFERENCE_BUFFSZ, start, end)
+                    return REFERENCE_BUFFER[start:end], nil
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
+                    m := filechecksum.DefaultStrongHashGenerator()
+                    m.Write(data)
+                    return m.Sum(nil), nil
+                }),
+            ),
+        }
+    )
+    defer func() {
+        clean()
+        close(progC)
+        close(ctrlC)
+        close(errC)
+    }()
+    act, err := testActionPack(repos)
+    if err != nil {
+        t.Fatal(err.Error())
+    }
+    go func() {
+        for p := range progC {
+            if p < 40 {
+                ctrlC <- true
+            } else {
+                log.Debugf("since patcher has passed a threshold, let's stop")
+                close(stopC)
+            }
+        }
+    }()
+    go func() {
+       errC <- execSync(tFeeder, act, stopC, testRoutPath, tmpdir)
+    }()
+    select {
+        case <- time.After(time.Second * 10): {
+            t.Fatal("test timeout failure")
+        }
+        case err := <- errC: {
+            if err == nil {
+                t.Fatal(err.Error())
+            }
+            // err should not be nil
+            t.Log(err.Error())
+            if !multisources.IsInterruptError(err) {
+                t.Fatalf("error should be user halt : %v", err.Error())
+            }
+        }
     }
 }
