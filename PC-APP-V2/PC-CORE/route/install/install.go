@@ -7,6 +7,7 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+    "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/model"
@@ -46,6 +47,12 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
             stopC             = make(chan struct{})
             client            = newClient(timeout, false)
         )
+
+        // 0. find registry destination first
+        regDir, err := context.SharedHostContext().ApplicationRepositoryDirectory()
+        if err != nil {
+            return errors.WithStack(err)
+        }
 
         // 1. parse input package id
         err := json.Unmarshal([]byte(payload), &struct {
@@ -114,7 +121,7 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync core image"))
         }
-        err = execSync(feeder, cActionPack, rpProgress, stopC)
+        err = execSync(feeder, cActionPack, stopC, rpProgress, regDir)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync core image"))
         }
@@ -132,7 +139,7 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync node image"))
         }
-        err = execSync(feeder, nActionPack, rpProgress, stopC)
+        err = execSync(feeder, nActionPack, stopC, rpProgress, regDir)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync node image"))
         }

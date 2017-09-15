@@ -1,11 +1,12 @@
 package install
 
 import (
-    "encoding/json"
     "bytes"
     "encoding/binary"
+    "encoding/json"
     "fmt"
     "io"
+    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -19,8 +20,6 @@ import (
     "github.com/Redundancy/go-sync/patcher"
     "github.com/Redundancy/go-sync/patcher/multisources"
     "github.com/Redundancy/go-sync/showpipe"
-
-    "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/route"
 )
 
@@ -158,24 +157,19 @@ func prepSync(repoList []string, syncData []byte, refChksum, imageURL string) (*
 }
 
 
-func execSync(feeder route.ResponseFeeder, action *patchActionPack, rpath string, exitC chan struct{}) error {
+func execSync(feeder route.ResponseFeeder, action *patchActionPack, exitC chan struct{}, rpPath, uaPath string) error {
     var (
         uerrC = make(chan error)
         perrC = make(chan error)
     )
-    go func(act *patchActionPack, errC chan error) {
+    go func(act *patchActionPack, errC chan error, rDir string) {
         defer close(errC)
 
-        rDir, err := context.SharedHostContext().ApplicationRepositoryDirectory()
-        if err != nil {
-            errC <- err
-            return
-        }
-        err = xzUncompressor(action.reader, rDir)
+        err := xzUncompressor(action.reader, rDir)
         if err != nil {
             errC <- err
         }
-    }(action, uerrC)
+    }(action, uerrC, uaPath)
 
     go func(act *patchActionPack, errC chan error) {
         defer close(errC)
@@ -183,44 +177,48 @@ func execSync(feeder route.ResponseFeeder, action *patchActionPack, rpath string
         errC <- act.msync.Patch()
     }(action, perrC)
 
+    // wait a bit to patch action to start so we don't accidentally make requests on close BlockRepository when user
+    // interruption comes in before actual patch activity. (This needs to be fixed)
+    <- time.After(time.Millisecond * 100)
+
     for {
         select {
-        // close everythign
-        case <- exitC: {
-            action.close()
-            return errors.Errorf("core image sync halt")
-        }
-
-        case err := <- perrC: {
-            return errors.WithStack(err)
-        }
-
-            // this is emergency as unarchiving fails
-        case err := <- uerrC: {
-            return errors.WithStack(err)
-        }
-
-            // report progress
-        case rpt := <- action.report: {
-            data, err := json.Marshal(route.ReponseMessage{
-                "package-progress": {
-                    "total-size":   rpt.TotalSize,
-                    "received":     rpt.Received,
-                    "remaining":    rpt.Remaining,
-                    "speed":        rpt.Speed,
-                    "done-percent": rpt.DonePercent,
-                },
-            })
-            if err != nil {
-                log.Errorf(err.Error())
-                continue
+            // close everythign
+            case <- exitC: {
+                action.close()
+                return errors.Errorf("core image sync halt")
             }
-            err = feeder.FeedResponseForPost(rpath, string(data))
-            if err != nil {
-                log.Errorf(err.Error())
-                continue
+
+            case err := <- perrC: {
+                return errors.WithStack(err)
             }
-        }
+
+                // this is emergency as unarchiving fails
+            case err := <- uerrC: {
+                return errors.WithStack(err)
+            }
+
+                // report progress
+            case rpt := <- action.report: {
+                data, err := json.Marshal(route.ReponseMessage{
+                    "package-progress": {
+                        "total-size":   rpt.TotalSize,
+                        "received":     rpt.Received,
+                        "remaining":    rpt.Remaining,
+                        "speed":        rpt.Speed,
+                        "done-percent": rpt.DonePercent,
+                    },
+                })
+                if err != nil {
+                    log.Errorf(err.Error())
+                    continue
+                }
+                err = feeder.FeedResponseForPost(rpPath, string(data))
+                if err != nil {
+                    log.Errorf(err.Error())
+                    continue
+                }
+            }
         }
     }
 }
