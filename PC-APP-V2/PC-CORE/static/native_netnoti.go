@@ -83,15 +83,15 @@ func NetworkChangeNotificationInterface(interfaceArray **C.PCNetworkInterface, l
             mediaType = C.GoString(iface.mediaType)
         }
         hostInterfaces[idx] = &context.HostNetworkInterface{
-            WifiPowerOff : bool(iface.wifiPowerOff),
-            IsActive     : bool(iface.isActive),
-            IsPrimary    : bool(iface.isPrimary),
-            AddrCount    : uint(iface.addrCount),
-            Address      : addresses,
-            BsdName      : bsdName,
-            DisplayName  : displayName,
-            MacAddress   : macAddress,
-            MediaType    : mediaType,
+            WifiPowerOff:    bool(iface.wifiPowerOff),
+            IsActive:        bool(iface.isActive),
+            IsPrimary:       bool(iface.isPrimary),
+            AddrCount:       uint(iface.addrCount),
+            Address:         addresses,
+            BsdName:         bsdName,
+            DisplayName:     displayName,
+            MacAddress:      macAddress,
+            MediaType:       mediaType,
         }
     }
     theApp.Send(network.Event {
