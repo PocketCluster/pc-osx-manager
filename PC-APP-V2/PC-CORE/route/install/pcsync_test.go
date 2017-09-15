@@ -3,6 +3,7 @@ package install
 import (
     "bytes"
     "io"
+    "io/ioutil"
     "testing"
     "os"
 
@@ -21,28 +22,32 @@ import (
 const (
     testRoutPath string = "test.routh.path"
     BLOCKSIZE           = 8
-    REFERENCE_STRING    = "The quick brown fox jumped over the lazy dog | The quick brown fox jumped over the lazy dog"
 )
 
 var (
-    REFERENCE_BUFFER *bytes.Buffer = nil
-    REFERENCE_BLOCKS []string      = nil
+    REFERENCE_BUFFER []byte        = nil
+    REFERENCE_BLOCKS [][]byte      = nil
     REFERENCE_HASHES [][]byte      = nil
     REFERENCE_RTHASH []byte        = nil
     REFERENCE_CHKSEQ chunks.SequentialChecksumList = nil
+    REFERENCE_BUFSIZ int           = 0
     BLOCK_COUNT      int           = 0
 )
 
 func setup() {
-    REFERENCE_BUFFER = bytes.NewBufferString(REFERENCE_STRING)
-    REFERENCE_BLOCKS = []string{}
+    data, err := ioutil.ReadFile("test.txt.tz")
+    if err != nil {
+        log.Panic(err.Error())
+    }
+
+    REFERENCE_BUFFER = data
+    REFERENCE_BLOCKS = [][]byte{}
     REFERENCE_HASHES = [][]byte{}
     BLOCK_COUNT      = 0
-
-    maxLen          := len(REFERENCE_STRING)
+    REFERENCE_BUFSIZ = len(data)
+    maxLen          := len(data)
     m               := ripemd160.New()
 
-    log.SetLevel(log.DebugLevel)
     for i := 0; i < maxLen; i += BLOCKSIZE {
         last := i + BLOCKSIZE
 
@@ -50,12 +55,12 @@ func setup() {
             last = maxLen
         }
 
-        block := REFERENCE_STRING[i:last]
+        block := data[i:last]
 
         REFERENCE_BLOCKS = append(REFERENCE_BLOCKS, block)
+        m.Reset()
         m.Write([]byte(block))
         REFERENCE_HASHES = append(REFERENCE_HASHES, m.Sum(nil))
-        m.Reset()
     }
 
     BLOCK_COUNT = len(REFERENCE_BLOCKS)
@@ -77,11 +82,12 @@ func clean() {
     BLOCK_COUNT      = 0
 }
 
-func stringToReadSeeker(input string) io.ReadSeeker {
-    return bytes.NewReader([]byte(input))
+// --- test util function ---
+func byteToReadSeeker() io.ReadSeeker {
+    return bytes.NewReader(REFERENCE_BUFFER)
 }
 
-func buildSequentialChecksum(refBlks []string, sChksums [][]byte, blocksize int) chunks.SequentialChecksumList {
+func buildSequentialChecksum(refBlks [][]byte, sChksums [][]byte, blocksize int) chunks.SequentialChecksumList {
     var (
         chksum = chunks.SequentialChecksumList{}
         rsum   = rollsum.NewRollsum64(uint(blocksize))
@@ -107,6 +113,7 @@ func buildSequentialChecksum(refBlks []string, sChksums [][]byte, blocksize int)
     return chksum
 }
 
+// --- test block reference ---
 type testBlkRef struct{}
 func (t *testBlkRef) EndBlockID() uint {
     return REFERENCE_CHKSEQ[len(REFERENCE_CHKSEQ) - 1].ChunkOffset
@@ -135,7 +142,6 @@ func (t *testBlkRef) VerifyRootHash(hashes [][]byte) error {
     }
     return nil
 }
-
 
 // --- test feeder ---
 type testFeed struct {
@@ -168,16 +174,20 @@ func (t *testFeed) FeedResponseForDelete(path, payload string) error {
 }
 
 // --- test action pack ---
-
 func testActionPack() (*syncActionPack, error) {
     var (
-        reader, writer, report = showpipe.PipeWithReport(uint64(len(REFERENCE_STRING)))
+        reader, writer, report = showpipe.PipeWithReport(uint64(REFERENCE_BUFSIZ))
         repos = []patcher.BlockRepository{
             blockrepository.NewReadSeekerBlockRepository(
                 0,
-                stringToReadSeeker(REFERENCE_STRING),
+                byteToReadSeeker(),
                 blockrepository.MakeNullUniformSizeResolver(BLOCKSIZE),
-                nil),
+                blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
+                    m := ripemd160.New()
+                    m.Write(data)
+                    return m.Sum(nil), nil
+                }),
+            ),
         }
     )
     msync, err := multisources.NewMultiSourcePatcher(
@@ -197,11 +207,15 @@ func testActionPack() (*syncActionPack, error) {
 }
 
 func Test_ExecSync_Normal(t *testing.T) {
+    log.SetLevel(log.DebugLevel)
     var (
         stopC = make(chan struct{})
         tmpdir = os.TempDir()
         tFeeder = &testFeed{}
     )
+    defer func() {
+        close(stopC)
+    }()
     act, err := testActionPack()
     if err != nil {
         t.Fatal(err.Error())
