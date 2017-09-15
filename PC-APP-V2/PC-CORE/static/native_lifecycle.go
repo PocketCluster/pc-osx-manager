@@ -6,10 +6,6 @@
 
 package main
 
-// Simple on-screen app debugging for OS X. Not an officially supported
-// development target for apps, as screens with mice are very different
-// than screens with touch panels.
-
 /*
 #cgo CFLAGS: -x objective-c
 #cgo LDFLAGS: -framework Cocoa -Wl,-U,_PCNativeThreadID,-U,_PCNativeMainStart,-U,_PCNativeMainStop
@@ -25,35 +21,24 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+    "github.com/stkim1/pc-core/app"
+    "github.com/stkim1/pc-core/config"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/crash"
-    "github.com/stkim1/pc-core/event/route"
+    "github.com/stkim1/pc-core/route"
 )
 
 type appMainLife struct {
-    *app
-    *route.Router
+    app.App
+    route.Router
     service.ServiceSupervisor
 }
 
 var (
     initThreadID uint64
-    theApp = &appMainLife{
-        app:&app{
-            eventsOut:      make(chan interface{}),
-            lifecycleStage: lifecycle.StageDead,
-        },
-        Router: route.NewRouter(func(_, _, _ string) error {
-            return errors.Errorf("invalid path root (/)")
-        }),
-        ServiceSupervisor: service.NewServiceSupervisor(),
-    }
+    theApp *appMainLife = nil
 )
-
-func init() {
-    theApp.eventsIn = pump(theApp.eventsOut)
-}
 
 func init() {
     // Lock the goroutine responsible for initialization to an OS thread.
@@ -65,6 +50,13 @@ func init() {
     // https://groups.google.com/forum/#!msg/golang-nuts/IiWZ2hUuLDA/SNKYYZBelsYJ
     runtime.LockOSThread()
     initThreadID = uint64(C.PCNativeThreadID())
+    theApp = &appMainLife{
+        App: app.NewApp(),
+        Router: route.NewRouter(func(_, _, _ string) error {
+            return errors.Errorf("invalid path root (/)")
+        }),
+        ServiceSupervisor: service.NewServiceSupervisor(),
+    }
 }
 
 // this was app package of main()
@@ -83,22 +75,22 @@ func appLifeCycle(f func(*appMainLife)) int {
 
 //export lifecycleDead
 func lifecycleDead() {
-    theApp.sendLifecycle(lifecycle.StageDead)
+    theApp.SendLifecycle(lifecycle.StageDead)
 }
 
 //export lifecycleAlive
 func lifecycleAlive() {
-    theApp.sendLifecycle(lifecycle.StageAlive)
+    theApp.SendLifecycle(lifecycle.StageAlive)
 }
 
 //export lifecycleVisible
 func lifecycleVisible() {
-    theApp.sendLifecycle(lifecycle.StageVisible)
+    theApp.SendLifecycle(lifecycle.StageVisible)
 }
 
 //export lifecycleFocused
 func lifecycleFocused() {
-    theApp.sendLifecycle(lifecycle.StageFocused)
+    theApp.SendLifecycle(lifecycle.StageFocused)
 }
 
 //export lifecycleAwaken
@@ -115,14 +107,14 @@ func lifecycleSleep() {
 
 //export crashEmergentExit
 func crashEmergentExit() {
-    theApp.sendCrash(crash.CrashEmergentExit)
+    theApp.SendCrash(crash.CrashEmergentExit)
 }
 
 //export engineDebugOutput
 func engineDebugOutput(debug C.int) {
     if int(debug) == 0 {
-        setLogger(false)
+        config.SetLogger(false)
     } else {
-        setLogger(true)
+        config.SetLogger(true)
     }
 }

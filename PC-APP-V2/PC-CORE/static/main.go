@@ -6,14 +6,24 @@ import (
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
 
+    "github.com/stkim1/pc-core/config"
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
-    "github.com/stkim1/pc-core/event/route"
+
+    "github.com/stkim1/pc-core/route"
+    "github.com/stkim1/pc-core/route/install"
+    "github.com/stkim1/pc-core/route/initcheck"
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/service"
+    "github.com/stkim1/pc-core/service/container"
+    "github.com/stkim1/pc-core/service/dns"
+    "github.com/stkim1/pc-core/service/health"
+    "github.com/stkim1/pc-core/service/ivent"
+    "github.com/stkim1/pc-core/service/master"
+    "github.com/stkim1/pc-core/service/vbox"
 )
 
 func main() {
@@ -21,8 +31,8 @@ func main() {
     appLifeCycle(func(appLife *appMainLife) {
 
         var (
-            config *serviceConfig = nil
-            err error = nil
+            srvcConfig *config.ServiceConfig = nil
+            err error             = nil
         )
 
         for e := range appLife.Events() {
@@ -47,8 +57,8 @@ func main() {
                             log.Debugf("[LIFE] initialize ApplicationContext...")
                             // this needs to be initialized before service loop initiated
                             context.SharedHostContext()
-                            initRoutePathServices(appLife)
-                            initInstallRoutePath(appLife)
+                            initcheck.InitRoutePathServices(appLife)
+                            install.InitInstallRoutePath(appLife)
 
                             log.Debugf("[LIFE] app is now created, fully initialized %v", e.String())
                         }
@@ -88,7 +98,7 @@ func main() {
                             // services should be running before receiving event. Otherwise, service will not start
                             if isSrvRun && updated {
                                 log.Debugf("[NET] network address change event triggered")
-                                appLife.BroadcastEvent(service.Event{Name:iventNetworkAddressChange})
+                                appLife.BroadcastEvent(service.Event{Name:ivent.IventNetworkAddressChange})
                             }
                         }
                         case network.NetworkChangeGateway: {
@@ -130,7 +140,7 @@ func main() {
 
                         // config should be setup after acquiring ip address on wifi
                         // This should run only once
-                        config, err = setupServiceConfig()
+                        srvcConfig, err = config.SetupServiceConfig()
                         if err != nil {
                             // TODO send error report
                             log.Debugf("[LIFE] CRITICAL ERROR %v", err)
@@ -156,7 +166,7 @@ func main() {
                         // --- role service sequence ---
                         // storage service
                         // (NODEP netchange, NODEP services)
-                        err = initStorageServie(appLife, config.etcdConfig)
+                        err = container.InitStorageServie(appLife, srvcConfig.ETCD)
                         if err != nil {
                             log.Debug(err)
                             return
@@ -164,7 +174,7 @@ func main() {
 
                         // registry service
                         // (NODEP netchange, NODEP services)
-                        err = initRegistryService(appLife, config.regConfig)
+                        err = container.InitRegistryService(appLife, srvcConfig.REG)
                         if err != nil {
                             log.Debug(err)
                             return
@@ -189,7 +199,7 @@ func main() {
 
                         // internal name service
                         // (NODEP netchange, DEP master beacon service)
-                        err = initPocketNameService(appLife, cid)
+                        err = dns.InitPocketNameService(appLife, cid)
                         if err != nil {
                             log.Debug(err)
                             return
@@ -197,7 +207,7 @@ func main() {
 
                         // swarm service
                         // (NODEP netchange, DEP master beacon service)
-                        err = initSwarmService(appLife)
+                        err = container.InitSwarmService(appLife)
                         if err != nil {
                             log.Debug(err)
                             return
@@ -205,7 +215,7 @@ func main() {
 
                         // master beacon service
                         // (DEP netchange, DEP vboxcontrol + teleport service)
-                        err = initMasterBeaconService(appLife, cid, config.teleConfig)
+                        err = master.InitMasterBeaconService(appLife, cid, srvcConfig.PCSSH)
                         if err != nil {
                             log.Debug(err)
                             return
@@ -213,7 +223,7 @@ func main() {
 
                         // vboxcontrol service
                         // (DEP netchange, NODEP service)
-                        err = initVboxCoreReportService(appLife, cid)
+                        err = vbox.InitVboxCoreReportService(appLife, cid)
                         if err != nil {
                             log.Debug(err)
                             return
@@ -222,13 +232,13 @@ func main() {
                         // teleport service
                         // (DEP netchange, NODEP services)
                         // TODO : need to hold teleport instance from GC -> not necessary as it embeds service instance???
-                        _, err = sshproc.NewEmbeddedMasterProcess(appLife.ServiceSupervisor, config.teleConfig)
+                        _, err = sshproc.NewEmbeddedMasterProcess(appLife.ServiceSupervisor, srvcConfig.PCSSH)
                         if err != nil {
                             log.Debug(err)
                             return
                         }
 
-                        err = initSystemHealthMonitor(appLife)
+                        err = health.InitSystemHealthMonitor(appLife)
                         if err != nil {
                             log.Debug(err)
                             return
@@ -246,7 +256,7 @@ func main() {
                     /// STORAGE ///
 
                     case operation.CmdStorageStart: {
-                        err = initStorageServie(appLife, config.etcdConfig)
+                        err = container.InitStorageServie(appLife, srvcConfig.ETCD)
                         if err != nil {
                             log.Debug(err)
                             return
@@ -272,11 +282,11 @@ func main() {
                         if err != nil {
                             log.Debug(err)
                         }
-                        err = buildVboxCoreDisk(cid, config.teleConfig)
+                        err = vbox.BuildVboxCoreDisk(cid, srvcConfig.PCSSH)
                         if err != nil {
                             log.Debug(err)
                         }
-                        err = buildVboxMachine(appLife)
+                        err = vbox.BuildVboxMachine()
                         if err != nil {
                             log.Debugf("vbox operation error %v", err)
                         }

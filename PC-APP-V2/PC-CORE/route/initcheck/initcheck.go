@@ -1,4 +1,4 @@
-package main
+package initcheck
 
 import (
     "encoding/json"
@@ -6,13 +6,14 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/context"
-    "github.com/stkim1/pc-core/event/route/routepath"
+    "github.com/stkim1/pc-core/route"
+    "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/vboxglue"
 )
 
 type ReponseMessage map[string]map[string]interface{}
 
-func initRoutePathServices(appLife *appMainLife) {
+func InitRoutePathServices(appLife route.Router) {
 
     // check if this system is suitable to run
     appLife.GET(routepath.RpathSystemReadiness(), func(_, path, _ string) error {

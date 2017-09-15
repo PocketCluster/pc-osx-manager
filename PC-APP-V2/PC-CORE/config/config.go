@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
     tefaults "github.com/gravitational/teleport/lib/defaults"
@@ -14,13 +14,13 @@ import (
     "github.com/stkim1/pc-core/model"
 )
 
-type serviceConfig struct {
-    etcdConfig     *embed.PocketConfig
-    teleConfig     *tervice.PocketConfig
-    regConfig      *registry.PocketRegistryConfig
+type ServiceConfig struct {
+    ETCD  *embed.PocketConfig
+    PCSSH *tervice.PocketConfig
+    REG   *registry.PocketRegistryConfig
 }
 
-func setupServiceConfig() (*serviceConfig, error) {
+func SetupServiceConfig() (*ServiceConfig, error) {
     // setup context
     ctx := context.SharedHostContext()
     err := context.SetupBasePath()
@@ -137,9 +137,9 @@ func setupServiceConfig() (*serviceConfig, error) {
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    return &serviceConfig {
-        etcdConfig: etcdCfg,
-        teleConfig: teleCfg,
-        regConfig: regCfg,
+    return &ServiceConfig{
+        ETCD:  etcdCfg,
+        PCSSH: teleCfg,
+        REG:   regCfg,
     }, nil
 }

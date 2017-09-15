@@ -1,4 +1,4 @@
-package main
+package vbox
 
 import (
     "net"
@@ -20,11 +20,12 @@ import (
     "github.com/gravitational/teleport/lib/auth"
     tervice "github.com/gravitational/teleport/lib/service"
     "github.com/stkim1/pc-core/service"
+    "github.com/stkim1/pc-core/service/ivent"
     "github.com/stkim1/pc-core/vboxglue"
     "github.com/stkim1/pc-core/defaults"
 )
 
-func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
+func BuildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     log.Debugf("[VBOX_DISK] build vbox core disk ")
 
     var (
@@ -122,7 +123,7 @@ func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     return errors.WithStack(md.BuildCoreDiskImage())
 }
 
-func buildVboxMachine(appLife *appMainLife) error {
+func BuildVboxMachine() error {
     vglue, err := vboxglue.NewGOVboxGlue()
     if err != nil {
         errors.WithStack(err)
@@ -174,6 +175,7 @@ func buildVboxMachine(appLife *appMainLife) error {
         HostInterface:       vbifname,
         BootImagePath:       bootPath,
         HddImagePath:        hddPath,
+        // TODO : WTF????
         SharedFolderPath:    "/Users/almightykim/temp",
         SharedFolderName:    "/tmp",
     }
@@ -267,7 +269,7 @@ type vboxCtrlObjBrcst struct {
     net.Listener
 }
 
-func initVboxCoreReportService(appLife *appMainLife, clusterID string) error {
+func InitVboxCoreReportService(appLife service.ServiceSupervisor, clusterID string) error {
     var (
         ctrlObjC  = make(chan service.Event)
         netC      = make(chan service.Event)
@@ -318,7 +320,7 @@ func initVboxCoreReportService(appLife *appMainLife, clusterID string) error {
 
             // broadcase the two
             appLife.BroadcastEvent(service.Event{
-                Name:iventVboxCtrlInstanceSpawn,
+                Name:ivent.IventVboxCtrlInstanceSpawn,
                 Payload: vboxCtrlObjBrcst{
                     Listener:          listen,
                     VBoxMasterControl: ctrl,
@@ -350,7 +352,7 @@ func initVboxCoreReportService(appLife *appMainLife, clusterID string) error {
 
             return nil
         },
-        service.BindEventWithService(iventNetworkAddressChange, netC))
+        service.BindEventWithService(ivent.IventNetworkAddressChange, netC))
 
     appLife.RegisterServiceWithFuncs(
         operation.ServiceVBoxMasterListener,
@@ -396,7 +398,7 @@ func initVboxCoreReportService(appLife *appMainLife, clusterID string) error {
             }
             return nil
         },
-        service.BindEventWithService(iventVboxCtrlInstanceSpawn, ctrlObjC))
+        service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn, ctrlObjC))
 
     return nil
 }

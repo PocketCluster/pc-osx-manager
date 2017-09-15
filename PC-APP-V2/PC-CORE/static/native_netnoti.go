@@ -94,10 +94,10 @@ func NetworkChangeNotificationInterface(interfaceArray **C.PCNetworkInterface, l
             MediaType    : mediaType,
         }
     }
-    theApp.eventsIn <- network.Event {
+    theApp.Send(network.Event {
         NetworkEvent:      network.NetworkChangeInterface,
         HostInterfaces:    hostInterfaces,
-    }
+    })
 }
 
 //export NetworkChangeNotificationGateway
@@ -118,8 +118,8 @@ func NetworkChangeNotificationGateway(gatewayArray **C.SCNIGateway, length C.uin
             Address:      C.GoString(gw.addr),
         }
     }
-    theApp.eventsIn <- network.Event {
+    theApp.Send(network.Event {
         NetworkEvent:    network.NetworkChangeGateway,
         HostGateways:    hostGateways,
-    }
+    })
 }

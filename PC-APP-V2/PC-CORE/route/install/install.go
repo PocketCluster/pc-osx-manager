@@ -1,4 +1,4 @@
-package main
+package install
 
 import (
     "archive/tar"
@@ -28,7 +28,8 @@ import (
     "xi2.org/x/xz"
 
     "github.com/stkim1/pc-core/context"
-    "github.com/stkim1/pc-core/event/route/routepath"
+    "github.com/stkim1/pc-core/route"
+    "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/service"
 )
@@ -212,7 +213,7 @@ func xzUncompressor(archiveReader io.Reader, uncompPath string) error {
     return nil
 }
 
-func initInstallRoutePath(appLife *appMainLife) {
+func InitInstallRoutePath(appLife route.Router) {
     const (
         timeout = time.Duration(10 * time.Second)
     )

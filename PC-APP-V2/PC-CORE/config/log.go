@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
     "os"
@@ -8,7 +8,7 @@ import (
 )
 
 // TODO : WE NEED UNIFIED LOGGING FACILITY (Master + Slave)
-func setLogger(debug bool) {
+func SetLogger(debug bool) {
     log.StandardLogger().Hooks = make(log.LevelHooks)
     log.SetFormatter(&log.TextFormatter{
         // Let's enable color for now
