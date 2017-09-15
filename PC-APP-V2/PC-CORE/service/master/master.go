@@ -3,10 +3,11 @@ package master
 import (
     "time"
 
-    "github.com/gravitational/teleport/embed"
-    tervice "github.com/gravitational/teleport/lib/service"
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+    "github.com/gravitational/teleport/embed"
+    tervice "github.com/gravitational/teleport/lib/service"
+    "github.com/stkim1/pc-vbox-comm/masterctrl"
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
@@ -86,7 +87,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
             )
             // wait for vbox control
             vc := <- vboxC
-            vbc, ok := vc.Payload.(vboxCtrlObjBrcst)
+            vbc, ok := vc.Payload.(masterctrl.VBoxMasterControl)
             if !ok {
                 log.Debugf("[AGENT] (ERR) invalid VBoxMasterControl type")
                 return errors.Errorf("[ERR] invalid VBoxMasterControl type")
@@ -95,7 +96,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
             // beacon manager
             beaconMan, err = beacon.NewBeaconManagerWithFunc(
                 clusterID,
-                vbc.VBoxMasterControl,
+                vbc,
                 beaconRoute,
                 func(host string, payload []byte) error {
                     log.Debugf("[AGENT] BEACON-TX [%v] Host %v", time.Now(), host)
@@ -169,9 +170,9 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
         },
         service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
         service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
-        service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,           vboxC),
+        service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,     vboxC),
         service.BindEventWithService(sshproc.EventPCSSHServerProxyStarted, teleC),
-        service.BindEventWithService(ivent.IventNetworkAddressChange,            netC))
+        service.BindEventWithService(ivent.IventNetworkAddressChange,      netC))
 
     return nil
 }

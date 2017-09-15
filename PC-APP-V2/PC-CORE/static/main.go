@@ -14,7 +14,7 @@ import (
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/route"
-    "github.com/stkim1/pc-core/route/install"
+//    "github.com/stkim1/pc-core/route/install"
     "github.com/stkim1/pc-core/route/initcheck"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/service/container"
@@ -23,6 +23,7 @@ import (
     "github.com/stkim1/pc-core/service/ivent"
     "github.com/stkim1/pc-core/service/master"
     "github.com/stkim1/pc-core/service/vbox"
+    "github.com/stkim1/pc-core/vboxglue"
 )
 
 func main() {
@@ -57,7 +58,7 @@ func main() {
                             // this needs to be initialized before service loop initiated
                             context.SharedHostContext()
                             initcheck.InitRoutePathServices(appLife, theFeeder)
-                            install.InitInstallRoutePath(appLife, theFeeder)
+//                            install.InitInstallRoutePath(appLife, theFeeder)
 
                             log.Debugf("[LIFE] app is now created, fully initialized %v", e.String())
                         }
@@ -281,11 +282,11 @@ func main() {
                         if err != nil {
                             log.Debug(err)
                         }
-                        err = vbox.BuildVboxCoreDisk(cid, appCfg.PCSSH)
+                        err = vboxglue.BuildVboxCoreDisk(cid, appCfg.PCSSH)
                         if err != nil {
                             log.Debug(err)
                         }
-                        err = vbox.BuildVboxMachine()
+                        err = vboxglue.BuildVboxMachine()
                         if err != nil {
                             log.Debugf("vbox operation error %v", err)
                         }
