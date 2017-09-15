@@ -11,7 +11,7 @@ import (
 func TestRouter(t *testing.T) { TestingT(t) }
 
 type RouterSuite struct {
-    router    *Router
+    router    Router
 }
 
 var _ = Suite(&RouterSuite{})

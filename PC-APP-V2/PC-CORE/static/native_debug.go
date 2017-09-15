@@ -1,3 +1,4 @@
+// +build darwin
 package main
 
 /*
@@ -10,49 +11,49 @@ import (
 
 //export OpsCmdBaseServiceStart
 func OpsCmdBaseServiceStart() {
-    theApp.eventsIn <- operation.Operation{
+    theApp.Send(operation.Operation{
         Command:    operation.CmdBaseServiceStart,
-    }
+    })
 }
 
 //export OpsCmdBaseServiceStop
 func OpsCmdBaseServiceStop() {
-    theApp.eventsIn <- operation.Operation{
+    theApp.Send(operation.Operation{
         Command:    operation.CmdBaseServiceStop,
-    }
+    })
 }
 
 //export OpsCmdStorageStart
 func OpsCmdStorageStart() {
-    theApp.eventsIn <- operation.Operation{
+    theApp.Send(operation.Operation{
         Command:    operation.CmdStorageStart,
-    }
+    })
 }
 
 //export OpsCmdStorageStop
 func OpsCmdStorageStop() {
-    theApp.eventsIn <- operation.Operation{
+    theApp.Send(operation.Operation{
         Command:    operation.CmdStorageStop,
-    }
+    })
 }
 
 //export OpsCmdTeleportRootAdd
 func OpsCmdTeleportRootAdd() {
-    theApp.eventsIn <- operation.Operation{
+    theApp.Send(operation.Operation{
         Command:    operation.CmdTeleportRootAdd,
-    }
+    })
 }
 
 //export OpsCmdTeleportUserAdd
 func OpsCmdTeleportUserAdd() {
-    theApp.eventsIn <- operation.Operation{
+    theApp.Send(operation.Operation{
         Command:    operation.CmdTeleportUserAdd,
-    }
+    })
 }
 
 //export OpsCmdDebug
 func OpsCmdDebug() {
-    theApp.eventsIn <- operation.Operation{
+    theApp.Send(operation.Operation{
         Command:    operation.CmdDebug,
-    }
+    })
 }

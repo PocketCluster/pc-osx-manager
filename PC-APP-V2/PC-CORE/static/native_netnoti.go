@@ -83,21 +83,21 @@ func NetworkChangeNotificationInterface(interfaceArray **C.PCNetworkInterface, l
             mediaType = C.GoString(iface.mediaType)
         }
         hostInterfaces[idx] = &context.HostNetworkInterface{
-            WifiPowerOff : bool(iface.wifiPowerOff),
-            IsActive     : bool(iface.isActive),
-            IsPrimary    : bool(iface.isPrimary),
-            AddrCount    : uint(iface.addrCount),
-            Address      : addresses,
-            BsdName      : bsdName,
-            DisplayName  : displayName,
-            MacAddress   : macAddress,
-            MediaType    : mediaType,
+            WifiPowerOff:    bool(iface.wifiPowerOff),
+            IsActive:        bool(iface.isActive),
+            IsPrimary:       bool(iface.isPrimary),
+            AddrCount:       uint(iface.addrCount),
+            Address:         addresses,
+            BsdName:         bsdName,
+            DisplayName:     displayName,
+            MacAddress:      macAddress,
+            MediaType:       mediaType,
         }
     }
-    theApp.eventsIn <- network.Event {
+    theApp.Send(network.Event {
         NetworkEvent:      network.NetworkChangeInterface,
         HostInterfaces:    hostInterfaces,
-    }
+    })
 }
 
 //export NetworkChangeNotificationGateway
@@ -118,8 +118,8 @@ func NetworkChangeNotificationGateway(gatewayArray **C.SCNIGateway, length C.uin
             Address:      C.GoString(gw.addr),
         }
     }
-    theApp.eventsIn <- network.Event {
+    theApp.Send(network.Event {
         NetworkEvent:    network.NetworkChangeGateway,
         HostGateways:    hostGateways,
-    }
+    })
 }

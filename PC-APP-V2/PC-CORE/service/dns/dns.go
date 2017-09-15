@@ -1,4 +1,4 @@
-package main
+package dns
 
 import (
     "net"
@@ -11,6 +11,7 @@ import (
     "github.com/stkim1/pc-core/beacon"
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/service"
+    "github.com/stkim1/pc-core/service/ivent"
 )
 
 // --- methods for name service --- //
@@ -82,7 +83,7 @@ func locaNodeName(beaconMan beacon.BeaconManger, w dns.ResponseWriter, req *dns.
     w.WriteMsg(m)
 }
 
-func initPocketNameService(appLife *appMainLife, clusterID string) error {
+func InitPocketNameService(appLife service.ServiceSupervisor, clusterID string) error {
     const (
         iventNameServerInstanceSpawn string = "ivent.name.server.instance.spawn"
     )
@@ -148,7 +149,7 @@ func initPocketNameService(appLife *appMainLife, clusterID string) error {
             udpAddr = nil
             return errors.WithStack(err)
         },
-        service.BindEventWithService(iventBeaconManagerSpawn, beaconManC))
+        service.BindEventWithService(ivent.IventBeaconManagerSpawn, beaconManC))
 
     return nil
 }

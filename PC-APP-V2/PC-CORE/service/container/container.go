@@ -1,7 +1,6 @@
-package main
+package container
 
 import (
-    "encoding/json"
     "time"
 
     log "github.com/Sirupsen/logrus"
@@ -13,10 +12,10 @@ import (
     "github.com/stkim1/pc-core/extlib/registry"
     swarmemb "github.com/stkim1/pc-core/extlib/swarm"
     "github.com/stkim1/pc-core/service"
-    "github.com/stkim1/pc-core/event/route/routepath"
+    "github.com/stkim1/pc-core/service/ivent"
 )
 
-func initStorageServie(appLife *appMainLife, config *embed.PocketConfig) error {
+func InitStorageServie(appLife service.ServiceSupervisor, config *embed.PocketConfig) error {
     appLife.RegisterServiceWithFuncs(
         operation.ServiceStorageProcess,
         func() error {
@@ -53,7 +52,7 @@ func initStorageServie(appLife *appMainLife, config *embed.PocketConfig) error {
     return nil
 }
 
-func initRegistryService(appLife *appMainLife, config *registry.PocketRegistryConfig) error {
+func InitRegistryService(appLife service.ServiceSupervisor, config *registry.PocketRegistryConfig) error {
     appLife.RegisterServiceWithFuncs(
         operation.ServiceContainerRegistry,
         func() error {
@@ -76,7 +75,7 @@ func initRegistryService(appLife *appMainLife, config *registry.PocketRegistryCo
     return nil
 }
 
-func initSwarmService(appLife *appMainLife) error {
+func InitSwarmService(appLife service.ServiceSupervisor) error {
     const (
         iventSwarmInstanceSpawn string  = "ivent.swarm.instance.spawn"
     )
@@ -146,99 +145,7 @@ func initSwarmService(appLife *appMainLife) error {
             err = swarmsrv.ListenAndServeSingleHost()
             return errors.WithStack(err)
         },
-        service.BindEventWithService(iventBeaconManagerSpawn, beaconManC))
-
-    return nil
-}
-
-func initSystemHealthMonitor(appLife *appMainLife) error {
-    var (
-        unregNodeC = make(chan service.Event)
-        regNodeC = make(chan service.Event)
-    )
-    appLife.RegisterServiceWithFuncs(
-        operation.ServiceMonitorSystemHealth,
-        func() error {
-
-            type MonitorSystemHealth map[string]interface{}
-
-            var (
-                timer = time.NewTicker(time.Second)
-                rpUnregNode = routepath.RpathMonitorNodeUnregistered()
-                rpRegNode = routepath.RpathMonitorNodeRegistered()
-                rpSrvStat = routepath.RpathMonitorServiceStatus()
-            )
-
-            for {
-                select {
-                    case <- appLife.StopChannel(): {
-                        timer.Stop()
-                        return nil
-                    }
-                    // monitoring unregistered nodes
-                    case re := <- unregNodeC: {
-                        nodes, ok := re.Payload.([]map[string]string)
-                        if !ok {
-                            log.Debugf("[ERR] invalid unregistered node list type")
-                            continue
-                        }
-                        data, err := json.Marshal(map[string]interface{} {"unregistered" : nodes})
-                        if err != nil {
-                            log.Debugf(err.Error())
-                            continue
-                        }
-                        err = FeedResponseForGet(rpUnregNode, string(data))
-                        if err != nil {
-                            log.Debugf(err.Error())
-                        }
-                    }
-                    // monitoring registered nodes
-                    case re := <- regNodeC: {
-                        nodes, ok := re.Payload.([]map[string]string)
-                        if !ok {
-                            log.Debugf("[ERR] invalid registered node list type")
-                            continue
-                        }
-                        data, err := json.Marshal(map[string]interface{} {"registered" : nodes})
-                        if err != nil {
-                            log.Debugf(err.Error())
-                            continue
-                        }
-                        err = FeedResponseForGet(rpRegNode, string(data))
-                        if err != nil {
-                            log.Debugf(err.Error())
-                        }
-                    }
-                    // service report
-                    case <- timer.C: {
-                        // report services status
-                        var (
-                            response = MonitorSystemHealth{}
-                            srvStatus = map[string]bool{}
-                        )
-
-                        sl := appLife.ServiceList()
-                        for i, _ := range sl {
-                            s := sl[i]
-                            srvStatus[s.Tag()] = s.IsRunning()
-                        }
-                        response["services"] = srvStatus
-                        data, err := json.Marshal(response)
-                        if err != nil {
-                            log.Debugf(err.Error())
-                        }
-                        err = FeedResponseForGet(rpSrvStat, string(data))
-                        if err != nil {
-                            log.Debugf(err.Error())
-                        }
-                    }
-                }
-            }
-
-            return nil
-        },
-        service.BindEventWithService(iventMonitorUnregisteredNode, unregNodeC),
-        service.BindEventWithService(iventMonitorRegisteredNode,   regNodeC))
+        service.BindEventWithService(ivent.IventBeaconManagerSpawn, beaconManC))
 
     return nil
 }

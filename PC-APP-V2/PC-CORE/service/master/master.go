@@ -1,12 +1,13 @@
-package main
+package master
 
 import (
     "time"
 
-    "github.com/gravitational/teleport/embed"
-    tervice "github.com/gravitational/teleport/lib/service"
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+    "github.com/gravitational/teleport/embed"
+    tervice "github.com/gravitational/teleport/lib/service"
+    "github.com/stkim1/pc-vbox-comm/masterctrl"
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
@@ -15,6 +16,7 @@ import (
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/model"
+    "github.com/stkim1/pc-core/service/ivent"
 )
 
 type beaconEventRoute struct {
@@ -63,7 +65,7 @@ func (b *beaconEventRoute) BeaconEventShutdown() error {
     return nil
 }
 
-func initMasterBeaconService(appLife *appMainLife, clusterID string, tcfg *tervice.PocketConfig) error {
+func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string, tcfg *tervice.PocketConfig) error {
     var (
         beaconC = make(chan service.Event)
         searchC = make(chan service.Event)
@@ -76,7 +78,7 @@ func initMasterBeaconService(appLife *appMainLife, clusterID string, tcfg *tervi
         func() error {
             var (
                 beaconRoute *beaconEventRoute  = &beaconEventRoute{
-                    ServiceSupervisor: appLife.ServiceSupervisor,
+                    ServiceSupervisor: appLife,
                     PocketConfig:      tcfg,
                 }
                 timer                          = time.NewTicker(time.Second)
@@ -85,7 +87,7 @@ func initMasterBeaconService(appLife *appMainLife, clusterID string, tcfg *tervi
             )
             // wait for vbox control
             vc := <- vboxC
-            vbc, ok := vc.Payload.(vboxCtrlObjBrcst)
+            vbc, ok := vc.Payload.(masterctrl.VBoxMasterControl)
             if !ok {
                 log.Debugf("[AGENT] (ERR) invalid VBoxMasterControl type")
                 return errors.Errorf("[ERR] invalid VBoxMasterControl type")
@@ -94,7 +96,7 @@ func initMasterBeaconService(appLife *appMainLife, clusterID string, tcfg *tervi
             // beacon manager
             beaconMan, err = beacon.NewBeaconManagerWithFunc(
                 clusterID,
-                vbc.VBoxMasterControl,
+                vbc,
                 beaconRoute,
                 func(host string, payload []byte) error {
                     log.Debugf("[AGENT] BEACON-TX [%v] Host %v", time.Now(), host)
@@ -116,7 +118,7 @@ func initMasterBeaconService(appLife *appMainLife, clusterID string, tcfg *tervi
             <- teleC
 
             log.Debugf("[AGENT] starting agent service...")
-            appLife.BroadcastEvent(service.Event{Name:iventBeaconManagerSpawn, Payload:beaconMan})
+            appLife.BroadcastEvent(service.Event{Name:ivent.IventBeaconManagerSpawn, Payload:beaconMan})
             for {
                 select {
                     case <-appLife.StopChannel(): {
@@ -156,7 +158,7 @@ func initMasterBeaconService(appLife *appMainLife, clusterID string, tcfg *tervi
                             log.Debug(err.Error())
                         }
                         regNodes := beaconMan.RegisteredNodesList()
-                        appLife.BroadcastEvent(service.Event{Name:iventMonitorRegisteredNode, Payload:regNodes})
+                        appLife.BroadcastEvent(service.Event{Name:ivent.IventMonitorRegisteredNode, Payload:regNodes})
                     }
                     case <- netC: {
                         // TODO update primary address
@@ -168,9 +170,9 @@ func initMasterBeaconService(appLife *appMainLife, clusterID string, tcfg *tervi
         },
         service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
         service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
-        service.BindEventWithService(iventVboxCtrlInstanceSpawn,           vboxC),
+        service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,     vboxC),
         service.BindEventWithService(sshproc.EventPCSSHServerProxyStarted, teleC),
-        service.BindEventWithService(iventNetworkAddressChange,            netC))
+        service.BindEventWithService(ivent.IventNetworkAddressChange,      netC))
 
     return nil
 }

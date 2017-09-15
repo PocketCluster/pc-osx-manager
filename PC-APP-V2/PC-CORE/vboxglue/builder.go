@@ -1,30 +1,26 @@
-package main
+package vboxglue
 
 import (
     "net"
-    "time"
     "path/filepath"
+    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
-
-    "github.com/stkim1/pcrypto"
-    "github.com/stkim1/pc-vbox-comm/masterctrl"
-    "github.com/stkim1/pc-vbox-core/vboxutil"
-
-    "github.com/stkim1/pc-core/context"
-    "github.com/stkim1/pc-core/event/operation"
-    "github.com/stkim1/pc-core/model"
-
     "github.com/gravitational/teleport/embed"
     "github.com/gravitational/teleport/lib/auth"
     tervice "github.com/gravitational/teleport/lib/service"
-    "github.com/stkim1/pc-core/service"
-    "github.com/stkim1/pc-core/vboxglue"
+
+    "github.com/stkim1/pc-vbox-comm/masterctrl"
+    "github.com/stkim1/pc-vbox-core/vboxutil"
+    "github.com/stkim1/pcrypto"
+
+    "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/defaults"
+    "github.com/stkim1/pc-core/model"
 )
 
-func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
+func BuildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     log.Debugf("[VBOX_DISK] build vbox core disk ")
 
     var (
@@ -122,8 +118,8 @@ func buildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     return errors.WithStack(md.BuildCoreDiskImage())
 }
 
-func buildVboxMachine(appLife *appMainLife) error {
-    vglue, err := vboxglue.NewGOVboxGlue()
+func BuildVboxMachine() error {
+    vglue, err := NewGOVboxGlue()
     if err != nil {
         errors.WithStack(err)
     }
@@ -166,7 +162,7 @@ func buildVboxMachine(appLife *appMainLife) error {
     hddPath := filepath.Join(vmPath, defaults.VBoxDefualtCoreDiskName)
     log.Debugf("[VBOX] %s", hddPath)
 
-    builder := &vboxglue.VBoxBuildOption{
+    builder := &VBoxBuildOption{
         CPUCount:            cpuCount,
         MemSize:             memSize,
         BaseDirPath:         baseDir,
@@ -174,11 +170,12 @@ func buildVboxMachine(appLife *appMainLife) error {
         HostInterface:       vbifname,
         BootImagePath:       bootPath,
         HddImagePath:        hddPath,
+        // TODO : WTF????
         SharedFolderPath:    "/Users/almightykim/temp",
         SharedFolderName:    "/tmp",
     }
 
-    err = vboxglue.ValidateVBoxBuildOption(builder)
+    err = ValidateVBoxBuildOption(builder)
     if err != nil {
         return errors.WithStack(err)
     }
@@ -215,7 +212,6 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
                 if 0 < errorCount {
                     time.Sleep(masterctrl.BoundedTimeout)
                 }
-
 /*
                 err = conn.SetReadDeadline(time.Now().Add(time.Second * 3))
                 if err != nil {
@@ -259,144 +255,4 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
             }
         }
     }
-}
-
-// this is to broadcast masterctrl object w/ listener
-type vboxCtrlObjBrcst struct {
-    masterctrl.VBoxMasterControl
-    net.Listener
-}
-
-func initVboxCoreReportService(appLife *appMainLife, clusterID string) error {
-    var (
-        ctrlObjC  = make(chan service.Event)
-        netC      = make(chan service.Event)
-    )
-
-    appLife.RegisterServiceWithFuncs(
-        operation.ServiceVBoxMasterControl,
-        func() error {
-            var (
-                ctrl           masterctrl.VBoxMasterControl = nil
-                coreNode       *model.CoreNode              = nil
-                listen         net.Listener                 = nil
-                prvkey, pubkey []byte                       = nil, nil
-                err            error                        = nil
-                paddr          string                       = ""
-            )
-
-            // --- build vbox controller --- //
-            // by this time, all the core node data should have been generated
-            coreNode = model.RetrieveCoreNode()
-            _, err = coreNode.GetAuthToken()
-            if err != nil {
-                return errors.Errorf("[ERR] core node should have auth token at this point")
-            }
-            prvkey, err = context.SharedHostContext().MasterVBoxCtrlPrivateKey()
-            if err != nil {
-                return errors.WithStack(err)
-            }
-            pubkey, err = context.SharedHostContext().MasterVBoxCtrlPublicKey()
-            if err != nil {
-                return errors.WithStack(err)
-            }
-            paddr, err = context.SharedHostContext().HostPrimaryAddress()
-            if err != nil {
-                return errors.WithStack(err)
-            }
-            log.Debugf("[VBOXCTRL] external ip address %v", paddr)
-            ctrl, err = masterctrl.NewVBoxMasterControl(clusterID, paddr, prvkey, pubkey, coreNode, nil)
-            if err != nil {
-                return errors.WithStack(err)
-            }
-
-            // --- build network listener --- //
-            listen, err = net.Listen("tcp4", net.JoinHostPort("127.0.0.1", "10068"))
-            if err != nil {
-                return errors.WithStack(err)
-            }
-
-            // broadcase the two
-            appLife.BroadcastEvent(service.Event{
-                Name:iventVboxCtrlInstanceSpawn,
-                Payload: vboxCtrlObjBrcst{
-                    Listener:          listen,
-                    VBoxMasterControl: ctrl,
-                }})
-
-            log.Debugf("[VBOXCTRL] VBox Core Control service started... %s", ctrl.CurrentState().String())
-            for {
-                select {
-                    case <- appLife.StopChannel(): {
-                        log.Debugf("[VBOXCTRL] VBox Core Control shutdown...")
-                        return errors.WithStack(listen.Close())
-                    }
-                    case <- netC: {
-                        log.Debugf("[VBOXCTRL] Host Address changed")
-                        paddr, err := context.SharedHostContext().HostPrimaryAddress()
-
-                        // when there is an error
-                        if err != nil {
-                            ctrl.ClearMasterIPv4ExternalAddress()
-
-                        // when there is no error to change the primary address
-                        } else {
-                            ctrl.SetMasterIPv4ExternalAddress(paddr)
-
-                        }
-                    }
-                }
-            }
-
-            return nil
-        },
-        service.BindEventWithService(iventNetworkAddressChange, netC))
-
-    appLife.RegisterServiceWithFuncs(
-        operation.ServiceVBoxMasterListener,
-        func() error {
-            var (
-                ctrl      masterctrl.VBoxMasterControl = nil
-                listen    net.Listener                 = nil
-                conn      net.Conn                     = nil
-                err       error                        = nil
-            )
-
-            // masterctrl.VBoxMasterControl
-            cc := <- ctrlObjC
-            vbc, ok := cc.Payload.(vboxCtrlObjBrcst)
-            if !ok {
-                log.Debugf("[ERR] invalid VBoxMasterControl type")
-                return errors.Errorf("[ERR] invalid VBoxMasterControl type")
-            }
-            ctrl = vbc.VBoxMasterControl
-            listen = vbc.Listener
-
-            log.Debugf("[VBOXLSTN] VBox Core Listener service started... %s", ctrl.CurrentState().String())
-            for {
-                select {
-                    case <- appLife.StopChannel(): {
-                        log.Debugf("[VBOXLSTN] VBox Core listener shutdown...")
-                        return nil
-                    }
-                    default: {
-                        conn, err = listen.Accept()
-                        if err != nil {
-                            log.Debugf("[VBOXLSTN] connection open error (%v)", err.Error())
-                            time.Sleep(masterctrl.BoundedTimeout)
-                        } else {
-                            log.Debugf("[VBOXLSTN] new connection opens")
-                            err = handleConnection(ctrl, conn, appLife.StopChannel())
-                            if err != nil {
-                                log.Debugf("[VBOXLSTN] connection handle error (%v)", err.Error())
-                            }
-                        }
-                    }
-                }
-            }
-            return nil
-        },
-        service.BindEventWithService(iventVboxCtrlInstanceSpawn, ctrlObjC))
-
-    return nil
 }

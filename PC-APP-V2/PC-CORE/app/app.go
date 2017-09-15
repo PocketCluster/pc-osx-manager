@@ -4,7 +4,7 @@
 
 // +build linux darwin windows
 
-package main
+package app
 
 import (
     "github.com/stkim1/pc-core/event/lifecycle"
@@ -36,6 +36,12 @@ type App interface {
     // but the function can also return its argument unchanged, where its purpose
     // is to trigger a side effect rather than modify the event.
     RegisterFilter(f func(interface{}) interface{})
+
+    // dispatch life cycle event
+    SendLifecycle(to lifecycle.Stage)
+
+    // enforce crash
+    SendCrash(reason crash.CrashType)
 }
 
 type app struct {
@@ -43,6 +49,15 @@ type app struct {
     eventsOut         chan interface{}
     eventsIn          chan interface{}
     lifecycleStage    lifecycle.Stage
+}
+
+func NewApp() App {
+    a := &app{
+        eventsOut:      make(chan interface{}),
+        lifecycleStage: lifecycle.StageDead,
+    }
+    a.eventsIn = pump(a.eventsOut)
+    return a
 }
 
 func (a *app) Events() <-chan interface{} {
@@ -64,7 +79,7 @@ func (a *app) RegisterFilter(f func(interface{}) interface{}) {
     a.filters = append(a.filters, f)
 }
 
-func (a *app) sendLifecycle(to lifecycle.Stage) {
+func (a *app) SendLifecycle(to lifecycle.Stage) {
     if a.lifecycleStage == to {
         return
     }
@@ -75,7 +90,7 @@ func (a *app) sendLifecycle(to lifecycle.Stage) {
     a.lifecycleStage = to
 }
 
-func (a *app) sendCrash(reason crash.CrashType) {
+func (a *app) SendCrash(reason crash.CrashType) {
     a.eventsIn <- crash.Crash{
         Reason:      reason,
     }
