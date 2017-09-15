@@ -14,7 +14,7 @@ import (
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/route"
-//    "github.com/stkim1/pc-core/route/install"
+    "github.com/stkim1/pc-core/route/install"
     "github.com/stkim1/pc-core/route/initcheck"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/service/container"
@@ -58,7 +58,7 @@ func main() {
                             // this needs to be initialized before service loop initiated
                             context.SharedHostContext()
                             initcheck.InitRoutePathServices(appLife, theFeeder)
-//                            install.InitInstallRoutePath(appLife, theFeeder)
+                            install.InitInstallListRouthPath(appLife, theFeeder)
 
                             log.Debugf("[LIFE] app is now created, fully initialized %v", e.String())
                         }
@@ -140,7 +140,7 @@ func main() {
 
                         // config should be setup after acquiring ip address on wifi
                         // This should run only once
-                        appCfg, err = config.SetupServiceConfig()
+                        appCfg, err = config.InitServiceConfig()
                         if err != nil {
                             // TODO send error report
                             log.Debugf("[LIFE] CRITICAL ERROR %v", err)

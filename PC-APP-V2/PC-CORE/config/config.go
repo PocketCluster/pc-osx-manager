@@ -20,7 +20,7 @@ type ServiceConfig struct {
     REG   *registry.PocketRegistryConfig
 }
 
-func SetupServiceConfig() (*ServiceConfig, error) {
+func InitServiceConfig() (*ServiceConfig, error) {
     // setup context
     ctx := context.SharedHostContext()
     err := context.SetupBasePath()
