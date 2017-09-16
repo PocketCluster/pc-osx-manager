@@ -158,17 +158,15 @@ func prepSync(repoList []string, syncData []byte, refChksum, imageURL string) (*
 
 func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan struct{}, rpPath, uaPath string) error {
     var (
-        uerrC = make(chan error)
-        perrC = make(chan error)
-
-        unarchDone = false
-        patchDone = false
+        uerrC      chan error = make(chan error)
+        perrC      chan error = make(chan error)
+        unarchDone       bool = false
+        patchDone        bool = false
     )
     defer func() {
         close(uerrC)
         close(perrC)
     }()
-
     go func(act *syncActionPack, errC chan error, rDir string) {
         log.Debugf("[UNARCH] started")
         uerrC <- xzUncompressor(action.reader, rDir)
@@ -194,26 +192,24 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
 
             // patch error
             case err := <- perrC: {
+                log.Debugf("[PATCH] error signals %v", err.Error())
                 patchDone = true
                 if unarchDone {
                     return errors.WithStack(err)
                 }
-                log.Debugf("[PATCH] patch signals")
                 if err != nil {
-                    log.Debugf("[PATCH] there's an error. Let's kill patcher")
                     go action.close()
                 }
             }
 
             // this is emergency as unarchiving fails
             case err := <- uerrC: {
+                log.Debugf("[UNARCH] error signals %v", err.Error())
                 unarchDone = true
                 if patchDone {
                     return errors.WithStack(err)
                 }
-                log.Debugf("[UNARCH] unarch signals %v", err)
                 if err != nil {
-                    log.Debugf("[UNARCH] there's an error error %v", err)
                     go action.close()
                 }
             }
