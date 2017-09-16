@@ -2,13 +2,11 @@ package install
 
 import (
     "bytes"
-    "io"
     "io/ioutil"
     "testing"
     "os"
     "path/filepath"
     "runtime"
-    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -89,10 +87,6 @@ func clean() {
 }
 
 // --- test util function ---
-func byteToReadSeeker() io.ReadSeeker {
-    return bytes.NewReader(REFERENCE_BUFFER)
-}
-
 func buildSequentialChecksum(refBlks [][]byte, sChksums [][]byte, blocksize int) chunks.SequentialChecksumList {
     var (
         chksum = chunks.SequentialChecksumList{}
@@ -200,6 +194,8 @@ func testActionPack(repos []patcher.BlockRepository) (*syncActionPack, error) {
     }, nil
 }
 
+
+// - * - * - * - * - * - * - * - * - * - * - * - TEST SET - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * -
 func Test_ExecSyncSuccess_Normal(t *testing.T) {
     log.SetLevel(log.DebugLevel)
     setup()
@@ -210,7 +206,7 @@ func Test_ExecSyncSuccess_Normal(t *testing.T) {
         repos = []patcher.BlockRepository{
             blockrepository.NewReadSeekerBlockRepository(
                 0,
-                byteToReadSeeker(),
+                bytes.NewReader(REFERENCE_BUFFER),
                 blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
                 blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
                     m := filechecksum.DefaultStrongHashGenerator()
@@ -234,7 +230,7 @@ func Test_ExecSyncSuccess_Normal(t *testing.T) {
     }
 }
 
-func Test_ExecSyncFail_With_SingleRepo(t *testing.T) {
+func Test_ExecSyncFail_With_BlockRepo(t *testing.T) {
     log.SetLevel(log.DebugLevel)
     setup()
     var (
@@ -281,8 +277,6 @@ func Test_ExecSyncFail_With_UserStop(t *testing.T) {
     var (
         stopC = make(chan struct{})
         progC = make(chan int64)
-        ctrlC = make(chan bool)
-        errC  = make(chan error)
 
         tmpdir = os.TempDir()
         tFeeder = &testFeed{}
@@ -291,7 +285,6 @@ func Test_ExecSyncFail_With_UserStop(t *testing.T) {
                 0,
                 blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
                     progC <- start
-                    <- ctrlC
                     log.Debugf("let's hand over data for (%v)[%v:%v]", REFERENCE_BUFFSZ, start, end)
                     return REFERENCE_BUFFER[start:end], nil
                 }),
@@ -307,39 +300,30 @@ func Test_ExecSyncFail_With_UserStop(t *testing.T) {
     defer func() {
         clean()
         close(progC)
-        close(ctrlC)
-        close(errC)
     }()
     act, err := testActionPack(repos)
     if err != nil {
         t.Fatal(err.Error())
     }
     go func() {
-        for p := range progC {
-            if p < 40 {
-                ctrlC <- true
-            } else {
+        for {
+            p := <- progC
+            if p == 40 {
                 log.Debugf("since patcher has passed a threshold, let's stop")
                 close(stopC)
             }
         }
     }()
-    go func() {
-       errC <- execSync(tFeeder, act, stopC, testRoutPath, tmpdir)
-    }()
-    select {
-        case <- time.After(time.Second * 10): {
-            t.Fatal("test timeout failure")
-        }
-        case err := <- errC: {
-            if err == nil {
-                t.Fatal(err.Error())
-            }
-            // err should not be nil
-            t.Log(err.Error())
-            if !multisources.IsInterruptError(err) {
-                t.Fatalf("error should be user halt : %v", err.Error())
-            }
-        }
+    err = execSync(tFeeder, act, stopC, testRoutPath, tmpdir)
+    if err == nil {
+        t.Fatal(err.Error())
     }
+    if !multisources.IsInterruptError(err) {
+        t.Fatalf("error should be user halt : %v", err.Error())
+    }
+    log.Debugf(err.Error())
+}
+
+func Test_ExecSyncFail_With_Unarchive(t *testing.T) {
+
 }

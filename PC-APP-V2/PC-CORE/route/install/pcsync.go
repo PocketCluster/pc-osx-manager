@@ -189,6 +189,7 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
             }
 
             case err := <- perrC: {
+                action.close()
                 return errors.WithStack(err)
             }
 
