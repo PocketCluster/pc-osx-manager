@@ -189,7 +189,6 @@ func testActionPack(repos []patcher.BlockRepository) (*syncActionPack, error) {
         writer:    writer,
         report:    report,
         msync:     msync,
-        blocksz:   BLOCKSIZE,
     }, nil
 }
 

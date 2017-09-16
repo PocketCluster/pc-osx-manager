@@ -105,7 +105,6 @@ type syncActionPack struct {
     writer     io.WriteCloser
     report     chan showpipe.PipeProgress
     msync      *multisources.MultiSourcePatcher
-    blocksz    uint32
 }
 
 func (p *syncActionPack) close() {
@@ -154,7 +153,6 @@ func prepSync(repoList []string, syncData []byte, refChksum, imageURL string) (*
         writer:    writer,
         report:    report,
         msync:     msync,
-        blocksz:   blocksize,
     }, nil
 }
 
@@ -170,7 +168,7 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
         close(perrC)
     }()
     go func(act *syncActionPack, errC chan error, rDir string) {
-        errC <- xzUncompressor(act.reader, act.blocksz, rDir)
+        errC <- xzUncompressor(act.reader, rDir)
         log.Debugf("execSync()->unarch() Closed")
     }(action, uerrC, uaPath)
     go func(act *syncActionPack, errC chan error) {

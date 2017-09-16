@@ -12,7 +12,7 @@ import (
     "github.com/Redundancy/go-sync"
 )
 
-func xzUncompressor(archiveReader io.Reader, blocksize uint32, uncompPath string) error {
+func xzUncompressor(archiveReader io.Reader, uncompPath string) error {
     var (
         xreader   *xz.Reader
         unarchive *tar.Reader
@@ -60,10 +60,6 @@ func xzUncompressor(archiveReader io.Reader, blocksize uint32, uncompPath string
     }
 
     // when reader reaches this point, it means we have some unexhausted buffer to read off.
-    blksz := blocksize
-    if blksz < uint32(gosync.PocketSyncDefaultBlockSize) {
-        blksz = gosync.PocketSyncDefaultBlockSize
-    }
     var (
         buf = make([]byte, gosync.PocketSyncDefaultBlockSize)
     )
