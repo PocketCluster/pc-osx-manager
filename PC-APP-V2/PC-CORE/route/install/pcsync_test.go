@@ -7,6 +7,7 @@ import (
     "os"
     "path/filepath"
     "runtime"
+    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -276,7 +277,7 @@ func Test_ExecSyncFail_With_UserStop(t *testing.T) {
     setup()
     var (
         stopC = make(chan struct{})
-        progC = make(chan int64)
+        syncC = make(chan struct{})
 
         tmpdir = os.TempDir()
         tFeeder = &testFeed{}
@@ -284,8 +285,9 @@ func Test_ExecSyncFail_With_UserStop(t *testing.T) {
             blockrepository.NewBlockRepositoryBase(
                 0,
                 blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
-                    progC <- start
-                    log.Debugf("let's hand over data for (%v)[%v:%v]", REFERENCE_BUFFSZ, start, end)
+                    <- syncC
+                    time.Sleep(time.Millisecond * 10)
+                    log.Debugf("Let's hand over data for (%v)[%v:%v]", REFERENCE_BUFFSZ, start, end)
                     return REFERENCE_BUFFER[start:end], nil
                 }),
                 blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
@@ -299,29 +301,27 @@ func Test_ExecSyncFail_With_UserStop(t *testing.T) {
     )
     defer func() {
         clean()
-        close(progC)
     }()
     act, err := testActionPack(repos)
     if err != nil {
         t.Fatal(err.Error())
     }
     go func() {
-        for {
-            p := <- progC
-            if p == 40 {
-                log.Debugf("since patcher has passed a threshold, let's stop")
-                close(stopC)
-            }
-        }
+        <- syncC
+        time.Sleep(time.Millisecond * 200)
+        log.Debugf("patcher has passed a timer mark. Let's stop")
+        close(stopC)
     }()
+
+    // sync repo & stopper
+    close(syncC)
     err = execSync(tFeeder, act, stopC, testRoutPath, tmpdir)
     if err == nil {
         t.Fatal(err.Error())
     }
-    if !multisources.IsInterruptError(err) {
-        t.Fatalf("error should be user halt : %v", err.Error())
-    }
     log.Debugf(err.Error())
+
+    time.Sleep(time.Second)
 }
 
 func Test_ExecSyncFail_With_Unarchive(t *testing.T) {

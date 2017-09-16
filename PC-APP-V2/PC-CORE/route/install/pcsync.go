@@ -160,20 +160,25 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
     var (
         uerrC = make(chan error)
         perrC = make(chan error)
-    )
-    go func(act *syncActionPack, errC chan error, rDir string) {
-        defer close(errC)
 
-        err := xzUncompressor(action.reader, rDir)
-        if err != nil {
-            errC <- err
-        }
+        unarchDone = false
+        patchDone = false
+    )
+    defer func() {
+        close(uerrC)
+        close(perrC)
+    }()
+
+    go func(act *syncActionPack, errC chan error, rDir string) {
+        log.Debugf("[UNARCH] started")
+        uerrC <- xzUncompressor(action.reader, rDir)
+        log.Debugf("[UNARCH] closed successfully")
     }(action, uerrC, uaPath)
 
     go func(act *syncActionPack, errC chan error) {
-        defer close(errC)
-
-        errC <- act.msync.Patch()
+        log.Debugf("[PATCH] started")
+        perrC <- act.msync.Patch()
+        log.Debugf("[PATCH] closed successfully")
     }(action, perrC)
 
     // wait a bit to patch action to start so we don't accidentally make requests on close BlockRepository when user
@@ -184,21 +189,36 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
         select {
             // close everythign
             case <-stopC: {
-                action.close()
-                return errors.Errorf("core image sync halt")
+                go action.close()
             }
 
+            // patch error
             case err := <- perrC: {
-                action.close()
-                return errors.WithStack(err)
+                patchDone = true
+                if unarchDone {
+                    return errors.WithStack(err)
+                }
+                log.Debugf("[PATCH] patch signals")
+                if err != nil {
+                    log.Debugf("[PATCH] there's an error. Let's kill patcher")
+                    go action.close()
+                }
             }
 
-                // this is emergency as unarchiving fails
+            // this is emergency as unarchiving fails
             case err := <- uerrC: {
-                return errors.WithStack(err)
+                unarchDone = true
+                if patchDone {
+                    return errors.WithStack(err)
+                }
+                log.Debugf("[UNARCH] unarch signals %v", err)
+                if err != nil {
+                    log.Debugf("[UNARCH] there's an error error %v", err)
+                    go action.close()
+                }
             }
 
-                // report progress
+            // report progress
             case rpt := <- action.report: {
                 data, err := json.Marshal(route.ReponseMessage{
                     "package-progress": {
