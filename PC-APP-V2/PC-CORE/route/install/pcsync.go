@@ -171,9 +171,11 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
     }()
     go func(act *syncActionPack, errC chan error, rDir string) {
         errC <- xzUncompressor(act.reader, act.blocksz, rDir)
+        log.Debugf("execSync::unarch() closed")
     }(action, uerrC, uaPath)
     go func(act *syncActionPack, errC chan error) {
         errC <- act.msync.Patch()
+        log.Debugf("execSync::patcher() closed")
     }(action, perrC)
 
     // wait a bit to patch action to start so we don't accidentally make requests on close BlockRepository when user
