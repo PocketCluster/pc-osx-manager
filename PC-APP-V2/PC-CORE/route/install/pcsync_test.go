@@ -4,6 +4,7 @@ import (
     "bytes"
     "io/ioutil"
     "testing"
+    "math/rand"
     "os"
     "path/filepath"
     "runtime"
@@ -228,6 +229,71 @@ func Test_ExecSyncSuccess_Normal(t *testing.T) {
     }
 }
 
+func Test_ExecSyncSuccess_MultiRepo_Normal(t *testing.T) {
+    log.SetLevel(log.DebugLevel)
+    setup()
+
+    var (
+        stopC    = make(chan struct{})
+        tmpdir   = os.TempDir()
+        tFeeder  = &testFeed{}
+        verifier = blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
+            m := filechecksum.DefaultStrongHashGenerator()
+            m.Write(data)
+            return m.Sum(nil), nil
+        })
+        repos = []patcher.BlockRepository {
+            blockrepository.NewBlockRepositoryBase(
+                0,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    time.Sleep(time.Millisecond * time.Duration(10 * rand.Intn(10)))
+                    return REFERENCE_BUFFER[start:end], nil
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                verifier),
+
+            blockrepository.NewBlockRepositoryBase(
+                1,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    time.Sleep(time.Millisecond * time.Duration(10 * rand.Intn(10)))
+                    return REFERENCE_BUFFER[start:end], nil
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                verifier),
+
+            blockrepository.NewBlockRepositoryBase(
+                2,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    time.Sleep(time.Millisecond * time.Duration(10 * rand.Intn(10)))
+                    return REFERENCE_BUFFER[start:end], nil
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                verifier),
+
+            blockrepository.NewBlockRepositoryBase(
+                3,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    time.Sleep(time.Millisecond * time.Duration(10 * rand.Intn(10)))
+                    return REFERENCE_BUFFER[start:end], nil
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                verifier),
+        }
+    )
+    defer func() {
+        close(stopC)
+        clean()
+    }()
+    act, err := testActionPack(repos)
+    if err != nil {
+        t.Fatal(err.Error())
+    }
+    err = execSync(tFeeder, act, stopC, testRoutPath, tmpdir)
+    if err != nil {
+        t.Fatal(err.Error())
+    }
+}
+
 func Test_ExecSyncFail_With_BlockRepo(t *testing.T) {
     log.SetLevel(log.DebugLevel)
     setup()
@@ -263,7 +329,86 @@ func Test_ExecSyncFail_With_BlockRepo(t *testing.T) {
     }
     err = execSync(tFeeder, act, stopC, testRoutPath, tmpdir)
     if err == nil {
+        t.Fatal("error should not be nil")
+    }
+    // err should not be nil
+    t.Log(err.Error())
+}
+
+func Test_ExecSyncFail_MultiRepo_RandomDelay_Normal(t *testing.T) {
+    log.SetLevel(log.DebugLevel)
+    setup()
+
+    var (
+        stopC    = make(chan struct{})
+        tmpdir   = os.TempDir()
+        tFeeder  = &testFeed{}
+        verifier = blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
+            m := filechecksum.DefaultStrongHashGenerator()
+            m.Write(data)
+            return m.Sum(nil), nil
+        })
+        repos = []patcher.BlockRepository {
+            blockrepository.NewBlockRepositoryBase(
+                0,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    time.Sleep(time.Millisecond * time.Duration(100 * rand.Intn(10)))
+                    if start < 40 {
+                        return REFERENCE_BUFFER[start:end], nil
+                    }
+                    return nil, &blocksources.TestError{}
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                verifier),
+
+            blockrepository.NewBlockRepositoryBase(
+                1,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    time.Sleep(time.Millisecond * time.Duration(100 * rand.Intn(10)))
+                    if start < 40 {
+                        return REFERENCE_BUFFER[start:end], nil
+                    }
+                    return nil, &blocksources.TestError{}
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                verifier),
+
+            blockrepository.NewBlockRepositoryBase(
+                2,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    time.Sleep(time.Millisecond * time.Duration(100 * rand.Intn(10)))
+                    if start < 40 {
+                        return REFERENCE_BUFFER[start:end], nil
+                    }
+                    return nil, &blocksources.TestError{}
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                verifier),
+
+            blockrepository.NewBlockRepositoryBase(
+                3,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    time.Sleep(time.Millisecond * time.Duration(100 * rand.Intn(10)))
+                    if start < 40 {
+                        return REFERENCE_BUFFER[start:end], nil
+                    }
+                    return nil, &blocksources.TestError{}
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                verifier),
+        }
+    )
+    defer func() {
+        close(stopC)
+        clean()
+    }()
+    act, err := testActionPack(repos)
+    if err != nil {
         t.Fatal(err.Error())
+    }
+    err = execSync(tFeeder, act, stopC, testRoutPath, tmpdir)
+    if err == nil {
+        t.Fatal("error should not be nil")
     }
     // err should not be nil
     t.Log(err.Error())
@@ -293,6 +438,86 @@ func Test_ExecSyncFail_With_Unarchive(t *testing.T) {
                     return m.Sum(nil), nil
                 }),
             ),
+        }
+    )
+    defer func() {
+        clean()
+    }()
+    act, err := testActionPack(repos)
+    if err != nil {
+        t.Fatal(err.Error())
+    }
+    go func() {
+        <- syncC
+        time.Sleep(time.Millisecond * 200)
+        log.Debugf("\n\t --- PATCHER HAS PASSED A TIMER MARK. LET'S GENERATE IO ERROR FOR UNARCHIVER ---\n")
+        act.reader.Close()
+    }()
+
+    // sync repo & stopper
+    close(syncC)
+    err = execSync(tFeeder, act, stopC, testRoutPath, tmpdir)
+    if err == nil {
+        t.Fatal(err.Error())
+    }
+    log.Errorf(err.Error())
+
+    // we want to see if patcher/unarchiver loop closed succesfully
+    time.Sleep(time.Second)
+}
+
+func Test_ExecSyncFail_MultiRepo_RandomDelay_With_Unarchive(t *testing.T) {
+    log.SetLevel(log.DebugLevel)
+    setup()
+    var (
+        stopC = make(chan struct{})
+        syncC = make(chan struct{})
+
+        tmpdir = os.TempDir()
+        tFeeder = &testFeed{}
+        verifier = blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
+            m := filechecksum.DefaultStrongHashGenerator()
+            m.Write(data)
+            return m.Sum(nil), nil
+        })
+
+        repos = []patcher.BlockRepository{
+            blockrepository.NewBlockRepositoryBase(
+                0,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    <- syncC
+                    time.Sleep(time.Millisecond * time.Duration(100 * rand.Intn(10)))
+                    return REFERENCE_BUFFER[start:end], nil
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                verifier),
+            blockrepository.NewBlockRepositoryBase(
+                1,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    <- syncC
+                    time.Sleep(time.Millisecond * time.Duration(100 * rand.Intn(10)))
+                    return REFERENCE_BUFFER[start:end], nil
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                verifier),
+            blockrepository.NewBlockRepositoryBase(
+                2,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    <- syncC
+                    time.Sleep(time.Millisecond * time.Duration(100 * rand.Intn(10)))
+                    return REFERENCE_BUFFER[start:end], nil
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                verifier),
+            blockrepository.NewBlockRepositoryBase(
+                3,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    <- syncC
+                    time.Sleep(time.Millisecond * time.Duration(100 * rand.Intn(10)))
+                    return REFERENCE_BUFFER[start:end], nil
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                verifier),
         }
     )
     defer func() {
@@ -357,7 +582,100 @@ func Test_ExecSyncFail_With_UserStop(t *testing.T) {
     go func() {
         <- syncC
         time.Sleep(time.Millisecond * 200)
-        log.Debugf("patcher has passed a timer mark. Let's stop")
+        log.Debugf("\n\t --- PATCHER HAS PASSED A TIMER MARK. LET'S GENERATE USER STOP ---\n")
+        close(stopC)
+    }()
+
+    // sync repo & stopper
+    close(syncC)
+    err = execSync(tFeeder, act, stopC, testRoutPath, tmpdir)
+    if err == nil {
+        t.Fatal(err.Error())
+    }
+    log.Errorf(err.Error())
+
+    // we want to see if patcher/unarchiver loop closed succesfully
+    time.Sleep(time.Second)
+}
+
+func Test_ExecSyncFail_MultiRepo_RandomDelay_With_UserStop(t *testing.T) {
+    log.SetLevel(log.DebugLevel)
+    setup()
+    var (
+        stopC = make(chan struct{})
+        syncC = make(chan struct{})
+
+        tmpdir = os.TempDir()
+        tFeeder = &testFeed{}
+        repos = []patcher.BlockRepository{
+            blockrepository.NewBlockRepositoryBase(
+                0,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    <- syncC
+                    time.Sleep(time.Millisecond * time.Duration(100 * rand.Intn(10)))
+                    return REFERENCE_BUFFER[start:end], nil
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
+                    m := filechecksum.DefaultStrongHashGenerator()
+                    m.Write(data)
+                    return m.Sum(nil), nil
+                }),
+            ),
+            blockrepository.NewBlockRepositoryBase(
+                1,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    <- syncC
+                    time.Sleep(time.Millisecond * time.Duration(100 * rand.Intn(10)))
+                    return REFERENCE_BUFFER[start:end], nil
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
+                    m := filechecksum.DefaultStrongHashGenerator()
+                    m.Write(data)
+                    return m.Sum(nil), nil
+                }),
+            ),
+            blockrepository.NewBlockRepositoryBase(
+                2,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    <- syncC
+                    time.Sleep(time.Millisecond * time.Duration(100 * rand.Intn(10)))
+                    return REFERENCE_BUFFER[start:end], nil
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
+                    m := filechecksum.DefaultStrongHashGenerator()
+                    m.Write(data)
+                    return m.Sum(nil), nil
+                }),
+            ),
+            blockrepository.NewBlockRepositoryBase(
+                3,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    <- syncC
+                    time.Sleep(time.Millisecond * time.Duration(100 * rand.Intn(10)))
+                    return REFERENCE_BUFFER[start:end], nil
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
+                    m := filechecksum.DefaultStrongHashGenerator()
+                    m.Write(data)
+                    return m.Sum(nil), nil
+                }),
+            ),
+        }
+    )
+    defer func() {
+        clean()
+    }()
+    act, err := testActionPack(repos)
+    if err != nil {
+        t.Fatal(err.Error())
+    }
+    go func() {
+        <- syncC
+        time.Sleep(time.Millisecond * 200)
         log.Debugf("\n\t --- PATCHER HAS PASSED A TIMER MARK. LET'S GENERATE USER STOP ---\n")
         close(stopC)
     }()
