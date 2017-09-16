@@ -189,7 +189,6 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
 
             // patch error
             case err := <- perrC: {
-                log.Debugf("[PATCH] error signals %v", err)
                 patchDone = true
                 if unarchDone {
                     return errors.WithStack(err)
@@ -200,7 +199,6 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
 
             // this is emergency as unarchiving fails
             case err := <- uerrC: {
-                log.Debugf("[UNARCH] error signals %v", err)
                 unarchDone = true
                 if patchDone {
                     return errors.WithStack(err)
