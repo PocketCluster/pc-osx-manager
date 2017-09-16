@@ -205,12 +205,10 @@ func Test_ExecSyncSuccess_Normal(t *testing.T) {
         tmpdir = os.TempDir()
         tFeeder = &testFeed{}
         repos = []patcher.BlockRepository{
-            blockrepository.NewBlockRepositoryBase(
+            blockrepository.NewReadSeekerBlockRepository(
                 0,
-                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
-                    return REFERENCE_BUFFER[start:end], nil
-                }),
-                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                bytes.NewReader(REFERENCE_BUFFER),
+                blockrepository.MakeNullUniformSizeResolver(BLOCKSIZE),
                 blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
                     m := filechecksum.DefaultStrongHashGenerator()
                     m.Write(data)

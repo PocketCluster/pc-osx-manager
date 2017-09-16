@@ -169,13 +169,12 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
     }()
     go func(act *syncActionPack, errC chan error, rDir string) {
         log.Debugf("[UNARCH] started")
-        uerrC <- xzUncompressor(action.reader, rDir)
+        errC <- xzUncompressor(action.reader, rDir)
         log.Debugf("[UNARCH] closed successfully")
     }(action, uerrC, uaPath)
-
     go func(act *syncActionPack, errC chan error) {
         log.Debugf("[PATCH] started")
-        perrC <- act.msync.Patch()
+        errC <- act.msync.Patch()
         log.Debugf("[PATCH] closed successfully")
     }(action, perrC)
 
@@ -192,7 +191,7 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
 
             // patch error
             case err := <- perrC: {
-                log.Debugf("[PATCH] error signals %v", err.Error())
+                log.Debugf("[PATCH] error signals %v", err)
                 patchDone = true
                 if unarchDone {
                     return errors.WithStack(err)
@@ -204,7 +203,7 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
 
             // this is emergency as unarchiving fails
             case err := <- uerrC: {
-                log.Debugf("[UNARCH] error signals %v", err.Error())
+                log.Debugf("[UNARCH] error signals %v", err)
                 unarchDone = true
                 if patchDone {
                     return errors.WithStack(err)
