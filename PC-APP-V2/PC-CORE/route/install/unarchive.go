@@ -9,9 +9,10 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "xi2.org/x/xz"
+    "github.com/Redundancy/go-sync"
 )
 
-func xzUncompressor(archiveReader io.Reader, uncompPath string) error {
+func xzUncompressor(archiveReader io.Reader, blocksize uint32, uncompPath string) error {
     var (
         xreader   *xz.Reader
         unarchive *tar.Reader
@@ -57,5 +58,21 @@ func xzUncompressor(archiveReader io.Reader, uncompPath string) error {
             return errors.WithStack(err)
         }
     }
+
+    // when reader reaches this point, it means we have some unexhausted buffer to read off.
+    blksz := blocksize
+    if blksz < uint32(gosync.PocketSyncDefaultBlockSize) {
+        blksz = gosync.PocketSyncDefaultBlockSize
+    }
+    var (
+        buf = make([]byte, gosync.PocketSyncDefaultBlockSize)
+    )
+    for {
+        _, err = archiveReader.Read(buf)
+        if err != nil {
+            break
+        }
+    }
+
     return nil
 }

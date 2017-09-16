@@ -34,7 +34,6 @@ var (
     REFERENCE_RTHASH []byte                        = nil
     REFERENCE_CHKSEQ chunks.SequentialChecksumList = nil
     REFERENCE_BUFFSZ int                           = 0
-    BLOCK_COUNT      int                           = 0
 )
 
 func setup() {
@@ -48,8 +47,6 @@ func setup() {
     REFERENCE_BUFFER = data
     REFERENCE_BLOCKS = [][]byte{}
     REFERENCE_HASHES = [][]byte{}
-    BLOCK_COUNT      = 0
-    REFERENCE_BUFFSZ = len(data)
     maxLen          := len(data)
     m               := filechecksum.DefaultStrongHashGenerator()
 
@@ -64,18 +61,18 @@ func setup() {
 
         REFERENCE_BLOCKS = append(REFERENCE_BLOCKS, block)
         m.Reset()
-        m.Write([]byte(block))
+        m.Write(block)
         REFERENCE_HASHES = append(REFERENCE_HASHES, m.Sum(nil))
     }
 
-    BLOCK_COUNT = len(REFERENCE_BLOCKS)
     REFERENCE_CHKSEQ = buildSequentialChecksum(REFERENCE_BLOCKS, REFERENCE_HASHES, BLOCKSIZE)
     rootchksum, err := REFERENCE_CHKSEQ.RootHash()
     if err != nil {
         log.Panic(err.Error())
     }
     REFERENCE_RTHASH = rootchksum
-    log.Debugf("Root Merkle Hash %v", REFERENCE_RTHASH)
+    REFERENCE_BUFFSZ = maxLen
+    log.Debugf("Total Blocks Count %v | Data Size in Byte %v | Root Merkle Hash %v", len(REFERENCE_BLOCKS), REFERENCE_BUFFSZ, REFERENCE_RTHASH)
 }
 
 func clean() {
@@ -84,7 +81,6 @@ func clean() {
     REFERENCE_HASHES = nil
     REFERENCE_RTHASH = nil
     REFERENCE_CHKSEQ = nil
-    BLOCK_COUNT      = 0
 }
 
 // --- test util function ---
@@ -192,6 +188,7 @@ func testActionPack(repos []patcher.BlockRepository) (*syncActionPack, error) {
         writer:    writer,
         report:    report,
         msync:     msync,
+        blocksz:   BLOCKSIZE,
     }, nil
 }
 
@@ -272,6 +269,58 @@ func Test_ExecSyncFail_With_BlockRepo(t *testing.T) {
     t.Log(err.Error())
 }
 
+func Test_ExecSyncFail_With_Unarchive(t *testing.T) {
+    log.SetLevel(log.DebugLevel)
+    setup()
+    var (
+        stopC = make(chan struct{})
+        syncC = make(chan struct{})
+
+        tmpdir = os.TempDir()
+        tFeeder = &testFeed{}
+        repos = []patcher.BlockRepository{
+            blockrepository.NewBlockRepositoryBase(
+                0,
+                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
+                    <- syncC
+                    time.Sleep(time.Millisecond * 10)
+                    return REFERENCE_BUFFER[start:end], nil
+                }),
+                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
+                blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
+                    m := filechecksum.DefaultStrongHashGenerator()
+                    m.Write(data)
+                    return m.Sum(nil), nil
+                }),
+            ),
+        }
+    )
+    defer func() {
+        clean()
+    }()
+    act, err := testActionPack(repos)
+    if err != nil {
+        t.Fatal(err.Error())
+    }
+    go func() {
+        <- syncC
+        time.Sleep(time.Millisecond * 200)
+        log.Debugf("\n\t --- PATCHER HAS PASSED A TIMER MARK. LET'S GENERATE IO ERROR FOR UNARCHIVER ---\n")
+        act.reader.Close()
+    }()
+
+    // sync repo & stopper
+    close(syncC)
+    err = execSync(tFeeder, act, stopC, testRoutPath, tmpdir)
+    if err == nil {
+        t.Fatal(err.Error())
+    }
+    log.Errorf(err.Error())
+
+    // we want to see if patcher/unarchiver loop closed succesfully
+    time.Sleep(time.Second)
+}
+
 func Test_ExecSyncFail_With_UserStop(t *testing.T) {
     log.SetLevel(log.DebugLevel)
     setup()
@@ -311,58 +360,6 @@ func Test_ExecSyncFail_With_UserStop(t *testing.T) {
         log.Debugf("patcher has passed a timer mark. Let's stop")
         log.Debugf("\n\t --- PATCHER HAS PASSED A TIMER MARK. LET'S GENERATE USER STOP ---\n")
         close(stopC)
-    }()
-
-    // sync repo & stopper
-    close(syncC)
-    err = execSync(tFeeder, act, stopC, testRoutPath, tmpdir)
-    if err == nil {
-        t.Fatal(err.Error())
-    }
-    log.Errorf(err.Error())
-
-    // we want to see if patcher/unarchiver loop closed succesfully
-    time.Sleep(time.Second)
-}
-
-func Test_ExecSyncFail_With_Unarchive(t *testing.T) {
-    log.SetLevel(log.DebugLevel)
-    setup()
-    var (
-        stopC = make(chan struct{})
-        syncC = make(chan struct{})
-
-        tmpdir = os.TempDir()
-        tFeeder = &testFeed{}
-        repos = []patcher.BlockRepository{
-            blockrepository.NewBlockRepositoryBase(
-                0,
-                blocksources.FunctionRequester(func(start, end int64) (data []byte, err error) {
-                    <- syncC
-                    time.Sleep(time.Millisecond * 10)
-                    return REFERENCE_BUFFER[start:end], nil
-                }),
-                blockrepository.MakeKnownFileSizedBlockResolver(BLOCKSIZE, int64(REFERENCE_BUFFSZ)),
-                blockrepository.FunctionChecksumVerifier(func(startBlockID uint, data []byte) ([]byte, error){
-                    m := filechecksum.DefaultStrongHashGenerator()
-                    m.Write(data)
-                    return m.Sum(nil), nil
-                }),
-            ),
-        }
-    )
-    defer func() {
-        clean()
-    }()
-    act, err := testActionPack(repos)
-    if err != nil {
-        t.Fatal(err.Error())
-    }
-    go func() {
-        <- syncC
-        time.Sleep(time.Millisecond * 200)
-        log.Debugf("\n\t --- PATCHER HAS PASSED A TIMER MARK. LET'S GENERATE IO ERROR FOR UNARCHIVER ---\n")
-        act.reader.Close()
     }()
 
     // sync repo & stopper

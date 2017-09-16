@@ -105,6 +105,7 @@ type syncActionPack struct {
     writer     io.WriteCloser
     report     chan showpipe.PipeProgress
     msync      *multisources.MultiSourcePatcher
+    blocksz    uint32
 }
 
 func (p *syncActionPack) close() {
@@ -153,6 +154,7 @@ func prepSync(repoList []string, syncData []byte, refChksum, imageURL string) (*
         writer:    writer,
         report:    report,
         msync:     msync,
+        blocksz:   blocksize,
     }, nil
 }
 
@@ -168,14 +170,10 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
         close(perrC)
     }()
     go func(act *syncActionPack, errC chan error, rDir string) {
-        log.Debugf("[UNARCH] started")
-        errC <- xzUncompressor(action.reader, rDir)
-        log.Debugf("[UNARCH] closed successfully")
+        errC <- xzUncompressor(act.reader, act.blocksz, rDir)
     }(action, uerrC, uaPath)
     go func(act *syncActionPack, errC chan error) {
-        log.Debugf("[PATCH] started")
         errC <- act.msync.Patch()
-        log.Debugf("[PATCH] closed successfully")
     }(action, perrC)
 
     // wait a bit to patch action to start so we don't accidentally make requests on close BlockRepository when user
@@ -196,9 +194,8 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
                 if unarchDone {
                     return errors.WithStack(err)
                 }
-                if err != nil {
-                    go action.close()
-                }
+                // regardless of error or not, patcher should close action as it's the one to quit in normal cond.
+                go action.close()
             }
 
             // this is emergency as unarchiving fails
