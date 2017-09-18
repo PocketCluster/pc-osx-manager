@@ -108,6 +108,10 @@ shouldEditTableColumn:(NSTableColumn *)tableColumn
 
 - (NSIndexSet *)tableView:(NSTableView *)aTableView
 selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
+    if ([anIndex count] == 0) {
+        return anIndex;
+    }
+
     NSInteger row = (NSInteger)anIndex.firstIndex;
     if (![self.packageList objectAtIndex:(NSUInteger)row].installed) {
         _selectedIndex = row;
