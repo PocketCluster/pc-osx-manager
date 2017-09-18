@@ -8,7 +8,6 @@
             <connections>
                 <outlet property="btnCancel" destination="thl-ld-VP8" id="ceg-9q-QYZ"/>
                 <outlet property="btnInstall" destination="Fps-Vf-vrR" id="jcp-gv-FTk"/>
-                <outlet property="circularProgress" destination="NVT-gd-dSG" id="O6Q-0q-rgl"/>
                 <outlet property="packageTable" destination="AYe-3s-L1Q" id="Di6-2b-prT"/>
                 <outlet property="pannel" destination="3Rc-Cp-oah" id="no9-RR-1Tv"/>
                 <outlet property="progressBar" destination="3rn-uc-5rZ" id="hQd-ZQ-XGv"/>
@@ -125,9 +124,6 @@ Please be patient and do not exit during installation.</string>
             <rect key="frame" x="0.0" y="0.0" width="580" height="420"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <progressIndicator hidden="YES" wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="NVT-gd-dSG">
-                    <rect key="frame" x="20" y="20" width="16" height="16"/>
-                </progressIndicator>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Fps-Vf-vrR">
                     <rect key="frame" x="492" y="13" width="77" height="32"/>
                     <buttonCell key="cell" type="push" title="Install" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="zX0-aG-BVF">

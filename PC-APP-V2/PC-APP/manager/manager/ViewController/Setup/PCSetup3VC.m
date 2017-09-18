@@ -14,8 +14,8 @@
 
 @interface PCSetup3VC()<PCRouteRequest>
 @property (nonatomic, strong) NSMutableArray<Package *> *packageList;
--(void)_enableControls;
--(void)_disableControls;
++ (void)_enableControls:(PCSetup3VC *)vc;
++ (void)_disableControls:(PCSetup3VC *)vc;
 @end
 
 @implementation PCSetup3VC {
@@ -67,11 +67,11 @@
               message:[response valueForKeyPath:@"package-list.error"]];
          }
 
-         [belf _enableControls];
+         [PCSetup3VC _enableControls:belf];
          [[PCRouter sharedRouter] delGetRequest:belf onPath:rpPkgList];
      }];
     
-    [self _disableControls];
+    [PCSetup3VC _disableControls:self];
     [PCRouter routeRequestGet:RPATH_PACKAGE_LIST];
 }
 
@@ -120,27 +120,33 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
 }
 
 #pragma mark - Setup UI states
--(void)_enableControls {
-    [self.btnInstall setEnabled:YES];
-    [self.btnCancel setEnabled:YES];
-    [self.progressLabel setStringValue:@""];
-    [self.progressBar displayIfNeeded];
++ (void)_enableControls:(PCSetup3VC *)vc {
+    [vc.btnInstall    setEnabled:YES];
+    [vc.btnCancel     setEnabled:YES];
+    [vc.progressLabel setStringValue:@""];
+    [vc.progressBar   displayIfNeeded];
 
-    [self.circularProgress setHidden:YES];
-    [self.circularProgress stopAnimation:nil];
-    [self.circularProgress displayIfNeeded];
+    [vc.circularProgress setHidden:YES];
+    [vc.circularProgress stopAnimation:nil];
+    [vc.circularProgress displayIfNeeded];
+    [vc.circularProgress removeFromSuperview];
+    [vc setCircularProgress:nil];
 }
 
--(void)_disableControls {
-    [self.btnInstall setEnabled:NO];
-    [self.btnCancel setEnabled:NO];
-    [self.progressLabel setStringValue:@""];
-    [self.progressBar displayIfNeeded];
++ (void)_disableControls:(PCSetup3VC *)vc {
+    [vc.btnInstall    setEnabled:NO];
+    [vc.btnCancel     setEnabled:NO];
+    [vc.progressLabel setStringValue:@""];
+    [vc.progressBar   displayIfNeeded];
 
-    [self.circularProgress setHidden:NO];
-    [self.circularProgress setIndeterminate:YES];
-    [self.circularProgress startAnimation:nil];
-    [self.circularProgress displayIfNeeded];
+    NSProgressIndicator *ind = [[NSProgressIndicator alloc] initWithFrame:(NSRect){{20.0, 20.0}, {16.0, 16.0}}];
+    [ind setStyle:NSProgressIndicatorSpinningStyle];
+    [vc.view addSubview:ind];
+    [vc setCircularProgress:ind];
+    [ind setHidden:NO];
+    [ind setIndeterminate:YES];
+    [ind startAnimation:vc];
+    [ind displayIfNeeded];
 }
 
 #pragma mark - IBACTION
@@ -154,7 +160,7 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
         return;
     }
 
-    [self _disableControls];
+    [PCSetup3VC _disableControls:self];
     
     /*** checking user authed ***/
     WEAK_SELF(self);
@@ -173,7 +179,7 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
               message:[response valueForKeyPath:@"package-install.error"]];
          }
 
-         [belf _enableControls];
+         [PCSetup3VC _enableControls:belf];
          [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInstall];
          [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInstProg];
      }];
