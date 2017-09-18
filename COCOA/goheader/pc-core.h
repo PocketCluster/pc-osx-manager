@@ -5,7 +5,7 @@
 /* Start of preamble from import "C" comments.  */
 
 
-#line 3 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_debug.go"
+#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_debug.go"
 
 
 
@@ -18,7 +18,7 @@
 #include "PCResponseHandle.h"
 
 
-#line 9 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_lifecycle.go"
+#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_lifecycle.go"
 
 
 
@@ -39,7 +39,7 @@
 
 
 
-#line 3 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_route.go"
+#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_route.go"
 
 
 

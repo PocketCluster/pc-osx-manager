@@ -72,7 +72,7 @@ func readHeadersAndCheck(r io.Reader) (int64, uint32, uint32, []byte, error) {
     return filesize, blocksize, blockcount, rootHash, nil
 }
 
-func readIndex(rd io.Reader, blocksize, blockcount uint, rootHash []byte) (*index.ChecksumIndex, error) {
+func readIndex(rd io.Reader, blocksize, blockcount uint, rootChksum []byte) (*index.ChecksumIndex, error) {
     var (
         generator    = filechecksum.NewFileChecksumGenerator(blocksize)
         idx          *index.ChecksumIndex = nil
@@ -89,12 +89,14 @@ func readIndex(rd io.Reader, blocksize, blockcount uint, rootHash []byte) (*inde
     }
 
     idx = index.MakeChecksumIndex(readChunks)
-    cRootHash, err := idx.SequentialChecksumList().RootHash()
+    cRootChksum, err := idx.SequentialChecksumList().RootHash()
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    if bytes.Compare(cRootHash, rootHash) != 0 {
-        return nil, errors.Errorf("[ERR] mismatching integrity checksum")
+    if bytes.Compare(cRootChksum, rootChksum) != 0 {
+        log.Debugf("C RH : %v", cRootChksum)
+        log.Debugf("A RH : %v", rootChksum)
+        return nil, errors.Errorf("[ERR] mismatching checksum integrity")
     }
 
     return idx, nil

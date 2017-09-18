@@ -34,6 +34,7 @@ func main() {
         var (
             appCfg *config.ServiceConfig = nil
             err    error                 = nil
+            IsContextInit           bool = false
         )
 
         for e := range appLife.Events() {
@@ -54,12 +55,16 @@ func main() {
                         case lifecycle.CrossOn: {
                             // this should happen only once in the lifetime of an application.
                             // so we'll initialize our context here to have safe operation
+                            if !IsContextInit {
+                                log.Debugf("[LIFE] initialize ApplicationContext...")
+                                // this needs to be initialized before service loop initiated
+                                context.SharedHostContext()
+                                initcheck.InitRoutePathServices(appLife, theFeeder)
+                                install.InitInstallListRouthPath(appLife, theFeeder)
+                                install.InitInstallPackageRoutePath(appLife, theFeeder)
 
-                            log.Debugf("[LIFE] initialize ApplicationContext...")
-                            // this needs to be initialized before service loop initiated
-                            context.SharedHostContext()
-                            initcheck.InitRoutePathServices(appLife, theFeeder)
-                            install.InitInstallListRouthPath(appLife, theFeeder)
+                                IsContextInit = true
+                            }
 
                             log.Debugf("[LIFE] app is now created, fully initialized %v", e.String())
                         }
