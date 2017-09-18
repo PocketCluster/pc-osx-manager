@@ -170,6 +170,7 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
     /*** checking user authed ***/
     WEAK_SELF(self);
     NSString *rpPkgInst = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL];
+    NSString *rpPkgInstProg = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL_PROGRESS];
     
     [[PCRouter sharedRouter]
      addPostRequest:self
@@ -182,9 +183,24 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
               showWarningAlertWithTitle:@"Temporarily Unavailable"
               message:[response valueForKeyPath:@"package-install.error"]];
          }
-         
+
          [self _enableControls];
-         [[PCRouter sharedRouter] delGetRequest:belf onPath:rpPkgInst];
+         [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInst];
+         [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInstProg];
+     }];
+
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:rpPkgInst
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         
+         NSString *speed = [NSString stringWithFormat:@"Total %.1lf GB Received %.1lf GB (%.1lf MB/sec)",
+                            ([[response valueForKeyPath:@"package-progress.total-size"] doubleValue] / 1073741824.0),
+                            ([[response valueForKeyPath:@"package-progress.received"] doubleValue] / 1073741824.0),
+                            ([[response valueForKeyPath:@"package-progress.speed"] doubleValue] / 1048576.0)];
+         [belf.progressLabel setStringValue:speed];
+
+         [belf.progressBar setDoubleValue:[[response valueForKeyPath:@"package-progress.done-percent"] doubleValue]];
      }];
     
     [self _disableControls];

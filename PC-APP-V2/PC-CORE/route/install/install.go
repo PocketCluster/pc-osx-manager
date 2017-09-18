@@ -144,6 +144,6 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
             return feedError(errors.WithMessage(err, "unable to sync node image"))
         }
 
-        return nil
+        return feedError(errors.Errorf("ALL DONE OK"))
     })
 }
