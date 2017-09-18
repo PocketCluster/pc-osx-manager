@@ -10,6 +10,7 @@
 #import "PCSetup3VC.h"
 #import "PCRouter.h"
 #import "ShowAlert.h"
+#import "NullStringChecker.h"
 
 @interface PCSetup3VC()<PCRouteRequest>
 @property (nonatomic, strong) NSMutableArray<Package *> *packageList;
@@ -197,13 +198,38 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
      onPath:rpPkgInstProg
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         NSString *speed = [NSString stringWithFormat:@"Total %.1lf GB Received %.1lf GB (%.1lf MB/sec)",
-                            ([[response valueForKeyPath:@"package-progress.total-size"] doubleValue] / unit_gigabyte),
-                            ([[response valueForKeyPath:@"package-progress.received"] doubleValue] / unit_gigabyte),
-                            ([[response valueForKeyPath:@"package-progress.speed"] doubleValue] / unit_megabyte)];
-         [belf.progressLabel setStringValue:speed];
+         NSString *message = [response valueForKeyPath:@"package-progress.message"];
+         if (!ISNULL_STRING(message)) {
+             [belf.progressLabel setStringValue:message];
 
-         [belf.progressBar setDoubleValue:[[response valueForKeyPath:@"package-progress.done-percent"] doubleValue]];
+         } else {
+             double bytes_total = [[response valueForKeyPath:@"package-progress.total-size"] doubleValue];
+             NSString *stringTotal;
+             if (unit_gigabyte < bytes_total) {
+                 bytes_total /= unit_gigabyte;
+                 stringTotal = [NSString stringWithFormat:@"%.1lf GB", bytes_total];
+             } else {
+                 bytes_total /= unit_megabyte;
+                 stringTotal = [NSString stringWithFormat:@"%.1lf MB", bytes_total];
+             }
+
+             double bytes_received = [[response valueForKeyPath:@"package-progress.received"] doubleValue];
+             NSString *stringReceived;
+             if (unit_gigabyte < bytes_received) {
+                 bytes_received /= unit_gigabyte;
+                 stringReceived = [NSString stringWithFormat:@"%.1lf GB", bytes_received];
+             } else {
+                 bytes_received /= unit_megabyte;
+                 stringReceived = [NSString stringWithFormat:@"%.1lf MB", bytes_received];
+             }
+
+             NSString *speed = [NSString stringWithFormat:@"Total %@ Received %@ (%.1lf MB/sec)"
+                                ,stringTotal, stringReceived
+                                ,([[response valueForKeyPath:@"package-progress.speed"] doubleValue] / unit_megabyte)];
+             [belf.progressLabel setStringValue:speed];
+
+             [belf.progressBar setDoubleValue:[[response valueForKeyPath:@"package-progress.done-percent"] doubleValue]];
+         }
      }];
     
     [self _disableControls];

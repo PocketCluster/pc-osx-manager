@@ -75,6 +75,7 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
 
 
         // --- --- --- --- --- download meta first --- --- --- --- ---
+        _ = makeMessageFeedBack(feeder, rpProgress, "Downloading package information...")
         metaReq, err := newRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.MetaURL), false)
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access package meta data"))
@@ -91,6 +92,7 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
 
 
         //  --- --- --- --- --- download repo list --- --- --- --- ---
+        _ = makeMessageFeedBack(feeder, rpProgress, "Checking image repositories...")
         repoReq, err := newRequest("https://api.pocketcluster.io/service/v014/package/repo", false)
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access repository list"))
@@ -109,6 +111,7 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
 
 
         //  --- --- --- --- --- download core sync --- --- --- --- ---
+        _ = makeMessageFeedBack(feeder, rpProgress, "Downloading core image...")
         cSyncReq, err := newRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.CoreImageSync), true)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync core image"))
@@ -127,6 +130,7 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
         }
 
         //  --- --- --- --- --- download node sync --- --- --- --- ---
+        _ = makeMessageFeedBack(feeder, rpProgress, "Downloading node image...")
         nSyncReq, err := newRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.NodeImageSync), true)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync node image"))
