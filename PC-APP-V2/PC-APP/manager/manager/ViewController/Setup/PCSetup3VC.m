@@ -14,6 +14,8 @@
 
 @interface PCSetup3VC()<PCRouteRequest>
 @property (nonatomic, strong) NSMutableArray<Package *> *packageList;
+-(void)_enableControls;
+-(void)_disableControls;
 @end
 
 @implementation PCSetup3VC {
@@ -65,7 +67,7 @@
               message:[response valueForKeyPath:@"package-list.error"]];
          }
 
-         [self _enableControls];
+         [belf _enableControls];
          [[PCRouter sharedRouter] delGetRequest:belf onPath:rpPkgList];
      }];
     
@@ -91,9 +93,7 @@
 }
 
 // disable table row text editing
-- (BOOL)tableView:(NSTableView *)tableView
-shouldEditTableColumn:(NSTableColumn *)tableColumn
-              row:(NSInteger)row {
+- (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
     return NO;
 }
 
@@ -124,62 +124,43 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
     [self.btnInstall setEnabled:YES];
     [self.btnCancel setEnabled:YES];
     [self.progressLabel setStringValue:@""];
+    [self.progressBar displayIfNeeded];
+
     [self.circularProgress setHidden:YES];
     [self.circularProgress stopAnimation:nil];
-    [self.progressBar displayIfNeeded];
+    [self.circularProgress displayIfNeeded];
 }
 
 -(void)_disableControls {
     [self.btnInstall setEnabled:NO];
     [self.btnCancel setEnabled:NO];
     [self.progressLabel setStringValue:@""];
+    [self.progressBar displayIfNeeded];
+
     [self.circularProgress setHidden:NO];
+    [self.circularProgress setIndeterminate:YES];
     [self.circularProgress startAnimation:nil];
-    [self.progressBar setDoubleValue:0.0];
-    [self.progressBar displayIfNeeded];
-}
-
-- (void)_setUIToProceedState {
-    [self.btnInstall setEnabled:NO];
-    [self.circularProgress startAnimation:nil];
-}
-
--(void)_setProgressMessage:(NSString *)aMessage value:(double)aValue {
-    [self.circularProgress startAnimation:nil];
-    [self.progressLabel setStringValue:aMessage];
-    [self.progressBar setDoubleValue:aValue];
-    [self.progressBar displayIfNeeded];
-}
-
--(void)setProgMessage:(NSString *)aMessage value:(double)aValue {
-    [self.circularProgress startAnimation:nil];
-    [self.progressLabel setStringValue:aMessage];
-    [self.progressBar setDoubleValue:aValue];
-    [self.progressBar displayIfNeeded];
-}
-
--(void)_setToNextStage {
-    [self setProgMessage:@"Installation completed!" value:100.0];
-    [self.btnInstall setEnabled:NO];
-    [self.circularProgress stopAnimation:nil];
+    [self.circularProgress displayIfNeeded];
 }
 
 #pragma mark - IBACTION
 -(IBAction)install:(id)sender {
+    static const double unit_gigabyte = 1073741824.0;
+    static const double unit_megabyte = 1048576.0;
+
     //[self.stageControl shouldControlProgressFrom:self withParam:nil];
 
     if (_selectedIndex == -1 || (NSInteger)[self.packageList count] <= _selectedIndex ) {
         return;
     }
 
-    static const double unit_gigabyte = 1073741824.0;
-    static const double unit_megabyte = 1048576.0;
+    [self _disableControls];
     
     /*** checking user authed ***/
     WEAK_SELF(self);
     NSString *rpPkgInstall = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL];
     NSString *rpPkgInstProg = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL_PROGRESS];
-    
+
     [[PCRouter sharedRouter]
      addPostRequest:self
      onPath:rpPkgInstall
@@ -192,7 +173,7 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
               message:[response valueForKeyPath:@"package-install.error"]];
          }
 
-         [self _enableControls];
+         [belf _enableControls];
          [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInstall];
          [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInstProg];
      }];
@@ -235,8 +216,7 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
              [belf.progressBar setDoubleValue:[[response valueForKeyPath:@"package-progress.done-percent"] doubleValue]];
          }
      }];
-    
-    [self _disableControls];
+
     [PCRouter
      routeRequestPost:RPATH_PACKAGE_INSTALL
      withRequestBody:@{@"pkg-id":[self.packageList objectAtIndex:(NSUInteger)_selectedIndex].packageID}];
