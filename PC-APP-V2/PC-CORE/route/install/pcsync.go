@@ -25,7 +25,7 @@ import (
 
 // reads the file headers and checks the magic string, then the semantic versioning
 // return : in order of 'filesize', 'blocksize', 'blockcount', 'rootHash', 'error'
-func readHeadersAndCheck(r io.Reader) (int64, uint32, uint32, []byte, error) {
+func readHeadersAndCheck(headerReader io.Reader) (int64, uint32, uint32, []byte, error) {
     var (
         bMagic                []byte = make([]byte, len(gosync.PocketSyncMagicString))
         major, minor, patch   uint16 = 0, 0, 0
@@ -35,7 +35,7 @@ func readHeadersAndCheck(r io.Reader) (int64, uint32, uint32, []byte, error) {
         rootHash              []byte = nil
     )
     // magic string
-    if _, err := r.Read(bMagic); err != nil {
+    if _, err := headerReader.Read(bMagic); err != nil {
         return 0, 0, 0, nil, errors.WithStack(err)
     } else if string(bMagic) != gosync.PocketSyncMagicString {
         return 0, 0, 0, nil, errors.New("meta header does not confirm. Not a valid meta")
@@ -43,7 +43,7 @@ func readHeadersAndCheck(r io.Reader) (int64, uint32, uint32, []byte, error) {
 
     // version
     for _, v := range []*uint16{&major, &minor, &patch} {
-        if err := binary.Read(r, binary.LittleEndian, v); err != nil {
+        if err := binary.Read(headerReader, binary.LittleEndian, v); err != nil {
             return 0, 0, 0, nil, errors.WithStack(err)
         }
     }
@@ -53,33 +53,33 @@ func readHeadersAndCheck(r io.Reader) (int64, uint32, uint32, []byte, error) {
             gosync.PocketSyncMajorVersion, gosync.PocketSyncMinorVersion, gosync.PocketSyncPatchVersion)
     }
 
-    if err := binary.Read(r, binary.LittleEndian, &filesize); err != nil {
+    if err := binary.Read(headerReader, binary.LittleEndian, &filesize); err != nil {
         return 0, 0, 0, nil, errors.WithStack(err)
     }
-    if err := binary.Read(r, binary.LittleEndian, &blocksize); err != nil {
+    if err := binary.Read(headerReader, binary.LittleEndian, &blocksize); err != nil {
         return 0, 0, 0, nil, errors.WithStack(err)
     }
-    if err := binary.Read(r, binary.LittleEndian, &blockcount); err != nil {
+    if err := binary.Read(headerReader, binary.LittleEndian, &blockcount); err != nil {
         return 0, 0, 0, nil, errors.WithStack(err)
     }
-    if err := binary.Read(r, binary.LittleEndian, &hLen); err != nil {
+    if err := binary.Read(headerReader, binary.LittleEndian, &hLen); err != nil {
         return 0, 0, 0, nil, errors.WithStack(err)
     }
     rootHash = make([]byte, hLen)
-    if _, err := r.Read(rootHash); err != nil {
+    if _, err := headerReader.Read(rootHash); err != nil {
         return 0, 0, 0, nil, errors.WithStack(err)
     }
     return filesize, blocksize, blockcount, rootHash, nil
 }
 
-func readIndex(rd io.Reader, blocksize, blockcount uint, rootChksum []byte) (*index.ChecksumIndex, error) {
+func readIndex(indexReader io.Reader, blocksize, blockcount uint, rootChksum []byte) (*index.ChecksumIndex, error) {
     var (
         generator    = filechecksum.NewFileChecksumGenerator(blocksize)
         idx          *index.ChecksumIndex = nil
     )
 
     readChunks, err := chunks.CountedLoadChecksumsFromReader(
-        rd,
+        indexReader,
         blockcount,
         generator.GetWeakRollingHash().Size(),
         generator.GetStrongHash().Size(),
@@ -94,8 +94,6 @@ func readIndex(rd io.Reader, blocksize, blockcount uint, rootChksum []byte) (*in
         return nil, errors.WithStack(err)
     }
     if bytes.Compare(cRootChksum, rootChksum) != 0 {
-        log.Debugf("C RH : %v", cRootChksum)
-        log.Debugf("A RH : %v", rootChksum)
         return nil, errors.Errorf("[ERR] mismatching checksum integrity")
     }
 
@@ -116,7 +114,8 @@ func (p *syncActionPack) close() {
 }
 
 func prepSync(repoList []string, syncData []byte, refChksum, imageURL string) (*syncActionPack, error) {
-    filesize, blocksize, blockcount, rootHash, err := readHeadersAndCheck(bytes.NewBuffer(syncData))
+    var headIndexReader = bytes.NewBuffer(syncData)
+    filesize, blocksize, blockcount, rootHash, err := readHeadersAndCheck(headIndexReader)
     if err != nil {
         return nil, errors.WithStack(err)
     }
@@ -124,7 +123,7 @@ func prepSync(repoList []string, syncData []byte, refChksum, imageURL string) (*
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    chksumIdx, err := readIndex(bytes.NewBuffer(syncData), uint(blocksize), uint(blockcount), rootHash)
+    chksumIdx, err := readIndex(headIndexReader, uint(blocksize), uint(blockcount), rootHash)
     if err != nil {
         return nil, errors.WithStack(err)
     }
