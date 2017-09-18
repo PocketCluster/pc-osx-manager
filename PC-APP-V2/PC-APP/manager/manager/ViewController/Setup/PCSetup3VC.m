@@ -166,15 +166,18 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
     if (_selectedIndex == -1 || (NSInteger)[self.packageList count] <= _selectedIndex ) {
         return;
     }
+
+    static const double unit_gigabyte = 1073741824.0;
+    static const double unit_megabyte = 1048576.0;
     
     /*** checking user authed ***/
     WEAK_SELF(self);
-    NSString *rpPkgInst = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL];
+    NSString *rpPkgInstall = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL];
     NSString *rpPkgInstProg = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL_PROGRESS];
     
     [[PCRouter sharedRouter]
      addPostRequest:self
-     onPath:rpPkgInst
+     onPath:rpPkgInstall
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          
          if ([[response valueForKeyPath:@"package-install.status"] boolValue]) {
@@ -185,19 +188,19 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
          }
 
          [self _enableControls];
-         [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInst];
+         [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInstall];
          [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInstProg];
      }];
 
     [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:rpPkgInst
+     addPostRequest:self
+     onPath:rpPkgInstProg
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         
+
          NSString *speed = [NSString stringWithFormat:@"Total %.1lf GB Received %.1lf GB (%.1lf MB/sec)",
-                            ([[response valueForKeyPath:@"package-progress.total-size"] doubleValue] / 1073741824.0),
-                            ([[response valueForKeyPath:@"package-progress.received"] doubleValue] / 1073741824.0),
-                            ([[response valueForKeyPath:@"package-progress.speed"] doubleValue] / 1048576.0)];
+                            ([[response valueForKeyPath:@"package-progress.total-size"] doubleValue] / unit_gigabyte),
+                            ([[response valueForKeyPath:@"package-progress.received"] doubleValue] / unit_gigabyte),
+                            ([[response valueForKeyPath:@"package-progress.speed"] doubleValue] / unit_megabyte)];
          [belf.progressLabel setStringValue:speed];
 
          [belf.progressBar setDoubleValue:[[response valueForKeyPath:@"package-progress.done-percent"] doubleValue]];

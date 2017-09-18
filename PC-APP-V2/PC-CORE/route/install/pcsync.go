@@ -211,23 +211,25 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
 
             // report progress
             case rpt := <- action.report: {
-                data, err := json.Marshal(route.ReponseMessage{
-                    "package-progress": {
-                        "total-size":   rpt.TotalSize,
-                        "received":     rpt.Received,
-                        "remaining":    rpt.Remaining,
-                        "speed":        rpt.Speed,
-                        "done-percent": rpt.DonePercent,
-                    },
-                })
-                if err != nil {
-                    log.Errorf(err.Error())
-                    continue
-                }
-                err = feeder.FeedResponseForPost(rpPath, string(data))
-                if err != nil {
-                    log.Errorf(err.Error())
-                    continue
+                if !(unarchDone || patchDone) {
+                    data, err := json.Marshal(route.ReponseMessage{
+                        "package-progress": {
+                            "total-size":   rpt.TotalSize,
+                            "received":     rpt.Received,
+                            "remaining":    rpt.Remaining,
+                            "speed":        rpt.Speed,
+                            "done-percent": rpt.DonePercent,
+                        },
+                    })
+                    if err != nil {
+                        log.Errorf(err.Error())
+                        continue
+                    }
+                    err = feeder.FeedResponseForPost(rpPath, string(data))
+                    if err != nil {
+                        log.Errorf(err.Error())
+                        continue
+                    }
                 }
             }
         }
