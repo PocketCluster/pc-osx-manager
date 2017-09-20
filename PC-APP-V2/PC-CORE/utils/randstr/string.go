@@ -1,4 +1,4 @@
-package utils
+package randstr
 
 import (
     mathrand "math/rand"

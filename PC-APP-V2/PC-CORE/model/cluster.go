@@ -8,7 +8,7 @@ import (
     "github.com/pkg/errors"
 
     "github.com/stkim1/pcrypto"
-    "github.com/stkim1/pc-core/utils"
+    "github.com/stkim1/pc-core/utils/randstr"
 )
 
 type ClusterMeta struct {
@@ -25,7 +25,7 @@ type ClusterMeta struct {
 
 func NewClusterMeta() (*ClusterMeta) {
     var (
-        cid string = utils.NewRandomString(16)
+        cid string = randstr.NewRandomString(16)
         domain string = fmt.Sprintf(pcrypto.FormFQDNClusterID, cid)
     )
     return &ClusterMeta{

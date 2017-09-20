@@ -2,13 +2,13 @@ package swarm
 
 import (
     "crypto/tls"
-    "crypto/x509"
     "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/docker/swarm/cluster"
     "github.com/docker/docker/pkg/discovery"
     "github.com/pkg/errors"
+    "github.com/stkim1/pc-core/utils/tlscfg"
 )
 
 const (
@@ -45,7 +45,7 @@ func NewContextWithCertAndKey(tlsCa, tlsCert, tlsKey []byte, discoveryBackend di
     )
 
     // TODO : (04/17/2017) We should check if verifying clients with CA would results in errors for clients to connect. It appears to be ok with file version
-    tlsConfig, err := buildTLSConfig(tlsCa, tlsCert, tlsKey, true)
+    tlsConfig, err := tlscfg.BuildTLSConfigWithCAcert(tlsCa, tlsCert, tlsKey, true)
     if err != nil {
         return nil, errors.WithStack(err)
     }
@@ -69,32 +69,6 @@ func NewContextWithCertAndKey(tlsCa, tlsCert, tlsKey []byte, discoveryBackend di
         strategy:           "spread",
         tlsConfig:          tlsConfig,
     }, nil
-}
-
-// Load the TLS certificates/keys and, if verify is true, the CA.
-func buildTLSConfig(ca, cert, key []byte, verify bool) (*tls.Config, error) {
-    c, err := tls.X509KeyPair(cert, key)
-    if err != nil {
-        return nil, errors.WithStack(err)
-    }
-
-    config := &tls.Config{
-        Certificates: []tls.Certificate{c},
-        MinVersion:   tls.VersionTLS10,
-    }
-
-    if verify {
-        certPool := x509.NewCertPool()
-        certPool.AppendCertsFromPEM(ca)
-        config.RootCAs = certPool
-        config.ClientAuth = tls.RequireAndVerifyClientCert
-        config.ClientCAs = certPool
-    } else {
-        // If --tlsverify is not supplied, disable CA validation.
-        config.InsecureSkipVerify = true
-    }
-
-    return config, nil
 }
 
 // createNodesDiscovery replaces $GOPATH/src/github.com/docker/swarm/cli/manage/createDiscovery

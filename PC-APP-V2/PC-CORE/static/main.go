@@ -276,8 +276,20 @@ func main() {
                     }
 
                     case operation.CmdTeleportRootAdd: {
+                        log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdTeleportUserAdd: {
+                        cli, err := install.NewContainerClient("pc-node1")
+                        if err != nil {
+                            log.Debugf(err.Error())
+                            return
+                        }
+                        err = install.InstallImageFromRepository(cli, "")
+                        if err != nil {
+                            log.Debugf(err.Error())
+                            return
+                        }
+
                         log.Debugf("[OP] %v", e.String())
                     }
 
