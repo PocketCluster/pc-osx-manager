@@ -12,7 +12,7 @@ import (
     "github.com/stkim1/pc-core/utils/tlscfg"
 )
 
-func NewContainerClient(host string) (*client.Client, error) {
+func NewContainerClient(host, version string) (*client.Client, error) {
     ctx := pccctx.SharedHostContext()
     caCert, err := ctx.CertAuthCertificate()
     if err != nil {
@@ -35,9 +35,12 @@ func NewContainerClient(host string) (*client.Client, error) {
             TLSClientConfig: tlsc,
         },
     }
+    if len(version) == 0 {
+        version = client.DefaultVersion
+    }
 
     // empty version enables client to automatically override version
-    cli, err := client.NewClient(host, client.DefaultVersion, httpcli, nil)
+    cli, err := client.NewClient(host, version, httpcli, nil)
     if err != nil {
         return nil, errors.WithStack(err)
     }
@@ -48,7 +51,6 @@ func InstallImageFromRepository(cli *client.Client, imageRef string) error {
     if len(imageRef) == 0 {
         return errors.Errorf("cannot install invalid image path")
     }
-    r, err := cli.ImagePull(context.Background(), imageRef, types.ImagePullOptions{})
-    defer r.Close()
+    _, err := cli.ImagePull(context.Background(), imageRef, types.ImagePullOptions{})
     return errors.WithStack(err)
 }

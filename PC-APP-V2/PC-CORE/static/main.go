@@ -279,15 +279,13 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdTeleportUserAdd: {
-                        cli, err := install.NewContainerClient("pc-node1")
+                        cli, err := install.NewContainerClient("tcp://pc-node1:2736", "")
                         if err != nil {
                             log.Debugf(err.Error())
-                            return
                         }
-                        err = install.InstallImageFromRepository(cli, "")
+                        err = install.InstallImageFromRepository(cli, "pc-master:5000/arm64v8-ubuntu")
                         if err != nil {
                             log.Debugf(err.Error())
-                            return
                         }
 
                         log.Debugf("[OP] %v", e.String())
