@@ -1,4 +1,4 @@
-package install
+package dkclient
 
 import (
     "net/http"
@@ -51,6 +51,6 @@ func InstallImageFromRepository(cli *client.Client, imageRef string) error {
     if len(imageRef) == 0 {
         return errors.Errorf("cannot install invalid image path")
     }
-    _, err := cli.ImagePull(context.Background(), imageRef, types.ImagePullOptions{})
+    _, err := cli.ImagePull(context.TODO(), imageRef, types.ImagePullOptions{})
     return errors.WithStack(err)
 }
