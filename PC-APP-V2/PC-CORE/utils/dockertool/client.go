@@ -1,4 +1,4 @@
-package dkclient
+package dockertool
 
 import (
     "net/http"

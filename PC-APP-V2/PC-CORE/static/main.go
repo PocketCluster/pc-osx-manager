@@ -25,7 +25,7 @@ import (
     "github.com/stkim1/pc-core/service/master"
     "github.com/stkim1/pc-core/service/vbox"
     "github.com/stkim1/pc-core/vboxglue"
-    "github.com/stkim1/pc-core/utils/dkclient"
+    "github.com/stkim1/pc-core/utils/dockertool"
 )
 
 func main() {
@@ -280,11 +280,11 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdTeleportUserAdd: {
-                        cli, err := dkclient.NewContainerClient("tcp://pc-node1:2376", "1.24")
+                        cli, err := dockertool.NewContainerClient("tcp://pc-node1:2376", "1.24")
                         if err != nil {
                             log.Debugf(err.Error())
                         }
-                        err = dkclient.InstallImageFromRepository(cli, "pc-master:5000/arm64v8-ubuntu")
+                        err = dockertool.InstallImageFromRepository(cli, "pc-master:5000/arm64v8-ubuntu")
                         if err != nil {
                             log.Debugf(err.Error())
                         }
