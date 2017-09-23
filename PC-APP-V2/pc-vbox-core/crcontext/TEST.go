@@ -38,6 +38,6 @@ func DebugPrepareCoreContextWithRoot(rootPath string) PocketCoreContext {
 
 func DebugDestroyCoreContext() {
     singletonContext.DiscardMasterSession()
-    config.DebugConfigDestory(singletonContext.config)
+    config.DebugConfigDestory(singletonContext.PocketCoreConfig)
     singletonContext = nil
 }
