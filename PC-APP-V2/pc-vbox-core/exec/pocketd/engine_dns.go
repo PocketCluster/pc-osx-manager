@@ -68,7 +68,7 @@ func locaNameServe(w dns.ResponseWriter, req *dns.Msg) {
 
                     // internal interface
                     iaddr, ierr := findgate.FindIPv4GatewayWithInterface("eth0")
-                    if ierr == nil {
+                    if crcontext.SharedCoreContext().IsInstallMode() && ierr == nil {
                         inr := new(dns.A)
                         inr.Hdr = dns.RR_Header{
                             Name:      question.Name,
