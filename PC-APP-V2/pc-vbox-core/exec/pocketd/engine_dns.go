@@ -52,20 +52,6 @@ func locaNameServe(w dns.ResponseWriter, req *dns.Msg) {
                 fqdn := fmt.Sprintf(fqdnPocketMasterName, cid)
                 if question.Name == localPocketMasterName || question.Name == fqdn {
 
-                    // external interface
-                    maddr, merr := crcontext.SharedCoreContext().GetMasterIP4ExtAddr()
-                    if merr == nil {
-                        ext := new(dns.A)
-                        ext.Hdr = dns.RR_Header{
-                            Name:      question.Name,
-                            Rrtype:    question.Qtype,
-                            Class:     dns.ClassINET,
-                            Ttl:       64,
-                        }
-                        ext.A = net.ParseIP(maddr)
-                        m.Answer = append(m.Answer, ext)
-                    }
-
                     // internal interface
                     iaddr, ierr := findgate.FindIPv4GatewayWithInterface("eth0")
                     if crcontext.SharedCoreContext().IsInstallMode() && ierr == nil {
@@ -74,10 +60,24 @@ func locaNameServe(w dns.ResponseWriter, req *dns.Msg) {
                             Name:      question.Name,
                             Rrtype:    question.Qtype,
                             Class:     dns.ClassINET,
-                            Ttl:       32,
+                            Ttl:       10,
                         }
                         inr.A = net.ParseIP(iaddr[0].Address)
                         m.Answer = append(m.Answer, inr)
+                    }
+
+                    // external interface
+                    maddr, merr := crcontext.SharedCoreContext().GetMasterIP4ExtAddr()
+                    if merr == nil {
+                        ext := new(dns.A)
+                        ext.Hdr = dns.RR_Header{
+                            Name:      question.Name,
+                            Rrtype:    question.Qtype,
+                            Class:     dns.ClassINET,
+                            Ttl:       10,
+                        }
+                        ext.A = net.ParseIP(maddr)
+                        m.Answer = append(m.Answer, ext)
                     }
                 }
             }
