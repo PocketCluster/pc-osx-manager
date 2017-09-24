@@ -53,17 +53,18 @@ func locaNameServe(w dns.ResponseWriter, req *dns.Msg) {
                 if question.Name == localPocketMasterName || question.Name == fqdn {
 
                     // internal interface
-                    iaddr, ierr := findgate.FindIPv4GatewayWithInterface("eth0")
-                    if crcontext.SharedCoreContext().IsInstallMode() && ierr == nil {
-                        inr := new(dns.A)
-                        inr.Hdr = dns.RR_Header{
-                            Name:      question.Name,
-                            Rrtype:    question.Qtype,
-                            Class:     dns.ClassINET,
-                            Ttl:       10,
+                    if crcontext.SharedCoreContext().IsInstallMode() {
+                        if iaddr, ierr := findgate.FindIPv4GatewayWithInterface("eth0"); ierr == nil {
+                            inr := new(dns.A)
+                            inr.Hdr = dns.RR_Header{
+                                Name:      question.Name,
+                                Rrtype:    question.Qtype,
+                                Class:     dns.ClassINET,
+                                Ttl:       10,
+                            }
+                            inr.A = net.ParseIP(iaddr[0].Address)
+                            m.Answer = append(m.Answer, inr)
                         }
-                        inr.A = net.ParseIP(iaddr[0].Address)
-                        m.Answer = append(m.Answer, inr)
                     }
 
                     // external interface
