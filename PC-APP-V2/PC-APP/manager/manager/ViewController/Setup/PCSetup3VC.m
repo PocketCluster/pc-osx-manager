@@ -173,6 +173,10 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          
          if ([[response valueForKeyPath:@"package-install.status"] boolValue]) {
+             [ShowAlert
+              showWarningAlertWithTitle:@"Installation Completed!"
+              message:@"FIND PACKAGE ID AND MARK AS INSTALLED"];
+
          } else {
              [ShowAlert
               showWarningAlertWithTitle:@"Temporarily Unavailable"

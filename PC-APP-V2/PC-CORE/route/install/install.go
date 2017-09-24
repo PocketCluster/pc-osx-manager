@@ -11,6 +11,7 @@ import (
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/model"
+    "github.com/stkim1/pc-core/utils/dockertool"
 )
 
 const (
@@ -148,6 +149,32 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
             return feedError(errors.WithMessage(err, "unable to sync node image"))
         }
 
-        return feedError(errors.Errorf("ALL DONE OK"))
+        // --- --- --- --- --- install image to core --- --- --- --- ---
+        _ = makeMessageFeedBack(feeder, rpProgress, "Installing core image...")
+
+        // --- --- --- --- --- install image to nodes --- --- --- --- ---
+        _ = makeMessageFeedBack(feeder, rpProgress, "Installing node image...")
+        cli, err := dockertool.NewContainerClient("tcp://pc-node1:2376", "1.24")
+        if err != nil {
+            log.Debugf(err.Error())
+        }
+        err = dockertool.InstallImageFromRepository(cli, "pc-master:5000/arm64v8-ubuntu")
+        if err != nil {
+            log.Debugf(err.Error())
+        }
+
+        // --- --- --- --- --- install image to nodes --- --- --- --- ---
+        data, err := json.Marshal(route.ReponseMessage{
+            "package-install": {
+                "status": true,
+                "pkg-id" : pkgID,
+            },
+        })
+        // this should never happen
+        if err != nil {
+            log.Error(err.Error())
+        }
+        err = feeder.FeedResponseForPost(rpath, string(data))
+        return errors.WithStack(err)
     })
 }
