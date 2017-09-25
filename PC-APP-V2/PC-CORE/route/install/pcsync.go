@@ -21,6 +21,7 @@ import (
     "github.com/Redundancy/go-sync/patcher/multisources"
     "github.com/Redundancy/go-sync/showpipe"
     "github.com/stkim1/pc-core/route"
+    "github.com/stkim1/pc-core/utils/dblerr"
 )
 
 // reads the file headers and checks the magic string, then the semantic versioning
@@ -161,6 +162,7 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
     var (
         uerrC      chan error = make(chan error)
         perrC      chan error = make(chan error)
+        uerr, perr      error = nil, nil
         unarchDone       bool = false
         patchDone        bool = false
     )
@@ -191,8 +193,9 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
             // patch error
             case err := <- perrC: {
                 patchDone = true
+                perr = err
                 if unarchDone {
-                    return errors.WithStack(err)
+                    return errors.WithStack(dblerr.SummarizeErrors(perr, uerr))
                 }
                 // regardless of error or not, patcher should close action as it's the one to quit in normal cond.
                 go action.close()
@@ -201,8 +204,9 @@ func execSync(feeder route.ResponseFeeder, action *syncActionPack, stopC chan st
             // this is emergency as unarchiving fails
             case err := <- uerrC: {
                 unarchDone = true
+                uerr = err
                 if patchDone {
-                    return errors.WithStack(err)
+                    return errors.WithStack(dblerr.SummarizeErrors(uerr, perr))
                 }
                 if err != nil {
                     go action.close()
