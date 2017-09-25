@@ -62,5 +62,5 @@ func MakeNewClient(cfg *service.PocketConfig, login, targetHost string) (tc *cli
         // Interactive, when set to true, launches remote command with the terminal attached
         Interactive:        false,
     }
-    return client.NewClient(c)
+    return client.NewPocketClient(c)
 }
