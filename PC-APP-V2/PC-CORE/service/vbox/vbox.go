@@ -86,14 +86,6 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
 }
 
 func InitVboxCoreReportService(appLife service.ServiceSupervisor, clusterID string) error {
-    // this is to broadcast masterctrl object w/ listener
-    type vboxCtrlObjBrcst struct {
-        masterctrl.VBoxMasterControl
-        net.Listener
-    }
-    const (
-        iventVboxCtrlObjectBroadcast string = "ivent.vbox.ctrl.object.broadcast"
-    )
     var (
         ctrlObjC  = make(chan service.Event)
         netC      = make(chan service.Event)
@@ -111,7 +103,7 @@ func InitVboxCoreReportService(appLife service.ServiceSupervisor, clusterID stri
 
             // masterctrl.VBoxMasterControl
             cc := <- ctrlObjC
-            vbc, ok := cc.Payload.(vboxCtrlObjBrcst)
+            vbc, ok := cc.Payload.(*ivent.VboxCtrlBrcstObj)
             if !ok {
                 log.Debugf("[ERR] invalid VBoxMasterControl type")
                 return errors.Errorf("[ERR] invalid VBoxMasterControl type")
@@ -143,7 +135,7 @@ func InitVboxCoreReportService(appLife service.ServiceSupervisor, clusterID stri
             }
             return nil
         },
-        service.BindEventWithService(iventVboxCtrlObjectBroadcast, ctrlObjC))
+        service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn, ctrlObjC))
 
     appLife.RegisterServiceWithFuncs(
         operation.ServiceVBoxMasterControl,
@@ -190,16 +182,11 @@ func InitVboxCoreReportService(appLife service.ServiceSupervisor, clusterID stri
 
             // broadcase the two and start vbox controller first
             appLife.BroadcastEvent(service.Event{
-                Name:iventVboxCtrlObjectBroadcast,
-                Payload: vboxCtrlObjBrcst{
+                Name:ivent.IventVboxCtrlInstanceSpawn,
+                Payload: &ivent.VboxCtrlBrcstObj{
                     Listener:          listen,
                     VBoxMasterControl: ctrl,
                 }})
-
-            // then broadcast master controller to start master beacon
-            appLife.BroadcastEvent(service.Event{
-                Name:ivent.IventVboxCtrlInstanceSpawn,
-                Payload: ctrl})
 
             log.Debugf("[VBOXCTRL] VBox Core Control service started... %s", ctrl.CurrentState().String())
             for {

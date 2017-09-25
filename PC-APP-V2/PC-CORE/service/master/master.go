@@ -7,7 +7,6 @@ import (
     "github.com/pkg/errors"
     "github.com/gravitational/teleport/embed"
     tervice "github.com/gravitational/teleport/lib/service"
-    "github.com/stkim1/pc-vbox-comm/masterctrl"
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
@@ -87,7 +86,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
             )
             // wait for vbox control
             vc := <- vboxC
-            vbc, ok := vc.Payload.(masterctrl.VBoxMasterControl)
+            vbc, ok := vc.Payload.(*ivent.VboxCtrlBrcstObj)
             if !ok {
                 log.Debugf("[AGENT] (ERR) invalid VBoxMasterControl type")
                 return errors.Errorf("[ERR] invalid VBoxMasterControl type")
@@ -96,7 +95,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
             // beacon manager
             beaconMan, err = beacon.NewBeaconManagerWithFunc(
                 clusterID,
-                vbc,
+                vbc.VBoxMasterControl,
                 beaconRoute,
                 func(host string, payload []byte) error {
                     log.Debugf("[AGENT] BEACON-TX [%v] Host %v", time.Now(), host)
