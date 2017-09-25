@@ -5,13 +5,13 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
-    "github.com/gravitational/teleport/embed"
     tervice "github.com/gravitational/teleport/lib/service"
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/pc-core/beacon"
     "github.com/stkim1/pc-core/event/operation"
+    "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/model"
@@ -30,12 +30,12 @@ func (b *beaconEventRoute) terminate() error {
 }
 
 func (b *beaconEventRoute) BeaconEventPrepareJoin(slave *model.SlaveNode) error {
-    clt, err := embed.OpenAdminClientWithAuthService(b.PocketConfig)
+    clt, err := sshadmin.OpenAdminClientWithAuthService(b.PocketConfig)
     if err != nil {
         return errors.WithStack(err)
     }
     defer clt.Close()
-    token, err := embed.GenerateNodeInviationWithTTL(clt, embed.MaxInvitationTLL)
+    token, err := sshadmin.GenerateNodeInviationWithTTL(clt, sshadmin.MaxInvitationTLL)
     if err != nil {
         return errors.WithStack(err)
     }

@@ -7,7 +7,11 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+//    tconfig "github.com/gravitational/teleport/lib/config"
+    tervice "github.com/gravitational/teleport/lib/service"
+
     "github.com/stkim1/pc-core/context"
+//    "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/model"
@@ -18,7 +22,7 @@ const (
     timeout = time.Duration(10 * time.Second)
 )
 
-func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeeder) {
+func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeeder, sshCfg *tervice.PocketConfig) {
     // install a package
     appLife.POST(routepath.RpathPackageInstall(), func(_, rpath, payload string) error {
         var (
@@ -156,11 +160,11 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
         _ = makeMessageFeedBack(feeder, rpProgress, "Installing node image...")
         cli, err := dockertool.NewContainerClient("tcp://pc-node1:2376", "1.24")
         if err != nil {
-            log.Debugf(err.Error())
+            return feedError(errors.WithMessage(err, "unable to make connection to " + "pc-node1"))
         }
         err = dockertool.InstallImageFromRepository(cli, "pc-master:5000/arm64v8-ubuntu")
         if err != nil {
-            log.Debugf(err.Error())
+            return feedError(errors.WithMessage(err, "unable to sync image to " + "pc-node1"))
         }
 
         // --- --- --- --- --- install image to nodes --- --- --- --- ---

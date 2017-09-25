@@ -33,9 +33,9 @@ func main() {
     appLifeCycle(func(appLife *appMainLife) {
 
         var (
-            appCfg *config.ServiceConfig = nil
-            err    error                 = nil
-            IsContextInit           bool = false
+            appCfg        *config.ServiceConfig = nil
+            err           error                 = nil
+            IsContextInit bool                  = false
         )
 
         for e := range appLife.Events() {
@@ -62,7 +62,7 @@ func main() {
                                 context.SharedHostContext()
                                 initcheck.InitRoutePathServices(appLife, theFeeder)
                                 install.InitInstallListRouthPath(appLife, theFeeder)
-                                install.InitInstallPackageRoutePath(appLife, theFeeder)
+                                install.InitInstallPackageRoutePath(appLife, theFeeder, appCfg.PCSSH)
 
                                 IsContextInit = true
                             }
