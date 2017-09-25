@@ -25,6 +25,9 @@ import (
     "github.com/stkim1/pc-core/service/master"
     "github.com/stkim1/pc-core/service/vbox"
     "github.com/stkim1/pc-core/vboxglue"
+)
+import (
+    "github.com/stkim1/pc-core/extlib/pcssh/sshclient"
     "github.com/stkim1/pc-core/utils/dockertool"
 )
 
@@ -62,7 +65,6 @@ func main() {
                                 context.SharedHostContext()
                                 initcheck.InitRoutePathServices(appLife, theFeeder)
                                 install.InitInstallListRouthPath(appLife, theFeeder)
-                                install.InitInstallPackageRoutePath(appLife, theFeeder, appCfg.PCSSH)
 
                                 IsContextInit = true
                             }
@@ -153,6 +155,8 @@ func main() {
                             log.Debugf("[LIFE] CRITICAL ERROR %v", err)
                             return
                         }
+                        // TODO : move this initializer after network initiated
+                        install.InitInstallPackageRoutePath(appLife, theFeeder, appCfg.PCSSH)
 
                         // TODO check all the status before start
 
@@ -277,6 +281,10 @@ func main() {
                     }
 
                     case operation.CmdTeleportRootAdd: {
+                        _, err := sshclient.MakeNewClient(appCfg.PCSSH,"root", "pc-node1")
+                        if err != nil {
+                            log.Error(err.Error())
+                        }
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdTeleportUserAdd: {
