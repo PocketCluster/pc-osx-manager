@@ -24,6 +24,7 @@ func MakeNewClient(cfg *service.PocketConfig, login, targetHost string) (tc *cli
         return nil, err
     }
 
+    // TODO : shouldn't this be acquired with teleport.RoleNode ???
     id, err := auth.ReadIdentityFromCertStorage(cfg.CoreProperty.CertStorage,
         auth.IdentityID{
             HostUUID: cfg.HostUUID,

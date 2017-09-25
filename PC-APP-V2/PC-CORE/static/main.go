@@ -28,7 +28,7 @@ import (
 )
 import (
     "github.com/stkim1/pc-core/extlib/pcssh/sshclient"
-    "github.com/stkim1/pc-core/utils/dockertool"
+    "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
 )
 
 func main() {
@@ -281,22 +281,30 @@ func main() {
                     }
 
                     case operation.CmdTeleportRootAdd: {
+                        cli, err := sshadmin.OpenAdminClientWithAuthService(appCfg.PCSSH)
+                        if err != nil {
+                            log.Error(err.Error())
+                        }
+                        err = sshadmin.CreateTeleportUser(cli, "root", "-password-")
+                        if err != nil {
+                            log.Error(err.Error())
+                        }
+                        uname, err := context.SharedHostContext().LoginUserName()
+                        if err != nil {
+                            log.Error(err.Error())
+                        }
+                        err = sshadmin.CreateTeleportUser(cli, uname, "-password-")
+                        if err != nil {
+                            log.Error(err.Error())
+                        }
+
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdTeleportUserAdd: {
                         _, err := sshclient.MakeNewClient(appCfg.PCSSH,"root", "pc-node1")
                         if err != nil {
                             log.Error(err.Error())
                         }
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdTeleportUserAdd: {
-                        cli, err := dockertool.NewContainerClient("tcp://pc-node1:2376", "1.24")
-                        if err != nil {
-                            log.Debugf(err.Error())
-                        }
-                        err = dockertool.InstallImageFromRepository(cli, "pc-master:5000/arm64v8-ubuntu")
-                        if err != nil {
-                            log.Debugf(err.Error())
-                        }
-
                         log.Debugf("[OP] %v", e.String())
                     }
 
