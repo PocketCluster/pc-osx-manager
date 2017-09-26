@@ -19,11 +19,9 @@ import (
 func InitPackageStartupRoutePath(appLife route.Router, feeder route.ResponseFeeder) {
 
     // install a package
-    appLife.POST(routepath.RpathPackageInstall(), func(_, rpath, payload string) error {
-        var (
-            pkgID      string = ""
-        )
+    appLife.POST(routepath.RpathPackageStartup(), func(_, rpath, payload string) error {
         // 1. parse input package id
+        var pkgID string = ""
         err := json.Unmarshal([]byte(payload), &struct {
             PkgID *string `json:"pkg-id"`
         }{&pkgID})

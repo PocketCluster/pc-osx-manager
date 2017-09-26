@@ -278,16 +278,9 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
 
-                    case operation.CmdTeleportRootAdd: {
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdTeleportUserAdd: {
-                        log.Debugf("[OP] %v", e.String())
-                    }
-
                     /// DEBUG ///
 
-                    case operation.CmdDebug: {
+                    case operation.CmdDebug0: {
                         // setup users
                         {
                             cli, err := sshadmin.OpenAdminClientWithAuthService(appCfg.PCSSH)
@@ -335,6 +328,15 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
 
+                    case operation.CmdDebug1: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug2: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug3: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
 
                     default:
                         log.Debug("[OP-ERROR] THIS SHOULD NOT HAPPEN %v", e.String())

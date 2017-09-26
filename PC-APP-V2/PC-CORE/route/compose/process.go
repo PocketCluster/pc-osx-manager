@@ -18,7 +18,7 @@ import (
 func InitPackageProcessRoutePath(appLife route.Router, feeder route.ResponseFeeder) {
 
     // install a package
-    appLife.POST(routepath.RpathPackageInstall(), func(_, rpath, payload string) error {
+    appLife.POST(routepath.RpathPackageProcess(), func(_, rpath, payload string) error {
         var (
             columns []string = []string{"Id", "Name", "Command", "State", "Ports"}
             pkgID     string = ""

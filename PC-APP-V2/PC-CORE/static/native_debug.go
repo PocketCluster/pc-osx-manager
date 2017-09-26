@@ -37,23 +37,30 @@ func OpsCmdStorageStop() {
     })
 }
 
-//export OpsCmdTeleportRootAdd
-func OpsCmdTeleportRootAdd() {
+//export OpsCmdDebug0
+func OpsCmdDebug0() {
     theApp.Send(operation.Operation{
-        Command:    operation.CmdTeleportRootAdd,
+        Command:    operation.CmdDebug0,
     })
 }
 
-//export OpsCmdTeleportUserAdd
-func OpsCmdTeleportUserAdd() {
+//export OpsCmdDebug1
+func OpsCmdDebug1() {
     theApp.Send(operation.Operation{
-        Command:    operation.CmdTeleportUserAdd,
+        Command:    operation.CmdDebug1,
     })
 }
 
-//export OpsCmdDebug
-func OpsCmdDebug() {
+//export OpsCmdDebug2
+func OpsCmdDebug2() {
     theApp.Send(operation.Operation{
-        Command:    operation.CmdDebug,
+        Command:    operation.CmdDebug2,
+    })
+}
+
+//export OpsCmdDebug3
+func OpsCmdDebug3() {
+    theApp.Send(operation.Operation{
+        Command:    operation.CmdDebug3,
     })
 }

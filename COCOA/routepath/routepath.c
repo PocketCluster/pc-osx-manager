@@ -15,6 +15,9 @@ const char* RPATH_SYSTEM_IS_FIRST_RUN       = "/v1/inquiry/system/is-first-run";
 const char* RPATH_PACKAGE_LIST              = "/v1/inquiry/package/list";
 const char* RPATH_PACKAGE_INSTALL           = "/v1/cmd/package/install";
 const char* RPATH_PACKAGE_INSTALL_PROGRESS  = "/v1/monitor/package/install";
+const char* RPATH_PACKAGE_STARTUP           = "/v1/cmd/package/startup";
+const char* RPATH_PACKAGE_KILL              = "/v1/cmd/package/kill";
+const char* RPATH_MONITOR_PACKAGE_PROCESS   = "/v1/monitor/package/process";
 
 const char* RPATH_MONITOR_NODE_REGISTERED   = "/v1/monitor/node/registered";
 const char* RPATH_MONITOR_NODE_UNREGISTERED = "/v1/monitor/node/unregistered";

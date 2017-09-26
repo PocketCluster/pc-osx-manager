@@ -98,11 +98,13 @@ extern void OpsCmdStorageStart();
 
 extern void OpsCmdStorageStop();
 
-extern void OpsCmdTeleportRootAdd();
+extern void OpsCmdDebug0();
 
-extern void OpsCmdTeleportUserAdd();
+extern void OpsCmdDebug1();
 
-extern void OpsCmdDebug();
+extern void OpsCmdDebug2();
+
+extern void OpsCmdDebug3();
 
 extern void StartResponseFeed();
 
