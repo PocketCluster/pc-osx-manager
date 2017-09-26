@@ -14,6 +14,7 @@ import (
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
+    "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/install"
@@ -26,9 +27,6 @@ import (
     "github.com/stkim1/pc-core/service/master"
     "github.com/stkim1/pc-core/service/vbox"
     "github.com/stkim1/pc-core/vboxglue"
-)
-import (
-    "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
 )
 
 func main() {
