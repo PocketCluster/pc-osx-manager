@@ -53,13 +53,10 @@ func UpsertUserMeta(meta *UserMeta) (error) {
 }
 
 func FindUserMetaWithLogin(login string) ([]*UserMeta, error) {
-    var (
-        meta []*UserMeta = nil
-        err error = nil
-    )
+    var meta []*UserMeta = nil
     SharedRecordGate().Session().Where("login = ?", login).Find(&meta)
     if len(meta) == 0 {
         return nil, NoItemFound
     }
-    return meta, err
+    return meta, nil
 }

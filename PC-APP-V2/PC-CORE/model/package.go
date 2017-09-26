@@ -54,9 +54,12 @@ func (Package) TableName() string {
     return packageTable
 }
 
-func FindPackage(query interface{}, args ...interface{}) ([]Package, error) {
-    var pkgs []Package = nil
+func FindPackage(query interface{}, args ...interface{}) ([]*Package, error) {
+    var pkgs []*Package = nil
     SharedRecordGate().Session().Where(query, args).Find(&pkgs)
+    if len(pkgs) == 0 {
+        return nil, NoItemFound
+    }
     return pkgs, nil
 }
 

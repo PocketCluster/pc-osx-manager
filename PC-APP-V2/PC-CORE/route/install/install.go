@@ -1,17 +1,17 @@
 package install
 
 import (
+    "context"
     "encoding/json"
     "fmt"
     "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
-//    tconfig "github.com/gravitational/teleport/lib/config"
     tervice "github.com/gravitational/teleport/lib/service"
+    tclient "github.com/gravitational/teleport/lib/client"
 
-    "github.com/stkim1/pc-core/context"
-//    "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
+    pcctx "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/model"
@@ -45,7 +45,8 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
                 return irr
             }
 
-            pkg        model.Package
+            pkg        *model.Package
+            uRoot      *model.UserMeta
             rpProgress string = routepath.RpathPackageInstallProgress()
             pkgID      string = ""
             repoList          = []string{}
@@ -54,7 +55,7 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
         )
 
         // 0. find registry destination first
-        regDir, err := context.SharedHostContext().ApplicationRepositoryDirectory()
+        regDir, err := pcctx.SharedHostContext().ApplicationRepositoryDirectory()
         if err != nil {
             return errors.WithStack(err)
         }
@@ -69,14 +70,25 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
 
         // TODO 2. check if service is already running
 
-        // 3. find appropriate model
-        pkgs, _ := model.FindPackage("pkg_id = ?", pkgID)
-        if len(pkgs) == 0 {
+        // 3. pick up the first package & we are ready to patch.
+        pkgs, err := model.FindPackage("pkg_id = ?", pkgID)
+        if err != nil {
             return feedError(errors.Errorf("selected package %s is not available", pkgID))
         }
-
-        // 4. pick up the first package & we are ready to patch.
         pkg = pkgs[0]
+
+        // 4. pick root password for devops
+        rUsers, err := model.FindUserMetaWithLogin("root")
+        if err != nil {
+            return feedError(errors.WithMessage(err, "Unable to install package due to improper permission"))
+        }
+        uRoot = rUsers[0]
+
+        // 5. read local user for devops
+        _, err = pcctx.SharedHostContext().LoginUserName()
+        if err != nil {
+            return feedError(errors.WithMessage(err, "Unable to install package due to invalid user information"))
+        }
 
 
         // --- --- --- --- --- download meta first --- --- --- --- ---
@@ -166,6 +178,22 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync image to " + "pc-node1"))
         }
+
+        // --- --- --- --- --- setup node --- --- --- --- ---
+        tNode := "pc-node1"
+        c, err := tclient.MakeNewClient(sshCfg, uRoot.Login, tNode)
+        if err != nil {
+            return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
+        }
+        err = c.APISSH(context.TODO(), []string{"mkdir -p /pocket/basic/package"}, "1524rmfo",false)
+        if err != nil {
+            return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
+        }
+        err = c.Logout()
+        if err != nil {
+            return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
+        }
+
 
         // --- --- --- --- --- install image to nodes --- --- --- --- ---
         data, err := json.Marshal(route.ReponseMessage{
