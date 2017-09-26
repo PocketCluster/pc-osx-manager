@@ -122,6 +122,12 @@ func OpenRecordGate(dataDir, recordFile string) (RecordGate, error) {
         sess.AutoMigrate(&ClusterMeta{})
     }
 
+    if !sess.HasTable(&UserMeta{}) {
+        sess.CreateTable(&UserMeta{})
+    } else {
+        sess.AutoMigrate(&UserMeta{})
+    }
+
     if !sess.HasTable(&SlaveNode{}) {
         sess.CreateTable(&SlaveNode{})
     } else {

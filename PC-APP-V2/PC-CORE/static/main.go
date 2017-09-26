@@ -30,7 +30,6 @@ import (
     ctx "context"
     "github.com/gravitational/teleport/lib/client"
     "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
-    "github.com/gravitational/teleport/lib/defaults"
 )
 
 func main() {

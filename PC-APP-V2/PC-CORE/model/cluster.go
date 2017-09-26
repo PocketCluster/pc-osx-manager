@@ -11,6 +11,10 @@ import (
     "github.com/stkim1/pc-core/utils/randstr"
 )
 
+const (
+    clusterMetaTable        string = `pc_clustermeta`
+)
+
 type ClusterMeta struct {
     gorm.Model
     // this is short id
@@ -21,6 +25,11 @@ type ClusterMeta struct {
     ClusterDomain    string    `gorm:"column:cluster_domain;type:VARCHAR(42)"`
     // User defined Name
     UserMadeName     string    `gorm:"column:user_made_name;type:VARCHAR(255)"`
+}
+
+// instance methods
+func (ClusterMeta) TableName() string {
+    return clusterMetaTable
 }
 
 func NewClusterMeta() (*ClusterMeta) {
