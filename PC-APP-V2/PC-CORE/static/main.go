@@ -28,7 +28,7 @@ import (
 )
 import (
     ctx "context"
-    "github.com/stkim1/pc-core/extlib/pcssh/sshclient"
+    "github.com/gravitational/teleport/lib/client"
     "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
 )
 
@@ -302,11 +302,11 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdTeleportUserAdd: {
-                        c, err := sshclient.MakeNewClient(appCfg.PCSSH,"root", "pc-node1")
+                        c, err := client.MakeNewClient(appCfg.PCSSH,"root", "pc-node1")
                         if err != nil {
                             log.Error(err.Error())
                         }
-                        err = c.APISSH(ctx.TODO(), []string{"ls", "/"}, false)
+                        err = c.APISSH(ctx.TODO(), []string{"ls", "/"}, "1524rmfo", "",false)
                         if err != nil {
                             log.Error(err.Error())
                         }
