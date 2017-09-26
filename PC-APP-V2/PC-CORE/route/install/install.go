@@ -4,6 +4,7 @@ import (
     "context"
     "encoding/json"
     "fmt"
+    "os/user"
     "time"
 
     log "github.com/Sirupsen/logrus"
@@ -78,17 +79,22 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
         pkg = pkgs[0]
 
         // 4. pick root password for devops
-        rUsers, err := model.FindUserMetaWithLogin("root")
+        rusers, err := model.FindUserMetaWithLogin("root")
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to install package due to improper permission"))
         }
-        uRoot = rUsers[0]
+        uRoot = rusers[0]
 
-        // 5. read local user for devops
-        _, err = pcctx.SharedHostContext().LoginUserName()
+        // 5. read local user information for devops
+        luname, err := pcctx.SharedHostContext().LoginUserName()
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to install package due to invalid user information"))
         }
+        luser, err := user.Lookup(luname)
+        if err != nil {
+            return feedError(errors.WithMessage(err, "Unable to access user information"))
+        }
+        log.Infof("user name %v, user id %v", luname, luser.Uid)
 
 
         // --- --- --- --- --- download meta first --- --- --- --- ---

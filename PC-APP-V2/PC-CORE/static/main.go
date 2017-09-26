@@ -14,6 +14,7 @@ import (
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
+    "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/install"
     "github.com/stkim1/pc-core/route/initcheck"
@@ -280,23 +281,6 @@ func main() {
                     }
 
                     case operation.CmdTeleportRootAdd: {
-                        cli, err := sshadmin.OpenAdminClientWithAuthService(appCfg.PCSSH)
-                        if err != nil {
-                            log.Error(err.Error())
-                        }
-                        err = sshadmin.CreateTeleportUser(cli, "root", "-password-")
-                        if err != nil {
-                            log.Error(err.Error())
-                        }
-                        uname, err := context.SharedHostContext().LoginUserName()
-                        if err != nil {
-                            log.Error(err.Error())
-                        }
-                        err = sshadmin.CreateTeleportUser(cli, uname, "-password-")
-                        if err != nil {
-                            log.Error(err.Error())
-                        }
-
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdTeleportUserAdd: {
@@ -306,17 +290,48 @@ func main() {
                     /// DEBUG ///
 
                     case operation.CmdDebug: {
-                        cid, err := context.SharedHostContext().MasterAgentName()
-                        if err != nil {
-                            log.Debug(err)
+                        // setup users
+                        {
+                            cli, err := sshadmin.OpenAdminClientWithAuthService(appCfg.PCSSH)
+                            if err != nil {
+                                log.Error(err.Error())
+                            }
+                            roots, err := model.FindUserMetaWithLogin("root")
+                            if err != nil {
+                                log.Error(err.Error())
+                            }
+                            err = sshadmin.CreateTeleportUser(cli, "root", roots[0].Password)
+                            if err != nil {
+                                log.Error(err.Error())
+                            }
+                            uname, err := context.SharedHostContext().LoginUserName()
+                            if err != nil {
+                                log.Error(err.Error())
+                            }
+                            lusers, err := model.FindUserMetaWithLogin(uname)
+                            if err != nil {
+                                log.Error(err.Error())
+                            }
+                            err = sshadmin.CreateTeleportUser(cli, uname, lusers[0].Password)
+                            if err != nil {
+                                log.Error(err.Error())
+                            }
                         }
-                        err = vboxglue.BuildVboxCoreDisk(cid, appCfg.PCSSH)
-                        if err != nil {
-                            log.Debug(err)
-                        }
-                        err = vboxglue.BuildVboxMachine()
-                        if err != nil {
-                            log.Debugf("vbox operation error %v", err)
+
+                        // setup vbox
+                        {
+                            cid, err := context.SharedHostContext().MasterAgentName()
+                            if err != nil {
+                                log.Debug(err)
+                            }
+                            err = vboxglue.BuildVboxCoreDisk(cid, appCfg.PCSSH)
+                            if err != nil {
+                                log.Debug(err)
+                            }
+                            err = vboxglue.BuildVboxMachine()
+                            if err != nil {
+                                log.Debugf("vbox operation error %v", err)
+                            }
                         }
 
                         log.Debugf("[OP] %v", e.String())

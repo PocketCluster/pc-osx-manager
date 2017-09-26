@@ -6,9 +6,10 @@ import (
     "github.com/jinzhu/gorm"
 )
 
-const packageTable string = `pc_package`
-
-const PackageModelVersion = "0.1.4"
+const (
+    packageTable        string = `pc_package`
+    PackageModelVersion string = "0.1.4"
+)
 
 type Package struct {
     gorm.Model                `json:"-"`
