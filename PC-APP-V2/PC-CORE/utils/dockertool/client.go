@@ -8,25 +8,24 @@ import (
     "github.com/docker/docker/api/types"
     "github.com/docker/docker/client"
 
-    pccctx "github.com/stkim1/pc-core/context"
+    pcctx "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/utils/tlscfg"
 )
 
 func NewContainerClient(host, version string) (*client.Client, error) {
-    ctx := pccctx.SharedHostContext()
-    caCert, err := ctx.CertAuthCertificate()
+    caCert, err := pcctx.SharedHostContext().CertAuthCertificate()
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    hostCrt, err := ctx.MasterHostCertificate()
+    hostCrt, err := pcctx.SharedHostContext().MasterHostCertificate()
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    hostPrv, err := ctx.MasterHostPrivateKey()
+    hostKey, err := pcctx.SharedHostContext().MasterHostPrivateKey()
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    tlsc, err := tlscfg.BuildTLSConfigWithCAcert(caCert, hostCrt, hostPrv, true)
+    tlsc, err := tlscfg.BuildTLSConfigWithCAcert(caCert, hostCrt, hostKey, true)
     if err != nil {
         return nil, errors.WithStack(err)
     }

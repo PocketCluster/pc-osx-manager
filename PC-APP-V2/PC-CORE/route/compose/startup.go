@@ -1,84 +1,80 @@
 package compose
 
 import (
-    "os"
-    "io/ioutil"
-
-    "github.com/docker/libcompose/docker"
-    "github.com/docker/libcompose/docker/ctx"
-    "github.com/docker/libcompose/docker/client"
-    "github.com/docker/libcompose/project"
-    "github.com/docker/libcompose/project/options"
+    "encoding/json"
 
     "golang.org/x/net/context"
     log "github.com/Sirupsen/logrus"
-    //"github.com/davecgh/go-spew/spew"
+    "github.com/pkg/errors"
+
+    "github.com/docker/libcompose/docker"
+    "github.com/docker/libcompose/docker/ctx"
+    "github.com/docker/libcompose/project"
+    "github.com/docker/libcompose/project/options"
+
+    "github.com/stkim1/pc-core/route"
+    "github.com/stkim1/pc-core/route/routepath"
 )
 
-func main() {
-    log.SetOutput(os.Stdout)
-    composeBytes, err := ioutil.ReadFile("pocket-deploy.json")
-    if err != nil && !os.IsNotExist(err) {
-        log.Fatal("Failed to open the compose file: pocket-deploy.json")
-    }
-    caCert, err  := ioutil.ReadFile("/Users/almightykim/Workspace/DKIMG/CERT/ca-cert.pub")
-    if err != nil {
-        log.Fatal(err.Error())
-    }
-    tlsCert, err := ioutil.ReadFile("/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.cert")
-    if err != nil {
-        log.Fatal(err.Error())
-    }
-    tlsKey, err  := ioutil.ReadFile("/Users/almightykim/Workspace/DKIMG/PC-MASTER/pc-master.key")
-    if err != nil {
-        log.Fatal(err.Error())
-    }
+func InitPackageStartupRoutePath(appLife route.Router, feeder route.ResponseFeeder) {
 
-    opts, err := client.NewPocketCientOption(caCert, tlsCert, tlsKey, "tcp://pc-master:3376")
-    if err != nil {
-        log.Fatal(err.Error())
-    }
-    project, err := docker.NewPocketProject(&docker.PocketContext{
-        Context: &ctx.Context{
-            Context: project.Context{
-                ProjectName:  "pocket-hadoop",
+    // install a package
+    appLife.POST(routepath.RpathPackageInstall(), func(_, rpath, payload string) error {
+        var (
+            pkgID      string = ""
+        )
+        // 1. parse input package id
+        err := json.Unmarshal([]byte(payload), &struct {
+            PkgID *string `json:"pkg-id"`
+        }{&pkgID})
+        if err != nil {
+            return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to specify package id"))
+        }
+
+        // 2. load template
+        cTempl, err := loadComposeTemplate(pkgID)
+        if err != nil {
+            return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to access package template"))
+        }
+
+        // 3. build client
+        opts, err := newComposeClient()
+        if err != nil {
+            return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to build orchestration client"))
+        }
+
+        // 4. build package
+        project, err := docker.NewPocketProject(&docker.PocketContext{
+            Context: &ctx.Context{
+                Context: project.Context{
+                    ProjectName:  "pocket-hadoop",
+                },
             },
-        },
-        ClientOptions: opts,
-        Manifest: composeBytes,
-    }, nil)
-    if err != nil {
-        log.Fatal(err)
-    }
+            ClientOptions: opts,
+            Manifest: cTempl,
+        }, nil)
+        if err != nil {
+            return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to create project"))
+        }
 
-    var action = 3
-    switch action {
-    case 0: {
-        //log.Info(spew.Sdump(project))
-        allInfo, err := project.Ps(context.Background(), []string{}...)
+        // 5. startup package
+        err = project.Up(context.TODO(), options.Up{})
         if err != nil {
-            log.Fatal(err)
+            return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to start package"))
         }
-        columns := []string{"Id", "Name", "Command", "State", "Ports"}
-        os.Stdout.WriteString(allInfo.String(columns, false))
-    }
-    case 1: {
-        err = project.Up(context.Background(), options.Up{})
+
+        // 6. return feedback
+        data, err := json.Marshal(route.ReponseMessage{
+            packageFeedbackStartup: {
+                "status": true,
+                "pkg-id" : pkgID,
+            },
+        })
+        // this should never happen
         if err != nil {
-            log.Fatal(err)
+            log.Error(err.Error())
         }
-    }
-    case 2: {
-        err = project.Kill(context.Background(), "SIGINT", []string{}...)
-        if err != nil {
-            log.Fatal(err)
-        }
-    }
-    case 3: {
-        err = project.Delete(context.Background(), options.Delete{}, []string{}...)
-        if err != nil {
-            log.Fatal(err)
-        }
-    }
-    }
+        err = feeder.FeedResponseForPost(rpath, string(data))
+        return errors.WithStack(err)
+    })
 }
