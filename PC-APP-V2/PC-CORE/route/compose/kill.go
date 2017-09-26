@@ -10,6 +10,7 @@ import (
     "github.com/docker/libcompose/docker"
     "github.com/docker/libcompose/docker/ctx"
     "github.com/docker/libcompose/project"
+    "github.com/docker/libcompose/project/options"
 
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
@@ -59,10 +60,16 @@ func InitPackageKillRoutePath(appLife route.Router, feeder route.ResponseFeeder)
         // 5. kill package
         err = project.Kill(context.TODO(), "SIGINT", []string{}...)
         if err != nil {
-            return feedError(feeder, rpath, packageFeedbackKill, errors.WithMessage(err, "unable to start package"))
+            return feedError(feeder, rpath, packageFeedbackKill, errors.WithMessage(err, "unable to stop package"))
         }
 
-        // 6. return feedback
+        // 6. kill package
+        err = project.Delete(context.Background(), options.Delete{}, []string{}...)
+        if err != nil {
+            return feedError(feeder, rpath, packageFeedbackKill, errors.WithMessage(err, "unable to remove package residue"))
+        }
+
+        // 7. return feedback
         data, err := json.Marshal(route.ReponseMessage{
             packageFeedbackKill: {
                 "status": true,

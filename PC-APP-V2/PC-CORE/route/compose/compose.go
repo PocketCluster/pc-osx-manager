@@ -14,7 +14,7 @@ import (
 
 const (
     packageFeedbackStartup string = "package-startup"
-    packageFeedbackDelete  string = "package-delete"
+    packageFeedbackProcess string = "package-process"
     packageFeedbackKill    string = "package-kill"
 )
 
