@@ -30,6 +30,7 @@ import (
     ctx "context"
     "github.com/gravitational/teleport/lib/client"
     "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
+    "github.com/gravitational/teleport/lib/defaults"
 )
 
 func main() {
@@ -302,11 +303,23 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdTeleportUserAdd: {
+                        log.Info("\t---- Make Cient to node ---")
                         c, err := client.MakeNewClient(appCfg.PCSSH,"root", "pc-node1")
                         if err != nil {
                             log.Error(err.Error())
                         }
-                        err = c.APISSH(ctx.TODO(), []string{"ls", "/"}, "1524rmfo",false)
+                        log.Info("\t---- Make Cient to Login ---")
+                        _, err = c.Login()
+                        if err != nil {
+                            log.Error(err.Error())
+                        }
+                        log.Info("\t---- SSH TO NODE ---")
+                        err = c.APISSH(ctx.TODO(), []string{"mkdir -p /pocket && ls /"}, "1524rmfo",false)
+                        if err != nil {
+                            log.Error(err.Error())
+                        }
+                        log.Info("\t---- LOGOUT ---")
+                        err = c.Logout()
                         if err != nil {
                             log.Error(err.Error())
                         }
