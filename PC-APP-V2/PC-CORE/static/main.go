@@ -306,7 +306,7 @@ func main() {
                         if err != nil {
                             log.Error(err.Error())
                         }
-                        err = c.APISSH(ctx.TODO(), []string{"ls", "/"}, "1524rmfo", "",false)
+                        err = c.APISSH(ctx.TODO(), []string{"ls", "/"}, "1524rmfo",false)
                         if err != nil {
                             log.Error(err.Error())
                         }
