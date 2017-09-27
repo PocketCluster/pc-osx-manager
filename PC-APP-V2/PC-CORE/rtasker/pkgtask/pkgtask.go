@@ -1,4 +1,4 @@
-package compose
+package pkgtask
 
 import (
     "encoding/json"
