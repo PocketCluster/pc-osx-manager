@@ -53,6 +53,14 @@ func newComposeClient() (*client.PocketClientOption, error) {
     return client.NewPocketCientOption(caCert, hostCrt, hostKey, "tcp://pc-master:3376")
 }
 
+
+const (
+    iventPackageKillPrefix   string = "ivent.package.kill."
+    taskPackageStartupPrefix string = "task.pacakge.startup."
+    taskPackageProcessPrefix string = "task.pacakge.process."
+    taskPackageKillPrefix    string = "task.pacakge.kill."
+)
+
 func loadComposeTemplate(pkgID string) ([]byte, error) {
     return nil, errors.Errorf("no package for %v found", pkgID)
 }
