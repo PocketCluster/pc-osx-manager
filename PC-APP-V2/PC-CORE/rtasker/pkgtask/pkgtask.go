@@ -2,10 +2,13 @@ package pkgtask
 
 import (
     "encoding/json"
+    "fmt"
+//    "strings"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/docker/libcompose/docker/client"
+    "github.com/flosch/pongo2"
 
     pcctx "github.com/stkim1/pc-core/context"
     _ "github.com/stkim1/pc-core/model"
@@ -61,6 +64,12 @@ const (
     taskPackageKillPrefix    string = "task.pacakge.kill."
 )
 
-func loadComposeTemplate(pkgID string) ([]byte, error) {
-    return nil, errors.Errorf("no package for %v found", pkgID)
+func loadComposeTemplate(template string) ([]byte, error) {
+    tpl, err := pongo2.FromString(template)
+    if err != nil {
+        log.Error(errors.WithStack(err).Error())
+    }
+
+    out, err := tpl.Execute(pongo2.Context{})
+    return []byte(out), errors.WithMessage(err,fmt.Sprintf("package template parse error for %v"))
 }
