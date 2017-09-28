@@ -233,3 +233,77 @@ func (s *SupervisorSuite) Test_Multiple_Service_Receive_Event(c *C) {
     // close everything
     close(eventLatch)
 }
+
+func (s *SupervisorSuite) Test_Service_And_Individual_Exchange_Event(c *C) {
+    var(
+        exitChecker1 string = ""
+
+        eventLatch = make(chan string)
+
+        eventC1    = make(chan Event)
+        eventC2    = make(chan Event)
+    )
+    err := s.app.StartServices()
+    c.Assert(err, IsNil)
+
+    err = s.app.RegisterServiceWithFuncs(
+        testService1,
+        func() error {
+            for {
+                select {
+                    case e := <-eventC1: {
+                        s.app.BroadcastEvent(Event{Name:testEvent2, Payload:e.Payload.(string)})
+                        eventLatch <- e.Payload.(string)
+                    }
+                    case <- s.app.StopChannel(): {
+                        exitChecker1 = exitValue
+                        return nil
+                    }
+                }
+            }
+        },
+        BindEventWithService(testEvent1, eventC1))
+    c.Assert(err, IsNil)
+    c.Assert(s.app.serviceCount(), Equals, 1)
+    c.Assert(len(s.app.(*srvcSupervisor).eventWaiters), Equals, 1)
+
+    // bind discrete event failure (existing event cannot be bound)
+    err = s.app.BindDiscreteEvent(testEvent1, eventC2)
+    c.Assert(err, NotNil)
+    c.Log(err.Error())
+
+    // bind discrete event
+    err = s.app.BindDiscreteEvent(testEvent2, eventC2)
+    c.Assert(err, IsNil)
+    c.Assert(s.app.serviceCount(), Equals, 1)
+    c.Assert(len(s.app.(*srvcSupervisor).eventWaiters), Equals, 2)
+
+    // exchange signals -> send event to service -> recieve to a discrete event
+    s.app.BroadcastEvent(Event{Name:testEvent1, Payload:testValue1})
+    ve := <- eventC2
+    tv, ok := ve.Payload.(string)
+    c.Assert(ok, Equals, true)
+    c.Assert(tv, Equals, testValue1)
+    c.Assert(<-eventLatch, Equals, testValue1)
+
+    // unbind discrete event
+    err = s.app.UntieDiscreteEvent(testEvent2)
+    c.Assert(err, IsNil)
+
+    // unbind discrete event failture
+    err = s.app.UntieDiscreteEvent(testEvent2)
+    c.Assert(err, NotNil)
+    c.Log(err.Error())
+
+    err = s.app.StopServices()
+    c.Assert(err, IsNil)
+    c.Check(exitChecker1, Equals, exitValue)
+    c.Assert(s.app.serviceCount(), Equals, 0)
+
+    // check if water queue is empty
+    c.Assert(len(s.app.(*srvcSupervisor).eventWaiters), Equals, 1)
+    c.Assert(len(s.app.(*srvcSupervisor).eventWaiters[testEvent1]), Equals, 0)
+
+    // close everything
+    close(eventLatch)
+}

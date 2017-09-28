@@ -158,16 +158,22 @@ func BindEventWithService(eventName string, eventC chan Event) ServiceOption {
 // --- --- --- --- --- --- --- --- --- --- ServiceSupervisor Options and Functions --- --- --- --- --- --- --- --- -- //
 
 type ServiceSupervisor interface {
+    // ---- communication --- //
     BroadcastEvent(event Event)
+    BindDiscreteEvent(eventName string, eventC chan Event) error
+    UntieDiscreteEvent(eventName string) error
+
+    // --- register service --- //
     RegisterServiceWithFuncs(tag string, sfn serveFunc, options... ServiceOption) error
 
+    // --- service control --- //
     IsStopped() bool
     StopChannel() <- chan struct{}
 
     StartServices() error
     StopServices() error
 
-    // ---    status info   --- //
+    // --- status information --- //
     ServiceList() []Service
 
     // --- internal service --- //
@@ -250,6 +256,52 @@ func (s *srvcSupervisor) BroadcastEvent(event Event) {
             case s.eventsC <- event:
         }
     }()
+}
+
+/*
+ * (2017/09/28) Bind a discrete event waiter has limitations such as
+ * 1. cannot bind a waiter with exiting name
+ * 2. the waiter must be removed before quit, so use it with discretion
+ */
+func (s *srvcSupervisor) BindDiscreteEvent(eventName string, eventC chan Event) error {
+    s.Lock()
+    defer s.Unlock()
+
+    if len(eventName) == 0 {
+        return errors.Errorf("invalid event name to add")
+    }
+    if eventC == nil {
+        return errors.Errorf("invalid event channel to add")
+    }
+    if len(s.eventWaiters[eventName]) != 0 {
+        return errors.Errorf("invalid event name to add as there exists waiters w/ same event name")
+    }
+
+    aWaiter := &waiter{
+        eventName: eventName,
+        eventC:    eventC,
+    }
+    s.eventWaiters[eventName] = append(s.eventWaiters[eventName], aWaiter)
+    return nil
+}
+
+func (s *srvcSupervisor) UntieDiscreteEvent(eventName string) error {
+    s.Lock()
+    defer s.Unlock()
+
+    if len(eventName) == 0 {
+        return errors.Errorf("invalid event name to delete")
+    }
+    if len(s.eventWaiters[eventName]) != 1 {
+        return errors.Errorf("invalid event to delete. there should only be one event. abort.")
+    }
+
+    var waiters []*waiter = s.eventWaiters[eventName]
+    delete(s.eventWaiters, eventName)
+    for i := range waiters {
+        close(waiters[i].eventC)
+    }
+    return nil
 }
 
 // --- --- --- --- --- --- --- --- --- --- Service Related Methods --- --- --- --- --- --- --- --- --- --- --- --- -- //
