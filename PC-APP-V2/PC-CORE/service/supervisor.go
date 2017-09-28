@@ -160,6 +160,7 @@ func BindEventWithService(eventName string, eventC chan Event) ServiceOption {
 type ServiceSupervisor interface {
     // ---- communication --- //
     BroadcastEvent(event Event)
+    // TODO : discrete events need timeout event handler
     BindDiscreteEvent(eventName string, eventC chan Event) error
     UntieDiscreteEvent(eventName string) error
 

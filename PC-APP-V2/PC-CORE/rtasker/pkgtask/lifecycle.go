@@ -18,6 +18,7 @@ import (
     "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/rtasker"
     "github.com/stkim1/pc-core/service"
+    "github.com/stkim1/pc-core/service/ivent"
 )
 
 func InitPackageProcess(appLife rtasker.RouteTasker, feeder route.ResponseFeeder) error {
@@ -26,6 +27,7 @@ func InitPackageProcess(appLife rtasker.RouteTasker, feeder route.ResponseFeeder
     appLife.POST(routepath.RpathPackageStartup(), func(_, rpath, payload string) error {
         // 1. parse input package id
         var (
+            reportC = make(chan service.Event)
             pkgID string = ""
         )
         err := json.Unmarshal([]byte(payload), &struct {
@@ -35,19 +37,32 @@ func InitPackageProcess(appLife rtasker.RouteTasker, feeder route.ResponseFeeder
             return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to specify package id"))
         }
 
-        // 2. load template
+        // 2. get the node list report
+        err = appLife.BindDiscreteEvent(ivent.IventReportNodeListResult, reportC)
+        if err != nil {
+            return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to access node list report"))
+        }
+        nr := <- reportC
+        appLife.UntieDiscreteEvent(ivent.IventReportNodeListResult)
+        nl, ok := nr.Payload.([]string)
+        if !ok {
+            return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to access proper node list"))
+        }
+        log.Infof("node list %v", nl)
+
+        // 3. load template
         cTempl, err := loadComposeTemplate(pkgID)
         if err != nil {
             return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to access package template"))
         }
 
-        // 3. build client
+        // 4. build client
         opts, err := newComposeClient()
         if err != nil {
             return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to build orchestration client"))
         }
 
-        // 4. build package
+        // 5. build package
         project, err := docker.NewPocketProject(&docker.PocketContext{
             Context: &ctx.Context{
                 Context: project.Context{

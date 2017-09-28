@@ -64,8 +64,12 @@ const (
     taskPackageKillPrefix    string = "task.pacakge.kill."
 )
 
-func loadComposeTemplate(template string) ([]byte, error) {
-    tpl, err := pongo2.FromString(template)
+func loadComposeTemplate(pkgID string, nodeList []string) ([]byte, error) {
+    if len(nodeList) == 0 {
+        return nil, errors.Errorf("unable to generate template with empty node list")
+    }
+    // get the template
+    tpl, err := pongo2.FromString(pkgID)
     if err != nil {
         log.Error(errors.WithStack(err).Error())
     }

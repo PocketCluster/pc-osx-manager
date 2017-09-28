@@ -71,6 +71,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
         vboxC   = make(chan service.Event)
         teleC   = make(chan service.Event)
         netC    = make(chan service.Event)
+        nodeC   = make(chan service.Event)
     )
     appLife.RegisterServiceWithFuncs(
         operation.ServiceBeaconMaster,
@@ -163,6 +164,12 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                         // TODO update primary address
                         log.Debugf("[AGENT] Host Address changed")
                     }
+                    case <- nodeC: {
+                        // TODO : report node list
+                        appLife.BroadcastEvent(service.Event{
+                            Name:ivent.IventReportNodeListResult,
+                            Payload:[]string{"pc-core", "pc-node1"}})
+                    }
                 }
             }
             return nil
@@ -171,7 +178,8 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
         service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
         service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,     vboxC),
         service.BindEventWithService(sshproc.EventPCSSHServerProxyStarted, teleC),
-        service.BindEventWithService(ivent.IventNetworkAddressChange,      netC))
+        service.BindEventWithService(ivent.IventNetworkAddressChange,      netC),
+        service.BindEventWithService(ivent.IventReportNodeListRequest,     nodeC))
 
     return nil
 }

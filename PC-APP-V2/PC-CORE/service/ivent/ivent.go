@@ -13,6 +13,8 @@ const (
     IventVboxCtrlInstanceSpawn   string = "ivent.vbox.ctrl.instance.spawn"
     IventMonitorRegisteredNode   string = "ivent.monitor.registered.node"
     IventMonitorUnregisteredNode string = "ivent.monitor.unregistered.node"
+    IventReportNodeListRequest   string = "ivent.report.node.list.request"
+    IventReportNodeListResult    string = "ivent.report.node.list.result"
 )
 
 // this is to broadcast masterctrl object w/ listener. It's shared with BeaconAgent + VBoxController
