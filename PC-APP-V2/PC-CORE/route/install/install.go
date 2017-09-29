@@ -111,7 +111,20 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access package meta data"))
         }
-        // TODO : save meta
+        tmpl, err := model.FindTemplateWithPackageID(pkgID)
+        if err != nil {
+            if err == model.NoItemFound {
+                tmpl = model.NewTemplateMeta()
+            } else {
+                return feedError(errors.WithMessage(err, "Unable to store package composer meta data"))
+            }
+        }
+        tmpl.PkgID = pkgID
+        tmpl.Body  = metaData
+        err = tmpl.Update()
+        if err != nil {
+            return feedError(errors.WithMessage(err, "Unable to store package composer meta data"))
+        }
 
 
         //  --- --- --- --- --- download repo list --- --- --- --- ---

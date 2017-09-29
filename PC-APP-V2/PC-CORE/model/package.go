@@ -1,7 +1,6 @@
 package model
 
 import (
-//    log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/jinzhu/gorm"
 )

@@ -146,6 +146,12 @@ func OpenRecordGate(dataDir, recordFile string) (RecordGate, error) {
         sess.AutoMigrate(&Package{})
     }
 
+    if !sess.HasTable(&TemplateMeta{}) {
+        sess.CreateTable(&TemplateMeta{})
+    } else {
+        sess.AutoMigrate(&TemplateMeta{})
+    }
+
     gate = &dbGate{
         database:    database,
         certsess:    cert,
