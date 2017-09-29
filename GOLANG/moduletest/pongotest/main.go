@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-    templ, err := ioutil.ReadFile("test.template")
+    templ, err := ioutil.ReadFile("test.taml")
     if err != nil {
         log.Error(errors.WithStack(err).Error())
     }

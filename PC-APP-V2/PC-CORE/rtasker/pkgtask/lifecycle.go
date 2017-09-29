@@ -14,6 +14,7 @@ import (
     "github.com/docker/libcompose/project"
     "github.com/docker/libcompose/project/options"
 
+    "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/rtasker"
@@ -51,7 +52,12 @@ func InitPackageProcess(appLife rtasker.RouteTasker, feeder route.ResponseFeeder
         log.Infof("node list %v", nlist)
 
         // 3. load template
-        cTempl, err := loadComposeTemplate(pkgID, nlist)
+        // retrieve template
+        tmpl, err := model.FindTemplateWithPackageID(pkgID)
+        if err != nil {
+            return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to access package template"))
+        }
+        cTempl, err := loadComposeTemplate(tmpl.Body, nlist)
         if err != nil {
             return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to access package template"))
         }

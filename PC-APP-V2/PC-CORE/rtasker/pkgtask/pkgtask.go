@@ -11,7 +11,6 @@ import (
     "github.com/docker/libcompose/docker/client"
 
     "github.com/stkim1/pc-core/context"
-    "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/route"
 )
 
@@ -63,14 +62,12 @@ const (
     taskPackageKillPrefix    string = "task.pacakge.kill."
 )
 
-func loadComposeTemplate(pkgID string, nodeList []string) ([]byte, error) {
+func loadComposeTemplate(template []byte, nodeList []string) ([]byte, error) {
     if len(nodeList) == 0 {
         return nil, errors.Errorf("unable to generate template with empty node list")
     }
-    // retrieve template
-    tmpl, err := model.FindTemplateWithPackageID(pkgID)
-    if err != nil {
-        return nil, errors.WithStack(err)
+    if len(template) == 0 {
+        return nil, errors.Errorf("invalid template to reinstate")
     }
 
     // build node data
@@ -78,6 +75,9 @@ func loadComposeTemplate(pkgID string, nodeList []string) ([]byte, error) {
     for _, node := range nodeList {
 
         if node == "pc-core" {
+            continue
+        }
+        if !strings.HasPrefix(node, "pc-node") {
             continue
         }
 
@@ -107,7 +107,7 @@ func loadComposeTemplate(pkgID string, nodeList []string) ([]byte, error) {
     }
 
     // bring template into life
-    tpl, err := pongo2.FromString(string(tmpl.Body))
+    tpl, err := pongo2.FromString(string(template))
     if err != nil {
         log.Error(errors.WithStack(err).Error())
     }

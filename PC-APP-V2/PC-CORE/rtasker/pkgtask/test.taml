@@ -1,0 +1,7 @@
+container_name: {{ corenode.name }}
+ipv4_address: 172.16.128.{{ corenode.address }}
+{% for node in slavenodes %}
+datanode{{ node.index }}:
+container_name: {{ node.name }}
+ipv4_address: 172.16.128.{{ node.address }}
+{% endfor %}
