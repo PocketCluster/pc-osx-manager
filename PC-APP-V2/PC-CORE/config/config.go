@@ -57,6 +57,43 @@ func InitServiceConfig() (*ServiceConfig, error) {
     log.Debugf("Cluster ID %v | UUID %v", meta.ClusterID, meta.ClusterUUID)
     ctx.SetClusterMeta(meta)
 
+    // setup root user
+    _, err = model.FindUserMetaWithLogin("root")
+    if err != nil {
+        if err == model.NoItemFound {
+            urr := model.UpsertUserMeta(model.NewUserMeta("root"))
+            if urr != nil {
+                // This is critical error. report it to UI and ask them to clean & re-install
+                return nil, errors.WithStack(err)
+            }
+        } else {
+            // This is critical error. report it to UI and ask them to clean & re-install
+            return nil, errors.WithStack(err)
+        }
+    }
+    // setup local user
+    uname, err := context.SharedHostContext().LoginUserName()
+    if err != nil {
+        // This is critical error. report it to UI and ask them to clean & re-install
+        return nil, errors.WithStack(err)
+    }
+    log.Infof("user %v should be created", uname)
+    _, err = model.FindUserMetaWithLogin(uname)
+    if err != nil {
+        if err == model.NoItemFound {
+            log.Infof("user %v not found", uname)
+            urr := model.UpsertUserMeta(model.NewUserMeta(uname))
+            if urr != nil {
+                // This is critical error. report it to UI and ask them to clean & re-install
+                return nil, errors.WithStack(err)
+            }
+            log.Infof("user %v creation ok", uname)
+        } else {
+            // This is critical error. report it to UI and ask them to clean & re-install
+            return nil, errors.WithStack(err)
+        }
+    }
+
     country, err := ctx.CurrentCountryCode()
     if err != nil {
         // (03/26/2017) skip coutry code error and defaults it to US

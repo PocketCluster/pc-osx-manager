@@ -6,6 +6,7 @@ import (
 
     "github.com/pkg/errors"
     "github.com/miekg/dns"
+    "github.com/stkim1/findgate"
     "github.com/stkim1/pc-node-agent/service"
     "github.com/stkim1/pc-vbox-core/crcontext"
 )
@@ -49,20 +50,37 @@ func locaNameServe(w dns.ResponseWriter, req *dns.Msg) {
             if remoteIP4 != nil && len(cid) != 0 {
 
                 fqdn := fmt.Sprintf(fqdnPocketMasterName, cid)
-                maddr, err := crcontext.SharedCoreContext().GetMasterIP4ExtAddr()
+                if question.Name == localPocketMasterName || question.Name == fqdn {
 
-                if err == nil && (question.Name == localPocketMasterName || question.Name == fqdn) {
-                    rr := new(dns.A)
-                    rr.Hdr = dns.RR_Header{
-                        Name:      question.Name,
-                        Rrtype:    question.Qtype,
-                        Class:     dns.ClassINET,
-                        Ttl:       10,
+                    // internal interface
+                    if crcontext.SharedCoreContext().IsInstallMode() {
+                        if iaddr, ierr := findgate.FindIPv4GatewayWithInterface("eth0"); ierr == nil {
+                            inr := new(dns.A)
+                            inr.Hdr = dns.RR_Header{
+                                Name:      question.Name,
+                                Rrtype:    question.Qtype,
+                                Class:     dns.ClassINET,
+                                Ttl:       10,
+                            }
+                            inr.A = net.ParseIP(iaddr[0].Address)
+                            m.Answer = append(m.Answer, inr)
+                        }
                     }
-                    rr.A = net.ParseIP(maddr)
-                    m.Answer = []dns.RR{rr}
-                }
 
+                    // external interface
+                    maddr, merr := crcontext.SharedCoreContext().GetMasterIP4ExtAddr()
+                    if merr == nil {
+                        ext := new(dns.A)
+                        ext.Hdr = dns.RR_Header{
+                            Name:      question.Name,
+                            Rrtype:    question.Qtype,
+                            Class:     dns.ClassINET,
+                            Ttl:       10,
+                        }
+                        ext.A = net.ParseIP(maddr)
+                        m.Answer = append(m.Answer, ext)
+                    }
+                }
             }
         }
     }

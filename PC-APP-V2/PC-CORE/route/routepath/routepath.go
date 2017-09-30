@@ -36,6 +36,18 @@ func RpathPackageInstallProgress() string {
     return C.GoString(C.RPATH_PACKAGE_INSTALL_PROGRESS)
 }
 
+func RpathPackageStartup() string {
+    return C.GoString(C.RPATH_PACKAGE_STARTUP)
+}
+
+func RpathPackageKill() string {
+    return C.GoString(C.RPATH_PACKAGE_KILL)
+}
+
+func RpathPackageProcess() string {
+    return C.GoString(C.RPATH_MONITOR_PACKAGE_PROCESS)
+}
+
 func RpathMonitorNodeRegistered() string {
     return C.GoString(C.RPATH_MONITOR_NODE_REGISTERED)
 }

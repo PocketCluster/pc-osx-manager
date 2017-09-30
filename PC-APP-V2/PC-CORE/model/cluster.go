@@ -8,7 +8,11 @@ import (
     "github.com/pkg/errors"
 
     "github.com/stkim1/pcrypto"
-    "github.com/stkim1/pc-core/utils"
+    "github.com/stkim1/pc-core/utils/randstr"
+)
+
+const (
+    clusterMetaTable        string = `pc_clustermeta`
 )
 
 type ClusterMeta struct {
@@ -23,9 +27,14 @@ type ClusterMeta struct {
     UserMadeName     string    `gorm:"column:user_made_name;type:VARCHAR(255)"`
 }
 
+// instance methods
+func (ClusterMeta) TableName() string {
+    return clusterMetaTable
+}
+
 func NewClusterMeta() (*ClusterMeta) {
     var (
-        cid string = utils.NewRandomString(16)
+        cid string = randstr.NewRandomString(16)
         domain string = fmt.Sprintf(pcrypto.FormFQDNClusterID, cid)
     )
     return &ClusterMeta{

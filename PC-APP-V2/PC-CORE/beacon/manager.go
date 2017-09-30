@@ -98,6 +98,7 @@ type BeaconManger interface {
     AddressForName(name string) (string, error)
 
     // For reporting to UI layer
+    // TODO : formalize return value with a struct
     RegisteredNodesList() []map[string]string
 }
 

@@ -7,7 +7,6 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
-    "github.com/gravitational/teleport/embed"
     "github.com/gravitational/teleport/lib/auth"
     tervice "github.com/gravitational/teleport/lib/service"
 
@@ -17,6 +16,7 @@ import (
 
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/defaults"
+    "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
     "github.com/stkim1/pc-core/model"
 )
 
@@ -73,12 +73,12 @@ func BuildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
 
 
     // generate ssh auth token
-    tclt, err = embed.OpenAdminClientWithAuthService(tcfg)
+    tclt, err = sshadmin.OpenAdminClientWithAuthService(tcfg)
     if err != nil {
         return errors.WithStack(err)
     }
     defer tclt.Close()
-    authToken, err = embed.GenerateNodeInviationWithTTL(tclt, embed.MaxInvitationTLL)
+    authToken, err = sshadmin.GenerateNodeInviationWithTTL(tclt, sshadmin.MaxInvitationTLL)
     if err != nil {
         return errors.WithStack(err)
     }

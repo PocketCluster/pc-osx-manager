@@ -42,16 +42,20 @@
     OpsCmdStorageStop();
 }
 
-- (IBAction)opsCmdTeleportRootAdd:(id)sender {
-    OpsCmdTeleportRootAdd();
+- (IBAction)opsCmdDebug0:(id)sender {
+    OpsCmdDebug0();
 }
 
-- (IBAction)opsCmdTeleportUserAdd:(id)sender {
-    OpsCmdTeleportUserAdd();
+- (IBAction)opsCmdDebug1:(id)sender {
+    OpsCmdDebug1();
 }
 
-- (IBAction)opsCmdDebug:(id)sender {
-    OpsCmdDebug();
+- (IBAction)opsCmdDebug2:(id)sender {
+    OpsCmdDebug2();
+}
+
+- (IBAction)opsCmdDebug3:(id)sender {
+    OpsCmdDebug3();
 }
 
 #pragma mark - WINDOW

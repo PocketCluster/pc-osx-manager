@@ -100,12 +100,19 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCRouter, sharedRouter);
         Log(@"%@", [error description]);
         return;
     }
-    // count data length prevent invalid character to be appended at the end of [data bytes]
-    [data length];
-
-    Log(@"routeRequestPost aPath[%s], aRequestBody[%s]\n", aPath, (char *)[data bytes]);
-
-    RouteRequestPost((char *)aPath, (char *)[data bytes]);
+    
+    size_t payload_len = [data length];
+    char *payload = (char *) malloc (sizeof(char) * payload_len + 1);
+    // fill the buffer with termination
+    memset(payload, '\0', payload_len + 1);
+    // copy json data to payload
+    memcpy(payload, [data bytes], payload_len);
+    
+    Log(@"routeRequestPost aPath[%s], aRequestBody[%s]\n", aPath, payload);
+    
+    RouteRequestPost((char *)aPath, payload);
+    // free the payload as it's cocoa's response to handle memory
+    free(payload);
 }
 
 @end

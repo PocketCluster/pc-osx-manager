@@ -42,23 +42,23 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="y1g-2c-4bl">
-                        <rect key="frame" x="14" y="98" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="Teleport Root Add" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5hd-3j-KqJ">
+                        <rect key="frame" x="14" y="114" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Debug 0" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5hd-3j-KqJ">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="opsCmdTeleportRootAdd:" target="-2" id="m4g-Lw-1T2"/>
+                            <action selector="opsCmdDebug0:" target="-2" id="Dj0-Bc-pAY"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Zrf-TX-MDf">
-                        <rect key="frame" x="14" y="65" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="Teleport User Add" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="CqG-Z6-HnV">
+                        <rect key="frame" x="14" y="81" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Debug 1" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="CqG-Z6-HnV">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="opsCmdTeleportUserAdd:" target="-2" id="bbK-vH-VFT"/>
+                            <action selector="opsCmdDebug1:" target="-2" id="dY1-PZ-y0G"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SYO-pc-xrj">
@@ -82,13 +82,13 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lOe-An-aD8">
-                        <rect key="frame" x="14" y="13" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="Debug" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="8Tk-t9-kvl">
+                        <rect key="frame" x="14" y="48" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Debug 2" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="8Tk-t9-kvl">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="opsCmdDebug:" target="-2" id="3fS-rp-D0a"/>
+                            <action selector="opsCmdDebug2:" target="-2" id="FVg-4v-vgC"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EHR-gA-Cvs">
@@ -209,6 +209,16 @@
                         </buttonCell>
                         <connections>
                             <action selector="menu_05:" target="-2" id="PSW-wq-VUT"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ksz-45-uOW">
+                        <rect key="frame" x="14" y="13" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Debug 3" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="rpB-ZI-VTG">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="opsCmdDebug3:" target="-2" id="qke-vN-zmU"/>
                         </connections>
                     </button>
                 </subviews>

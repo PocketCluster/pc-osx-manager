@@ -152,7 +152,7 @@ func (c *PocketCoreConfig) SaveCoreConfig() error {
     return nil
 }
 
-func (c *PocketCoreConfig) CorePublicKey() ([]byte, error) {
+func (c *PocketCoreConfig) LoadCorePublicKey() ([]byte, error) {
     path := FilePathCoreVboxPublicKey(c.rootPath)
     if _, err := os.Stat(path); os.IsNotExist(err) {
         return nil, errors.Errorf("[ERR] core public key has not been generated properly")
@@ -160,7 +160,7 @@ func (c *PocketCoreConfig) CorePublicKey() ([]byte, error) {
     return ioutil.ReadFile(path)
 }
 
-func (c *PocketCoreConfig) CorePrivateKey() ([]byte, error) {
+func (c *PocketCoreConfig) LoadCorePrivateKey() ([]byte, error) {
     path := FilePathCoreVboxPrivateKey(c.rootPath)
     if _, err := os.Stat(path); os.IsNotExist(err) {
         return nil, errors.Errorf("[ERR] core private key has not been generated properly")
@@ -168,7 +168,7 @@ func (c *PocketCoreConfig) CorePrivateKey() ([]byte, error) {
     return ioutil.ReadFile(path)
 }
 
-func (c *PocketCoreConfig) MasterPublicKey() ([]byte, error) {
+func (c *PocketCoreConfig) LoadMasterPublicKey() ([]byte, error) {
     path := FilePathMasterVboxPublicKey(c.rootPath)
     if _, err := os.Stat(path); os.IsNotExist(err) {
         return nil, errors.Errorf("[ERR] master public key has not been generated properly")

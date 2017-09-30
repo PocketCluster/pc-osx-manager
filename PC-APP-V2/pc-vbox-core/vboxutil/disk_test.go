@@ -6,7 +6,6 @@ import (
     "path/filepath"
 
     . "gopkg.in/check.v1"
-    "github.com/stkim1/pcrypto"
 )
 
 // Copy disk image from given source path to destination

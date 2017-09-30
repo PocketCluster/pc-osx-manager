@@ -14,6 +14,8 @@ import (
     "github.com/stkim1/pc-core/event/crash"
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
+    "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
+    "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/install"
     "github.com/stkim1/pc-core/route/initcheck"
@@ -32,8 +34,9 @@ func main() {
     appLifeCycle(func(appLife *appMainLife) {
 
         var (
-            appCfg *config.ServiceConfig = nil
-            err    error                 = nil
+            appCfg        *config.ServiceConfig = nil
+            err           error                 = nil
+            IsContextInit bool                  = false
         )
 
         for e := range appLife.Events() {
@@ -54,12 +57,15 @@ func main() {
                         case lifecycle.CrossOn: {
                             // this should happen only once in the lifetime of an application.
                             // so we'll initialize our context here to have safe operation
+                            if !IsContextInit {
+                                log.Debugf("[LIFE] initialize ApplicationContext...")
+                                // this needs to be initialized before service loop initiated
+                                context.SharedHostContext()
+                                initcheck.InitRoutePathServices(appLife, theFeeder)
+                                install.InitInstallListRouthPath(appLife, theFeeder)
 
-                            log.Debugf("[LIFE] initialize ApplicationContext...")
-                            // this needs to be initialized before service loop initiated
-                            context.SharedHostContext()
-                            initcheck.InitRoutePathServices(appLife, theFeeder)
-                            install.InitInstallListRouthPath(appLife, theFeeder)
+                                IsContextInit = true
+                            }
 
                             log.Debugf("[LIFE] app is now created, fully initialized %v", e.String())
                         }
@@ -147,6 +153,8 @@ func main() {
                             log.Debugf("[LIFE] CRITICAL ERROR %v", err)
                             return
                         }
+                        // TODO : move this initializer after network initiated
+                        install.InitInstallPackageRoutePath(appLife, theFeeder, appCfg.PCSSH)
 
                         // TODO check all the status before start
 
@@ -270,31 +278,65 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
 
-                    case operation.CmdTeleportRootAdd: {
-                    }
-                    case operation.CmdTeleportUserAdd: {
-                        log.Debugf("[OP] %v", e.String())
-                    }
-
                     /// DEBUG ///
 
-                    case operation.CmdDebug: {
-                        cid, err := context.SharedHostContext().MasterAgentName()
-                        if err != nil {
-                            log.Debug(err)
+                    case operation.CmdDebug0: {
+                        // setup users
+                        {
+                            cli, err := sshadmin.OpenAdminClientWithAuthService(appCfg.PCSSH)
+                            if err != nil {
+                                log.Error(err.Error())
+                            }
+                            roots, err := model.FindUserMetaWithLogin("root")
+                            if err != nil {
+                                log.Error(err.Error())
+                            }
+                            err = sshadmin.CreateTeleportUser(cli, "root", roots[0].Password)
+                            if err != nil {
+                                log.Error(err.Error())
+                            }
+                            uname, err := context.SharedHostContext().LoginUserName()
+                            if err != nil {
+                                log.Error(err.Error())
+                            }
+                            lusers, err := model.FindUserMetaWithLogin(uname)
+                            if err != nil {
+                                log.Error(err.Error())
+                            }
+                            err = sshadmin.CreateTeleportUser(cli, uname, lusers[0].Password)
+                            if err != nil {
+                                log.Error(err.Error())
+                            }
                         }
-                        err = vboxglue.BuildVboxCoreDisk(cid, appCfg.PCSSH)
-                        if err != nil {
-                            log.Debug(err)
-                        }
-                        err = vboxglue.BuildVboxMachine()
-                        if err != nil {
-                            log.Debugf("vbox operation error %v", err)
+
+                        // setup vbox
+                        {
+                            cid, err := context.SharedHostContext().MasterAgentName()
+                            if err != nil {
+                                log.Debug(err)
+                            }
+                            err = vboxglue.BuildVboxCoreDisk(cid, appCfg.PCSSH)
+                            if err != nil {
+                                log.Debug(err)
+                            }
+                            err = vboxglue.BuildVboxMachine()
+                            if err != nil {
+                                log.Debugf("vbox operation error %v", err)
+                            }
                         }
 
                         log.Debugf("[OP] %v", e.String())
                     }
 
+                    case operation.CmdDebug1: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug2: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug3: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
 
                     default:
                         log.Debug("[OP-ERROR] THIS SHOULD NOT HAPPEN %v", e.String())

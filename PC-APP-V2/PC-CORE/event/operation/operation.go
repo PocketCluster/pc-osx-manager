@@ -30,13 +30,11 @@ const (
     // ETCD control
     CmdStorageStart
     CmdStorageStop
-
     // debug add node, root, & user
-    CmdTeleportRootAdd
-    CmdTeleportUserAdd
-
-    // Debug control
-    CmdDebug
+    CmdDebug0
+    CmdDebug1
+    CmdDebug2
+    CmdDebug3
 )
 
 func (c CommandType) String() string {
@@ -45,16 +43,19 @@ func (c CommandType) String() string {
             return "CmdBaseServiceStart"
         case CmdBaseServiceStop:
             return "CmdBaseServiceStop"
+
         case CmdStorageStart:
             return "CmdStorageStart"
         case CmdStorageStop:
             return "CmdStroageStop"
-        case CmdTeleportRootAdd:
-            return "CmdTeleportRootAdd"
-        case CmdTeleportUserAdd:
-            return "CmdTeleportUserAdd"
-        case CmdDebug:
-            return "CmdDebug"
+        case CmdDebug0:
+            return "CmdDebug0"
+        case CmdDebug1:
+            return "CmdDebug1"
+        case CmdDebug2:
+            return "CmdDebug2"
+        case CmdDebug3:
+            return "CmdDebug3"
 
         default:
             return fmt.Sprintf("CommandType(%d)", c)

@@ -5,7 +5,7 @@
 /* Start of preamble from import "C" comments.  */
 
 
-#line 3 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_debug.go"
+#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_debug.go"
 
 
 
@@ -18,7 +18,7 @@
 #include "PCResponseHandle.h"
 
 
-#line 9 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_lifecycle.go"
+#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_lifecycle.go"
 
 
 
@@ -39,7 +39,7 @@
 
 
 
-#line 3 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_route.go"
+#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_route.go"
 
 
 
@@ -98,11 +98,13 @@ extern void OpsCmdStorageStart();
 
 extern void OpsCmdStorageStop();
 
-extern void OpsCmdTeleportRootAdd();
+extern void OpsCmdDebug0();
 
-extern void OpsCmdTeleportUserAdd();
+extern void OpsCmdDebug1();
 
-extern void OpsCmdDebug();
+extern void OpsCmdDebug2();
+
+extern void OpsCmdDebug3();
 
 extern void StartResponseFeed();
 

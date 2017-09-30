@@ -10,9 +10,12 @@
 #import "PCSetup3VC.h"
 #import "PCRouter.h"
 #import "ShowAlert.h"
+#import "NullStringChecker.h"
 
 @interface PCSetup3VC()<PCRouteRequest>
 @property (nonatomic, strong) NSMutableArray<Package *> *packageList;
++ (void)_enableControls:(PCSetup3VC *)vc;
++ (void)_disableControls:(PCSetup3VC *)vc;
 @end
 
 @implementation PCSetup3VC {
@@ -64,11 +67,11 @@
               message:[response valueForKeyPath:@"package-list.error"]];
          }
 
-         [self _enableControls];
+         [PCSetup3VC _enableControls:belf];
          [[PCRouter sharedRouter] delGetRequest:belf onPath:rpPkgList];
      }];
     
-    [self _disableControls];
+    [PCSetup3VC _disableControls:self];
     [PCRouter routeRequestGet:RPATH_PACKAGE_LIST];
 }
 
@@ -90,9 +93,7 @@
 }
 
 // disable table row text editing
-- (BOOL)tableView:(NSTableView *)tableView
-shouldEditTableColumn:(NSTableColumn *)tableColumn
-              row:(NSInteger)row {
+- (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
     return NO;
 }
 
@@ -107,6 +108,10 @@ shouldEditTableColumn:(NSTableColumn *)tableColumn
 
 - (NSIndexSet *)tableView:(NSTableView *)aTableView
 selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
+    if ([anIndex count] == 0) {
+        return anIndex;
+    }
+
     NSInteger row = (NSInteger)anIndex.firstIndex;
     if (![self.packageList objectAtIndex:(NSUInteger)row].installed) {
         _selectedIndex = row;
@@ -115,79 +120,113 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
 }
 
 #pragma mark - Setup UI states
--(void)_enableControls {
-    [self.btnInstall setEnabled:YES];
-    [self.btnCancel setEnabled:YES];
-    [self.progressLabel setStringValue:@""];
-    [self.circularProgress setHidden:YES];
-    [self.circularProgress stopAnimation:nil];
-    [self.progressBar displayIfNeeded];
++ (void)_enableControls:(PCSetup3VC *)vc {
+    [vc.btnInstall    setEnabled:YES];
+    [vc.btnCancel     setEnabled:YES];
+    [vc.progressLabel setStringValue:@""];
+    [vc.progressBar   displayIfNeeded];
+
+    [vc.circularProgress setHidden:YES];
+    [vc.circularProgress stopAnimation:nil];
+    [vc.circularProgress displayIfNeeded];
+    [vc.circularProgress removeFromSuperview];
+    [vc setCircularProgress:nil];
 }
 
--(void)_disableControls {
-    [self.btnInstall setEnabled:NO];
-    [self.btnCancel setEnabled:NO];
-    [self.progressLabel setStringValue:@""];
-    [self.circularProgress setHidden:NO];
-    [self.circularProgress startAnimation:nil];
-    [self.progressBar setDoubleValue:0.0];
-    [self.progressBar displayIfNeeded];
-}
++ (void)_disableControls:(PCSetup3VC *)vc {
+    [vc.btnInstall    setEnabled:NO];
+    [vc.btnCancel     setEnabled:NO];
+    [vc.progressLabel setStringValue:@""];
+    [vc.progressBar   displayIfNeeded];
 
-- (void)_setUIToProceedState {
-    [self.btnInstall setEnabled:NO];
-    [self.circularProgress startAnimation:nil];
-}
-
--(void)_setProgressMessage:(NSString *)aMessage value:(double)aValue {
-    [self.circularProgress startAnimation:nil];
-    [self.progressLabel setStringValue:aMessage];
-    [self.progressBar setDoubleValue:aValue];
-    [self.progressBar displayIfNeeded];
-}
-
--(void)setProgMessage:(NSString *)aMessage value:(double)aValue {
-    [self.circularProgress startAnimation:nil];
-    [self.progressLabel setStringValue:aMessage];
-    [self.progressBar setDoubleValue:aValue];
-    [self.progressBar displayIfNeeded];
-}
-
--(void)_setToNextStage {
-    [self setProgMessage:@"Installation completed!" value:100.0];
-    [self.btnInstall setEnabled:NO];
-    [self.circularProgress stopAnimation:nil];
+    NSProgressIndicator *ind = [[NSProgressIndicator alloc] initWithFrame:(NSRect){{20.0, 20.0}, {16.0, 16.0}}];
+    [ind setStyle:NSProgressIndicatorSpinningStyle];
+    [vc.view addSubview:ind];
+    [vc setCircularProgress:ind];
+    [ind setHidden:NO];
+    [ind setIndeterminate:YES];
+    [ind startAnimation:vc];
+    [ind displayIfNeeded];
 }
 
 #pragma mark - IBACTION
 -(IBAction)install:(id)sender {
+    static const double unit_gigabyte = 1073741824.0;
+    static const double unit_megabyte = 1048576.0;
+
     //[self.stageControl shouldControlProgressFrom:self withParam:nil];
 
     if (_selectedIndex == -1 || (NSInteger)[self.packageList count] <= _selectedIndex ) {
         return;
     }
+
+    [PCSetup3VC _disableControls:self];
     
     /*** checking user authed ***/
     WEAK_SELF(self);
-    NSString *rpPkgInst = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL];
-    
+    NSString *rpPkgInstall = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL];
+    NSString *rpPkgInstProg = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL_PROGRESS];
+
     [[PCRouter sharedRouter]
      addPostRequest:self
-     onPath:rpPkgInst
+     onPath:rpPkgInstall
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          
          if ([[response valueForKeyPath:@"package-install.status"] boolValue]) {
+             [ShowAlert
+              showWarningAlertWithTitle:@"Installation Completed!"
+              message:@"FIND PACKAGE ID AND MARK AS INSTALLED"];
+
          } else {
              [ShowAlert
               showWarningAlertWithTitle:@"Temporarily Unavailable"
               message:[response valueForKeyPath:@"package-install.error"]];
          }
-         
-         [self _enableControls];
-         [[PCRouter sharedRouter] delGetRequest:belf onPath:rpPkgInst];
+
+         [PCSetup3VC _enableControls:belf];
+         [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInstall];
+         [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInstProg];
      }];
-    
-    [self _disableControls];
+
+    [[PCRouter sharedRouter]
+     addPostRequest:self
+     onPath:rpPkgInstProg
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+
+         NSString *message = [response valueForKeyPath:@"package-progress.message"];
+         if (!ISNULL_STRING(message)) {
+             [belf.progressLabel setStringValue:message];
+
+         } else {
+             double bytes_total = [[response valueForKeyPath:@"package-progress.total-size"] doubleValue];
+             NSString *stringTotal;
+             if (unit_gigabyte < bytes_total) {
+                 bytes_total /= unit_gigabyte;
+                 stringTotal = [NSString stringWithFormat:@"%.1lf GB", bytes_total];
+             } else {
+                 bytes_total /= unit_megabyte;
+                 stringTotal = [NSString stringWithFormat:@"%.1lf MB", bytes_total];
+             }
+
+             double bytes_received = [[response valueForKeyPath:@"package-progress.received"] doubleValue];
+             NSString *stringReceived;
+             if (unit_gigabyte < bytes_received) {
+                 bytes_received /= unit_gigabyte;
+                 stringReceived = [NSString stringWithFormat:@"%.1lf GB", bytes_received];
+             } else {
+                 bytes_received /= unit_megabyte;
+                 stringReceived = [NSString stringWithFormat:@"%.1lf MB", bytes_received];
+             }
+
+             NSString *speed = [NSString stringWithFormat:@"Total %@ Received %@ (%.1lf MB/sec)"
+                                ,stringTotal, stringReceived
+                                ,([[response valueForKeyPath:@"package-progress.speed"] doubleValue] / unit_megabyte)];
+             [belf.progressLabel setStringValue:speed];
+
+             [belf.progressBar setDoubleValue:[[response valueForKeyPath:@"package-progress.done-percent"] doubleValue]];
+         }
+     }];
+
     [PCRouter
      routeRequestPost:RPATH_PACKAGE_INSTALL
      withRequestBody:@{@"pkg-id":[self.packageList objectAtIndex:(NSUInteger)_selectedIndex].packageID}];

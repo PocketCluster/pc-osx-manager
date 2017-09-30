@@ -41,7 +41,7 @@ func TestConfigSaveReload(t *testing.T) {
         return
     }
 
-    pubKey, err := cfg.CorePublicKey()
+    pubKey, err := cfg.LoadCorePublicKey()
     if err != nil {
         t.Error(err.Error())
         return
@@ -51,7 +51,7 @@ func TestConfigSaveReload(t *testing.T) {
         return
     }
 
-    prvKey, err := cfg.CorePrivateKey()
+    prvKey, err := cfg.LoadCorePrivateKey()
     if err != nil {
         t.Error(err.Error())
         return
@@ -60,7 +60,7 @@ func TestConfigSaveReload(t *testing.T) {
         t.Error("[ERR] private key cannot be null")
         return
     }
-    master, err := cfg.MasterPublicKey()
+    master, err := cfg.LoadMasterPublicKey()
     if err != nil {
         t.Error(err.Error())
         return

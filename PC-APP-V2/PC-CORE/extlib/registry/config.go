@@ -13,7 +13,7 @@ import (
     _ "github.com/docker/distribution/registry/storage/driver/filesystem"
     "github.com/docker/libtrust"
 
-    "github.com/stkim1/pc-core/utils"
+    "github.com/stkim1/pc-core/utils/randstr"
 )
 
 func GarbageCollection(pcfg *PocketRegistryConfig) error {
@@ -123,7 +123,7 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
         }
 
         // HTTP contains configuration parameters for the registry's http interface.
-        secret = utils.NewRandomString(32)
+        secret = randstr.NewRandomString(32)
         http = struct {
             Addr            string      `yaml:"addr,omitempty"`
             Net             string      `yaml:"net,omitempty"`

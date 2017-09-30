@@ -5,14 +5,13 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
-    "github.com/gravitational/teleport/embed"
     tervice "github.com/gravitational/teleport/lib/service"
-    "github.com/stkim1/pc-vbox-comm/masterctrl"
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
     "github.com/stkim1/pc-core/beacon"
     "github.com/stkim1/pc-core/event/operation"
+    "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/model"
@@ -31,12 +30,12 @@ func (b *beaconEventRoute) terminate() error {
 }
 
 func (b *beaconEventRoute) BeaconEventPrepareJoin(slave *model.SlaveNode) error {
-    clt, err := embed.OpenAdminClientWithAuthService(b.PocketConfig)
+    clt, err := sshadmin.OpenAdminClientWithAuthService(b.PocketConfig)
     if err != nil {
         return errors.WithStack(err)
     }
     defer clt.Close()
-    token, err := embed.GenerateNodeInviationWithTTL(clt, embed.MaxInvitationTLL)
+    token, err := sshadmin.GenerateNodeInviationWithTTL(clt, sshadmin.MaxInvitationTLL)
     if err != nil {
         return errors.WithStack(err)
     }
@@ -72,6 +71,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
         vboxC   = make(chan service.Event)
         teleC   = make(chan service.Event)
         netC    = make(chan service.Event)
+        nodeC   = make(chan service.Event)
     )
     appLife.RegisterServiceWithFuncs(
         operation.ServiceBeaconMaster,
@@ -87,7 +87,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
             )
             // wait for vbox control
             vc := <- vboxC
-            vbc, ok := vc.Payload.(masterctrl.VBoxMasterControl)
+            vbc, ok := vc.Payload.(*ivent.VboxCtrlBrcstObj)
             if !ok {
                 log.Debugf("[AGENT] (ERR) invalid VBoxMasterControl type")
                 return errors.Errorf("[ERR] invalid VBoxMasterControl type")
@@ -96,7 +96,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
             // beacon manager
             beaconMan, err = beacon.NewBeaconManagerWithFunc(
                 clusterID,
-                vbc,
+                vbc.VBoxMasterControl,
                 beaconRoute,
                 func(host string, payload []byte) error {
                     log.Debugf("[AGENT] BEACON-TX [%v] Host %v", time.Now(), host)
@@ -164,6 +164,12 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                         // TODO update primary address
                         log.Debugf("[AGENT] Host Address changed")
                     }
+                    case <- nodeC: {
+                        nodeList := beaconMan.RegisteredNodesList()
+                        appLife.BroadcastEvent(service.Event{
+                            Name:ivent.IventReportNodeListResult,
+                            Payload:nodeList})
+                    }
                 }
             }
             return nil
@@ -172,7 +178,8 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
         service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
         service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,     vboxC),
         service.BindEventWithService(sshproc.EventPCSSHServerProxyStarted, teleC),
-        service.BindEventWithService(ivent.IventNetworkAddressChange,      netC))
+        service.BindEventWithService(ivent.IventNetworkAddressChange,      netC),
+        service.BindEventWithService(ivent.IventReportNodeListRequest,     nodeC))
 
     return nil
 }

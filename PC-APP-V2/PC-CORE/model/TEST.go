@@ -12,8 +12,8 @@ import (
 )
 
 const (
-    DEBUG_SLAVE_NODE_NAME string = "pc-node1"
-    PC_CORE_TEST_STORAGE_FILE = "pc-test-core.db"
+    DEBUG_SLAVE_NODE_NAME     string = "pc-node1"
+    PC_CORE_TEST_STORAGE_FILE string = "pc-test-core.db"
 )
 
 func DebugRecordGatePrepare(dataDir string) (RecordGate, error) {

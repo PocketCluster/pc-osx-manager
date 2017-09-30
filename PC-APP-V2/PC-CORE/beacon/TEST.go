@@ -6,7 +6,7 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/stkim1/pcrypto"
     "github.com/stkim1/pc-core/model"
-    "github.com/stkim1/pc-core/utils"
+    "github.com/stkim1/pc-core/utils/randstr"
 )
 
 type DebugCommChannel struct {
@@ -90,7 +90,7 @@ type DebugBeaconNotiReceiver struct {
 }
 
 func (d *DebugBeaconNotiReceiver) BeaconEventPrepareJoin(slave *model.SlaveNode) error {
-    err := slave.SetAuthToken(utils.NewRandomString(maxRandomSlaveIdLenth))
+    err := slave.SetAuthToken(randstr.NewRandomString(maxRandomSlaveIdLenth))
     if err != nil {
         log.Debugf(err.Error())
     }

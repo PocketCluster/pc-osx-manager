@@ -12,9 +12,9 @@
 @property (nonatomic, strong) IBOutlet NSView *pannel;
 
 @property (nonatomic, weak) IBOutlet NSTableView *packageTable;
-@property (nonatomic, weak) IBOutlet NSProgressIndicator *circularProgress;
 @property (nonatomic, weak) IBOutlet NSProgressIndicator *progressBar;
 @property (nonatomic, weak) IBOutlet NSTextField *progressLabel;
+@property (nonatomic, weak) NSProgressIndicator *circularProgress;
 
 @property (nonatomic, weak) IBOutlet NSButton *btnInstall;
 @property (nonatomic, weak) IBOutlet NSButton *btnCancel;
