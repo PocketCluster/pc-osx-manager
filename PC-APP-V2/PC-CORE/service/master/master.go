@@ -165,10 +165,10 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                         log.Debugf("[AGENT] Host Address changed")
                     }
                     case <- nodeC: {
-                        // TODO : report node list
+                        nodeList := beaconMan.RegisteredNodesList()
                         appLife.BroadcastEvent(service.Event{
                             Name:ivent.IventReportNodeListResult,
-                            Payload:[]string{"pc-core", "pc-node1"}})
+                            Payload:nodeList})
                     }
                 }
             }

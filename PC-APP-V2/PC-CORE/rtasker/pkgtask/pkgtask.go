@@ -62,7 +62,7 @@ const (
     taskPackageKillPrefix    string = "task.pacakge.kill."
 )
 
-func loadComposeTemplate(template []byte, nodeList []string) ([]byte, error) {
+func buildComposeTemplateWithNodeList(template []byte, nodeList []map[string]string) ([]byte, error) {
     if len(nodeList) == 0 {
         return nil, errors.Errorf("unable to generate template with empty node list")
     }
@@ -73,15 +73,14 @@ func loadComposeTemplate(template []byte, nodeList []string) ([]byte, error) {
     // build node data
     var snodes = []pongo2.Context{}
     for _, node := range nodeList {
+        nodeName := node["nodename"]
 
-        if node == "pc-core" {
+        // we skip pc-core for now
+        if !strings.HasPrefix(nodeName, "pc-node") {
             continue
         }
-        if !strings.HasPrefix(node, "pc-node") {
-            continue
-        }
 
-        nidx := strings.Replace(node,"pc-node", "", -1)
+        nidx := strings.Replace(nodeName,"pc-node", "", -1)
         nadr, err := strconv.Atoi(nidx)
         if err != nil {
             continue
@@ -92,7 +91,7 @@ func loadComposeTemplate(template []byte, nodeList []string) ([]byte, error) {
             pongo2.Context{
                 "index":   nidx,
                 "address": nadr + 1,
-                "name":    node,
+                "name":    nodeName,
             })
     }
     if len(snodes) == 0 {

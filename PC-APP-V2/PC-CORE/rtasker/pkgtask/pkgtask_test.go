@@ -12,7 +12,13 @@ import (
 
 func TestTemplateGeneration(t *testing.T) {
     var (
-        nodeList = []string{"pc-node1", "pc-node3", "pc-core", "pc-node4", "pc-node6"}
+        nodeList = []map[string]string{
+            {"nodename":"pc-node1"},
+            {"nodename":"pc-node3"},
+            {"nodename":"pc-core"},
+            {"nodename":"pc-node4"},
+            {"nodename":"pc-node6"}}
+
         etmpl = []byte(`container_name: pc-core
 ipv4_address: 172.16.128.1
 
@@ -43,7 +49,7 @@ ipv4_address: 172.16.128.7
     }
 
     // generate template
-    gtmpl, err := loadComposeTemplate(data, nodeList)
+    gtmpl, err := buildComposeTemplateWithNodeList(data, nodeList)
     if err != nil {
         t.Fatal(err.Error())
     }

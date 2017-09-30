@@ -45,19 +45,18 @@ func InitPackageProcess(appLife rtasker.RouteTasker, feeder route.ResponseFeeder
         }
         nr := <- reportC
         appLife.UntieDiscreteEvent(ivent.IventReportNodeListResult)
-        nlist, ok := nr.Payload.([]string)
+        nlist, ok := nr.Payload.([]map[string]string)
         if !ok {
             return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to access proper node list"))
         }
         log.Infof("node list %v", nlist)
 
         // 3. load template
-        // retrieve template
         tmpl, err := model.FindTemplateWithPackageID(pkgID)
         if err != nil {
             return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to access package template"))
         }
-        cTempl, err := loadComposeTemplate(tmpl.Body, nlist)
+        cTempl, err := buildComposeTemplateWithNodeList(tmpl.Body, nlist)
         if err != nil {
             return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to access package template"))
         }
