@@ -170,10 +170,14 @@ func BuildVboxMachine() error {
         HostInterface:       vbifname,
         BootImagePath:       bootPath,
         HddImagePath:        hddPath,
-        // TODO : WTF????
-        SharedFolderPath:    "/Users/almightykim/temp",
-        SharedFolderName:    "/tmp",
     }
+
+/*
+    // TODO : add folders
+    SharedFolderPath:    "/Users/almightykim/temp",
+    SharedFolderName:    "/tmp",
+ */
+
 
     err = ValidateVBoxBuildOption(builder)
     if err != nil {

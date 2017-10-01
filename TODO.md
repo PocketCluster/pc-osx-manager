@@ -62,17 +62,17 @@
 
 
 #### VirtualBox
-- [ ] get the actual core count
-- [ ] vbox files permissions
+- [x] get the actual core count
+- [x] vbox files permissions
+- [x] multiple shared folder
 - [ ] vbox machine start stop
-- [ ] vbox disk creation from XPCOM
 - [ ] vbox machine “options”
   * "VBoxInternal/CPUM/EnableHVP", “1"
-- [ ] multiple shared folder
 - [ ] Discard all snapshots, settings (IMachine::discardSettings())
   * -> when machine powerdown settings changed! 
 - [ ] Disable snapshot, save, teleport,  restore, fault-tolerant-sync, setting up, (these are illiegal statates)
 - [ ] force get session from running machine to reboot
+- [ ] vbox disk creation from XPCOM
 
 
 #### Beacon/Locator

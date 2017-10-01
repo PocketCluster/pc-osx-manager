@@ -1173,18 +1173,18 @@ vbox_machine_add_hard_disk(IVirtualBox* virtualbox, IMachine* vbox_machine, ISes
     return NS_OK;
 }
 
-
 #pragma mark -
 VBoxBuildOption*
-VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* boot, const char* hdd, const char* spath, const char* sname) {
+VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* boot, const char* hdd, VBoxSharedFolder **sfolders, int sflen) {
     VBoxBuildOption* option = (VBoxBuildOption*)calloc(1, sizeof(VBoxBuildOption));
     option->CpuCount      = cpu;
     option->MemSize       = mem;
     option->HostInterface = host;
     option->BootImagePath = boot;
     option->HddImagePath  = hdd;
-    option->SharedDirPath = spath;
-    option->SharedDirName = sname;
+    option->Sharedfolders = sfolders;
+    option->SFoldersCount = sflen;
+
     return option;
 }
 
@@ -1232,14 +1232,6 @@ VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
         print_error_info(session->error_msg, "[VBox] invalid host interface", NS_ERROR_INVALID_ARG);
         return VBGlue_Fail;
     }
-    if (strlen(option->SharedDirPath) == 0) {
-        print_error_info(session->error_msg, "[VBox] invalid shared folder path", NS_ERROR_INVALID_ARG);
-        return VBGlue_Fail;
-    }
-    if (strlen(option->SharedDirName) == 0) {
-        print_error_info(session->error_msg, "[VBox] invalid shared folder name", NS_ERROR_INVALID_ARG);
-        return VBGlue_Fail;
-    }
     if (strlen(option->BootImagePath) == 0) {
         print_error_info(session->error_msg, "[VBox] invalid boot image path", NS_ERROR_INVALID_ARG);
         return VBGlue_Fail;
@@ -1248,6 +1240,7 @@ VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
         print_error_info(session->error_msg, "[VBox] invalid hdd path", NS_ERROR_INVALID_ARG);
         return VBGlue_Fail;
     }
+    // TODO : check shared folder list size
 
     // build basic machine with bios & motherboard settings
     result = vbox_machine_build(session->vbox, session->machine, option->CpuCount, option->MemSize, session->error_msg);
@@ -1267,10 +1260,21 @@ VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
         return VBGlue_Fail;
     }
 
-    // add shared folder
-    result = vbox_machine_add_shared_folder(session->machine, session->vsession, option->SharedDirName, option->SharedDirPath, session->error_msg);
-    if (FAILED(result)) {
-        return VBGlue_Fail;
+    for (int i = 0; i < option->SFoldersCount; i++) {
+        VBoxSharedFolder* sf = (VBoxSharedFolder*)(option->Sharedfolders[i]);
+        if (strlen(sf->SharedDirName) == 0) {
+            print_error_info(session->error_msg, "[VBox] invalid shared folder name", NS_ERROR_INVALID_ARG);
+            return VBGlue_Fail;
+        }
+        if (strlen(sf->SharedDirPath) == 0) {
+            print_error_info(session->error_msg, "[VBox] invalid shared folder path", NS_ERROR_INVALID_ARG);
+            return VBGlue_Fail;
+        }
+        // add shared folder
+        result = vbox_machine_add_shared_folder(session->machine, session->vsession, sf->SharedDirName, sf->SharedDirPath, session->error_msg);
+        if (FAILED(result)) {
+            return VBGlue_Fail;
+        }
     }
 
     // add storage controller

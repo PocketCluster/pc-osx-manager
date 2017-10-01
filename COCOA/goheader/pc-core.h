@@ -28,7 +28,6 @@
 #include "PCNativeThread.h"
 
 
-
 #line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_netnoti.go"
 
 
@@ -36,7 +35,6 @@
 
 #include "SCNetworkTypes.h"
 #include "PCInterfaceTypes.h"
-
 
 
 #line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_route.go"

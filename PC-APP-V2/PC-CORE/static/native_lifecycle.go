@@ -8,7 +8,6 @@ package main
 #include <pthread.h>
 #include "PCLifeCycle.h"
 #include "PCNativeThread.h"
-
 */
 import "C"
 import (
