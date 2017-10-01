@@ -75,6 +75,13 @@
 - [ ] force get session from running machine to reboot
 
 
+#### Beacon/Locator
+- [ ] Cleanup the package / Reduce Garbage collection (no allocation on every socket, clean interface, ...)
+- [ ] Additional Command (UPDATE/REBOOT/SHUTDOWN/BREAKCONN)
+- [ ] Expiring discovery broadcast after some point
+- [ ] TLS-TCP connection for confirmed and large packet size
+
+
 ### V0.1.3
 -
 ```
