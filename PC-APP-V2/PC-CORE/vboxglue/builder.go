@@ -151,8 +151,12 @@ func BuildVboxMachine() error {
         errors.WithStack(err)
     }
 
-    // TODO get this from context
-    bootPath := "/Users/almightykim/Workspace/VBOX-IMAGE/pc-core.iso"
+    // pc-core iso
+    bdlsrc, err := context.SharedHostContext().ApplicationResourceDirectory()
+    if err != nil {
+        errors.WithStack(err)
+    }
+    bootPath := filepath.Join(bdlsrc, "pc-core.iso")
 
     // hdd path
     vmPath, err := context.SharedHostContext().ApplicationVirtualMachineDirectory()
@@ -162,6 +166,18 @@ func BuildVboxMachine() error {
     hddPath := filepath.Join(vmPath, defaults.VBoxDefualtCoreDiskName)
     log.Debugf("[VBOX] %s", hddPath)
 
+    // core data
+    cdata, err := context.SharedHostContext().ApplicationPocketCoreDataDirectory()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    // core input
+    cinput, err := context.SharedHostContext().ApplicationPocketCoreInputDirectory()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
     builder := &VBoxBuildOption{
         CPUCount:            cpuCount,
         MemSize:             memSize,
@@ -170,14 +186,11 @@ func BuildVboxMachine() error {
         HostInterface:       vbifname,
         BootImagePath:       bootPath,
         HddImagePath:        hddPath,
+        SharedFolders:       VBoxSharedFolderList{
+            {SharedDirName:"/pocket",   SharedDirPath:cdata},
+            {SharedDirName:"/document", SharedDirPath:cinput}, // TODO : fix the name
+        },
     }
-
-/*
-    // TODO : add folders
-    SharedFolderPath:    "/Users/almightykim/temp",
-    SharedFolderName:    "/tmp",
- */
-
 
     err = ValidateVBoxBuildOption(builder)
     if err != nil {
@@ -209,7 +222,7 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
             }
             default: {
                 if masterctrl.TransitionFailureLimit <= errorCount {
-                    log.Debugf("[VBOXLSTN] error count exceeds 5. Let's close connection and return")
+                    log.Debugf("[VBOXLSTN] error count exceeds TransitionFailureLimit %v. Let's close connection and return", masterctrl.TransitionFailureLimit)
                     ctrl.HandleCoreDisconnection(time.Now())
                     return errors.WithStack(conn.Close())
                 }

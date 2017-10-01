@@ -11,7 +11,14 @@ type HostContextCompositeEnv interface {
     ApplicationUserDataDirectory() (string, error)
     ApplicationRepositoryDirectory() (string, error)
     ApplicationStorageDirectory() (string, error)
+
+    // --- virtualbox related ---
+    // CORE HDD
     ApplicationVirtualMachineDirectory() (string, error)
+    // CORE /pocket
+    ApplicationPocketCoreDataDirectory() (string, error)
+    // CORE document input
+    ApplicationPocketCoreInputDirectory() (string, error)
 }
 
 func (c *hostContext) ApplicationUserDataDirectory() (string, error) {
@@ -48,4 +55,14 @@ func (c *hostContext) ApplicationVirtualMachineDirectory() (string, error) {
     }
 
     return filepath.Join(dataDir, defaults.VirtualMachinePath), nil
+}
+
+func (c *hostContext) ApplicationPocketCoreDataDirectory() (string, error) {
+    // TODO : fix this
+    return "coredata", nil
+}
+
+func (c *hostContext) ApplicationPocketCoreInputDirectory() (string, error) {
+    // TODO : fix this
+    return "userinput", nil
 }
