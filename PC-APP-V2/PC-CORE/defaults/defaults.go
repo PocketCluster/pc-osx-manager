@@ -45,7 +45,7 @@ const (
 
     PathPostfixVirtualMachine  string = "pc-core"
 
-    PathPostfixCoreNodeData    string = ".pocket-core-data"
+    PathPostfixCoreNodeData    string = ".pocketcluster/coredata"
 
     PathPostfixCoreDataInput   string = "PocketCluster"
 )
