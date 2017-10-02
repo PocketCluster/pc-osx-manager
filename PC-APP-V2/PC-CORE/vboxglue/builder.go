@@ -187,8 +187,8 @@ func BuildVboxMachine() error {
         BootImagePath:       bootPath,
         HddImagePath:        hddPath,
         SharedFolders:       VBoxSharedFolderList{
-            {SharedDirName:"/pocket",   SharedDirPath:cdata},
-            {SharedDirName:"/document", SharedDirPath:cinput}, // TODO : fix the name
+            {SharedDirName:"/pocket",        SharedDirPath:cdata},
+            {SharedDirName:"/PocketCluster", SharedDirPath:cinput},
         },
     }
 

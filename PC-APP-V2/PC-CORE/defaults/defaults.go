@@ -39,13 +39,15 @@ const (
 )
 
 const (
-    UserDataPath               string = ".pocket"
+    PathPostfixRepository      string = "repository"
 
-    RepositoryPathPostfix      string = "repository"
+    PathPostfixStorage         string = "storage"
 
-    StoragePathPostfix         string = "storage"
+    PathPostfixVirtualMachine  string = "pc-core"
 
-    VirtualMachinePath         string = "pc-core"
+    PathPostfixCoreNodeData    string = ".pocket-core-data"
+
+    PathPostfixCoreDataInput   string = "PocketCluster"
 )
 
 const (
