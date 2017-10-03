@@ -35,6 +35,10 @@ const (
     CmdDebug1
     CmdDebug2
     CmdDebug3
+    CmdDebug4
+    CmdDebug5
+    CmdDebug6
+    CmdDebug7
 )
 
 func (c CommandType) String() string {
@@ -56,6 +60,14 @@ func (c CommandType) String() string {
             return "CmdDebug2"
         case CmdDebug3:
             return "CmdDebug3"
+        case CmdDebug4:
+            return "CmdDebug4"
+        case CmdDebug5:
+            return "CmdDebug5"
+        case CmdDebug6:
+            return "CmdDebug6"
+        case CmdDebug7:
+            return "CmdDebug7"
 
         default:
             return fmt.Sprintf("CommandType(%d)", c)

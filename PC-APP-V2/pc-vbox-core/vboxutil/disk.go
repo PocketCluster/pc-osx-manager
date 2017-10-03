@@ -33,6 +33,8 @@ type MachineDisk struct {
     ClusterID           string
     AuthToken           string
     UserName            string
+    UserUID             string
+    UserGID             string
     CoreVboxPublicKey   []byte
     CoreVboxPrivateKey  []byte
     MasterVboxPublicKey []byte

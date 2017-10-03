@@ -1,6 +1,7 @@
 package vboxglue
 
 import (
+    "os/user"
     "net"
     "path/filepath"
     "time"
@@ -42,6 +43,12 @@ func BuildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
         return errors.WithStack(err)
     }
 
+    // add user id
+    uinfo, err := user.Lookup(userName)
+    if err != nil {
+        return errors.WithMessage(err, "Unable to access user information")
+    }
+    log.Infof("user uid %v | gid %v", uinfo.Uid, uinfo.Gid)
 
     // Vbox ctrl & report keys
     mVpuk, err = context.SharedHostContext().MasterVBoxCtrlPublicKey()
@@ -108,6 +115,8 @@ func BuildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     md.ClusterID = clusterID
     md.AuthToken = authToken
     md.UserName = userName
+    md.UserUID = uinfo.Uid
+    md.UserGID = uinfo.Gid
     md.CoreVboxPublicKey = cVpuk
     md.CoreVboxPrivateKey = cVprk
     md.MasterVboxPublicKey = mVpuk

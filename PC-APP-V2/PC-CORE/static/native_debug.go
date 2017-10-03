@@ -64,3 +64,31 @@ func OpsCmdDebug3() {
         Command:    operation.CmdDebug3,
     })
 }
+
+//export OpsCmdDebug4
+func OpsCmdDebug4() {
+    theApp.Send(operation.Operation{
+        Command:    operation.CmdDebug4,
+    })
+}
+
+//export OpsCmdDebug5
+func OpsCmdDebug5() {
+    theApp.Send(operation.Operation{
+        Command:    operation.CmdDebug5,
+    })
+}
+
+//export OpsCmdDebug6
+func OpsCmdDebug6() {
+    theApp.Send(operation.Operation{
+        Command:    operation.CmdDebug6,
+    })
+}
+
+//export OpsCmdDebug7
+func OpsCmdDebug7() {
+    theApp.Send(operation.Operation{
+        Command:    operation.CmdDebug7,
+    })
+}

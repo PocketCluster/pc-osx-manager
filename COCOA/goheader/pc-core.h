@@ -104,6 +104,14 @@ extern void OpsCmdDebug2();
 
 extern void OpsCmdDebug3();
 
+extern void OpsCmdDebug4();
+
+extern void OpsCmdDebug5();
+
+extern void OpsCmdDebug6();
+
+extern void OpsCmdDebug7();
+
 extern void StartResponseFeed();
 
 extern void StopResponseFeed();

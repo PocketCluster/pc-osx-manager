@@ -85,6 +85,7 @@
 		04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
 		04F705701BD7A9B700829651 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04F7056F1BD7A9B700829651 /* IOKit.framework */; };
 		04F705721BD7A9BD00829651 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04F705711BD7A9BD00829651 /* CoreFoundation.framework */; };
+		04F98D151F8376E800823DC8 /* pc-core.iso in Resources */ = {isa = PBXBuildFile; fileRef = 04F98D141F8376E800823DC8 /* pc-core.iso */; };
 		89580BEF40BDD88F96DECDEE /* Pods_PocketCluster.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C46CEC44F04E5FF247FB7D68 /* Pods_PocketCluster.framework */; };
 /* End PBXBuildFile section */
 
@@ -259,6 +260,7 @@
 		04E51DBF1BDC88E3001F1F22 /* Resources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Resources.bundle; sourceTree = "<group>"; };
 		04F7056F1BD7A9B700829651 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		04F705711BD7A9BD00829651 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		04F98D141F8376E800823DC8 /* pc-core.iso */ = {isa = PBXFileReference; lastKnownFileType = file; name = "pc-core.iso"; path = "../../../../../POCKETOPS/VBOX-IMAGE/pc-core.iso"; sourceTree = "<group>"; };
 		2F1A9A9FFD26979D210B6933 /* Pods-PocketCluster.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PocketCluster.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-PocketCluster/Pods-PocketCluster.debug.xcconfig"; sourceTree = "<group>"; };
 		8528D605609CDB0AD8DA7C48 /* Pods-PocketCluster.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PocketCluster.release.xcconfig"; path = "../Pods/Target Support Files/Pods-PocketCluster/Pods-PocketCluster.release.xcconfig"; sourceTree = "<group>"; };
 		C46CEC44F04E5FF247FB7D68 /* Pods_PocketCluster.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PocketCluster.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -639,6 +641,7 @@
 		048678071BCF5FE20071594B /* manager */ = {
 			isa = PBXGroup;
 			children = (
+				04F98D141F8376E800823DC8 /* pc-core.iso */,
 				04CA54A81F44900F00A7AF48 /* EULA.rtf */,
 				0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */,
 				04E51DBF1BDC88E3001F1F22 /* Resources.bundle */,
@@ -922,6 +925,7 @@
 				04BD309F1F3E4B2D00509B21 /* PCSetup2VC.xib in Resources */,
 				04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */,
 				048678121BCF5FE20071594B /* MainMenu.xib in Resources */,
+				04F98D151F8376E800823DC8 /* pc-core.iso in Resources */,
 				04CAE2E81E9B8A4900B23B22 /* DebugWindow.xib in Resources */,
 				046D310F1F3D32440081CC3E /* PCPkgInstallWC.xib in Resources */,
 				04CA54A71F447B1700A7AF48 /* AgreementWC.xib in Resources */,

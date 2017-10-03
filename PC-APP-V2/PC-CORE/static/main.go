@@ -9,6 +9,7 @@ import (
 
     "github.com/stkim1/pc-core/config"
     "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/event/crash"
@@ -36,6 +37,7 @@ func main() {
         var (
             appCfg        *config.ServiceConfig = nil
             err           error                 = nil
+            vboxCore      vboxglue.VBoxGlue     = nil
             IsContextInit bool                  = false
         )
 
@@ -308,7 +310,10 @@ func main() {
                                 log.Error(err.Error())
                             }
                         }
+                        log.Debugf("[OP] %v", e.String())
+                    }
 
+                    case operation.CmdDebug1: {
                         // setup vbox
                         {
                             cid, err := context.SharedHostContext().MasterAgentName()
@@ -324,17 +329,56 @@ func main() {
                                 log.Debugf("vbox operation error %v", err)
                             }
                         }
-
-                        log.Debugf("[OP] %v", e.String())
-                    }
-
-                    case operation.CmdDebug1: {
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdDebug2: {
+                        // start machine
+                        {
+                            vcore, err := vboxglue.NewGOVboxGlue()
+                            if err != nil {
+                                log.Debug(err)
+                                continue
+                            }
+                            err = vcore.FindMachineByNameOrID(defaults.PocketClusterCoreName)
+                            if err != nil {
+                                log.Debug(err)
+                                continue
+                            }
+                            err = vcore.StartMachine()
+                            if err != nil {
+                                log.Debug(err)
+                                continue
+                            }
+                            vboxCore = vcore
+                        }
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdDebug3: {
+                        // stop machine
+                        {
+                            if vboxCore == nil {
+                                log.Debug("unable to stop null pc-core")
+                            }
+                            err := vboxCore.AcpiStopMachine()
+                            if err != nil {
+                                log.Debug(err)
+                                continue
+                            }
+                            vboxCore = nil
+                        }
+
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug4: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug5: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug6: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug7: {
                         log.Debugf("[OP] %v", e.String())
                     }
 

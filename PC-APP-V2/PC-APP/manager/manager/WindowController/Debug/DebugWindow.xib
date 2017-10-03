@@ -42,7 +42,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="y1g-2c-4bl">
-                        <rect key="frame" x="14" y="114" width="182" height="32"/>
+                        <rect key="frame" x="14" y="114" width="93" height="32"/>
                         <buttonCell key="cell" type="push" title="Debug 0" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5hd-3j-KqJ">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -52,7 +52,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Zrf-TX-MDf">
-                        <rect key="frame" x="14" y="81" width="182" height="32"/>
+                        <rect key="frame" x="14" y="81" width="93" height="32"/>
                         <buttonCell key="cell" type="push" title="Debug 1" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="CqG-Z6-HnV">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -82,7 +82,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lOe-An-aD8">
-                        <rect key="frame" x="14" y="48" width="182" height="32"/>
+                        <rect key="frame" x="14" y="48" width="93" height="32"/>
                         <buttonCell key="cell" type="push" title="Debug 2" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="8Tk-t9-kvl">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -212,7 +212,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ksz-45-uOW">
-                        <rect key="frame" x="14" y="13" width="182" height="32"/>
+                        <rect key="frame" x="14" y="13" width="93" height="32"/>
                         <buttonCell key="cell" type="push" title="Debug 3" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="rpB-ZI-VTG">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -221,12 +221,52 @@
                             <action selector="opsCmdDebug3:" target="-2" id="qke-vN-zmU"/>
                         </connections>
                     </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qy3-AN-QbZ">
+                        <rect key="frame" x="103" y="114" width="93" height="32"/>
+                        <buttonCell key="cell" type="push" title="Debug 4" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="DFb-gU-g91">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="opsCmdDebug4:" target="-2" id="TRL-cM-wbS"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aMf-Xu-QxQ">
+                        <rect key="frame" x="103" y="81" width="93" height="32"/>
+                        <buttonCell key="cell" type="push" title="Debug 5" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="rPB-i5-Ljm">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="opsCmdDebug5:" target="-2" id="cZy-ph-z6g"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HD6-a8-iC3">
+                        <rect key="frame" x="103" y="48" width="93" height="32"/>
+                        <buttonCell key="cell" type="push" title="Debug 6" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="iI1-WQ-F5H">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="opsCmdDebug6:" target="-2" id="C3c-9c-edz"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="n1Q-3b-LMg">
+                        <rect key="frame" x="103" y="13" width="93" height="32"/>
+                        <buttonCell key="cell" type="push" title="Debug 7" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="JVS-BL-Ymc">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="opsCmdDebug7:" target="-2" id="KPR-Q0-vEv"/>
+                        </connections>
+                    </button>
                 </subviews>
             </view>
             <connections>
                 <outlet property="delegate" destination="-2" id="0bl-1N-AYu"/>
             </connections>
-            <point key="canvasLocation" x="694" y="225"/>
+            <point key="canvasLocation" x="280" y="23"/>
         </window>
     </objects>
 </document>

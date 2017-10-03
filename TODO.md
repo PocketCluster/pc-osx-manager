@@ -11,6 +11,7 @@
 
 
 ### V0.1.4
+- [ ] Fix Teleport generate log in Log directory
 - [ ] `CoreNode`, `SlaveNode` : `LastAlive` data for health check on OSX. Save the last alive time to report in OSX.
 - [ ] `CoreNode` set `SlaveID` with `MachineID`.
 - [ ] Cluster User Defined Name
@@ -30,8 +31,9 @@
 - [ ] `Makefile` to remove all *_test.go and TEST.go
 - [ ] Clean up core node including `vi`
 - [ ] More Test for `pc-vbox-comm`
-- [ ] Pass `uid` to all slave nodes to have them setup the __user__ with the same `uid` 
+- [ ] Pass `uid` + `gid` to all slave nodes to have them setup the __user__ with the same `uid` 
   * Look `Resources.bundle/setup/raspberry_user_setup.sh` and extract essential tasks
+  * UID/GID pair in vbox disk for core. Same pair in slavenode Teleport docker setup
 - [ ] Look carefully `etcd` TLS configuration behave with `docker-compose` connected.
   * At initial, etcd `network/bridged` API point isn't available and dockerd complains. This seems to be normal though.
   * <https://dims-devguide.readthedocs.io/en/latest/dockerdatacenter.html>
@@ -65,14 +67,14 @@
 - [x] get the actual core count
 - [x] vbox files permissions
 - [x] multiple shared folder
-- [ ] vbox machine start stop
-- [ ] vbox machine “options”
-  * "VBoxInternal/CPUM/EnableHVP", “1"
+- [x] vbox machine start stop
+- [ ] force get session from running machine to reboot
 - [ ] Discard all snapshots, settings (IMachine::discardSettings())
   * -> when machine powerdown settings changed! 
 - [ ] Disable snapshot, save, teleport,  restore, fault-tolerant-sync, setting up, (these are illiegal statates)
-- [ ] force get session from running machine to reboot
 - [ ] vbox disk creation from XPCOM
+- [ ] vbox machine “options”
+  * "VBoxInternal/CPUM/EnableHVP", “1"
 
 
 #### Beacon/Locator
