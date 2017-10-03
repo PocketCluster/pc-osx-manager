@@ -69,6 +69,9 @@
 - [x] multiple shared folder
 - [x] vbox machine start stop
 - [ ] force get session from running machine to reboot
+- [ ] check if setting has been changed / or reset machine setting everytime
+- [ ] make sure ACPI shutdown works properly
+- [ ] shared folder permissions
 - [ ] Discard all snapshots, settings (IMachine::discardSettings())
   * -> when machine powerdown settings changed! 
 - [ ] Disable snapshot, save, teleport,  restore, fault-tolerant-sync, setting up, (these are illiegal statates)

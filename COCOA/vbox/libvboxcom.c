@@ -651,6 +651,15 @@ vbox_machine_build(IVirtualBox* virtualbox, IMachine* vbox_machine, int cpu_coun
             print_error_info(error_message, "[VBox] Failed to ACPI autostop", result);
             return result;
         }
+/*
+        // this is untested!
+        // set powerdown type
+        result = IMachine_SetAutostopType(vbox_machine, AutostopType_AcpiShutdown);
+        if (FAILED(result)) {
+            print_error_info(error_message, "[VBox] Failed to setting autostop type", result);
+            return result;
+        }
+*/
     }
 
     // SAVE SETTINGS & REGISTER MACHINE BEFORE ATTACH A MEDIUM

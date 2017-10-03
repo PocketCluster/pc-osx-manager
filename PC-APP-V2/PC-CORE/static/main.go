@@ -153,7 +153,7 @@ func main() {
                         if err != nil {
                             // TODO send error report
                             log.Debugf("[LIFE] CRITICAL ERROR %v", err)
-                            return
+                            continue
                         }
                         // TODO : move this initializer after network initiated
                         install.InitInstallPackageRoutePath(appLife, theFeeder, appCfg.PCSSH)
@@ -165,13 +165,13 @@ func main() {
                         cid, err := context.SharedHostContext().MasterAgentName()
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
                         // get primary interface bsd name
                         iname, err := context.SharedHostContext().HostPrimaryInterfaceShortName()
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // --- role service sequence ---
@@ -180,7 +180,7 @@ func main() {
                         err = container.InitStorageServie(appLife, appCfg.ETCD)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // registry service
@@ -188,7 +188,7 @@ func main() {
                         err = container.InitRegistryService(appLife, appCfg.REG)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // search catcher service
@@ -197,7 +197,7 @@ func main() {
                         _, err = mcast.NewSearchCatcher(appLife.ServiceSupervisor, iname)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
                         // beacon locator service
                         // (NODEP netchange, NODEP service)
@@ -205,7 +205,7 @@ func main() {
                         _, err = ucast.NewBeaconLocator(appLife.ServiceSupervisor)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // internal name service
@@ -213,7 +213,7 @@ func main() {
                         err = dns.InitPocketNameService(appLife, cid)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // swarm service
@@ -221,7 +221,7 @@ func main() {
                         err = container.InitSwarmService(appLife)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // master beacon service
@@ -229,7 +229,7 @@ func main() {
                         err = master.InitMasterBeaconService(appLife, cid, appCfg.PCSSH)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // vboxcontrol service
@@ -237,7 +237,7 @@ func main() {
                         err = vbox.InitVboxCoreReportService(appLife, cid)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // teleport service
@@ -246,13 +246,13 @@ func main() {
                         _, err = sshproc.NewEmbeddedMasterProcess(appLife.ServiceSupervisor, appCfg.PCSSH)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         err = health.InitSystemHealthMonitor(appLife, theFeeder)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         appLife.StartServices()
@@ -270,7 +270,7 @@ func main() {
                         err = container.InitStorageServie(appLife, appCfg.ETCD)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
                         appLife.StartServices()
                         log.Debugf("[OP] %v", e.String())
@@ -342,11 +342,24 @@ func main() {
                             err = vcore.FindMachineByNameOrID(defaults.PocketClusterCoreName)
                             if err != nil {
                                 log.Debug(err)
+                                vboxCore.Close()
                                 continue
                             }
+
+                            // shutoff vbox core
+                            if vcore.CurrentMachineState() != vboxglue.VBGlueMachine_PoweredOff {
+                                err := vboxglue.EmergencyStop(vcore, defaults.PocketClusterCoreName)
+                                if err != nil {
+                                    log.Debug(err)
+                                    continue
+                                }
+                            }
+
+                            // then start back up
                             err = vcore.StartMachine()
                             if err != nil {
                                 log.Debug(err)
+                                vboxCore.Close()
                                 continue
                             }
                             vboxCore = vcore
@@ -356,13 +369,28 @@ func main() {
                     case operation.CmdDebug3: {
                         // stop machine
                         {
+                            // this is case where previous run or user has acticated pc-core
                             if vboxCore == nil {
-                                log.Debug("unable to stop null pc-core")
+                                vcore, err := vboxglue.NewGOVboxGlue()
+                                if err != nil {
+                                    log.Debug(err)
+                                    continue
+                                }
+                                err = vcore.FindMachineByNameOrID(defaults.PocketClusterCoreName)
+                                if err != nil {
+                                    log.Debug(err)
+                                    vcore.Close()
+                                    continue
+                                }
+                                vboxCore = vcore
                             }
                             err := vboxCore.AcpiStopMachine()
                             if err != nil {
                                 log.Debug(err)
-                                continue
+                            }
+                            err = vboxCore.Close()
+                            if err != nil {
+                                log.Debug(err)
                             }
                             vboxCore = nil
                         }
@@ -370,6 +398,32 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdDebug4: {
+                        vcore, err := vboxglue.NewGOVboxGlue()
+                        if err != nil {
+                            log.Debug(err)
+                            vcore.Close()
+                            continue
+                        }
+                        err = vcore.FindMachineByNameOrID(defaults.PocketClusterCoreName)
+                        if err != nil {
+                            log.Debug(err)
+                            continue
+                        }
+
+                        log.Infof("Current Machine State %v", vcore.CurrentMachineState())
+                        if !vcore.IsMachineSafeToStart() {
+                            err := vboxglue.EmergencyStop(vcore, defaults.PocketClusterCoreName)
+                            if err != nil {
+                                log.Debug(err)
+                                continue
+                            }
+                        }
+
+                        err = vcore.Close()
+                        if err != nil {
+                            log.Debug(err)
+                            continue
+                        }
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdDebug5: {

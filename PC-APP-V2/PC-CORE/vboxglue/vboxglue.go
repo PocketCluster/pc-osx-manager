@@ -134,6 +134,7 @@ type VBoxGlue interface {
     SearchHostNetworkInterfaceByName(hostIface string) (string, error)
 
     CurrentMachineState() VBGlueMachineState
+    IsMachineSafeToStart() bool
     IsMachineSettingChanged() (bool, error)
 
     FindMachineByNameOrID(machineName string) error
@@ -221,6 +222,7 @@ type VBGlueMachineState uint
 const (
     VBGlueMachine_Illegal    = C.VBGlueMachine_Illegal
     VBGlueMachine_PoweredOff = C.VBGlueMachine_PoweredOff
+    VBGlueMachine_Saved      = C.VBGlueMachine_Saved
     VBGlueMachine_Aborted    = C.VBGlueMachine_Aborted
     VBGlueMachine_Running    = C.VBGlueMachine_Running
     VBGlueMachine_Paused     = C.VBGlueMachine_Paused
@@ -229,8 +231,41 @@ const (
     VBGlueMachine_Stopping   = C.VBGlueMachine_Stopping
 )
 
+func (s VBGlueMachineState) String() string {
+    switch s {
+        case VBGlueMachine_Illegal:
+            return "VBGlueMachine_Illegal"
+        case VBGlueMachine_PoweredOff:
+            return "VBGlueMachine_PoweredOff"
+        case VBGlueMachine_Saved:
+            return "VBGlueMachine_Saved"
+        case VBGlueMachine_Aborted:
+            return "VBGlueMachine_Aborted"
+        case VBGlueMachine_Running:
+            return "VBGlueMachine_Running"
+        case VBGlueMachine_Paused:
+            return "VBGlueMachine_Paused"
+        case VBGlueMachine_Stuck:
+            return "VBGlueMachine_Stuck"
+        case VBGlueMachine_Starting:
+            return "VBGlueMachine_Starting"
+        case VBGlueMachine_Stopping:
+            return "VBGlueMachine_Stopping"
+    }
+    return "unrecognizable state"
+}
+
 func (v *goVoxGlue) CurrentMachineState() VBGlueMachineState {
     return VBGlueMachineState(C.VBoxMachineGetCurrentState(v.cvboxglue))
+}
+
+func (v *goVoxGlue) IsMachineSafeToStart() bool {
+    switch v.CurrentMachineState() {
+        case VBGlueMachine_PoweredOff, VBGlueMachine_Aborted, VBGlueMachine_Saved: {
+            return true
+        }
+    }
+    return false
 }
 
 func (v *goVoxGlue) IsMachineSettingChanged() (bool, error) {

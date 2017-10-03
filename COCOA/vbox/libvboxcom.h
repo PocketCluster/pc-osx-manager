@@ -48,6 +48,7 @@ VBoxHostGetMaxGuestMemSize(VBoxGlue glue, unsigned int* memSize);
 typedef enum VBGlueMachineState {
     VBGlueMachine_Illegal       = 0,
     VBGlueMachine_PoweredOff    = 1,
+    VBGlueMachine_Saved         = 2,
     VBGlueMachine_Aborted       = 4,
     VBGlueMachine_Running       = 5,
     VBGlueMachine_Paused        = 6,
