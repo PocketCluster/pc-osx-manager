@@ -68,7 +68,8 @@
 - [x] vbox files permissions
 - [x] multiple shared folder
 - [x] vbox machine start stop
-- [ ] force get session from running machine to reboot
+- [x] force get session from running machine to reboot
+  * -> We cannot hijack a session. We force to stop and restart with command line
 - [ ] check if setting has been changed / or reset machine setting everytime
 - [ ] make sure ACPI shutdown works properly
 - [ ] shared folder permissions
