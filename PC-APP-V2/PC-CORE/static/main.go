@@ -318,25 +318,26 @@ func main() {
                         {
                             cid, err := context.SharedHostContext().MasterAgentName()
                             if err != nil {
-                                log.Debug(err)
+                                log.Debug(err.Error())
                                 continue
                             }
 
                             err = vboxglue.BuildVboxCoreDisk(cid, appCfg.PCSSH)
                             if err != nil {
-                                log.Debug(err)
+                                log.Debug(err.Error())
                                 continue
                             }
 
                             vcore, err := vboxglue.NewGOVboxGlue()
                             if err != nil {
-                                log.Debug(err)
+                                log.Debug(err.Error())
                                 continue
                             }
 
                             err = vboxglue.CreateNewMachine(vcore)
                             if err != nil {
-                                log.Debugf("vbox operation error %v", err)
+                                log.Debug(err.Error())
+                                vcore.Close()
                                 continue
                             }
 
@@ -344,7 +345,8 @@ func main() {
                             if !vcore.IsMachineSafeToStart() {
                                 err := vboxglue.EmergencyStop(vcore, defaults.PocketClusterCoreName)
                                 if err != nil {
-                                    log.Debug(err)
+                                    log.Debug(err.Error())
+                                    vcore.Close()
                                     continue
                                 }
                             }
@@ -352,7 +354,7 @@ func main() {
                             // then start back up
                             err = vcore.StartMachine()
                             if err != nil {
-                                log.Debug(err)
+                                log.Debug(err.Error())
                                 vboxCore.Close()
                                 continue
                             }
@@ -365,36 +367,46 @@ func main() {
                         {
                             vcore, err := vboxglue.NewGOVboxGlue()
                             if err != nil {
-                                log.Debug(err)
+                                log.Debug(err.Error())
                                 continue
                             }
                             err = vcore.FindMachineByNameOrID(defaults.PocketClusterCoreName)
                             if err != nil {
-                                log.Debug(err)
+                                log.Debug(err.Error())
                                 vboxCore.Close()
                                 continue
                             }
 
-                            // shutoff vbox core
+                            // force shutoff vbox core
                             if !vcore.IsMachineSafeToStart() {
                                 err := vboxglue.EmergencyStop(vcore, defaults.PocketClusterCoreName)
                                 if err != nil {
-                                    log.Debug(err)
+                                    log.Debug(err.Error())
+                                    vboxCore.Close()
                                     continue
                                 }
                             }
 
-                            // reset the option again
-                            err = vboxglue.ResetExistingMachine(vcore)
+                            // check if machine setting changed
+                            chgd, err := vcore.IsMachineSettingChanged()
                             if err != nil {
-                                log.Debug(err)
+                                log.Debug(err.Error())
+                                vcore.Close()
+                                continue
+                            }
+                            // warn user and abort boot procedure
+                            if chgd {
+                                log.Errorf("core node setting has changed. abort boot procedure")
+                                // reset the option again (2017/10/03 : this is not working as of now)
+                                _ = vboxglue.ResetExistingMachine(vcore)
+                                vcore.Close()
                                 continue
                             }
 
                             // then start back up
                             err = vcore.StartMachine()
                             if err != nil {
-                                log.Debug(err)
+                                log.Debug(err.Error())
                                 vboxCore.Close()
                                 continue
                             }
@@ -409,12 +421,12 @@ func main() {
                             if vboxCore == nil {
                                 vcore, err := vboxglue.NewGOVboxGlue()
                                 if err != nil {
-                                    log.Debug(err)
+                                    log.Debug(err.Error())
                                     continue
                                 }
                                 err = vcore.FindMachineByNameOrID(defaults.PocketClusterCoreName)
                                 if err != nil {
-                                    log.Debug(err)
+                                    log.Debug(err.Error())
                                     vcore.Close()
                                     continue
                                 }
@@ -422,23 +434,23 @@ func main() {
                                 if !vcore.IsMachineSafeToStart() {
                                     err := vboxglue.EmergencyStop(vcore, defaults.PocketClusterCoreName)
                                     if err != nil {
-                                        log.Debug(err)
+                                        log.Debug(err.Error())
                                     }
                                 }
                                 err = vcore.Close()
                                 if err != nil {
-                                    log.Debug(err)
+                                    log.Debug(err.Error())
                                 }
 
                             } else {
                                 // normal start and stop procedure
                                 err := vboxCore.AcpiStopMachine()
                                 if err != nil {
-                                    log.Debug(err)
+                                    log.Debug(err.Error())
                                 }
                                 err = vboxCore.Close()
                                 if err != nil {
-                                    log.Debug(err)
+                                    log.Debug(err.Error())
                                 }
                                 vboxCore = nil
                             }

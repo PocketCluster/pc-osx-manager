@@ -1300,7 +1300,7 @@ VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
 
 VBGlueResult
 VBoxMachineResetWithOption(VBoxGlue glue, VBoxBuildOption* option) {
-    // TODO
+    // TODO : change option setttings
     return VBGlue_Ok;
 }
 
