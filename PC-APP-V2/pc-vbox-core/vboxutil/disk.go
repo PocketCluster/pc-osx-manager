@@ -106,6 +106,29 @@ func (m *MachineDisk) BuildCoreDiskImage() error {
             return errors.WithStack(err)
         }
 
+        // core user uid
+        if len(m.UserUID) == 0 {
+            return errors.Errorf("[ERR] invalid user uid")
+        }
+        file = &tar.Header{Name: config.ArchivePathUserUID(), Size: int64(len(m.UserUID)), Mode: 0600}
+        if err := tw.WriteHeader(file); err != nil {
+            return errors.WithStack(err)
+        }
+        if _, err := tw.Write([]byte(m.UserUID)); err != nil {
+            return errors.WithStack(err)
+        }
+
+        // core user gid
+        if len(m.UserGID) == 0 {
+            return errors.Errorf("[ERR] invalid user gid")
+        }
+        file = &tar.Header{Name: config.ArchivePathUserGID(), Size: int64(len(m.UserGID)), Mode: 0600}
+        if err := tw.WriteHeader(file); err != nil {
+            return errors.WithStack(err)
+        }
+        if _, err := tw.Write([]byte(m.UserGID)); err != nil {
+            return errors.WithStack(err)
+        }
 
         // cert dir
         file = &tar.Header{Name: config.ArchivePathCertsDir(), Typeflag: tar.TypeDir, Mode: 0700}
