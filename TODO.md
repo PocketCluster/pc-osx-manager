@@ -73,7 +73,7 @@
 - [x] check if setting has been changed
 - [x] make sure ACPI shutdown works properly
 - [x] discard machine setting if change has made (IMachine::discardSettings())
-  * -> when machine powerdown settings changed! 
+  * -> when force machine powerdown settings changed! 
 - [ ] shared folder permissions
 - [ ] modify machine settings
 - [ ] disable snapshot, save, teleport,  restore, fault-tolerant-sync, setting up, (these are illiegal statates)
