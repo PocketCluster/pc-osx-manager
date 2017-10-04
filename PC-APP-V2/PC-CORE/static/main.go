@@ -319,15 +319,44 @@ func main() {
                             cid, err := context.SharedHostContext().MasterAgentName()
                             if err != nil {
                                 log.Debug(err)
+                                continue
                             }
+
                             err = vboxglue.BuildVboxCoreDisk(cid, appCfg.PCSSH)
                             if err != nil {
                                 log.Debug(err)
+                                continue
                             }
-                            err = vboxglue.BuildVboxMachine()
+
+                            vcore, err := vboxglue.NewGOVboxGlue()
+                            if err != nil {
+                                log.Debug(err)
+                                continue
+                            }
+
+                            err = vboxglue.CreateNewMachine(vcore)
                             if err != nil {
                                 log.Debugf("vbox operation error %v", err)
+                                continue
                             }
+
+                            // shutoff vbox core. very unlikely
+                            if !vcore.IsMachineSafeToStart() {
+                                err := vboxglue.EmergencyStop(vcore, defaults.PocketClusterCoreName)
+                                if err != nil {
+                                    log.Debug(err)
+                                    continue
+                                }
+                            }
+
+                            // then start back up
+                            err = vcore.StartMachine()
+                            if err != nil {
+                                log.Debug(err)
+                                vboxCore.Close()
+                                continue
+                            }
+                            vboxCore = vcore
                         }
                         log.Debugf("[OP] %v", e.String())
                     }
@@ -347,12 +376,19 @@ func main() {
                             }
 
                             // shutoff vbox core
-                            if vcore.CurrentMachineState() != vboxglue.VBGlueMachine_PoweredOff {
+                            if !vcore.IsMachineSafeToStart() {
                                 err := vboxglue.EmergencyStop(vcore, defaults.PocketClusterCoreName)
                                 if err != nil {
                                     log.Debug(err)
                                     continue
                                 }
+                            }
+
+                            // reset the option again
+                            err = vboxglue.ResetExistingMachine(vcore)
+                            if err != nil {
+                                log.Debug(err)
+                                continue
                             }
 
                             // then start back up
@@ -382,48 +418,35 @@ func main() {
                                     vcore.Close()
                                     continue
                                 }
-                                vboxCore = vcore
+
+                                if !vcore.IsMachineSafeToStart() {
+                                    err := vboxglue.EmergencyStop(vcore, defaults.PocketClusterCoreName)
+                                    if err != nil {
+                                        log.Debug(err)
+                                    }
+                                }
+                                err = vcore.Close()
+                                if err != nil {
+                                    log.Debug(err)
+                                }
+
+                            } else {
+                                // normal start and stop procedure
+                                err := vboxCore.AcpiStopMachine()
+                                if err != nil {
+                                    log.Debug(err)
+                                }
+                                err = vboxCore.Close()
+                                if err != nil {
+                                    log.Debug(err)
+                                }
+                                vboxCore = nil
                             }
-                            err := vboxCore.AcpiStopMachine()
-                            if err != nil {
-                                log.Debug(err)
-                            }
-                            err = vboxCore.Close()
-                            if err != nil {
-                                log.Debug(err)
-                            }
-                            vboxCore = nil
                         }
 
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdDebug4: {
-                        vcore, err := vboxglue.NewGOVboxGlue()
-                        if err != nil {
-                            log.Debug(err)
-                            vcore.Close()
-                            continue
-                        }
-                        err = vcore.FindMachineByNameOrID(defaults.PocketClusterCoreName)
-                        if err != nil {
-                            log.Debug(err)
-                            continue
-                        }
-
-                        log.Infof("Current Machine State %v", vcore.CurrentMachineState())
-                        if !vcore.IsMachineSafeToStart() {
-                            err := vboxglue.EmergencyStop(vcore, defaults.PocketClusterCoreName)
-                            if err != nil {
-                                log.Debug(err)
-                                continue
-                            }
-                        }
-
-                        err = vcore.Close()
-                        if err != nil {
-                            log.Debug(err)
-                            continue
-                        }
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdDebug5: {

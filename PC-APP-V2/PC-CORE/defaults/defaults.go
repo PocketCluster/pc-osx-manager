@@ -59,6 +59,7 @@ const (
 )
 
 const (
+    VBoxDefaultCoreBootImage   string = "pc-core.iso"
     VBoxDefualtCoreDiskName    string = "pc-core-hdd.vmdk"
     // 46 GB
     //VBoxDefualtCoreDiskSize    uint   = 128000

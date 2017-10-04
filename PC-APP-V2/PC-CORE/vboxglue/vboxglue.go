@@ -137,9 +137,9 @@ type VBoxGlue interface {
     IsMachineSafeToStart() bool
     IsMachineSettingChanged() (bool, error)
 
+    CreateMachineWithOptions(builder *VBoxBuildOption) error
     FindMachineByNameOrID(machineName string) error
-    CreateMachineByName(baseFolder, machineName string) error
-    BuildMachine(builder *VBoxBuildOption) error
+    ResetMachineWithOptions(resetter *VBoxBuildOption) error
     ReleaseMachine() error
     DestoryMachine() error
 
@@ -278,43 +278,7 @@ func (v *goVoxGlue) IsMachineSettingChanged() (bool, error) {
     return bool(isChanged), nil
 }
 
-func (v *goVoxGlue) FindMachineByNameOrID(machineName string) error {
-    if len(machineName) == 0 {
-        return errors.Errorf("[ERR] machine name should be provided")
-    }
-    cMachineName := C.CString(machineName)
-    result := C.VBoxMachineFindByNameOrID(v.cvboxglue, cMachineName)
-    C.free(unsafe.Pointer(cMachineName))
-    if result != VBGlue_Ok {
-        return errors.Errorf("[ERR] unable to find machine by name %s %v", machineName, C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
-    }
-
-    return nil
-}
-
-func (v *goVoxGlue) CreateMachineByName(baseFolder, machineName string) error {
-    if len(baseFolder) == 0 {
-        return errors.Errorf("[ERR] base folder path should be provided")
-    }
-    if len(machineName) == 0 {
-        return errors.Errorf("[ERR] machine name should be provided")
-    }
-    var (
-        cBaseFolder  = C.CString(baseFolder)
-        cMachineName = C.CString(machineName)
-    )
-
-    result := C.VBoxMachineCreateByName(v.cvboxglue, cBaseFolder, cMachineName)
-    if result != VBGlue_Ok {
-        return errors.Errorf("[ERR] unable to create machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
-    }
-
-    C.free(unsafe.Pointer(cBaseFolder))
-    C.free(unsafe.Pointer(cMachineName))
-    return nil
-}
-
-func (v *goVoxGlue) BuildMachine(builder *VBoxBuildOption) error {
+func (v *goVoxGlue) CreateMachineWithOptions(builder *VBoxBuildOption) error {
     err := ValidateVBoxBuildOption(builder)
     if err != nil {
         return errors.WithStack(err)
@@ -348,6 +312,54 @@ func (v *goVoxGlue) BuildMachine(builder *VBoxBuildOption) error {
     C.free(unsafe.Pointer(cBootImagePath))
     C.free(unsafe.Pointer(cHddImagePath))
     cleanNativeBoxSharedFolders(cSharedFolders, builder.SharedFolders.lenth())
+    C.free(unsafe.Pointer(option))
+
+    return nil
+}
+
+func (v *goVoxGlue) FindMachineByNameOrID(machineName string) error {
+    if len(machineName) == 0 {
+        return errors.Errorf("[ERR] machine name should be provided")
+    }
+    cMachineName := C.CString(machineName)
+    result := C.VBoxMachineFindByNameOrID(v.cvboxglue, cMachineName)
+    C.free(unsafe.Pointer(cMachineName))
+    if result != VBGlue_Ok {
+        return errors.Errorf("[ERR] unable to find machine by name %s %v", machineName, C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
+    }
+
+    return nil
+}
+
+func (v *goVoxGlue) ResetMachineWithOptions(resetter *VBoxBuildOption) error {
+    err := ValidateVBoxBuildOption(resetter)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    var (
+        cBaseDirPath      = C.CString(resetter.BaseDirPath)
+        cMachineName      = C.CString(resetter.MachineName)
+        cHostInterface    = C.CString(resetter.HostInterface)
+        cBootImagePath    = C.CString(resetter.BootImagePath)
+        cHddImagePath     = C.CString(resetter.HddImagePath)
+        cSharedFolders    = resetter.SharedFolders.buildNativeVboxSharedFolders()
+        cSFoldersCount    = C.int(resetter.SharedFolders.lenth())
+    )
+
+    option := C.VBoxMakeBuildOption(C.int(resetter.CPUCount), C.int(resetter.MemSize), cHostInterface, cBootImagePath, cHddImagePath, cSharedFolders, cSFoldersCount)
+
+    result := C.VBoxMachineBuildWithOption(v.cvboxglue, option)
+    if result != VBGlue_Ok {
+        return errors.Errorf("[ERR] unable to build machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
+    }
+
+    C.free(unsafe.Pointer(cBaseDirPath))
+    C.free(unsafe.Pointer(cMachineName))
+    C.free(unsafe.Pointer(cHostInterface))
+    C.free(unsafe.Pointer(cBootImagePath))
+    C.free(unsafe.Pointer(cHddImagePath))
+    cleanNativeBoxSharedFolders(cSharedFolders, resetter.SharedFolders.lenth())
     C.free(unsafe.Pointer(option))
 
     return nil
