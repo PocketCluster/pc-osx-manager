@@ -71,7 +71,7 @@
 - [x] force get session from running machine to reboot
   * -> We cannot hijack a session. We force to stop and restart with command line
 - [ ] check if setting has been changed / or reset machine setting everytime
-- [ ] make sure ACPI shutdown works properly
+- [x] make sure ACPI shutdown works properly
 - [ ] shared folder permissions
 - [ ] Discard all snapshots, settings (IMachine::discardSettings())
   * -> when machine powerdown settings changed! 

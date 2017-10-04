@@ -1420,7 +1420,7 @@ VBoxMachineHeadlessStart(VBoxGlue glue) {
 }
 
 VBGlueResult
-VBoxMachineAcpiDown(VBoxGlue glue) {
+VBoxMachineForceDown(VBoxGlue glue) {
 
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -1436,7 +1436,7 @@ VBoxMachineAcpiDown(VBoxGlue glue) {
         print_error_info(session->error_msg, "[VBox] failed to acquire console from sesssion", result);
         return VBGlue_Fail;
     }
-    result = VboxConsoleAcpiPowerDown(console, &progress);
+    result = VboxConsoleForcePowerDown(console, &progress);
     if (FAILED(result)) {
         print_error_info(session->error_msg, "[VBox] failed to acquire acpi shutdown progress", result);
         return VBGlue_Fail;
@@ -1466,7 +1466,7 @@ VBoxMachineAcpiDown(VBoxGlue glue) {
 }
 
 VBGlueResult
-VBoxMachineForceDown(VBoxGlue glue) {
+VBoxMachineAcpiDown(VBoxGlue glue) {
 
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -1480,7 +1480,7 @@ VBoxMachineForceDown(VBoxGlue glue) {
         print_error_info(session->error_msg, "[VBox] failed to acquire console from sesssion", result);
         return VBGlue_Fail;
     }
-    result = VboxConsoleForceDown(console);
+    result = VboxConsoleAcpiPowerDown(console);
     if (FAILED(result)) {
         print_error_info(session->error_msg, "[VBox] failed to force down", result);
         return VBGlue_Fail;

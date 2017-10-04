@@ -106,10 +106,10 @@ VBGlueResult
 VBoxMachineHeadlessStart(VBoxGlue glue);
 
 VBGlueResult
-VBoxMachineAcpiDown(VBoxGlue glue);
+VBoxMachineForceDown(VBoxGlue glue);
 
 VBGlueResult
-VBoxMachineForceDown(VBoxGlue glue);
+VBoxMachineAcpiDown(VBoxGlue glue);
 
 
 #pragma mark utils
