@@ -1193,11 +1193,12 @@ VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
     
     static const char* STORAGE_CONTROLLER_NAME = "SATA";
 
+    // sanity check
+    assert(glue != NULL);
+
     ivbox_session* session = toiVBoxSession(glue);
     HRESULT result = NS_OK;
 
-    // sanity check
-    assert(glue != NULL);
     if (session->vbox == NULL) {
         print_error_info(session->error_msg, "[VBox] null virtualbox for building machine", NS_ERROR_INVALID_ARG);
         return VBGlue_Fail;
@@ -1299,8 +1300,57 @@ VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
 }
 
 VBGlueResult
-VBoxMachineResetWithOption(VBoxGlue glue, VBoxBuildOption* option) {
+VBoxMachineModifyWithOption(VBoxGlue glue, VBoxBuildOption* option) {
     // TODO : change option setttings
+    return VBGlue_Ok;
+}
+
+VBGlueResult
+VBoxMachineDiscardSettings(VBoxGlue glue) {
+
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
+
+    ivbox_session* session = toiVBoxSession(glue);
+    IMachine *mutable_machine;
+
+    //firstly lock the machine
+    HRESULT result = VboxLockMachine(session->machine, session->vsession, LockType_Write);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] Failed to lock machine for checking machine setting", result);
+        return VBGlue_Fail;
+    }
+
+    // get mutable machine
+    result = VboxGetSessionMachine(session->vsession, &mutable_machine);
+    if (FAILED(result) || mutable_machine == NULL) {
+        print_error_info(session->error_msg, "[VBox] Failed to get a mutable copy of a machine", result);
+        return VBGlue_Fail;
+    }
+
+    // Discards any changes to the machine settings made since the session has been opened or since the last call to saveSettings or discardSettings.
+    result = IMachine_DiscardSettings(mutable_machine);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] Fail to discard modification", result);
+        return VBGlue_Fail;
+    }
+
+    // then we can safely release the mutable machine
+    if (mutable_machine) {
+        result = VboxIMachineRelease(mutable_machine);
+        if (FAILED(result)) {
+            print_error_info(session->error_msg, "[VBox] Failed to release locked machine", result);
+            return VBGlue_Fail;
+        }
+    }
+
+    // then unlock machine
+    result = VboxUnlockMachine(session->vsession);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] Failed to unlock machine for attaching adapter", result);
+        return VBGlue_Fail;
+    }
+
     return VBGlue_Ok;
 }
 

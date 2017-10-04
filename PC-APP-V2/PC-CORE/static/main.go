@@ -394,13 +394,16 @@ func main() {
                                 vcore.Close()
                                 continue
                             }
-                            // warn user and abort boot procedure
+                            // warn user and reset additional changes
                             if chgd {
-                                log.Errorf("core node setting has changed. abort boot procedure")
-                                // reset the option again (2017/10/03 : this is not working as of now)
-                                _ = vboxglue.ResetExistingMachine(vcore)
-                                vcore.Close()
-                                continue
+                                log.Errorf("core node setting has changed. discard additional settings")
+                                err = vcore.DiscardMachineSettings()
+                                if err != nil {
+                                    // unable to discard changes. abort startup
+                                    log.Debug(err.Error())
+                                    vcore.Close()
+                                    continue
+                                }
                             }
 
                             // then start back up

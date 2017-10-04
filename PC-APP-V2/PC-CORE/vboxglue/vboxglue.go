@@ -7,7 +7,7 @@ package vboxglue
 #cgo LDFLAGS: -Wl,-U,_VBoxAppVersion,-U,_VBoxApiVersion
 #cgo LDFLAGS: -Wl,-U,_VBoxHostSearchNetworkInterfaceByName,-U,_VBoxHostGetMaxGuestCpuCount,-U,_VBoxHostGetMaxGuestMemSize
 #cgo LDFLAGS: -Wl,-U,_VBoxMachineGetCurrentState,-U,_VBoxMachineIsSettingChanged,-U,_VBoxMachineFindByNameOrID,-U,_VBoxMachineCreateByName
-#cgo LDFLAGS: -Wl,-U,_VBoxMakeBuildOption,-U,_VBoxMachineBuildWithOption,-U,_VBoxMachineResetWithOption,-U,_VBoxMachineRelease,-U,_VBoxMachineDestory
+#cgo LDFLAGS: -Wl,-U,_VBoxMakeBuildOption,-U,_VBoxMachineBuildWithOption,-U,_VBoxMachineModifyWithOption,-U,_VBoxMachineDiscardSettings,-U,_VBoxMachineRelease,-U,_VBoxMachineDestory
 #cgo LDFLAGS: -Wl,-U,_VBoxMachineHeadlessStart,-U,_VBoxMachineAcpiDown,-U,_VBoxMachineForceDown
 #cgo LDFLAGS: -Wl,-U,_VBoxGetErrorMessage,-U,_VBoxGetSettingFilePath,-U,_VBoxGetMachineID
 #cgo LDFLAGS: -Wl,-U,_VBoxTestErrorMessage
@@ -139,7 +139,8 @@ type VBoxGlue interface {
 
     CreateMachineWithOptions(builder *VBoxBuildOption) error
     FindMachineByNameOrID(machineName string) error
-    ResetMachineWithOptions(resetter *VBoxBuildOption) error
+    ModifyMachineWithOptions(modifier *VBoxBuildOption) error
+    DiscardMachineSettings() error
     ReleaseMachine() error
     DestoryMachine() error
 
@@ -331,25 +332,25 @@ func (v *goVoxGlue) FindMachineByNameOrID(machineName string) error {
     return nil
 }
 
-func (v *goVoxGlue) ResetMachineWithOptions(resetter *VBoxBuildOption) error {
-    err := ValidateVBoxBuildOption(resetter)
+func (v *goVoxGlue) ModifyMachineWithOptions(modifier *VBoxBuildOption) error {
+    err := ValidateVBoxBuildOption(modifier)
     if err != nil {
         return errors.WithStack(err)
     }
 
     var (
-        cBaseDirPath      = C.CString(resetter.BaseDirPath)
-        cMachineName      = C.CString(resetter.MachineName)
-        cHostInterface    = C.CString(resetter.HostInterface)
-        cBootImagePath    = C.CString(resetter.BootImagePath)
-        cHddImagePath     = C.CString(resetter.HddImagePath)
-        cSharedFolders    = resetter.SharedFolders.buildNativeVboxSharedFolders()
-        cSFoldersCount    = C.int(resetter.SharedFolders.lenth())
+        cBaseDirPath      = C.CString(modifier.BaseDirPath)
+        cMachineName      = C.CString(modifier.MachineName)
+        cHostInterface    = C.CString(modifier.HostInterface)
+        cBootImagePath    = C.CString(modifier.BootImagePath)
+        cHddImagePath     = C.CString(modifier.HddImagePath)
+        cSharedFolders    = modifier.SharedFolders.buildNativeVboxSharedFolders()
+        cSFoldersCount    = C.int(modifier.SharedFolders.lenth())
     )
 
-    option := C.VBoxMakeBuildOption(C.int(resetter.CPUCount), C.int(resetter.MemSize), cHostInterface, cBootImagePath, cHddImagePath, cSharedFolders, cSFoldersCount)
+    option := C.VBoxMakeBuildOption(C.int(modifier.CPUCount), C.int(modifier.MemSize), cHostInterface, cBootImagePath, cHddImagePath, cSharedFolders, cSFoldersCount)
 
-    result := C.VBoxMachineResetWithOption(v.cvboxglue, option)
+    result := C.VBoxMachineModifyWithOption(v.cvboxglue, option)
     if result != VBGlue_Ok {
         return errors.Errorf("[ERR] unable to build machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
     }
@@ -359,9 +360,17 @@ func (v *goVoxGlue) ResetMachineWithOptions(resetter *VBoxBuildOption) error {
     C.free(unsafe.Pointer(cHostInterface))
     C.free(unsafe.Pointer(cBootImagePath))
     C.free(unsafe.Pointer(cHddImagePath))
-    cleanNativeBoxSharedFolders(cSharedFolders, resetter.SharedFolders.lenth())
+    cleanNativeBoxSharedFolders(cSharedFolders, modifier.SharedFolders.lenth())
     C.free(unsafe.Pointer(option))
 
+    return nil
+}
+
+func (v *goVoxGlue) DiscardMachineSettings() error {
+    result := C.VBoxMachineDiscardSettings(v.cvboxglue)
+    if result != VBGlue_Ok {
+        return errors.Errorf("[ERR] unable to discard machine  settings %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
+    }
     return nil
 }
 

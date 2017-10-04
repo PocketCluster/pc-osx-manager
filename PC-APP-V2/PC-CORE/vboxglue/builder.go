@@ -212,7 +212,7 @@ func CreateNewMachine(vglue VBoxGlue) error {
     return vglue.CreateMachineWithOptions(options)
 }
 
-func ResetExistingMachine(vglue VBoxGlue) error {
+func ModifyExistingMachine(vglue VBoxGlue) error {
     // host interface name
     iname, err := context.SharedHostContext().HostPrimaryInterfaceShortName()
     if err != nil {
@@ -224,7 +224,7 @@ func ResetExistingMachine(vglue VBoxGlue) error {
         return errors.WithStack(err)
     }
 
-    return vglue.ResetMachineWithOptions(options)
+    return vglue.ModifyMachineWithOptions(options)
 }
 
 func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <- chan struct{}) error {

@@ -95,7 +95,10 @@ VBGlueResult
 VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option);
 
 VBGlueResult
-VBoxMachineResetWithOption(VBoxGlue glue, VBoxBuildOption* option);
+VBoxMachineModifyWithOption(VBoxGlue glue, VBoxBuildOption* option);
+
+VBGlueResult
+VBoxMachineDiscardSettings(VBoxGlue glue);
 
 VBGlueResult
 VBoxMachineRelease(VBoxGlue glue);

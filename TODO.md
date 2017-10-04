@@ -72,11 +72,11 @@
   * -> We cannot hijack a session. We force to stop and restart with command line
 - [x] check if setting has been changed
 - [x] make sure ACPI shutdown works properly
-- [ ] reset machine setting everytime
-- [ ] shared folder permissions
-- [ ] Discard all snapshots, settings (IMachine::discardSettings())
+- [x] discard machine setting if change has made (IMachine::discardSettings())
   * -> when machine powerdown settings changed! 
-- [ ] Disable snapshot, save, teleport,  restore, fault-tolerant-sync, setting up, (these are illiegal statates)
+- [ ] shared folder permissions
+- [ ] modify machine settings
+- [ ] disable snapshot, save, teleport,  restore, fault-tolerant-sync, setting up, (these are illiegal statates)
 - [ ] vbox disk creation from XPCOM
 - [ ] vbox machine “options”
   * "VBoxInternal/CPUM/EnableHVP", “1"
