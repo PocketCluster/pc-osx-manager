@@ -7,7 +7,7 @@ package vboxglue
 #cgo LDFLAGS: -Wl,-U,_VBoxAppVersion,-U,_VBoxApiVersion
 #cgo LDFLAGS: -Wl,-U,_VBoxHostSearchNetworkInterfaceByName,-U,_VBoxHostGetMaxGuestCpuCount,-U,_VBoxHostGetMaxGuestMemSize
 #cgo LDFLAGS: -Wl,-U,_VBoxMachineGetCurrentState,-U,_VBoxMachineIsSettingChanged,-U,_VBoxMachineFindByNameOrID,-U,_VBoxMachineCreateByName
-#cgo LDFLAGS: -Wl,-U,_VBoxMakeBuildOption,-U,_VBoxMachineBuildWithOption,-U,_VBoxMachineRelease,-U,_VBoxMachineDestory
+#cgo LDFLAGS: -Wl,-U,_VBoxMakeBuildOption,-U,_VBoxMachineBuildWithOption,-U,_VBoxMachineResetWithOption,-U,_VBoxMachineRelease,-U,_VBoxMachineDestory
 #cgo LDFLAGS: -Wl,-U,_VBoxMachineHeadlessStart,-U,_VBoxMachineAcpiDown,-U,_VBoxMachineForceDown
 #cgo LDFLAGS: -Wl,-U,_VBoxGetErrorMessage,-U,_VBoxGetSettingFilePath,-U,_VBoxGetMachineID
 #cgo LDFLAGS: -Wl,-U,_VBoxTestErrorMessage
@@ -349,7 +349,7 @@ func (v *goVoxGlue) ResetMachineWithOptions(resetter *VBoxBuildOption) error {
 
     option := C.VBoxMakeBuildOption(C.int(resetter.CPUCount), C.int(resetter.MemSize), cHostInterface, cBootImagePath, cHddImagePath, cSharedFolders, cSFoldersCount)
 
-    result := C.VBoxMachineBuildWithOption(v.cvboxglue, option)
+    result := C.VBoxMachineResetWithOption(v.cvboxglue, option)
     if result != VBGlue_Ok {
         return errors.Errorf("[ERR] unable to build machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
     }

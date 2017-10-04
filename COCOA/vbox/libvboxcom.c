@@ -1299,6 +1299,12 @@ VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
 }
 
 VBGlueResult
+VBoxMachineResetWithOption(VBoxGlue glue, VBoxBuildOption* option) {
+    // TODO
+    return VBGlue_Ok;
+}
+
+VBGlueResult
 VBoxMachineRelease(VBoxGlue glue) {
 
     // make sure the pointer passed is not null.
