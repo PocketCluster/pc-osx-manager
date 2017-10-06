@@ -290,7 +290,7 @@ func (p *EmbeddedNodeProcess) AcquireEngineCertificate(onSucessAct func(certPack
 /// --- NODE OPERATION PARAM ACQUISITION --- ///
 // AcquireEngineCertificate uses one time provisioning token obtained earlier from the server to get a pair of Docker
 // Engine keys signed by Auth server host certificate authority
-func (p *EmbeddedNodeProcess) AcquireNodeUserInfo(onSucessAct func(user *auth.PocketResponseUserIdentity) error) error {
+func (p *EmbeddedNodeProcess) AcquireUserIdentity(onSucessAct func(user *auth.PocketResponseUserIdentity) error) error {
     var (
         cfg     = p.config
         eventsC = make(chan pervice.Event)

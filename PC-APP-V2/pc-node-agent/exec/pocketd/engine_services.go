@@ -14,6 +14,7 @@ import (
     "github.com/stkim1/pc-node-agent/pcssh/sshcfg"
     "github.com/stkim1/pc-node-agent/pcssh/sshproc"
     "github.com/stkim1/pc-node-agent/utils/dhcp"
+    "github.com/gravitational/teleport/lib/auth"
 )
 
 const (
@@ -103,6 +104,12 @@ func initTeleportNodeService(app service.AppSupervisor) error {
             // execute docker engine cert acquisition before SSH node start
             // TODO : create a waitforevent channel and restart docker engine accordingly
             err = pcsshNode.AcquireEngineCertificate(slcontext.DockerEnvironemtPostProcess)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+
+            // handle user information gathering
+            err = pcsshNode.AcquireUserIdentity(slcontext.UserIdentityPostProcess)
             if err != nil {
                 return errors.WithStack(err)
             }
