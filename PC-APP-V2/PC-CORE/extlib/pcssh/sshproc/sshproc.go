@@ -4,6 +4,7 @@ package sshproc
 import (
     "fmt"
     "net"
+    "os/user"
     "path/filepath"
     "time"
 
@@ -22,12 +23,13 @@ import (
     "github.com/gravitational/teleport/lib/srv"
     "github.com/gravitational/teleport/lib/service"
 
-    "github.com/stkim1/pc-core/extlib/pcssh/sshcfg"
-    pervice "github.com/stkim1/pc-core/service"
-
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "golang.org/x/crypto/ssh"
+
+    "github.com/stkim1/pc-core/extlib/pcssh/sshcfg"
+    pervice "github.com/stkim1/pc-core/service"
+    pcctx "github.com/stkim1/pc-core/context"
 )
 
 const (
@@ -145,6 +147,12 @@ func (p *EmbeddedMasterProcess) initAuthStorage() (backend.Backend, error) {
     return bk, nil
 }
 
+// this is to distribute & deliver user identity across all cluster node
+type userKiosk func(hname, huuid string) (*auth.UserIdentity, error)
+func (u userKiosk) GetUserIdentity(hostName, hostUUID string) (*auth.UserIdentity, error) {
+    return u(hostName, hostUUID)
+}
+
 // initAuthService can be called to initialize auth server service
 func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error {
     var (
@@ -235,6 +243,26 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
             log.Debugf("[AUTH] Auth service is starting on %v", cfg.Auth.SSHAddr.Addr)
 
             var (
+                uKiosk userKiosk = func(hname, huuid string) (*auth.UserIdentity, error) {
+                    log.Debugf("[AUTH] user identity is inquired from %v w/ %v", hname, huuid)
+                    // core user & disk path
+                    ulogin, err := pcctx.SharedHostContext().LoginUserName()
+                    if err != nil {
+                        return nil, err
+                    }
+
+                    uinfo, err := user.Lookup(ulogin)
+                    if err != nil {
+                        return nil, err
+                    }
+
+                    return &auth.UserIdentity {
+                        LoginName:    ulogin,
+                        UID:          uinfo.Uid,
+                        GID:          uinfo.Gid,
+                    }, nil
+                }
+
                 authTunnel *auth.AuthTunnel
                 err error = nil
             )
@@ -299,6 +327,7 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                 AuditLog:          auditLog,
                 CertSigner:        p.config.CaSigner,
                 CertStorage:       p.config.CertStorage,
+                UserKiosk:         uKiosk,
             }
 
             limiter, err := limiter.NewLimiter(cfg.Auth.Limiter)
