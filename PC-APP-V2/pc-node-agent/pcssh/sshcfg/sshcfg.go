@@ -83,9 +83,6 @@ func applyNodeDefaults(cfg *service.PocketConfig, context slcontext.PocketSlaveC
     cfg.DataDir         = dataDir
     cfg.AdvertiseIP     = net.ParseIP(advAddr)
 
-    cfg.AuthorityCertFile      = slcontext.SharedSlaveContext().SlaveEngineAuthCertFileName()
-    cfg.NodeEngineKeyFile      = slcontext.SharedSlaveContext().SlaveEnginePrivateKeyFileName()
-    cfg.NodeEngineCertFile     = slcontext.SharedSlaveContext().SlaveEngineKeyCertFileName()
     cfg.NodeSSHCertificateFile = slcontext.SharedSlaveContext().SlaveSSHKeyCertFileName()
     cfg.NodeSSHPrivateKeyFile  = slcontext.SharedSlaveContext().SlaveSSHPrivateKeyFileName()
 

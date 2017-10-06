@@ -231,7 +231,7 @@ func (p *EmbeddedNodeProcess) StartNodeSSH() error {
 /// --- DOCKER ENGINE CERTIFICATE ACQUISITION --- ///
 // AcquireEngineCertificate uses one time provisioning token obtained earlier from the server to get a pair of Docker
 // Engine keys signed by Auth server host certificate authority
-func (p *EmbeddedNodeProcess) AcquireEngineCertificate(onSucessAct func() error) error {
+func (p *EmbeddedNodeProcess) AcquireEngineCertificate(onSucessAct func(certPack *auth.PocketResponseAuthKeyCert) error) error {
     var (
         cfg     = p.config
         eventsC = make(chan pervice.Event)
@@ -247,33 +247,89 @@ func (p *EmbeddedNodeProcess) AcquireEngineCertificate(onSucessAct func() error)
     // connect to the auth server and provision the keys
     p.RegisterServiceWithFuncs(
         func() error {
-            var (
-                retryTime = defaults.ServerHeartbeatTTL / 3
-                err error = nil
-            )
+            var retryTime = defaults.ServerHeartbeatTTL / 3
+
             // we're to wait until SSH successfully connects to master
             _ = <-eventsC
             log.Debugf("[Node] %v requesting a signed certificate with a token %v | UUID %v : ", role, token, cfg.HostUUID)
             // start request signed certificate
             for {
-                err = auth.RequestSignedCertificate(
-                    &auth.PocketCertParam{
-                        AuthServers:          cfg.AuthServers,
-                        Role:                 role,
-                        Hostname:             cfg.Hostname,
-                        HostUUID:             cfg.HostUUID,
-                        AuthToken:            token,
-                        AuthorityCertFile:    cfg.AuthorityCertFile,
-                        NodeEngineCertFile:   cfg.NodeEngineCertFile,
-                        NodeEngineKeyFile:    cfg.NodeEngineKeyFile,
+                keys, err := auth.RequestSignedCertificate(
+                    &auth.PocketRequestBase {
+                        AuthServers:    cfg.AuthServers,
+                        Role:           role,
+                        Hostname:       cfg.Hostname,
+                        HostUUID:       cfg.HostUUID,
+                        AuthToken:      token,
                     })
                 if err != nil {
                     log.Debugf("[%v] failed to receive a signed certificate : %v", role, err)
                     time.Sleep(retryTime)
                 } else {
                     if onSucessAct != nil {
-                        // we'll ignore errors
-                        onSucessAct()
+                        err = onSucessAct(keys)
+                        if err != nil {
+                            return err
+                        }
+                    }
+                    log.Debugf("[%v] Successfully received a signed certificate & finished subsequent action", role)
+                    return nil
+                }
+            }
+        },
+        func(_ func(interface{})) error {
+            return nil
+        },
+        // we're to wait until SSH successfully connects to master
+        pervice.BindEventWithService(eventNodeSSHIdentity, eventsC),
+    )
+
+    return nil
+}
+
+/// --- NODE OPERATION PARAM ACQUISITION --- ///
+// AcquireEngineCertificate uses one time provisioning token obtained earlier from the server to get a pair of Docker
+// Engine keys signed by Auth server host certificate authority
+func (p *EmbeddedNodeProcess) AcquireNodeUserInfo(onSucessAct func(user *auth.PocketResponseUserInfo) error) error {
+    var (
+        cfg     = p.config
+        eventsC = make(chan pervice.Event)
+        role    = teleport.RoleNode
+        token   = p.config.Token
+    )
+    // Auth server is remote, so we need a provisioning token
+    if token == "" {
+        return errors.Errorf("%v must request a signed certificate and needs a provisioning token", role)
+    }
+
+    // this means the server has not been initialized yet, we are starting the registering client that attempts to
+    // connect to the auth server and provision the keys
+    p.RegisterServiceWithFuncs(
+        func() error {
+            var retryTime = defaults.ServerHeartbeatTTL / 3
+
+            // we're to wait until SSH successfully connects to master
+            _ = <-eventsC
+            log.Debugf("[Node] %v requesting a signed certificate with a token %v | UUID %v : ", role, token, cfg.HostUUID)
+            // start request signed certificate
+            for {
+                user, err := auth.RequestUserInfo(
+                    &auth.PocketRequestBase {
+                        AuthServers:     cfg.AuthServers,
+                        Role:            role,
+                        Hostname:        cfg.Hostname,
+                        HostUUID:        cfg.HostUUID,
+                        AuthToken:       token,
+                    })
+                if err != nil {
+                    log.Debugf("[%v] failed to receive a signed certificate : %v", role, err)
+                    time.Sleep(retryTime)
+                } else {
+                    if onSucessAct != nil {
+                        err = onSucessAct(user)
+                        if err != nil {
+                            return err
+                        }
                     }
                     log.Debugf("[%v] Successfully received a signed certificate & finished subsequent action", role)
                     return nil
