@@ -14,7 +14,6 @@ import (
     "github.com/stkim1/pc-node-agent/pcssh/sshcfg"
     "github.com/stkim1/pc-node-agent/pcssh/sshproc"
     "github.com/stkim1/pc-node-agent/utils/dhcp"
-    "github.com/gravitational/teleport/lib/auth"
 )
 
 const (
