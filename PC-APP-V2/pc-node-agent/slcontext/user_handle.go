@@ -20,7 +20,7 @@ func UserIdentityPostProcess(uinfo *auth.PocketResponseUserIdentity) error {
         return errors.Errorf("invalid gid")
     }
 
-    cmdtmpl := `/usr/sbin/addgroup --gid [UID] [USERLOGIN];/usr/sbin/adduser --disabled-login --shell /usr/sbin/nologin --gid [UID] --uid [UID] [USERLOGIN];/usr/bin/passwd -l [USERLOGIN]`
+    cmdtmpl := `/usr/sbin/addgroup --gid [UID] [USERLOGIN];/usr/sbin/adduser --gecos PocketCluster_Main_User --disabled-login --shell /usr/sbin/nologin --gid [UID] --uid [UID] [USERLOGIN];/usr/bin/passwd -l [USERLOGIN]`
     cmdtmpl = strings.Replace(cmdtmpl, "[USERLOGIN]", uinfo.LoginName, -1)
     cmdtmpl = strings.Replace(cmdtmpl, "[UID]", uinfo.UID, -1)
     cmds := strings.Split(cmdtmpl, ";")
