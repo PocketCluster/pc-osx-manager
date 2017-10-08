@@ -30,6 +30,13 @@ import (
     "github.com/stkim1/pc-core/vboxglue"
 )
 
+// for upgrade
+import (
+    ctx "context"
+    tclient "github.com/gravitational/teleport/lib/client"
+    tdefs "github.com/gravitational/teleport/lib/defaults"
+)
+
 func main() {
 
     appLifeCycle(func(appLife *appMainLife) {
@@ -471,6 +478,28 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdDebug7: {
+                        roots, err := model.FindUserMetaWithLogin("root")
+                        if err != nil {
+                            log.Error(err.Error())
+                            continue
+                        }
+
+                        clt, err := tclient.MakeNewClient(appCfg.PCSSH, "root", "pc-node1")
+                        if err != nil {
+                            log.Error(err.Error())
+                            continue
+                        }
+
+                        err = clt.APISCP(ctx.TODO(), []string{"/Users/almightykim/temp/100mb.test", "root@pc-node1:/pocket/100mb.test"}, roots[0].Password, tdefs.SSHServerListenPort, false, false)
+                        if err != nil {
+                            log.Errorf("ERROR : %v", err.Error())
+                            // exit with the same exit status as the failed command:
+                            if clt.ExitStatus != 0 {
+                            } else {
+                            }
+                        }
+
+                        clt.Logout()
                         log.Debugf("[OP] %v", e.String())
                     }
 
