@@ -35,7 +35,7 @@
 
 ### `systemd service`
 
-1. `pocket.service`
+1. `pocketd.service`
 
   ```sh
   [Unit]
@@ -44,7 +44,7 @@
   
   [Service]
   Type=simple
-  PIDFile=/var/run/pocket.pid
+  PIDFile=/var/run/pocketd.pid
   Restart=always
   ExecStart=/opt/pocket/bin/pocketd
   
@@ -54,19 +54,19 @@
 2. Activate the service with foloowing command
 
   ```sh
-  mv pocket.service /etc/systemd/system/ && chown root:root /etc/systemd/system/pocket.service
+  mv pocketd.service /etc/systemd/system/ && chown root:root /etc/systemd/system/pocketd.service
   
   systemctl daemon-reload
-  systemctl start pocket
-  systemctl enable pocket
-  systemctl status pocket.service
+  systemctl start pocketd
+  systemctl enable pocketd
+  systemctl status pocketd.service
   ```
 
-### Upgrade process
+### Update process
 
-1. Copy `update.sh` -> `/opt/pocket/bin/update.sh` and `pocketd.upgrade` -> `/opt/pocket/bin/pocketd.upgrade` and `/bin/bash /opt/pocket/bin/update.sh`
+1. Copy `update.sh` -> `/opt/pocket/bin/update.sh` and `pocketd.update` -> `/opt/pocket/bin/pocketd.update` and `/bin/bash /opt/pocket/bin/update.sh`
 
-  - `update.sh` (upgrade script)
+  - `update.sh` (update script)
 
   ```sh
   #!/usr/bin/env bash
