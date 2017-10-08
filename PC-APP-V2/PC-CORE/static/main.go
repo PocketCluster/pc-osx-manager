@@ -478,6 +478,7 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdDebug7: {
+                        // update process
                         roots, err := model.FindUserMetaWithLogin("root")
                         if err != nil {
                             log.Error(err.Error())
@@ -490,13 +491,21 @@ func main() {
                             continue
                         }
 
-                        err = clt.APISCP(ctx.TODO(), []string{"/Users/almightykim/temp/100mb.test", "root@pc-node1:/pocket/100mb.test"}, roots[0].Password, tdefs.SSHServerListenPort, false, false)
+                        err = clt.APISCP(ctx.TODO(), []string{"/Users/almightykim/temp/update.sh", "root@pc-node1:/opt/pocket/bin/update.sh"}, roots[0].Password, tdefs.SSHServerListenPort, false, false)
+                        if err != nil {
+                            log.Errorf("ERROR : %v", err.Error())
+                        }
+                        err = clt.APISCP(ctx.TODO(), []string{"/Users/almightykim/temp/pocketd.update", "root@pc-node1:/opt/pocket/bin/pocketd.update"}, roots[0].Password, tdefs.SSHServerListenPort, false, false)
                         if err != nil {
                             log.Errorf("ERROR : %v", err.Error())
                             // exit with the same exit status as the failed command:
                             if clt.ExitStatus != 0 {
                             } else {
                             }
+                        }
+                        err = clt.APISSH(ctx.TODO(), []string{"/bin/bash", "/opt/pocket/bin/update.sh"}, roots[0].Password, false)
+                        if err != nil {
+                            log.Errorf("ERROR : %v", err.Error())
                         }
 
                         clt.Logout()

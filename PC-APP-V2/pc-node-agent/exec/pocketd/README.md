@@ -61,3 +61,23 @@
   systemctl enable pocket
   systemctl status pocket.service
   ```
+
+### Upgrade process
+
+1. Copy `update.sh` -> `/opt/pocket/bin/update.sh` and `pocketd.upgrade` -> `/opt/pocket/bin/pocketd.upgrade` and `/bin/bash /opt/pocket/bin/update.sh`
+
+  - `update.sh` (upgrade script)
+
+  ```sh
+  #!/usr/bin/env bash
+
+  if [[ -f "/opt/pocket/bin/pocketd.update" ]]; then
+    mv /opt/pocket/bin/pocketd.update /opt/pocket/bin/pocketd
+  fi
+
+  if [[ -f "/opt/pocket/bin/update.sh" ]]; then
+    rm /opt/pocket/bin/update.sh
+  fi
+
+  /usr/sbin/service pocket restart
+  ```
