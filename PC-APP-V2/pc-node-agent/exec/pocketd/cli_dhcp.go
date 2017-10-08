@@ -13,7 +13,7 @@ import (
 
 func runDhcpAgentReport() error {
     if os.Getuid() != 0 {
-        return errors.Errorf("insufficient Permission")
+        return errors.Errorf("inadequate permission")
     }
     // dhclient-script pid
     sps, err := process.FindProcess(os.Getppid())

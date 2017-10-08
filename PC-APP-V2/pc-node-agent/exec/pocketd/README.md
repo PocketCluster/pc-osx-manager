@@ -1,8 +1,8 @@
 # Node `pocketd` install & config guide
 
-### 1. `dhcpagent` is to receieve dhcp event.
+### `dhcpagent` is to receieve dhcp event.
 
-1. place `dhcpagent` script in `/etc/dhcp/dhclient-exit-hooks.d` with following content for debugging
+1. [DEBUG] place a script in `/etc/dhcp/dhclient-exit-hooks.d/dhcpagent` with following content for debugging
 
   ```sh
   # Notifies DHCP event
@@ -22,7 +22,7 @@
   echo "-------------------------------- show noti exit hook log --------------------------------"
   cat /tmp/dh-client-env.log
   ```
-2. for production, remove all extra debugging info from `dhcpagent`
+2. [RELEASE] for production, remove all extra debugging info from `dhcpagent` with `0644` permission
 
   ```sh
   # Notifies DHCP event
@@ -32,3 +32,32 @@
   ```
   - you might add ` > /dev/null 2>&1` at the end.
   - <https://unix.stackexchange.com/questions/119648/redirecting-to-dev-null>
+
+### `systemd service`
+
+1. `pocket.service`
+
+  ```sh
+  [Unit]
+  Description=PocketCluster Node Agent
+  After=network.target
+  
+  [Service]
+  Type=simple
+  PIDFile=/var/run/pocket.pid
+  Restart=always
+  ExecStart=/opt/pocket/bin/pocketd
+  
+  [Install]
+  WantedBy=multi-user.target
+  ```
+2. Activate the service with foloowing command
+
+  ```sh
+  mv pocket.service /etc/systemd/system/ && chown root:root /etc/systemd/system/pocket.service
+  
+  systemctl daemon-reload
+  systemctl start pocket
+  systemctl enable pocket
+  systemctl status pocket.service
+  ```

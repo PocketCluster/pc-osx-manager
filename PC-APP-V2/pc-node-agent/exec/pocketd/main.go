@@ -2,6 +2,7 @@ package main
 
 import (
     "flag"
+    "fmt"
     "log/syslog"
     "io/ioutil"
     "os"
@@ -9,6 +10,7 @@ import (
     log "github.com/Sirupsen/logrus"
     logrusSyslog "github.com/Sirupsen/logrus/hooks/syslog"
     "github.com/gravitational/teleport/lib/sshutils/scp"
+    nodeagent "github.com/stkim1/pc-node-agent"
 )
 
 const (
@@ -19,6 +21,7 @@ const (
     modeDhcpAgent string = "dhcpagent"
     modeScpAgent  string = "scp"
     modePartition string = "fdisk"
+    modeVerCheck  string = "--version"
 )
 
 func initLogger() {
@@ -50,13 +53,19 @@ func main() {
             log.Error(err.Error())
         }
 
-    // dhcp agent
-    } else if len(os.Args) == 2 && os.Args[1] == modeDhcpAgent {
-        err := runDhcpAgentReport()
-        if err != nil {
-            log.Error(err.Error())
+    } else if len(os.Args) == 2 {
+        // dhcp agent
+        switch os.Args[1] {
+            case modeDhcpAgent: {
+                err := runDhcpAgentReport()
+                if err != nil {
+                    log.Error(err.Error())
+                }
+            }
+            case modeVerCheck: {
+                fmt.Printf("PocketCluster Node Agent %v", nodeagent.PocketClusterNodeAgentVersion)
+            }
         }
-
 
     } else if 2 < len(os.Args) {
         switch os.Args[1] {
@@ -91,6 +100,11 @@ func main() {
             // sfdisk
             case modePartition: {
 
+            }
+
+            // and rest of stuff
+            default: {
+                os.Exit(2)
             }
         }
 
