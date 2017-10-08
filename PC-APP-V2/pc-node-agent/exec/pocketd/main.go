@@ -72,24 +72,17 @@ func main() {
             // scp execution
             case modeScpAgent: {
                 var (
-                    sFlag      = flag.NewFlagSet(modeScpAgent, flag.ExitOnError)
-                    Sink       = sFlag.Bool("t",             false, "")
-                    Source     = sFlag.Bool("f",             false, "")
-                    Verbose    = sFlag.Bool("v",             false, "")
-                    Recursive  = sFlag.Bool("r",             false, "")
-                    RemoteAddr = sFlag.String("remote-addr", "",    "")
-                    LocalAddr  = sFlag.String("local-addr",  "",    "")
+                    scpCommand = scp.Command{}
+                    sFlag = flag.NewFlagSet(modeScpAgent, flag.ExitOnError)
                 )
+                sFlag.BoolVar(&scpCommand.Sink,         "t",           false, "")
+                sFlag.BoolVar(&scpCommand.Source,       "f",           false, "")
+                sFlag.BoolVar(&scpCommand.Verbose,      "v",           false, "")
+                sFlag.BoolVar(&scpCommand.Recursive,    "r",           false, "")
+                sFlag.StringVar(&scpCommand.RemoteAddr, "remote-addr", "",    "")
+                sFlag.StringVar(&scpCommand.LocalAddr,  "local-addr",  "",    "")
                 sFlag.Parse(os.Args[2:])
-                scpCommand := scp.Command{
-                    Sink:       *Sink,
-                    Source:     *Source,
-                    Verbose:    *Verbose,
-                    Recursive:  *Recursive,
-                    RemoteAddr: *RemoteAddr,
-                    LocalAddr:  *LocalAddr,
-                    Target:     os.Args[len(os.Args) - 1],
-                }
+                scpCommand.Target = os.Args[len(os.Args) - 1]
 
                 err := runScpCommand(&scpCommand)
                 if err != nil {
