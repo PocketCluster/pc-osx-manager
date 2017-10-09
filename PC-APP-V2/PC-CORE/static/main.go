@@ -9,6 +9,7 @@ import (
 
     "github.com/stkim1/pc-core/config"
     "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/event/lifecycle"
     "github.com/stkim1/pc-core/event/network"
     "github.com/stkim1/pc-core/event/crash"
@@ -29,6 +30,13 @@ import (
     "github.com/stkim1/pc-core/vboxglue"
 )
 
+// for upgrade
+import (
+    ctx "context"
+    tclient "github.com/gravitational/teleport/lib/client"
+    tdefs "github.com/gravitational/teleport/lib/defaults"
+)
+
 func main() {
 
     appLifeCycle(func(appLife *appMainLife) {
@@ -36,6 +44,7 @@ func main() {
         var (
             appCfg        *config.ServiceConfig = nil
             err           error                 = nil
+            vboxCore      vboxglue.VBoxGlue     = nil
             IsContextInit bool                  = false
         )
 
@@ -151,7 +160,7 @@ func main() {
                         if err != nil {
                             // TODO send error report
                             log.Debugf("[LIFE] CRITICAL ERROR %v", err)
-                            return
+                            continue
                         }
                         // TODO : move this initializer after network initiated
                         install.InitInstallPackageRoutePath(appLife, theFeeder, appCfg.PCSSH)
@@ -163,13 +172,13 @@ func main() {
                         cid, err := context.SharedHostContext().MasterAgentName()
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
                         // get primary interface bsd name
                         iname, err := context.SharedHostContext().HostPrimaryInterfaceShortName()
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // --- role service sequence ---
@@ -178,7 +187,7 @@ func main() {
                         err = container.InitStorageServie(appLife, appCfg.ETCD)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // registry service
@@ -186,7 +195,7 @@ func main() {
                         err = container.InitRegistryService(appLife, appCfg.REG)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // search catcher service
@@ -195,7 +204,7 @@ func main() {
                         _, err = mcast.NewSearchCatcher(appLife.ServiceSupervisor, iname)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
                         // beacon locator service
                         // (NODEP netchange, NODEP service)
@@ -203,7 +212,7 @@ func main() {
                         _, err = ucast.NewBeaconLocator(appLife.ServiceSupervisor)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // internal name service
@@ -211,7 +220,7 @@ func main() {
                         err = dns.InitPocketNameService(appLife, cid)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // swarm service
@@ -219,7 +228,7 @@ func main() {
                         err = container.InitSwarmService(appLife)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // master beacon service
@@ -227,7 +236,7 @@ func main() {
                         err = master.InitMasterBeaconService(appLife, cid, appCfg.PCSSH)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // vboxcontrol service
@@ -235,7 +244,7 @@ func main() {
                         err = vbox.InitVboxCoreReportService(appLife, cid)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         // teleport service
@@ -244,13 +253,13 @@ func main() {
                         _, err = sshproc.NewEmbeddedMasterProcess(appLife.ServiceSupervisor, appCfg.PCSSH)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         err = health.InitSystemHealthMonitor(appLife, theFeeder)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
 
                         appLife.StartServices()
@@ -268,7 +277,7 @@ func main() {
                         err = container.InitStorageServie(appLife, appCfg.ETCD)
                         if err != nil {
                             log.Debug(err)
-                            return
+                            continue
                         }
                         appLife.StartServices()
                         log.Debugf("[OP] %v", e.String())
@@ -308,33 +317,198 @@ func main() {
                                 log.Error(err.Error())
                             }
                         }
+                        log.Debugf("[OP] %v", e.String())
+                    }
 
+                    case operation.CmdDebug1: {
                         // setup vbox
                         {
                             cid, err := context.SharedHostContext().MasterAgentName()
                             if err != nil {
-                                log.Debug(err)
+                                log.Debug(err.Error())
+                                continue
                             }
+
                             err = vboxglue.BuildVboxCoreDisk(cid, appCfg.PCSSH)
                             if err != nil {
-                                log.Debug(err)
+                                log.Debug(err.Error())
+                                continue
                             }
-                            err = vboxglue.BuildVboxMachine()
+
+                            vcore, err := vboxglue.NewGOVboxGlue()
                             if err != nil {
-                                log.Debugf("vbox operation error %v", err)
+                                log.Debug(err.Error())
+                                continue
+                            }
+
+                            err = vboxglue.CreateNewMachine(vcore)
+                            if err != nil {
+                                log.Debug(err.Error())
+                                vcore.Close()
+                                continue
+                            }
+
+                            // shutoff vbox core. very unlikely
+                            if !vcore.IsMachineSafeToStart() {
+                                err := vboxglue.EmergencyStop(vcore, defaults.PocketClusterCoreName)
+                                if err != nil {
+                                    log.Debug(err.Error())
+                                    vcore.Close()
+                                    continue
+                                }
+                            }
+
+                            // then start back up
+                            err = vcore.StartMachine()
+                            if err != nil {
+                                log.Debug(err.Error())
+                                vboxCore.Close()
+                                continue
+                            }
+                            vboxCore = vcore
+                        }
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug2: {
+                        // start machine
+                        {
+                            vcore, err := vboxglue.NewGOVboxGlue()
+                            if err != nil {
+                                log.Debug(err.Error())
+                                continue
+                            }
+                            err = vcore.FindMachineByNameOrID(defaults.PocketClusterCoreName)
+                            if err != nil {
+                                log.Debug(err.Error())
+                                vboxCore.Close()
+                                continue
+                            }
+
+                            // force shutoff vbox core
+                            if !vcore.IsMachineSafeToStart() {
+                                err := vboxglue.EmergencyStop(vcore, defaults.PocketClusterCoreName)
+                                if err != nil {
+                                    log.Debug(err.Error())
+                                    vboxCore.Close()
+                                    continue
+                                }
+                            }
+
+                            // check if machine setting changed
+                            chgd, err := vcore.IsMachineSettingChanged()
+                            if err != nil {
+                                log.Debug(err.Error())
+                                vcore.Close()
+                                continue
+                            }
+                            // warn user and reset additional changes
+                            if chgd {
+                                log.Errorf("core node setting has changed. discard additional settings")
+                                err = vcore.DiscardMachineSettings()
+                                if err != nil {
+                                    // unable to discard changes. abort startup
+                                    log.Debug(err.Error())
+                                    vcore.Close()
+                                    continue
+                                }
+                            }
+
+                            // then start back up
+                            err = vcore.StartMachine()
+                            if err != nil {
+                                log.Debug(err.Error())
+                                vboxCore.Close()
+                                continue
+                            }
+                            vboxCore = vcore
+                        }
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug3: {
+                        // stop machine
+                        {
+                            // this is case where previous run or user has acticated pc-core
+                            if vboxCore == nil {
+                                vcore, err := vboxglue.NewGOVboxGlue()
+                                if err != nil {
+                                    log.Debug(err.Error())
+                                    continue
+                                }
+                                err = vcore.FindMachineByNameOrID(defaults.PocketClusterCoreName)
+                                if err != nil {
+                                    log.Debug(err.Error())
+                                    vcore.Close()
+                                    continue
+                                }
+
+                                if !vcore.IsMachineSafeToStart() {
+                                    err := vboxglue.EmergencyStop(vcore, defaults.PocketClusterCoreName)
+                                    if err != nil {
+                                        log.Debug(err.Error())
+                                    }
+                                }
+                                err = vcore.Close()
+                                if err != nil {
+                                    log.Debug(err.Error())
+                                }
+
+                            } else {
+                                // normal start and stop procedure
+                                err := vboxCore.AcpiStopMachine()
+                                if err != nil {
+                                    log.Debug(err.Error())
+                                }
+                                err = vboxCore.Close()
+                                if err != nil {
+                                    log.Debug(err.Error())
+                                }
+                                vboxCore = nil
                             }
                         }
 
                         log.Debugf("[OP] %v", e.String())
                     }
+                    case operation.CmdDebug4: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug5: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug6: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug7: {
+                        // update process
+                        roots, err := model.FindUserMetaWithLogin("root")
+                        if err != nil {
+                            log.Error(err.Error())
+                            continue
+                        }
 
-                    case operation.CmdDebug1: {
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdDebug2: {
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdDebug3: {
+                        clt, err := tclient.MakeNewClient(appCfg.PCSSH, "root", "pc-node1")
+                        if err != nil {
+                            log.Error(err.Error())
+                            continue
+                        }
+
+                        err = clt.APISCP(ctx.TODO(), []string{"/Users/almightykim/temp/update.sh", "root@pc-node1:/opt/pocket/bin/update.sh"}, roots[0].Password, tdefs.SSHServerListenPort, false, false)
+                        if err != nil {
+                            log.Errorf("ERROR : %v", err.Error())
+                        }
+                        err = clt.APISCP(ctx.TODO(), []string{"/Users/almightykim/temp/pocketd.update", "root@pc-node1:/opt/pocket/bin/pocketd.update"}, roots[0].Password, tdefs.SSHServerListenPort, false, false)
+                        if err != nil {
+                            log.Errorf("ERROR : %v", err.Error())
+                            // exit with the same exit status as the failed command:
+                            if clt.ExitStatus != 0 {
+                            } else {
+                            }
+                        }
+                        err = clt.APISSH(ctx.TODO(), []string{"/bin/bash", "/opt/pocket/bin/update.sh"}, roots[0].Password, false)
+                        if err != nil {
+                            log.Errorf("ERROR : %v", err.Error())
+                        }
+
+                        clt.Logout()
                         log.Debugf("[OP] %v", e.String())
                     }
 

@@ -28,7 +28,6 @@
 #include "PCNativeThread.h"
 
 
-
 #line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_netnoti.go"
 
 
@@ -36,7 +35,6 @@
 
 #include "SCNetworkTypes.h"
 #include "PCInterfaceTypes.h"
-
 
 
 #line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_route.go"
@@ -105,6 +103,14 @@ extern void OpsCmdDebug1();
 extern void OpsCmdDebug2();
 
 extern void OpsCmdDebug3();
+
+extern void OpsCmdDebug4();
+
+extern void OpsCmdDebug5();
+
+extern void OpsCmdDebug6();
+
+extern void OpsCmdDebug7();
 
 extern void StartResponseFeed();
 

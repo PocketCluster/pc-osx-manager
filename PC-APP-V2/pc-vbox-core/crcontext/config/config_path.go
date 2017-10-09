@@ -16,6 +16,8 @@ const (
     core_cluster_id_file        string = "cluster.id"
     core_ssh_auth_token_file    string = "ssh.auth.token"
     core_user_name_file         string = "core.user.name"
+    core_user_uid_file          string = "core.user.uid"
+    core_user_gid_file          string = "core.user.gid"
 
     // cert directory
     dir_core_certs              string = "pki"
@@ -88,6 +90,14 @@ func ArchivePathAuthToken() string {
 
 func ArchivePathUserName() string {
     return core_user_name_file
+}
+
+func ArchivePathUserUID() string {
+    return core_user_uid_file
+}
+
+func ArchivePathUserGID() string {
+    return core_user_gid_file
 }
 
 func ArchivePathCertsDir() string {

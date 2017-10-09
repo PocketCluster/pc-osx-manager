@@ -17,14 +17,14 @@ HRESULT VboxGetConsoleMachine(IConsole* cconsole, IMachine** cmachine) {
     return IConsole_GetMachine(cconsole, cmachine);
 }
 
-HRESULT VboxConsoleAcpiPowerDown(IConsole* cconsole, IProgress** cprogress) {
+HRESULT VboxConsoleForcePowerDown(IConsole* cconsole, IProgress** cprogress) {
     return IConsole_PowerDown(cconsole, cprogress);
 }
 
-HRESULT VboxConsoleForceDown(IConsole* cconsole) {
+HRESULT VboxConsoleAcpiPowerDown(IConsole* cconsole) {
     return IConsole_PowerButton(cconsole);
 }
 
-HRESULT VboxIConsoleRelease(IConsole* cconsole) {
+HRESULT VboxConsoleRelease(IConsole* cconsole) {
     return IConsole_Release(cconsole);
 }

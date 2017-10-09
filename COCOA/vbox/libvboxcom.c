@@ -1173,18 +1173,18 @@ vbox_machine_add_hard_disk(IVirtualBox* virtualbox, IMachine* vbox_machine, ISes
     return NS_OK;
 }
 
-
 #pragma mark -
 VBoxBuildOption*
-VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* boot, const char* hdd, const char* spath, const char* sname) {
+VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* boot, const char* hdd, VBoxSharedFolder **sfolders, int sflen) {
     VBoxBuildOption* option = (VBoxBuildOption*)calloc(1, sizeof(VBoxBuildOption));
     option->CpuCount      = cpu;
     option->MemSize       = mem;
     option->HostInterface = host;
     option->BootImagePath = boot;
     option->HddImagePath  = hdd;
-    option->SharedDirPath = spath;
-    option->SharedDirName = sname;
+    option->Sharedfolders = sfolders;
+    option->SFoldersCount = sflen;
+
     return option;
 }
 
@@ -1193,11 +1193,12 @@ VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
     
     static const char* STORAGE_CONTROLLER_NAME = "SATA";
 
+    // sanity check
+    assert(glue != NULL);
+
     ivbox_session* session = toiVBoxSession(glue);
     HRESULT result = NS_OK;
 
-    // sanity check
-    assert(glue != NULL);
     if (session->vbox == NULL) {
         print_error_info(session->error_msg, "[VBox] null virtualbox for building machine", NS_ERROR_INVALID_ARG);
         return VBGlue_Fail;
@@ -1232,14 +1233,6 @@ VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
         print_error_info(session->error_msg, "[VBox] invalid host interface", NS_ERROR_INVALID_ARG);
         return VBGlue_Fail;
     }
-    if (strlen(option->SharedDirPath) == 0) {
-        print_error_info(session->error_msg, "[VBox] invalid shared folder path", NS_ERROR_INVALID_ARG);
-        return VBGlue_Fail;
-    }
-    if (strlen(option->SharedDirName) == 0) {
-        print_error_info(session->error_msg, "[VBox] invalid shared folder name", NS_ERROR_INVALID_ARG);
-        return VBGlue_Fail;
-    }
     if (strlen(option->BootImagePath) == 0) {
         print_error_info(session->error_msg, "[VBox] invalid boot image path", NS_ERROR_INVALID_ARG);
         return VBGlue_Fail;
@@ -1248,6 +1241,7 @@ VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
         print_error_info(session->error_msg, "[VBox] invalid hdd path", NS_ERROR_INVALID_ARG);
         return VBGlue_Fail;
     }
+    // TODO : check shared folder list size
 
     // build basic machine with bios & motherboard settings
     result = vbox_machine_build(session->vbox, session->machine, option->CpuCount, option->MemSize, session->error_msg);
@@ -1267,10 +1261,21 @@ VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
         return VBGlue_Fail;
     }
 
-    // add shared folder
-    result = vbox_machine_add_shared_folder(session->machine, session->vsession, option->SharedDirName, option->SharedDirPath, session->error_msg);
-    if (FAILED(result)) {
-        return VBGlue_Fail;
+    for (int i = 0; i < option->SFoldersCount; i++) {
+        VBoxSharedFolder* sf = (VBoxSharedFolder*)(option->Sharedfolders[i]);
+        if (strlen(sf->SharedDirName) == 0) {
+            print_error_info(session->error_msg, "[VBox] invalid shared folder name", NS_ERROR_INVALID_ARG);
+            return VBGlue_Fail;
+        }
+        if (strlen(sf->SharedDirPath) == 0) {
+            print_error_info(session->error_msg, "[VBox] invalid shared folder path", NS_ERROR_INVALID_ARG);
+            return VBGlue_Fail;
+        }
+        // add shared folder
+        result = vbox_machine_add_shared_folder(session->machine, session->vsession, sf->SharedDirName, sf->SharedDirPath, session->error_msg);
+        if (FAILED(result)) {
+            return VBGlue_Fail;
+        }
     }
 
     // add storage controller
@@ -1288,6 +1293,61 @@ VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option) {
     // add hard drive
     result = vbox_machine_add_hard_disk(session->vbox, session->machine, session->vsession, STORAGE_CONTROLLER_NAME, option->HddImagePath, 200000, session->error_msg);
     if (FAILED(result)) {
+        return VBGlue_Fail;
+    }
+
+    return VBGlue_Ok;
+}
+
+VBGlueResult
+VBoxMachineModifyWithOption(VBoxGlue glue, VBoxBuildOption* option) {
+    // TODO : change option setttings
+    return VBGlue_Ok;
+}
+
+VBGlueResult
+VBoxMachineDiscardSettings(VBoxGlue glue) {
+
+    // make sure the pointer passed is not null.
+    assert(glue != NULL);
+
+    ivbox_session* session = toiVBoxSession(glue);
+    IMachine *mutable_machine;
+
+    //firstly lock the machine
+    HRESULT result = VboxLockMachine(session->machine, session->vsession, LockType_Write);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] Failed to lock machine for checking machine setting", result);
+        return VBGlue_Fail;
+    }
+
+    // get mutable machine
+    result = VboxGetSessionMachine(session->vsession, &mutable_machine);
+    if (FAILED(result) || mutable_machine == NULL) {
+        print_error_info(session->error_msg, "[VBox] Failed to get a mutable copy of a machine", result);
+        return VBGlue_Fail;
+    }
+
+    // Discards any changes to the machine settings made since the session has been opened or since the last call to saveSettings or discardSettings.
+    result = IMachine_DiscardSettings(mutable_machine);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] Fail to discard modification", result);
+        return VBGlue_Fail;
+    }
+
+    // then we can safely release the mutable machine
+    if (mutable_machine) {
+        result = VboxIMachineRelease(mutable_machine);
+        if (FAILED(result)) {
+            print_error_info(session->error_msg, "[VBox] Failed to release locked machine", result);
+            return VBGlue_Fail;
+        }
+    }
+
+    // then unlock machine
+    result = VboxUnlockMachine(session->vsession);
+    if (FAILED(result)) {
+        print_error_info(session->error_msg, "[VBox] Failed to unlock machine for attaching adapter", result);
         return VBGlue_Fail;
     }
 
@@ -1410,7 +1470,7 @@ VBoxMachineHeadlessStart(VBoxGlue glue) {
 }
 
 VBGlueResult
-VBoxMachineAcpiDown(VBoxGlue glue) {
+VBoxMachineForceDown(VBoxGlue glue) {
 
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -1426,7 +1486,7 @@ VBoxMachineAcpiDown(VBoxGlue glue) {
         print_error_info(session->error_msg, "[VBox] failed to acquire console from sesssion", result);
         return VBGlue_Fail;
     }
-    result = VboxConsoleAcpiPowerDown(console, &progress);
+    result = VboxConsoleForcePowerDown(console, &progress);
     if (FAILED(result)) {
         print_error_info(session->error_msg, "[VBox] failed to acquire acpi shutdown progress", result);
         return VBGlue_Fail;
@@ -1456,7 +1516,7 @@ VBoxMachineAcpiDown(VBoxGlue glue) {
 }
 
 VBGlueResult
-VBoxMachineForceDown(VBoxGlue glue) {
+VBoxMachineAcpiDown(VBoxGlue glue) {
 
     // make sure the pointer passed is not null.
     assert(glue != NULL);
@@ -1470,7 +1530,7 @@ VBoxMachineForceDown(VBoxGlue glue) {
         print_error_info(session->error_msg, "[VBox] failed to acquire console from sesssion", result);
         return VBGlue_Fail;
     }
-    result = VboxConsoleForceDown(console);
+    result = VboxConsoleAcpiPowerDown(console);
     if (FAILED(result)) {
         print_error_info(session->error_msg, "[VBox] failed to force down", result);
         return VBGlue_Fail;

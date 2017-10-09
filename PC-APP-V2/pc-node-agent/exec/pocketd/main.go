@@ -1,70 +1,107 @@
 package main
 
 import (
-    log "github.com/Sirupsen/logrus"
-    "github.com/pkg/errors"
+    "flag"
+    "fmt"
+    "log/syslog"
+    "io/ioutil"
+    "os"
 
-    "github.com/stkim1/udpnet/mcast"
-    "github.com/stkim1/udpnet/ucast"
-    "github.com/stkim1/pc-node-agent/slcontext"
-    "github.com/stkim1/pc-node-agent/service"
+    log "github.com/Sirupsen/logrus"
+    logrusSyslog "github.com/Sirupsen/logrus/hooks/syslog"
+    "github.com/gravitational/teleport/lib/sshutils/scp"
+    nodeagent "github.com/stkim1/pc-node-agent"
 )
 
-func main() {
-    var (
-        err error = nil
-        app service.AppSupervisor = nil
-    )
+const (
+    // this is used to check if anything other than pocketd is launching a child process for special command such as SCP
+    pocketdExecName string = "pocketd"
+
+    // modes list
+    modeDhcpAgent string = "dhcpagent"
+    modeScpAgent  string = "scp"
+    modePartition string = "fdisk"
+    modeVerCheck  string = "--version"
+)
+
+func initLogger() {
     log.SetLevel(log.DebugLevel)
+    // clear existing hooks:
+    log.StandardLogger().Hooks = make(log.LevelHooks)
+    log.SetFormatter(&log.TextFormatter{})
 
-    // TODO check user and reject if not root
-    // TODO check if this exceed Date limit set for raspberry pi 3
-
-    // initialize slave context
-    slcontext.SharedSlaveContext()
-    app = service.NewAppSupervisor()
-
-    // dhcp listner
-    err = initDhcpListner(app)
+    hook, err := logrusSyslog.NewSyslogHook("", "", syslog.LOG_DEBUG, "")
     if err != nil {
-        log.Panic(errors.WithStack(err))
+        // syslog not available
+        log.Warn("syslog not available. reverting to stderr")
+    } else {
+        // ... and disable stderr:
+        log.AddHook(hook)
+        log.SetOutput(ioutil.Discard)
     }
-
-    // search service
-    _, err = mcast.NewSearchCaster(app)
-    if err != nil {
-        log.Panic(errors.WithStack(err))
-    }
-
-    // beacon service
-    _, err = ucast.NewBeaconAgent(app)
-    if err != nil {
-        log.Panic(errors.WithStack(err))
-    }
-
-    // agent service
-    err = initAgentService(app)
-    if err != nil {
-        log.Panic(errors.WithStack(err))
-    }
-
-    // teleport management
-    err = initTeleportNodeService(app)
-    if err != nil {
-        log.Panic(errors.WithStack(err))
-    }
-
-    // DNS service
-    err = initDNSService(app)
-    if err != nil {
-        log.Panic(errors.WithStack(err))
-    }
-
-    // application
-    err = app.Start()
-    if err != nil {
-        log.Panic(errors.WithStack(err))
-    }
-    app.Wait()
 }
 
+func main() {
+    // TODO activate syslog hook b4 release
+    //initLogger()
+    log.SetLevel(log.DebugLevel)
+
+    // pocket agent daemon
+    if len(os.Args) == 1 {
+        err := servePocketAgent()
+        if err != nil {
+            log.Error(err.Error())
+        }
+
+    } else if len(os.Args) == 2 {
+        // dhcp agent
+        switch os.Args[1] {
+            case modeDhcpAgent: {
+                err := runDhcpAgentReport()
+                if err != nil {
+                    log.Error(err.Error())
+                }
+            }
+            case modeVerCheck: {
+                fmt.Printf("PocketCluster Node Agent %v", nodeagent.PocketClusterNodeAgentVersion)
+            }
+        }
+
+    } else if 2 < len(os.Args) {
+        switch os.Args[1] {
+            // scp execution
+            case modeScpAgent: {
+                var (
+                    scpCommand = scp.Command{}
+                    sFlag = flag.NewFlagSet(modeScpAgent, flag.ExitOnError)
+                )
+                sFlag.BoolVar(&scpCommand.Sink,         "t",           false, "")
+                sFlag.BoolVar(&scpCommand.Source,       "f",           false, "")
+                sFlag.BoolVar(&scpCommand.Verbose,      "v",           false, "")
+                sFlag.BoolVar(&scpCommand.Recursive,    "r",           false, "")
+                sFlag.StringVar(&scpCommand.RemoteAddr, "remote-addr", "",    "")
+                sFlag.StringVar(&scpCommand.LocalAddr,  "local-addr",  "",    "")
+                sFlag.Parse(os.Args[2:])
+                scpCommand.Target = os.Args[len(os.Args) - 1]
+
+                err := runScpCommand(&scpCommand)
+                if err != nil {
+                    log.Error(err.Error())
+                }
+            }
+
+            // sfdisk
+            case modePartition: {
+
+            }
+
+            // and rest of stuff
+            default: {
+                os.Exit(2)
+            }
+        }
+
+    } else {
+        os.Exit(2)
+    }
+}

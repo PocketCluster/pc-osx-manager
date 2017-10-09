@@ -16,18 +16,18 @@
             <rect key="frame" x="0.0" y="0.0" width="400" height="330"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="01q-zu-gu5">
+                    <rect key="frame" x="136" y="141" width="128" height="128"/>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="raspberry" id="IWU-0V-nOV"/>
+                </imageView>
                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4Es-Nc-GRF">
-                    <rect key="frame" x="100" y="37" width="201" height="62"/>
-                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="center" title="Setup a Raspberry Pi 3 cluster up to 4 nodes." id="Cwg-Qb-AJ8">
+                    <rect key="frame" x="20" y="57" width="360" height="40"/>
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="center" title="Setup a Raspberry Pi cluster" id="Cwg-Qb-AJ8">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="01q-zu-gu5">
-                    <rect key="frame" x="136" y="141" width="128" height="128"/>
-                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="raspberry" id="IWU-0V-nOV"/>
-                </imageView>
             </subviews>
             <point key="canvasLocation" x="-30" y="288"/>
         </customView>

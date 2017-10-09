@@ -9,7 +9,7 @@ import (
 
 type HostContextApplicationEnv interface {
     ApplicationSupportDirectory() (string, error)
-    ApplicationDocumentsDirectoru() (string, error)
+    ApplicationDocumentsDirectory() (string, error)
     ApplicationTemporaryDirectory() (string, error)
     ApplicationLibraryCacheDirectory() (string, error)
     ApplicationResourceDirectory() (string, error)
@@ -42,7 +42,7 @@ func (c *hostAppEnv) ApplicationSupportDirectory() (string, error) {
     return c.applicationSupportPath, nil
 }
 
-func (c *hostAppEnv) ApplicationDocumentsDirectoru() (string, error) {
+func (c *hostAppEnv) ApplicationDocumentsDirectory() (string, error) {
     if len(c.applicationDocumentPath) == 0 {
         return "", errors.Errorf("[ERR] invalid app doc directory")
     }

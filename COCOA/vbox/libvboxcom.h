@@ -48,6 +48,7 @@ VBoxHostGetMaxGuestMemSize(VBoxGlue glue, unsigned int* memSize);
 typedef enum VBGlueMachineState {
     VBGlueMachine_Illegal       = 0,
     VBGlueMachine_PoweredOff    = 1,
+    VBGlueMachine_Saved         = 2,
     VBGlueMachine_Aborted       = 4,
     VBGlueMachine_Running       = 5,
     VBGlueMachine_Paused        = 6,
@@ -72,21 +73,32 @@ VBoxMachineCreateByName(VBoxGlue glue, const char* baseFolder, const char* machi
 
 // option created by this function does not handle deallocation.
 // make sure to dealloc it once done
+typedef struct VBoxSharedFolder {
+    char*    SharedDirName;
+    char*    SharedDirPath;
+} VBoxSharedFolder;
+
 typedef struct VBoxBuildOption {
-    int            CpuCount;
-    int            MemSize;
-    const char*    HostInterface;
-    const char*    BootImagePath;
-    const char*    HddImagePath;
-    const char*    SharedDirPath;
-    const char*    SharedDirName;
+    int                CpuCount;
+    int                MemSize;
+    const char*        HostInterface;
+    const char*        BootImagePath;
+    const char*        HddImagePath;
+    VBoxSharedFolder** Sharedfolders;
+    int                SFoldersCount;
 } VBoxBuildOption;
 
 VBoxBuildOption*
-VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* boot, const char* hdd, const char* spath, const char* sname);
+VBoxMakeBuildOption(int cpu, int mem, const char* host, const char* boot, const char* hdd, VBoxSharedFolder** sfolders, int sflen);
 
 VBGlueResult
 VBoxMachineBuildWithOption(VBoxGlue glue, VBoxBuildOption* option);
+
+VBGlueResult
+VBoxMachineModifyWithOption(VBoxGlue glue, VBoxBuildOption* option);
+
+VBGlueResult
+VBoxMachineDiscardSettings(VBoxGlue glue);
 
 VBGlueResult
 VBoxMachineRelease(VBoxGlue glue);
@@ -100,10 +112,10 @@ VBGlueResult
 VBoxMachineHeadlessStart(VBoxGlue glue);
 
 VBGlueResult
-VBoxMachineAcpiDown(VBoxGlue glue);
+VBoxMachineForceDown(VBoxGlue glue);
 
 VBGlueResult
-VBoxMachineForceDown(VBoxGlue glue);
+VBoxMachineAcpiDown(VBoxGlue glue);
 
 
 #pragma mark utils

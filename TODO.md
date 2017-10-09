@@ -11,6 +11,7 @@
 
 
 ### V0.1.4
+- [ ] Fix Teleport generate log in Log directory
 - [ ] `CoreNode`, `SlaveNode` : `LastAlive` data for health check on OSX. Save the last alive time to report in OSX.
 - [ ] `CoreNode` set `SlaveID` with `MachineID`.
 - [ ] Cluster User Defined Name
@@ -30,8 +31,9 @@
 - [ ] `Makefile` to remove all *_test.go and TEST.go
 - [ ] Clean up core node including `vi`
 - [ ] More Test for `pc-vbox-comm`
-- [ ] Pass `uid` to all slave nodes to have them setup the __user__ with the same `uid` 
+- [ ] Pass `uid` + `gid` to all slave nodes to have them setup the __user__ with the same `uid` 
   * Look `Resources.bundle/setup/raspberry_user_setup.sh` and extract essential tasks
+  * UID/GID pair in vbox disk for core. Same pair in slavenode Teleport docker setup
 - [ ] Look carefully `etcd` TLS configuration behave with `docker-compose` connected.
   * At initial, etcd `network/bridged` API point isn't available and dockerd complains. This seems to be normal though.
   * <https://dims-devguide.readthedocs.io/en/latest/dockerdatacenter.html>
@@ -62,17 +64,30 @@
 
 
 #### VirtualBox
-- [ ] get the actual core count
-- [ ] vbox files permissions
-- [ ] vbox machine start stop
+- [x] get the actual core count
+- [x] vbox files permissions
+- [x] multiple shared folder
+- [x] vbox machine start stop
+- [x] force get session from running machine to reboot
+  * -> We cannot hijack a session. We force to stop and restart with command line
+- [x] check if setting has been changed
+- [x] make sure ACPI shutdown works properly
+- [x] discard machine setting if change has made (IMachine::discardSettings())
+  * -> when force machine powerdown settings changed! 
+- [ ] shared folder permissions
+- [ ] modify machine settings
+- [ ] disable snapshot, save, teleport,  restore, fault-tolerant-sync, setting up, (these are illiegal statates)
 - [ ] vbox disk creation from XPCOM
 - [ ] vbox machine “options”
   * "VBoxInternal/CPUM/EnableHVP", “1"
-- [ ] multiple shared folder
-- [ ] Discard all snapshots, settings (IMachine::discardSettings())
-  * -> when machine powerdown settings changed! 
-- [ ] Disable snapshot, save, teleport,  restore, fault-tolerant-sync, setting up, (these are illiegal statates)
-- [ ] force get session from running machine to reboot
+
+
+#### Beacon/Locator
+- [ ] Cleanup the package / Reduce Garbage collection (no allocation on every socket, clean interface, ...)
+- [ ] Per-node PUB/PRI key pair on Master
+- [ ] Additional Command (UPDATE/REBOOT/SHUTDOWN/BREAKCONN)
+- [ ] Expiring discovery broadcast after some point
+- [ ] TLS-TCP connection for confirmed and large packet size
 
 
 ### V0.1.3

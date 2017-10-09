@@ -7,7 +7,6 @@ package main
 
 #include "SCNetworkTypes.h"
 #include "PCInterfaceTypes.h"
-
 */
 import "C"
 import (

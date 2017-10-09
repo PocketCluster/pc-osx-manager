@@ -133,7 +133,7 @@
                         <font key="font" metaFont="system"/>
                         <string key="title">Power up Raspberry Pi nodes. 
 Connect network cables. 
-Click Build when the nodes appear.</string>
+Click Build when nodes appear.</string>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>

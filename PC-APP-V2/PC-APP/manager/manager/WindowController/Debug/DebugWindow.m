@@ -58,6 +58,22 @@
     OpsCmdDebug3();
 }
 
+- (IBAction)opsCmdDebug4:(id)sender {
+    OpsCmdDebug4();
+}
+
+- (IBAction)opsCmdDebug5:(id)sender {
+    OpsCmdDebug5();
+}
+
+- (IBAction)opsCmdDebug6:(id)sender {
+    OpsCmdDebug6();
+}
+
+- (IBAction)opsCmdDebug7:(id)sender {
+    OpsCmdDebug7();
+}
+
 #pragma mark - WINDOW
 - (IBAction)setup_01:(id)sender {
     [[AppDelegate sharedDelegate] activeWindowByClassName:@"AgreementWC" withResponder:nil];

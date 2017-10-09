@@ -39,13 +39,15 @@ const (
 )
 
 const (
-    UserDataPath               string = ".pocket"
+    PathPostfixRepository      string = "repository"
 
-    RepositoryPathPostfix      string = "repository"
+    PathPostfixStorage         string = "storage"
 
-    StoragePathPostfix         string = "storage"
+    PathPostfixVirtualMachine  string = "pc-core"
 
-    VirtualMachinePath         string = "pc-core"
+    PathPostfixCoreNodeData    string = ".pocketcluster/coredata"
+
+    PathPostfixCoreDataInput   string = "PocketCluster"
 )
 
 const (
@@ -57,6 +59,7 @@ const (
 )
 
 const (
+    VBoxDefaultCoreBootImage   string = "pc-core.iso"
     VBoxDefualtCoreDiskName    string = "pc-core-hdd.vmdk"
     // 46 GB
     //VBoxDefualtCoreDiskSize    uint   = 128000

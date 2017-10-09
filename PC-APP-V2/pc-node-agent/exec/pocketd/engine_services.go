@@ -107,6 +107,12 @@ func initTeleportNodeService(app service.AppSupervisor) error {
                 return errors.WithStack(err)
             }
 
+            // handle user information gathering
+            err = pcsshNode.AcquireUserIdentity(slcontext.UserIdentityPostProcess)
+            if err != nil {
+                return errors.WithStack(err)
+            }
+
             err = pcsshNode.StartNodeSSH()
             if err != nil {
                 return errors.WithStack(err)

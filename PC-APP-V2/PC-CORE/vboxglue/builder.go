@@ -1,6 +1,7 @@
 package vboxglue
 
 import (
+    "os/user"
     "net"
     "path/filepath"
     "time"
@@ -42,6 +43,12 @@ func BuildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
         return errors.WithStack(err)
     }
 
+    // add user id
+    uinfo, err := user.Lookup(userName)
+    if err != nil {
+        return errors.WithMessage(err, "Unable to access user information")
+    }
+    log.Infof("user uid %v | gid %v", uinfo.Uid, uinfo.Gid)
 
     // Vbox ctrl & report keys
     mVpuk, err = context.SharedHostContext().MasterVBoxCtrlPublicKey()
@@ -108,6 +115,8 @@ func BuildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     md.ClusterID = clusterID
     md.AuthToken = authToken
     md.UserName = userName
+    md.UserUID = uinfo.Uid
+    md.UserGID = uinfo.Gid
     md.CoreVboxPublicKey = cVpuk
     md.CoreVboxPrivateKey = cVprk
     md.MasterVboxPublicKey = mVpuk
@@ -118,12 +127,7 @@ func BuildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     return errors.WithStack(md.BuildCoreDiskImage())
 }
 
-func BuildVboxMachine() error {
-    vglue, err := NewGOVboxGlue()
-    if err != nil {
-        errors.WithStack(err)
-    }
-    log.Debugf("AppVersion %d, ApiVersion %d", vglue.AppVersion(), vglue.APIVersion())
+func buildVboxMachineOption(vglue VBoxGlue, iname string) (*VBoxBuildOption, error) {
 
     cpuCount := context.SharedHostContext().HostPhysicalCoreCount()
     if context.HostMaxResourceCpuCount < cpuCount {
@@ -135,34 +139,44 @@ func BuildVboxMachine() error {
         memSize = context.HostMaxResourceMemSize
     }
 
-    // base directory
     baseDir, err := context.SharedHostContext().ApplicationUserDataDirectory()
     if err != nil {
-        return errors.WithStack(err)
+        return nil, errors.WithStack(err)
     }
 
-    // host interface name
-    iname, err := context.SharedHostContext().HostPrimaryInterfaceShortName()
-    if err != nil {
-        return errors.WithStack(err)
-    }
+    // interface
     vbifname, err := vglue.SearchHostNetworkInterfaceByName(iname)
     if err != nil {
-        errors.WithStack(err)
+        return nil, errors.WithStack(err)
     }
 
-    // TODO get this from context
-    bootPath := "/Users/almightykim/Workspace/VBOX-IMAGE/pc-core.iso"
+    // boot image path
+    bdlsrc, err := context.SharedHostContext().ApplicationResourceDirectory()
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+    bootPath := filepath.Join(bdlsrc, defaults.VBoxDefaultCoreBootImage)
 
     // hdd path
     vmPath, err := context.SharedHostContext().ApplicationVirtualMachineDirectory()
     if err != nil {
-        return errors.WithStack(err)
+        return nil, errors.WithStack(err)
     }
     hddPath := filepath.Join(vmPath, defaults.VBoxDefualtCoreDiskName)
-    log.Debugf("[VBOX] %s", hddPath)
 
-    builder := &VBoxBuildOption{
+    // core data
+    cdata, err := context.SharedHostContext().ApplicationPocketCoreDataDirectory()
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+
+    // core input
+    cinput, err := context.SharedHostContext().ApplicationPocketCoreInputDirectory()
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+
+    options := &VBoxBuildOption{
         CPUCount:            cpuCount,
         MemSize:             memSize,
         BaseDirPath:         baseDir,
@@ -170,22 +184,47 @@ func BuildVboxMachine() error {
         HostInterface:       vbifname,
         BootImagePath:       bootPath,
         HddImagePath:        hddPath,
-        // TODO : WTF????
-        SharedFolderPath:    "/Users/almightykim/temp",
-        SharedFolderName:    "/tmp",
+        SharedFolders:       VBoxSharedFolderList{
+            {SharedDirName:"/pocket",        SharedDirPath:cdata},
+            {SharedDirName:"/PocketCluster", SharedDirPath:cinput},
+        },
     }
 
-    err = ValidateVBoxBuildOption(builder)
+    err = ValidateVBoxBuildOption(options)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+    return options, nil
+}
+
+func CreateNewMachine(vglue VBoxGlue) error {
+    // host interface name
+    iname, err := context.SharedHostContext().HostPrimaryInterfaceShortName()
     if err != nil {
         return errors.WithStack(err)
     }
 
-    err = vglue.BuildMachine(builder)
+    options, err := buildVboxMachineOption(vglue, iname)
     if err != nil {
         return errors.WithStack(err)
     }
 
-    return vglue.Close()
+    return vglue.CreateMachineWithOptions(options)
+}
+
+func ModifyExistingMachine(vglue VBoxGlue) error {
+    // host interface name
+    iname, err := context.SharedHostContext().HostPrimaryInterfaceShortName()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    options, err := buildVboxMachineOption(vglue, iname)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    return vglue.ModifyMachineWithOptions(options)
 }
 
 func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <- chan struct{}) error {
@@ -205,7 +244,7 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
             }
             default: {
                 if masterctrl.TransitionFailureLimit <= errorCount {
-                    log.Debugf("[VBOXLSTN] error count exceeds 5. Let's close connection and return")
+                    log.Debugf("[VBOXLSTN] error count exceeds TransitionFailureLimit %v. Let's close connection and return", masterctrl.TransitionFailureLimit)
                     ctrl.HandleCoreDisconnection(time.Now())
                     return errors.WithStack(conn.Close())
                 }

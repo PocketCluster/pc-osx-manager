@@ -12,7 +12,7 @@
 
 - (void) finishConstruction {
     [super finishConstruction];
-    [self setTitle:@"Setup New Cluster"];
+    [self setTitle:@"Setup a New Cluster"];
 }
 
 - (void) viewDidLoad {

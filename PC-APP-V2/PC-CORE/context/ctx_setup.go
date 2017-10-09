@@ -60,5 +60,29 @@ func SetupBasePath() error {
         }
     }
 
+    // pocket core data directory
+    cdata, err := SharedHostContext().ApplicationPocketCoreDataDirectory()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    if _, err := os.Stat(cdata); os.IsNotExist(err) {
+        err = os.MkdirAll(cdata, os.ModeDir|0700)
+        if err != nil {
+            return errors.WithStack(err)
+        }
+    }
+
+    // pocket core input directory
+    cinput, err := SharedHostContext().ApplicationPocketCoreInputDirectory()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    if _, err := os.Stat(cinput); os.IsNotExist(err) {
+        err = os.MkdirAll(cinput, os.ModeDir|0700)
+        if err != nil {
+            return errors.WithStack(err)
+        }
+    }
+
     return nil
 }

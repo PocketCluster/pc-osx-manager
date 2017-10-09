@@ -7,7 +7,7 @@ package vboxglue
 #cgo LDFLAGS: -Wl,-U,_VBoxAppVersion,-U,_VBoxApiVersion
 #cgo LDFLAGS: -Wl,-U,_VBoxHostSearchNetworkInterfaceByName,-U,_VBoxHostGetMaxGuestCpuCount,-U,_VBoxHostGetMaxGuestMemSize
 #cgo LDFLAGS: -Wl,-U,_VBoxMachineGetCurrentState,-U,_VBoxMachineIsSettingChanged,-U,_VBoxMachineFindByNameOrID,-U,_VBoxMachineCreateByName
-#cgo LDFLAGS: -Wl,-U,_VBoxMakeBuildOption,-U,_VBoxMachineBuildWithOption,-U,_VBoxMachineRelease,-U,_VBoxMachineDestory
+#cgo LDFLAGS: -Wl,-U,_VBoxMakeBuildOption,-U,_VBoxMachineBuildWithOption,-U,_VBoxMachineModifyWithOption,-U,_VBoxMachineDiscardSettings,-U,_VBoxMachineRelease,-U,_VBoxMachineDestory
 #cgo LDFLAGS: -Wl,-U,_VBoxMachineHeadlessStart,-U,_VBoxMachineAcpiDown,-U,_VBoxMachineForceDown
 #cgo LDFLAGS: -Wl,-U,_VBoxGetErrorMessage,-U,_VBoxGetSettingFilePath,-U,_VBoxGetMachineID
 #cgo LDFLAGS: -Wl,-U,_VBoxTestErrorMessage
@@ -30,16 +30,70 @@ const (
     VBGlue_Fail = C.VBGlue_Fail
 )
 
+type VBoxSharedFolder struct {
+    SharedDirName    string
+    SharedDirPath    string
+}
+
+type VBoxSharedFolderList []VBoxSharedFolder
+
+func (sf VBoxSharedFolderList) lenth() int {
+    return len(sf)
+}
+
+func (sf VBoxSharedFolderList) ValidateVboxSharedFolders() error {
+    if len(sf) == 0 {
+        return errors.Errorf("[ERR] empty shared folder. should specify shared folders")
+    }
+    for _, s := range sf {
+        if len(s.SharedDirName) == 0 || len(s.SharedDirPath) == 0 {
+            errors.Errorf("invalid shared folder name or path")
+        }
+    }
+    return nil
+}
+
+func (sf VBoxSharedFolderList) buildNativeVboxSharedFolders() unsafe.Pointer {
+    var (
+        sflen  = len(sf)
+        sfsize = C.size_t(unsafe.Sizeof(C.VBoxSharedFolder{}))
+        nlist  = C.malloc( C.size_t(sflen) * C.size_t(unsafe.Sizeof(uintptr(0))))
+        glist  = (*[10]*C.VBoxSharedFolder)(nlist)
+    )
+
+    for idx, gsf := range sf {
+        nsf := (*C.VBoxSharedFolder)(C.malloc(sfsize))
+        nsf.SharedDirName = C.CString(gsf.SharedDirName)
+        nsf.SharedDirPath = C.CString(gsf.SharedDirPath)
+        glist[idx] = nsf
+    }
+
+    return nlist
+}
+
+func cleanNativeBoxSharedFolders(nsfolders unsafe.Pointer, sflen int) {
+    var (
+        glist = (*[10]*C.VBoxSharedFolder)(nsfolders)
+    )
+    for idx := 0; idx < sflen; idx++ {
+        nsf := glist[idx]
+        C.free(unsafe.Pointer(nsf.SharedDirName))
+        C.free(unsafe.Pointer(nsf.SharedDirPath))
+        C.free(unsafe.Pointer(nsf))
+        glist[idx] = nil
+    }
+    C.free(unsafe.Pointer(nsfolders))
+}
+
 type VBoxBuildOption struct {
-    CPUCount            uint
-    MemSize             uint
-    BaseDirPath         string
-    MachineName         string
-    HostInterface       string
-    BootImagePath       string
-    HddImagePath        string
-    SharedFolderPath    string
-    SharedFolderName    string
+    CPUCount         uint
+    MemSize          uint
+    BaseDirPath      string
+    MachineName      string
+    HostInterface    string
+    BootImagePath    string
+    HddImagePath     string
+    SharedFolders    VBoxSharedFolderList
 }
 
 func ValidateVBoxBuildOption(builder *VBoxBuildOption) error {
@@ -64,11 +118,9 @@ func ValidateVBoxBuildOption(builder *VBoxBuildOption) error {
     if len(builder.HddImagePath) == 0 {
         return errors.Errorf("[ERR] invalid persistent disk image path")
     }
-    if len(builder.SharedFolderPath) == 0 {
-        return errors.Errorf("[ERR] invalid shared directory path")
-    }
-    if len(builder.SharedFolderName) == 0 {
-        return errors.Errorf("[ERR] invalid shared directory name")
+    err := builder.SharedFolders.ValidateVboxSharedFolders()
+    if err != nil {
+        return errors.WithStack(err)
     }
     return nil
 }
@@ -82,11 +134,13 @@ type VBoxGlue interface {
     SearchHostNetworkInterfaceByName(hostIface string) (string, error)
 
     CurrentMachineState() VBGlueMachineState
+    IsMachineSafeToStart() bool
     IsMachineSettingChanged() (bool, error)
 
+    CreateMachineWithOptions(builder *VBoxBuildOption) error
     FindMachineByNameOrID(machineName string) error
-    CreateMachineByName(baseFolder, machineName string) error
-    BuildMachine(builder *VBoxBuildOption) error
+    ModifyMachineWithOptions(modifier *VBoxBuildOption) error
+    DiscardMachineSettings() error
     ReleaseMachine() error
     DestoryMachine() error
 
@@ -169,6 +223,7 @@ type VBGlueMachineState uint
 const (
     VBGlueMachine_Illegal    = C.VBGlueMachine_Illegal
     VBGlueMachine_PoweredOff = C.VBGlueMachine_PoweredOff
+    VBGlueMachine_Saved      = C.VBGlueMachine_Saved
     VBGlueMachine_Aborted    = C.VBGlueMachine_Aborted
     VBGlueMachine_Running    = C.VBGlueMachine_Running
     VBGlueMachine_Paused     = C.VBGlueMachine_Paused
@@ -177,8 +232,41 @@ const (
     VBGlueMachine_Stopping   = C.VBGlueMachine_Stopping
 )
 
+func (s VBGlueMachineState) String() string {
+    switch s {
+        case VBGlueMachine_Illegal:
+            return "VBGlueMachine_Illegal"
+        case VBGlueMachine_PoweredOff:
+            return "VBGlueMachine_PoweredOff"
+        case VBGlueMachine_Saved:
+            return "VBGlueMachine_Saved"
+        case VBGlueMachine_Aborted:
+            return "VBGlueMachine_Aborted"
+        case VBGlueMachine_Running:
+            return "VBGlueMachine_Running"
+        case VBGlueMachine_Paused:
+            return "VBGlueMachine_Paused"
+        case VBGlueMachine_Stuck:
+            return "VBGlueMachine_Stuck"
+        case VBGlueMachine_Starting:
+            return "VBGlueMachine_Starting"
+        case VBGlueMachine_Stopping:
+            return "VBGlueMachine_Stopping"
+    }
+    return "unrecognizable state"
+}
+
 func (v *goVoxGlue) CurrentMachineState() VBGlueMachineState {
     return VBGlueMachineState(C.VBoxMachineGetCurrentState(v.cvboxglue))
+}
+
+func (v *goVoxGlue) IsMachineSafeToStart() bool {
+    switch v.CurrentMachineState() {
+        case VBGlueMachine_PoweredOff, VBGlueMachine_Aborted, VBGlueMachine_Saved: {
+            return true
+        }
+    }
+    return false
 }
 
 func (v *goVoxGlue) IsMachineSettingChanged() (bool, error) {
@@ -189,6 +277,45 @@ func (v *goVoxGlue) IsMachineSettingChanged() (bool, error) {
     }
 
     return bool(isChanged), nil
+}
+
+func (v *goVoxGlue) CreateMachineWithOptions(builder *VBoxBuildOption) error {
+    err := ValidateVBoxBuildOption(builder)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    var (
+        cBaseDirPath      = C.CString(builder.BaseDirPath)
+        cMachineName      = C.CString(builder.MachineName)
+        cHostInterface    = C.CString(builder.HostInterface)
+        cBootImagePath    = C.CString(builder.BootImagePath)
+        cHddImagePath     = C.CString(builder.HddImagePath)
+        cSharedFolders    = builder.SharedFolders.buildNativeVboxSharedFolders()
+        cSFoldersCount    = C.int(builder.SharedFolders.lenth())
+    )
+
+    option := C.VBoxMakeBuildOption(C.int(builder.CPUCount), C.int(builder.MemSize), cHostInterface, cBootImagePath, cHddImagePath, cSharedFolders, cSFoldersCount)
+
+    result := C.VBoxMachineCreateByName(v.cvboxglue, cBaseDirPath, cMachineName)
+    if result != VBGlue_Ok {
+        return errors.Errorf("[ERR] unable to create machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
+    }
+
+    result = C.VBoxMachineBuildWithOption(v.cvboxglue, option)
+    if result != VBGlue_Ok {
+        return errors.Errorf("[ERR] unable to build machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
+    }
+
+    C.free(unsafe.Pointer(cBaseDirPath))
+    C.free(unsafe.Pointer(cMachineName))
+    C.free(unsafe.Pointer(cHostInterface))
+    C.free(unsafe.Pointer(cBootImagePath))
+    C.free(unsafe.Pointer(cHddImagePath))
+    cleanNativeBoxSharedFolders(cSharedFolders, builder.SharedFolders.lenth())
+    C.free(unsafe.Pointer(option))
+
+    return nil
 }
 
 func (v *goVoxGlue) FindMachineByNameOrID(machineName string) error {
@@ -205,51 +332,25 @@ func (v *goVoxGlue) FindMachineByNameOrID(machineName string) error {
     return nil
 }
 
-func (v *goVoxGlue) CreateMachineByName(baseFolder, machineName string) error {
-    if len(baseFolder) == 0 {
-        return errors.Errorf("[ERR] base folder path should be provided")
-    }
-    if len(machineName) == 0 {
-        return errors.Errorf("[ERR] machine name should be provided")
-    }
-    var (
-        cBaseFolder  = C.CString(baseFolder)
-        cMachineName = C.CString(machineName)
-    )
-
-    result := C.VBoxMachineCreateByName(v.cvboxglue, cBaseFolder, cMachineName)
-    if result != VBGlue_Ok {
-        return errors.Errorf("[ERR] unable to create machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
-    }
-
-    C.free(unsafe.Pointer(cBaseFolder))
-    C.free(unsafe.Pointer(cMachineName))
-    return nil
-}
-
-func (v *goVoxGlue) BuildMachine(builder *VBoxBuildOption) error {
-    err := ValidateVBoxBuildOption(builder)
+func (v *goVoxGlue) ModifyMachineWithOptions(modifier *VBoxBuildOption) error {
+    err := ValidateVBoxBuildOption(modifier)
     if err != nil {
         return errors.WithStack(err)
     }
 
     var (
-        cBaseDirPath      = C.CString(builder.BaseDirPath)
-        cMachineName      = C.CString(builder.MachineName)
-        cHostInterface    = C.CString(builder.HostInterface)
-        cBootImagePath    = C.CString(builder.BootImagePath)
-        cHddImagePath     = C.CString(builder.HddImagePath)
-        cSharedFolderPath = C.CString(builder.SharedFolderPath)
-        cSharedFolderName = C.CString(builder.SharedFolderName)
-        option            = C.VBoxMakeBuildOption(C.int(builder.CPUCount), C.int(builder.MemSize), cHostInterface, cBootImagePath, cHddImagePath, cSharedFolderPath, cSharedFolderName)
+        cBaseDirPath      = C.CString(modifier.BaseDirPath)
+        cMachineName      = C.CString(modifier.MachineName)
+        cHostInterface    = C.CString(modifier.HostInterface)
+        cBootImagePath    = C.CString(modifier.BootImagePath)
+        cHddImagePath     = C.CString(modifier.HddImagePath)
+        cSharedFolders    = modifier.SharedFolders.buildNativeVboxSharedFolders()
+        cSFoldersCount    = C.int(modifier.SharedFolders.lenth())
     )
 
-    result := C.VBoxMachineCreateByName(v.cvboxglue, cBaseDirPath, cMachineName)
-    if result != VBGlue_Ok {
-        return errors.Errorf("[ERR] unable to create machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
-    }
+    option := C.VBoxMakeBuildOption(C.int(modifier.CPUCount), C.int(modifier.MemSize), cHostInterface, cBootImagePath, cHddImagePath, cSharedFolders, cSFoldersCount)
 
-    result = C.VBoxMachineBuildWithOption(v.cvboxglue, option)
+    result := C.VBoxMachineModifyWithOption(v.cvboxglue, option)
     if result != VBGlue_Ok {
         return errors.Errorf("[ERR] unable to build machine %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
     }
@@ -257,12 +358,19 @@ func (v *goVoxGlue) BuildMachine(builder *VBoxBuildOption) error {
     C.free(unsafe.Pointer(cBaseDirPath))
     C.free(unsafe.Pointer(cMachineName))
     C.free(unsafe.Pointer(cHostInterface))
-    C.free(unsafe.Pointer(cSharedFolderPath))
-    C.free(unsafe.Pointer(cSharedFolderName))
     C.free(unsafe.Pointer(cBootImagePath))
     C.free(unsafe.Pointer(cHddImagePath))
+    cleanNativeBoxSharedFolders(cSharedFolders, modifier.SharedFolders.lenth())
     C.free(unsafe.Pointer(option))
 
+    return nil
+}
+
+func (v *goVoxGlue) DiscardMachineSettings() error {
+    result := C.VBoxMachineDiscardSettings(v.cvboxglue)
+    if result != VBGlue_Ok {
+        return errors.Errorf("[ERR] unable to discard machine  settings %v", C.GoString(C.VBoxGetErrorMessage(v.cvboxglue)))
+    }
     return nil
 }
 
