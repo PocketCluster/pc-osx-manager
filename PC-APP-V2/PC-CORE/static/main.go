@@ -198,23 +198,6 @@ func main() {
                             continue
                         }
 
-                        // search catcher service
-                        // (DEP netchange, NODEP services)
-                        // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
-                        _, err = mcast.NewSearchCatcher(appLife.ServiceSupervisor, iname)
-                        if err != nil {
-                            log.Debug(err)
-                            continue
-                        }
-                        // beacon locator service
-                        // (NODEP netchange, NODEP service)
-                        // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
-                        _, err = ucast.NewBeaconLocator(appLife.ServiceSupervisor)
-                        if err != nil {
-                            log.Debug(err)
-                            continue
-                        }
-
                         // internal name service
                         // (NODEP netchange, DEP master beacon service)
                         err = dns.InitPocketNameService(appLife, cid)
@@ -234,6 +217,23 @@ func main() {
                         // master beacon service
                         // (DEP netchange, DEP vboxcontrol + teleport service)
                         err = master.InitMasterBeaconService(appLife, cid, appCfg.PCSSH)
+                        if err != nil {
+                            log.Debug(err)
+                            continue
+                        }
+
+                        // search catcher service needs to initiated after master beacon
+                        // (DEP netchange, NODEP services)
+                        // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
+                        _, err = mcast.NewSearchCatcher(appLife.ServiceSupervisor, iname)
+                        if err != nil {
+                            log.Debug(err)
+                            continue
+                        }
+                        // beacon locator service needs to initiated after master beacon
+                        // (NODEP netchange, NODEP service)
+                        // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
+                        _, err = ucast.NewBeaconLocator(appLife.ServiceSupervisor)
                         if err != nil {
                             log.Debug(err)
                             continue
