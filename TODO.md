@@ -8,7 +8,7 @@
 
 - [ ] MUSL ARM64 w/ GOLANG
 - [ ] TinyCore ARM64 (from Busybox)
-
+- [ ] Have a UI queue to stack ui requests so that duplicated requests will not cause double execution
 
 ### V0.1.4
 - [ ] Fix Teleport generate log in Log directory
