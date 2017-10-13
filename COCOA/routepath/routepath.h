@@ -22,6 +22,9 @@ extern const char* RPATH_MONITOR_PACKAGE_PROCESS;
 
 extern const char* RPATH_MONITOR_NODE_REGISTERED;
 extern const char* RPATH_MONITOR_NODE_UNREGISTERED;
+extern const char* RPATH_MONITOR_NODE_BOUNDED;
+extern const char* RPATH_MONITOR_NODE_PCSSH;
+extern const char* RPATH_MONITOR_NODE_ORCHST;
 extern const char* RPATH_MONITOR_SERVICE_STATUS;
 
 #endif /* routepath.h */

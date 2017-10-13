@@ -56,6 +56,18 @@ func RpathMonitorNodeUnregistered() string {
     return C.GoString(C.RPATH_MONITOR_NODE_UNREGISTERED)
 }
 
+func RpathMonitorNodeBounded() string {
+    return C.GoString(C.RPATH_MONITOR_NODE_BOUNDED)
+}
+
+func RpathMonitorNodePcssh() string {
+    return C.GoString(C.RPATH_MONITOR_NODE_PCSSH)
+}
+
+func RpathMonitorNodeOrchst() string {
+    return C.GoString(C.RPATH_MONITOR_NODE_ORCHST)
+}
+
 func RpathMonitorServiceStatus() string {
     return C.GoString(C.RPATH_MONITOR_SERVICE_STATUS)
 }

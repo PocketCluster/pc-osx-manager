@@ -10,9 +10,7 @@
 
 @interface AppDelegate(AppCheck)
 - (void) initCheck;
-- (void) systemMon;
-- (void) clearSysMon;
 
-- (void) packageMon;
-- (void) clearPkgMon;
+- (void) startMonitors;
+- (void) closeMonitors;
 @end

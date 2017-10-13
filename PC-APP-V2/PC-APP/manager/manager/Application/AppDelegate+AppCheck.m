@@ -133,30 +133,50 @@
     [PCRouter routeRequestGet:RPATH_SYSTEM_READINESS];
 }
 
-- (void) systemMon {
+- (void) startMonitors {
 //    WEAK_SELF(self);
 
-    NSString *rpUnregNodes = [NSString stringWithUTF8String:RPATH_MONITOR_NODE_UNREGISTERED];
-    NSString *rpRegNodes   = [NSString stringWithUTF8String:RPATH_MONITOR_NODE_REGISTERED];
-    NSString *rpSrvStat    = [NSString stringWithUTF8String:RPATH_MONITOR_SERVICE_STATUS];
-
+    // --- --- --- --- --- --- node monitors --- --- --- --- --- ---
     [[PCRouter sharedRouter]
      addGetRequest:self
-     onPath:rpUnregNodes
+     onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_UNREGISTERED]
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-//         Log(@"%@ %@", path, response);
+         // Log(@"%@ %@", path, response);
      }];
 
     [[PCRouter sharedRouter]
      addGetRequest:self
-     onPath:rpRegNodes
+     onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_REGISTERED]
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-//         Log(@"%@ %@", path, response);
+         // Log(@"%@ %@", path, response);
      }];
 
     [[PCRouter sharedRouter]
      addGetRequest:self
-     onPath:rpSrvStat
+     onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_BOUNDED]
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         // Log(@"%@ %@", path, response);
+     }];
+
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_PCSSH]
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         // Log(@"%@ %@", path, response);
+     }];
+
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_ORCHST]
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         // Log(@"%@ %@", path, response);
+     }];
+
+    
+    // --- --- --- --- --- --- service monitors --- --- --- --- --- ---
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:[NSString stringWithUTF8String:RPATH_MONITOR_SERVICE_STATUS]
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) { 
  /*
         Log(@"%@ %@", path, response);
@@ -182,43 +202,37 @@
         })
 */
      }];
-}
-
-- (void) clearSysMon {
-    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_UNREGISTERED]];
-    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_REGISTERED]];
-    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_SERVICE_STATUS]];
-}
-
-- (void) packageMon {
-    NSString *rpPkgStart = [NSString stringWithUTF8String:RPATH_PACKAGE_STARTUP];
-    NSString *rpPkgKill  = [NSString stringWithUTF8String:RPATH_PACKAGE_KILL];
-    NSString *rpPkgMon   = [NSString stringWithUTF8String:RPATH_MONITOR_PACKAGE_PROCESS];
+    
+    // --- --- --- --- --- --- package start/kill/ps --- --- --- --- --- ---
+    [[PCRouter sharedRouter]
+     addPostRequest:self
+     onPath:[NSString stringWithUTF8String:RPATH_PACKAGE_STARTUP]
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         // Log(@"%@ %@", path, response);
+     }];
     
     [[PCRouter sharedRouter]
      addPostRequest:self
-     onPath:rpPkgStart
+     onPath:[NSString stringWithUTF8String:RPATH_PACKAGE_KILL]
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         Log(@"%@ %@", path, response);
+         // Log(@"%@ %@", path, response);
      }];
-
+    
     [[PCRouter sharedRouter]
      addPostRequest:self
-     onPath:rpPkgKill
+     onPath:[NSString stringWithUTF8String:RPATH_MONITOR_PACKAGE_PROCESS]
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         Log(@"%@ %@", path, response);
+         // Log(@"%@ %@", path, response);
      }];
-
-    [[PCRouter sharedRouter]
-     addPostRequest:self
-     onPath:rpPkgMon
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         Log(@"%@ %@", path, response);
-     }];
-
 }
 
-- (void) clearPkgMon {
+- (void) closeMonitors {
+    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_UNREGISTERED]];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_REGISTERED]];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_BOUNDED]];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_PCSSH]];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_ORCHST]];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_SERVICE_STATUS]];
     [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_PACKAGE_STARTUP]];
     [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_PACKAGE_KILL]];
     [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_PACKAGE_PROCESS]];

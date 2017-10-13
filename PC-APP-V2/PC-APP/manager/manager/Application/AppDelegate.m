@@ -96,8 +96,7 @@
     Log(@"Application Started. Let's begin initial check");
 
     // 12. Monitor system health
-    [self systemMon];
-    [self packageMon];
+    [self startMonitors];
 
     // 13. begin app ready sequence
     // this might update OSX side as well, so we need UI to be working beforehand.
@@ -120,11 +119,8 @@
     // stop sleep notification
     [self removeSleepNotifications];
     
-    // clear package monitoring
-    [self clearPkgMon];
-    
-    // clear system monitoring
-    [self clearSysMon];
+    // close monitoring
+    [self closeMonitors];
     
     // Stop host feed
     StopResponseFeed();
