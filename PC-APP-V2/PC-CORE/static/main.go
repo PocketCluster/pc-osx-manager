@@ -17,6 +17,8 @@ import (
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
     "github.com/stkim1/pc-core/model"
+    "github.com/stkim1/pc-core/rasker"
+    "github.com/stkim1/pc-core/rasker/pkgtask"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/install"
     "github.com/stkim1/pc-core/route/initcheck"
@@ -72,7 +74,11 @@ func main() {
                                 context.SharedHostContext()
                                 initcheck.InitRoutePathServices(appLife, theFeeder)
                                 install.InitInstallListRouthPath(appLife, theFeeder)
-
+                                pkgtask.InitPackageProcess(rasker.RouteTasker{
+                                        ServiceSupervisor: appLife.ServiceSupervisor,
+                                        Router: appLife.Router,
+                                    },
+                                    theFeeder)
                                 IsContextInit = true
                             }
 

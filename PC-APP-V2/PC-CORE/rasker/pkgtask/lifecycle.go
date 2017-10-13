@@ -17,12 +17,12 @@ import (
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
-    "github.com/stkim1/pc-core/rtasker"
+    "github.com/stkim1/pc-core/rasker"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/service/ivent"
 )
 
-func InitPackageProcess(appLife rtasker.RouteTasker, feeder route.ResponseFeeder) error {
+func InitPackageProcess(appLife rasker.RouteTasker, feeder route.ResponseFeeder) error {
 
     // install a package
     appLife.POST(routepath.RpathPackageStartup(), func(_, rpath, payload string) error {
