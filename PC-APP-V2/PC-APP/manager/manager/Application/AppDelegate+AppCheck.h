@@ -11,4 +11,8 @@
 @interface AppDelegate(AppCheck)
 - (void) initCheck;
 - (void) systemMon;
+- (void) clearSysMon;
+
+- (void) packageMon;
+- (void) clearPkgMon;
 @end

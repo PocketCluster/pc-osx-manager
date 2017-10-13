@@ -183,4 +183,45 @@
 */
      }];
 }
+
+- (void) clearSysMon {
+    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_UNREGISTERED]];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_REGISTERED]];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_SERVICE_STATUS]];
+}
+
+- (void) packageMon {
+    NSString *rpPkgStart = [NSString stringWithUTF8String:RPATH_PACKAGE_STARTUP];
+    NSString *rpPkgKill  = [NSString stringWithUTF8String:RPATH_PACKAGE_KILL];
+    NSString *rpPkgMon   = [NSString stringWithUTF8String:RPATH_MONITOR_PACKAGE_PROCESS];
+    
+    [[PCRouter sharedRouter]
+     addPostRequest:self
+     onPath:rpPkgStart
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         Log(@"%@ %@", path, response);
+     }];
+
+    [[PCRouter sharedRouter]
+     addPostRequest:self
+     onPath:rpPkgKill
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         Log(@"%@ %@", path, response);
+     }];
+
+    [[PCRouter sharedRouter]
+     addPostRequest:self
+     onPath:rpPkgMon
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         Log(@"%@ %@", path, response);
+     }];
+
+}
+
+- (void) clearPkgMon {
+    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_PACKAGE_STARTUP]];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_PACKAGE_KILL]];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_PACKAGE_PROCESS]];
+}
+
 @end

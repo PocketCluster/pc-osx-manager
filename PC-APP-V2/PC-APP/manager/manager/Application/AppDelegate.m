@@ -97,6 +97,7 @@
 
     // 12. Monitor system health
     [self systemMon];
+    [self packageMon];
 
     // 13. begin app ready sequence
     // this might update OSX side as well, so we need UI to be working beforehand.
@@ -118,6 +119,12 @@
     
     // stop sleep notification
     [self removeSleepNotifications];
+    
+    // clear package monitoring
+    [self clearPkgMon];
+    
+    // clear system monitoring
+    [self clearSysMon];
     
     // Stop host feed
     StopResponseFeed();

@@ -63,6 +63,19 @@
   * `pc-master` queries to main DNS.
 
 
+#### UI Layer
+- [ ] check `pc-core` & `pc-nodes` connections for
+  1. teleport clients
+  2. swarm nodes
+  3. beacon/locator
+- [ ] UI mode flow
+  0. sign up
+  1. setup cluster / restart cluster
+  2. install a package
+  3. run a package
+  4. turn off the package
+  5. turn off cluster
+
 #### VirtualBox
 - [x] get the actual core count
 - [x] vbox files permissions

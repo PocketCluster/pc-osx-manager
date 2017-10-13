@@ -71,6 +71,7 @@ func InitPackageProcess(appLife rasker.RouteTasker, feeder route.ResponseFeeder)
         project, err := docker.NewPocketProject(&docker.PocketContext{
             Context: &ctx.Context{
                 Context: project.Context{
+                    // TODO : package name
                     ProjectName:  "pocket-hadoop",
                 },
             },
