@@ -17,12 +17,7 @@ const char* RPATH_PACKAGE_INSTALL           = "/v1/cmd/package/install";
 const char* RPATH_PACKAGE_INSTALL_PROGRESS  = "/v1/monitor/package/install";
 const char* RPATH_PACKAGE_STARTUP           = "/v1/cmd/package/startup";
 const char* RPATH_PACKAGE_KILL              = "/v1/cmd/package/kill";
+
 const char* RPATH_MONITOR_PACKAGE_PROCESS   = "/v1/monitor/package/process";
-
-const char* RPATH_MONITOR_NODE_REGISTERED   = "/v1/monitor/node/registered";
-const char* RPATH_MONITOR_NODE_UNREGISTERED = "/v1/monitor/node/unregistered";
-const char* RPATH_MONITOR_NODE_BOUNDED      = "/v1/monitor/node/bounded";
-const char* RPATH_MONITOR_NODE_PCSSH        = "/v1/monitor/node/pcssh";
-const char* RPATH_MONITOR_NODE_ORCHST       = "/v1/monitor/node/orchst";
-
 const char* RPATH_MONITOR_SERVICE_STATUS    = "/v1/monitor/service/status";
+const char* RPATH_MONITOR_NODE_STATUS       = "/v1/monitor/node/status";

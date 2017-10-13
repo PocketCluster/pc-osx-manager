@@ -11,8 +11,9 @@ const (
     IventNetworkAddressChange    string = "ivent.network.address.change"
     IventBeaconManagerSpawn      string = "ivent.beacon.manager.spawn"
     IventVboxCtrlInstanceSpawn   string = "ivent.vbox.ctrl.instance.spawn"
-    IventMonitorRegisteredNode   string = "ivent.monitor.registered.node"
-    IventMonitorUnregisteredNode string = "ivent.monitor.unregistered.node"
+    IventMonitorNodeBeacon       string = "ivent.monitor.node.beacon"
+    IventMonitorNodePcssh        string = "ivent.monitor.node.pcssh"
+    IventMonitorNodeOrchst       string = "ivent.monitor.node.orchst"
     IventReportNodeListRequest   string = "ivent.report.node.list.request"
     IventReportNodeListResult    string = "ivent.report.node.list.result"
 )

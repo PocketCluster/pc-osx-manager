@@ -72,6 +72,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
         teleC   = make(chan service.Event)
         netC    = make(chan service.Event)
         nodeC   = make(chan service.Event)
+        statC   = make(chan service.Event)
     )
     appLife.RegisterServiceWithFuncs(
         operation.ServiceBeaconMaster,
@@ -134,6 +135,12 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                         log.Debugf("[AGENT] stopping agent service...")
                         return nil
                     }
+                    case <-timer.C: {
+                        err = beaconMan.TransitionWithTimestamp(time.Now())
+                        if err != nil {
+                            log.Debug(err.Error())
+                        }
+                    }
                     case b := <-beaconC: {
                         bp, ok := b.Payload.(ucast.BeaconPack)
                         if ok {
@@ -152,23 +159,23 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                             }
                         }
                     }
-                    case <-timer.C: {
-                        err = beaconMan.TransitionWithTimestamp(time.Now())
-                        if err != nil {
-                            log.Debug(err.Error())
-                        }
-                        regNodes := beaconMan.RegisteredNodesList()
-                        appLife.BroadcastEvent(service.Event{Name:ivent.IventMonitorRegisteredNode, Payload:regNodes})
-                    }
+                    // network monitor event
                     case <- netC: {
                         // TODO update primary address
                         log.Debugf("[AGENT] Host Address changed")
                     }
+                    // package node list service
                     case <- nodeC: {
                         nodeList := beaconMan.RegisteredNodesList()
                         appLife.BroadcastEvent(service.Event{
                             Name:ivent.IventReportNodeListResult,
                             Payload:nodeList})
+                    }
+                    // node status report service
+                    case <- statC: {
+                        // need unregistered node, registered node, bounded node
+                        regNodes := beaconMan.RegisteredNodesList()
+                        appLife.BroadcastEvent(service.Event{Name:ivent.IventMonitorNodeBeacon, Payload:regNodes})
                     }
                 }
             }
@@ -179,7 +186,8 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
         service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,     vboxC),
         service.BindEventWithService(sshproc.EventPCSSHServerProxyStarted, teleC),
         service.BindEventWithService(ivent.IventNetworkAddressChange,      netC),
-        service.BindEventWithService(ivent.IventReportNodeListRequest,     nodeC))
+        service.BindEventWithService(ivent.IventReportNodeListRequest,     nodeC),
+        service.BindEventWithService(ivent.IventMonitorNodeBeacon,         statC))
 
     return nil
 }

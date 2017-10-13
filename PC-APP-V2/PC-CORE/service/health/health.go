@@ -14,9 +14,11 @@ import (
 
 func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.ResponseFeeder) error {
     var (
-        unregNodeC = make(chan service.Event)
-        regNodeC = make(chan service.Event)
+        nodeBeaconC = make(chan service.Event)
+        nodePcsshC  = make(chan service.Event)
+        nodeOrchstC = make(chan service.Event)
     )
+
     appLife.RegisterServiceWithFuncs(
         operation.ServiceMonitorSystemHealth,
         func() error {
@@ -24,11 +26,13 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
             type MonitorSystemHealth map[string]interface{}
 
             var (
-                timer = time.NewTicker(time.Second)
-                rpUnregNode = routepath.RpathMonitorNodeUnregistered()
-                rpRegNode = routepath.RpathMonitorNodeRegistered()
-                rpSrvStat = routepath.RpathMonitorServiceStatus()
+                timer        = time.NewTicker(time.Second)
+                // node status (beacon, pcssh, orchst) will be coalesced into one report
+                rpNodeStat   = routepath.RpathMonitorNodeStatus()
+                rpSrvStat    = routepath.RpathMonitorServiceStatus()
             )
+
+            // TODO : we need a trigger to make sure beacon/ pcssh/ orchst all have started
 
             for {
                 select {
@@ -37,40 +41,30 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                         return nil
                     }
 
-                    // monitoring unregistered nodes
-                    case re := <- unregNodeC: {
+                    // monitoring beacon
+                    case re := <- nodeBeaconC: {
                         nodes, ok := re.Payload.([]map[string]string)
                         if !ok {
                             log.Debugf("[ERR] invalid unregistered node list type")
                             continue
                         }
-                        data, err := json.Marshal(map[string]interface{} {"unregistered" : nodes})
+                        data, err := json.Marshal(map[string]interface{} {"nodestat" : nodes})
                         if err != nil {
                             log.Debugf(err.Error())
                             continue
                         }
-                        err = feeder.FeedResponseForGet(rpUnregNode, string(data))
+                        err = feeder.FeedResponseForGet(rpNodeStat, string(data))
                         if err != nil {
                             log.Debugf(err.Error())
                         }
                     }
 
-                    // monitoring registered nodes
-                    case re := <- regNodeC: {
-                        nodes, ok := re.Payload.([]map[string]string)
-                        if !ok {
-                            log.Debugf("[ERR] invalid registered node list type")
-                            continue
-                        }
-                        data, err := json.Marshal(map[string]interface{} {"registered" : nodes})
-                        if err != nil {
-                            log.Debugf(err.Error())
-                            continue
-                        }
-                        err = feeder.FeedResponseForGet(rpRegNode, string(data))
-                        if err != nil {
-                            log.Debugf(err.Error())
-                        }
+                    // monitoring pcssh
+                    case <- nodePcsshC: {
+                    }
+
+                    // monitoring orchst
+                    case <- nodeOrchstC: {
                     }
 
                     // service report
@@ -101,8 +95,9 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
 
             return nil
         },
-        service.BindEventWithService(ivent.IventMonitorUnregisteredNode, unregNodeC),
-        service.BindEventWithService(ivent.IventMonitorRegisteredNode,   regNodeC))
+        service.BindEventWithService(ivent.IventMonitorNodeBeacon, nodeBeaconC),
+        service.BindEventWithService(ivent.IventMonitorNodePcssh,  nodePcsshC),
+        service.BindEventWithService(ivent.IventMonitorNodeOrchst, nodeOrchstC))
 
     return nil
 }
