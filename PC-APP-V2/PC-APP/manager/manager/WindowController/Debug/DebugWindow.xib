@@ -42,8 +42,8 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="y1g-2c-4bl">
-                        <rect key="frame" x="14" y="114" width="93" height="32"/>
-                        <buttonCell key="cell" type="push" title="Debug 0" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5hd-3j-KqJ">
+                        <rect key="frame" x="9" y="114" width="103" height="32"/>
+                        <buttonCell key="cell" type="push" title="[D] b.users" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5hd-3j-KqJ">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
@@ -52,8 +52,8 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Zrf-TX-MDf">
-                        <rect key="frame" x="14" y="81" width="93" height="32"/>
-                        <buttonCell key="cell" type="push" title="Debug 1" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="CqG-Z6-HnV">
+                        <rect key="frame" x="9" y="81" width="103" height="32"/>
+                        <buttonCell key="cell" type="push" title="[D] b.vbox" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="CqG-Z6-HnV">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
@@ -82,8 +82,8 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lOe-An-aD8">
-                        <rect key="frame" x="14" y="48" width="93" height="32"/>
-                        <buttonCell key="cell" type="push" title="Debug 2" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="8Tk-t9-kvl">
+                        <rect key="frame" x="10" y="48" width="102" height="32"/>
+                        <buttonCell key="cell" type="push" title="[D] s.vbox" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="8Tk-t9-kvl">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
@@ -212,8 +212,8 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ksz-45-uOW">
-                        <rect key="frame" x="14" y="13" width="93" height="32"/>
-                        <buttonCell key="cell" type="push" title="Debug 3" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="rpB-ZI-VTG">
+                        <rect key="frame" x="9" y="13" width="103" height="32"/>
+                        <buttonCell key="cell" type="push" title="[D] e.vbox" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="rpB-ZI-VTG">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
@@ -223,7 +223,7 @@
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qy3-AN-QbZ">
                         <rect key="frame" x="103" y="114" width="93" height="32"/>
-                        <buttonCell key="cell" type="push" title="Debug 4" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="DFb-gU-g91">
+                        <buttonCell key="cell" type="push" title="[D] u.node" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="DFb-gU-g91">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>

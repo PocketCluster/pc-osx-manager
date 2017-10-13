@@ -262,6 +262,7 @@ func main() {
                             continue
                         }
 
+                        // TODO : need to check if necessary services have started
                         err = health.InitSystemHealthMonitor(appLife, theFeeder)
                         if err != nil {
                             log.Debug(err)
@@ -475,15 +476,6 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdDebug4: {
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdDebug5: {
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdDebug6: {
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdDebug7: {
                         // update process
                         roots, err := model.FindUserMetaWithLogin("root")
                         if err != nil {
@@ -513,8 +505,17 @@ func main() {
                         if err != nil {
                             log.Errorf("ERROR : %v", err.Error())
                         }
-
                         clt.Logout()
+
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug5: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug6: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug7: {
                         log.Debugf("[OP] %v", e.String())
                     }
 

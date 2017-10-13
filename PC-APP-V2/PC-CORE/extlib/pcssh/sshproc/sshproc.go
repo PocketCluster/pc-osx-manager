@@ -33,9 +33,9 @@ import (
 )
 
 const (
-    eventProxyIdentity string       = "event.proxy.identity"
-    eventAuthorityInstance string   = "event.authority.instance"
-    eventAuthorityClientConn string = "event.authority.client.conn"
+    iventProxyIdentity       string = "ivent.proxy.identity"
+    iventAuthAndSessionObj   string = "ivent.auth.session.obj"
+    iventAuthorityClientConn string = "ivent.authority.client.conn"
 
     ServicePCSSHAuthority string    = "service.pcssh.authority"
     ServicePCSSHConnAdmin string    = "service.pcssh.conn.admin"
@@ -45,8 +45,19 @@ const (
     ServicePCSSHServerProxy string  = "service.pcssh.server.proxy"
 
     // external event telling waiters that proxy instance is up and running
-    EventPCSSHServerProxyStarted string  = "event.pcssh.server.proxy.started"
+    EventPCSSHServerProxyStarted string = "event.pcssh.server.proxy.started"
+    // external event requesting available node list
+    EventPCSSHNodeListRequest    string = "event.pcssh.node.list.request"
+    EventPCSSHNodeListResult     string = "event.pcssh.node.list.result"
 )
+
+// nost status info for health monitor
+type NodeStatusInfo struct {
+    HostName    string
+    ID          string
+    Addr        string
+    HasSession  bool
+}
 
 // IsConnectionProblem returns whether this error is of ConnectionProblemError. This is originated from teleport trace
 func isConnectionProblem(e error) bool {
@@ -153,38 +164,49 @@ func (u userKiosk) GetUserIdentity(hostName, hostUUID string) (*auth.UserIdentit
     return u(hostName, hostUUID)
 }
 
+// delivery auth and session together
+type authAndSession struct {
+    *auth.AuthServer
+    session.Service
+}
+
 // initAuthService can be called to initialize auth server service
 func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error {
     var (
-        cfg = p.config
-    )
-
-    // updating the auth server presence
-    var (
+        cfg        = p.config
+        // updating the auth server presence
         asrvEventC = make(chan pervice.Event)
         authConnC  = make(chan pervice.Event)
+        nodeReqC   = make(chan pervice.Event)
     )
     p.RegisterServiceWithFuncs(
         ServicePCSSHServerAuth,
         func() error {
             var (
                 authServer *auth.AuthServer = nil
+                sessService session.Service = nil
+                aas         *authAndSession = nil
                 asrvOk, authConnOk bool = false, false
             )
+            // this is node list for temporary node count
+            type nodeWithSessions struct {
+                Node     services.Server   `json:"node"`
+                Sessions []session.Session `json:"sessions"`
+            }
 
             // prepare auth server
-            srv := services.Server{
+            authFront := services.Server{
                 ID:       p.config.HostUUID,
                 Addr:     cfg.Auth.SSHAddr.Addr,
                 Hostname: p.config.Hostname,
             }
-            host, port, err := net.SplitHostPort(srv.Addr)
+            host, port, err := net.SplitHostPort(authFront.Addr)
             // advertise-ip is explicitly set:
             if p.config.AdvertiseIP != nil {
                 if err != nil {
                     return errors.WithStack(err)
                 }
-                srv.Addr = fmt.Sprintf("%v:%v", p.config.AdvertiseIP.String(), port)
+                authFront.Addr = fmt.Sprintf("%v:%v", p.config.AdvertiseIP.String(), port)
             } else {
                 // advertise-ip is not set, while the CA is listening on 0.0.0.0? lets try
                 // to guess the 'advertise ip' then:
@@ -193,10 +215,10 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                     if err != nil {
                         log.Debug(err)
                     } else {
-                        srv.Addr = net.JoinHostPort(ip.String(), port)
+                        authFront.Addr = net.JoinHostPort(ip.String(), port)
                     }
                 }
-                log.Debugf("advertise_ip is not set for this auth server!!! Trying to guess the IP this server can be reached at: %v", srv.Addr)
+                log.Debugf("advertise_ip is not set for this auth server!!! Trying to guess the IP this server can be reached at: %v", authFront.Addr)
             }
 
             // immediately register, and then keep repeating in a loop:
@@ -208,9 +230,11 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                     }
                     // waiting for authserver to come up
                     case ae := <-asrvEventC: {
-                        authServer, asrvOk = ae.Payload.(*auth.AuthServer)
+                        aas, asrvOk = ae.Payload.(*authAndSession)
                         if asrvOk {
-                            log.Debugf("[AUTH] AuthServer instance delivery succeed")
+                            authServer = aas.AuthServer
+                            sessService = aas.Service
+                            log.Debugf("[AUTH] AuthServer and Session instances delivery succeed")
                         } else {
                             return errors.Errorf("[AUTH] AuthServer instance delivery failed")
                         }
@@ -220,9 +244,56 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                         authConnOk = true
                         log.Debugf("[AUTH] authServer client connection succeed")
                     }
+                    case <- nodeReqC: {
+                        servers, err := authServer.GetNodes()
+                        if err != nil {
+                            p.BroadcastEvent(pervice.Event{
+                                Name:    EventPCSSHNodeListResult,
+                                Payload: errors.Errorf("unable to get node from authority"),
+                            })
+                            continue
+                        }
+                        sessions, err := sessService.GetSessions()
+                        if err != nil {
+                            p.BroadcastEvent(pervice.Event{
+                                Name:    EventPCSSHNodeListResult,
+                                Payload: errors.Errorf("unable to get sessions"),
+                            })
+                            continue
+                        }
+
+                        nodeMap := make(map[string]*nodeWithSessions, len(servers))
+                        for i := range servers {
+                            nodeMap[servers[i].ID] = &nodeWithSessions{Node: servers[i]}
+                        }
+                        for i := range sessions {
+                            sess := sessions[i]
+                            for _, p := range sess.Parties {
+                                if _, ok := nodeMap[p.ServerID]; ok {
+                                    nodeMap[p.ServerID].Sessions = append(nodeMap[p.ServerID].Sessions, sess)
+                                }
+                            }
+                        }
+                        nodes := make([]NodeStatusInfo, 0, len(nodeMap))
+                        for key := range nodeMap {
+                            n := *nodeMap[key]
+                            nodes = append(nodes,
+                                NodeStatusInfo{
+                                    HostName: n.Node.Hostname,
+                                    ID:       n.Node.ID,
+                                    Addr:     n.Node.Addr,
+                                    // we report if node has active sessions
+                                    HasSession: bool(len(n.Sessions) != 0),
+                                })
+                        }
+                        p.BroadcastEvent(pervice.Event{
+                            Name:    EventPCSSHNodeListResult,
+                            Payload: nodes,
+                        })
+                    }
                     default: {
                         if asrvOk && authConnOk {
-                            err := authServer.UpsertAuthServer(srv, defaults.ServerHeartbeatTTL)
+                            err := authServer.UpsertAuthServer(authFront, defaults.ServerHeartbeatTTL)
                             if err != nil {
                                 log.Debugf("failed to announce presence: %v", err)
                             }
@@ -233,8 +304,9 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                 }
             }
         },
-        pervice.BindEventWithService(eventAuthorityInstance, asrvEventC),
-        pervice.BindEventWithService(eventAuthorityClientConn, authConnC))
+        pervice.BindEventWithService(iventAuthAndSessionObj,    asrvEventC),
+        pervice.BindEventWithService(iventAuthorityClientConn,  authConnC),
+        pervice.BindEventWithService(EventPCSSHNodeListRequest, nodeReqC))
 
     // Register an SSH endpoint which is used to create an SSH tunnel to send HTTP requests to the Auth API
     p.RegisterServiceWithFuncs(
@@ -311,7 +383,6 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
             if err != nil {
                 return errors.WithStack(err)
             }
-            p.BroadcastEvent(pervice.Event{Name:eventAuthorityInstance, Payload:authServer})
 
             // second, create the API Server: it's actually a collection of API servers,
             // each serving requests for a "role" which is assigned to every connected
@@ -320,6 +391,16 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
             if err != nil {
                 return errors.WithStack(err)
             }
+
+            // hand over AuthServer and Session Service
+            p.BroadcastEvent(pervice.Event{
+                Name: iventAuthAndSessionObj,
+                Payload: &authAndSession{
+                    AuthServer: authServer,
+                    Service:    sessionService,
+                },
+            })
+
             apiConf := &auth.APIConfig{
                 AuthServer:        authServer,
                 SessionService:    sessionService,
@@ -367,7 +448,7 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                 connector, err := p.connectToAuthService(role)
                 if err == nil {
                     log.Debugf("[%v] connected successfully.", role)
-                    p.BroadcastEvent(pervice.Event{Name:eventAuthorityClientConn})
+                    p.BroadcastEvent(pervice.Event{Name: iventAuthorityClientConn})
 
                     // wait for service closure
                     <- p.StopChannel()
@@ -405,9 +486,9 @@ func (p *EmbeddedMasterProcess) registerWithAuthServer(token string, role telepo
             )
             // wait for AuthServer to come up
             ae := <- eventC
-            asrv, ok := ae.Payload.(*auth.AuthServer)
+            aas, ok := ae.Payload.(*authAndSession)
             if ok {
-                authServer = asrv
+                authServer = aas.AuthServer
                 log.Debugf("[%v] AuthServer instance delivery succeed", role)
             } else {
                 return errors.Errorf("[%v] AuthServer instance delivery failed", role)
@@ -444,7 +525,7 @@ func (p *EmbeddedMasterProcess) registerWithAuthServer(token string, role telepo
             }
             return nil
         },
-        pervice.BindEventWithService(eventAuthorityInstance, eventC))
+        pervice.BindEventWithService(iventAuthAndSessionObj, eventC))
 }
 
 // initProxy gets called if teleport runs with 'proxy' role enabled to proxy SSH connections to nodes running with
@@ -512,9 +593,9 @@ func (p *EmbeddedMasterProcess) initProxy() error {
             log.Debugf("[PROXY] ReverseTunnel exited. Error: %v", err)
             return errors.WithStack(err)
         },
-        pervice.BindEventWithService(eventProxyIdentity, eventsC))
+        pervice.BindEventWithService(iventProxyIdentity, eventsC))
 
-    p.registerWithAuthServer(p.config.Token, teleport.RoleProxy, eventProxyIdentity)
+    p.registerWithAuthServer(p.config.Token, teleport.RoleProxy, iventProxyIdentity)
 
     return nil
 }
