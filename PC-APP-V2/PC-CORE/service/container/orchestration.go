@@ -9,6 +9,7 @@ import (
     swarmemb "github.com/stkim1/pc-core/extlib/swarm"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/service/ivent"
+    "time"
 )
 
 // nost status info for health monitor
@@ -19,9 +20,6 @@ type EngineStatusInfo struct {
 }
 
 func InitSwarmService(appLife service.ServiceSupervisor) error {
-    const (
-        iventSwarmInstanceSpawn string  = "ivent.swarm.instance.spawn"
-    )
     var (
         swarmSrvC = make(chan service.Event)
         nodeStatC = make(chan service.Event)
@@ -36,11 +34,11 @@ func InitSwarmService(appLife service.ServiceSupervisor) error {
                 select {
                     case se := <- swarmSrvC: {
                         sobj, ok := se.Payload.(*swarmemb.SwarmService)
-                        if ok {
-                            log.Debugf("[SWARM-CTRL] orchestration instance detected...")
+                        if sobj != nil && ok {
+                            log.Debugf("[ORCHST.CTRL] orchestration instance detected...")
                             swarmsrv = sobj
                         } else {
-                            log.Errorf("[SWARM-CTRL] unable to recieve orchestration instance")
+                            log.Errorf("[ORCHST.CTRL] unable to recieve orchestration instance")
                         }
                     }
                     case <- appLife.StopChannel(): {
@@ -48,7 +46,7 @@ func InitSwarmService(appLife service.ServiceSupervisor) error {
                             err := swarmsrv.Close()
                             return errors.WithStack(err)
                         }
-                        return errors.Errorf("[ERR] null SWARM instance")
+                        return errors.Errorf("[ERR] null orchestration instance")
                     }
                     case <- nodeStatC: {
                         if swarmsrv == nil {
@@ -77,18 +75,31 @@ func InitSwarmService(appLife service.ServiceSupervisor) error {
             }
             return nil
         },
-        service.BindEventWithService(iventSwarmInstanceSpawn,         swarmSrvC),
+        service.BindEventWithService(ivent.IventOrchstInstanceSpawn,  swarmSrvC),
         service.BindEventWithService(ivent.IventMonitorNodeReqOrchst, nodeStatC))
 
     beaconManC := make(chan service.Event)
     appLife.RegisterServiceWithFuncs(
         operation.ServiceOrchestrationServer,
         func() error {
-            be := <- beaconManC
-            beaconMan, ok := be.Payload.(beacon.BeaconManger)
-            if !ok {
-                return errors.Errorf("[ERR] invalid beacon manager type")
+            var (
+                beaconMan beacon.BeaconManger = nil
+            )
+            select {
+                case <- time.After(time.Minute): {
+                    return errors.Errorf("[ORCHST] unable to recieve beacon manager")
+                }
+                case be := <- beaconManC: {
+                    bm, ok := be.Payload.(beacon.BeaconManger)
+                    if bm != nil && ok {
+                        beaconMan = bm
+                    } else {
+                        return errors.Errorf("[ERR] invalid beacon manager type")
+                    }
+                }
             }
+
+            log.Debugf("[ORCHST] beacon manager received...")
             ctx := context.SharedHostContext()
             caCert, err := ctx.CertAuthCertificate()
             if err != nil {
@@ -110,8 +121,11 @@ func InitSwarmService(appLife service.ServiceSupervisor) error {
             if err != nil {
                 return errors.WithStack(err)
             }
-            appLife.BroadcastEvent(service.Event{Name:iventSwarmInstanceSpawn, Payload:swarmsrv})
-            log.Debugf("[SWARM] swarm service started...")
+            appLife.BroadcastEvent(service.Event{
+                Name:ivent.IventOrchstInstanceSpawn,
+                Payload:swarmsrv})
+
+            log.Debugf("[ORCHST] orchestration service started...")
             err = swarmsrv.ListenAndServeSingleHost()
             return errors.WithStack(err)
         },

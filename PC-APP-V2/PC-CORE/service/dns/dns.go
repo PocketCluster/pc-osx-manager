@@ -3,6 +3,7 @@ package dns
 import (
     "net"
     "strings"
+    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/miekg/dns"
@@ -111,16 +112,30 @@ func InitPocketNameService(appLife service.ServiceSupervisor, clusterID string) 
                     Addr:    "127.0.0.1:10059",
                     Net:     "udp",
                 }
-                udpPacketConn *net.UDPConn = nil
-                udpAddr *net.UDPAddr = nil
-                err error = nil
+                udpPacketConn    *net.UDPConn = nil
+                udpAddr          *net.UDPAddr = nil
+                beaconMan beacon.BeaconManger = nil
+                err error                     = nil
             )
-            // wait for beacon manager to come up
-            be := <- beaconManC
-            beaconMan, ok := be.Payload.(beacon.BeaconManger)
-            if !ok {
-                return errors.Errorf("[ERR] invalid beacon manager type")
+            select {
+                case <-time.After(time.Minute): {
+                    // cleanup resources
+                    udpServer.Shutdown()
+                    return errors.Errorf("[ERR] unable to detect beacon agent")
+                }
+                // wait for beacon manager to come up
+                case be := <- beaconManC: {
+                    bm, ok := be.Payload.(beacon.BeaconManger)
+                    if bm != nil && ok {
+                        beaconMan = bm
+                    } else {
+                        return errors.Errorf("[ERR] invalid beacon manager type")
+                    }
+                }
             }
+
+            log.Infof("[NAME-SERVICE] service ready to start...")
+            // setup dns handler
             dns.HandleFunc(".", func(w dns.ResponseWriter, req *dns.Msg) {
                 locaNodeName(beaconMan, w, req)
             })
@@ -137,7 +152,9 @@ func InitPocketNameService(appLife service.ServiceSupervisor, clusterID string) 
             udpServer.PacketConn = udpPacketConn
 
             // send udp server to operation
-            appLife.BroadcastEvent(service.Event{Name:iventNameServerInstanceSpawn, Payload: udpServer})
+            appLife.BroadcastEvent(service.Event{
+                Name:iventNameServerInstanceSpawn,
+                Payload:udpServer})
 
             // wait for stop event
             <- appLife.StopChannel()

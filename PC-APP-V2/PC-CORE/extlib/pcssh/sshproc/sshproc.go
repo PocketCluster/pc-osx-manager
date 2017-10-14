@@ -182,17 +182,17 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
     p.RegisterServiceWithFuncs(
         ServicePCSSHServerAuth,
         func() error {
+            // this is node list for temporary node count
+            type nodeWithSessions struct {
+                Node     services.Server   `json:"node"`
+                Sessions []session.Session `json:"sessions"`
+            }
             var (
                 authServer *auth.AuthServer = nil
                 sessService session.Service = nil
                 aas         *authAndSession = nil
                 asrvOk, authConnOk bool = false, false
             )
-            // this is node list for temporary node count
-            type nodeWithSessions struct {
-                Node     services.Server   `json:"node"`
-                Sessions []session.Session `json:"sessions"`
-            }
 
             // prepare auth server
             authFront := services.Server{

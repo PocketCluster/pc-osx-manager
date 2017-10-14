@@ -204,6 +204,15 @@ func main() {
                             continue
                         }
 
+                        // --- services ---
+                        // health monitor
+                        // (NODEP netchange, DEP beacon, orchst, pcssh)
+                        err = health.InitSystemHealthMonitor(appLife, theFeeder)
+                        if err != nil {
+                            log.Debug(err)
+                            continue
+                        }
+
                         // internal name service
                         // (NODEP netchange, DEP master beacon service)
                         err = dns.InitPocketNameService(appLife, cid)
@@ -212,7 +221,7 @@ func main() {
                             continue
                         }
 
-                        // swarm service
+                        // orcst service
                         // (NODEP netchange, DEP master beacon service)
                         err = container.InitSwarmService(appLife)
                         if err != nil {
@@ -228,6 +237,16 @@ func main() {
                             continue
                         }
 
+                        // teleport service
+                        // (DEP netchange, NODEP services)
+                        // TODO : need to hold teleport instance from GC -> not necessary as it embeds service instance???
+                        _, err = sshproc.NewEmbeddedMasterProcess(appLife.ServiceSupervisor, appCfg.PCSSH)
+                        if err != nil {
+                            log.Debug(err)
+                            continue
+                        }
+
+                        // --- net listeners ---
                         // search catcher service needs to initiated after master beacon
                         // (DEP netchange, NODEP services)
                         // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
@@ -248,22 +267,6 @@ func main() {
                         // vboxcontrol service
                         // (DEP netchange, NODEP service)
                         err = vbox.InitVboxCoreReportService(appLife, cid)
-                        if err != nil {
-                            log.Debug(err)
-                            continue
-                        }
-
-                        // teleport service
-                        // (DEP netchange, NODEP services)
-                        // TODO : need to hold teleport instance from GC -> not necessary as it embeds service instance???
-                        _, err = sshproc.NewEmbeddedMasterProcess(appLife.ServiceSupervisor, appCfg.PCSSH)
-                        if err != nil {
-                            log.Debug(err)
-                            continue
-                        }
-
-                        // TODO : need to check if necessary services have started
-                        err = health.InitSystemHealthMonitor(appLife, theFeeder)
                         if err != nil {
                             log.Debug(err)
                             continue

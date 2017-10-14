@@ -5,6 +5,7 @@ import (
     "time"
 
     log "github.com/Sirupsen/logrus"
+    "github.com/pkg/errors"
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/route"
@@ -18,6 +19,11 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
         nodeBeaconC = make(chan service.Event)
         nodePcsshC  = make(chan service.Event)
         nodeOrchstC = make(chan service.Event)
+
+        // service readiness checker
+        readyBeaconC = make(chan service.Event)
+        readyPcsshC  = make(chan service.Event)
+        readyOrchstC = make(chan service.Event)
     )
 
     appLife.RegisterServiceWithFuncs(
@@ -31,9 +37,56 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                 // node status (beacon, pcssh, orchst) will be coalesced into one report
                 rpNodeStat   = routepath.RpathMonitorNodeStatus()
                 rpSrvStat    = routepath.RpathMonitorServiceStatus()
+                failtimer    = time.NewTicker(time.Minute)
+                readyMarker  = map[string]bool{
+                    ivent.IventBeaconManagerSpawn:        false,
+                    sshproc.EventPCSSHServerProxyStarted: false,
+                    ivent.IventOrchstInstanceSpawn:       false,
+                }
+                readyChecker = func(marker map[string]bool) bool {
+                    for k := range marker {
+                        if !marker[k] {
+                            return false
+                        }
+                    }
+                    return true
+                }
             )
 
-            // TODO : we need a trigger to make sure beacon/ pcssh/ orchst all have started
+            for {
+                select {
+                    case <- failtimer.C: {
+                        failtimer.Stop()
+                        timer.Stop()
+                        return errors.Errorf("[HEALTH] fail to start health service")
+                    }
+                    case <- readyBeaconC: {
+                        log.Infof("[HEALTH] beacon ready")
+                        readyMarker[ivent.IventBeaconManagerSpawn] = true
+                        if readyChecker(readyMarker) {
+                            goto monstart
+                        }
+                    }
+                    case <- readyPcsshC: {
+                        log.Infof("[HEALTH] pcssh ready")
+                        readyMarker[sshproc.EventPCSSHServerProxyStarted] = true
+                        if readyChecker(readyMarker) {
+                            goto monstart
+                        }
+                    }
+                    case <- readyOrchstC: {
+                        log.Infof("[HEALTH] orchst ready")
+                        readyMarker[ivent.IventOrchstInstanceSpawn] = true
+                        if readyChecker(readyMarker) {
+                            goto monstart
+                        }
+                    }
+                }
+            }
+
+            monstart:
+            failtimer.Stop()
+            log.Infof("[HEALTH] all required services are ready")
 
             for {
                 select {
@@ -98,7 +151,12 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
         },
         service.BindEventWithService(ivent.IventMonitorNodeRsltBeacon, nodeBeaconC),
         service.BindEventWithService(sshproc.EventPCSSHNodeListResult, nodePcsshC),
-        service.BindEventWithService(ivent.IventMonitorNodeRsltOrchst, nodeOrchstC))
+        service.BindEventWithService(ivent.IventMonitorNodeRsltOrchst, nodeOrchstC),
+
+        // service readiness checker
+        service.BindEventWithService(ivent.IventBeaconManagerSpawn,    readyBeaconC),
+        service.BindEventWithService(sshproc.EventPCSSHServerProxyStarted, readyPcsshC),
+        service.BindEventWithService(ivent.IventOrchstInstanceSpawn,   readyOrchstC))
 
     return nil
 }

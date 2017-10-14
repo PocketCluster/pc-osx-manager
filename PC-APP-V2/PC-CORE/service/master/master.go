@@ -82,22 +82,68 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     ServiceSupervisor: appLife,
                     PocketConfig:      tcfg,
                 }
-                timer                          = time.NewTicker(time.Second)
+                readyMarker  = map[string]bool{
+                    sshproc.EventPCSSHServerProxyStarted: false,
+                    ivent.IventVboxCtrlInstanceSpawn:     false,
+                }
+                readyChecker = func(marker map[string]bool) bool {
+                    for k := range marker {
+                        if !marker[k] {
+                            return false
+                        }
+                    }
+                    return true
+                }
+                failtimer         *time.Ticker = time.NewTicker(time.Minute)
+                timer             *time.Ticker = time.NewTicker(time.Second)
                 beaconMan  beacon.BeaconManger = nil
+                vboxCtrl   *ivent.VboxCtrlBrcstObj = nil
                 err        error               = nil
             )
-            // wait for vbox control
-            vc := <- vboxC
-            vbc, ok := vc.Payload.(*ivent.VboxCtrlBrcstObj)
-            if !ok {
-                log.Debugf("[AGENT] (ERR) invalid VBoxMasterControl type")
-                return errors.Errorf("[ERR] invalid VBoxMasterControl type")
+
+            for {
+                select {
+                    // fail to start service after one minute
+                    case <- failtimer.C: {
+                        failtimer.Stop()
+                        timer.Stop()
+                        beaconRoute.terminate()
+                        log.Errorf("[AGENT] fail to start agent service")
+                        return errors.Errorf("[AGENT] fail to start agent service")
+                    }
+                    // waiting teleport to start
+                    case <- teleC: {
+                        log.Infof("[AGENT] pcssh ready")
+                        readyMarker[sshproc.EventPCSSHServerProxyStarted] = true
+                        if readyChecker(readyMarker) {
+                            goto buildagent
+                        }
+                    }
+                    // wait for vbox control
+                    case vc := <- vboxC: {
+                        log.Infof("[AGENT] vbox core ready")
+                        vbc, ok := vc.Payload.(*ivent.VboxCtrlBrcstObj)
+                        if vbc != nil && ok {
+                            vboxCtrl = vbc
+                            readyMarker[ivent.IventVboxCtrlInstanceSpawn] = true
+                            if readyChecker(readyMarker) {
+                                goto buildagent
+                            }
+                        } else {
+                            log.Debugf("[AGENT] (ERR) invalid VBoxMasterControl type")
+                            return errors.Errorf("[ERR] invalid VBoxMasterControl type")
+                        }
+                    }
+                }
             }
 
+            buildagent:
+            // stop failtimer
+            failtimer.Stop()
             // beacon manager
             beaconMan, err = beacon.NewBeaconManagerWithFunc(
                 clusterID,
-                vbc.VBoxMasterControl,
+                vboxCtrl.VBoxMasterControl,
                 beaconRoute,
                 func(host string, payload []byte) error {
                     log.Debugf("[AGENT] BEACON-TX [%v] Host %v", time.Now(), host)
@@ -115,11 +161,11 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                 return errors.WithStack(err)
             }
 
-            // waiting teleport to start
-            <- teleC
-
+            appLife.BroadcastEvent(service.Event{
+                Name:ivent.IventBeaconManagerSpawn,
+                Payload:beaconMan})
             log.Debugf("[AGENT] starting agent service...")
-            appLife.BroadcastEvent(service.Event{Name:ivent.IventBeaconManagerSpawn, Payload:beaconMan})
+
             for {
                 select {
                     case <-appLife.StopChannel(): {
@@ -185,11 +231,13 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
         },
         service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
         service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
-        service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,     vboxC),
-        service.BindEventWithService(sshproc.EventPCSSHServerProxyStarted, teleC),
         service.BindEventWithService(ivent.IventNetworkAddressChange,      netC),
         service.BindEventWithService(ivent.IventReportNodeListRequest,     nodeC),
-        service.BindEventWithService(ivent.IventMonitorNodeReqBeacon,      statC))
+        service.BindEventWithService(ivent.IventMonitorNodeReqBeacon,      statC),
+
+        // service readiness checker
+        service.BindEventWithService(sshproc.EventPCSSHServerProxyStarted, teleC),
+        service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,     vboxC))
 
     return nil
 }

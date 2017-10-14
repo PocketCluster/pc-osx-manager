@@ -11,6 +11,7 @@ const (
     IventNetworkAddressChange    string = "ivent.network.address.change"
     IventBeaconManagerSpawn      string = "ivent.beacon.manager.spawn"
     IventVboxCtrlInstanceSpawn   string = "ivent.vbox.ctrl.instance.spawn"
+    IventOrchstInstanceSpawn     string = "ivent.orchst.instance.spawn"
     IventReportNodeListRequest   string = "ivent.report.node.list.request"
     IventReportNodeListResult    string = "ivent.report.node.list.result"
 
