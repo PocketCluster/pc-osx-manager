@@ -12,7 +12,6 @@ import (
     "github.com/stkim1/pc-core/beacon"
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
-    "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/service/ivent"
@@ -83,8 +82,8 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     PocketConfig:      tcfg,
                 }
                 readyMarker  = map[string]bool{
-                    sshproc.EventPCSSHServerProxyStarted: false,
-                    ivent.IventVboxCtrlInstanceSpawn:     false,
+                    ivent.IventPcsshProxyInstanceSpawn: false,
+                    ivent.IventVboxCtrlInstanceSpawn:   false,
                 }
                 readyChecker = func(marker map[string]bool) bool {
                     for k := range marker {
@@ -115,7 +114,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     // waiting teleport to start
                     case <- teleC: {
                         log.Infof("[AGENT] pcssh ready")
-                        readyMarker[sshproc.EventPCSSHServerProxyStarted] = true
+                        readyMarker[ivent.IventPcsshProxyInstanceSpawn] = true
                         if readyChecker(readyMarker) {
                             goto buildagent
                         }
@@ -223,7 +222,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                         // need unregistered node, registered node, bounded node
                         regNodes := beaconMan.RegisteredNodesList()
                         appLife.BroadcastEvent(service.Event{
-                            Name:ivent.IventMonitorNodeRsltBeacon,
+                            Name:ivent.IventMonitorNodeRespBeacon,
                             Payload:regNodes})
                     }
                 }
@@ -234,10 +233,10 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
         service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
         service.BindEventWithService(ivent.IventNetworkAddressChange,      netC),
         service.BindEventWithService(ivent.IventReportNodeListRequest,     nodeC),
-        service.BindEventWithService(ivent.IventMonitorNodeReqBeacon,      statC),
+        service.BindEventWithService(ivent.IventMonitorNodeReqStatus,      statC),
 
         // service readiness checker
-        service.BindEventWithService(sshproc.EventPCSSHServerProxyStarted, teleC),
+        service.BindEventWithService(ivent.IventPcsshProxyInstanceSpawn,   teleC),
         service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,     vboxC))
 
     return nil

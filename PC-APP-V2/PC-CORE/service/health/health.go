@@ -7,7 +7,6 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/event/operation"
-    "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/service"
@@ -33,15 +32,15 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
             type MonitorSystemHealth map[string]interface{}
 
             var (
-                timer        = time.NewTicker(time.Second)
+                timer        = time.NewTicker(time.Second * 2)
                 // node status (beacon, pcssh, orchst) will be coalesced into one report
                 rpNodeStat   = routepath.RpathMonitorNodeStatus()
                 rpSrvStat    = routepath.RpathMonitorServiceStatus()
                 failtimeout  = time.NewTicker(time.Minute)
                 readyMarker  = map[string]bool{
-                    ivent.IventBeaconManagerSpawn:        false,
-                    sshproc.EventPCSSHServerProxyStarted: false,
-                    ivent.IventOrchstInstanceSpawn:       false,
+                    ivent.IventBeaconManagerSpawn:      false,
+                    ivent.IventPcsshProxyInstanceSpawn: false,
+                    ivent.IventOrchstInstanceSpawn:     false,
                 }
                 readyChecker = func(marker map[string]bool) bool {
                     for k := range marker {
@@ -70,7 +69,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                     }
                     case <- readyPcsshC: {
                         log.Infof("[HEALTH] pcssh ready")
-                        readyMarker[sshproc.EventPCSSHServerProxyStarted] = true
+                        readyMarker[ivent.IventPcsshProxyInstanceSpawn] = true
                         if readyChecker(readyMarker) {
                             goto monstart
                         }
@@ -91,6 +90,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
 
             for {
                 select {
+                    // service halt
                     case <- appLife.StopChannel(): {
                         timer.Stop()
                         return nil
@@ -150,14 +150,14 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
 
             return nil
         },
-        service.BindEventWithService(ivent.IventMonitorNodeRsltBeacon, nodeBeaconC),
-        service.BindEventWithService(sshproc.EventPCSSHNodeListResult, nodePcsshC),
-        service.BindEventWithService(ivent.IventMonitorNodeRsltOrchst, nodeOrchstC),
+        service.BindEventWithService(ivent.IventMonitorNodeRespBeacon,   nodeBeaconC),
+        service.BindEventWithService(ivent.IventMonitorNodeRespPcssh,    nodePcsshC),
+        service.BindEventWithService(ivent.IventMonitorNodeRespOrchst,   nodeOrchstC),
 
         // service readiness checker
-        service.BindEventWithService(ivent.IventBeaconManagerSpawn,    readyBeaconC),
-        service.BindEventWithService(sshproc.EventPCSSHServerProxyStarted, readyPcsshC),
-        service.BindEventWithService(ivent.IventOrchstInstanceSpawn,   readyOrchstC))
+        service.BindEventWithService(ivent.IventBeaconManagerSpawn,      readyBeaconC),
+        service.BindEventWithService(ivent.IventPcsshProxyInstanceSpawn, readyPcsshC),
+        service.BindEventWithService(ivent.IventOrchstInstanceSpawn,     readyOrchstC))
 
     return nil
 }

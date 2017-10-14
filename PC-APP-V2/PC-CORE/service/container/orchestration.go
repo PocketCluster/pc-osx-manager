@@ -51,7 +51,7 @@ func InitSwarmService(appLife service.ServiceSupervisor) error {
                     case <- nodeStatC: {
                         if swarmsrv == nil {
                             appLife.BroadcastEvent(service.Event{
-                                Name:    ivent.IventMonitorNodeRsltOrchst,
+                                Name:    ivent.IventMonitorNodeRespOrchst,
                                 Payload: errors.Errorf("unable to query orchestration engine")})
                             continue
                         }
@@ -68,7 +68,7 @@ func InitSwarmService(appLife service.ServiceSupervisor) error {
                             })
                         }
                         appLife.BroadcastEvent(service.Event{
-                            Name:    ivent.IventMonitorNodeRsltOrchst,
+                            Name:    ivent.IventMonitorNodeRespOrchst,
                             Payload: engines})
                     }
                 }
@@ -76,7 +76,7 @@ func InitSwarmService(appLife service.ServiceSupervisor) error {
             return nil
         },
         service.BindEventWithService(ivent.IventOrchstInstanceSpawn,  swarmSrvC),
-        service.BindEventWithService(ivent.IventMonitorNodeReqOrchst, nodeStatC))
+        service.BindEventWithService(ivent.IventMonitorNodeReqStatus, nodeStatC))
 
     beaconManC := make(chan service.Event)
     appLife.RegisterServiceWithFuncs(

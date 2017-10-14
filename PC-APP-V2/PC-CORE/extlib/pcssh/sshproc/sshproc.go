@@ -30,6 +30,7 @@ import (
     "github.com/stkim1/pc-core/extlib/pcssh/sshcfg"
     pervice "github.com/stkim1/pc-core/service"
     pcctx "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/service/ivent"
 )
 
 const (
@@ -43,12 +44,6 @@ const (
 
     ServicePCSSHConnProxy string    = "service.pcssh.conn.proxy"
     ServicePCSSHServerProxy string  = "service.pcssh.server.proxy"
-
-    // external event telling waiters that proxy instance is up and running
-    EventPCSSHServerProxyStarted string = "event.pcssh.server.proxy.started"
-    // external event requesting available node list
-    EventPCSSHNodeListRequest    string = "event.pcssh.node.list.request"
-    EventPCSSHNodeListResult     string = "event.pcssh.node.list.result"
 )
 
 // nost status info for health monitor
@@ -248,16 +243,16 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                         servers, err := authServer.GetNodes()
                         if err != nil {
                             p.BroadcastEvent(pervice.Event{
-                                Name:    EventPCSSHNodeListResult,
-                                Payload: errors.Errorf("unable to get node from authority"),
+                                Name:    ivent.IventMonitorNodeRespPcssh,
+                                Payload: errors.WithMessage(err, "unable to get node from authority"),
                             })
                             continue
                         }
                         sessions, err := sessService.GetSessions()
                         if err != nil {
                             p.BroadcastEvent(pervice.Event{
-                                Name:    EventPCSSHNodeListResult,
-                                Payload: errors.Errorf("unable to get sessions"),
+                                Name:    ivent.IventMonitorNodeRespPcssh,
+                                Payload: errors.WithMessage(err,"unable to get sessions"),
                             })
                             continue
                         }
@@ -287,7 +282,7 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                                 })
                         }
                         p.BroadcastEvent(pervice.Event{
-                            Name:    EventPCSSHNodeListResult,
+                            Name:    ivent.IventMonitorNodeRespPcssh,
                             Payload: nodes,
                         })
                     }
@@ -304,16 +299,14 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                 }
             }
         },
-        pervice.BindEventWithService(iventAuthAndSessionObj,    asrvEventC),
-        pervice.BindEventWithService(iventAuthorityClientConn,  authConnC),
-        pervice.BindEventWithService(EventPCSSHNodeListRequest, nodeReqC))
+        pervice.BindEventWithService(iventAuthAndSessionObj,          asrvEventC),
+        pervice.BindEventWithService(iventAuthorityClientConn,        authConnC),
+        pervice.BindEventWithService(ivent.IventMonitorNodeReqStatus, nodeReqC))
 
     // Register an SSH endpoint which is used to create an SSH tunnel to send HTTP requests to the Auth API
     p.RegisterServiceWithFuncs(
         ServicePCSSHAuthority,
         func() error {
-            log.Debugf("[AUTH] Auth service is starting on %v", cfg.Auth.SSHAddr.Addr)
-
             var (
                 uKiosk userKiosk = func(hname, huuid string) (*auth.UserIdentity, error) {
                     log.Debugf("[AUTH] user identity is inquired from %v w/ %v", hname, huuid)
@@ -338,6 +331,8 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                 authTunnel *auth.AuthTunnel
                 err error = nil
             )
+
+            log.Debugf("[AUTH] Auth service is starting on %v", cfg.Auth.SSHAddr.Addr)
 
             // Initialize the storage back-ends for keys, events and records
             bkEnd, err := p.initAuthStorage()
@@ -411,7 +406,7 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                 UserKiosk:         uKiosk,
             }
 
-            limiter, err := limiter.NewLimiter(cfg.Auth.Limiter)
+            lmtr, err := limiter.NewLimiter(cfg.Auth.Limiter)
             if err != nil {
                 return errors.WithStack(err)
             }
@@ -419,7 +414,7 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                 cfg.Auth.SSHAddr,
                 identity.KeySigner,
                 apiConf,
-                auth.SetLimiter(limiter),
+                auth.SetLimiter(lmtr),
             )
             if err != nil {
                 log.Debugf("[AUTH] Error: %v", err)
@@ -583,7 +578,7 @@ func (p *EmbeddedMasterProcess) initProxy() error {
             }
             err = SSHProxy.Start()
             log.Debugf("[PROXY] SSH proxy service is starting on %v. Error : %v", cfg.Proxy.SSHAddr.Addr, err)
-            p.BroadcastEvent(pervice.Event{Name:EventPCSSHServerProxyStarted})
+            p.BroadcastEvent(pervice.Event{Name:ivent.IventPcsshProxyInstanceSpawn})
 
             // wait for exit
             <- p.StopChannel()

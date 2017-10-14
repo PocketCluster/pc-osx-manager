@@ -12,18 +12,23 @@ const (
     IventBeaconManagerSpawn      string = "ivent.beacon.manager.spawn"
     IventVboxCtrlInstanceSpawn   string = "ivent.vbox.ctrl.instance.spawn"
     IventOrchstInstanceSpawn     string = "ivent.orchst.instance.spawn"
+    // external event telling waiters that pcssh proxy instance is up and running
+    IventPcsshProxyInstanceSpawn string = "ivent.pcssh.proxy.instance.spawn"
+
+
+    // request to monitor node status
+    IventMonitorNodeReqStatus    string = "ivent.monitor.node.req.status"
+    // monitor beacon
+    IventMonitorNodeRespBeacon   string = "ivent.monitor.node.resp.beacon"
+    // monitor pcssh
+    IventMonitorNodeRespPcssh    string = "ivent.monitor.node.resp.pcssh"
+    // monitor orchestration
+    IventMonitorNodeRespOrchst   string = "ivent.monitor.node.resp.orchst"
+
+
+    // for package node list
     IventReportNodeListRequest   string = "ivent.report.node.list.request"
     IventReportNodeListResult    string = "ivent.report.node.list.result"
-
-    // monitor beacon
-    IventMonitorNodeReqBeacon    string = "ivent.monitor.node.req.beacon"
-    IventMonitorNodeRsltBeacon   string = "ivent.monitor.node.rslt.beacon"
-
-    // pcssh monitor ivent is in its own package
-
-    // monitor orchestration
-    IventMonitorNodeReqOrchst    string = "ivent.monitor.node.req.orchst"
-    IventMonitorNodeRsltOrchst   string = "ivent.monitor.node.rslt.orchst"
 )
 
 // this is to broadcast masterctrl object w/ listener. It's shared with BeaconAgent + VBoxController
