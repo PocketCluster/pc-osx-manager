@@ -12,13 +12,6 @@ import (
     "time"
 )
 
-// nost status info for health monitor
-type EngineStatusInfo struct {
-    Name    string
-    ID      string
-    Addr    string
-}
-
 func InitSwarmService(appLife service.ServiceSupervisor) error {
     var (
         swarmSrvC = make(chan service.Event)
@@ -48,7 +41,14 @@ func InitSwarmService(appLife service.ServiceSupervisor) error {
                         }
                         return errors.Errorf("[ERR] null orchestration instance")
                     }
-                    case <- nodeStatC: {
+                    case re := <- nodeStatC: {
+                        ts, ok := re.Payload.(time.Time)
+                        if !ok {
+                            appLife.BroadcastEvent(service.Event{
+                                Name:    ivent.IventMonitorNodeRespOrchst,
+                                Payload: errors.Errorf("inaccurate timestamp")})
+                            continue
+                        }
                         if swarmsrv == nil {
                             appLife.BroadcastEvent(service.Event{
                                 Name:    ivent.IventMonitorNodeRespOrchst,
@@ -57,19 +57,22 @@ func InitSwarmService(appLife service.ServiceSupervisor) error {
                         }
 
                         nets := swarmsrv.Cluster.Networks()
-                        engines := make([]EngineStatusInfo, 0, len(nets))
+                        engines := make([]ivent.EngineStatusInfo, 0, len(nets))
                         for i, _ := range nets {
                             n := nets[i]
-                            log.Debugf("node ip %v | addr %v", n.Engine.Addr)
-                            engines = append(engines, EngineStatusInfo {
+                            engines = append(engines, ivent.EngineStatusInfo {
                                 Name: n.Engine.Name,
                                 ID:   n.Engine.ID,
-                                Addr: n.Engine.IP,
+                                IP:   n.Engine.IP,
+                                Addr: n.Engine.Addr,
                             })
                         }
                         appLife.BroadcastEvent(service.Event{
                             Name:    ivent.IventMonitorNodeRespOrchst,
-                            Payload: engines})
+                            Payload: ivent.EngineStatusMeta{
+                                TimeStamp: ts,
+                                Engines:   engines,
+                            }})
                     }
                 }
             }

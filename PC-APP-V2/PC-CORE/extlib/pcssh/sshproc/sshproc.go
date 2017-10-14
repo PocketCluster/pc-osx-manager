@@ -46,14 +46,6 @@ const (
     ServicePCSSHServerProxy string  = "service.pcssh.server.proxy"
 )
 
-// nost status info for health monitor
-type NodeStatusInfo struct {
-    HostName    string
-    ID          string
-    Addr        string
-    HasSession  bool
-}
-
 // IsConnectionProblem returns whether this error is of ConnectionProblemError. This is originated from teleport trace
 func isConnectionProblem(e error) bool {
     type ad interface {
@@ -239,7 +231,16 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                         authConnOk = true
                         log.Debugf("[AUTH] authServer client connection succeed")
                     }
-                    case <- nodeReqC: {
+                    case re := <- nodeReqC: {
+                        ts, ok := re.Payload.(time.Time)
+                        if !ok {
+                            p.BroadcastEvent(pervice.Event{
+                                Name:    ivent.IventMonitorNodeRespPcssh,
+                                Payload: errors.WithMessage(err, "inaccurate timestamp"),
+                            })
+                            continue
+                        }
+
                         servers, err := authServer.GetNodes()
                         if err != nil {
                             p.BroadcastEvent(pervice.Event{
@@ -269,11 +270,11 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                                 }
                             }
                         }
-                        nodes := make([]NodeStatusInfo, 0, len(nodeMap))
+                        nodes := make([]ivent.NodeStatusInfo, 0, len(nodeMap))
                         for key := range nodeMap {
                             n := *nodeMap[key]
                             nodes = append(nodes,
-                                NodeStatusInfo{
+                                ivent.NodeStatusInfo{
                                     HostName: n.Node.Hostname,
                                     ID:       n.Node.ID,
                                     Addr:     n.Node.Addr,
@@ -283,8 +284,10 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                         }
                         p.BroadcastEvent(pervice.Event{
                             Name:    ivent.IventMonitorNodeRespPcssh,
-                            Payload: nodes,
-                        })
+                            Payload: ivent.NodeStatusMeta {
+                                TimeStamp: ts,
+                                Nodes:     nodes,
+                            }})
                     }
                     default: {
                         if asrvOk && authConnOk {

@@ -247,14 +247,16 @@ func main() {
                         }
 
                         // --- net listeners ---
-                        // search catcher service needs to initiated after master beacon
-                        // (DEP netchange, NODEP services)
-                        // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
-                        _, err = mcast.NewSearchCatcher(appLife.ServiceSupervisor, iname)
+                        // vboxcontrol service comes first (as it's internal network listener)
+                        // (DEP netchange, NODEP service)
+                        err = vbox.InitVboxCoreReportService(appLife, cid)
                         if err != nil {
                             log.Debug(err)
                             continue
                         }
+
+                        // - then initiate the external listeners -
+
                         // beacon locator service needs to initiated after master beacon
                         // (NODEP netchange, NODEP service)
                         // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
@@ -264,9 +266,10 @@ func main() {
                             continue
                         }
 
-                        // vboxcontrol service
-                        // (DEP netchange, NODEP service)
-                        err = vbox.InitVboxCoreReportService(appLife, cid)
+                        // search catcher service needs to initiated after master beacon
+                        // (DEP netchange, NODEP services)
+                        // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
+                        _, err = mcast.NewSearchCatcher(appLife.ServiceSupervisor, iname)
                         if err != nil {
                             log.Debug(err)
                             continue

@@ -1,9 +1,7 @@
 package ivent
 
 import (
-    "net"
-
-    "github.com/stkim1/pc-vbox-comm/masterctrl"
+    "time"
 )
 
 // These are the internal events that need to rounted to main packages
@@ -33,6 +31,32 @@ const (
 
 // this is to broadcast masterctrl object w/ listener. It's shared with BeaconAgent + VBoxController
 type VboxCtrlBrcstObj struct {
-    masterctrl.VBoxMasterControl
-    net.Listener
+    VBoxMasterControl interface{}
+    Listener          interface{}
+}
+
+// node status info from orchestration
+type EngineStatusInfo struct {
+    Name    string
+    ID      string
+    IP      string
+    Addr    string
+}
+
+type EngineStatusMeta struct {
+    TimeStamp time.Time
+    Engines   []EngineStatusInfo
+}
+
+// node status info from Pcssh
+type NodeStatusInfo struct {
+    HostName    string
+    ID          string
+    Addr        string
+    HasSession  bool
+}
+
+type NodeStatusMeta struct {
+    TimeStamp   time.Time
+    Nodes       []NodeStatusInfo
 }

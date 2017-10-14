@@ -32,11 +32,16 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
             type MonitorSystemHealth map[string]interface{}
 
             var (
-                timer        = time.NewTicker(time.Second * 2)
                 // node status (beacon, pcssh, orchst) will be coalesced into one report
-                rpNodeStat   = routepath.RpathMonitorNodeStatus()
+                //rpNodeStat   = routepath.RpathMonitorNodeStatus()
                 rpSrvStat    = routepath.RpathMonitorServiceStatus()
+
+                // timers
+                timer        = time.NewTicker(time.Second * 2)
                 failtimeout  = time.NewTicker(time.Minute)
+                lastTS       = time.Now()
+
+                // service ready checks
                 readyMarker  = map[string]bool{
                     ivent.IventBeaconManagerSpawn:      false,
                     ivent.IventPcsshProxyInstanceSpawn: false,
@@ -103,33 +108,64 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             log.Debugf("[ERR] invalid unregistered node list type")
                             continue
                         }
-                        data, err := json.Marshal(map[string]interface{} {"nodestat" : nodes})
+                        _, err := json.Marshal(map[string]interface{} {"nodestat" : nodes})
                         if err != nil {
                             log.Debugf(err.Error())
                             continue
                         }
+/*
                         err = feeder.FeedResponseForGet(rpNodeStat, string(data))
                         if err != nil {
                             log.Debugf(err.Error())
                         }
+*/
                     }
 
                     // monitoring pcssh
-                    case <- nodePcsshC: {
+                    case re := <- nodePcsshC: {
+                        md, ok := re.Payload.(ivent.NodeStatusMeta)
+                        if !ok {
+                            er, ok := re.Payload.(error)
+                            if ok {
+                                log.Errorf("cannot fetch node status from pcssh %v", er)
+                            } else {
+                                log.Errorf("cannot fetch node status from pcssh w/ invalid data %v", md)
+                            }
+                            continue
+                        }
+                        if lastTS.After(md.TimeStamp) {
+                            log.Errorf("invalid timestamp from pcssh last.ts %v | md.ts %v", lastTS, md.TimeStamp)
+                            continue
+                        }
                     }
 
                     // monitoring orchst
-                    case <- nodeOrchstC: {
+                    case re := <- nodeOrchstC: {
+                        md, ok := re.Payload.(ivent.EngineStatusMeta)
+                        if !ok {
+                            er, ok := re.Payload.(error)
+                            if ok {
+                                log.Errorf("cannot fetch node status from orchst %v", er)
+                            } else {
+                                log.Errorf("cannot fetch node status from orchst w/ invalid data %v", md)
+                            }
+                            continue
+                        }
+                        if lastTS.After(md.TimeStamp) {
+                            log.Errorf("invalid timestamp from orchst last.ts %v | md.ts %v", lastTS, md.TimeStamp)
+                            continue
+                        }
                     }
 
                     // service report
-                    case <- timer.C: {
+                    case ts := <- timer.C: {
                         // report services status
                         var (
                             response = MonitorSystemHealth{}
                             srvStatus = map[string]bool{}
                         )
 
+                        // 1. report service status
                         sl := appLife.ServiceList()
                         for i, _ := range sl {
                             s := sl[i]
@@ -144,6 +180,18 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                         if err != nil {
                             log.Debugf(err.Error())
                         }
+
+                        // 2. report node status
+
+
+                        // 3. request node status to services
+                        appLife.BroadcastEvent(service.Event{
+                            Name: ivent.IventMonitorNodeReqStatus,
+                            Payload: ts,
+                        })
+
+                        // record ts
+                        lastTS = ts
                     }
                 }
             }

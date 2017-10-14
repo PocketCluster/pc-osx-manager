@@ -9,6 +9,7 @@ import (
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
+    "github.com/stkim1/pc-vbox-comm/masterctrl"
     "github.com/stkim1/pc-core/beacon"
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
@@ -96,7 +97,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                 failtimout         *time.Ticker = time.NewTicker(time.Minute)
                 timer             *time.Ticker = time.NewTicker(time.Second)
                 beaconMan  beacon.BeaconManger = nil
-                vboxCtrl   *ivent.VboxCtrlBrcstObj = nil
+                vmctrl     masterctrl.VBoxMasterControl
                 err        error               = nil
             )
 
@@ -113,25 +114,29 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     }
                     // waiting teleport to start
                     case <- teleC: {
-                        log.Infof("[AGENT] pcssh ready")
                         readyMarker[ivent.IventPcsshProxyInstanceSpawn] = true
+                        log.Infof("[AGENT] pcssh ready")
+
                         if readyChecker(readyMarker) {
                             goto buildagent
                         }
                     }
                     // wait for vbox control
                     case vc := <- vboxC: {
-                        log.Infof("[AGENT] vbox core ready")
                         vbc, ok := vc.Payload.(*ivent.VboxCtrlBrcstObj)
                         if vbc != nil && ok {
-                            vboxCtrl = vbc
+                            vmctrl, ok = vbc.VBoxMasterControl.(masterctrl.VBoxMasterControl)
+                            if !ok {
+                                return errors.Errorf("[AGENT] (ERR) invalid VBoxMasterControl type")
+                            }
                             readyMarker[ivent.IventVboxCtrlInstanceSpawn] = true
+                            log.Infof("[AGENT] vbox core ready")
+
                             if readyChecker(readyMarker) {
                                 goto buildagent
                             }
                         } else {
-                            log.Debugf("[AGENT] (ERR) invalid VBoxMasterControl type")
-                            return errors.Errorf("[ERR] invalid VBoxMasterControl type")
+                            return errors.Errorf("[AGENT] (ERR) invalid VBoxMasterControl type")
                         }
                     }
                 }
@@ -143,7 +148,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
             // beacon manager
             beaconMan, err = beacon.NewBeaconManagerWithFunc(
                 clusterID,
-                vboxCtrl.VBoxMasterControl,
+                vmctrl,
                 beaconRoute,
                 func(host string, payload []byte) error {
                     log.Debugf("[AGENT] BEACON-TX [%v] Host %v", time.Now(), host)
@@ -218,7 +223,13 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                             Payload:nodeList})
                     }
                     // node status report service
-                    case <- statC: {
+                    case re := <- statC: {
+                        _, ok := re.Payload.(time.Time)
+                        if !ok {
+                            appLife.BroadcastEvent(service.Event{
+                                Name:    ivent.IventMonitorNodeRespBeacon,
+                                Payload: errors.Errorf("inaccurate timestamp")})
+                        }
                         // need unregistered node, registered node, bounded node
                         regNodes := beaconMan.RegisteredNodesList()
                         appLife.BroadcastEvent(service.Event{
