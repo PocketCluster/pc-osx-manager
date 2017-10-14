@@ -6,6 +6,7 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/stkim1/pc-core/event/operation"
+    "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/service"
@@ -95,9 +96,9 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
 
             return nil
         },
-        service.BindEventWithService(ivent.IventMonitorNodeBeacon, nodeBeaconC),
-        service.BindEventWithService(ivent.IventMonitorNodePcssh,  nodePcsshC),
-        service.BindEventWithService(ivent.IventMonitorNodeOrchst, nodeOrchstC))
+        service.BindEventWithService(ivent.IventMonitorNodeRsltBeacon, nodeBeaconC),
+        service.BindEventWithService(sshproc.EventPCSSHNodeListResult, nodePcsshC),
+        service.BindEventWithService(ivent.IventMonitorNodeRsltOrchst, nodeOrchstC))
 
     return nil
 }

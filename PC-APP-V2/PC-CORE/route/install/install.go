@@ -188,6 +188,7 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
         _ = makeMessageFeedBack(feeder, rpProgress, "Installing core image...")
 
         // --- --- --- --- --- install image to nodes --- --- --- --- ---
+        // TODO : we can request swarm server to do this job
         _ = makeMessageFeedBack(feeder, rpProgress, "Installing node image...")
         cli, err := dockertool.NewContainerClient("tcp://pc-node1:2376", "1.24")
         if err != nil {

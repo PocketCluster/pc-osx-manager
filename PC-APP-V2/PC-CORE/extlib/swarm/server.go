@@ -10,6 +10,7 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/docker/swarm/api"
+    "github.com/docker/swarm/cluster"
     "gopkg.in/tylerb/graceful.v1"
 )
 
@@ -29,7 +30,7 @@ func newListener(proto, addr string, tlsConfig *tls.Config) (net.Listener, error
 }
 
 // NewServer creates an api.Server.
-func newStoppableServiceForSingleHost(ctx *SwarmContext, handler http.Handler) (*SwarmService, error) {
+func newStoppableServiceForSingleHost(ctx *SwarmContext, handler http.Handler, aCluster cluster.Cluster) (*SwarmService, error) {
     var (
         hosts []string = ctx.managerHost
         tlsConfig *tls.Config = ctx.tlsConfig
@@ -75,6 +76,7 @@ func newStoppableServiceForSingleHost(ctx *SwarmContext, handler http.Handler) (
                 Handler:        handler,
             },
         },
+        Cluster:       aCluster,
     }, nil
 }
 
@@ -84,6 +86,9 @@ type SwarmService struct {
     tlsConfig     *tls.Config
     listener      net.Listener
     server        *graceful.Server
+
+    // this reference is to be used to pull cluster information
+    cluster.Cluster
 
     // this field is to be deprecated
     dispatcher    *dispatcher

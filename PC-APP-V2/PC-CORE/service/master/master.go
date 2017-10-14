@@ -175,7 +175,9 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     case <- statC: {
                         // need unregistered node, registered node, bounded node
                         regNodes := beaconMan.RegisteredNodesList()
-                        appLife.BroadcastEvent(service.Event{Name:ivent.IventMonitorNodeBeacon, Payload:regNodes})
+                        appLife.BroadcastEvent(service.Event{
+                            Name:ivent.IventMonitorNodeRsltBeacon,
+                            Payload:regNodes})
                     }
                 }
             }
@@ -187,7 +189,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
         service.BindEventWithService(sshproc.EventPCSSHServerProxyStarted, teleC),
         service.BindEventWithService(ivent.IventNetworkAddressChange,      netC),
         service.BindEventWithService(ivent.IventReportNodeListRequest,     nodeC),
-        service.BindEventWithService(ivent.IventMonitorNodeBeacon,         statC))
+        service.BindEventWithService(ivent.IventMonitorNodeReqBeacon,      statC))
 
     return nil
 }
