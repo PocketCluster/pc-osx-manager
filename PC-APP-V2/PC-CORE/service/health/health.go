@@ -37,7 +37,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                 // node status (beacon, pcssh, orchst) will be coalesced into one report
                 rpNodeStat   = routepath.RpathMonitorNodeStatus()
                 rpSrvStat    = routepath.RpathMonitorServiceStatus()
-                failtimer    = time.NewTicker(time.Minute)
+                failtimeout  = time.NewTicker(time.Minute)
                 readyMarker  = map[string]bool{
                     ivent.IventBeaconManagerSpawn:        false,
                     sshproc.EventPCSSHServerProxyStarted: false,
@@ -53,10 +53,11 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                 }
             )
 
+            // monitor pre-requisite services with timeout
             for {
                 select {
-                    case <- failtimer.C: {
-                        failtimer.Stop()
+                    case <- failtimeout.C: {
+                        failtimeout.Stop()
                         timer.Stop()
                         return errors.Errorf("[HEALTH] fail to start health service")
                     }
@@ -85,7 +86,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
             }
 
             monstart:
-            failtimer.Stop()
+            failtimeout.Stop()
             log.Infof("[HEALTH] all required services are ready")
 
             for {

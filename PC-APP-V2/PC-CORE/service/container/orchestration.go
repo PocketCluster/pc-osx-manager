@@ -84,9 +84,13 @@ func InitSwarmService(appLife service.ServiceSupervisor) error {
         func() error {
             var (
                 beaconMan beacon.BeaconManger = nil
+                failtimout = time.NewTicker(time.Minute)
             )
+
+            // wait becon agent
             select {
-                case <- time.After(time.Minute): {
+                case <- failtimout.C: {
+                    failtimout.Stop()
                     return errors.Errorf("[ORCHST] unable to recieve beacon manager")
                 }
                 case be := <- beaconManC: {
@@ -99,7 +103,9 @@ func InitSwarmService(appLife service.ServiceSupervisor) error {
                 }
             }
 
-            log.Debugf("[ORCHST] beacon manager received...")
+            failtimout.Stop()
+            log.Info("[ORCHST] beacon manager received...")
+
             ctx := context.SharedHostContext()
             caCert, err := ctx.CertAuthCertificate()
             if err != nil {
