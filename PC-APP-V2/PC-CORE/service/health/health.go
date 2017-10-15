@@ -13,6 +13,55 @@ import (
     "github.com/stkim1/pc-core/service/ivent"
 )
 
+type NodeStat struct {
+    Name          string        `json:"name"`
+    MacAddr       string        `json:"mac"`
+    Registered    bool          `json:"reged"`
+    Bounded       bool          `json:"bnded"`
+    PcsshOn       bool          `json:"pcssh"`
+    OrchstOn      bool          `json:"orchst"`
+}
+
+type NodeMeta struct {
+    Timestamp     int64         `json:"ts"`
+    BeaconChecked bool          `json:"-"`
+    PcsshChecked  bool          `json:"-"`
+    OrchstChecked bool          `json:"-"`
+    Stat          []*NodeStat   `json:"stat"`
+}
+
+func (nm *NodeMeta) isReadyToReport() bool {
+    //return bool(nm.BeaconChecked && nm.PcsshChecked && nm.OrchstChecked)
+    return bool(nm.PcsshChecked && nm.OrchstChecked)
+}
+
+type TimedStats map[int64]*NodeMeta
+
+func (t TimedStats) removeStatForTimestamp(ts int64) {
+    delete(t, ts)
+}
+
+func (t TimedStats) cleanRequestBefore(ts int64) {
+    if len(t) == 0 {
+        return
+    }
+    var tks []int64 = []int64{}
+    for tk := range t {
+        tks = append(tks, tk)
+    }
+
+    for _, tk := range tks {
+        if tk <= ts {
+            log.Warnf("[HEALTH] [WARN] deleting old tk %v", tk)
+            delete(t, tk)
+        }
+    }
+}
+
+func (t TimedStats) isReadyToRequest() bool {
+    return len(t) == 0
+}
+
 func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.ResponseFeeder) error {
     var (
         nodeBeaconC = make(chan service.Event)
@@ -39,7 +88,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                 // timers
                 timer        = time.NewTicker(time.Second * 2)
                 failtimeout  = time.NewTicker(time.Minute)
-                lastTS       = time.Now()
+                timedStat    = make(TimedStats, 0)
 
                 // service ready checks
                 readyMarker  = map[string]bool{
@@ -102,40 +151,30 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                     }
 
                     // monitoring beacon
-                    case re := <- nodeBeaconC: {
-                        nodes, ok := re.Payload.([]map[string]string)
-                        if !ok {
-                            log.Debugf("[ERR] invalid unregistered node list type")
-                            continue
-                        }
-                        _, err := json.Marshal(map[string]interface{} {"nodestat" : nodes})
-                        if err != nil {
-                            log.Debugf(err.Error())
-                            continue
-                        }
-/*
-                        err = feeder.FeedResponseForGet(rpNodeStat, string(data))
-                        if err != nil {
-                            log.Debugf(err.Error())
-                        }
-*/
+                    case <- nodeBeaconC: {
                     }
 
                     // monitoring pcssh
                     case re := <- nodePcsshC: {
-                        md, ok := re.Payload.(ivent.NodeStatusMeta)
+                        md, ok := re.Payload.(ivent.PcsshNodeStatusMeta)
                         if !ok {
-                            er, ok := re.Payload.(error)
-                            if ok {
-                                log.Errorf("cannot fetch node status from pcssh %v", er)
-                            } else {
-                                log.Errorf("cannot fetch node status from pcssh w/ invalid data %v", md)
-                            }
+                            log.Errorf("[HEALTH] [ERR] cannot fetch node status from pcssh w/ invalid data %v", md)
                             continue
                         }
-                        if lastTS.After(md.TimeStamp) {
-                            log.Errorf("invalid timestamp from pcssh last.ts %v | md.ts %v", lastTS, md.TimeStamp)
+                        if md.Error != nil {
+                            log.Errorf(md.Error.Error())
                             continue
+                        }
+                        meta, ok := timedStat[md.TimeStamp]
+                        if !ok {
+                            log.Errorf("[HEALTH] [ERR] timestamp %v record for reported stat does not exists", md.TimeStamp)
+                            continue
+                        }
+                        meta.PcsshChecked = true
+
+                        if meta.isReadyToReport() {
+                            log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
+                            timedStat.removeStatForTimestamp(md.TimeStamp)
                         }
                     }
 
@@ -143,17 +182,23 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                     case re := <- nodeOrchstC: {
                         md, ok := re.Payload.(ivent.EngineStatusMeta)
                         if !ok {
-                            er, ok := re.Payload.(error)
-                            if ok {
-                                log.Errorf("cannot fetch node status from orchst %v", er)
-                            } else {
-                                log.Errorf("cannot fetch node status from orchst w/ invalid data %v", md)
-                            }
+                            log.Errorf("[HEALTH] [ERR] cannot fetch node status from orchst w/ invalid data %v", md)
                             continue
                         }
-                        if lastTS.After(md.TimeStamp) {
-                            log.Errorf("invalid timestamp from orchst last.ts %v | md.ts %v", lastTS, md.TimeStamp)
+                        if md.Error != nil {
+                            log.Errorf(md.Error.Error())
                             continue
+                        }
+                        meta, ok := timedStat[md.TimeStamp]
+                        if !ok {
+                            log.Errorf("[HEALTH] [ERR] timestamp %v record for reported stat does not exists", md.TimeStamp)
+                            continue
+                        }
+                        meta.OrchstChecked = true
+
+                        if meta.isReadyToReport() {
+                            log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
+                            timedStat.removeStatForTimestamp(md.TimeStamp)
                         }
                     }
 
@@ -163,6 +208,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                         var (
                             response = MonitorSystemHealth{}
                             srvStatus = map[string]bool{}
+                            tmark = ts.Unix()
                         )
 
                         // 1. report service status
@@ -183,15 +229,21 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
 
                         // 2. report node status
 
+                        // 3. --- request node status to services ---
+                        // clear requests older than 10 sec
+                        timedStat.cleanRequestBefore(tmark - int64(10))
 
-                        // 3. request node status to services
-                        appLife.BroadcastEvent(service.Event{
-                            Name: ivent.IventMonitorNodeReqStatus,
-                            Payload: ts,
-                        })
-
-                        // record ts
-                        lastTS = ts
+                        // unless requested stat report is being cleared, we will not make another request
+                        if timedStat.isReadyToRequest() {
+                            timedStat[tmark] = &NodeMeta{
+                                Timestamp: tmark,
+                            }
+                            appLife.BroadcastEvent(service.Event{
+                                Name: ivent.IventMonitorNodeReqStatus,
+                                Payload: tmark,
+                            })
+                            log.Infof("[HEALTH] ->> (%v) new stat request made", tmark)
+                        }
                     }
                 }
             }

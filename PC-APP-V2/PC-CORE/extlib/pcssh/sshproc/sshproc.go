@@ -232,12 +232,14 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                         log.Debugf("[AUTH] authServer client connection succeed")
                     }
                     case re := <- nodeReqC: {
-                        ts, ok := re.Payload.(time.Time)
+                        ts, ok := re.Payload.(int64)
                         if !ok {
                             p.BroadcastEvent(pervice.Event{
                                 Name:    ivent.IventMonitorNodeRespPcssh,
-                                Payload: errors.WithMessage(err, "inaccurate timestamp"),
-                            })
+                                Payload: ivent.PcsshNodeStatusMeta{
+                                    TimeStamp: ts,
+                                    Error:     errors.WithMessage(err, "inaccurate timestamp"),
+                                }})
                             continue
                         }
 
@@ -270,11 +272,11 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                                 }
                             }
                         }
-                        nodes := make([]ivent.NodeStatusInfo, 0, len(nodeMap))
+                        nodes := make([]ivent.PcsshNodeStatusInfo, 0, len(nodeMap))
                         for key := range nodeMap {
                             n := *nodeMap[key]
                             nodes = append(nodes,
-                                ivent.NodeStatusInfo{
+                                ivent.PcsshNodeStatusInfo{
                                     HostName: n.Node.Hostname,
                                     ID:       n.Node.ID,
                                     Addr:     n.Node.Addr,
@@ -284,7 +286,7 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                         }
                         p.BroadcastEvent(pervice.Event{
                             Name:    ivent.IventMonitorNodeRespPcssh,
-                            Payload: ivent.NodeStatusMeta {
+                            Payload: ivent.PcsshNodeStatusMeta {
                                 TimeStamp: ts,
                                 Nodes:     nodes,
                             }})

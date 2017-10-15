@@ -1,8 +1,9 @@
 package ivent
 
-import (
-    "time"
-)
+/*
+ * This package contains internal message event name and struct. Do not import other packages
+ */
+
 
 // These are the internal events that need to rounted to main packages
 const (
@@ -37,26 +38,28 @@ type VboxCtrlBrcstObj struct {
 
 // node status info from orchestration
 type EngineStatusInfo struct {
-    Name    string
-    ID      string
-    IP      string
-    Addr    string
+    Name          string
+    ID            string
+    IP            string
+    Addr          string
 }
 
 type EngineStatusMeta struct {
-    TimeStamp time.Time
-    Engines   []EngineStatusInfo
+    TimeStamp     int64
+    Error         error
+    Engines       []EngineStatusInfo
 }
 
 // node status info from Pcssh
-type NodeStatusInfo struct {
-    HostName    string
-    ID          string
-    Addr        string
-    HasSession  bool
+type PcsshNodeStatusInfo struct {
+    HostName      string
+    ID            string
+    Addr          string
+    HasSession    bool
 }
 
-type NodeStatusMeta struct {
-    TimeStamp   time.Time
-    Nodes       []NodeStatusInfo
+type PcsshNodeStatusMeta struct {
+    TimeStamp     int64
+    Error         error
+    Nodes         []PcsshNodeStatusInfo
 }

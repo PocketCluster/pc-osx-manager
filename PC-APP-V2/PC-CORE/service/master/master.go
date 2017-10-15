@@ -224,7 +224,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     }
                     // node status report service
                     case re := <- statC: {
-                        _, ok := re.Payload.(time.Time)
+                        _, ok := re.Payload.(int64)
                         if !ok {
                             appLife.BroadcastEvent(service.Event{
                                 Name:    ivent.IventMonitorNodeRespBeacon,

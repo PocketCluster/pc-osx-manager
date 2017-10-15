@@ -11,6 +11,9 @@
 - [ ] Have a UI queue to stack ui requests so that duplicated requests will not cause double execution
 
 ### V0.1.4
+- [ ] make sure `interface` building tips from [`S39hostname`](/PC-APP-V1/pc-rpi-agent/S39hostname) being applied to [PocketAgent](/PC-APP-V1/pc-rpi-agent).
+- [ ] Close health monitor + external net listener first before close any other services so that supervisor won't crash
+- [ ] Fix External net listener open timing (after all services are ready)
 - [ ] Fix Teleport generate log in Log directory
 - [ ] `CoreNode`, `SlaveNode` : `LastAlive` data for health check on OSX. Save the last alive time to report in OSX.
 - [ ] `CoreNode` set `SlaveID` with `MachineID`.

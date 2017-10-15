@@ -42,17 +42,23 @@ func InitSwarmService(appLife service.ServiceSupervisor) error {
                         return errors.Errorf("[ERR] null orchestration instance")
                     }
                     case re := <- nodeStatC: {
-                        ts, ok := re.Payload.(time.Time)
+                        ts, ok := re.Payload.(int64)
                         if !ok {
                             appLife.BroadcastEvent(service.Event{
                                 Name:    ivent.IventMonitorNodeRespOrchst,
-                                Payload: errors.Errorf("inaccurate timestamp")})
+                                Payload: ivent.EngineStatusMeta{
+                                    TimeStamp: ts,
+                                    Error:     errors.Errorf("inaccurate timestamp"),
+                                }})
                             continue
                         }
                         if swarmsrv == nil {
                             appLife.BroadcastEvent(service.Event{
                                 Name:    ivent.IventMonitorNodeRespOrchst,
-                                Payload: errors.Errorf("unable to query orchestration engine")})
+                                Payload: ivent.EngineStatusMeta{
+                                    TimeStamp: ts,
+                                    Error:     errors.Errorf("unable to query orchestration engine"),
+                                }})
                             continue
                         }
 
