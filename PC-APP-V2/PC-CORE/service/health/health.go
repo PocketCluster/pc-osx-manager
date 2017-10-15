@@ -35,6 +35,16 @@ func (nm *NodeMeta) isReadyToReport() bool {
     return bool(nm.PcsshChecked && nm.OrchstChecked)
 }
 
+func (nm *NodeMeta) buildReport() ([]byte, error) {
+    resp := route.ReponseMessage{
+        "nodestat": {
+            "status": true,
+            "stats": nm,
+        },
+    }
+    return json.Marshal(resp)
+}
+
 type TimedStats map[int64]*NodeMeta
 
 func (t TimedStats) removeStatForTimestamp(ts int64) {
@@ -78,17 +88,21 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
         operation.ServiceMonitorSystemHealth,
         func() error {
 
-            type MonitorSystemHealth map[string]interface{}
-
             var (
                 // node status (beacon, pcssh, orchst) will be coalesced into one report
-                //rpNodeStat   = routepath.RpathMonitorNodeStatus()
+                rpNodeStat   = routepath.RpathMonitorNodeStatus()
                 rpSrvStat    = routepath.RpathMonitorServiceStatus()
 
                 // timers
-                timer        = time.NewTicker(time.Second * 2)
-                failtimeout  = time.NewTicker(time.Minute)
-                timedStat    = make(TimedStats, 0)
+                // service checker
+                sChkTimer   = time.NewTicker(time.Second * 2)
+                // node status checker. node status checking frequent than 10 sec puts stress in system that
+                // other services miss catching important signals such as stop.
+                nStatTimer  = time.NewTicker(time.Second * 10)
+                failtimeout = time.NewTicker(time.Minute)
+
+                // stat collector
+                timedStat   = make(TimedStats, 0)
 
                 // service ready checks
                 readyMarker  = map[string]bool{
@@ -104,6 +118,13 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                     }
                     return true
                 }
+                reportNodeStatus = func (meta *NodeMeta, fdr route.ResponseFeeder, rpath string) error {
+                    data, err := meta.buildReport()
+                    if err != nil {
+                        return err
+                    }
+                    return fdr.FeedResponseForGet(rpath, string(data))
+                }
             )
 
             // monitor pre-requisite services with timeout
@@ -111,7 +132,8 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                 select {
                     case <- failtimeout.C: {
                         failtimeout.Stop()
-                        timer.Stop()
+                        sChkTimer.Stop()
+                        nStatTimer.Stop()
                         return errors.Errorf("[HEALTH] fail to start health service")
                     }
                     case <- readyBeaconC: {
@@ -146,8 +168,59 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                 select {
                     // service halt
                     case <- appLife.StopChannel(): {
-                        timer.Stop()
+                        sChkTimer.Stop()
+                        nStatTimer.Stop()
                         return nil
+                    }
+
+                    // report services status
+                    case <- sChkTimer.C: {
+                        var (
+                            srvStatus = map[string]bool{}
+                        )
+
+                        // 1. report service status
+                        sl := appLife.ServiceList()
+                        for i, _ := range sl {
+                            s := sl[i]
+                            srvStatus[s.Tag()] = s.IsRunning()
+                        }
+                        resp := route.ReponseMessage{
+                            "srvcstats": {
+                                "status": true,
+                                "stats": srvStatus,
+                            },
+                        }
+                        data, err := json.Marshal(resp)
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                        err = feeder.FeedResponseForGet(rpSrvStat, string(data))
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                    }
+
+                    // request node status to services
+                    case ts := <- nStatTimer.C: {
+                        var (
+                            tmark = ts.Unix()
+                        )
+
+                        // clear requests older than 10 sec
+                        timedStat.cleanRequestBefore(tmark - int64(10))
+
+                        // unless requested stat report is being cleared, we will not make another request
+                        if timedStat.isReadyToRequest() {
+                            timedStat[tmark] = &NodeMeta{
+                                Timestamp: tmark,
+                            }
+                            appLife.BroadcastEvent(service.Event{
+                                Name: ivent.IventMonitorNodeReqStatus,
+                                Payload: tmark,
+                            })
+                            log.Infof("[HEALTH] ->> (%v) new stat request made", tmark)
+                        }
                     }
 
                     // monitoring beacon
@@ -174,6 +247,10 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
+                            err := reportNodeStatus(meta, feeder, rpNodeStat)
+                            if err != nil {
+                                log.Errorf("[HEALTH] [ERR] unable to report node stat %v", err)
+                            }
                             timedStat.removeStatForTimestamp(md.TimeStamp)
                         }
                     }
@@ -198,51 +275,11 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
-                            timedStat.removeStatForTimestamp(md.TimeStamp)
-                        }
-                    }
-
-                    // service report
-                    case ts := <- timer.C: {
-                        // report services status
-                        var (
-                            response = MonitorSystemHealth{}
-                            srvStatus = map[string]bool{}
-                            tmark = ts.Unix()
-                        )
-
-                        // 1. report service status
-                        sl := appLife.ServiceList()
-                        for i, _ := range sl {
-                            s := sl[i]
-                            srvStatus[s.Tag()] = s.IsRunning()
-                        }
-                        response["services"] = srvStatus
-                        data, err := json.Marshal(response)
-                        if err != nil {
-                            log.Debugf(err.Error())
-                        }
-                        err = feeder.FeedResponseForGet(rpSrvStat, string(data))
-                        if err != nil {
-                            log.Debugf(err.Error())
-                        }
-
-                        // 2. report node status
-
-                        // 3. --- request node status to services ---
-                        // clear requests older than 10 sec
-                        timedStat.cleanRequestBefore(tmark - int64(10))
-
-                        // unless requested stat report is being cleared, we will not make another request
-                        if timedStat.isReadyToRequest() {
-                            timedStat[tmark] = &NodeMeta{
-                                Timestamp: tmark,
+                            err := reportNodeStatus(meta, feeder, rpNodeStat)
+                            if err != nil {
+                                log.Errorf("[HEALTH] [ERR] unable to report node stat %v", err)
                             }
-                            appLife.BroadcastEvent(service.Event{
-                                Name: ivent.IventMonitorNodeReqStatus,
-                                Payload: tmark,
-                            })
-                            log.Infof("[HEALTH] ->> (%v) new stat request made", tmark)
+                            timedStat.removeStatForTimestamp(md.TimeStamp)
                         }
                     }
                 }
