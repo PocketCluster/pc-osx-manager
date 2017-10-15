@@ -6,6 +6,7 @@ import (
     "net"
     "os/user"
     "path/filepath"
+    "strings"
     "time"
 
     "github.com/gravitational/teleport"
@@ -215,6 +216,7 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                         log.Debugf("[AUTH] heartbeat to other auth servers exited")
                         return nil
                     }
+
                     // waiting for authserver to come up
                     case ae := <-asrvEventC: {
                         aas, asrvOk = ae.Payload.(*authAndSession)
@@ -226,12 +228,19 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                             return errors.Errorf("[AUTH] AuthServer instance delivery failed")
                         }
                     }
+
                     // waiting for authority client connection to come up
                     case <- authConnC: {
                         authConnOk = true
                         log.Debugf("[AUTH] authServer client connection succeed")
                     }
+
+                    // report node status
                     case re := <- nodeReqC: {
+                        const (
+                            doInclSessInfo bool = false
+                        )
+
                         ts, ok := re.Payload.(int64)
                         if !ok {
                             p.BroadcastEvent(pervice.Event{
@@ -251,38 +260,46 @@ func (p *EmbeddedMasterProcess) initAuthService(authority auth.Authority) error 
                             })
                             continue
                         }
-                        sessions, err := sessService.GetSessions()
-                        if err != nil {
-                            p.BroadcastEvent(pervice.Event{
-                                Name:    ivent.IventMonitorNodeRespPcssh,
-                                Payload: errors.WithMessage(err,"unable to get sessions"),
-                            })
-                            continue
-                        }
-
                         nodeMap := make(map[string]*nodeWithSessions, len(servers))
                         for i := range servers {
                             nodeMap[servers[i].ID] = &nodeWithSessions{Node: servers[i]}
                         }
-                        for i := range sessions {
-                            sess := sessions[i]
-                            for _, p := range sess.Parties {
-                                if _, ok := nodeMap[p.ServerID]; ok {
-                                    nodeMap[p.ServerID].Sessions = append(nodeMap[p.ServerID].Sessions, sess)
+
+                        // (2017/10/15) we don't really need whether session is open or not at this point.
+                        // leaving session info will speed up the report process
+                        if doInclSessInfo {
+                            sessions, err := sessService.GetSessions()
+                            if err != nil {
+                                p.BroadcastEvent(pervice.Event{
+                                    Name:    ivent.IventMonitorNodeRespPcssh,
+                                    Payload: errors.WithMessage(err,"unable to get sessions"),
+                                })
+                                continue
+                            }
+                            for i := range sessions {
+                                sess := sessions[i]
+                                for _, p := range sess.Parties {
+                                    if _, ok := nodeMap[p.ServerID]; ok {
+                                        nodeMap[p.ServerID].Sessions = append(nodeMap[p.ServerID].Sessions, sess)
+                                    }
                                 }
                             }
                         }
+
                         nodes := make([]ivent.PcsshNodeStatusInfo, 0, len(nodeMap))
                         for key := range nodeMap {
                             n := *nodeMap[key]
-                            nodes = append(nodes,
-                                ivent.PcsshNodeStatusInfo{
-                                    HostName: n.Node.Hostname,
-                                    ID:       n.Node.ID,
-                                    Addr:     n.Node.Addr,
-                                    // we report if node has active sessions
-                                    HasSession: bool(len(n.Sessions) != 0),
-                                })
+                            ns := ivent.PcsshNodeStatusInfo{
+                                HostName: n.Node.Hostname,
+                                ID:       n.Node.ID,
+                                // address -> IP:Port form
+                                Addr:     strings.Split(n.Node.Addr, ":")[0],
+                            }
+                            // we report if node has active sessions
+                            if doInclSessInfo {
+                                ns.HasSession = bool(len(n.Sessions) != 0)
+                            }
+                            nodes = append(nodes, ns)
                         }
                         p.BroadcastEvent(pervice.Event{
                             Name:    ivent.IventMonitorNodeRespPcssh,

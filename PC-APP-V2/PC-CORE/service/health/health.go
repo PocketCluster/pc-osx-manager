@@ -57,14 +57,15 @@ func (nm *NodeStatMeta) updatePcsshStatus(pMeta ivent.PcsshNodeStatusMeta) {
     for _, pn := range pMeta.Nodes {
         for i, _ := range nm.Nodes {
             ns := nm.Nodes[i]
-            if strings.HasPrefix(pn.HostName, ns.Name) {
+            if strings.HasPrefix(pn.HostName, ns.Name) && pn.Addr == ns.IPAddr {
                 ns.PcsshOn = true
                 continue update_pcssh
             }
         }
         // given pcssh node not found. so let's add
         nm.Nodes = append(nm.Nodes, &NodeStat{
-            Name: pn.HostName,
+            Name:    pn.HostName,
+            IPAddr:  pn.Addr,
             PcsshOn: true,
         })
     }
@@ -77,14 +78,15 @@ func (nm *NodeStatMeta) updateOrchstStatus(oMeta ivent.EngineStatusMeta) {
     for _, oe := range oMeta.Engines {
         for i, _ := range nm.Nodes {
             ns := nm.Nodes[i]
-            if strings.HasPrefix(oe.Name, ns.Name) {
+            if strings.HasPrefix(oe.Name, ns.Name) && oe.IP == ns.IPAddr {
                 ns.OrchstOn = true
                 continue update_orchst
             }
         }
         // given pcssh node not found. so let's add
         nm.Nodes = append(nm.Nodes, &NodeStat{
-            Name: oe.Name,
+            Name:     oe.Name,
+            IPAddr:   oe.IP,
             OrchstOn: true,
         })
     }
@@ -94,7 +96,8 @@ func (nm *NodeStatMeta) buildReport() ([]byte, error) {
     resp := route.ReponseMessage{
         "nodestat": {
             "status": true,
-            "stats": nm,
+            "ts":    nm.Timestamp,
+            "nodes": nm.Nodes,
         },
     }
     return json.Marshal(resp)
@@ -299,6 +302,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             continue
                         }
                         meta.updatePcsshStatus(md)
+                        log.Infof("[HEALTH] pcssh %v", md)
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
@@ -327,6 +331,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             continue
                         }
                         meta.updateOrchstStatus(md)
+                        log.Infof("[HEALTH] orchst %v", md)
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
