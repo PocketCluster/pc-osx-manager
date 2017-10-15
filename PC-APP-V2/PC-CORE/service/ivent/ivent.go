@@ -36,18 +36,19 @@ type VboxCtrlBrcstObj struct {
     Listener          interface{}
 }
 
-// node status info from orchestration
-type EngineStatusInfo struct {
+// node status info from beacon
+type BeaconNodeStatusInfo struct {
     Name          string
-    ID            string
-    IP            string
-    Addr          string
+    MacAddr       string
+    IPAddr        string
+    Registered    bool
+    Bounded       bool
 }
 
-type EngineStatusMeta struct {
+type BeaconNodeStatusMeta struct {
     TimeStamp     int64
     Error         error
-    Engines       []EngineStatusInfo
+    Nodes         []BeaconNodeStatusInfo
 }
 
 // node status info from Pcssh
@@ -63,3 +64,18 @@ type PcsshNodeStatusMeta struct {
     Error         error
     Nodes         []PcsshNodeStatusInfo
 }
+
+// node status info from orchestration
+type EngineStatusInfo struct {
+    Name          string
+    ID            string
+    IP            string
+    Addr          string
+}
+
+type EngineStatusMeta struct {
+    TimeStamp     int64
+    Error         error
+    Engines       []EngineStatusInfo
+}
+

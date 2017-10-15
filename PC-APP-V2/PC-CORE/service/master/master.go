@@ -224,17 +224,20 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     }
                     // node status report service
                     case re := <- statC: {
-                        _, ok := re.Payload.(int64)
+                        ts, ok := re.Payload.(int64)
                         if !ok {
                             appLife.BroadcastEvent(service.Event{
                                 Name:    ivent.IventMonitorNodeRespBeacon,
-                                Payload: errors.Errorf("inaccurate timestamp")})
+                                Payload: ivent.BeaconNodeStatusMeta{
+                                    TimeStamp: ts,
+                                    Error:     errors.Errorf("[AGENT] inaccurate timestamp"),
+                                }})
                         }
                         // need unregistered node, registered node, bounded node
-                        regNodes := beaconMan.RegisteredNodesList()
+                        nodeStat := beaconMan.ReportAllNodeStatus(ts)
                         appLife.BroadcastEvent(service.Event{
                             Name:ivent.IventMonitorNodeRespBeacon,
-                            Payload:regNodes})
+                            Payload:nodeStat})
                     }
                 }
             }

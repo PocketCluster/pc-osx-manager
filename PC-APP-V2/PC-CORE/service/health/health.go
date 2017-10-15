@@ -40,12 +40,33 @@ func newNodeMetaWithTS(ts int64) *NodeStatMeta {
 }
 
 func (nm *NodeStatMeta) isReadyToReport() bool {
-    //return bool(nm.BeaconChecked && nm.PcsshChecked && nm.OrchstChecked)
-    return bool(nm.PcsshChecked && nm.OrchstChecked)
+    return bool(nm.BeaconChecked && nm.PcsshChecked && nm.OrchstChecked)
 }
 
-func (nm *NodeStatMeta) updateBeaconStatus() {
+func (nm *NodeStatMeta) updateBeaconStatus(bMeta ivent.BeaconNodeStatusMeta) {
     nm.BeaconChecked = true
+
+    update_beacon:
+    for _, bn := range bMeta.Nodes {
+        for i, _ := range nm.Nodes {
+            ns := nm.Nodes[i]
+            if strings.HasPrefix(bn.Name, ns.Name) && bn.IPAddr == ns.IPAddr {
+                ns.MacAddr    = bn.MacAddr
+                ns.Registered = bn.Registered
+                ns.Bounded    = bn.Bounded
+                continue update_beacon
+            }
+        }
+
+        // given pcssh node not found. so let's add
+        nm.Nodes = append(nm.Nodes, &NodeStat{
+            Name:        bn.Name,
+            MacAddr:     bn.MacAddr,
+            IPAddr:      bn.IPAddr,
+            Registered:  bn.Registered,
+            Bounded:     bn.Bounded,
+        })
+    }
 }
 
 func (nm *NodeStatMeta) updatePcsshStatus(pMeta ivent.PcsshNodeStatusMeta) {
@@ -282,7 +303,32 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                     }
 
                     // monitoring beacon
-                    case <- nodeBeaconC: {
+                    case re := <- nodeBeaconC: {
+                        md, ok := re.Payload.(ivent.BeaconNodeStatusMeta)
+                        if !ok {
+                            log.Errorf("[HEALTH] [ERR] cannot fetch node status from pcssh w/ invalid data %v", md)
+                            continue
+                        }
+                        if md.Error != nil {
+                            log.Errorf(md.Error.Error())
+                            continue
+                        }
+                        meta, ok := timedStat[md.TimeStamp]
+                        if !ok {
+                            log.Errorf("[HEALTH] [ERR] timestamp %v record for reported stat does not exists", md.TimeStamp)
+                            continue
+                        }
+                        meta.updateBeaconStatus(md)
+                        log.Infof("[HEALTH] beacon %v", md)
+
+                        if meta.isReadyToReport() {
+                            log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
+                            err := reportNodeStats(meta, feeder, rpNodeStat)
+                            if err != nil {
+                                log.Errorf("[HEALTH] [ERR] unable to report node stat %v", err)
+                            }
+                            timedStat.removeStatForTimestamp(md.TimeStamp)
+                        }
                     }
 
                     // monitoring pcssh
