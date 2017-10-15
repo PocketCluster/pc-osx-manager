@@ -193,7 +193,7 @@
      addGetRequest:self
      onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_STATUS]
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         // Log(@"%@ %@", path, response);
+         Log(@"%@ %@", path, response);
      }];
 }
 

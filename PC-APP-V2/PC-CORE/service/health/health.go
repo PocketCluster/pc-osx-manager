@@ -2,6 +2,7 @@ package health
 
 import (
     "encoding/json"
+    "strings"
     "time"
 
     log "github.com/Sirupsen/logrus"
@@ -22,20 +23,73 @@ type NodeStat struct {
     OrchstOn      bool          `json:"orchst"`
 }
 
-type NodeMeta struct {
+type NodeStatMeta struct {
     Timestamp     int64         `json:"ts"`
     BeaconChecked bool          `json:"-"`
     PcsshChecked  bool          `json:"-"`
     OrchstChecked bool          `json:"-"`
-    Stat          []*NodeStat   `json:"stat"`
+    Nodes         []*NodeStat   `json:"nodes"`
 }
 
-func (nm *NodeMeta) isReadyToReport() bool {
+func newNodeMetaWithTS(ts int64) *NodeStatMeta {
+    return &NodeStatMeta{
+        Timestamp: ts,
+        Nodes:     []*NodeStat{},
+    }
+}
+
+func (nm *NodeStatMeta) isReadyToReport() bool {
     //return bool(nm.BeaconChecked && nm.PcsshChecked && nm.OrchstChecked)
     return bool(nm.PcsshChecked && nm.OrchstChecked)
 }
 
-func (nm *NodeMeta) buildReport() ([]byte, error) {
+func (nm *NodeStatMeta) updateBeaconStatus() {
+    nm.BeaconChecked = true
+}
+
+func (nm *NodeStatMeta) updatePcsshStatus(pMeta ivent.PcsshNodeStatusMeta) {
+    nm.PcsshChecked = true
+    // https://github.com/golang/go/wiki/SliceTricks#additional-tricks
+    // nl := nm.Nodes[:0]
+
+    update_pcssh:
+    for _, pn := range pMeta.Nodes {
+        for i, _ := range nm.Nodes {
+            ns := nm.Nodes[i]
+            if strings.HasPrefix(pn.HostName, ns.Name) {
+                ns.PcsshOn = true
+                continue update_pcssh
+            }
+        }
+        // given pcssh node not found. so let's add
+        nm.Nodes = append(nm.Nodes, &NodeStat{
+            Name: pn.HostName,
+            PcsshOn: true,
+        })
+    }
+}
+
+func (nm *NodeStatMeta) updateOrchstStatus(oMeta ivent.EngineStatusMeta) {
+    nm.OrchstChecked = true
+
+    update_orchst:
+    for _, oe := range oMeta.Engines {
+        for i, _ := range nm.Nodes {
+            ns := nm.Nodes[i]
+            if strings.HasPrefix(oe.Name, ns.Name) {
+                ns.OrchstOn = true
+                continue update_orchst
+            }
+        }
+        // given pcssh node not found. so let's add
+        nm.Nodes = append(nm.Nodes, &NodeStat{
+            Name: oe.Name,
+            OrchstOn: true,
+        })
+    }
+}
+
+func (nm *NodeStatMeta) buildReport() ([]byte, error) {
     resp := route.ReponseMessage{
         "nodestat": {
             "status": true,
@@ -45,7 +99,7 @@ func (nm *NodeMeta) buildReport() ([]byte, error) {
     return json.Marshal(resp)
 }
 
-type TimedStats map[int64]*NodeMeta
+type TimedStats map[int64]*NodeStatMeta
 
 func (t TimedStats) removeStatForTimestamp(ts int64) {
     delete(t, ts)
@@ -81,7 +135,7 @@ func readyChecker(marker map[string]bool) bool {
     return true
 }
 
-func reportNodeStats(meta *NodeMeta, fdr route.ResponseFeeder, rpath string) error {
+func reportNodeStats(meta *NodeStatMeta, fdr route.ResponseFeeder, rpath string) error {
     data, err := meta.buildReport()
     if err != nil {
         return err
@@ -209,14 +263,12 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             tmark = ts.Unix()
                         )
 
-                        // clear requests older than 10 sec
-                        timedStat.cleanRequestBefore(tmark - int64(10))
+                        // clear requests older than certain time period
+                        timedStat.cleanRequestBefore(tmark - int64(30))
 
                         // unless requested stat report is being cleared, we will not make another request
                         if timedStat.isReadyToRequest() {
-                            timedStat[tmark] = &NodeMeta{
-                                Timestamp: tmark,
-                            }
+                            timedStat[tmark] = newNodeMetaWithTS(tmark)
                             appLife.BroadcastEvent(service.Event{
                                 Name: ivent.IventMonitorNodeReqStatus,
                                 Payload: tmark,
@@ -245,7 +297,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             log.Errorf("[HEALTH] [ERR] timestamp %v record for reported stat does not exists", md.TimeStamp)
                             continue
                         }
-                        meta.PcsshChecked = true
+                        meta.updatePcsshStatus(md)
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
@@ -273,7 +325,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             log.Errorf("[HEALTH] [ERR] timestamp %v record for reported stat does not exists", md.TimeStamp)
                             continue
                         }
-                        meta.OrchstChecked = true
+                        meta.updateOrchstStatus(md)
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)

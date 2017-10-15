@@ -64,8 +64,15 @@ func InitSwarmService(appLife service.ServiceSupervisor) error {
 
                         nets := swarmsrv.Cluster.Networks()
                         engines := make([]ivent.EngineStatusInfo, 0, len(nets))
+
+                        iterate_nets:
                         for i, _ := range nets {
                             n := nets[i]
+                            for _, e := range engines {
+                                if e.Name == n.Engine.Name {
+                                    continue iterate_nets
+                                }
+                            }
                             engines = append(engines, ivent.EngineStatusInfo {
                                 Name: n.Engine.Name,
                                 ID:   n.Engine.ID,
