@@ -17,6 +17,7 @@ import (
 type NodeStat struct {
     Name          string        `json:"name"`
     MacAddr       string        `json:"mac"`
+    IPAddr        string        `json:"-"`
     Registered    bool          `json:"reged"`
     Bounded       bool          `json:"bnded"`
     PcsshOn       bool          `json:"pcssh"`
