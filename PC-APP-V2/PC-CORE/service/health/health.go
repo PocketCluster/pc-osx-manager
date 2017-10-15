@@ -72,6 +72,23 @@ func (t TimedStats) isReadyToRequest() bool {
     return len(t) == 0
 }
 
+func readyChecker(marker map[string]bool) bool {
+    for k := range marker {
+        if !marker[k] {
+            return false
+        }
+    }
+    return true
+}
+
+func reportNodeStats(meta *NodeMeta, fdr route.ResponseFeeder, rpath string) error {
+    data, err := meta.buildReport()
+    if err != nil {
+        return err
+    }
+    return fdr.FeedResponseForGet(rpath, string(data))
+}
+
 func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.ResponseFeeder) error {
     var (
         nodeBeaconC = make(chan service.Event)
@@ -109,21 +126,6 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                     ivent.IventBeaconManagerSpawn:      false,
                     ivent.IventPcsshProxyInstanceSpawn: false,
                     ivent.IventOrchstInstanceSpawn:     false,
-                }
-                readyChecker = func(marker map[string]bool) bool {
-                    for k := range marker {
-                        if !marker[k] {
-                            return false
-                        }
-                    }
-                    return true
-                }
-                reportNodeStatus = func (meta *NodeMeta, fdr route.ResponseFeeder, rpath string) error {
-                    data, err := meta.buildReport()
-                    if err != nil {
-                        return err
-                    }
-                    return fdr.FeedResponseForGet(rpath, string(data))
                 }
             )
 
@@ -247,7 +249,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
-                            err := reportNodeStatus(meta, feeder, rpNodeStat)
+                            err := reportNodeStats(meta, feeder, rpNodeStat)
                             if err != nil {
                                 log.Errorf("[HEALTH] [ERR] unable to report node stat %v", err)
                             }
@@ -275,7 +277,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
-                            err := reportNodeStatus(meta, feeder, rpNodeStat)
+                            err := reportNodeStats(meta, feeder, rpNodeStat)
                             if err != nil {
                                 log.Errorf("[HEALTH] [ERR] unable to report node stat %v", err)
                             }
