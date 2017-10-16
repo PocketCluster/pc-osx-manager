@@ -10,7 +10,7 @@
 
 @interface PCRouter : NSObject
 
-+ (PCRouter *)sharedRouter;
++ (instancetype)sharedRouter;
 
 // All these method should only be invoked on MAIN THREAD!
 - (void) addGetRequest:(NSObject<PCRouteRequest> *)aRequest onPath:(NSString*)aPath withHandler:(ResponseHandler)aHandler;

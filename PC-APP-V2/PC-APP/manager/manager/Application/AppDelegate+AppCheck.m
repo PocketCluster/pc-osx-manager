@@ -12,6 +12,7 @@
 
 #import "AppDelegate+Window.h"
 #import "AppDelegate+AppCheck.h"
+#import "StatusCache.h"
 
 @interface AppDelegate(AppCheckPrivate)<PCRouteRequest>
 @end
@@ -120,7 +121,7 @@
 
          if (_isUserAuthed) {
              // TODO : choose appropriate menu
-             [belf.mainMenu setupMenuNewCluster];
+             [belf.mainMenu setupMenuStartService];
          } else {
              [ShowAlert
               showWarningAlertWithTitle:@"Your invitation is not valid"
@@ -163,48 +164,36 @@
      addGetRequest:self
      onPath:@(RPATH_MONITOR_NODE_STATUS)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         Log(@"%@ %@", path, response);
+         if (![[response valueForKeyPath:@"node-stat.status"] boolValue]) {
+             // node are not ready
+             [[StatusCache SharedStatusCache] invalidateNodeList];
+             return;
+         }
+
+         // refresh node status
+         NSArray<NSDictionary*>* rnodes = [response valueForKeyPath:@"node-stat.nodes"];
+         [[StatusCache SharedStatusCache] refreshNodList:rnodes];
+
+         // update menu status
      }];
 
     // --- --- --- --- --- --- service monitors --- --- --- --- --- ---
-    // (2017/10/16) this list should be updated whenever necessary
-    __block NSArray<NSString *>* srvcList = \
-        @[@"service.beacon.catcher",
-          @"service.beacon.location.read",
-          @"service.beacon.location.write",
-          @"service.beacon.master",
-          @"service.discovery.server",
-          @"service.internal.node.name.control",
-          @"service.internal.node.name.server",
-          @"service.monitor.system.health",
-          @"service.orchst.control",
-          @"service.orchst.registry",
-          @"service.orchst.server",
-          @"service.pcssh.authority",
-          @"service.pcssh.conn.admin",
-          @"service.pcssh.conn.proxy",
-          @"service.pcssh.server.auth",
-          @"service.pcssh.server.proxy",
-          @"service.vbox.master.control",
-          @"service.vbox.master.listener"];
-
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:@(RPATH_MONITOR_SERVICE_STATUS)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         // service not ready
          if (![[response valueForKeyPath:@"srvc-stat.status"] boolValue]) {
-             // service not ready
+             [[StatusCache SharedStatusCache] invalidateServiceStatus];
              return;
          }
          
+         // refresh service status
          NSDictionary<NSString*, id>* rsrvcs = [response valueForKeyPath:@"srvc-stat.srvcs"];
-         for (NSString *sname in srvcList) {
-             id srvc = [rsrvcs objectForKey:sname];
-             if (srvc == nil || [srvc intValue] != 1) {
-                 // service not ready
-                 return;
-             }
-         }
+         [[StatusCache SharedStatusCache] refreshServiceStatus:rsrvcs];
+         
+         
+         // update menu status
      }];
 }
 

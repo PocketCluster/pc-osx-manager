@@ -52,6 +52,7 @@
 		046D31251F3D346B0081CC3E /* PCSetup1VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D31161F3D346B0081CC3E /* PCSetup1VC.xib */; };
 		046D312A1F3D346B0081CC3E /* PCSetup3VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D311E1F3D346B0081CC3E /* PCSetup3VC.m */; };
 		046D312B1F3D346B0081CC3E /* PCSetup3VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D311F1F3D346B0081CC3E /* PCSetup3VC.xib */; };
+		0478C3B51F9561440096F7D9 /* StatusCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 0478C3B41F9561440096F7D9 /* StatusCache.m */; };
 		0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0486780E1BCF5FE20071594B /* Assets.xcassets */; };
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
 		048EF4B31F43C2C8003BEEF0 /* AppDelegate+AppCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = 048EF4B21F43C2C8003BEEF0 /* AppDelegate+AppCheck.m */; };
@@ -199,6 +200,8 @@
 		046D311D1F3D346B0081CC3E /* PCSetup3VC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup3VC.h; sourceTree = "<group>"; };
 		046D311E1F3D346B0081CC3E /* PCSetup3VC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetup3VC.m; sourceTree = "<group>"; };
 		046D311F1F3D346B0081CC3E /* PCSetup3VC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCSetup3VC.xib; sourceTree = "<group>"; };
+		0478C3B31F9561440096F7D9 /* StatusCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusCache.h; sourceTree = "<group>"; };
+		0478C3B41F9561440096F7D9 /* StatusCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StatusCache.m; sourceTree = "<group>"; };
 		048678051BCF5FE20071594B /* PocketCluster.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PocketCluster.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0486780E1BCF5FE20071594B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		048678111BCF5FE20071594B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -316,6 +319,8 @@
 				04030F611F3D5B6500EA793D /* Node.m */,
 				04030F621F3D5B6500EA793D /* Package.h */,
 				04030F631F3D5B6500EA793D /* Package.m */,
+				0478C3B31F9561440096F7D9 /* StatusCache.h */,
+				0478C3B41F9561440096F7D9 /* StatusCache.m */,
 			);
 			name = Model;
 			path = manager/Model;
@@ -1047,6 +1052,7 @@
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
 				04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */,
 				046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
+				0478C3B51F9561440096F7D9 /* StatusCache.m in Sources */,
 				04030F681F3D5B6500EA793D /* Package.m in Sources */,
 				046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				046D312A1F3D346B0081CC3E /* PCSetup3VC.m in Sources */,

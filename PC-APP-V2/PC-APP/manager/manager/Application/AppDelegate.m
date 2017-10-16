@@ -17,6 +17,8 @@
 #import "AppDelegate+ResponseHandle.h"
 #import "AppDelegate+Sparkle.h"
 #import "AppDelegate+AppCheck.h"
+#import "StatusCache.h"
+
 
 @interface AppDelegate ()<NSUserNotificationCenterDelegate>
 @property (nonatomic, strong, readwrite) NativeMenu *mainMenu;
@@ -78,6 +80,8 @@
     self.openWindows = [[NSMutableArray alloc] init];
     //   b. create popup and status menu item
     self.mainMenu = [[NativeMenu alloc] init];
+    //   c. initialize status cache
+    [StatusCache SharedStatusCache];
 
     // 9. setup application mode
     [[NSRunningApplication currentApplication] activateWithOptions:(NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps)];

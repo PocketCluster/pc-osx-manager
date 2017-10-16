@@ -10,6 +10,6 @@
 
 @interface NativeMenu(NewCluster)
 - (void) setupMenuInitCheck;
-
+- (void) setupMenuStartService;
 - (void) setupMenuNewCluster;
 @end

@@ -2,17 +2,18 @@
 //  Node.h
 //
 
+/*
+ * This is a faithful representation of "NodeStat" in "github.com/stkim1/pc-core/service/health"
+ */
+
 @interface Node : NSObject
+@property (strong, nonatomic, readonly) NSString *Name;
+@property (strong, nonatomic, readonly) NSString *MacAddr;
+@property (nonatomic, readonly) BOOL Registered;
+@property (nonatomic, readonly) BOOL Bounded;
+@property (nonatomic, readonly) BOOL PcsshOn;
+@property (nonatomic, readonly) BOOL OrchstOn;
 
-@property (strong, nonatomic) NSString *Status;
-@property (strong, nonatomic) NSString *SlaveID;
-@property (strong, nonatomic) NSString *Hardware;
-@property (strong, nonatomic) NSString *NodeName;
-@property (strong, nonatomic) NSString *IP4Address;
-@property (strong, nonatomic) NSString *IP4Gateway;
-@property (strong, nonatomic) NSString *UserMadeName;
-@property (nonatomic, readonly) NSDate *LastAlive;
-
--(instancetype)initWithDictionary:(NSDictionary *)aDict;
-
+- (instancetype) initWithDictionary:(NSDictionary *)aNodeDict;
+- (BOOL) isReady;
 @end

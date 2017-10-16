@@ -18,10 +18,25 @@
     NSMenu* menuRoot = [[NSMenu alloc] init];
     [menuRoot setAutoenablesItems:NO];
 
-    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Checking..." action:@selector(menuSelectedNewCluster:) keyEquivalent:@""];
+    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Checking..." action:nil keyEquivalent:@""];
     [mChecking setEnabled:NO];
     [menuRoot addItem:mChecking];
 
+    // add common bottom menus
+    [self addInitCommonMenu:menuRoot];
+    
+    // set status
+    [self.statusItem setMenu:menuRoot];
+}
+
+- (void) setupMenuStartService {
+    NSMenu* menuRoot = [[NSMenu alloc] init];
+    [menuRoot setAutoenablesItems:NO];
+    
+    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Starting..." action:nil keyEquivalent:@""];
+    [mChecking setEnabled:NO];
+    [menuRoot addItem:mChecking];
+    
     // add common bottom menus
     [self addInitCommonMenu:menuRoot];
     
