@@ -89,7 +89,7 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
     [menuRoot addItem:[NSMenuItem separatorItem]];
 
     // chat menu
-    NSMenuItem *mSlack = [[NSMenuItem alloc] initWithTitle:@"#PocketCluster (Slack)" action:@selector(menuSelectedSlack:) keyEquivalent:@""];
+    NSMenuItem *mSlack = [[NSMenuItem alloc] initWithTitle:@"#PocketCluster Slack" action:@selector(menuSelectedSlack:) keyEquivalent:@""];
     [mSlack setTarget:self];
     [menuRoot addItem:mSlack];
 
@@ -116,7 +116,7 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
 - (void) addInitCommonMenu:(NSMenu *)menuRoot {
     // chat menu
     [menuRoot addItem:[NSMenuItem separatorItem]];
-    NSMenuItem *mSlack = [[NSMenuItem alloc] initWithTitle:@"#PocketCluster (Slack)" action:@selector(menuSelectedSlack:) keyEquivalent:@""];
+    NSMenuItem *mSlack = [[NSMenuItem alloc] initWithTitle:@"#PocketCluster Slack" action:@selector(menuSelectedSlack:) keyEquivalent:@""];
     [mSlack setTarget:self];
     [menuRoot addItem:mSlack];
 

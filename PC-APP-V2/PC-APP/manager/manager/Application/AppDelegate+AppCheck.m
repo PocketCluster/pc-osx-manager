@@ -22,10 +22,10 @@
 
     WEAK_SELF(self);
     
-    NSString *pathSystemReady = [NSString stringWithUTF8String:RPATH_SYSTEM_READINESS];
-    NSString *pathAppExpired  = [NSString stringWithUTF8String:RPATH_APP_EXPIRED];
-    NSString *pathUserAuthed  = [NSString stringWithUTF8String:RPATH_USER_AUTHED];
-    NSString *pathIsFirstRun  = [NSString stringWithUTF8String:RPATH_SYSTEM_IS_FIRST_RUN];
+    NSString *pathSystemReady = @(RPATH_SYSTEM_READINESS);
+    NSString *pathAppExpired  = @(RPATH_APP_EXPIRED);
+    NSString *pathUserAuthed  = @(RPATH_USER_AUTHED);
+    NSString *pathIsFirstRun  = @(RPATH_SYSTEM_IS_FIRST_RUN);
     
     /*** checking system readiness ***/
     [[PCRouter sharedRouter]
@@ -139,70 +139,81 @@
     // --- --- --- --- --- --- package start/kill/ps --- --- --- --- --- ---
     [[PCRouter sharedRouter]
      addPostRequest:self
-     onPath:[NSString stringWithUTF8String:RPATH_PACKAGE_STARTUP]
+     onPath:@(RPATH_PACKAGE_STARTUP)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          // Log(@"%@ %@", path, response);
      }];
     
     [[PCRouter sharedRouter]
      addPostRequest:self
-     onPath:[NSString stringWithUTF8String:RPATH_PACKAGE_KILL]
+     onPath:@(RPATH_PACKAGE_KILL)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          // Log(@"%@ %@", path, response);
      }];
     
     [[PCRouter sharedRouter]
      addPostRequest:self
-     onPath:[NSString stringWithUTF8String:RPATH_MONITOR_PACKAGE_PROCESS]
+     onPath:@(RPATH_MONITOR_PACKAGE_PROCESS)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          // Log(@"%@ %@", path, response);
      }];
     
-    // --- --- --- --- --- --- service monitors --- --- --- --- --- ---
-    [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:[NSString stringWithUTF8String:RPATH_MONITOR_SERVICE_STATUS]
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         /*
-          Log(@"%@ %@", path, response);
-          ({
-          "service.beacon.catcher" = 1;
-          "service.beacon.location.read" = 1;
-          "service.beacon.location.write" = 1;
-          "service.beacon.master" = 1;
-          "service.container.registry" = 1;
-          "service.internal.node.name.operation" = 1;
-          "service.internal.node.name.server" = 1;
-          "service.monitor.system.health" = 1;
-          "service.pcssh.authority" = 1;
-          "service.pcssh.conn.admin" = 1;
-          "service.pcssh.conn.proxy" = 1;
-          "service.pcssh.server.auth" = 1;
-          "service.pcssh.server.proxy" = 1;
-          "service.storage.process" = 1;
-          "service.swarm.embedded.operation" = 1;
-          "service.swarm.embedded.server" = 1;
-          "service.vbox.master.control" = 1;
-          "service.vbox.master.listener" = 1;
-          })
-          */
-     }];
-
     // --- --- --- --- --- --- node monitors --- --- --- --- --- ---
     [[PCRouter sharedRouter]
      addGetRequest:self
-     onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_STATUS]
+     onPath:@(RPATH_MONITOR_NODE_STATUS)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          Log(@"%@ %@", path, response);
+     }];
+
+    // --- --- --- --- --- --- service monitors --- --- --- --- --- ---
+    // (2017/10/16) this list should be updated whenever necessary
+    __block NSArray<NSString *>* srvcList = \
+        @[@"service.beacon.catcher",
+          @"service.beacon.location.read",
+          @"service.beacon.location.write",
+          @"service.beacon.master",
+          @"service.discovery.server",
+          @"service.internal.node.name.control",
+          @"service.internal.node.name.server",
+          @"service.monitor.system.health",
+          @"service.orchst.control",
+          @"service.orchst.registry",
+          @"service.orchst.server",
+          @"service.pcssh.authority",
+          @"service.pcssh.conn.admin",
+          @"service.pcssh.conn.proxy",
+          @"service.pcssh.server.auth",
+          @"service.pcssh.server.proxy",
+          @"service.vbox.master.control",
+          @"service.vbox.master.listener"];
+
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_MONITOR_SERVICE_STATUS)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         if (![[response valueForKeyPath:@"srvc-stat.status"] boolValue]) {
+             // service not ready
+             return;
+         }
+         
+         NSDictionary<NSString*, id>* rsrvcs = [response valueForKeyPath:@"srvc-stat.srvcs"];
+         for (NSString *sname in srvcList) {
+             id srvc = [rsrvcs objectForKey:sname];
+             if (srvc == nil || [srvc intValue] != 1) {
+                 // service not ready
+                 return;
+             }
+         }
      }];
 }
 
 - (void) closeMonitors {
-    [[PCRouter sharedRouter] delPostRequest:self onPath:[NSString stringWithUTF8String:RPATH_PACKAGE_STARTUP]];
-    [[PCRouter sharedRouter] delPostRequest:self onPath:[NSString stringWithUTF8String:RPATH_PACKAGE_KILL]];
-    [[PCRouter sharedRouter] delPostRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_PACKAGE_PROCESS]];
-    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_SERVICE_STATUS]];
-    [[PCRouter sharedRouter] delGetRequest:self onPath:[NSString stringWithUTF8String:RPATH_MONITOR_NODE_STATUS]];
+    [[PCRouter sharedRouter] delPostRequest:self onPath:@(RPATH_PACKAGE_STARTUP)];
+    [[PCRouter sharedRouter] delPostRequest:self onPath:@(RPATH_PACKAGE_KILL)];
+    [[PCRouter sharedRouter] delPostRequest:self onPath:@(RPATH_MONITOR_PACKAGE_PROCESS)];
+    [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_MONITOR_NODE_STATUS)];
+    [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_MONITOR_SERVICE_STATUS)];
 }
 
 @end

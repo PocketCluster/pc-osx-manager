@@ -11,9 +11,9 @@ import (
     "github.com/stkim1/pc-core/service"
 )
 
-func InitStorageServie(appLife service.ServiceSupervisor, config *embed.PocketConfig) error {
+func InitDiscoveryService(appLife service.ServiceSupervisor, config *embed.PocketConfig) error {
     appLife.RegisterServiceWithFuncs(
-        operation.ServiceStorageProcess,
+        operation.ServiceDiscoveryServer,
         func() error {
             etcd, err := embed.StartPocketEtcd(config)
             if err != nil {
@@ -50,7 +50,7 @@ func InitStorageServie(appLife service.ServiceSupervisor, config *embed.PocketCo
 
 func InitRegistryService(appLife service.ServiceSupervisor, config *registry.PocketRegistryConfig) error {
     appLife.RegisterServiceWithFuncs(
-        operation.ServiceContainerRegistry,
+        operation.ServiceOrchstRegistry,
         func() error {
             reg, err := registry.NewPocketRegistry(config)
             if err != nil {

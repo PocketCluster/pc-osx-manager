@@ -105,7 +105,7 @@ func InitPocketNameService(appLife service.ServiceSupervisor, clusterID string) 
 
     beaconManC := make(chan service.Event)
     appLife.RegisterServiceWithFuncs(
-        operation.ServiceInternalNodeNameOperation,
+        operation.ServiceInternalNodeNameControl,
         func() error {
             var (
                 udpServer = &dns.Server {

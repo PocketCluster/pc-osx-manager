@@ -190,7 +190,7 @@ func main() {
                         // --- role service sequence ---
                         // storage service
                         // (NODEP netchange, NODEP services)
-                        err = container.InitStorageServie(appLife, appCfg.ETCD)
+                        err = container.InitDiscoveryService(appLife, appCfg.ETCD)
                         if err != nil {
                             log.Debug(err)
                             continue
@@ -223,7 +223,7 @@ func main() {
 
                         // orcst service
                         // (NODEP netchange, DEP master beacon service)
-                        err = container.InitSwarmService(appLife)
+                        err = container.InitOrchstService(appLife)
                         if err != nil {
                             log.Debug(err)
                             continue
@@ -287,7 +287,7 @@ func main() {
                     /// STORAGE ///
 
                     case operation.CmdStorageStart: {
-                        err = container.InitStorageServie(appLife, appCfg.ETCD)
+                        err = container.InitDiscoveryService(appLife, appCfg.ETCD)
                         if err != nil {
                             log.Debug(err)
                             continue

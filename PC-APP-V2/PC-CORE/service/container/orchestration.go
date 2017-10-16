@@ -12,13 +12,13 @@ import (
     "time"
 )
 
-func InitSwarmService(appLife service.ServiceSupervisor) error {
+func InitOrchstService(appLife service.ServiceSupervisor) error {
     var (
         swarmSrvC = make(chan service.Event)
         nodeStatC = make(chan service.Event)
     )
     appLife.RegisterServiceWithFuncs(
-        operation.ServiceOrchestrationOperation,
+        operation.ServiceOrchstControl,
         func() error {
             var (
                 swarmsrv *swarmemb.SwarmService = nil
@@ -96,7 +96,7 @@ func InitSwarmService(appLife service.ServiceSupervisor) error {
 
     beaconManC := make(chan service.Event)
     appLife.RegisterServiceWithFuncs(
-        operation.ServiceOrchestrationServer,
+        operation.ServiceOrchstServer,
         func() error {
             var (
                 beaconMan beacon.BeaconManger = nil
