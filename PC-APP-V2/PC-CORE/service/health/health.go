@@ -18,8 +18,8 @@ type NodeStat struct {
     Name          string        `json:"name"`
     MacAddr       string        `json:"mac"`
     IPAddr        string        `json:"-"`
-    Registered    bool          `json:"reged"`
-    Bounded       bool          `json:"bnded"`
+    Registered    bool          `json:"rgstd"`
+    Bounded       bool          `json:"bound"`
     PcsshOn       bool          `json:"pcssh"`
     OrchstOn      bool          `json:"orchst"`
 }
@@ -115,7 +115,7 @@ func (nm *NodeStatMeta) updateOrchstStatus(oMeta ivent.EngineStatusMeta) {
 
 func (nm *NodeStatMeta) buildReport() ([]byte, error) {
     resp := route.ReponseMessage{
-        "nodestat": {
+        "node-stat": {
             "status": true,
             "ts":    nm.Timestamp,
             "nodes": nm.Nodes,
@@ -267,9 +267,9 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             srvStatus[s.Tag()] = s.IsRunning()
                         }
                         resp := route.ReponseMessage{
-                            "srvcstats": {
+                            "srvc-stat": {
                                 "status": true,
-                                "stats": srvStatus,
+                                "srvcs": srvStatus,
                             },
                         }
                         data, err := json.Marshal(resp)

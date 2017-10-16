@@ -145,8 +145,8 @@ func InitPackageProcess(appLife rasker.RouteTasker, feeder route.ResponseFeeder)
                             // return feedback
                             data, err := json.Marshal(route.ReponseMessage{
                                 packageFeedbackProcess: {
-                                    "status": true,
-                                    "pkg-id" : pkgID,
+                                    "status":  true,
+                                    "pkg-id":  pkgID,
                                     "process": pslist,
                                 },
                             })
