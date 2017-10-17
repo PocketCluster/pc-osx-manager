@@ -47,6 +47,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                 // other services miss catching important signals such as stop.
                 nStatTimer  = time.NewTicker(time.Second * 10)
                 // this is to wait timer for other services to start. Especially for this timeout, we'll give 90 secs
+                // this also works as a timeout for core node to boot. make sure core node boot in 90 sec
                 failTimeout = time.NewTicker(time.Second * 90)
                 // app start timeup counter. This should only be triggered after 1 minute
                 nodeOnlineTimeup *time.Ticker = nil
@@ -65,8 +66,9 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                     ivent.IventVboxCtrlInstanceSpawn:   false,
                 }
 
-                // report node error
-                shouldReportNodeError = false
+                // ignore core node error. the only critical error for node report is core node death.
+                // make sure core node error reported to front-end after node oneline ticker fires
+                checkCoreError = false
             )
 
             // monitor pre-requisite services with timeout
@@ -204,7 +206,8 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                     case <- nodeOnlineTimeup.C: {
                         // shoul not nullify start timeup. It will crash
                         nodeOnlineTimeup.Stop()
-                        shouldReportNodeError = true
+                        // do not ignore core node error after this point
+                        checkCoreError = true
 
                         data, err := json.Marshal(route.ReponseMessage{"node-timeup": {"status": true}})
                         if err != nil {
@@ -214,7 +217,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                         if err != nil {
                             log.Debugf(err.Error())
                         }
-                        log.Infof("[HEALTH] node online due is up! report? %v", shouldReportNodeError)
+                        log.Infof("[HEALTH] node online due is up!")
                     }
 
                     // report services status
@@ -286,7 +289,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
-                            err := reportNodeStats(meta, feeder, rpNodeStat)
+                            err := reportNodeStats(meta, feeder, rpNodeStat, checkCoreError)
                             if err != nil {
                                 log.Errorf("[HEALTH] [ERR] unable to report node stat %v", err)
                             }
@@ -315,7 +318,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
-                            err := reportNodeStats(meta, feeder, rpNodeStat)
+                            err := reportNodeStats(meta, feeder, rpNodeStat, checkCoreError)
                             if err != nil {
                                 log.Errorf("[HEALTH] [ERR] unable to report node stat %v", err)
                             }
@@ -344,7 +347,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
-                            err := reportNodeStats(meta, feeder, rpNodeStat)
+                            err := reportNodeStats(meta, feeder, rpNodeStat, checkCoreError)
                             if err != nil {
                                 log.Errorf("[HEALTH] [ERR] unable to report node stat %v", err)
                             }

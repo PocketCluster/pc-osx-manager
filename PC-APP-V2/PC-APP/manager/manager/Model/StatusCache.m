@@ -17,7 +17,6 @@
     __strong NSMutableArray<Node *>* _nodeList;
     __strong NSArray<NSString *>* _serviceList;
     BOOL _serviceReady;
-    BOOL _appStartTimeup;
 }
 SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
@@ -60,12 +59,6 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
     return list;
 }
 
-- (void) invalidateNodeList {
-    @synchronized(self) {
-        [_nodeList removeAllObjects];
-    }
-}
-
 - (void) refreshNodList:(NSArray<NSDictionary *>*)aNodeList {
     @synchronized(self) {
         [_nodeList removeAllObjects];
@@ -76,7 +69,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
     }
 }
 
-- (BOOL) isAllRegisteredNodesReady {
+- (BOOL) isRegisteredNodesReady {
     @synchronized(self) {
         for (Node *node in _nodeList) {
             if ([node Registered] && ![node isReady]) {
@@ -87,18 +80,8 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
     return YES;
 }
 
-- (BOOL) isCoreReady {
-    @synchronized(self) {
-        for (Node *node in _nodeList) {
-            if ([[node Name] isEqualToString:@"pc-core"] && [node isReady]) {
-                return YES;
-            }
-        }
-    }
-    return NO;
-}
-
 #pragma mark - service status
+@dynamic serviceReady;
 - (BOOL) isServiceReady {
     BOOL isReady = NO;
     @synchronized(self) {
@@ -107,9 +90,9 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
     return isReady;
 }
 
-- (void) invalidateServiceStatus {
+- (void) setServiceReady:(BOOL)serviceReady {
     @synchronized(self) {
-        _serviceReady = NO;
+        _serviceReady = serviceReady;
     }
 }
 
@@ -123,21 +106,6 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
             }
         }
         _serviceReady = YES;
-    }
-}
-
-#pragma mark - app status
-- (BOOL) isAppStartTimeUp {
-    BOOL isReady = NO;
-    @synchronized(self) {
-        isReady = _serviceReady;
-    }
-    return isReady;
-}
-
-- (void) refreshAppStartupStatus {
-    @synchronized(self) {
-        _appStartTimeup = YES;
     }
 }
 

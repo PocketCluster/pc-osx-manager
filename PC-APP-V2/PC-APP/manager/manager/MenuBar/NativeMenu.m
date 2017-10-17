@@ -89,27 +89,9 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
 - (void) setMenuWithStartupCondition {
 
     // app should have been fully up by this (check "github.com/stkim1/pc-core/service/health")
-    if ([[StatusCache SharedStatusCache] isAppStartTimeUp]) {
-        
-        if ([[StatusCache SharedStatusCache] isServiceReady]) {
-            
-            if ([[StatusCache SharedStatusCache] isCoreReady]) {
-                
-            } else {
-                
-            }
-            
-            
-        } else {
-            
-        }
-        
+    if ([[StatusCache SharedStatusCache] isServiceReady]) {
         
     } else {
-
-        
-        
-        
         
     }
 }

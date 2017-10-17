@@ -23,18 +23,19 @@
 + (instancetype)SharedStatusCache;
 
 #pragma mark - node status
+// this property indicates whether frontend can display what's happening in online nodes
+@property (readwrite, getter=showOnlineNode, setter=setShowOnlineNode:) BOOL showOnlineNode;
+
 - (NSMutableArray<Node *>*) nodeList;
-- (void) invalidateNodeList;
 - (void) refreshNodList:(NSArray<NSDictionary *>*)aNodeList;
-- (BOOL) isAllRegisteredNodesReady;
-- (BOOL) isCoreReady;
+- (BOOL) isRegisteredNodesReady;
 
 #pragma mark - service status
-- (BOOL) isServiceReady;
-- (void) invalidateServiceStatus;
+// this property should be used to indicate if there is grave service error.
+// Whenever service is not ready for whatever reason, kill application as it's a critical error
+@property (readwrite, getter=isServiceReady, setter=setServiceReady:) BOOL serviceReady;
+
+// regular monitoring of internal services. When something is missing, it's a critical error. kill application
 - (void) refreshServiceStatus:(NSDictionary<NSString*, id>*)aServiceStatusList;
 
-#pragma mark - app status
-- (BOOL) isAppStartTimeUp;
-- (void) refreshAppStartupStatus;
 @end

@@ -135,43 +135,8 @@
 
 - (void) startMonitors {
     WEAK_SELF(self);
-    
-    // --- --- --- --- --- --- node online timeup noti --- --- --- --- --- ---
-    [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:@(RPATH_NOTI_NODE_ONLINE_TIMEUP)
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         Log(@"%@ %@", path, response);
-         if ([[response valueForKeyPath:@"node-timeup.status"] boolValue]) {
 
-         // this is an error we need to report user and take an action
-         } else {
-         }
-         
-         // update menu status
-     }];
-    
-    // --- --- --- --- --- --- service online timeup noti --- --- --- --- --- ---
-    [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:@(RPATH_NOTI_SRVC_ONLINE_TIMEUP)
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         Log(@"%@ %@", path, response);
-         if ([[response valueForKeyPath:@"srvc-timeup.status"] boolValue]) {
-             [[belf mainMenu] setupMenuStartNodes];
-
-         // this is an error. report user and kill application
-         } else {
-             [ShowAlert
-              showWarningAlertWithTitle:@"Unable to start due to an internal error"
-              message:[response valueForKeyPath:@"srvc-timeup.error"]];
-         }
-         
-         // update menu status
-     }];
-
-
-    // --- --- --- --- --- --- package start/kill/ps --- --- --- --- --- ---
+    // --- --- --- --- --- --- package start/kill/ps --- --- --- --- --- --- ---
     [[PCRouter sharedRouter]
      addPostRequest:self
      onPath:@(RPATH_PACKAGE_STARTUP)
@@ -193,42 +158,86 @@
          // Log(@"%@ %@", path, response);
      }];
     
-    // --- --- --- --- --- --- node monitors --- --- --- --- --- ---
+
+    // --- --- --- --- --- --- [monitors] node --- --- --- --- --- --- --- --- -
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:@(RPATH_MONITOR_NODE_STATUS)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         if (![[response valueForKeyPath:@"node-stat.status"] boolValue]) {
-             // node are not ready
-             [[StatusCache SharedStatusCache] invalidateNodeList];
-             return;
-         }
 
-         // refresh node status
+         // for this routepath, we'll refresh node status first then deal with error
+         // so that users would not be perplexed
          NSArray<NSDictionary*>* rnodes = [response valueForKeyPath:@"node-stat.nodes"];
          [[StatusCache SharedStatusCache] refreshNodList:rnodes];
 
          // update menu status
+         
+         // TODO : this is a critical error. alert user and kill application
+         if (![[response valueForKeyPath:@"node-stat.status"] boolValue]) {
+
+             Log(@"%@", [response valueForKeyPath:@"node-stat.error"]);
+             return;
+         }
      }];
 
-    // --- --- --- --- --- --- service monitors --- --- --- --- --- ---
+    // --- --- --- --- --- --- [monitors] service --- --- --- --- --- --- --- --
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:@(RPATH_MONITOR_SERVICE_STATUS)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         // service not ready
+         
+          // TODO : this is a critical error. alert user and kill application
          if (![[response valueForKeyPath:@"srvc-stat.status"] boolValue]) {
-             [[StatusCache SharedStatusCache] invalidateServiceStatus];
+             [[StatusCache SharedStatusCache] setServiceReady:NO];
+             
+             Log(@"%@", [response valueForKeyPath:@"srvc-stat.error"]);
              return;
          }
          
          // refresh service status
          NSDictionary<NSString*, id>* rsrvcs = [response valueForKeyPath:@"srvc-stat.srvcs"];
          [[StatusCache SharedStatusCache] refreshServiceStatus:rsrvcs];
-         
+         if (![[StatusCache SharedStatusCache] isServiceReady]) {
+             // TODO : this is an error. alert user and kill application
+
+             return;
+         }
          
          // update menu status
      }];
+
+
+    // --- --- --- --- --- --- [noti] node online timeup --- --- --- --- --- ---
+    // this noti always comes later than service online noti. There's no error message
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_NOTI_NODE_ONLINE_TIMEUP)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+
+         [[StatusCache SharedStatusCache] setShowOnlineNode:YES];
+
+         // update menu status
+     }];
+    
+    // --- --- --- --- --- --- [noti] service online timeup --- --- --- --- ---
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_NOTI_SRVC_ONLINE_TIMEUP)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         
+         // TODO : this is a critical error. alert user and kill application
+         if (![[response valueForKeyPath:@"srvc-timeup.status"] boolValue]) {
+             [[StatusCache SharedStatusCache] setServiceReady:NO];
+             
+             Log(@"%@", [response valueForKeyPath:@"srvc-timeup.error"]);
+             return;
+         }
+
+         [[StatusCache SharedStatusCache] setServiceReady:YES];
+         // we manually update menu here
+         [[belf mainMenu] setupMenuStartNodes];
+     }];
+
 }
 
 - (void) closeMonitors {

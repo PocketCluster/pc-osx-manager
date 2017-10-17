@@ -5,6 +5,7 @@ import (
     "strings"
 
     log "github.com/Sirupsen/logrus"
+    "github.com/pkg/errors"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/service/ivent"
 )
@@ -108,13 +109,41 @@ func (nm *NodeStatMeta) updateOrchstStatus(oMeta ivent.EngineStatusMeta) {
     }
 }
 
-func (nm *NodeStatMeta) buildReport() ([]byte, error) {
-    resp := route.ReponseMessage{
-        "node-stat": {
-            "status": true,
-            "ts":    nm.Timestamp,
-            "nodes": nm.Nodes,
-        },
+func (nm *NodeStatMeta) buildReport(checkCoreError bool) ([]byte, error) {
+    var (
+        resp = route.ReponseMessage{
+            "node-stat": {
+                "status": true,
+                "ts":     nm.Timestamp,
+                "nodes":  nm.Nodes,
+            },
+        }
+        cFound = false
+        err error = nil
+    )
+    // find core node and build error if core is not normal
+    if checkCoreError {
+        for i := 0; i < len(nm.Nodes); i++ {
+            ns := nm.Nodes[i]
+            if ns.Name == "pc-core" {
+                cFound = true
+                // we might want to count ip address but that's to restrictive. Let's only count what pc-master sees
+                if !(ns.Registered && ns.Bounded && ns.PcsshOn && ns.OrchstOn) {
+                    err = errors.Errorf("core node is offline. cluster should shutdown now.")
+                }
+                break
+            }
+        }
+        // core node is not found. this is even more serious issue
+        if !cFound {
+            err = errors.Errorf("core node not found. cluster should shutdown now.")
+        }
+
+        // include error if exists. this is critical
+        if err != nil {
+            resp["node-stat"]["status"] = false
+            resp["node-stat"]["error"] = err.Error()
+        }
     }
     return json.Marshal(resp)
 }
@@ -155,8 +184,8 @@ func readyChecker(marker map[string]bool) bool {
     return true
 }
 
-func reportNodeStats(meta *NodeStatMeta, fdr route.ResponseFeeder, rpath string) error {
-    data, err := meta.buildReport()
+func reportNodeStats(meta *NodeStatMeta, fdr route.ResponseFeeder, rpath string, checkCoreError bool) error {
+    data, err := meta.buildReport(checkCoreError)
     if err != nil {
         return err
     }
