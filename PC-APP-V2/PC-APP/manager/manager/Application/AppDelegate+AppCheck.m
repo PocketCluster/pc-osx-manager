@@ -135,8 +135,6 @@
 }
 
 - (void) startMonitors {
-    //WEAK_SELF(self);
-
     // --- --- --- --- --- --- package start/kill/ps --- --- --- --- --- ---
     [[PCRouter sharedRouter]
      addPostRequest:self
@@ -195,6 +193,16 @@
          
          // update menu status
      }];
+
+    // --- --- --- --- --- --- app start timeup noti --- --- --- --- --- ---
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_NOTI_APP_START_TIMEUP)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         [[StatusCache SharedStatusCache] refreshAppStartupStatus];
+         
+         // update menu status
+     }];
 }
 
 - (void) closeMonitors {
@@ -203,6 +211,7 @@
     [[PCRouter sharedRouter] delPostRequest:self onPath:@(RPATH_MONITOR_PACKAGE_PROCESS)];
     [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_MONITOR_NODE_STATUS)];
     [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_MONITOR_SERVICE_STATUS)];
+    [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_NOTI_APP_START_TIMEUP)];
 }
 
 @end

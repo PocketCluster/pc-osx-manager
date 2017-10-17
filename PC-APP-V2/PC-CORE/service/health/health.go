@@ -189,13 +189,16 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                 rpNodeStat   = routepath.RpathMonitorNodeStatus()
                 rpSrvStat    = routepath.RpathMonitorServiceStatus()
 
-                // timers
+                // --- timers ---
                 // service checker
                 sChkTimer   = time.NewTicker(time.Second * 2)
                 // node status checker. node status checking frequent than 10 sec puts stress in system that
                 // other services miss catching important signals such as stop.
                 nStatTimer  = time.NewTicker(time.Second * 10)
-                failtimeout = time.NewTicker(time.Minute)
+                // this is to wait timer for other services to start
+                failTimeout = time.NewTicker(time.Minute)
+                // app start timeup counter. This should only be triggered after 1 minute
+                startTimeup *time.Ticker = nil
 
                 // stat collector
                 timedStat   = make(TimedStats, 0)
@@ -211,8 +214,8 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
             // monitor pre-requisite services with timeout
             for {
                 select {
-                    case <- failtimeout.C: {
-                        failtimeout.Stop()
+                    case <- failTimeout.C: {
+                        failTimeout.Stop()
                         sChkTimer.Stop()
                         nStatTimer.Stop()
                         return errors.Errorf("[HEALTH] fail to start health service")
@@ -242,7 +245,8 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
             }
 
             monstart:
-            failtimeout.Stop()
+            failTimeout.Stop()
+            startTimeup = time.NewTicker(time.Minute)
             log.Infof("[HEALTH] all required services are ready")
 
             for {
@@ -251,7 +255,28 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                     case <- appLife.StopChannel(): {
                         sChkTimer.Stop()
                         nStatTimer.Stop()
+                        startTimeup.Stop()
                         return nil
+                    }
+
+                    // app start timeup (should fire only once forfrontend to prep)
+                    case <- startTimeup.C: {
+                        // shoul not nullify start timeup. It will crash
+                        startTimeup.Stop()
+
+                        data, err := json.Marshal(route.ReponseMessage{
+                            "start-timeup": {
+                                "status": true,
+                            },
+                        })
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                        err = feeder.FeedResponseForGet(routepath.RpathNotiAppStartTimeup(), string(data))
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                        log.Info("[HEALTH] app start timeline is up!")
                     }
 
                     // report services status

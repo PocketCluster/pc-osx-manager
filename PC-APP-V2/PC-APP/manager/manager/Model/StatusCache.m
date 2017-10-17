@@ -22,7 +22,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
     self = [super init];
     if (self != nil) {
         self.nodeList = [NSMutableArray arrayWithCapacity:0];
-        
+
         // (2017/10/16) this list should be updated whenever necessary
         self.serviceList = \
             @[@"service.beacon.catcher",
@@ -60,7 +60,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 - (void) refreshNodList:(NSArray<NSDictionary *>*)aNodeList {
     @synchronized(self) {
         [self.nodeList removeAllObjects];
-        
+
         for (NSDictionary* node in aNodeList) {
             [self.nodeList addObject:[[Node alloc] initWithDictionary:node]];
         }
@@ -90,7 +90,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 }
 
 #pragma mark - service status
-@synthesize serviceReady = _serviceReady;
+@synthesize isServiceReady = _serviceReady;
 @synthesize serviceList;
 
 - (void) invalidateServiceStatus {
@@ -113,4 +113,14 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
         _serviceReady = YES;
     }
 }
+
+#pragma mark - app status
+@synthesize isAppStarted = _appStarted;
+
+- (void) refreshAppStartupStatus {
+    @synchronized(self) {
+        _appStarted = YES;
+    }
+}
+
 @end

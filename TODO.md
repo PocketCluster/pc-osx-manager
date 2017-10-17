@@ -11,6 +11,7 @@
 - [ ] Have a UI queue to stack ui requests so that duplicated requests will not cause double execution
 
 ### V0.1.4
+- [ ] `health` check service should count *ETCD*, *Registry* service startup as well.
 - [ ] make sure `interface` building tips from [`S39hostname`](/PC-APP-V1/pc-rpi-agent/S39hostname) being applied to [PocketAgent](/PC-APP-V1/pc-rpi-agent).
 - [ ] Close health monitor + external net listener first before close any other services so that supervisor won't crash
 - [ ] Fix External net listener open timing (after all services are ready)

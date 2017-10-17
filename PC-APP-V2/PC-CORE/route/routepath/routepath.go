@@ -55,3 +55,7 @@ func RpathMonitorServiceStatus() string {
 func RpathMonitorNodeStatus() string {
     return C.GoString(C.RPATH_MONITOR_NODE_STATUS)
 }
+
+func RpathNotiAppStartTimeup() string {
+    return C.GoString(C.RPATH_NOTI_APP_START_TIMEUP)
+}

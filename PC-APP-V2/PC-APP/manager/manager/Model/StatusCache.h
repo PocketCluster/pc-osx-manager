@@ -8,8 +8,8 @@
 
 /*
  * The purpose of UICache is to have a cache of Routepath data for responsive UI
- * representation of cluster status such as node, package, & etc. 
- * 
+ * representation of cluster status such as node, package, & etc.
+ *
  * This cache should never be modified in places other than router receiver, and
  * should only be modified + accessed in main thread.
  */
@@ -21,8 +21,9 @@
 
 @interface StatusCache : NSObject {
 @private
-    BOOL                    _serviceReady;
     NSMutableArray<Node *>* _nodeList;
+    BOOL _serviceReady;
+    BOOL _appStarted;
 }
 + (instancetype)SharedStatusCache;
 
@@ -34,7 +35,11 @@
 - (BOOL) isCoreReady;
 
 #pragma mark - service status
-@property (nonatomic, readonly) BOOL serviceReady;
+@property (nonatomic, readonly) BOOL isServiceReady;
 - (void) invalidateServiceStatus;
 - (void) refreshServiceStatus:(NSDictionary<NSString*, id>*)aServiceStatusList;
+
+#pragma mark - app status
+@property (nonatomic, readonly) BOOL isAppStarted;
+- (void) refreshAppStartupStatus;
 @end

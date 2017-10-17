@@ -21,3 +21,5 @@ const char* RPATH_PACKAGE_KILL              = "/v1/cmd/package/kill";
 const char* RPATH_MONITOR_PACKAGE_PROCESS   = "/v1/monitor/package/process";
 const char* RPATH_MONITOR_SERVICE_STATUS    = "/v1/monitor/service/status";
 const char* RPATH_MONITOR_NODE_STATUS       = "/v1/monitor/node/status";
+
+const char* RPATH_NOTI_APP_START_TIMEUP     = "/v1/noti/app/start-timeup";
