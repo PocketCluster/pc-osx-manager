@@ -20,7 +20,6 @@
 @implementation AppDelegate(AppCheck)
 
 - (void) initCheck {
-
     WEAK_SELF(self);
     
     NSString *pathSystemReady = @(RPATH_SYSTEM_READINESS);
@@ -135,6 +134,43 @@
 }
 
 - (void) startMonitors {
+    WEAK_SELF(self);
+    
+    // --- --- --- --- --- --- node online timeup noti --- --- --- --- --- ---
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_NOTI_NODE_ONLINE_TIMEUP)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         Log(@"%@ %@", path, response);
+         if ([[response valueForKeyPath:@"node-timeup.status"] boolValue]) {
+
+         // this is an error we need to report user and take an action
+         } else {
+         }
+         
+         // update menu status
+     }];
+    
+    // --- --- --- --- --- --- service online timeup noti --- --- --- --- --- ---
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_NOTI_SRVC_ONLINE_TIMEUP)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         Log(@"%@ %@", path, response);
+         if ([[response valueForKeyPath:@"srvc-timeup.status"] boolValue]) {
+             [[belf mainMenu] setupMenuStartNodes];
+
+         // this is an error. report user and kill application
+         } else {
+             [ShowAlert
+              showWarningAlertWithTitle:@"Unable to start due to an internal error"
+              message:[response valueForKeyPath:@"srvc-timeup.error"]];
+         }
+         
+         // update menu status
+     }];
+
+
     // --- --- --- --- --- --- package start/kill/ps --- --- --- --- --- ---
     [[PCRouter sharedRouter]
      addPostRequest:self
@@ -193,16 +229,6 @@
          
          // update menu status
      }];
-
-    // --- --- --- --- --- --- app start timeup noti --- --- --- --- --- ---
-    [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:@(RPATH_NOTI_APP_START_TIMEUP)
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         [[StatusCache SharedStatusCache] refreshAppStartupStatus];
-         
-         // update menu status
-     }];
 }
 
 - (void) closeMonitors {
@@ -211,7 +237,8 @@
     [[PCRouter sharedRouter] delPostRequest:self onPath:@(RPATH_MONITOR_PACKAGE_PROCESS)];
     [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_MONITOR_NODE_STATUS)];
     [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_MONITOR_SERVICE_STATUS)];
-    [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_NOTI_APP_START_TIMEUP)];
+    [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_NOTI_NODE_ONLINE_TIMEUP)];
+    [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_NOTI_SRVC_ONLINE_TIMEUP)];
 }
 
 @end

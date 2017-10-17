@@ -163,6 +163,11 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     return nil
                 })
             if err != nil {
+                // fail to start beacon. this is critical
+                appLife.BroadcastEvent(service.Event{
+                    Name: ivent.IventInternalSpawnError,
+                    Payload: err,
+                })
                 return errors.WithStack(err)
             }
 

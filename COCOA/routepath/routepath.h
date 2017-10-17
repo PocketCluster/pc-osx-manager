@@ -23,6 +23,7 @@ extern const char* RPATH_MONITOR_PACKAGE_PROCESS;
 extern const char* RPATH_MONITOR_SERVICE_STATUS;
 extern const char* RPATH_MONITOR_NODE_STATUS;
 
-extern const char* RPATH_NOTI_APP_START_TIMEUP;
+extern const char* RPATH_NOTI_SRVC_ONLINE_TIMEUP;
+extern const char* RPATH_NOTI_NODE_ONLINE_TIMEUP;
 
 #endif /* routepath.h */

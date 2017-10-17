@@ -11,20 +11,23 @@
 #import "NullStringChecker.h"
 
 @interface StatusCache()
-@property (nonatomic, strong, readwrite) NSMutableArray<Node *>* nodeList;
-@property (nonatomic, strong) NSArray<NSString *>* serviceList;
 @end
 
-@implementation StatusCache
+@implementation StatusCache {
+    __strong NSMutableArray<Node *>* _nodeList;
+    __strong NSArray<NSString *>* _serviceList;
+    BOOL _serviceReady;
+    BOOL _appStartTimeup;
+}
 SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
 - (instancetype) init {
     self = [super init];
     if (self != nil) {
-        self.nodeList = [NSMutableArray arrayWithCapacity:0];
+        _nodeList = [NSMutableArray arrayWithCapacity:0];
 
         // (2017/10/16) this list should be updated whenever necessary
-        self.serviceList = \
+        _serviceList = \
             @[@"service.beacon.catcher",
               @"service.beacon.location.read",
               @"service.beacon.location.write",
@@ -49,17 +52,23 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 }
 
 #pragma mark - node status
-@synthesize nodeList = _nodeList;
+- (NSMutableArray<Node *>*) nodeList {
+    NSMutableArray<Node *>* list = [NSMutableArray arrayWithCapacity:0];
+    @synchronized(self) {
+        [list addObjectsFromArray:_nodeList];
+    }
+    return list;
+}
 
 - (void) invalidateNodeList {
     @synchronized(self) {
-        [self.nodeList removeAllObjects];
+        [_nodeList removeAllObjects];
     }
 }
 
 - (void) refreshNodList:(NSArray<NSDictionary *>*)aNodeList {
     @synchronized(self) {
-        [self.nodeList removeAllObjects];
+        [_nodeList removeAllObjects];
 
         for (NSDictionary* node in aNodeList) {
             [self.nodeList addObject:[[Node alloc] initWithDictionary:node]];
@@ -69,7 +78,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
 - (BOOL) isAllRegisteredNodesReady {
     @synchronized(self) {
-        for (Node *node in self.nodeList) {
+        for (Node *node in _nodeList) {
             if ([node Registered] && ![node isReady]) {
                 return NO;
             }
@@ -80,7 +89,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
 - (BOOL) isCoreReady {
     @synchronized(self) {
-        for (Node *node in self.nodeList) {
+        for (Node *node in _nodeList) {
             if ([[node Name] isEqualToString:@"pc-core"] && [node isReady]) {
                 return YES;
             }
@@ -90,8 +99,13 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 }
 
 #pragma mark - service status
-@synthesize isServiceReady = _serviceReady;
-@synthesize serviceList;
+- (BOOL) isServiceReady {
+    BOOL isReady = NO;
+    @synchronized(self) {
+        isReady = _serviceReady;
+    }
+    return isReady;
+}
 
 - (void) invalidateServiceStatus {
     @synchronized(self) {
@@ -101,25 +115,29 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
 - (void) refreshServiceStatus:(NSDictionary<NSString*, id>*)aServiceStatusList {
     @synchronized(self) {
-        
-        for (NSString *sname in self.serviceList) {
+        for (NSString *sname in _serviceList) {
             id srvc = [aServiceStatusList objectForKey:sname];
             if (srvc == nil || [srvc intValue] != 1) {
                 _serviceReady = NO;
                 return;
             }
         }
-
         _serviceReady = YES;
     }
 }
 
 #pragma mark - app status
-@synthesize isAppStarted = _appStarted;
+- (BOOL) isAppStartTimeUp {
+    BOOL isReady = NO;
+    @synchronized(self) {
+        isReady = _serviceReady;
+    }
+    return isReady;
+}
 
 - (void) refreshAppStartupStatus {
     @synchronized(self) {
-        _appStarted = YES;
+        _appStartTimeup = YES;
     }
 }
 

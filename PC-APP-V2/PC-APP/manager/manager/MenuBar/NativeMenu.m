@@ -11,6 +11,7 @@
 
 #import <Sparkle/Sparkle.h>
 #import "AppDelegate+Window.h"
+#import "StatusCache.h"
 
 static NSString * const UPDATE_TITLE_CHECK_IN_PROGRESS = @"Checking New Updates...";
 static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
@@ -53,6 +54,7 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
     return self;
 }
 
+#pragma mark - Utility Funcs
 - (void) clusterStatusOn {
     [self.statusItem.button setImage:[NSImage imageNamed:@"status-on"]];
 }
@@ -71,6 +73,47 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
         [self.updateAvail setImage:nil];
     }
 }
+
+#pragma mark - State Selection
+/*
+ * Menu state changes following procedure.
+ *                                                     ↓ "service reaady" + "all registered node up" or "APP_START_TIMEUP"
+ *     "setupMenuInitCheck" -> "setupMenuStartService" -> "setupMenuNewCluster"
+ *                                                     -> "setupMenuRunCluster"
+ *
+ * Following "setMenuWithStartupCondition" checks conditions and update menu accordingly at the last stage. 
+ * Until then, user cannot do anything. (not even exiting.)
+ * 
+ * Once app moves beyond "APP_START_TIMEUP" then
+ */
+- (void) setMenuWithStartupCondition {
+
+    // app should have been fully up by this (check "github.com/stkim1/pc-core/service/health")
+    if ([[StatusCache SharedStatusCache] isAppStartTimeUp]) {
+        
+        if ([[StatusCache SharedStatusCache] isServiceReady]) {
+            
+            if ([[StatusCache SharedStatusCache] isCoreReady]) {
+                
+            } else {
+                
+            }
+            
+            
+        } else {
+            
+        }
+        
+        
+    } else {
+
+        
+        
+        
+        
+    }
+}
+
 
 #pragma mark - Basic Menu Handling
 - (void) addCommonMenu:(NSMenu *)menuRoot {

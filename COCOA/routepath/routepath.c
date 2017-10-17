@@ -22,4 +22,5 @@ const char* RPATH_MONITOR_PACKAGE_PROCESS   = "/v1/monitor/package/process";
 const char* RPATH_MONITOR_SERVICE_STATUS    = "/v1/monitor/service/status";
 const char* RPATH_MONITOR_NODE_STATUS       = "/v1/monitor/node/status";
 
-const char* RPATH_NOTI_APP_START_TIMEUP     = "/v1/noti/app/start-timeup";
+const char* RPATH_NOTI_SRVC_ONLINE_TIMEUP  = "/v1/noti/srvc/online-timeup";
+const char* RPATH_NOTI_NODE_ONLINE_TIMEUP  = "/v1/noti/node/online-timeup";

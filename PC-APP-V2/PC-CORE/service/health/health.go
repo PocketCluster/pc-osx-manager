@@ -2,7 +2,6 @@ package health
 
 import (
     "encoding/json"
-    "strings"
     "time"
 
     log "github.com/Sirupsen/logrus"
@@ -14,170 +13,21 @@ import (
     "github.com/stkim1/pc-core/service/ivent"
 )
 
-type NodeStat struct {
-    Name          string        `json:"name"`
-    MacAddr       string        `json:"mac"`
-    IPAddr        string        `json:"-"`
-    Registered    bool          `json:"rgstd"`
-    Bounded       bool          `json:"bound"`
-    PcsshOn       bool          `json:"pcssh"`
-    OrchstOn      bool          `json:"orchst"`
-}
-
-type NodeStatMeta struct {
-    Timestamp     int64         `json:"ts"`
-    BeaconChecked bool          `json:"-"`
-    PcsshChecked  bool          `json:"-"`
-    OrchstChecked bool          `json:"-"`
-    Nodes         []*NodeStat   `json:"nodes"`
-}
-
-func newNodeMetaWithTS(ts int64) *NodeStatMeta {
-    return &NodeStatMeta{
-        Timestamp: ts,
-        Nodes:     []*NodeStat{},
-    }
-}
-
-func (nm *NodeStatMeta) isReadyToReport() bool {
-    return bool(nm.BeaconChecked && nm.PcsshChecked && nm.OrchstChecked)
-}
-
-func (nm *NodeStatMeta) updateBeaconStatus(bMeta ivent.BeaconNodeStatusMeta) {
-    nm.BeaconChecked = true
-
-    update_beacon:
-    for _, bn := range bMeta.Nodes {
-        for i, _ := range nm.Nodes {
-            ns := nm.Nodes[i]
-            if strings.HasPrefix(bn.Name, ns.Name) && bn.IPAddr == ns.IPAddr {
-                ns.MacAddr    = bn.MacAddr
-                ns.Registered = bn.Registered
-                ns.Bounded    = bn.Bounded
-                continue update_beacon
-            }
-        }
-
-        // given pcssh node not found. so let's add
-        nm.Nodes = append(nm.Nodes, &NodeStat{
-            Name:        bn.Name,
-            MacAddr:     bn.MacAddr,
-            IPAddr:      bn.IPAddr,
-            Registered:  bn.Registered,
-            Bounded:     bn.Bounded,
-        })
-    }
-}
-
-func (nm *NodeStatMeta) updatePcsshStatus(pMeta ivent.PcsshNodeStatusMeta) {
-    nm.PcsshChecked = true
-    // https://github.com/golang/go/wiki/SliceTricks#additional-tricks
-    // nl := nm.Nodes[:0]
-
-    update_pcssh:
-    for _, pn := range pMeta.Nodes {
-        for i, _ := range nm.Nodes {
-            ns := nm.Nodes[i]
-            if strings.HasPrefix(pn.HostName, ns.Name) && pn.Addr == ns.IPAddr {
-                ns.PcsshOn = true
-                continue update_pcssh
-            }
-        }
-        // given pcssh node not found. so let's add
-        nm.Nodes = append(nm.Nodes, &NodeStat{
-            Name:    pn.HostName,
-            IPAddr:  pn.Addr,
-            PcsshOn: true,
-        })
-    }
-}
-
-func (nm *NodeStatMeta) updateOrchstStatus(oMeta ivent.EngineStatusMeta) {
-    nm.OrchstChecked = true
-
-    update_orchst:
-    for _, oe := range oMeta.Engines {
-        for i, _ := range nm.Nodes {
-            ns := nm.Nodes[i]
-            if strings.HasPrefix(oe.Name, ns.Name) && oe.IP == ns.IPAddr {
-                ns.OrchstOn = true
-                continue update_orchst
-            }
-        }
-        // given pcssh node not found. so let's add
-        nm.Nodes = append(nm.Nodes, &NodeStat{
-            Name:     oe.Name,
-            IPAddr:   oe.IP,
-            OrchstOn: true,
-        })
-    }
-}
-
-func (nm *NodeStatMeta) buildReport() ([]byte, error) {
-    resp := route.ReponseMessage{
-        "node-stat": {
-            "status": true,
-            "ts":    nm.Timestamp,
-            "nodes": nm.Nodes,
-        },
-    }
-    return json.Marshal(resp)
-}
-
-type TimedStats map[int64]*NodeStatMeta
-
-func (t TimedStats) removeStatForTimestamp(ts int64) {
-    delete(t, ts)
-}
-
-func (t TimedStats) cleanRequestBefore(ts int64) {
-    if len(t) == 0 {
-        return
-    }
-    var tks []int64 = []int64{}
-    for tk := range t {
-        tks = append(tks, tk)
-    }
-
-    for _, tk := range tks {
-        if tk <= ts {
-            log.Warnf("[HEALTH] [WARN] deleting old tk %v", tk)
-            delete(t, tk)
-        }
-    }
-}
-
-func (t TimedStats) isReadyToRequest() bool {
-    return len(t) == 0
-}
-
-func readyChecker(marker map[string]bool) bool {
-    for k := range marker {
-        if !marker[k] {
-            return false
-        }
-    }
-    return true
-}
-
-func reportNodeStats(meta *NodeStatMeta, fdr route.ResponseFeeder, rpath string) error {
-    data, err := meta.buildReport()
-    if err != nil {
-        return err
-    }
-    return fdr.FeedResponseForGet(rpath, string(data))
-}
-
-func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.ResponseFeeder) error {
+func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.ResponseFeeder) {
     var (
         nodeBeaconC = make(chan service.Event)
         nodePcsshC  = make(chan service.Event)
         nodeOrchstC = make(chan service.Event)
 
         // service readiness checker
+        readyDscvryC = make(chan service.Event)
+        readyRgstryC = make(chan service.Event)
+        readyNameC   = make(chan service.Event)
         readyBeaconC = make(chan service.Event)
         readyPcsshC  = make(chan service.Event)
         readyOrchstC = make(chan service.Event)
+        readyVboxC   = make(chan service.Event)
+        innerErrC    = make(chan service.Event)
     )
 
     appLife.RegisterServiceWithFuncs(
@@ -187,7 +37,8 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
             var (
                 // node status (beacon, pcssh, orchst) will be coalesced into one report
                 rpNodeStat   = routepath.RpathMonitorNodeStatus()
-                rpSrvStat    = routepath.RpathMonitorServiceStatus()
+                rpSrvcTimeup = routepath.RpathNotiSrvcOnlineTimeup()
+                rpSrvcStat   = routepath.RpathMonitorServiceStatus()
 
                 // --- timers ---
                 // service checker
@@ -195,20 +46,27 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                 // node status checker. node status checking frequent than 10 sec puts stress in system that
                 // other services miss catching important signals such as stop.
                 nStatTimer  = time.NewTicker(time.Second * 10)
-                // this is to wait timer for other services to start
-                failTimeout = time.NewTicker(time.Minute)
+                // this is to wait timer for other services to start. Especially for this timeout, we'll give 90 secs
+                failTimeout = time.NewTicker(time.Second * 90)
                 // app start timeup counter. This should only be triggered after 1 minute
-                startTimeup *time.Ticker = nil
+                nodeOnlineTimeup *time.Ticker = nil
 
                 // stat collector
                 timedStat   = make(TimedStats, 0)
 
                 // service ready checks
                 readyMarker  = map[string]bool{
+                    ivent.IventDiscoveryInstanceSpwan:  false,
+                    ivent.IventRegistryInstanceSpawn:   false,
+                    ivent.IventNameServerInstanceSpawn: false,
                     ivent.IventBeaconManagerSpawn:      false,
                     ivent.IventPcsshProxyInstanceSpawn: false,
                     ivent.IventOrchstInstanceSpawn:     false,
+                    ivent.IventVboxCtrlInstanceSpawn:   false,
                 }
+
+                // report node error
+                shouldReportNodeError = false
             )
 
             // monitor pre-requisite services with timeout
@@ -218,8 +76,72 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                         failTimeout.Stop()
                         sChkTimer.Stop()
                         nStatTimer.Stop()
+
+                        data, err := json.Marshal(route.ReponseMessage{
+                            "srvc-timeup": {
+                                "status": false,
+                                "error": "unable to start internal services on time",
+                            }})
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                        err = feeder.FeedResponseForGet(rpSrvcTimeup, string(data))
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
                         return errors.Errorf("[HEALTH] fail to start health service")
                     }
+                    // !!! Any error happens in initializing internal service is critical one. !!!
+                    // provide feedback upon receiving one and stop application
+                    case ee := <-innerErrC: {
+                        failTimeout.Stop()
+                        sChkTimer.Stop()
+                        nStatTimer.Stop()
+
+                        irr, ok := ee.Payload.(error)
+                        if !ok {
+                            log.Error("[HEALTH] invalid internal error message type")
+                        }
+                        data, err := json.Marshal(route.ReponseMessage{
+                            "srvc-timeup": {
+                                "status": false,
+                                "error": irr.Error(),
+                            }})
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                        err = feeder.FeedResponseForGet(rpSrvcTimeup, string(data))
+                        if err != nil {
+                            log.Debugf(err.Error())
+                        }
+                        return errors.Errorf("[HEALTH] fail to start health service")
+                    }
+
+                    // discovery
+                    case <- readyDscvryC: {
+                        log.Infof("[HEALTH] discovery ready")
+                        readyMarker[ivent.IventDiscoveryInstanceSpwan] = true
+                        if readyChecker(readyMarker) {
+                            goto monstart
+                        }
+                    }
+                    // registry
+                    case <- readyRgstryC: {
+                        log.Infof("[HEALTH] registry ready")
+                        readyMarker[ivent.IventRegistryInstanceSpawn] = true
+                        if readyChecker(readyMarker) {
+                            goto monstart
+                        }
+                    }
+                    // named
+                    case <- readyNameC: {
+                        log.Infof("[HEALTH] named ready")
+                        readyMarker[ivent.IventNameServerInstanceSpawn] = true
+                        if readyChecker(readyMarker) {
+                            goto monstart
+                        }
+                    }
+                    // beacon
                     case <- readyBeaconC: {
                         log.Infof("[HEALTH] beacon ready")
                         readyMarker[ivent.IventBeaconManagerSpawn] = true
@@ -227,6 +149,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             goto monstart
                         }
                     }
+                    // pcssh
                     case <- readyPcsshC: {
                         log.Infof("[HEALTH] pcssh ready")
                         readyMarker[ivent.IventPcsshProxyInstanceSpawn] = true
@@ -234,9 +157,18 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             goto monstart
                         }
                     }
+                    // orchst
                     case <- readyOrchstC: {
                         log.Infof("[HEALTH] orchst ready")
                         readyMarker[ivent.IventOrchstInstanceSpawn] = true
+                        if readyChecker(readyMarker) {
+                            goto monstart
+                        }
+                    }
+                    // vbox
+                    case <- readyVboxC: {
+                        log.Infof("[HEALTH] vbox ready")
+                        readyMarker[ivent.IventVboxCtrlInstanceSpawn] = true
                         if readyChecker(readyMarker) {
                             goto monstart
                         }
@@ -246,7 +178,16 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
 
             monstart:
             failTimeout.Stop()
-            startTimeup = time.NewTicker(time.Minute)
+            // notify frontend that all services started as intented
+            data, err := json.Marshal(route.ReponseMessage{"srvc-timeup": {"status": true}})
+            if err != nil {
+                log.Debugf(err.Error())
+            }
+            err = feeder.FeedResponseForGet(rpSrvcTimeup, string(data))
+            if err != nil {
+                log.Debugf(err.Error())
+            }
+            nodeOnlineTimeup = time.NewTicker(time.Minute)
             log.Infof("[HEALTH] all required services are ready")
 
             for {
@@ -255,28 +196,25 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                     case <- appLife.StopChannel(): {
                         sChkTimer.Stop()
                         nStatTimer.Stop()
-                        startTimeup.Stop()
+                        nodeOnlineTimeup.Stop()
                         return nil
                     }
 
-                    // app start timeup (should fire only once forfrontend to prep)
-                    case <- startTimeup.C: {
+                    // node should have been all online timeup (should fire only once forfrontend to prep)
+                    case <- nodeOnlineTimeup.C: {
                         // shoul not nullify start timeup. It will crash
-                        startTimeup.Stop()
+                        nodeOnlineTimeup.Stop()
+                        shouldReportNodeError = true
 
-                        data, err := json.Marshal(route.ReponseMessage{
-                            "start-timeup": {
-                                "status": true,
-                            },
-                        })
+                        data, err := json.Marshal(route.ReponseMessage{"node-timeup": {"status": true}})
                         if err != nil {
                             log.Debugf(err.Error())
                         }
-                        err = feeder.FeedResponseForGet(routepath.RpathNotiAppStartTimeup(), string(data))
+                        err = feeder.FeedResponseForGet(routepath.RpathNotiNodeOnlineTimeup(), string(data))
                         if err != nil {
                             log.Debugf(err.Error())
                         }
-                        log.Info("[HEALTH] app start timeline is up!")
+                        log.Infof("[HEALTH] node online due is up! report? %v", shouldReportNodeError)
                     }
 
                     // report services status
@@ -301,7 +239,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                         if err != nil {
                             log.Debugf(err.Error())
                         }
-                        err = feeder.FeedResponseForGet(rpSrvStat, string(data))
+                        err = feeder.FeedResponseForGet(rpSrvcStat, string(data))
                         if err != nil {
                             log.Debugf(err.Error())
                         }
@@ -423,9 +361,14 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
         service.BindEventWithService(ivent.IventMonitorNodeRespOrchst,   nodeOrchstC),
 
         // service readiness checker
+        service.BindEventWithService(ivent.IventDiscoveryInstanceSpwan,  readyDscvryC),
+        service.BindEventWithService(ivent.IventRegistryInstanceSpawn,   readyRgstryC),
+        service.BindEventWithService(ivent.IventNameServerInstanceSpawn, readyNameC),
         service.BindEventWithService(ivent.IventBeaconManagerSpawn,      readyBeaconC),
         service.BindEventWithService(ivent.IventPcsshProxyInstanceSpawn, readyPcsshC),
-        service.BindEventWithService(ivent.IventOrchstInstanceSpawn,     readyOrchstC))
+        service.BindEventWithService(ivent.IventOrchstInstanceSpawn,     readyOrchstC),
+        service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,   readyVboxC),
 
-    return nil
+        // internal error collector
+        service.BindEventWithService(ivent.IventInternalSpawnError,      innerErrC))
 }

@@ -33,13 +33,28 @@
     NSMenu* menuRoot = [[NSMenu alloc] init];
     [menuRoot setAutoenablesItems:NO];
 
-    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Starting..." action:nil keyEquivalent:@""];
+    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Services Starting..." action:nil keyEquivalent:@""];
     [mChecking setEnabled:NO];
     [menuRoot addItem:mChecking];
 
     // add common bottom menus
     [self addInitCommonMenu:menuRoot];
 
+    // set status
+    [self.statusItem setMenu:menuRoot];
+}
+
+- (void) setupMenuStartNodes {
+    NSMenu* menuRoot = [[NSMenu alloc] init];
+    [menuRoot setAutoenablesItems:NO];
+    
+    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Nodes Starting..." action:nil keyEquivalent:@""];
+    [mChecking setEnabled:NO];
+    [menuRoot addItem:mChecking];
+    
+    // add common bottom menus
+    [self addInitCommonMenu:menuRoot];
+    
     // set status
     [self.statusItem setMenu:menuRoot];
 }

@@ -19,27 +19,22 @@
 #import "Node.h"
 #import "Package.h"
 
-@interface StatusCache : NSObject {
-@private
-    NSMutableArray<Node *>* _nodeList;
-    BOOL _serviceReady;
-    BOOL _appStarted;
-}
+@interface StatusCache : NSObject
 + (instancetype)SharedStatusCache;
 
 #pragma mark - node status
-@property (nonatomic, strong, readonly) NSMutableArray<Node *>* nodeList;
+- (NSMutableArray<Node *>*) nodeList;
 - (void) invalidateNodeList;
 - (void) refreshNodList:(NSArray<NSDictionary *>*)aNodeList;
 - (BOOL) isAllRegisteredNodesReady;
 - (BOOL) isCoreReady;
 
 #pragma mark - service status
-@property (nonatomic, readonly) BOOL isServiceReady;
+- (BOOL) isServiceReady;
 - (void) invalidateServiceStatus;
 - (void) refreshServiceStatus:(NSDictionary<NSString*, id>*)aServiceStatusList;
 
 #pragma mark - app status
-@property (nonatomic, readonly) BOOL isAppStarted;
+- (BOOL) isAppStartTimeUp;
 - (void) refreshAppStartupStatus;
 @end

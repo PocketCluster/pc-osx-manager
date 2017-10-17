@@ -7,12 +7,22 @@ package ivent
 
 // These are the internal events that need to rounted to main packages
 const (
+    // network address change event
     IventNetworkAddressChange    string = "ivent.network.address.change"
+
+
+    // internal service spawn list
+    IventDiscoveryInstanceSpwan  string = "ivent.dicovery.instance.spawn"
+    IventRegistryInstanceSpawn   string = "ivent.registry.instance.spawn"
+    IventNameServerInstanceSpawn string = "ivent.name.server.instance.spawn"
     IventBeaconManagerSpawn      string = "ivent.beacon.manager.spawn"
-    IventVboxCtrlInstanceSpawn   string = "ivent.vbox.ctrl.instance.spawn"
-    IventOrchstInstanceSpawn     string = "ivent.orchst.instance.spawn"
-    // external event telling waiters that pcssh proxy instance is up and running
     IventPcsshProxyInstanceSpawn string = "ivent.pcssh.proxy.instance.spawn"
+    IventOrchstInstanceSpawn     string = "ivent.orchst.instance.spawn"
+    IventVboxCtrlInstanceSpawn   string = "ivent.vbox.ctrl.instance.spawn"
+
+    // internal service spawn error for health monitor.
+    // Only to be fired from "github.com/stkim1/pc-core/static/main.go" or initialization
+    IventInternalSpawnError      string = "ivent.internal.spawn.error"
 
 
     // request to monitor node status

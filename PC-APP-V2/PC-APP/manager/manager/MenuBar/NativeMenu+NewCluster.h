@@ -11,5 +11,6 @@
 @interface NativeMenu(NewCluster)
 - (void) setupMenuInitCheck;
 - (void) setupMenuStartService;
+- (void) setupMenuStartNodes;
 - (void) setupMenuNewCluster;
 @end

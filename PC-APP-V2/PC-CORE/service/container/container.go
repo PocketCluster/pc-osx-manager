@@ -9,6 +9,7 @@ import (
     "github.com/stkim1/pc-core/event/operation"
     "github.com/stkim1/pc-core/extlib/registry"
     "github.com/stkim1/pc-core/service"
+    "github.com/stkim1/pc-core/service/ivent"
 )
 
 func InitDiscoveryService(appLife service.ServiceSupervisor, config *embed.PocketConfig) error {
@@ -22,22 +23,31 @@ func InitDiscoveryService(appLife service.ServiceSupervisor, config *embed.Pocke
             // startup preps
             select {
                 case <-etcd.Server.ReadyNotify(): {
-                    log.Debugf("[ETCD] server is ready to run")
+                    log.Debugf("[DSCVRY] server is ready to run")
                 }
                 case <-time.After(120 * time.Second): {
                     etcd.Server.Stop() // trigger a shutdown
-                    return errors.Errorf("[ETCD] Server took too long to start!")
+
+                    appLife.BroadcastEvent(service.Event{
+                        Name:    ivent.IventInternalSpawnError,
+                        Payload: errors.Errorf("[DSCVRY] Server took too long to start!"),
+                    })
+                    return errors.Errorf("[DSCVRY] Server took too long to start!")
                 }
             }
+
+            // report successful start up
+            appLife.BroadcastEvent(service.Event{Name:ivent.IventDiscoveryInstanceSpwan})
+
             // until server goes down, errors and stop signal will be constantly checked
             for {
                 select {
                     case err = <-etcd.Err(): {
-                        log.Debugf("[ETCD] error : %v", err)
+                        log.Debugf("[DSCVRY] error : %v", err)
                     }
                     case <- appLife.StopChannel(): {
                         etcd.Close()
-                        log.Debugf("[ETCD] server shuts down")
+                        log.Debugf("[DSCVRY] server shuts down")
                         return nil
                     }
                 }
@@ -54,12 +64,23 @@ func InitRegistryService(appLife service.ServiceSupervisor, config *registry.Poc
         func() error {
             reg, err := registry.NewPocketRegistry(config)
             if err != nil {
+                appLife.BroadcastEvent(service.Event{
+                    Name:    ivent.IventInternalSpawnError,
+                    Payload: errors.WithStack(err),
+                })
                 return errors.WithStack(err)
             }
             err = reg.Start()
             if err != nil {
+                appLife.BroadcastEvent(service.Event{
+                    Name:    ivent.IventInternalSpawnError,
+                    Payload: errors.WithStack(err),
+                })
                 return errors.WithStack(err)
             }
+
+            // report successful start up
+            appLife.BroadcastEvent(service.Event{Name:ivent.IventRegistryInstanceSpawn})
             log.Debugf("[REGISTRY] server start successful")
 
             // wait for service to stop

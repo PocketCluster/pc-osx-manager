@@ -56,6 +56,10 @@ func RpathMonitorNodeStatus() string {
     return C.GoString(C.RPATH_MONITOR_NODE_STATUS)
 }
 
-func RpathNotiAppStartTimeup() string {
-    return C.GoString(C.RPATH_NOTI_APP_START_TIMEUP)
+func RpathNotiSrvcOnlineTimeup() string {
+    return C.GoString(C.RPATH_NOTI_SRVC_ONLINE_TIMEUP)
+}
+
+func RpathNotiNodeOnlineTimeup() string {
+    return C.GoString(C.RPATH_NOTI_NODE_ONLINE_TIMEUP)
 }
