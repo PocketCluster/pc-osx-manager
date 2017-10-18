@@ -28,6 +28,9 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
 
 @interface NativeMenu()
 @property (nonatomic, strong, readwrite) NSStatusItem *statusItem;
+- (void) clusterStatusOn;
+- (void) clusterStatusOff;
+
 - (void) menuSelectedPref:(id)sender;
 - (void) menuSelectedCheckForUpdates:(id)sender;
 - (void) menuSelectedSlack:(id)sender;
@@ -130,6 +133,7 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
     [self.statusItem.button setImage:[NSImage imageNamed:@"status-off"]];
 }
 
+#pragma mark - update notification
 - (void) updateNewVersionAvailability:(BOOL)IsAvailable {
     NSMenuItem *mUpdate = [self.statusItem.menu itemWithTag:MENUITEM_UPDATE];
     [mUpdate setTitle:UPDATE_TITLE_INITIATE_CHECKING];

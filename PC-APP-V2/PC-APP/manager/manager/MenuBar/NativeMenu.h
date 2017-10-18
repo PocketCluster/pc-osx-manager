@@ -13,8 +13,7 @@
 }
 @property (nonatomic, strong, readonly) NSStatusItem *statusItem;
 
-- (void) clusterStatusOn;
-- (void) clusterStatusOff;
+#pragma mark - update notification
 - (void) updateNewVersionAvailability:(BOOL)IsAvailable;
 
 #pragma mark - menu updator
