@@ -10,20 +10,17 @@
 @interface NativeMenu : NSObject <NSMenuDelegate, PCRouteRequest>{
 @private
     NSStatusItem     *_statusItem;
-    NSMenuItem       *_updateAvail;
 }
 @property (nonatomic, strong, readonly) NSStatusItem *statusItem;
-@property (nonatomic, strong, readonly) NSMenuItem *updateAvail;
 
 - (void) clusterStatusOn;
 - (void) clusterStatusOff;
-
 - (void) updateNewVersionAvailability:(BOOL)IsAvailable;
 
 #pragma mark - menu updator
 - (void) updateMenuWithCondition;
 
 #pragma mark - Common menus
-- (void) addCommonMenu:(NSMenu *)menuRoot;
-- (void) addInitCommonMenu:(NSMenu *)menuRoot;
+- (void) setupCheckupMenu;
+- (void) setupOperationMenu;
 @end

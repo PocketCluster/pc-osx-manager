@@ -131,19 +131,27 @@
 }
 
 - (IBAction)menu_02:(id)sender {
-    [[[AppDelegate sharedDelegate] mainMenu] setupMenuNewCluster];
+    [[[AppDelegate sharedDelegate] mainMenu] setupMenuStartService];
 }
 
 - (IBAction)menu_03:(id)sender {
-    [[[AppDelegate sharedDelegate] mainMenu] setupMenuRunCluster];
+    [[[AppDelegate sharedDelegate] mainMenu] setupMenuStartNodes];
 }
 
 - (IBAction)menu_04:(id)sender {
-    
+    [[[AppDelegate sharedDelegate] mainMenu] setupMenuNewCluster];
 }
 
 - (IBAction)menu_05:(id)sender {
+    [[[AppDelegate sharedDelegate] mainMenu] setupMenuRunCluster];
+}
+
+- (IBAction)menu_06:(id)sender {
+}
+
+- (IBAction)menu_07:(id)sender {
     [[[AppDelegate sharedDelegate] mainMenu] updateNewVersionAvailability:YES];
 }
+
 
 @end

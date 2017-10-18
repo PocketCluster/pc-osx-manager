@@ -172,33 +172,43 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DYG-T3-wv5">
-                        <rect key="frame" x="378" y="237" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="[M] New Cluster" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="P1T-jV-5Rm">
+                        <rect key="frame" x="378" y="204" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[M] Start Nodes" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="P1T-jV-5Rm">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="menu_02:" target="-2" id="DhM-ag-XC6"/>
+                            <action selector="menu_03:" target="-2" id="RrN-P4-ZLo"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OsX-ZO-fia">
-                        <rect key="frame" x="378" y="204" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="[M] Install Package" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Ch6-PV-Mvz">
+                        <rect key="frame" x="378" y="171" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[M] New Cluster" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Ch6-PV-Mvz">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="menu_03:" target="-2" id="qUw-Xq-VJV"/>
+                            <action selector="menu_04:" target="-2" id="dJz-Ww-8OS"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Fw-ue-HuN">
-                        <rect key="frame" x="378" y="171" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="-" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="mlt-VY-5Sy">
+                        <rect key="frame" x="378" y="138" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[M] Run Cluster" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="mlt-VY-5Sy">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="menu_04:" target="-2" id="VRc-8J-H93"/>
+                            <action selector="menu_05:" target="-2" id="pMG-0q-aAi"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7l7-Ig-eRO">
+                        <rect key="frame" x="378" y="237" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[M] Start Services" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="jo3-aP-5Gd">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="menu_02:" target="-2" id="jJI-jb-zcx"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QhG-Zi-dJq">
@@ -208,7 +218,7 @@
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="menu_05:" target="-2" id="PSW-wq-VUT"/>
+                            <action selector="menu_07:" target="-2" id="PXB-Ge-3O9"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ksz-45-uOW">
@@ -259,6 +269,16 @@
                         </buttonCell>
                         <connections>
                             <action selector="opsCmdDebug7:" target="-2" id="KPR-Q0-vEv"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QaB-fo-fPG">
+                        <rect key="frame" x="378" y="105" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="-" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="k0t-fV-SNu">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="menu_06:" target="-2" id="4PB-y4-dBN"/>
                         </connections>
                     </button>
                 </subviews>

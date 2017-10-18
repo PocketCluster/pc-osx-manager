@@ -15,63 +15,51 @@
 @implementation NativeMenu(NewCluster)
 
 - (void) setupMenuInitCheck {
-    NSMenu* menuRoot = [[NSMenu alloc] init];
-    [menuRoot setAutoenablesItems:NO];
+    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:1];
+    [mStatus setTitle:@"Initializing..."];
+    [mStatus setEnabled:NO];
+    [mStatus setAction:nil];
+    [mStatus setTarget:nil];
+    [mStatus setSubmenu:nil];
+    [self.statusItem.menu itemChanged:mStatus];
 
-    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Initializing..." action:nil keyEquivalent:@""];
-    [mChecking setEnabled:NO];
-    [menuRoot addItem:mChecking];
-
-    // add common bottom menus
-    [self addInitCommonMenu:menuRoot];
-    
-    // set status
-    [self.statusItem setMenu:menuRoot];
+    [self setupCheckupMenu];
 }
 
 - (void) setupMenuStartService {
-    NSMenu* menuRoot = [[NSMenu alloc] init];
-    [menuRoot setAutoenablesItems:NO];
-
-    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Starting Services..." action:nil keyEquivalent:@""];
-    [mChecking setEnabled:NO];
-    [menuRoot addItem:mChecking];
-
-    // add common bottom menus
-    [self addInitCommonMenu:menuRoot];
-
-    // set status
-    [self.statusItem setMenu:menuRoot];
+    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:1];
+    [mStatus setTitle:@"Starting Services..."];
+    [mStatus setEnabled:NO];
+    [mStatus setAction:nil];
+    [mStatus setTarget:nil];
+    [mStatus setSubmenu:nil];
+    [self.statusItem.menu itemChanged:mStatus];
+    
+    [self setupCheckupMenu];
 }
 
 - (void) setupMenuStartNodes {
-    NSMenu* menuRoot = [[NSMenu alloc] init];
-    [menuRoot setAutoenablesItems:NO];
+    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:1];
+    [mStatus setTitle:@"Checking Nodes..."];
+    [mStatus setEnabled:NO];
+    [mStatus setAction:nil];
+    [mStatus setTarget:nil];
+    [mStatus setSubmenu:nil];
+    [self.statusItem.menu itemChanged:mStatus];
     
-    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Checking Nodes..." action:nil keyEquivalent:@""];
-    [mChecking setEnabled:NO];
-    [menuRoot addItem:mChecking];
-    
-    // add common bottom menus
-    [self addInitCommonMenu:menuRoot];
-    
-    // set status
-    [self.statusItem setMenu:menuRoot];
+    [self setupCheckupMenu];
 }
 
 - (void) setupMenuNewCluster {
-    NSMenu* menuRoot = [[NSMenu alloc] init];
-    [menuRoot setAutoenablesItems:NO];
-    
-    NSMenuItem *mCluster = [[NSMenuItem alloc] initWithTitle:@"New Cluster" action:@selector(menuSelectedNewCluster:) keyEquivalent:@""];
-    [mCluster setTarget:self];
-    [menuRoot addItem:mCluster];
+    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:1];
+    [mStatus setTitle:@"Build Cluster"];
+    [mStatus setEnabled:YES];
+    [mStatus setAction:@selector(menuSelectedNewCluster:)];
+    [mStatus setTarget:self];
+    [mStatus setSubmenu:nil];
+    [self.statusItem.menu itemChanged:mStatus];
 
-    // add common bottom menus
-    [self addCommonMenu:menuRoot];
-
-    // set status
-    [self.statusItem setMenu:menuRoot];
+    [self setupOperationMenu];
 }
 
 - (void) menuSelectedNewCluster:(id)sender {
