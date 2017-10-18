@@ -192,20 +192,25 @@
              [[StatusCache SharedStatusCache] setServiceReady:NO];
              
              Log(@"%@", [response valueForKeyPath:@"srvc-stat.error"]);
+             
+             // unless something grave happens, don't update UI from service notice
+             // update menu status. doc @ "NativeMenu.updateMenuWithCondition"
+             [[belf mainMenu] updateMenuWithCondition];
              return;
          }
          
          // refresh service status
          NSDictionary<NSString*, id>* rsrvcs = [response valueForKeyPath:@"srvc-stat.srvcs"];
          [[StatusCache SharedStatusCache] refreshServiceStatus:rsrvcs];
-         if (![[StatusCache SharedStatusCache] isServiceReady]) {
-             // TODO : this is an error. alert user and kill application
 
+          // TODO : this is a critical error. alert user and kill application
+         if (![[StatusCache SharedStatusCache] isServiceReady]) {
+
+             // unless something grave happens, don't update UI from service notice
+             // update menu status. doc @ "NativeMenu.updateMenuWithCondition"
+             [[belf mainMenu] updateMenuWithCondition];
              return;
          }
-         
-         // update menu status. doc @ "NativeMenu.updateMenuWithCondition"
-         [[belf mainMenu] updateMenuWithCondition];
      }];
 
     /* 
@@ -218,7 +223,7 @@
      *     2. package missing
      *     3. something minor
      *
-     * app should have been fully up by this point 
+     * app + nodes should have been fully up after 'node online timeup' noti
      * (check "github.com/stkim1/pc-core/service/health")
      */
     // --- --- --- --- --- --- [noti] node online timeup --- --- --- --- --- ---
@@ -249,8 +254,8 @@
          }
 
          [[StatusCache SharedStatusCache] setServiceReady:YES];
-         // we manually update menu here.
-         // read "NativeMenu.updateMenuWithStartupCondition" doc
+
+         // manually menu update here.
          [[belf mainMenu] setupMenuStartNodes];
      }];
 

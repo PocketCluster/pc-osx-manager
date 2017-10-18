@@ -68,6 +68,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 - (BOOL) showOnlineNode {
     BOOL show = NO;
     @synchronized(self) {
+        show = _showOnlineNode;
     }
     return show;
 }
