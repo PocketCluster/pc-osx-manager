@@ -15,6 +15,9 @@
 
 @implementation StatusCache {
     __strong NSMutableArray<Node *>* _nodeList;
+    BOOL _nodeListValid;
+    BOOL _showOnlineNode;
+    
     __strong NSArray<NSString *>* _serviceList;
     BOOL _serviceReady;
 }
@@ -51,25 +54,63 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 }
 
 #pragma mark - node status
-- (NSMutableArray<Node *>*) nodeList {
-    NSMutableArray<Node *>* list = [NSMutableArray arrayWithCapacity:0];
+@dynamic isNodeListValid;
+@dynamic showOnlineNode;
+
+- (BOOL) isNodeListValid {
+    BOOL isValid = NO;
     @synchronized(self) {
-        [list addObjectsFromArray:_nodeList];
+        isValid  = _nodeListValid;
+    }
+    return isValid;
+}
+
+- (BOOL) showOnlineNode {
+    BOOL show = NO;
+    @synchronized(self) {
+    }
+    return show;
+}
+
+- (void) setShowOnlineNode:(BOOL)show {
+    @synchronized(self) {
+        _showOnlineNode = show;
+    }
+}
+
+- (NSArray<Node *>*) nodeList {
+    NSArray<Node *>* list = nil;
+    @synchronized(self) {
+        list = [NSArray arrayWithArray:_nodeList];
     }
     return list;
 }
 
 - (void) refreshNodList:(NSArray<NSDictionary *>*)aNodeList {
     @synchronized(self) {
+        _nodeListValid = YES;
         [_nodeList removeAllObjects];
 
         for (NSDictionary* node in aNodeList) {
-            [self.nodeList addObject:[[Node alloc] initWithDictionary:node]];
+            [_nodeList addObject:[[Node alloc] initWithDictionary:node]];
         }
     }
 }
 
-- (BOOL) isRegisteredNodesReady {
+- (BOOL) hasSlaveNodes {
+    BOOL sExist = NO;
+    @synchronized(self) {
+        for (Node *node in _nodeList) {
+            if ([node.Name hasPrefix:@"pc-node"]) {
+                sExist = YES;
+                break;
+            }
+        }
+    }
+    return sExist;
+}
+
+- (BOOL) isAllRegisteredNodesReady {
     @synchronized(self) {
         for (Node *node in _nodeList) {
             if ([node Registered] && ![node isReady]) {

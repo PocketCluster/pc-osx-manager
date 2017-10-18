@@ -8,11 +8,11 @@
 
 #import "PCRouter.h"
 #import "ShowAlert.h"
+#import "StatusCache.h"
 #import "NativeMenu+NewCluster.h"
 
 #import "AppDelegate+Window.h"
 #import "AppDelegate+AppCheck.h"
-#import "StatusCache.h"
 
 @interface AppDelegate(AppCheckPrivate)<PCRouteRequest>
 @end
@@ -170,7 +170,8 @@
          NSArray<NSDictionary*>* rnodes = [response valueForKeyPath:@"node-stat.nodes"];
          [[StatusCache SharedStatusCache] refreshNodList:rnodes];
 
-         // update menu status
+         // update menu status. doc @ "NativeMenu.updateMenuWithCondition"
+         [[belf mainMenu] updateMenuWithCondition];
          
          // TODO : this is a critical error. alert user and kill application
          if (![[response valueForKeyPath:@"node-stat.status"] boolValue]) {
@@ -203,10 +204,23 @@
              return;
          }
          
-         // update menu status
+         // update menu status. doc @ "NativeMenu.updateMenuWithCondition"
+         [[belf mainMenu] updateMenuWithCondition];
      }];
 
-
+    /* 
+     * Once the app has passed notification phase, a critical error
+     * (service dead, or core dead) will kill the app. The kill control will happen 
+     * here (AppDelegate+AppCheck.m) and (AppDelegate.m)
+     *
+     * Thus, UI front-end should only deal with warnings only such as
+     *     1. slave node missing
+     *     2. package missing
+     *     3. something minor
+     *
+     * app should have been fully up by this point 
+     * (check "github.com/stkim1/pc-core/service/health")
+     */
     // --- --- --- --- --- --- [noti] node online timeup --- --- --- --- --- ---
     // this noti always comes later than service online noti. There's no error message
     [[PCRouter sharedRouter]
@@ -216,7 +230,8 @@
 
          [[StatusCache SharedStatusCache] setShowOnlineNode:YES];
 
-         // update menu status
+         // update menu status. doc @ "NativeMenu.updateMenuWithCondition"
+         [[belf mainMenu] updateMenuWithCondition];
      }];
     
     // --- --- --- --- --- --- [noti] service online timeup --- --- --- --- ---
@@ -234,7 +249,8 @@
          }
 
          [[StatusCache SharedStatusCache] setServiceReady:YES];
-         // we manually update menu here
+         // we manually update menu here.
+         // read "NativeMenu.updateMenuWithStartupCondition" doc
          [[belf mainMenu] setupMenuStartNodes];
      }];
 

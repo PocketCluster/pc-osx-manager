@@ -77,25 +77,45 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
 #pragma mark - State Selection
 /*
  * Menu state changes following procedure.
- *                                                     ↓ "service reaady" + "all registered node up" or "APP_START_TIMEUP"
- *     "setupMenuInitCheck" -> "setupMenuStartService" -> "setupMenuNewCluster"
- *                                                     -> "setupMenuRunCluster"
+ *                                                                              (updateMenuWithCondition)
+ *     "setupMenuInitCheck" -> "setupMenuStartService" -> "setupMenuStartNodes" -> "setupMenuNewCluster"
+ *                                                                              -> "setupMenuRunCluster"
  *
- * Following "setMenuWithStartupCondition" checks conditions and update menu accordingly at the last stage. 
+ * This checks conditions and update menu accordingly as AppDelegate hands UI control to native menu.
  * Until then, user cannot do anything. (not even exiting.)
  * 
- * Once app moves beyond "APP_START_TIMEUP" then
+ * Once AppDelegate delegates UI frontend control, NativeMenu should select appropriate state.
  */
-- (void) setMenuWithStartupCondition {
+- (void) updateMenuWithCondition {
 
-    // app should have been fully up by this (check "github.com/stkim1/pc-core/service/health")
-    if ([[StatusCache SharedStatusCache] isServiceReady]) {
+    // only check the best case scenario when 'node online timeup' noti has not arrived
+    if (![[StatusCache SharedStatusCache] showOnlineNode]) {
         
+        if ([[StatusCache SharedStatusCache] isNodeListValid] && \
+            [[StatusCache SharedStatusCache] hasSlaveNodes] && \
+            [[StatusCache SharedStatusCache] isAllRegisteredNodesReady]) {
+            
+            // everything is good. set menu to good, normal condition
+            [self setupMenuRunCluster];
+        }
+        return;
+    }
+
+    // as 'node online timeup' noti should have been kicked, check strict manner
+    if (![[StatusCache SharedStatusCache] isNodeListValid]) {
+        // we don't know if node is valid to make judgement
+        return;
+    }
+
+    // show existing cluster and display package
+    if ([[StatusCache SharedStatusCache] hasSlaveNodes]) {
+        [self setupMenuRunCluster];
+
+    // build new cluster
     } else {
-        
+        [self setupMenuNewCluster];
     }
 }
-
 
 #pragma mark - Basic Menu Handling
 - (void) addCommonMenu:(NSMenu *)menuRoot {
@@ -110,7 +130,7 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
 #endif
 
     // check for update
-    [menuRoot addItem:[self updateAvail]];
+    //[menuRoot addItem:[self updateAvail]];
     [menuRoot addItem:[NSMenuItem separatorItem]];
 
     // chat menu
@@ -123,7 +143,7 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
     [mAbout setTarget:self];
     [menuRoot addItem:mAbout];
     [menuRoot addItem:[NSMenuItem separatorItem]];
-    
+
 #ifdef DEBUG
     // debug menu
     NSMenuItem *mDebug = [[NSMenuItem alloc] initWithTitle:@"-- [DEBUG] --" action:@selector(menuSelectedDebug:) keyEquivalent:@""];
@@ -131,7 +151,7 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
     [menuRoot addItem:mDebug];
     [menuRoot addItem:[NSMenuItem separatorItem]];
 #endif
-    
+
     // quit menu
     NSMenuItem *menuQuit = [[NSMenuItem alloc] initWithTitle:@"Quit" action:@selector(menuSelectedQuit:) keyEquivalent:@""];
     [menuQuit setTarget:self];

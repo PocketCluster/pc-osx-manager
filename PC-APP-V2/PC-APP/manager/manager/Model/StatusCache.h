@@ -23,12 +23,23 @@
 + (instancetype)SharedStatusCache;
 
 #pragma mark - node status
+/*
+ * isNodeListValid: sets to true when it's firstly updated.
+ *
+ * showOnlineNode: sets to true when 'node online timeup' notification sets
+ *
+ * isNodeListValid -> showOnlineNode order
+ */
+// this property indicates whether node list has ever been updated. only necessary at beginning
+@property (readonly) BOOL isNodeListValid;
 // this property indicates whether frontend can display what's happening in online nodes
 @property (readwrite, getter=showOnlineNode, setter=setShowOnlineNode:) BOOL showOnlineNode;
 
-- (NSMutableArray<Node *>*) nodeList;
+- (NSArray<Node *>*) nodeList;
 - (void) refreshNodList:(NSArray<NSDictionary *>*)aNodeList;
-- (BOOL) isRegisteredNodesReady;
+- (BOOL) hasSlaveNodes;
+- (BOOL) isAllRegisteredNodesReady;
+
 
 #pragma mark - service status
 // this property should be used to indicate if there is grave service error.

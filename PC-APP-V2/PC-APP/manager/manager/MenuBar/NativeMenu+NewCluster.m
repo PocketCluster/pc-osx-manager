@@ -18,7 +18,7 @@
     NSMenu* menuRoot = [[NSMenu alloc] init];
     [menuRoot setAutoenablesItems:NO];
 
-    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Checking..." action:nil keyEquivalent:@""];
+    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Initializing..." action:nil keyEquivalent:@""];
     [mChecking setEnabled:NO];
     [menuRoot addItem:mChecking];
 
@@ -33,7 +33,7 @@
     NSMenu* menuRoot = [[NSMenu alloc] init];
     [menuRoot setAutoenablesItems:NO];
 
-    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Services Starting..." action:nil keyEquivalent:@""];
+    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Starting Services..." action:nil keyEquivalent:@""];
     [mChecking setEnabled:NO];
     [menuRoot addItem:mChecking];
 
@@ -48,7 +48,7 @@
     NSMenu* menuRoot = [[NSMenu alloc] init];
     [menuRoot setAutoenablesItems:NO];
     
-    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Nodes Starting..." action:nil keyEquivalent:@""];
+    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Checking Nodes..." action:nil keyEquivalent:@""];
     [mChecking setEnabled:NO];
     [menuRoot addItem:mChecking];
     

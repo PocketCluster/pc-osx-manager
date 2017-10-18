@@ -7,6 +7,7 @@
 //
 
 #import "NativeMenu+RunCluster.h"
+#import "StatusCache.h"
 
 @interface NativeMenu(RunClusterPrivate)
 - (void) menuSelectedStopCluster:(id)sender;
@@ -18,9 +19,16 @@
     NSMenu* menuRoot = [[NSMenu alloc] init];
     [menuRoot setAutoenablesItems:NO];
     
-    NSMenuItem *mCluster = [[NSMenuItem alloc] initWithTitle:@"Cluster 1" action:nil keyEquivalent:@""];
+    NSMenuItem *mCluster = [[NSMenuItem alloc] initWithTitle:@"Cluster Control" action:nil keyEquivalent:@""];
     [mCluster setSubmenu:[NSMenu new]];
+    // show warning that some nodes are missing
+    if ([[StatusCache SharedStatusCache] isAllRegisteredNodesReady]) {
+        
+    } else {
+        
+    }
 
+    // setup submenu
     {
         NSMenuItem *sInstall = [[NSMenuItem alloc] initWithTitle:@"Install Package" action:@selector(menuSelectedStopCluster:) keyEquivalent:@""];
         [sInstall setTarget:self];

@@ -20,9 +20,10 @@
 
 - (void) updateNewVersionAvailability:(BOOL)IsAvailable;
 
-#pragma mark - State Selection
-- (void) setMenuWithStartupCondition;
+#pragma mark - menu updator
+- (void) updateMenuWithCondition;
 
+#pragma mark - Common menus
 - (void) addCommonMenu:(NSMenu *)menuRoot;
 - (void) addInitCommonMenu:(NSMenu *)menuRoot;
 @end
