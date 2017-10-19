@@ -6,8 +6,9 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
-#import "NativeMenu+RunCluster.h"
 #import "StatusCache.h"
+#import "NativeMenuAddition.h"
+#import "NativeMenu+RunCluster.h"
 
 @interface NativeMenu(RunClusterPrivate)
 - (void) menuSelectedStopCluster:(id)sender;
@@ -17,7 +18,7 @@
 
 - (void) setupMenuRunCluster {
     
-    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:1];
+    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
     [mStatus setTitle:@"Cluster Control"];
     [mStatus setEnabled:YES];
     [mStatus setAction:nil];
@@ -31,20 +32,38 @@
     }
 
     // setup submenu
-    {
+    if ([mStatus submenu] == nil) {
         [mStatus setSubmenu:[NSMenu new]];
 
-        NSMenuItem *sInstall = [[NSMenuItem alloc] initWithTitle:@"Install Package" action:@selector(menuSelectedStopCluster:) keyEquivalent:@""];
+        NSMenuItem *sInstall =
+            [[NSMenuItem alloc]
+             initWithTitle:@"Install Package"
+             action:@selector(menuSelectedInstallPackage:)
+             keyEquivalent:@""];
+
         [sInstall setTarget:self];
         [mStatus.submenu addItem:sInstall];
+        [mStatus.submenu addItem:[NSMenuItem separatorItem]];
+
         
-        NSMenuItem *sStop = [[NSMenuItem alloc] initWithTitle:@"Stop Cluster" action:@selector(menuSelectedStopCluster:) keyEquivalent:@""];
+        
+        
+        
+        NSMenuItem *sStop =
+            [[NSMenuItem alloc]
+             initWithTitle:@"Stop Cluster"
+             action:@selector(menuSelectedStopCluster:)
+             keyEquivalent:@""];
         [sStop setTarget:self];
         [mStatus.submenu addItem:sStop];
     }
     [self.statusItem.menu itemChanged:mStatus];
 
     [self setupOperationMenu];
+}
+
+- (void) menuSelectedInstallPackage:(id)sender {
+    
 }
 
 - (void) menuSelectedStopCluster:(id)sender {

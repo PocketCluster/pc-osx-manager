@@ -6,6 +6,7 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
+#import "NativeMenuAddition.h"
 #import "NativeMenu+NewCluster.h"
 
 @interface NativeMenu(NewClusterPrivate)
@@ -15,7 +16,7 @@
 @implementation NativeMenu(NewCluster)
 
 - (void) setupMenuInitCheck {
-    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:1];
+    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
     [mStatus setTitle:@"Initializing..."];
     [mStatus setEnabled:NO];
     [mStatus setAction:nil];
@@ -27,7 +28,7 @@
 }
 
 - (void) setupMenuStartService {
-    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:1];
+    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
     [mStatus setTitle:@"Starting Services..."];
     [mStatus setEnabled:NO];
     [mStatus setAction:nil];
@@ -39,7 +40,7 @@
 }
 
 - (void) setupMenuStartNodes {
-    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:1];
+    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
     [mStatus setTitle:@"Checking Nodes..."];
     [mStatus setEnabled:NO];
     [mStatus setAction:nil];
@@ -51,7 +52,7 @@
 }
 
 - (void) setupMenuNewCluster {
-    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:1];
+    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
     [mStatus setTitle:@"Build Cluster"];
     [mStatus setEnabled:YES];
     [mStatus setAction:@selector(menuSelectedNewCluster:)];

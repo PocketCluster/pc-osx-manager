@@ -213,6 +213,7 @@
 		046D311D1F3D346B0081CC3E /* PCSetup3VC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup3VC.h; sourceTree = "<group>"; };
 		046D311E1F3D346B0081CC3E /* PCSetup3VC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetup3VC.m; sourceTree = "<group>"; };
 		046D311F1F3D346B0081CC3E /* PCSetup3VC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCSetup3VC.xib; sourceTree = "<group>"; };
+		046F64991F9908E300DB0DD3 /* NativeMenuAddition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NativeMenuAddition.h; sourceTree = "<group>"; };
 		0478C3B31F9561440096F7D9 /* StatusCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusCache.h; sourceTree = "<group>"; };
 		0478C3B41F9561440096F7D9 /* StatusCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StatusCache.m; sourceTree = "<group>"; };
 		048678051BCF5FE20071594B /* PocketCluster.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PocketCluster.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -340,6 +341,7 @@
 		04030F771F3D5C1E00EA793D /* MenuBar */ = {
 			isa = PBXGroup;
 			children = (
+				046F64991F9908E300DB0DD3 /* NativeMenuAddition.h */,
 				04030F7C1F3D5C1E00EA793D /* NativeMenu.h */,
 				04030F7D1F3D5C1E00EA793D /* NativeMenu.m */,
 				04030F781F3D5C1E00EA793D /* NativeMenu+NewCluster.h */,

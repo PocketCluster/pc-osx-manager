@@ -5,6 +5,7 @@
 //  Copyright (c) 2015,2017 PocketCluster. All rights reserved.
 //
 
+#import "NativeMenuAddition.h"
 #import "NativeMenu.h"
 #import "NativeMenu+NewCluster.h"
 #import "NativeMenu+RunCluster.h"
@@ -12,16 +13,6 @@
 #import <Sparkle/Sparkle.h>
 #import "AppDelegate+Window.h"
 #import "StatusCache.h"
-
-enum {
-    MENUITEM_TOP_STATUS = 1,
-    MENUITEM_PREF,
-    MENUITEM_UPDATE,
-    MENUITEM_SLACK,
-    MENUITEM_ABOUT,
-    MENUITEM_DEBUG,
-    MENUITEM_QUIT,
-};
 
 static NSString * const UPDATE_TITLE_CHECK_IN_PROGRESS = @"Checking New Updates...";
 static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
@@ -65,7 +56,7 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
     NSMenu* menuRoot = [[NSMenu alloc] init];
     [menuRoot setAutoenablesItems:NO];
     
-    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"Initializing..." action:nil keyEquivalent:@""];
+    NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"- STATUS MESSAGE -" action:nil keyEquivalent:@""];
     [mChecking setTag:MENUITEM_TOP_STATUS];
     [mChecking setEnabled:NO];
     [menuRoot addItem:mChecking];

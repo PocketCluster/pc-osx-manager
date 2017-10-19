@@ -37,6 +37,9 @@
     self.window.styleMask |= NSFullSizeContentViewWindowMask;
 
     [[self.window contentView] addSubview:[self.viewController view]];
+
+    // begin with initialization method
+    [self.viewController.progressLabel setStringValue:@"Initializing..."];
 }
 
 #pragma mark - Stage Control
