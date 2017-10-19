@@ -271,6 +271,7 @@
 		04DD160D1F41000A0080D025 /* PCRoutePathConst.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCRoutePathConst.h; sourceTree = "<group>"; };
 		04DD160E1F4100570080D025 /* PCRoutePathConst.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCRoutePathConst.m; sourceTree = "<group>"; };
 		04E51DBF1BDC88E3001F1F22 /* Resources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Resources.bundle; sourceTree = "<group>"; };
+		04E841651F9879E500A32535 /* UpdateProgress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateProgress.h; sourceTree = "<group>"; };
 		04F7056F1BD7A9B700829651 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		04F705711BD7A9BD00829651 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		04F98D141F8376E800823DC8 /* pc-core.iso */ = {isa = PBXFileReference; lastKnownFileType = file; name = "pc-core.iso"; path = "../../../../../POCKETOPS/VBOX-IMAGE/pc-core.iso"; sourceTree = "<group>"; };
@@ -744,6 +745,7 @@
 				04CA54B51F44D47E00A7AF48 /* Alert */,
 				04CA54B81F44D47E00A7AF48 /* BaseBrandView */,
 				04CA54BE1F44E36A00A7AF48 /* StepStages */,
+				04E841631F9879D500A32535 /* UpdateProgress */,
 				04B379701F48C60B0080DBEA /* Window */,
 			);
 			name = UIElement;
@@ -813,6 +815,14 @@
 				04CAE2E61E9B8A4900B23B22 /* DebugWindow.xib */,
 			);
 			path = Debug;
+			sourceTree = "<group>";
+		};
+		04E841631F9879D500A32535 /* UpdateProgress */ = {
+			isa = PBXGroup;
+			children = (
+				04E841651F9879E500A32535 /* UpdateProgress.h */,
+			);
+			path = UpdateProgress;
 			sourceTree = "<group>";
 		};
 		3A1EA7B4E3AB3B354460F41A /* Frameworks */ = {

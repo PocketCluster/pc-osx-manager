@@ -7,7 +7,7 @@
 //
 
 #import "BaseWindowController.h"
+#import "UpdateProgress.h"
 
-@interface IntroWC : BaseWindowController
-
+@interface IntroWC : BaseWindowController <UpdateProgress>
 @end

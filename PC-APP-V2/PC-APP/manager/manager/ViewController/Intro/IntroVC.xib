@@ -7,6 +7,8 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="IntroVC">
             <connections>
+                <outlet property="circularProgress" destination="Nnb-gj-J5t" id="3GZ-ZD-LKs"/>
+                <outlet property="progressLabel" destination="LNU-0d-1Ut" id="el5-g8-enu"/>
                 <outlet property="view" destination="wWD-IO-Uhx" id="l8w-9V-8dQ"/>
                 <outlet property="webView" destination="h9j-ep-frg" id="GNu-5R-93Y"/>
             </connections>
@@ -30,6 +32,17 @@
                         <outlet property="policyDelegate" destination="-2" id="T1j-R4-HlT"/>
                     </connections>
                 </webView>
+                <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LNU-0d-1Ut">
+                    <rect key="frame" x="0.0" y="46" width="580" height="20"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" id="g7v-r1-ZpG">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <progressIndicator horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="Nnb-gj-J5t">
+                    <rect key="frame" x="282" y="20" width="16" height="16"/>
+                </progressIndicator>
             </subviews>
             <point key="canvasLocation" x="734" y="193"/>
         </customView>

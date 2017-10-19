@@ -16,5 +16,6 @@
 >
 
 @property (weak) IBOutlet WebView *webView;
-
+@property (weak) IBOutlet NSTextField *progressLabel;
+@property (weak) IBOutlet NSProgressIndicator *circularProgress;
 @end

@@ -172,7 +172,8 @@
 
          // update menu status. doc @ "NativeMenu.updateMenuWithCondition"
          [[belf mainMenu] updateMenuWithCondition];
-         
+         [belf updateNodeStatusWith:[StatusCache SharedStatusCache]];
+
          // TODO : this is a critical error. alert user and kill application
          if (![[response valueForKeyPath:@"node-stat.status"] boolValue]) {
 
@@ -196,6 +197,7 @@
              // unless something grave happens, don't update UI from service notice
              // update menu status. doc @ "NativeMenu.updateMenuWithCondition"
              [[belf mainMenu] updateMenuWithCondition];
+             [belf updateServiceStatusWith:[StatusCache SharedStatusCache]];
              return;
          }
          
@@ -209,6 +211,7 @@
              // unless something grave happens, don't update UI from service notice
              // update menu status. doc @ "NativeMenu.updateMenuWithCondition"
              [[belf mainMenu] updateMenuWithCondition];
+             [belf updateServiceStatusWith:[StatusCache SharedStatusCache]];
              return;
          }
      }];
@@ -237,6 +240,7 @@
 
          // update menu status. doc @ "NativeMenu.updateMenuWithCondition"
          [[belf mainMenu] updateMenuWithCondition];
+         [belf onNotifiedWith:[StatusCache SharedStatusCache] forNodeOnline:YES];
      }];
     
     // --- --- --- --- --- --- [noti] service online timeup --- --- --- --- ---
@@ -250,6 +254,7 @@
              [[StatusCache SharedStatusCache] setServiceReady:NO];
              
              Log(@"%@", [response valueForKeyPath:@"srvc-timeup.error"]);
+             [belf onNotifiedWith:[StatusCache SharedStatusCache] forServiceOnline:NO];
              return;
          }
 
@@ -257,6 +262,7 @@
 
          // manually menu update here.
          [[belf mainMenu] setupMenuStartNodes];
+         [belf onNotifiedWith:[StatusCache SharedStatusCache] forServiceOnline:YES];
      }];
 
 }

@@ -45,4 +45,66 @@
 
 -(void)shouldControlRevertFrom:(NSObject<StageStep> *)aStep withParam:(NSDictionary *)aParam {
 }
+
+
+#pragma mark - update message
+// show initial message
+- (void) setupInitialCheckMessage {
+    [self.viewController.progressLabel setStringValue:@"Initializing..."];
+}
+
+// show "service starting..." message
+- (void) setupStartServices {
+    [self.viewController.progressLabel setStringValue:@"Starting Services..."];
+}
+
+// services online timeup
+- (void) onNotifiedWith:(StatusCache *)aCache forServiceOnline:(BOOL)isSuccess {
+    [self.viewController.progressLabel setStringValue:@"Checking Nodes..."];
+}
+
+// nodes online timeup
+- (void) onNotifiedWith:(StatusCache *)aCache forNodeOnline:(BOOL)isSuccess {
+    WEAK_SELF(self);
+    
+    [[NSOperationQueue mainQueue]
+     addOperationWithBlock:^{
+         if(belf){
+             [belf close];
+         }
+     }];
+}
+
+// update services
+- (void) updateServiceStatusWith:(StatusCache *)aCache {
+    
+}
+
+// update nodes
+- (void) updateNodeStatusWith:(StatusCache *)aCache {
+    
+    // quickly filter out the worst case scenarios when 'node online timeup' noti has not fired
+    if (![[StatusCache SharedStatusCache] showOnlineNode]) {
+        if (![[StatusCache SharedStatusCache] isNodeListValid] || \
+            ![[StatusCache SharedStatusCache] isAllRegisteredNodesReady]) {
+            return;
+        }
+    }
+    
+    // -- as 'node online timeup' noti should have been kicked, check strict manner --
+    // node list should be valid at this point
+    if (![[StatusCache SharedStatusCache] isNodeListValid]) {
+        return;
+    }
+    
+    WEAK_SELF(self);
+
+    [[NSOperationQueue mainQueue]
+     addOperationWithBlock:^{
+         if(belf){
+             [belf close];
+         }
+     }];
+}
+
 @end

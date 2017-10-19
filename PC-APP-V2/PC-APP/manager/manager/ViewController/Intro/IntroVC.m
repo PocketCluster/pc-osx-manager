@@ -9,6 +9,9 @@
 #import "IntroVC.h"
 
 @implementation IntroVC
+@synthesize webView;
+@synthesize progressLabel;
+@synthesize circularProgress;
 
 - (void)finishConstruction {
     [super finishConstruction];
@@ -30,6 +33,8 @@
 
     [self.webView setDrawsBackground:NO];
     [self.webView.mainFrame loadHTMLString:str baseURL:nil];
+    [self.circularProgress startAnimation:self];
+    [self.circularProgress displayIfNeeded];
 }
 
 #pragma mark - WebView Delegate

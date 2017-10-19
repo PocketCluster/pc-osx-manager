@@ -155,4 +155,65 @@
     }
 }
 
+#pragma mark - update with events
+- (void) setupInitialCheckMessage {
+    @synchronized(_openWindows) {
+        for (NSObject<UpdateProgress> *window in _openWindows) {
+            if ([window conformsToProtocol:@protocol(UpdateProgress)]) {
+                [window setupInitialCheckMessage];
+            }
+        }
+    }
+}
+
+- (void) setupStartServices {
+    @synchronized(_openWindows) {
+        for (NSObject *window in _openWindows) {
+            if ([window conformsToProtocol:@protocol(UpdateProgress)]) {
+                [(id<UpdateProgress>)window setupStartServices];
+            }
+        }
+    }
+}
+
+- (void) onNotifiedWith:(StatusCache *)aCache forServiceOnline:(BOOL)isSuccess {
+    @synchronized(_openWindows) {
+        for (NSObject *window in _openWindows) {
+            if ([window conformsToProtocol:@protocol(UpdateProgress)]) {
+                [(id<UpdateProgress>)window onNotifiedWith:aCache forServiceOnline:isSuccess];
+            }
+        }
+    }
+}
+
+- (void) onNotifiedWith:(StatusCache *)aCache forNodeOnline:(BOOL)isSuccess {
+    @synchronized(_openWindows) {
+        for (NSObject *window in _openWindows) {
+            if ([window conformsToProtocol:@protocol(UpdateProgress)]) {
+                [(id<UpdateProgress>)window onNotifiedWith:aCache forNodeOnline:isSuccess];
+            }
+        }
+    }
+}
+
+- (void) updateServiceStatusWith:(StatusCache *)aCache {
+    @synchronized(_openWindows) {
+        for (NSObject *window in _openWindows) {
+            if ([window conformsToProtocol:@protocol(UpdateProgress)]) {
+                [(id<UpdateProgress>)window updateServiceStatusWith:aCache];
+            }
+        }
+    }
+}
+
+- (void) updateNodeStatusWith:(StatusCache *)aCache {
+    @synchronized(_openWindows) {
+        for (NSObject *window in _openWindows) {
+            if ([window conformsToProtocol:@protocol(UpdateProgress)]) {
+                [(id<UpdateProgress>)window updateNodeStatusWith:aCache];
+            }
+        }
+    }
+}
+
 @end
