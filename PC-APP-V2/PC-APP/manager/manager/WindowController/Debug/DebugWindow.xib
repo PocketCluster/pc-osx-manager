@@ -132,33 +132,33 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ecc-a9-ZHJ">
-                        <rect key="frame" x="196" y="237" width="182" height="32"/>
+                        <rect key="frame" x="196" y="204" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Setup" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Lug-Me-22v">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="setup_02:" target="-2" id="AVB-FM-AG7"/>
+                            <action selector="setup_03:" target="-2" id="5wO-eY-KYO"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ROL-U5-3Bf">
-                        <rect key="frame" x="196" y="204" width="182" height="32"/>
+                        <rect key="frame" x="196" y="171" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Install" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="rWg-2z-p4l">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="setup_03:" target="-2" id="4lO-vR-aMe"/>
+                            <action selector="setup_04:" target="-2" id="aOa-p6-b2f"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AuB-cT-teD">
-                        <rect key="frame" x="196" y="270" width="182" height="32"/>
+                        <rect key="frame" x="196" y="237" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="Agree" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="loe-39-GvN">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="setup_01:" target="-2" id="94C-se-WoK"/>
+                            <action selector="setup_02:" target="-2" id="haA-S2-NzA"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7RJ-U1-0iI">
@@ -279,6 +279,16 @@
                         </buttonCell>
                         <connections>
                             <action selector="menu_06:" target="-2" id="4PB-y4-dBN"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zYA-iP-YBp">
+                        <rect key="frame" x="196" y="270" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="Intro" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="RrH-vx-07C">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="setup_01:" target="-2" id="GcC-jr-IEJ"/>
                         </connections>
                     </button>
                 </subviews>

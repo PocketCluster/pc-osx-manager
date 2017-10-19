@@ -76,17 +76,20 @@
 
 #pragma mark - WINDOW
 - (IBAction)setup_01:(id)sender {
-    [[AppDelegate sharedDelegate] activeWindowByClassName:@"AgreementWC" withResponder:nil];
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"IntroWC" withResponder:nil];
 }
 
 - (IBAction)setup_02:(id)sender {
-    [[AppDelegate sharedDelegate] activeWindowByClassName:@"DPSetupWC" withResponder:nil];
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"AgreementWC" withResponder:nil];
 }
 
 - (IBAction)setup_03:(id)sender {
-    [[AppDelegate sharedDelegate] activeWindowByClassName:@"PCPkgInstallWC" withResponder:nil];
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"DPSetupWC" withResponder:nil];
 }
 
+- (IBAction)setup_04:(id)sender {    
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"PCPkgInstallWC" withResponder:nil];
+}
 
 #pragma mark - ROUTEPATH
 - (IBAction)route_01:(id)sender {

@@ -18,6 +18,8 @@
 		040A9BDA1F9836D70058F0EF /* UserCheckVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 040A9BD81F9836D70058F0EF /* UserCheckVC.xib */; };
 		040A9BDF1F9837670058F0EF /* IntroVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 040A9BDD1F9837670058F0EF /* IntroVC.m */; };
 		040A9BE01F9837670058F0EF /* IntroVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 040A9BDE1F9837670058F0EF /* IntroVC.xib */; };
+		040A9BEA1F98482E0058F0EF /* IntroWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 040A9BE81F98482E0058F0EF /* IntroWC.m */; };
+		040A9BEB1F98482E0058F0EF /* IntroWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 040A9BE91F98482E0058F0EF /* IntroWC.xib */; };
 		041023ED1BE434290083D62E /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 041023EC1BE434290083D62E /* AppKit.framework */; };
 		0416326C1F48EA850057BE5D /* SSSelectableToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 041632681F48EA850057BE5D /* SSSelectableToolbar.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		0416326D1F48EA850057BE5D /* SSSelectableToolbarItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0416326A1F48EA850057BE5D /* SSSelectableToolbarItem.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -143,6 +145,9 @@
 		040A9BDC1F9837670058F0EF /* IntroVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IntroVC.h; sourceTree = "<group>"; };
 		040A9BDD1F9837670058F0EF /* IntroVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IntroVC.m; sourceTree = "<group>"; };
 		040A9BDE1F9837670058F0EF /* IntroVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = IntroVC.xib; sourceTree = "<group>"; };
+		040A9BE71F98482E0058F0EF /* IntroWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IntroWC.h; sourceTree = "<group>"; };
+		040A9BE81F98482E0058F0EF /* IntroWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IntroWC.m; sourceTree = "<group>"; };
+		040A9BE91F98482E0058F0EF /* IntroWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = IntroWC.xib; sourceTree = "<group>"; };
 		041023EC1BE434290083D62E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		041632671F48EA850057BE5D /* SSSelectableToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSSelectableToolbar.h; sourceTree = "<group>"; };
 		041632681F48EA850057BE5D /* SSSelectableToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSSelectableToolbar.m; sourceTree = "<group>"; };
@@ -367,6 +372,16 @@
 			path = Intro;
 			sourceTree = "<group>";
 		};
+		040A9BE11F98470C0058F0EF /* Intro */ = {
+			isa = PBXGroup;
+			children = (
+				040A9BE71F98482E0058F0EF /* IntroWC.h */,
+				040A9BE81F98482E0058F0EF /* IntroWC.m */,
+				040A9BE91F98482E0058F0EF /* IntroWC.xib */,
+			);
+			path = Intro;
+			sourceTree = "<group>";
+		};
 		041632641F48EA850057BE5D /* Vendors */ = {
 			isa = PBXGroup;
 			children = (
@@ -442,6 +457,7 @@
 				04CA54A21F4479F300A7AF48 /* Agreement */,
 				04CAE2E31E9B8A2A00B23B22 /* Debug */,
 				046D31061F3D32440081CC3E /* Install */,
+				040A9BE11F98470C0058F0EF /* Intro */,
 				046D31001F3D310C0081CC3E /* Preferences */,
 				046D310A1F3D32440081CC3E /* Setup */,
 			);
@@ -943,6 +959,7 @@
 			files = (
 				0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */,
 				04CA54AF1F44AFF700A7AF48 /* AgreementVC.xib in Resources */,
+				040A9BEB1F98482E0058F0EF /* IntroWC.xib in Resources */,
 				046D31111F3D32440081CC3E /* DPSetupWC.xib in Resources */,
 				0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */,
 				046D312B1F3D346B0081CC3E /* PCSetup3VC.xib in Resources */,
@@ -1099,6 +1116,7 @@
 				040A9BD91F9836D70058F0EF /* UserCheckVC.m in Sources */,
 				04CA54A61F447B1700A7AF48 /* AgreementWC.m in Sources */,
 				04CAE2E71E9B8A4900B23B22 /* DebugWindow.m in Sources */,
+				040A9BEA1F98482E0058F0EF /* IntroWC.m in Sources */,
 				04CA54B91F44D47E00A7AF48 /* ShowAlert.m in Sources */,
 				04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */,
 				046D31241F3D346B0081CC3E /* PCSetup1VC.m in Sources */,
