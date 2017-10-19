@@ -14,6 +14,10 @@
 		04030F811F3D5C1E00EA793D /* NativeMenu+RunCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 04030F7B1F3D5C1E00EA793D /* NativeMenu+RunCluster.m */; };
 		04030F821F3D5C1E00EA793D /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 04030F7D1F3D5C1E00EA793D /* NativeMenu.m */; };
 		04030F861F3D5CD500EA793D /* PackageMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 04030F851F3D5CD500EA793D /* PackageMenuItem.m */; };
+		040A9BD91F9836D70058F0EF /* UserCheckVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 040A9BD71F9836D70058F0EF /* UserCheckVC.m */; };
+		040A9BDA1F9836D70058F0EF /* UserCheckVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 040A9BD81F9836D70058F0EF /* UserCheckVC.xib */; };
+		040A9BDF1F9837670058F0EF /* IntroVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 040A9BDD1F9837670058F0EF /* IntroVC.m */; };
+		040A9BE01F9837670058F0EF /* IntroVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 040A9BDE1F9837670058F0EF /* IntroVC.xib */; };
 		041023ED1BE434290083D62E /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 041023EC1BE434290083D62E /* AppKit.framework */; };
 		0416326C1F48EA850057BE5D /* SSSelectableToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 041632681F48EA850057BE5D /* SSSelectableToolbar.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		0416326D1F48EA850057BE5D /* SSSelectableToolbarItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0416326A1F48EA850057BE5D /* SSSelectableToolbarItem.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -74,8 +78,6 @@
 		04CA54A91F44900F00A7AF48 /* EULA.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 04CA54A81F44900F00A7AF48 /* EULA.rtf */; };
 		04CA54AE1F44AFF700A7AF48 /* AgreementVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CA54AC1F44AFF700A7AF48 /* AgreementVC.m */; };
 		04CA54AF1F44AFF700A7AF48 /* AgreementVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04CA54AD1F44AFF700A7AF48 /* AgreementVC.xib */; };
-		04CA54B31F44B10400A7AF48 /* UserCheckVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CA54B11F44B10400A7AF48 /* UserCheckVC.m */; };
-		04CA54B41F44B10400A7AF48 /* UserCheckVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04CA54B21F44B10400A7AF48 /* UserCheckVC.xib */; };
 		04CA54B91F44D47E00A7AF48 /* ShowAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CA54B71F44D47E00A7AF48 /* ShowAlert.m */; };
 		04CA54BC1F44D49500A7AF48 /* BaseBrandView.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CA54BB1F44D49500A7AF48 /* BaseBrandView.m */; };
 		04CAE2E71E9B8A4900B23B22 /* DebugWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CAE2E51E9B8A4900B23B22 /* DebugWindow.m */; };
@@ -135,6 +137,12 @@
 		04030F7D1F3D5C1E00EA793D /* NativeMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NativeMenu.m; sourceTree = "<group>"; };
 		04030F841F3D5CD500EA793D /* PackageMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PackageMenuItem.h; sourceTree = "<group>"; };
 		04030F851F3D5CD500EA793D /* PackageMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PackageMenuItem.m; sourceTree = "<group>"; };
+		040A9BD61F9836D70058F0EF /* UserCheckVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserCheckVC.h; sourceTree = "<group>"; };
+		040A9BD71F9836D70058F0EF /* UserCheckVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserCheckVC.m; sourceTree = "<group>"; };
+		040A9BD81F9836D70058F0EF /* UserCheckVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserCheckVC.xib; sourceTree = "<group>"; };
+		040A9BDC1F9837670058F0EF /* IntroVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IntroVC.h; sourceTree = "<group>"; };
+		040A9BDD1F9837670058F0EF /* IntroVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IntroVC.m; sourceTree = "<group>"; };
+		040A9BDE1F9837670058F0EF /* IntroVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = IntroVC.xib; sourceTree = "<group>"; };
 		041023EC1BE434290083D62E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		041632671F48EA850057BE5D /* SSSelectableToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSSelectableToolbar.h; sourceTree = "<group>"; };
 		041632681F48EA850057BE5D /* SSSelectableToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSSelectableToolbar.m; sourceTree = "<group>"; };
@@ -243,9 +251,6 @@
 		04CA54AB1F44AFF700A7AF48 /* AgreementVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AgreementVC.h; sourceTree = "<group>"; };
 		04CA54AC1F44AFF700A7AF48 /* AgreementVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AgreementVC.m; sourceTree = "<group>"; };
 		04CA54AD1F44AFF700A7AF48 /* AgreementVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AgreementVC.xib; sourceTree = "<group>"; };
-		04CA54B01F44B10400A7AF48 /* UserCheckVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserCheckVC.h; sourceTree = "<group>"; };
-		04CA54B11F44B10400A7AF48 /* UserCheckVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserCheckVC.m; sourceTree = "<group>"; };
-		04CA54B21F44B10400A7AF48 /* UserCheckVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserCheckVC.xib; sourceTree = "<group>"; };
 		04CA54B61F44D47E00A7AF48 /* ShowAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShowAlert.h; sourceTree = "<group>"; };
 		04CA54B71F44D47E00A7AF48 /* ShowAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShowAlert.m; sourceTree = "<group>"; };
 		04CA54BA1F44D49500A7AF48 /* BaseBrandView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseBrandView.h; sourceTree = "<group>"; };
@@ -340,6 +345,26 @@
 			);
 			name = MenuBar;
 			path = manager/MenuBar;
+			sourceTree = "<group>";
+		};
+		040A9BD51F9836D70058F0EF /* UserCheck */ = {
+			isa = PBXGroup;
+			children = (
+				040A9BD61F9836D70058F0EF /* UserCheckVC.h */,
+				040A9BD71F9836D70058F0EF /* UserCheckVC.m */,
+				040A9BD81F9836D70058F0EF /* UserCheckVC.xib */,
+			);
+			path = UserCheck;
+			sourceTree = "<group>";
+		};
+		040A9BDB1F9837590058F0EF /* Intro */ = {
+			isa = PBXGroup;
+			children = (
+				040A9BDC1F9837670058F0EF /* IntroVC.h */,
+				040A9BDD1F9837670058F0EF /* IntroVC.m */,
+				040A9BDE1F9837670058F0EF /* IntroVC.xib */,
+			);
+			path = Intro;
 			sourceTree = "<group>";
 		};
 		041632641F48EA850057BE5D /* Vendors */ = {
@@ -590,7 +615,9 @@
 				0447CAB91F47AD28003BB069 /* BaseSetupVC.h */,
 				0447CABA1F47AD28003BB069 /* BaseSetupVC.m */,
 				04CA54AA1F44AFD100A7AF48 /* Agreement */,
+				040A9BDB1F9837590058F0EF /* Intro */,
 				046D31131F3D346B0081CC3E /* Setup */,
+				040A9BD51F9836D70058F0EF /* UserCheck */,
 			);
 			name = ViewController;
 			path = manager/ViewController;
@@ -732,9 +759,6 @@
 				04CA54AB1F44AFF700A7AF48 /* AgreementVC.h */,
 				04CA54AC1F44AFF700A7AF48 /* AgreementVC.m */,
 				04CA54AD1F44AFF700A7AF48 /* AgreementVC.xib */,
-				04CA54B01F44B10400A7AF48 /* UserCheckVC.h */,
-				04CA54B11F44B10400A7AF48 /* UserCheckVC.m */,
-				04CA54B21F44B10400A7AF48 /* UserCheckVC.xib */,
 			);
 			path = Agreement;
 			sourceTree = "<group>";
@@ -920,12 +944,12 @@
 				0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */,
 				04CA54AF1F44AFF700A7AF48 /* AgreementVC.xib in Resources */,
 				046D31111F3D32440081CC3E /* DPSetupWC.xib in Resources */,
-				04CA54B41F44B10400A7AF48 /* UserCheckVC.xib in Resources */,
 				0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */,
 				046D312B1F3D346B0081CC3E /* PCSetup3VC.xib in Resources */,
 				041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				04CA54A91F44900F00A7AF48 /* EULA.rtf in Resources */,
 				046D31251F3D346B0081CC3E /* PCSetup1VC.xib in Resources */,
+				040A9BDA1F9836D70058F0EF /* UserCheckVC.xib in Resources */,
 				046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */,
 				04BD309F1F3E4B2D00509B21 /* PCSetup2VC.xib in Resources */,
 				04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */,
@@ -933,6 +957,7 @@
 				04F98D151F8376E800823DC8 /* pc-core.iso in Resources */,
 				04CAE2E81E9B8A4900B23B22 /* DebugWindow.xib in Resources */,
 				046D310F1F3D32440081CC3E /* PCPkgInstallWC.xib in Resources */,
+				040A9BE01F9837670058F0EF /* IntroVC.xib in Resources */,
 				04CA54A71F447B1700A7AF48 /* AgreementWC.xib in Resources */,
 				046D31051F3D310C0081CC3E /* PCPrefWC.xib in Resources */,
 			);
@@ -1048,7 +1073,6 @@
 				04BEEEAF1F40832E008426A7 /* PCRouteTrie.m in Sources */,
 				04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */,
 				04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */,
-				04CA54B31F44B10400A7AF48 /* UserCheckVC.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
 				04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */,
 				046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
@@ -1060,6 +1084,7 @@
 				046D31101F3D32440081CC3E /* DPSetupWC.m in Sources */,
 				046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
+				040A9BDF1F9837670058F0EF /* IntroVC.m in Sources */,
 				04030F821F3D5C1E00EA793D /* NativeMenu.m in Sources */,
 				046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */,
 				0416326C1F48EA850057BE5D /* SSSelectableToolbar.m in Sources */,
@@ -1071,6 +1096,7 @@
 				043F47131F3E0C730078A0C1 /* AppDelegate+Window.m in Sources */,
 				04CA54BC1F44D49500A7AF48 /* BaseBrandView.m in Sources */,
 				04CA54AE1F44AFF700A7AF48 /* AgreementVC.m in Sources */,
+				040A9BD91F9836D70058F0EF /* UserCheckVC.m in Sources */,
 				04CA54A61F447B1700A7AF48 /* AgreementWC.m in Sources */,
 				04CAE2E71E9B8A4900B23B22 /* DebugWindow.m in Sources */,
 				04CA54B91F44D47E00A7AF48 /* ShowAlert.m in Sources */,
