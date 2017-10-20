@@ -45,10 +45,6 @@
         [mStatus.submenu addItem:sInstall];
         [mStatus.submenu addItem:[NSMenuItem separatorItem]];
 
-        
-        
-        
-        
         NSMenuItem *sStop =
             [[NSMenuItem alloc]
              initWithTitle:@"Stop Cluster"
@@ -58,6 +54,20 @@
         [mStatus.submenu addItem:sStop];
     }
     [self.statusItem.menu itemChanged:mStatus];
+
+
+    // show package menu
+    {
+        // due to separator
+        for (NSMenuItem *item in [self.statusItem.menu itemArray]) {
+            if ([item tag] < PKG_TAG_BUMPER) {
+                continue;
+            }
+
+            [item setHidden:NO];
+            [self.statusItem.menu itemChanged:item];
+        }
+    }
 
     [self setupOperationMenu];
 }

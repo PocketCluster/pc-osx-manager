@@ -55,12 +55,26 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
 - (void) finalizeMenuSetup {
     NSMenu* menuRoot = [[NSMenu alloc] init];
     [menuRoot setAutoenablesItems:NO];
-    
+
     NSMenuItem *mChecking = [[NSMenuItem alloc] initWithTitle:@"- STATUS MESSAGE -" action:nil keyEquivalent:@""];
     [mChecking setTag:MENUITEM_TOP_STATUS];
     [mChecking setEnabled:NO];
     [menuRoot addItem:mChecking];
-    [menuRoot addItem:[NSMenuItem separatorItem]];
+
+    // In between the following two separators, packages will be added.
+    {
+        NSMenuItem *div = [NSMenuItem separatorItem];
+        [div setTag:MENUITEM_PKG_DIV];
+        [menuRoot addItem:div];
+        [menuRoot addItem:[NSMenuItem separatorItem]];
+    }
+
+    // update menu
+    NSMenuItem *mUpdate = [[NSMenuItem alloc] initWithTitle:UPDATE_TITLE_CHECK_IN_PROGRESS action:@selector(menuSelectedCheckForUpdates:) keyEquivalent:@""];
+    [mUpdate setTag:MENUITEM_UPDATE];
+    [mUpdate setTarget:self];
+    [mUpdate setEnabled:NO];
+    [menuRoot addItem:mUpdate];
     
 #ifdef USE_PRE_PANNEL
     // preference
@@ -70,14 +84,6 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
     [menuRoot addItem:mPref];
 #endif
 
-    // update menu
-    NSMenuItem *mUpdate = [[NSMenuItem alloc] initWithTitle:UPDATE_TITLE_CHECK_IN_PROGRESS action:@selector(menuSelectedCheckForUpdates:) keyEquivalent:@""];
-    [mUpdate setTag:MENUITEM_UPDATE];
-    [mUpdate setTarget:self];
-    [mUpdate setEnabled:NO];
-    [menuRoot addItem:mUpdate];
-    [menuRoot addItem:[NSMenuItem separatorItem]];
-    
     // chat menu
     NSMenuItem *mSlack = [[NSMenuItem alloc] initWithTitle:@"#PocketCluster Slack" action:@selector(menuSelectedSlack:) keyEquivalent:@""];
     [mSlack setTag:MENUITEM_SLACK];
@@ -122,6 +128,37 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
 
 - (void) clusterStatusOff {
     [self.statusItem.button setImage:[NSImage imageNamed:@"status-off"]];
+}
+
+- (void) updateWithInstalledPackageList {
+    NSInteger indexBegin = ([self.statusItem.menu
+                             indexOfItem:[self.statusItem.menu
+                                          itemWithTag:MENUITEM_PKG_DIV]] + 1);
+
+    // remove all old package menues
+    for (NSMenuItem *item in [self.statusItem.menu itemArray]) {
+        if ([item tag] < PKG_TAG_BUMPER) {
+            continue;
+        }
+        [self.statusItem.menu removeItem:item];
+    }
+
+    // add packages according to the list
+    for (NSInteger i = 0; i < 5; i++) {
+        NSMenuItem *pkg = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%ld", i] action:nil keyEquivalent:@""];
+        [pkg setTag:PKG_TAG_BUILDER(i)];
+
+        // add operation submenu
+        NSMenuItem *mOps = [[NSMenuItem alloc] initWithTitle:@"start" action:@selector(testOp) keyEquivalent:@""];
+        [mOps setTarget:self];
+        [pkg setSubmenu:[NSMenu new]];
+        [pkg.submenu addItem:mOps];
+        [self.statusItem.menu insertItem:pkg atIndex:(indexBegin + i)];
+    }
+}
+
+- (void) testOp {
+    
 }
 
 #pragma mark - update notification

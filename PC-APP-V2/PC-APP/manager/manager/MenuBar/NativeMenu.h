@@ -22,4 +22,6 @@
 #pragma mark - Common menus
 - (void) setupCheckupMenu;
 - (void) setupOperationMenu;
+
+- (void) updateWithInstalledPackageList;
 @end
