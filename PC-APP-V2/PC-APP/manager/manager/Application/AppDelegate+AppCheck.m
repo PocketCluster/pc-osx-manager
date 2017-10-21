@@ -157,7 +157,16 @@
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          // Log(@"%@ %@", path, response);
      }];
+
     
+    // --- --- --- --- --- --- package installed list --- --- --- --- --- --- --
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_PACKAGE_LIST_INSTALLED)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         Log(@"%@ %@", path, response);
+     }];
+
 
     // --- --- --- --- --- --- [monitors] node --- --- --- --- --- --- --- --- -
     [[PCRouter sharedRouter]
@@ -259,6 +268,7 @@
          }
 
          [[StatusCache SharedStatusCache] setServiceReady:YES];
+         [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
 
          // manually menu update here.
          [[belf mainMenu] setupMenuStartNodes];
@@ -271,6 +281,7 @@
     [[PCRouter sharedRouter] delPostRequest:self onPath:@(RPATH_PACKAGE_STARTUP)];
     [[PCRouter sharedRouter] delPostRequest:self onPath:@(RPATH_PACKAGE_KILL)];
     [[PCRouter sharedRouter] delPostRequest:self onPath:@(RPATH_MONITOR_PACKAGE_PROCESS)];
+    [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_PACKAGE_LIST_INSTALLED)];
     [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_MONITOR_NODE_STATUS)];
     [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_MONITOR_SERVICE_STATUS)];
     [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_NOTI_NODE_ONLINE_TIMEUP)];
