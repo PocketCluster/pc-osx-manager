@@ -20,8 +20,9 @@ import (
     "github.com/stkim1/pc-core/rasker"
     "github.com/stkim1/pc-core/rasker/pkgtask"
     "github.com/stkim1/pc-core/route"
-    "github.com/stkim1/pc-core/route/install"
     "github.com/stkim1/pc-core/route/initcheck"
+    "github.com/stkim1/pc-core/route/install"
+    "github.com/stkim1/pc-core/route/list"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/service/container"
     "github.com/stkim1/pc-core/service/dns"
@@ -259,12 +260,13 @@ func main() {
 
                         // --- route path event ---
                         initcheck.InitRoutePathServices(appLife, theFeeder)
-                        install.InitInstallListRouthPath(appLife, theFeeder)
                         pkgtask.InitPackageProcess(rasker.RouteTasker{
                             ServiceSupervisor: appLife.ServiceSupervisor,
                             Router: appLife.Router},
                             theFeeder)
-                        install.InitInstallPackageRoutePath(appLife, theFeeder, appCfg.PCSSH)
+                        install.InitRoutePathInstallPackage(appLife, theFeeder, appCfg.PCSSH)
+                        list.InitRouthPathListAvailable(appLife, theFeeder)
+                        list.InitRouthPathListInstalled(appLife, theFeeder)
 
                         // --- net listeners ---
                         // vboxcontrol service comes first (as it's internal network listener)

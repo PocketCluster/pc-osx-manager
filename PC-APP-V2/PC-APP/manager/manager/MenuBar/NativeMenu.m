@@ -148,11 +148,20 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
         NSMenuItem *pkg = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%ld", i] action:nil keyEquivalent:@""];
         [pkg setTag:PKG_TAG_BUILDER(i)];
 
-        // add operation submenu
-        NSMenuItem *mOps = [[NSMenuItem alloc] initWithTitle:@"start" action:@selector(testOp) keyEquivalent:@""];
-        [mOps setTarget:self];
         [pkg setSubmenu:[NSMenu new]];
-        [pkg.submenu addItem:mOps];
+        // add submenu - start
+        NSMenuItem *smStart = [[NSMenuItem alloc] initWithTitle:@"Start" action:@selector(testOp) keyEquivalent:@""];
+        [smStart setTarget:self];
+        [pkg.submenu addItem:smStart];
+        // add submneu - stop
+        NSMenuItem *smStop = [[NSMenuItem alloc] initWithTitle:@"Stop" action:@selector(testOp) keyEquivalent:@""];
+        [smStop setTarget:self];
+        [pkg.submenu addItem:smStop];
+        // add open web port menu
+        NSMenuItem *smWeb = [[NSMenuItem alloc] initWithTitle:@"Web Console" action:@selector(testOp) keyEquivalent:@""];
+        [smWeb setTarget:self];
+        [pkg.submenu addItem:smWeb];
+
         [self.statusItem.menu insertItem:pkg atIndex:(indexBegin + i)];
     }
 }

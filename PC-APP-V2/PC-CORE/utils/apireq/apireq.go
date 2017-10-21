@@ -1,4 +1,4 @@
-package install
+package apireq
 
 import (
     "io/ioutil"
@@ -8,7 +8,11 @@ import (
     "github.com/pkg/errors"
 )
 
-func newRequest(url string, isBinaryReq bool) (*http.Request, error) {
+const (
+    ConnTimeout = time.Duration(5 * time.Second)
+)
+
+func NewRequest(url string, isBinaryReq bool) (*http.Request, error) {
     req, err :=  http.NewRequest("GET", url, nil)
     if err != nil {
         return nil, errors.WithStack(err)
@@ -24,7 +28,7 @@ func newRequest(url string, isBinaryReq bool) (*http.Request, error) {
     return req, nil
 }
 
-func newClient(timeout time.Duration, noCompress bool) *http.Client {
+func NewClient(timeout time.Duration, noCompress bool) *http.Client {
     return &http.Client {
         Timeout: timeout,
         Transport: &http.Transport {
@@ -33,7 +37,7 @@ func newClient(timeout time.Duration, noCompress bool) *http.Client {
     }
 }
 
-func readRequest(req *http.Request, client *http.Client) ([]byte, error) {
+func ReadRequest(req *http.Request, client *http.Client) ([]byte, error) {
     resp, err := client.Do(req)
     if err != nil {
         return nil, errors.WithStack(err)

@@ -1,4 +1,4 @@
-package install
+package list
 
 import (
     "encoding/json"
@@ -10,13 +10,14 @@ import (
     "github.com/stkim1/pc-core/route/routepath"
 )
 
-func InitInstallListRouthPath(appLife route.Router, feeder route.ResponseFeeder) {
+// read available package list from backend
+func InitRouthPathListInstalled(appLife route.Router, feeder route.ResponseFeeder) {
     // get the list of available packages
-    appLife.GET(routepath.RpathPackageList(), func(_, rpath, _ string) error {
+    appLife.GET(routepath.RpathPackageListInstalled(), func(_, rpath, _ string) error {
         var (
             feedError = func(irr error) error {
                 data, frr := json.Marshal(route.ReponseMessage{
-                    "package-list": {
+                    "package-installed": {
                         "status": false,
                         "error" : irr.Error(),
                     },
@@ -34,26 +35,12 @@ func InitInstallListRouthPath(appLife route.Router, feeder route.ResponseFeeder)
             pkgList = []map[string]interface{}{}
             pkgs    = []*model.Package{}
         )
-        req, err := newRequest("https://api.pocketcluster.io/service/v014/package/list", false)
-        if err != nil {
-            return feedError(errors.WithMessage(err, "Unable to access package list"))
-        }
-        client := newClient(timeout, true)
-        resp, err := readRequest(req, client)
-        if err != nil {
-            return feedError(errors.WithMessage(err, "Unable to access package list"))
-        }
-        err = json.Unmarshal(resp, &pkgs)
-        if err != nil {
-            return feedError(errors.WithMessage(err, "Unable to access package list"))
-        }
-        if len(pkgs) == 0 {
-            return feedError(errors.Errorf("No package avaiable. Contact us at Slack channel."))
-        } else {
-            // update package doesn't return error when there is packages to update.
-            model.UpdatePackages(pkgs)
-        }
 
+        // update package doesn't return error when there is packages to update.
+        pkgs, err := model.FindPackage("", "")
+        if err != nil {
+            return feedError(errors.WithMessage(err, "Unable to access package list"))
+        }
         for i, _ := range pkgs {
             pkgList = append(pkgList, map[string]interface{} {
                 "package-id" : pkgs[i].PkgID,
@@ -62,7 +49,7 @@ func InitInstallListRouthPath(appLife route.Router, feeder route.ResponseFeeder)
             })
         }
         data, err := json.Marshal(route.ReponseMessage{
-            "package-list": {
+            "package-installed": {
                 "status": true,
                 "list":   pkgList,
             },

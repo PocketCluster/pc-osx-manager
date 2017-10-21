@@ -43,15 +43,15 @@
     
     /*** checking user authed ***/
     WEAK_SELF(self);
-    NSString *rpPkgList = [NSString stringWithUTF8String:RPATH_PACKAGE_LIST];
+    NSString *rpPkgList = [NSString stringWithUTF8String:RPATH_PACKAGE_LIST_AVAILABLE];
     
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:rpPkgList
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          
-         if ([[response valueForKeyPath:@"package-list.status"] boolValue]) {
-             NSArray<Package *> *list = [Package packagesFromList:[response valueForKeyPath:@"package-list.list"]];
+         if ([[response valueForKeyPath:@"package-available.status"] boolValue]) {
+             NSArray<Package *> *list = [Package packagesFromList:[response valueForKeyPath:@"package-available.list"]];
              if (list != nil) {
                  [self.packageList addObjectsFromArray:list];
                  [self.packageTable reloadData];
@@ -64,15 +64,15 @@
          } else {
              [ShowAlert
               showWarningAlertWithTitle:@"Temporarily Unavailable"
-              message:[response valueForKeyPath:@"package-list.error"]];
+              message:[response valueForKeyPath:@"package-available.error"]];
          }
 
          [PCSetup3VC _enableControls:belf];
          [[PCRouter sharedRouter] delGetRequest:belf onPath:rpPkgList];
      }];
-    
+
     [PCSetup3VC _disableControls:self];
-    [PCRouter routeRequestGet:RPATH_PACKAGE_LIST];
+    [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_AVAILABLE];
 }
 
 #pragma mark - NSTableViewDataSourceDelegate

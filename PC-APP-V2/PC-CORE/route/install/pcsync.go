@@ -22,6 +22,7 @@ import (
     "github.com/Redundancy/go-sync/showpipe"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/utils/dblerr"
+    "github.com/stkim1/pc-core/utils/apireq"
 )
 
 // reads the file headers and checks the magic string, then the semantic versioning
@@ -142,7 +143,7 @@ func prepSync(repoList []string, syncData []byte, refChksum, imageURL string) (*
         repoSrcList = append(repoSrcList,
             blockrepository.NewBlockRepositoryBase(
                 uint(rID),
-                blocksources.NewRequesterWithTimeout(fmt.Sprintf("https://%s%s", r, imageURL), "PocketCluster/0.1.4 (OSX)", true, timeout),
+                blocksources.NewRequesterWithTimeout(fmt.Sprintf("https://%s%s", r, imageURL), "PocketCluster/0.1.4 (OSX)", true, apireq.ConnTimeout),
                 resolver,
                 verifier))
     }

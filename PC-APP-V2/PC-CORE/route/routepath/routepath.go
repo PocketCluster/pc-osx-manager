@@ -24,8 +24,12 @@ func RpathSystemIsFirstRun() string {
     return C.GoString(C.RPATH_SYSTEM_IS_FIRST_RUN)
 }
 
-func RpathPackageList() string {
-    return C.GoString(C.RPATH_PACKAGE_LIST)
+func RpathPackageListAvailable() string {
+    return C.GoString(C.RPATH_PACKAGE_LIST_AVAILABLE)
+}
+
+func RpathPackageListInstalled() string {
+    return C.GoString(C.RPATH_PACKAGE_LIST_INSTALLED)
 }
 
 func RpathPackageInstall() string {

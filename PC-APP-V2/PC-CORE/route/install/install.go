@@ -5,7 +5,6 @@ import (
     "encoding/json"
     "fmt"
     "os/user"
-    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -17,13 +16,10 @@ import (
     "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/utils/dockertool"
+    "github.com/stkim1/pc-core/utils/apireq"
 )
 
-const (
-    timeout = time.Duration(10 * time.Second)
-)
-
-func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeeder, sshCfg *tervice.PocketConfig) {
+func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeeder, sshCfg *tervice.PocketConfig) {
     // install a package
     appLife.POST(routepath.RpathPackageInstall(), func(_, rpath, payload string) error {
         var (
@@ -52,7 +48,7 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
             pkgID      string = ""
             repoList          = []string{}
             stopC             = make(chan struct{})
-            client            = newClient(timeout, false)
+            client            = apireq.NewClient(apireq.ConnTimeout, false)
         )
 
         // 0. find registry destination first
@@ -99,11 +95,11 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
 
         // --- --- --- --- --- download meta first --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Downloading package information...")
-        metaReq, err := newRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.MetaURL), false)
+        metaReq, err := apireq.NewRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.MetaURL), false)
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access package meta data"))
         }
-        metaData, err := readRequest(metaReq, client)
+        metaData, err := apireq.ReadRequest(metaReq, client)
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access package meta data"))
         }
@@ -129,11 +125,11 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
 
         //  --- --- --- --- --- download repo list --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Checking image repositories...")
-        repoReq, err := newRequest("https://api.pocketcluster.io/service/v014/package/repo", false)
+        repoReq, err := apireq.NewRequest("https://api.pocketcluster.io/service/v014/package/repo", false)
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access repository list"))
         }
-        repoData, err := readRequest(repoReq, client)
+        repoData, err := apireq.ReadRequest(repoReq, client)
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access repository list"))
         }
@@ -148,11 +144,11 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
 
         //  --- --- --- --- --- download core sync --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Downloading core image...")
-        cSyncReq, err := newRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.CoreImageSync), true)
+        cSyncReq, err := apireq.NewRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.CoreImageSync), true)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync core image"))
         }
-        cSyncData, err := readRequest(cSyncReq, client)
+        cSyncData, err := apireq.ReadRequest(cSyncReq, client)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync core image"))
         }
@@ -167,11 +163,11 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
 
         //  --- --- --- --- --- download node sync --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Downloading node image...")
-        nSyncReq, err := newRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.NodeImageSync), true)
+        nSyncReq, err := apireq.NewRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.NodeImageSync), true)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync node image"))
         }
-        nSyncData, err := readRequest(nSyncReq, client)
+        nSyncData, err := apireq.ReadRequest(nSyncReq, client)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync node image"))
         }
