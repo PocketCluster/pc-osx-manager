@@ -130,46 +130,6 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
     [self.statusItem.button setImage:[NSImage imageNamed:@"status-off"]];
 }
 
-- (void) updateWithInstalledPackageList {
-    NSInteger indexBegin = ([self.statusItem.menu
-                             indexOfItem:[self.statusItem.menu
-                                          itemWithTag:MENUITEM_PKG_DIV]] + 1);
-
-    // remove all old package menues
-    for (NSMenuItem *item in [self.statusItem.menu itemArray]) {
-        if ([item tag] < PKG_TAG_BUMPER) {
-            continue;
-        }
-        [self.statusItem.menu removeItem:item];
-    }
-
-    // add packages according to the list
-    for (NSInteger i = 0; i < 5; i++) {
-        NSMenuItem *pkg = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%ld", i] action:nil keyEquivalent:@""];
-        [pkg setTag:PKG_TAG_BUILDER(i)];
-
-        [pkg setSubmenu:[NSMenu new]];
-        // add submenu - start
-        NSMenuItem *smStart = [[NSMenuItem alloc] initWithTitle:@"Start" action:@selector(testOp) keyEquivalent:@""];
-        [smStart setTarget:self];
-        [pkg.submenu addItem:smStart];
-        // add submneu - stop
-        NSMenuItem *smStop = [[NSMenuItem alloc] initWithTitle:@"Stop" action:@selector(testOp) keyEquivalent:@""];
-        [smStop setTarget:self];
-        [pkg.submenu addItem:smStop];
-        // add open web port menu
-        NSMenuItem *smWeb = [[NSMenuItem alloc] initWithTitle:@"Web Console" action:@selector(testOp) keyEquivalent:@""];
-        [smWeb setTarget:self];
-        [pkg.submenu addItem:smWeb];
-
-        [self.statusItem.menu insertItem:pkg atIndex:(indexBegin + i)];
-    }
-}
-
-- (void) testOp {
-    
-}
-
 #pragma mark - update notification
 - (void) updateNewVersionAvailability:(BOOL)IsAvailable {
     NSMenuItem *mUpdate = [self.statusItem.menu itemWithTag:MENUITEM_UPDATE];

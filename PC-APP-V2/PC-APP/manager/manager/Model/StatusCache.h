@@ -22,6 +22,12 @@
 @interface StatusCache : NSObject
 + (instancetype)SharedStatusCache;
 
+
+#pragma mark - package status
+- (NSArray<Package *>*) packageList;
+- (void) updatePackageList:(NSArray<NSDictionary *>*)aPackageList;
+
+
 #pragma mark - node status
 /*
  * isNodeListValid: sets to true when it's firstly updated.

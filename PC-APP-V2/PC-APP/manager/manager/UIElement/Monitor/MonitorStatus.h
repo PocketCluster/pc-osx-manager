@@ -1,5 +1,5 @@
 //
-//  UpdateProgress.h
+//  MonitorStatus.h
 //  manager
 //
 //  Created by Almighty Kim on 10/19/17.
@@ -8,7 +8,7 @@
 
 #import "StatusCache.h"
 
-@protocol UpdateProgress <NSObject>
+@protocol MonitorStatus <NSObject>
 @required
 // show initial message
 - (void) setupInitialCheckMessage;

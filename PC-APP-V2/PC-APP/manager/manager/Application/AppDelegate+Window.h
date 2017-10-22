@@ -7,9 +7,8 @@
 //
 
 #include "AppDelegate.h"
-#import "UpdateProgress.h"
 
-@interface AppDelegate(Window) <UpdateProgress>
+@interface AppDelegate(Window)
 - (NSObject *) activeWindowByClassName:(NSString *)aClassName withResponder:(id)aResponder;
 - (void)addOpenWindow:(BaseWindowController *)window;
 - (void)removeOpenWindow:(id)window;

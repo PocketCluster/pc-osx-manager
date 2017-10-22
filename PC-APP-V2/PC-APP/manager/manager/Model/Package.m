@@ -37,4 +37,9 @@ NSString * const kInstalled          = @"installed";
 
     return packages;
 }
+
+- (void) updateWithPackage:(Package *)newSamePackage {
+    self.packageDescription = newSamePackage.packageDescription;
+    self.installed          = newSamePackage.installed;
+}
 @end

@@ -11,6 +11,7 @@
 #import "StatusCache.h"
 #import "NativeMenu+NewCluster.h"
 
+#import "AppDelegate+Monitor.h"
 #import "AppDelegate+Window.h"
 #import "AppDelegate+AppCheck.h"
 
@@ -35,7 +36,7 @@
 
          Log(@"%@ %@", path, response);
 
-         BOOL isSystemReady = [[[response objectForKey:@"syscheck"] objectForKey:@"status"] boolValue];
+         BOOL isSystemReady = [[response valueForKeyPath:@"syscheck.status"] boolValue];
          _isSystemReady = isSystemReady;
 
          if (isSystemReady) {
@@ -47,9 +48,9 @@
 
              [ShowAlert
               showWarningAlertWithTitle:@"Unable to run PocketCluster"
-              message:[[response objectForKey:@"syscheck"] objectForKey:@"error"]];
+              message:[response valueForKeyPath:@"syscheck.error"]];
          }
-         
+
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathSystemReady];
      }];
 
@@ -61,11 +62,11 @@
 
          Log(@"%@ %@", path, response);
          
-         BOOL isAppExpired = [[[response objectForKey:@"expired"] objectForKey:@"status"] boolValue];
+         BOOL isAppExpired = [[response valueForKeyPath:@"expired.status"] boolValue];
          _isAppExpired = isAppExpired;
          
          if (!isAppExpired) {
-             NSString *warning = [[response objectForKey:@"expired"] objectForKey:@"warning"];
+             NSString *warning = [response valueForKeyPath:@"expired.warning"];
              if (warning != nil) {
                  [ShowAlert
                   showWarningAlertWithTitle:@"PocketCluster Expiration"
@@ -79,7 +80,7 @@
 
              [ShowAlert
               showWarningAlertWithTitle:@"PocketCluster Expiration"
-              message:[[response objectForKey:@"expired"] objectForKey:@"error"]];
+              message:[response valueForKeyPath:@"expired.error"]];
          }
 
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathAppExpired];
@@ -93,7 +94,7 @@
 
          Log(@"%@ %@", path, response);
 
-         BOOL isFirstRun = [[[response objectForKey:@"firsttime"] objectForKey:@"status"] boolValue];
+         BOOL isFirstRun = [[response valueForKeyPath:@"firsttime.status"] boolValue];
          _isFirstTime = isFirstRun;
 
          if (isFirstRun) {
@@ -115,7 +116,7 @@
 
          Log(@"%@ %@", path, response);
 
-         BOOL isUserAuthed = [[[response objectForKey:@"user-auth"] objectForKey:@"status"] boolValue];
+         BOOL isUserAuthed = [[response valueForKeyPath:@"user-auth.status"] boolValue];
          _isUserAuthed = isUserAuthed;
 
          if (_isUserAuthed) {
@@ -124,9 +125,9 @@
          } else {
              [ShowAlert
               showWarningAlertWithTitle:@"Your invitation is not valid"
-              message:[[response objectForKey:@"user-auth"] objectForKey:@"error"]];
+              message:[response valueForKeyPath:@"user-auth.error"]];
          }
-         
+
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
      }];
 
@@ -165,6 +166,18 @@
      onPath:@(RPATH_PACKAGE_LIST_INSTALLED)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          Log(@"%@ %@", path, response);
+
+         if (![[response valueForKeyPath:@"package-installed.status"] boolValue]) {
+             [belf onUpdatedWith:[StatusCache SharedStatusCache] forPackageListInstalled:NO];
+
+             [ShowAlert
+              showWarningAlertWithTitle:@"Unable to retrieve installed package list"
+              message:[response valueForKeyPath:@"package-installed.error"]];
+             return;
+         }
+
+         [[StatusCache SharedStatusCache] updatePackageList:[response valueForKeyPath:@"package-installed.list"]];
+         [belf onUpdatedWith:[StatusCache SharedStatusCache] forPackageListInstalled:YES];
      }];
 
 

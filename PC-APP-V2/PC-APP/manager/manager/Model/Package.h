@@ -11,10 +11,13 @@ extern NSString * const kPackageID;
 extern NSString * const kInstalled;
 
 @interface Package : NSObject
+
 @property (nonatomic, readonly) BOOL installed;
 @property (nonatomic, readonly) NSString *packageDescription;
 @property (nonatomic, readonly) NSString *packageID;
 
 + (NSArray<Package *> *)packagesFromList:(NSArray<NSDictionary *> *)aList;
 
+// update all package status except `package id` with a package w/ same id.
+- (void) updateWithPackage:(Package *)newSamePackage;
 @end

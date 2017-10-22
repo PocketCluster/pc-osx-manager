@@ -146,7 +146,6 @@
 }
 
 - (IBAction)menu_05:(id)sender {
-    [[[AppDelegate sharedDelegate] mainMenu] updateWithInstalledPackageList];
     [[[AppDelegate sharedDelegate] mainMenu] setupMenuRunCluster];
 }
 

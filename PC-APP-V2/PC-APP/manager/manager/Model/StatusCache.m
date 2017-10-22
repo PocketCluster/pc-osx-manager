@@ -14,6 +14,8 @@
 @end
 
 @implementation StatusCache {
+    __strong NSMutableArray<Package *>* _packageList;
+
     __strong NSMutableArray<Node *>* _nodeList;
     BOOL _nodeListValid;
     BOOL _showOnlineNode;
@@ -26,7 +28,9 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 - (instancetype) init {
     self = [super init];
     if (self != nil) {
-        _nodeList = [NSMutableArray arrayWithCapacity:0];
+        _packageList = [NSMutableArray<Package *> arrayWithCapacity:0];
+
+        _nodeList = [NSMutableArray<Node *> arrayWithCapacity:0];
 
         // (2017/10/16) this list should be updated whenever necessary
         _serviceList = \
@@ -51,6 +55,33 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
     }
     return self;
+}
+
+- (NSArray<Package *>*) packageList {
+    NSArray<Package *>* list = nil;
+    @synchronized(self) {
+        list = [NSArray arrayWithArray:_packageList];
+    }
+    return list;
+}
+
+- (void) updatePackageList:(NSArray<NSDictionary *>*)aPackageList {
+    @synchronized(self) {
+        NSArray<Package *>* list = [Package packagesFromList:aPackageList];
+        for (Package *nkg in list) {
+            BOOL isFound = NO;
+
+            for (Package *okg in _packageList) {
+                if ([okg.packageID isEqualToString:nkg.packageID]) {
+                    [okg updateWithPackage:nkg];
+                    isFound = YES;
+                }
+            }
+            if (!isFound) {
+                [_packageList addObject:nkg];
+            }
+        }
+    }
 }
 
 #pragma mark - node status

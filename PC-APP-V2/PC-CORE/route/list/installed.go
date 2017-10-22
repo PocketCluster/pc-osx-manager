@@ -45,7 +45,7 @@ func InitRouthPathListInstalled(appLife route.Router, feeder route.ResponseFeede
             pkgList = append(pkgList, map[string]interface{} {
                 "package-id" : pkgs[i].PkgID,
                 "description": pkgs[i].Description,
-                "installed": false,
+                "installed": true,
             })
         }
         data, err := json.Marshal(route.ReponseMessage{
