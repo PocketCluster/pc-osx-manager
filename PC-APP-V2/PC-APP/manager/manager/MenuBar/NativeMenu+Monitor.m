@@ -8,15 +8,117 @@
 
 #import "NativeMenuAddition.h"
 #import "NativeMenu+Monitor.h"
+#import "NativeMenu+NewCluster.h"
+#import "NativeMenu+RunCluster.h"
 
 @implementation NativeMenu(Monitor)
 
+// show initial message
+- (void) setupWithInitialCheckMessage {
+    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
+    [mStatus setTitle:@"Initializing..."];
+    [mStatus setEnabled:NO];
+    [mStatus setAction:nil];
+    [mStatus setTarget:nil];
+    [mStatus setSubmenu:nil];
+    [self.statusItem.menu itemChanged:mStatus];
+
+    [self setupCheckupMenu];
+}
+
+// show "service starting..." message
+- (void) setupWithStartServicesMessage {
+    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
+    [mStatus setTitle:@"Starting Services..."];
+    [mStatus setEnabled:NO];
+    [mStatus setAction:nil];
+    [mStatus setTarget:nil];
+    [mStatus setSubmenu:nil];
+    [self.statusItem.menu itemChanged:mStatus];
+
+    [self setupCheckupMenu];
+}
+
+// services online timeup
+- (void) onNotifiedWith:(StatusCache *)aCache serviceOnlineTimeup:(BOOL)isSuccess {
+
+}
+
+
+- (void) setupWithCheckingNodesMessage {
+    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
+    [mStatus setTitle:@"Checking Nodes..."];
+    [mStatus setEnabled:NO];
+    [mStatus setAction:nil];
+    [mStatus setTarget:nil];
+    [mStatus setSubmenu:nil];
+    [self.statusItem.menu itemChanged:mStatus];
+
+    [self setupCheckupMenu];
+}
+
+// nodes online timeup
+- (void) onNotifiedWith:(StatusCache *)aCache nodeOnlineTimeup:(BOOL)isSuccess {
+    // -- as 'node online timeup' noti should have been kicked, check strict manner --
+    // node list should be valid at this point
+    if (![aCache isNodeListValid] || !isSuccess) {
+        return;
+    }
+
+    // show existing cluster and display package
+    if ([aCache hasSlaveNodes]) {
+        [self setupMenuRunCluster];
+
+    // build new cluster
+    } else {
+        [self setupMenuNewCluster];
+
+    }
+}
+
+
+// update services
+- (void) updateServiceStatusWith:(StatusCache *)aCache {
+
+}
+
+// update nodes
+- (void) updateNodeStatusWith:(StatusCache *)aCache {
+    // quickly filter out the worst case scenarios when 'node online timeup' noti has not fired
+    if (![aCache showOnlineNode]) {
+        if (![aCache isNodeListValid] || ![aCache isAllRegisteredNodesReady]) {
+            return;
+        }
+    }
+
+    // -- as 'node online timeup' noti should have been kicked, check strict manner --
+    // node list should be valid at this point
+    if (![aCache isNodeListValid]) {
+        return;
+    }
+
+    // show existing cluster and display package
+    if ([aCache hasSlaveNodes]) {
+        [self setupMenuRunCluster];
+
+    // build new cluster
+    } else {
+        [self setupMenuNewCluster];
+    }
+}
+
+#pragma mark - package update
 - (void) onUpdatedWith:(StatusCache *)aCache forPackageListAvailable:(BOOL)isSuccess {
 }
 
-- (void) onUpdatedWith:(StatusCache *)aCache forPackageListInstalled:(BOOL)isSuccess {
+- (void) onUpdatedWith:(StatusCache *)sCache forPackageListInstalled:(BOOL)isSuccess {
     if (!isSuccess) {
         return;
+    }
+
+    BOOL hideMenu = YES;
+    if ([sCache isNodeListValid] && [sCache isAllRegisteredNodesReady] && [sCache hasSlaveNodes]) {
+        hideMenu = NO;
     }
 
     NSInteger indexBegin = ([self.statusItem.menu
@@ -32,7 +134,7 @@
     }
 
     // all the package list
-    NSArray<Package *>* plst = [aCache packageList];
+    NSArray<Package *>* plst = [sCache packageList];
     NSInteger pndx = 0;
 
     // add packages according to the list
@@ -40,39 +142,60 @@
         if (![pkg installed]) {
             continue;
         }
-        
-        NSMenuItem *penu = [[NSMenuItem alloc] initWithTitle:pkg.packageDescription action:nil keyEquivalent:@""];
+
+        // package display menu
+        NSMenuItem *penu =
+            [[NSMenuItem alloc]
+             initWithTitle:pkg.packageDescription
+             action:nil
+             keyEquivalent:@""];
         [penu setTag:PKG_TAG_BUILDER(pndx)];
+        [penu setHidden:hideMenu];
         [penu setSubmenu:[NSMenu new]];
 
-        // add submenu - start
-        NSMenuItem *smStart = [[NSMenuItem alloc] initWithTitle:@"Start" action:@selector(startPackage) keyEquivalent:@""];
+        // submenu - start
+        NSMenuItem *smStart =
+            [[NSMenuItem alloc]
+             initWithTitle:@"Start"
+             action:@selector(startPackage:)
+             keyEquivalent:@""];
         [smStart setTarget:self];
+        [smStart setRepresentedObject:pkg.packageID];
         [penu.submenu addItem:smStart];
 
-        // add submneu - stop
-        NSMenuItem *smStop = [[NSMenuItem alloc] initWithTitle:@"Stop" action:@selector(stopPackage) keyEquivalent:@""];
+        // submneu - stop
+        NSMenuItem *smStop =
+            [[NSMenuItem alloc]
+             initWithTitle:@"Stop"
+             action:@selector(stopPackage:)
+             keyEquivalent:@""];
         [smStop setTarget:self];
+        [smStart setRepresentedObject:pkg.packageID];
         [penu.submenu addItem:smStop];
 
-        // add open web port menu
-        NSMenuItem *smWeb = [[NSMenuItem alloc] initWithTitle:@"Web Console" action:@selector(openWebConsole) keyEquivalent:@""];
+        // submenu - open web port menu
+        NSMenuItem *smWeb =
+            [[NSMenuItem alloc]
+             initWithTitle:@"Web Console"
+             action:@selector(openWebConsole:)
+             keyEquivalent:@""];
         [smWeb setTarget:self];
+        [smWeb setRepresentedObject:pkg.packageID];
         [penu.submenu addItem:smWeb];
 
         [self.statusItem.menu insertItem:penu atIndex:(indexBegin + pndx)];
     }
 }
 
-- (void) startPackage {
-
+- (void) startPackage:(NSMenuItem *)mPackage {
+    Log(@"startPackage : %@", mPackage.representedObject);
 }
 
-- (void) stopPackage {
-
+- (void) stopPackage:(NSMenuItem *)mPackage {
+    Log(@"stopPackage : %@", mPackage.representedObject);
 }
 
-- (void) openWebConsole {
-
+- (void) openWebConsole:(NSMenuItem *)mPackage {
+    Log(@"openWebConsole : %@", mPackage.representedObject);
 }
 @end

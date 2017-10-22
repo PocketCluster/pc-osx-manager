@@ -36,6 +36,7 @@
 		0441A4151BD8BEF100AABD7A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36411BD791F8004E0946 /* Foundation.framework */; };
 		0441A4171BD8BF3E00AABD7A /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4161BD8BF3E00AABD7A /* CoreServices.framework */; };
 		0447CABB1F47AD28003BB069 /* BaseSetupVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 0447CABA1F47AD28003BB069 /* BaseSetupVC.m */; };
+		045BD3741F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.m in Sources */ = {isa = PBXBuildFile; fileRef = 045BD3731F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.m */; };
 		046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
 		046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
 		046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35E71BD78AB8004E0946 /* DrawingUtils.m */; };
@@ -67,7 +68,6 @@
 		04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */; };
 		04B379731F48C60B0080DBEA /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B379721F48C60B0080DBEA /* BaseWindow.m */; };
 		04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B3FB8D1F41133600A72834 /* AppDelegate+ResponseHandle.m */; };
-		04B7C8A21F9C7065000ECEEC /* AppDelegate+Monitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B7C8A11F9C7065000ECEEC /* AppDelegate+Monitor.m */; };
 		04B7C8A51F9C72C7000ECEEC /* NativeMenu+Monitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B7C8A41F9C72C7000ECEEC /* NativeMenu+Monitor.m */; };
 		04BC73831E8A2E910079BD77 /* AboutWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04BC73821E8A2E910079BD77 /* AboutWindow.m */; };
 		04BD309E1F3E4B2D00509B21 /* PCSetup2VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04BD309C1F3E4B2D00509B21 /* PCSetup2VC.m */; };
@@ -172,6 +172,8 @@
 		0447CABA1F47AD28003BB069 /* BaseSetupVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseSetupVC.m; sourceTree = "<group>"; };
 		0447CABD1F47B1F6003BB069 /* NSGeometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSGeometry.h; sourceTree = "<group>"; };
 		04570BB01F40E3440047CCF9 /* PCRouteRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCRouteRequest.h; sourceTree = "<group>"; };
+		045BD3721F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+MonitorDispenser.h"; sourceTree = "<group>"; };
+		045BD3731F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+MonitorDispenser.m"; sourceTree = "<group>"; };
 		046A35B61BD783CE004E0946 /* BaseWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseWindowController.h; sourceTree = "<group>"; };
 		046A35B71BD783CE004E0946 /* BaseWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseWindowController.m; sourceTree = "<group>"; };
 		046A35C61BD7871B004E0946 /* AboutWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AboutWindow.xib; sourceTree = "<group>"; };
@@ -241,8 +243,6 @@
 		04B3FB8D1F41133600A72834 /* AppDelegate+ResponseHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+ResponseHandle.m"; sourceTree = "<group>"; };
 		04B7C89E1F9C66B5000ECEEC /* MonitorStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MonitorStatus.h; sourceTree = "<group>"; };
 		04B7C89F1F9C68F8000ECEEC /* MonitorPackage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MonitorPackage.h; sourceTree = "<group>"; };
-		04B7C8A01F9C7065000ECEEC /* AppDelegate+Monitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Monitor.h"; sourceTree = "<group>"; };
-		04B7C8A11F9C7065000ECEEC /* AppDelegate+Monitor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Monitor.m"; sourceTree = "<group>"; };
 		04B7C8A31F9C72C7000ECEEC /* NativeMenu+Monitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NativeMenu+Monitor.h"; sourceTree = "<group>"; };
 		04B7C8A41F9C72C7000ECEEC /* NativeMenu+Monitor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NativeMenu+Monitor.m"; sourceTree = "<group>"; };
 		04BC73811E8A2E910079BD77 /* AboutWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutWindow.h; sourceTree = "<group>"; };
@@ -351,10 +351,10 @@
 				046F64991F9908E300DB0DD3 /* NativeMenuAddition.h */,
 				04030F7C1F3D5C1E00EA793D /* NativeMenu.h */,
 				04030F7D1F3D5C1E00EA793D /* NativeMenu.m */,
-				04030F781F3D5C1E00EA793D /* NativeMenu+NewCluster.h */,
-				04030F791F3D5C1E00EA793D /* NativeMenu+NewCluster.m */,
 				04B7C8A31F9C72C7000ECEEC /* NativeMenu+Monitor.h */,
 				04B7C8A41F9C72C7000ECEEC /* NativeMenu+Monitor.m */,
+				04030F781F3D5C1E00EA793D /* NativeMenu+NewCluster.h */,
+				04030F791F3D5C1E00EA793D /* NativeMenu+NewCluster.m */,
 				04030F7A1F3D5C1E00EA793D /* NativeMenu+RunCluster.h */,
 				04030F7B1F3D5C1E00EA793D /* NativeMenu+RunCluster.m */,
 				04030F841F3D5CD500EA793D /* PackageMenuItem.h */,
@@ -432,8 +432,8 @@
 				043F47121F3E0C730078A0C1 /* AppDelegate+Window.m */,
 				048EF4B11F43C2C8003BEEF0 /* AppDelegate+AppCheck.h */,
 				048EF4B21F43C2C8003BEEF0 /* AppDelegate+AppCheck.m */,
-				04B7C8A01F9C7065000ECEEC /* AppDelegate+Monitor.h */,
-				04B7C8A11F9C7065000ECEEC /* AppDelegate+Monitor.m */,
+				045BD3721F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.h */,
+				045BD3731F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.m */,
 			);
 			name = Application;
 			path = manager/Application;
@@ -1117,7 +1117,6 @@
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
 				04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */,
 				046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */,
-				04B7C8A21F9C7065000ECEEC /* AppDelegate+Monitor.m in Sources */,
 				0478C3B51F9561440096F7D9 /* StatusCache.m in Sources */,
 				04030F681F3D5B6500EA793D /* Package.m in Sources */,
 				046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */,
@@ -1126,6 +1125,7 @@
 				046D31101F3D32440081CC3E /* DPSetupWC.m in Sources */,
 				046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */,
+				045BD3741F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.m in Sources */,
 				04B7C8A51F9C72C7000ECEEC /* NativeMenu+Monitor.m in Sources */,
 				040A9BDF1F9837670058F0EF /* IntroVC.m in Sources */,
 				04030F821F3D5C1E00EA793D /* NativeMenu.m in Sources */,

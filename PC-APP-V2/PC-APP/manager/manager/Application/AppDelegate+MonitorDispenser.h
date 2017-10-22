@@ -10,5 +10,5 @@
 #import "MonitorStatus.h"
 #import "MonitorPackage.h"
 
-@interface AppDelegate(Monitor) <MonitorStatus, MonitorPackage>
+@interface AppDelegate(MonitorDispenser) <MonitorStatus, MonitorPackage>
 @end

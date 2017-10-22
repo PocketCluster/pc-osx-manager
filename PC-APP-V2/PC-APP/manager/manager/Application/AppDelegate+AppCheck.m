@@ -9,9 +9,8 @@
 #import "PCRouter.h"
 #import "ShowAlert.h"
 #import "StatusCache.h"
-#import "NativeMenu+NewCluster.h"
 
-#import "AppDelegate+Monitor.h"
+#import "AppDelegate+MonitorDispenser.h"
 #import "AppDelegate+Window.h"
 #import "AppDelegate+AppCheck.h"
 
@@ -121,7 +120,7 @@
 
          if (_isUserAuthed) {
              // TODO : choose appropriate menu
-             [belf.mainMenu setupMenuStartService];
+             [belf setupWithStartServicesMessage];
          } else {
              [ShowAlert
               showWarningAlertWithTitle:@"Your invitation is not valid"
@@ -131,6 +130,7 @@
          [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
      }];
 
+    [self setupWithInitialCheckMessage];
     [PCRouter routeRequestGet:RPATH_SYSTEM_READINESS];
 }
 
@@ -159,7 +159,77 @@
          // Log(@"%@ %@", path, response);
      }];
 
-    
+
+
+    /*
+     * Once the app has passed notification phase, a critical error
+     * (service dead, or core dead) will kill the app. The kill control will happen
+     * here (AppDelegate+AppCheck.m) and (AppDelegate.m)
+     *
+     * Thus, UI front-end should only deal with warnings only such as
+     *     1. slave node missing
+     *     2. package missing
+     *     3. something minor
+     *
+     * app + nodes should have been fully up after 'node online timeup' noti
+     * (check "github.com/stkim1/pc-core/service/health")
+     *
+     * 'MonitorStatus' protocol has state transition detail doc.
+     */
+
+    // --- --- --- --- --- --- [monitors] node --- --- --- --- --- --- --- --- -
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_MONITOR_NODE_STATUS)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+
+         // for this routepath, we'll refresh node status first then deal with error
+         // so that users would not be perplexed
+         NSArray<NSDictionary*>* rnodes = [response valueForKeyPath:@"node-stat.nodes"];
+         [[StatusCache SharedStatusCache] refreshNodList:rnodes];
+
+         [belf updateNodeStatusWith:[StatusCache SharedStatusCache]];
+
+         // TODO : this is a critical error. alert user and kill application
+         if (![[response valueForKeyPath:@"node-stat.status"] boolValue]) {
+
+             Log(@"%@", [response valueForKeyPath:@"node-stat.error"]);
+             return;
+         }
+     }];
+
+    // --- --- --- --- --- --- [monitors] service --- --- --- --- --- --- --- --
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_MONITOR_SERVICE_STATUS)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         
+         // TODO : this is a critical error.
+         // unless something grave happens, don't update UI for service faiure.
+         // alert user and kill application
+         if (![[response valueForKeyPath:@"srvc-stat.status"] boolValue]) {
+             [[StatusCache SharedStatusCache] setServiceReady:NO];
+
+             Log(@"%@", [response valueForKeyPath:@"srvc-stat.error"]);
+
+             [belf updateServiceStatusWith:[StatusCache SharedStatusCache]];
+             return;
+         }
+         
+         // refresh service status
+         NSDictionary<NSString*, id>* rsrvcs = [response valueForKeyPath:@"srvc-stat.srvcs"];
+         [[StatusCache SharedStatusCache] refreshServiceStatus:rsrvcs];
+
+         // TODO : this is a critical error.
+         // unless something grave happens, don't update UI for service faiure.
+         // alert user and kill application
+         if (![[StatusCache SharedStatusCache] isServiceReady]) {
+             [belf updateServiceStatusWith:[StatusCache SharedStatusCache]];
+             return;
+         }
+     }];
+
+
     // --- --- --- --- --- --- package installed list --- --- --- --- --- --- --
     [[PCRouter sharedRouter]
      addGetRequest:self
@@ -180,77 +250,6 @@
          [belf onUpdatedWith:[StatusCache SharedStatusCache] forPackageListInstalled:YES];
      }];
 
-
-    // --- --- --- --- --- --- [monitors] node --- --- --- --- --- --- --- --- -
-    [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:@(RPATH_MONITOR_NODE_STATUS)
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-
-         // for this routepath, we'll refresh node status first then deal with error
-         // so that users would not be perplexed
-         NSArray<NSDictionary*>* rnodes = [response valueForKeyPath:@"node-stat.nodes"];
-         [[StatusCache SharedStatusCache] refreshNodList:rnodes];
-
-         // update menu status. doc @ "NativeMenu.updateMenuWithCondition"
-         [[belf mainMenu] updateMenuWithCondition];
-         [belf updateNodeStatusWith:[StatusCache SharedStatusCache]];
-
-         // TODO : this is a critical error. alert user and kill application
-         if (![[response valueForKeyPath:@"node-stat.status"] boolValue]) {
-
-             Log(@"%@", [response valueForKeyPath:@"node-stat.error"]);
-             return;
-         }
-     }];
-
-    // --- --- --- --- --- --- [monitors] service --- --- --- --- --- --- --- --
-    [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:@(RPATH_MONITOR_SERVICE_STATUS)
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         
-          // TODO : this is a critical error. alert user and kill application
-         if (![[response valueForKeyPath:@"srvc-stat.status"] boolValue]) {
-             [[StatusCache SharedStatusCache] setServiceReady:NO];
-             
-             Log(@"%@", [response valueForKeyPath:@"srvc-stat.error"]);
-             
-             // unless something grave happens, don't update UI from service notice
-             // update menu status. doc @ "NativeMenu.updateMenuWithCondition"
-             [[belf mainMenu] updateMenuWithCondition];
-             [belf updateServiceStatusWith:[StatusCache SharedStatusCache]];
-             return;
-         }
-         
-         // refresh service status
-         NSDictionary<NSString*, id>* rsrvcs = [response valueForKeyPath:@"srvc-stat.srvcs"];
-         [[StatusCache SharedStatusCache] refreshServiceStatus:rsrvcs];
-
-          // TODO : this is a critical error. alert user and kill application
-         if (![[StatusCache SharedStatusCache] isServiceReady]) {
-
-             // unless something grave happens, don't update UI from service notice
-             // update menu status. doc @ "NativeMenu.updateMenuWithCondition"
-             [[belf mainMenu] updateMenuWithCondition];
-             [belf updateServiceStatusWith:[StatusCache SharedStatusCache]];
-             return;
-         }
-     }];
-
-    /* 
-     * Once the app has passed notification phase, a critical error
-     * (service dead, or core dead) will kill the app. The kill control will happen 
-     * here (AppDelegate+AppCheck.m) and (AppDelegate.m)
-     *
-     * Thus, UI front-end should only deal with warnings only such as
-     *     1. slave node missing
-     *     2. package missing
-     *     3. something minor
-     *
-     * app + nodes should have been fully up after 'node online timeup' noti
-     * (check "github.com/stkim1/pc-core/service/health")
-     */
     // --- --- --- --- --- --- [noti] node online timeup --- --- --- --- --- ---
     // this noti always comes later than service online noti. There's no error message
     [[PCRouter sharedRouter]
@@ -258,11 +257,11 @@
      onPath:@(RPATH_NOTI_NODE_ONLINE_TIMEUP)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
+         // setup state and notify those who need to listen
          [[StatusCache SharedStatusCache] setShowOnlineNode:YES];
 
-         // update menu status. doc @ "NativeMenu.updateMenuWithCondition"
-         [[belf mainMenu] updateMenuWithCondition];
-         [belf onNotifiedWith:[StatusCache SharedStatusCache] forNodeOnline:YES];
+         // complete notifying service online status
+         [belf onNotifiedWith:[StatusCache SharedStatusCache] nodeOnlineTimeup:YES];
      }];
     
     // --- --- --- --- --- --- [noti] service online timeup --- --- --- --- ---
@@ -276,16 +275,21 @@
              [[StatusCache SharedStatusCache] setServiceReady:NO];
              
              Log(@"%@", [response valueForKeyPath:@"srvc-timeup.error"]);
-             [belf onNotifiedWith:[StatusCache SharedStatusCache] forServiceOnline:NO];
+             [belf onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:NO];
              return;
          }
 
+         // setup state and notify those who need to listen
          [[StatusCache SharedStatusCache] setServiceReady:YES];
-         [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
 
-         // manually menu update here.
-         [[belf mainMenu] setupMenuStartNodes];
-         [belf onNotifiedWith:[StatusCache SharedStatusCache] forServiceOnline:YES];
+         // complete notifying service online status
+         [belf onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:YES];
+
+         // initiate node checking status
+         [belf setupWithCheckingNodesMessage];
+
+         // ask installed package status
+         [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
      }];
 
 }
@@ -294,9 +298,11 @@
     [[PCRouter sharedRouter] delPostRequest:self onPath:@(RPATH_PACKAGE_STARTUP)];
     [[PCRouter sharedRouter] delPostRequest:self onPath:@(RPATH_PACKAGE_KILL)];
     [[PCRouter sharedRouter] delPostRequest:self onPath:@(RPATH_MONITOR_PACKAGE_PROCESS)];
-    [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_PACKAGE_LIST_INSTALLED)];
+
     [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_MONITOR_NODE_STATUS)];
     [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_MONITOR_SERVICE_STATUS)];
+
+    [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_PACKAGE_LIST_INSTALLED)];
     [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_NOTI_NODE_ONLINE_TIMEUP)];
     [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_NOTI_SRVC_ONLINE_TIMEUP)];
 }

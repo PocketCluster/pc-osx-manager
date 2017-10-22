@@ -15,7 +15,7 @@
 #import "PCRoutePathConst.h"
 #import "NativeMenu+NewCluster.h"
 #import "NativeMenu+RunCluster.h"
-
+#import "NativeMenu+Monitor.h"
 
 @interface DebugWindow ()<PCRouteRequest>
 @end
@@ -130,15 +130,15 @@
 }
 
 - (IBAction)menu_01:(id)sender {
-    [[[AppDelegate sharedDelegate] mainMenu] setupMenuInitCheck];
+    [[[AppDelegate sharedDelegate] mainMenu] setupWithInitialCheckMessage];
 }
 
 - (IBAction)menu_02:(id)sender {
-    [[[AppDelegate sharedDelegate] mainMenu] setupMenuStartService];
+    [[[AppDelegate sharedDelegate] mainMenu] setupWithStartServicesMessage];
 }
 
 - (IBAction)menu_03:(id)sender {
-    [[[AppDelegate sharedDelegate] mainMenu] setupMenuStartNodes];
+    [[[AppDelegate sharedDelegate] mainMenu] setupWithCheckingNodesMessage];
 }
 
 - (IBAction)menu_04:(id)sender {

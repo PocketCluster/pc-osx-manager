@@ -52,22 +52,25 @@
 
 #pragma mark - update message
 // show initial message
-- (void) setupInitialCheckMessage {
+- (void) setupWithInitialCheckMessage {
     [self.viewController.progressLabel setStringValue:@"Initializing..."];
 }
 
 // show "service starting..." message
-- (void) setupStartServices {
+- (void) setupWithStartServicesMessage {
     [self.viewController.progressLabel setStringValue:@"Starting Services..."];
 }
 
-// services online timeup
-- (void) onNotifiedWith:(StatusCache *)aCache forServiceOnline:(BOOL)isSuccess {
+- (void) setupWithCheckingNodesMessage {
     [self.viewController.progressLabel setStringValue:@"Checking Nodes..."];
 }
 
+// services online timeup
+- (void) onNotifiedWith:(StatusCache *)aCache serviceOnlineTimeup:(BOOL)isSuccess {
+}
+
 // nodes online timeup
-- (void) onNotifiedWith:(StatusCache *)aCache forNodeOnline:(BOOL)isSuccess {
+- (void) onNotifiedWith:(StatusCache *)aCache nodeOnlineTimeup:(BOOL)isSuccess {
     WEAK_SELF(self);
     
     [[NSOperationQueue mainQueue]

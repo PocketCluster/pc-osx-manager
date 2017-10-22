@@ -5,14 +5,13 @@
 //  Copyright (c) 2015,2017 PocketCluster. All rights reserved.
 //
 
-#import "NativeMenuAddition.h"
-#import "NativeMenu.h"
-#import "NativeMenu+NewCluster.h"
-#import "NativeMenu+RunCluster.h"
-
 #import <Sparkle/Sparkle.h>
 #import "AppDelegate+Window.h"
 #import "StatusCache.h"
+
+#import "NativeMenuAddition.h"
+#import "NativeMenu.h"
+#import "NativeMenu+Monitor.h"
 
 static NSString * const UPDATE_TITLE_CHECK_IN_PROGRESS = @"Checking New Updates...";
 static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
@@ -46,7 +45,7 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
 
         // setup for very initial menu state
         [self clusterStatusOff];
-        [self setupMenuInitCheck];
+        [self setupWithInitialCheckMessage];
     }
 
     return self;
@@ -141,49 +140,6 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
         [mUpdate setImage:nil];
     }
     [self.statusItem.menu itemChanged:mUpdate];
-}
-
-#pragma mark - State Selection
-/*
- * Menu state changes following procedure.
- *                                                                              (updateMenuWithCondition)
- *     "setupMenuInitCheck" -> "setupMenuStartService" -> "setupMenuStartNodes" -> "setupMenuNewCluster"
- *                                                                              -> "setupMenuRunCluster"
- *
- * This checks conditions and update menu accordingly as AppDelegate hands 
- * UI control to native menu. Once AppDelegate delegates UI frontend control, 
- * NativeMenu should select appropriate state.
- * Until then, user cannot do anything. (not even exiting.)
- * 
- * In between 'setupMenuStartNodes' & 'node online timeup', UI still has chances
- * to set to good, normal condition if all nodes status are positive.
- * Otherwise, stay in "checking nodes..."  mode
- *
- */
-- (void) updateMenuWithCondition {
-
-    // quickly filter out the worst case scenarios when 'node online timeup' noti has not fired
-    if (![[StatusCache SharedStatusCache] showOnlineNode]) {
-        if (![[StatusCache SharedStatusCache] isNodeListValid] || \
-            ![[StatusCache SharedStatusCache] isAllRegisteredNodesReady]) {
-            return;
-        }
-    }
-
-    // -- as 'node online timeup' noti should have been kicked, check strict manner --
-    // node list should be valid at this point
-    if (![[StatusCache SharedStatusCache] isNodeListValid]) {
-        return;
-    }
-
-    // show existing cluster and display package
-    if ([[StatusCache SharedStatusCache] hasSlaveNodes]) {
-        [self setupMenuRunCluster];
-
-    // build new cluster
-    } else {
-        [self setupMenuNewCluster];
-    }
 }
 
 #pragma mark - Common Menu Handling

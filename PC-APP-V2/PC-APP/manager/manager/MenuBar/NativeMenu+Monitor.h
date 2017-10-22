@@ -7,8 +7,9 @@
 //
 
 #import "NativeMenu.h"
+#import "MonitorStatus.h"
 #import "MonitorPackage.h"
 
-@interface NativeMenu(Monitor) <MonitorPackage>
+@interface NativeMenu(Monitor) <MonitorStatus, MonitorPackage>
 
 @end

@@ -16,9 +16,6 @@
 #pragma mark - update notification
 - (void) updateNewVersionAvailability:(BOOL)IsAvailable;
 
-#pragma mark - menu updator
-- (void) updateMenuWithCondition;
-
 #pragma mark - Common menus
 - (void) setupCheckupMenu;
 - (void) setupOperationMenu;

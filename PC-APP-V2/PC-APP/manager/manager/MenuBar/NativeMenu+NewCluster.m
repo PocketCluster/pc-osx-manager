@@ -15,42 +15,6 @@
 
 @implementation NativeMenu(NewCluster)
 
-- (void) setupMenuInitCheck {
-    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
-    [mStatus setTitle:@"Initializing..."];
-    [mStatus setEnabled:NO];
-    [mStatus setAction:nil];
-    [mStatus setTarget:nil];
-    [mStatus setSubmenu:nil];
-    [self.statusItem.menu itemChanged:mStatus];
-
-    [self setupCheckupMenu];
-}
-
-- (void) setupMenuStartService {
-    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
-    [mStatus setTitle:@"Starting Services..."];
-    [mStatus setEnabled:NO];
-    [mStatus setAction:nil];
-    [mStatus setTarget:nil];
-    [mStatus setSubmenu:nil];
-    [self.statusItem.menu itemChanged:mStatus];
-    
-    [self setupCheckupMenu];
-}
-
-- (void) setupMenuStartNodes {
-    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
-    [mStatus setTitle:@"Checking Nodes..."];
-    [mStatus setEnabled:NO];
-    [mStatus setAction:nil];
-    [mStatus setTarget:nil];
-    [mStatus setSubmenu:nil];
-    [self.statusItem.menu itemChanged:mStatus];
-    
-    [self setupCheckupMenu];
-}
-
 - (void) setupMenuNewCluster {
     NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
     [mStatus setTitle:@"Build Cluster"];
