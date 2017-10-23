@@ -16,14 +16,19 @@ type Package struct {
     AppVer          string    `gorm:"column:app_ver;type:VARCHAR(16)"           json:"app-ver"`
     // Package unique id
     PkgID           string    `gorm:"column:pkg_id;type:VARCHAR(36) UNIQUE" sql:"index" json:"pkg-id"`
+    // Package revision
+    PkgVer          string    `gorm:"column:pkg_ver;type:VARCHAR(32)"           json:"pkg-ver"`
+    // Package checksum
+    PkgChksum       string    `gorm:"column:pkg_chksum;type:VARCHAR(32)"        json:"pkg-chksum"`
+
     // package name
     Name            string    `gorm:"column:name;type:VARCHAR(255)"             json:"name"`
     // Package Family
     Family          string    `gorm:"column:family;type:VARCHAR(255)"           json:"family"`
+    // Menu name
+    MenuName        string    `gorm:"column:menu_name;type:VARCHAR(255)"        json:"menu-name"`
     // Description
     Description     string    `gorm:"column:description;type:VARCHAR(255)"      json:"description"`
-    // Package revision
-    PkgVer          string    `gorm:"column:pkg_ver;type:VARCHAR(32)"           json:"pkg-ver"`
 
     // Package Meta URL
     MetaURL         string    `gorm:"column:meta_url;type:VARCHAR(255)"         json:"meta-url"`
@@ -38,6 +43,8 @@ type Package struct {
     CoreImageSync   string    `gorm:"column:core_image_sync;type:VARCHAR(255)"  json:"core-image-sync"`
     // Core Image URL
     CoreImageURL    string    `gorm:"column:core_image_url;type:VARCHAR(255)"   json:"core-image-url"`
+    // Core Data path to setup
+    CoreDataPath    string    `gorm:"column:core_data_path;type:VARCHAR(255)"   json:"core-data-path"`
 
     // Node Architecture
     NodeArch        string    `gorm:"column:node_arch;type:VARCHAR(32)"         json:"node-arch"`
@@ -47,6 +54,8 @@ type Package struct {
     NodeImageSync   string    `gorm:"column:node_image_sync;type:VARCHAR(255)"  json:"node-image-sync"`
     // Node Image URL
     NodeImageURL    string    `gorm:"column:node_image_url;type:VARCHAR(255)"   json:"node-image-url"`
+    // Node Data path to setup
+    NodeDataPath    string    `gorm:"column:node_data_path;type:VARCHAR(255)"   json:"node-data-path"`
 }
 
 // instance methods
