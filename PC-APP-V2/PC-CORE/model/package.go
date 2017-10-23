@@ -64,8 +64,8 @@ func (Package) TableName() string {
     return packageTable
 }
 
-func AllPackages() ([]Package, error) {
-    var pkgs []Package = nil
+func AllPackages() ([]*Package, error) {
+    var pkgs []*Package = nil
     SharedRecordGate().Session().Find(&pkgs)
     if len(pkgs) == 0 {
         return nil, NoItemFound
@@ -73,8 +73,8 @@ func AllPackages() ([]Package, error) {
     return pkgs, nil
 }
 
-func FindPackage(query interface{}, args ...interface{}) ([]Package, error) {
-    var pkgs []Package = nil
+func FindPackage(query interface{}, args ...interface{}) ([]*Package, error) {
+    var pkgs []*Package = nil
     SharedRecordGate().Session().Where(query, args).Find(&pkgs)
     if len(pkgs) == 0 {
         return nil, NoItemFound
@@ -82,11 +82,11 @@ func FindPackage(query interface{}, args ...interface{}) ([]Package, error) {
     return pkgs, nil
 }
 
-func UpsertPackages(pkgs []Package) (error) {
+func UpsertPackages(pkgs []*Package) (error) {
     if pkgs == nil || len(pkgs) == 0 {
         return errors.Errorf("[ERR] no packages to update")
     }
-    var ppkgs = []Package{}
+    var ppkgs []*Package = nil
     SharedRecordGate().Session().Find(&ppkgs)
 
     updatelp: for i, _ := range pkgs {

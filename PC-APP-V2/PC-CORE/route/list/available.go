@@ -34,7 +34,7 @@ func InitRouthPathListAvailable(appLife route.Router, feeder route.ResponseFeede
             }
 
             pkgList = []map[string]interface{}{}
-            pkgs    = []model.Package{}
+            pkgs    = []*model.Package{}
         )
         req, err := apireq.NewRequest("https://api.pocketcluster.io/service/v014/package/list", false)
         if err != nil {
