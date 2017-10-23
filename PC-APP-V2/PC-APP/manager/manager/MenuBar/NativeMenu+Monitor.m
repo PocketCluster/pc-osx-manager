@@ -146,7 +146,7 @@
         // package display menu
         NSMenuItem *penu =
             [[NSMenuItem alloc]
-             initWithTitle:pkg.packageDescription
+             initWithTitle:pkg.menuName
              action:nil
              keyEquivalent:@""];
         [penu setTag:PKG_TAG_BUILDER(pndx)];

@@ -75,6 +75,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
                 if ([okg.packageID isEqualToString:nkg.packageID]) {
                     [okg updateWithPackage:nkg];
                     isFound = YES;
+                    break;
                 }
             }
             if (!isFound) {

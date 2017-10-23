@@ -9,12 +9,14 @@
 extern NSString * const kPackageDescription;
 extern NSString * const kPackageID;
 extern NSString * const kInstalled;
+extern NSString * const kMenuName;
 
 @interface Package : NSObject
 
 @property (nonatomic, readonly) BOOL installed;
 @property (nonatomic, readonly) NSString *packageDescription;
 @property (nonatomic, readonly) NSString *packageID;
+@property (nonatomic, readonly) NSString *menuName;
 
 + (NSArray<Package *> *)packagesFromList:(NSArray<NSDictionary *> *)aList;
 

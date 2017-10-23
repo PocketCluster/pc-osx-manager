@@ -28,9 +28,7 @@ func (PkgRecord) TableName() string {
 }
 
 func AllRecords() ([]*PkgRecord, error) {
-    var (
-        recs = []*PkgRecord{}
-    )
+    var recs []*PkgRecord = nil
     SharedRecordGate().Session().Find(&recs)
     if len(recs) == 0 {
         return nil, NoItemFound
@@ -39,9 +37,7 @@ func AllRecords() ([]*PkgRecord, error) {
 }
 
 func FindRecord(query interface{}, args ...interface{}) ([]*PkgRecord, error) {
-    var (
-        recs = []*PkgRecord{}
-    )
+    var recs []*PkgRecord = nil
     SharedRecordGate().Session().Where(query, args).Find(&recs)
     if len(recs) == 0 {
         return nil, NoItemFound
@@ -53,7 +49,7 @@ func UpsertRecords(nRecs []*PkgRecord) error {
     if nRecs == nil || len(nRecs) == 0 {
         return errors.Errorf("[ERR] no record to update")
     }
-    var oRecs = []*PkgRecord{}
+    var oRecs []*PkgRecord = nil
     SharedRecordGate().Session().Find(&oRecs)
 
     updatelp:

@@ -240,9 +240,12 @@
          if (![[response valueForKeyPath:@"package-installed.status"] boolValue]) {
              [belf onUpdatedWith:[StatusCache SharedStatusCache] forPackageListInstalled:NO];
 
-             [ShowAlert
-              showWarningAlertWithTitle:@"Unable to retrieve installed package list"
-              message:[response valueForKeyPath:@"package-installed.error"]];
+             // (2017/10/24) if error happens, quietly ignore for now.
+             /*
+              * [ShowAlert
+              *  showWarningAlertWithTitle:@"Unable to retrieve installed package list"
+              *  message:[response valueForKeyPath:@"package-installed.error"]];
+              */
              return;
          }
 

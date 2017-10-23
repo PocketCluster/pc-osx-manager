@@ -11,11 +11,13 @@
 NSString * const kPackageDescription = @"description";
 NSString * const kPackageID          = @"package-id";
 NSString * const kInstalled          = @"installed";
+NSString * const kMenuName           = @"menu-name";
 
 @interface Package()
 @property (nonatomic, readwrite) BOOL installed;
 @property (nonatomic, strong, readwrite) NSString *packageDescription;
 @property (nonatomic, strong, readwrite) NSString *packageID;
+@property (nonatomic, strong, readwrite) NSString *menuName;
 @end
 
 @implementation Package
@@ -31,6 +33,7 @@ NSString * const kInstalled          = @"installed";
         Package *pkg = [Package new];
         pkg.packageDescription = [dict objectForKey:kPackageDescription];
         pkg.packageID = [dict objectForKey:kPackageID];
+        pkg.menuName  = [dict objectForKey:kMenuName];
         pkg.installed = [[dict objectForKey:kInstalled] boolValue];
         [packages addObject:pkg];
     }
@@ -41,5 +44,6 @@ NSString * const kInstalled          = @"installed";
 - (void) updateWithPackage:(Package *)newSamePackage {
     self.packageDescription = newSamePackage.packageDescription;
     self.installed          = newSamePackage.installed;
+    self.menuName           = newSamePackage.menuName;
 }
 @end

@@ -16,7 +16,7 @@ import (
 
 var (
     // ItemNotFound
-    NoItemFound       = &ngError{"[ERR] NotFound: No items are found"}
+    NoItemFound       = &ngError{"[ERR] no item is found"}
 
     gate *dbGate      = nil
     gateLock          = sync.Mutex{}

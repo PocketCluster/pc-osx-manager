@@ -36,16 +36,23 @@ func InitRouthPathListInstalled(appLife route.Router, feeder route.ResponseFeede
         )
 
         // update package doesn't return error when there is packages to update.
-        pkgs, err := model.AllPackages()
+        recs, err := model.AllRecords()
         if err != nil {
-            return feedError(errors.WithMessage(err, "Unable to access package list"))
+            return feedError(errors.WithMessage(err, "Unable to access installed packages"))
         }
-        for i, _ := range pkgs {
-            pkgList = append(pkgList, map[string]interface{} {
-                "package-id" : pkgs[i].PkgID,
-                "description": pkgs[i].Description,
-                "installed": true,
-            })
+        for i, _ := range recs {
+            r := recs[i]
+
+            if pkgs, err := model.FindPackage("pkg_id = ?", r.PkgID); err == nil && len(pkgs) != 0 {
+                p := pkgs[0]
+
+                pkgList = append(pkgList, map[string]interface{} {
+                    "package-id" : p.PkgID,
+                    "description": p.Description,
+                    "installed":   true,
+                    "menu-name":   p.MenuName,
+                })
+            }
         }
         data, err := json.Marshal(route.ReponseMessage{
             "package-installed": {
@@ -54,7 +61,7 @@ func InitRouthPathListInstalled(appLife route.Router, feeder route.ResponseFeede
             },
         })
         if err != nil {
-            return feedError(errors.WithMessage(err, "Unable to access package list"))
+            return feedError(errors.WithMessage(err, "Unable to access installed packages"))
         }
         err = feeder.FeedResponseForGet(rpath, string(data))
         if err != nil {
