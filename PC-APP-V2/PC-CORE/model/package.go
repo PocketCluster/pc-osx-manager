@@ -10,6 +10,7 @@ const (
     PackageModelVersion string = "0.1.4"
 )
 
+// this is a model that reflects what's available in api backend
 type Package struct {
     gorm.Model                `json:"-"`
     // Application specific ID
@@ -58,13 +59,22 @@ type Package struct {
     NodeDataPath    string    `gorm:"column:node_data_path;type:VARCHAR(255)"   json:"node-data-path"`
 }
 
-// instance methods
+// class methods
 func (Package) TableName() string {
     return packageTable
 }
 
-func FindPackage(query interface{}, args ...interface{}) ([]*Package, error) {
-    var pkgs []*Package = nil
+func AllPackages() ([]Package, error) {
+    var pkgs []Package = nil
+    SharedRecordGate().Session().Find(&pkgs)
+    if len(pkgs) == 0 {
+        return nil, NoItemFound
+    }
+    return pkgs, nil
+}
+
+func FindPackage(query interface{}, args ...interface{}) ([]Package, error) {
+    var pkgs []Package = nil
     SharedRecordGate().Session().Where(query, args).Find(&pkgs)
     if len(pkgs) == 0 {
         return nil, NoItemFound
@@ -72,11 +82,11 @@ func FindPackage(query interface{}, args ...interface{}) ([]*Package, error) {
     return pkgs, nil
 }
 
-func UpdatePackages(pkgs []*Package) (error) {
+func UpsertPackages(pkgs []Package) (error) {
     if pkgs == nil || len(pkgs) == 0 {
         return errors.Errorf("[ERR] no packages to update")
     }
-    var ppkgs []*Package = nil
+    var ppkgs = []Package{}
     SharedRecordGate().Session().Find(&ppkgs)
 
     updatelp: for i, _ := range pkgs {

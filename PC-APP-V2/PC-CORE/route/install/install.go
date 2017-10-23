@@ -42,7 +42,7 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
                 return irr
             }
 
-            pkg        *model.Package
+            pkg        model.Package
             uRoot      *model.UserMeta
             rpProgress string = routepath.RpathPackageInstallProgress()
             pkgID      string = ""

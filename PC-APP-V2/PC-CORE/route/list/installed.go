@@ -33,11 +33,10 @@ func InitRouthPathListInstalled(appLife route.Router, feeder route.ResponseFeede
             }
 
             pkgList = []map[string]interface{}{}
-            pkgs    = []*model.Package{}
         )
 
         // update package doesn't return error when there is packages to update.
-        pkgs, err := model.FindPackage("", "")
+        pkgs, err := model.AllPackages()
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access package list"))
         }

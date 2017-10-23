@@ -34,7 +34,7 @@ func InitRouthPathListAvailable(appLife route.Router, feeder route.ResponseFeede
             }
 
             pkgList = []map[string]interface{}{}
-            pkgs    = []*model.Package{}
+            pkgs    = []model.Package{}
         )
         req, err := apireq.NewRequest("https://api.pocketcluster.io/service/v014/package/list", false)
         if err != nil {
@@ -53,7 +53,7 @@ func InitRouthPathListAvailable(appLife route.Router, feeder route.ResponseFeede
             return feedError(errors.Errorf("No package avaiable. Contact us at Slack channel."))
         } else {
             // update package doesn't return error when there is packages to update.
-            model.UpdatePackages(pkgs)
+            model.UpsertPackages(pkgs)
         }
 
         for i, _ := range pkgs {
