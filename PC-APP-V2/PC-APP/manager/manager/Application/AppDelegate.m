@@ -116,6 +116,12 @@
     lifecycleVisible();
 }
 
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
+    //NSTerminateCancel;
+    //NSTerminateLater;
+    return NSTerminateNow;
+}
+
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     [self.interfaceStatus stopMonitoring];
     self.interfaceStatus = nil;
