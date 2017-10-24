@@ -8,7 +8,7 @@
 
 #import "BaseSetupVC.h"
 
-@interface PCSetup3VC : BaseSetupVC <NSTableViewDataSource, NSTableViewDelegate>
+@interface PCSetup3VC : BaseSetupVC <NSTableViewDataSource, NSTableViewDelegate, NSWindowDelegate>
 @property (nonatomic, strong) IBOutlet NSView *pannel;
 
 @property (nonatomic, weak) IBOutlet NSTableView *packageTable;

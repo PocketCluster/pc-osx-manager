@@ -36,8 +36,7 @@
 
 #pragma mark - NSWindowDelegate
 - (BOOL)windowShouldClose:(NSWindow *)sender {
-
-    return NO;
+    return [self.viewController windowShouldClose:sender];
 }
 
 #pragma mark - Stage Control

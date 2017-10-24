@@ -11,36 +11,38 @@
 #import "PCRouter.h"
 #import "ShowAlert.h"
 #import "NullStringChecker.h"
+#import "StatusCache.h"
 
 @interface PCSetup3VC()<PCRouteRequest>
-@property (nonatomic, strong) NSMutableArray<Package *> *packageList;
-+ (void)_enableControls:(PCSetup3VC *)vc;
-+ (void)_disableControls:(PCSetup3VC *)vc;
+- (void)_enableControls;
+- (void)_disableControls;
 @end
 
 @implementation PCSetup3VC {
     NSInteger _selectedIndex;
+    BOOL      _isInstalling;
 }
 
 - (void) finishConstruction {
     [super finishConstruction];
     [self setTitle:@"Install Package"];
-    self.packageList = [NSMutableArray<Package *> arrayWithCapacity:0];
+
+    _isInstalling = NO;
 }
 
 - (void) viewDidLoad {
     [super viewDidLoad];
-    
+
     [[((BaseBrandView *)self.view) contentBox] addSubview:self.pannel];
     self.pannel = nil;
 }
 
 - (void) viewDidAppear {
     [super viewDidAppear];
-    
+
     // reset selected index
     _selectedIndex = -1;
-    
+
     /*** checking user authed ***/
     WEAK_SELF(self);
     NSString *rpPkgList = [NSString stringWithUTF8String:RPATH_PACKAGE_LIST_AVAILABLE];
@@ -49,44 +51,57 @@
      addGetRequest:self
      onPath:rpPkgList
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         
+
          if ([[response valueForKeyPath:@"package-available.status"] boolValue]) {
-             NSArray<Package *> *list = [Package packagesFromList:[response valueForKeyPath:@"package-available.list"]];
-             if (list != nil) {
-                 [self.packageList addObjectsFromArray:list];
+
+             [[StatusCache SharedStatusCache] updatePackageList:[response valueForKeyPath:@"package-available.list"]];
+             NSArray<Package *> *list = [[StatusCache SharedStatusCache] packageList];
+             if (list != nil && [list count]) {
                  [self.packageTable reloadData];
              } else {
                  [ShowAlert
                   showWarningAlertWithTitle:@"Temporarily Unavailable"
-                  message:@"Unable to retrieve available packages. Please try a bit later."];
+                  message:@"Unable to retrieve available packages. Please try later."];
              }
-             
+
          } else {
              [ShowAlert
               showWarningAlertWithTitle:@"Temporarily Unavailable"
               message:[response valueForKeyPath:@"package-available.error"]];
          }
 
-         [PCSetup3VC _enableControls:belf];
+         [belf _enableControls];
          [[PCRouter sharedRouter] delGetRequest:belf onPath:rpPkgList];
      }];
 
-    [PCSetup3VC _disableControls:self];
+    [self _disableControls];
     [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_AVAILABLE];
+}
+
+#pragma mark - NSWindowDelegate
+- (BOOL)windowShouldClose:(NSWindow *)sender {
+    if (_isInstalling) {
+        [ShowAlert
+         showWarningAlertWithTitle:@"Please wait until the install finishes"
+         message:@"The installation takes some time. We'll let you know as soon as it's done."];
+        return NO;
+    }
+
+    return YES;
 }
 
 #pragma mark - NSTableViewDataSourceDelegate
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView {
-    return [self.packageList count];
+    return [[[StatusCache SharedStatusCache] packageList] count];
 }
 
 - (nullable id)tableView:(NSTableView *)tableView objectValueForTableColumn:(nullable NSTableColumn *)tableColumn row:(NSInteger)row {
-    return [[self.packageList objectAtIndex:row] description];
+    return [[[[StatusCache SharedStatusCache] packageList] objectAtIndex:row] description];
 }
 
 #pragma mark - NSTableViewDelegate
 -(NSView *)tableView:(NSTableView *)aTableView viewForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row {
-    Package *meta = [self.packageList objectAtIndex:row];
+    Package *meta = [[[StatusCache SharedStatusCache] packageList] objectAtIndex:row];
     NSTableCellView *nv = [aTableView makeViewWithIdentifier:@"packageview" owner:self];
     [nv.textField setStringValue:[meta packageDescription]];
     return nv;
@@ -103,7 +118,7 @@
 }
 
 - (BOOL)tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row {
-    return (![self.packageList objectAtIndex:(NSUInteger)row].installed);
+    return (![[[StatusCache SharedStatusCache] packageList] objectAtIndex:(NSUInteger)row].installed);
 }
 
 - (NSIndexSet *)tableView:(NSTableView *)aTableView
@@ -113,40 +128,44 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
     }
 
     NSInteger row = (NSInteger)anIndex.firstIndex;
-    if (![self.packageList objectAtIndex:(NSUInteger)row].installed) {
+    if (![[[StatusCache SharedStatusCache] packageList] objectAtIndex:(NSUInteger)row].installed) {
         _selectedIndex = row;
     }
     return anIndex;
 }
 
 #pragma mark - Setup UI states
-+ (void)_enableControls:(PCSetup3VC *)vc {
-    [vc.btnInstall    setEnabled:YES];
-    [vc.btnCancel     setEnabled:YES];
-    [vc.progressLabel setStringValue:@""];
-    [vc.progressBar   displayIfNeeded];
+- (void)_enableControls {
+    [self.btnInstall    setEnabled:YES];
+    [self.btnCancel     setEnabled:YES];
+    [self.progressLabel setStringValue:@""];
+    [self.progressBar   displayIfNeeded];
 
-    [vc.circularProgress setHidden:YES];
-    [vc.circularProgress stopAnimation:nil];
-    [vc.circularProgress displayIfNeeded];
-    [vc.circularProgress removeFromSuperview];
-    [vc setCircularProgress:nil];
+    [self.circularProgress setHidden:YES];
+    [self.circularProgress stopAnimation:nil];
+    [self.circularProgress displayIfNeeded];
+    [self.circularProgress removeFromSuperview];
+    [self setCircularProgress:nil];
+
+    _isInstalling = NO;
 }
 
-+ (void)_disableControls:(PCSetup3VC *)vc {
-    [vc.btnInstall    setEnabled:NO];
-    [vc.btnCancel     setEnabled:NO];
-    [vc.progressLabel setStringValue:@""];
-    [vc.progressBar   displayIfNeeded];
+- (void)_disableControls {
+    [self.btnInstall    setEnabled:NO];
+    [self.btnCancel     setEnabled:NO];
+    [self.progressLabel setStringValue:@""];
+    [self.progressBar   displayIfNeeded];
 
     NSProgressIndicator *ind = [[NSProgressIndicator alloc] initWithFrame:(NSRect){{20.0, 20.0}, {16.0, 16.0}}];
     [ind setStyle:NSProgressIndicatorSpinningStyle];
-    [vc.view addSubview:ind];
-    [vc setCircularProgress:ind];
+    [self.view addSubview:ind];
+    [self setCircularProgress:ind];
     [ind setHidden:NO];
     [ind setIndeterminate:YES];
-    [ind startAnimation:vc];
+    [ind startAnimation:self];
     [ind displayIfNeeded];
+
+    _isInstalling = YES;
 }
 
 #pragma mark - IBACTION
@@ -156,11 +175,11 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
 
     //[self.stageControl shouldControlProgressFrom:self withParam:nil];
 
-    if (_selectedIndex == -1 || (NSInteger)[self.packageList count] <= _selectedIndex ) {
+    if (_selectedIndex == -1 || (NSInteger)[[[StatusCache SharedStatusCache] packageList] count] <= _selectedIndex ) {
         return;
     }
 
-    [PCSetup3VC _disableControls:self];
+    [self _disableControls];
     
     /*** checking user authed ***/
     WEAK_SELF(self);
@@ -171,7 +190,7 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
      addPostRequest:self
      onPath:rpPkgInstall
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         
+
          if ([[response valueForKeyPath:@"package-install.status"] boolValue]) {
              [ShowAlert
               showWarningAlertWithTitle:@"Installation Completed!"
@@ -183,9 +202,12 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
               message:[response valueForKeyPath:@"package-install.error"]];
          }
 
-         [PCSetup3VC _enableControls:belf];
          [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInstall];
          [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInstProg];
+         // ask installed package status to update other UI parts
+         [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
+
+         [belf _enableControls];
      }];
 
     [[PCRouter sharedRouter]
@@ -229,7 +251,7 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
 
     [PCRouter
      routeRequestPost:RPATH_PACKAGE_INSTALL
-     withRequestBody:@{@"pkg-id":[self.packageList objectAtIndex:(NSUInteger)_selectedIndex].packageID}];
+     withRequestBody:@{@"pkg-id":[[[StatusCache SharedStatusCache] packageList] objectAtIndex:(NSUInteger)_selectedIndex].packageID}];
 }
 
 -(IBAction)cancel:(id)sender {

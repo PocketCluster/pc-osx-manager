@@ -68,6 +68,8 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
 
         // TODO 2. check if service is already running
 
+        // TODO 3. check if this package has been installed
+
         // 3. pick up the first package & we are ready to patch.
         pkgs, err := model.FindPackage("pkg_id = ?", pkgID)
         if err != nil {
