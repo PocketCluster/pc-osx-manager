@@ -58,8 +58,8 @@ func InitRouthPathListAvailable(appLife route.Router, feeder route.ResponseFeede
 
         for i, _ := range pkgs {
             var (
-                p         *model.Package = pkgs[i]
-                installed bool           = false
+                p         = pkgs[i]
+                installed = false
             )
             if recs, err := model.FindRecord("pkg_id = ?", p.PkgID); err == nil && len(recs) != 0 {
                 installed = true
@@ -69,6 +69,8 @@ func InitRouthPathListAvailable(appLife route.Router, feeder route.ResponseFeede
                 "description": p.Description,
                 "installed":   installed,
                 "menu-name":   p.MenuName,
+                "core-size":   p.CoreImageSize,
+                "node-size":   p.NodeImageSize,
             })
         }
         data, err := json.Marshal(route.ReponseMessage{
