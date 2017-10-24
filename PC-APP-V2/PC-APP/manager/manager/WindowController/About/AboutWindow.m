@@ -21,7 +21,7 @@
 
 - (void)windowDidLoad {
     [super windowDidLoad];
-    
+
     [self.window setBackgroundColor:[NSColor whiteColor]];
     [self.window setTitleVisibility:NSWindowTitleHidden];
     [self.window setTitlebarAppearsTransparent:YES];
@@ -31,12 +31,12 @@
 
     NSString *dateString = [NSString stringWithCString:__DATE__ encoding:NSASCIIStringEncoding];
     NSString *yearString = [dateString substringWithRange:NSMakeRange([dateString length] - 4, 4)];
-    
+
     str = [str stringByReplacingOccurrencesOfString:@"{YEAR}" withString:yearString];
     str = [str stringByReplacingOccurrencesOfString:@"{VERSION}" withString:[[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleShortVersionString"]];
     str = [str stringByReplacingOccurrencesOfString:@"{URL}" withString:@"https://github.com/pocketcluster/pocketcluster"];
     str = [str stringByReplacingOccurrencesOfString:@"\n" withString:@"<br>"];
-    
+
     //self.webView.policyDelegate = self;
     [self.webView setDrawsBackground:NO];
     [self.webView.mainFrame loadHTMLString:str baseURL:nil];

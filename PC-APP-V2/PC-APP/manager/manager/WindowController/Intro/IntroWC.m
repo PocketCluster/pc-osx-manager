@@ -30,11 +30,19 @@
 - (void)windowDidLoad {
     [super windowDidLoad];
     [self.window setBackgroundColor:[NSColor whiteColor]];
-    [self.window setTitleVisibility:NSWindowTitleHidden];
+    [self.window setTitleVisibility:NSWindowTitleVisible];
     [self.window setTitlebarAppearsTransparent:YES];
     [self.window setShowsResizeIndicator:NO];
     [self.window setShowsToolbarButton:NO];
     self.window.styleMask |= NSFullSizeContentViewWindowMask;
+
+/*
+    // (2017/10/24) this isn't strictly necessary as of now
+    [self.window setTitle:
+     [@"PocketCluster {VERSION} - Early Evaluation"
+      stringByReplacingOccurrencesOfString:@"{VERSION}"
+      withString:[[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleShortVersionString"]]];
+*/
 
     [[self.window contentView] addSubview:[self.viewController view]];
 

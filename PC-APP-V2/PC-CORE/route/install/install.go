@@ -5,6 +5,7 @@ import (
     "encoding/json"
     "fmt"
     "os/user"
+    "strings"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -42,13 +43,13 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
                 return irr
             }
 
-            pkg        *model.Package
-            uRoot      *model.UserMeta
-            rpProgress string = routepath.RpathPackageInstallProgress()
-            pkgID      string = ""
-            repoList          = []string{}
-            stopC             = make(chan struct{})
-            client            = apireq.NewClient(apireq.ConnTimeout, false)
+            rpProgress = routepath.RpathPackageInstallProgress()
+            stopC      = make(chan struct{})
+            client     = apireq.NewClient(apireq.ConnTimeout, false)
+            repoList   = []string{}
+            pkg        *model.Package = nil
+            uRoot      *model.UserMeta = nil
+            pkgID      = ""
         )
 
         // 0. find registry destination first
@@ -183,6 +184,12 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
         // --- --- --- --- --- install image to core --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Installing core image...")
 
+        // --- --- --- --- --- setup core node --- --- --- --- ---
+        // data paths to build
+        cdPath := strings.Split(pkg.CoreDataPath, "|")
+        log.Info("core data path %v", cdPath)
+
+
         // --- --- --- --- --- install image to nodes --- --- --- --- ---
         // TODO : we can request swarm server to do this job
         _ = makeMessageFeedBack(feeder, rpProgress, "Installing node image...")
@@ -196,20 +203,48 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
         }
 
         // --- --- --- --- --- setup node --- --- --- --- ---
+        // data paths to build
+        ndPath := strings.Split(pkg.NodeDataPath, "|")
+        log.Info("node data path %v", ndPath)
+
         tNode := "pc-node1"
         c, err := tclient.MakeNewClient(sshCfg, uRoot.Login, tNode)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
         }
-        err = c.APISSH(context.TODO(), []string{"mkdir -p /pocket/basic/package"}, "1524rmfo",false)
-        if err != nil {
-            return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
+        // data path ownership
+        ndOwner := fmt.Sprintf("chown -R %s:%s", luname, luname)
+        for _, ndp := range ndPath {
+            err = c.APISSH(context.TODO(), []string{"mkdir -p ", ndp}, uRoot.Password,false)
+            if err != nil {
+                return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
+            }
+            err = c.APISSH(context.TODO(), []string{"chmod -R 755", ndp}, uRoot.Password,false)
+            if err != nil {
+                return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
+            }
+            err = c.APISSH(context.TODO(), []string{ndOwner, ndp}, uRoot.Password,false)
+            if err != nil {
+                return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
+            }
         }
         err = c.Logout()
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
         }
 
+        // --- --- --- --- --- make installed package record --- --- --- --- ---
+        err = model.UpsertRecords([]*model.PkgRecord{
+            {
+                AppVer: pkg.AppVer,
+                PkgID:  pkg.PkgID,
+                PkgVer: pkg.PkgVer,
+                PkgChksum: pkg.PkgChksum,
+            },
+        })
+        if err != nil {
+            return feedError(errors.WithMessage(err, "unable to record package history" + pkg.Name))
+        }
 
         // --- --- --- --- --- install image to nodes --- --- --- --- ---
         data, err := json.Marshal(route.ReponseMessage{
