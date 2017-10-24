@@ -65,12 +65,12 @@ func InitRouthPathListAvailable(appLife route.Router, feeder route.ResponseFeede
                 installed = true
             }
             pkgList = append(pkgList, map[string]interface{} {
-                "package-id" : p.PkgID,
-                "description": p.Description,
-                "installed":   installed,
-                "menu-name":   p.MenuName,
-                "core-size":   p.CoreImageSize,
-                "node-size":   p.NodeImageSize,
+                "package-id" :     p.PkgID,
+                "description":     p.Description,
+                "installed":       installed,
+                "menu-name":       p.MenuName,
+                "core-image-size": p.CoreImageSize,
+                "node-image-size": p.NodeImageSize,
             })
         }
         data, err := json.Marshal(route.ReponseMessage{
