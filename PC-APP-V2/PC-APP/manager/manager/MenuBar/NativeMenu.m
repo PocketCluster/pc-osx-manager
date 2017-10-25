@@ -135,7 +135,7 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
     [mUpdate setTitle:UPDATE_TITLE_INITIATE_CHECKING];
     [mUpdate setEnabled:YES];
     if (IsAvailable) {
-        [mUpdate setImage:[NSImage imageNamed:@"status_icon_problem"]];
+        [mUpdate setImage:[NSImage imageNamed:@"update-available"]];
     } else {
         [mUpdate setImage:nil];
     }

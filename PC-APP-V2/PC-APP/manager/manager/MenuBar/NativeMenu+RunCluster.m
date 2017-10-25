@@ -7,6 +7,7 @@
 //
 
 #import "StatusCache.h"
+#import "AppDelegate+Window.h"
 #import "NativeMenuAddition.h"
 #import "NativeMenu+RunCluster.h"
 
@@ -23,12 +24,12 @@
     [mStatus setEnabled:YES];
     [mStatus setAction:nil];
     [mStatus setTarget:nil];
-    
+
     // show warning that some nodes are missing
     if ([[StatusCache SharedStatusCache] isAllRegisteredNodesReady]) {
-
+        [mStatus setImage:nil];
     } else {
-        
+        [mStatus setImage:[NSImage imageNamed:@"warning"]];
     }
 
     // setup submenu
@@ -73,7 +74,7 @@
 }
 
 - (void) menuSelectedInstallPackage:(id)sender {
-    
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"PCPkgInstallWC" withResponder:nil];
 }
 
 - (void) menuSelectedStopCluster:(id)sender {
