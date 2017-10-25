@@ -14,7 +14,7 @@ NSString * const kPackageID          = @"package-id";
 NSString * const kInstalled          = @"installed";
 NSString * const kMenuName           = @"menu-name";
 NSString * const kCoreImageSize      = @"core-image-size";
-NSString * const kNodeImageSize      = @"node-imgae-size";
+NSString * const kNodeImageSize      = @"node-image-size";
 
 @interface Package()
 @property (nonatomic, readwrite) BOOL installed;
@@ -45,7 +45,7 @@ NSString * const kNodeImageSize      = @"node-imgae-size";
 
         // core image size
         NSString *cSize = [dict objectForKey:kCoreImageSize];
-        // node imaeg isze
+        // node imaeg size
         NSString *nSize = [dict objectForKey:kNodeImageSize];
         // total image size
         if (!(ISNULL_STRING(cSize) || ISNULL_STRING(nSize))) {
@@ -69,8 +69,8 @@ NSString * const kNodeImageSize      = @"node-imgae-size";
 
 - (void) updateWithPackage:(Package *)aPackage {
     self.packageDescription = aPackage.packageDescription;
-    self.installed          = aPackage.installed;
     self.menuName           = aPackage.menuName;
+    self.installed          = aPackage.installed;
 
     if (!ISNULL_STRING(aPackage.totalImageSize)) {
         self.totalImageSize = aPackage.totalImageSize;

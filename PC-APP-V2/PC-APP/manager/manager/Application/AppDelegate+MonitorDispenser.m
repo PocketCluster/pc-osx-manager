@@ -101,25 +101,37 @@
 }
 
 #pragma mark - monitor package
-- (void) onUpdatedWith:(StatusCache *)aCache forPackageListAvailable:(BOOL)isSuccess {
+- (void) onAvailableListUpdateWith:(StatusCache *)aCache success:(BOOL)isSuccess error:(NSString *)anErrMsg {
     @synchronized(_openWindows) {
-        [self.mainMenu onUpdatedWith:aCache forPackageListAvailable:isSuccess];
+        [self.mainMenu
+         onAvailableListUpdateWith:aCache
+         success:isSuccess
+         error:anErrMsg];
 
         for (NSObject *window in _openWindows) {
             if ([window conformsToProtocol:@protocol(MonitorPackage)]) {
-                [(id<MonitorPackage>)window onUpdatedWith:aCache forPackageListAvailable:isSuccess];
+                [(id<MonitorPackage>)window
+                 onAvailableListUpdateWith:aCache
+                 success:isSuccess
+                 error:anErrMsg];
             }
         }
     }
 }
 
-- (void) onUpdatedWith:(StatusCache *)aCache forPackageListInstalled:(BOOL)isSuccess {
+- (void) onInstalledListUpdateWith:(StatusCache *)aCache success:(BOOL)isSuccess error:(NSString *)anErrMsg {
     @synchronized(_openWindows) {
-        [self.mainMenu onUpdatedWith:aCache forPackageListInstalled:isSuccess];
+        [self.mainMenu
+         onInstalledListUpdateWith:aCache
+         success:isSuccess
+         error:anErrMsg];
 
         for (NSObject *window in _openWindows) {
             if ([window conformsToProtocol:@protocol(MonitorPackage)]) {
-                [(id<MonitorPackage>)window onUpdatedWith:aCache forPackageListInstalled:isSuccess];
+                [(id<MonitorPackage>)window
+                 onInstalledListUpdateWith:aCache
+                 success:isSuccess
+                 error:anErrMsg];
             }
         }
     }

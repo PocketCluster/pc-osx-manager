@@ -108,10 +108,10 @@
 }
 
 #pragma mark - package update
-- (void) onUpdatedWith:(StatusCache *)aCache forPackageListAvailable:(BOOL)isSuccess {
+- (void) onAvailableListUpdateWith:(StatusCache *)aCache success:(BOOL)isSuccess error:(NSString *)anErrMsg {
 }
 
-- (void) onUpdatedWith:(StatusCache *)sCache forPackageListInstalled:(BOOL)isSuccess {
+- (void) onInstalledListUpdateWith:(StatusCache *)sCache success:(BOOL)isSuccess error:(NSString *)anErrMsg {
     if (!isSuccess) {
         return;
     }

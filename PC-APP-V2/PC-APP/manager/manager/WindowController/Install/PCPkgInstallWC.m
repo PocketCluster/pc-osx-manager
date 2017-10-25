@@ -29,7 +29,7 @@
 
 - (void)windowDidLoad {
     [super windowDidLoad];
-    
+
     [self.window setTitle:[self.viewController title]];
     [[self.window contentView] addSubview:[self.viewController view]];
 }
@@ -44,6 +44,23 @@
 }
 
 -(void)shouldControlRevertFrom:(NSObject<StageStep> *)aStep withParam:(NSDictionary *)aParam {
+}
+
+#pragma mark - MonitorPackage
+// this show all the available package from api backend
+- (void) onAvailableListUpdateWith:(StatusCache *)aCache success:(BOOL)isSuccess error:(NSString *)anErrMsg {
+    [self.viewController
+     onAvailableListUpdateWith:aCache
+     success:isSuccess
+     error:anErrMsg];
+}
+
+// this show all the installed package in the system
+- (void) onInstalledListUpdateWith:(StatusCache *)aCache success:(BOOL)isSuccess error:(NSString *)anErrMsg {
+    [self.viewController
+     onInstalledListUpdateWith:aCache
+     success:isSuccess
+     error:anErrMsg];
 }
 
 @end

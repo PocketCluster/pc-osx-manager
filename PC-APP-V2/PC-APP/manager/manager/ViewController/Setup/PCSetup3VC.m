@@ -13,6 +13,9 @@
 #import "NullStringChecker.h"
 #import "StatusCache.h"
 
+static NSString * const kPkgColTag  = @"pkgCol";
+static NSString * const kSizeColTag = @"sizeCol";
+
 @interface PCSetup3VC()<PCRouteRequest>
 - (void)_enableControls;
 - (void)_disableControls;
@@ -43,36 +46,7 @@
     // reset selected index
     _selectedIndex = -1;
 
-    /*** checking user authed ***/
-    WEAK_SELF(self);
-    NSString *rpPkgList = [NSString stringWithUTF8String:RPATH_PACKAGE_LIST_AVAILABLE];
-    
-    [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:rpPkgList
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-
-         if ([[response valueForKeyPath:@"package-available.status"] boolValue]) {
-
-             [[StatusCache SharedStatusCache] updatePackageList:[response valueForKeyPath:@"package-available.list"]];
-             NSArray<Package *> *list = [[StatusCache SharedStatusCache] packageList];
-             if (list != nil && [list count]) {
-                 [self.packageTable reloadData];
-             } else {
-                 [ShowAlert
-                  showWarningAlertWithTitle:@"Temporarily Unavailable"
-                  message:@"Unable to retrieve available packages. Please try later."];
-             }
-
-         } else {
-             [ShowAlert
-              showWarningAlertWithTitle:@"Temporarily Unavailable"
-              message:[response valueForKeyPath:@"package-available.error"]];
-         }
-
-         [belf _enableControls];
-         [[PCRouter sharedRouter] delGetRequest:belf onPath:rpPkgList];
-     }];
+    // TODO : checking user authed
 
     [self _disableControls];
     [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_AVAILABLE];
@@ -95,18 +69,21 @@
     return [[[StatusCache SharedStatusCache] packageList] count];
 }
 
-- (nullable id)tableView:(NSTableView *)tableView objectValueForTableColumn:(nullable NSTableColumn *)tableColumn row:(NSInteger)row {
-    return [[[[StatusCache SharedStatusCache] packageList] objectAtIndex:row] description];
+- (nullable id)tableView:(NSTableView *)tableView objectValueForTableColumn:(nullable NSTableColumn *)aTableColumn row:(NSInteger)row {
+    if (aTableColumn == nil) {
+        return nil;
+    }
+    Package *pkg = [[[StatusCache SharedStatusCache] packageList] objectAtIndex:row];
+    if ([[aTableColumn identifier] isEqualToString:kPkgColTag]) {
+        return pkg.packageDescription;
+
+    } else if ([[aTableColumn identifier] isEqualToString:kSizeColTag]) {
+        return pkg.totalImageSize;
+    }
+    return nil;
 }
 
 #pragma mark - NSTableViewDelegate
--(NSView *)tableView:(NSTableView *)aTableView viewForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row {
-    Package *meta = [[[StatusCache SharedStatusCache] packageList] objectAtIndex:row];
-    NSTableCellView *nv = [aTableView makeViewWithIdentifier:@"packageview" owner:self];
-    [nv.textField setStringValue:[meta packageDescription]];
-    return nv;
-}
-
 // disable table row text editing
 - (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
     return NO;
@@ -132,6 +109,38 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
         _selectedIndex = row;
     }
     return anIndex;
+}
+
+#pragma mark - Monitoring Package
+// this show all the available package from api backend
+- (void) onAvailableListUpdateWith:(StatusCache *)aCache success:(BOOL)isSuccess error:(NSString *)anErrMsg {
+
+    NSArray<Package *> *list = [aCache packageList];
+    if (isSuccess && list != nil && [list count]) {
+        [self.packageTable reloadData];
+
+    } else {
+        [ShowAlert
+         showWarningAlertWithTitle:@"Temporarily Unavailable"
+         message:anErrMsg];
+    }
+
+    [self _enableControls];
+}
+
+// this show all the installed package in the system
+- (void) onInstalledListUpdateWith:(StatusCache *)aCache success:(BOOL)isSuccess error:(NSString *)anErrMsg {
+    NSArray<Package *> *list = [aCache packageList];
+    if (isSuccess && list != nil && [list count]) {
+        [self.packageTable reloadData];
+
+    } else {
+        [ShowAlert
+         showWarningAlertWithTitle:@"Unable to confirm installed package"
+         message:anErrMsg];
+    }
+
+    [self _enableControls];
 }
 
 #pragma mark - Setup UI states
@@ -173,18 +182,23 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
     static const double unit_gigabyte = 1073741824.0;
     static const double unit_megabyte = 1048576.0;
 
+    NSString *rpPkgInstall = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL];
+    NSString *rpPkgInstProg = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL_PROGRESS];
+    WEAK_SELF(self);
+
     //[self.stageControl shouldControlProgressFrom:self withParam:nil];
 
-    if (_selectedIndex == -1 || (NSInteger)[[[StatusCache SharedStatusCache] packageList] count] <= _selectedIndex ) {
+    NSArray<Package *>* list = [[StatusCache SharedStatusCache] packageList];
+    if (_selectedIndex == -1 || (NSInteger)[list count] <= _selectedIndex ) {
+        return;
+    }
+    if ([[list objectAtIndex:_selectedIndex] installed]) {
         return;
     }
 
-    [self _disableControls];
+    /// TODO checking if user is authed
     
-    /*** checking user authed ***/
-    WEAK_SELF(self);
-    NSString *rpPkgInstall = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL];
-    NSString *rpPkgInstProg = [NSString stringWithUTF8String:RPATH_PACKAGE_INSTALL_PROGRESS];
+    [self _disableControls];
 
     [[PCRouter sharedRouter]
      addPostRequest:self
@@ -194,7 +208,7 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
          if ([[response valueForKeyPath:@"package-install.status"] boolValue]) {
              [ShowAlert
               showWarningAlertWithTitle:@"Installation Completed!"
-              message:@"FIND PACKAGE ID AND MARK AS INSTALLED"];
+              message:@""];
 
          } else {
              [ShowAlert
@@ -204,10 +218,8 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
 
          [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInstall];
          [[PCRouter sharedRouter] delPostRequest:belf onPath:rpPkgInstProg];
-         // ask installed package status to update other UI parts
+         // ask installed package status to update this and other UI parts
          [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
-
-         [belf _enableControls];
      }];
 
     [[PCRouter sharedRouter]

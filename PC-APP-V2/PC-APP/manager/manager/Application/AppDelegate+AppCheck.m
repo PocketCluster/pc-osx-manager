@@ -229,8 +229,33 @@
          }
      }];
 
+    // --- --- --- --- --- --- [package] available list --- --- --- --- --- --- --
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_PACKAGE_LIST_AVAILABLE)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         Log(@"%@ %@", path, response);
 
-    // --- --- --- --- --- --- package installed list --- --- --- --- --- --- --
+         if (![[response valueForKeyPath:@"package-available.status"] boolValue]) {
+             // (2017/10/25) package related error message display should be handled in UI part
+             [belf
+              onInstalledListUpdateWith:[StatusCache SharedStatusCache]
+              success:NO
+              error:[response valueForKeyPath:@"package-available.error"]];
+
+             return;
+         }
+
+         [[StatusCache SharedStatusCache]
+          updatePackageList:[response valueForKeyPath:@"package-available.list"]];
+
+         [belf
+          onInstalledListUpdateWith:[StatusCache SharedStatusCache]
+          success:YES
+          error:nil];
+     }];
+
+    // --- --- --- --- --- --- [package] installed list --- --- --- --- --- --- --
     [[PCRouter sharedRouter]
      addGetRequest:self
      onPath:@(RPATH_PACKAGE_LIST_INSTALLED)
@@ -238,19 +263,22 @@
          Log(@"%@ %@", path, response);
 
          if (![[response valueForKeyPath:@"package-installed.status"] boolValue]) {
-             [belf onUpdatedWith:[StatusCache SharedStatusCache] forPackageListInstalled:NO];
+             // (2017/10/25) package related error message display should be handled in UI part
+             [belf
+              onInstalledListUpdateWith:[StatusCache SharedStatusCache]
+              success:NO
+              error:[response valueForKeyPath:@"package-installed.error"]];
 
-             // (2017/10/24) if error happens, quietly ignore for now.
-             /*
-              * [ShowAlert
-              *  showWarningAlertWithTitle:@"Unable to retrieve installed package list"
-              *  message:[response valueForKeyPath:@"package-installed.error"]];
-              */
              return;
          }
 
-         [[StatusCache SharedStatusCache] updatePackageList:[response valueForKeyPath:@"package-installed.list"]];
-         [belf onUpdatedWith:[StatusCache SharedStatusCache] forPackageListInstalled:YES];
+         [[StatusCache SharedStatusCache]
+          updatePackageList:[response valueForKeyPath:@"package-installed.list"]];
+
+         [belf
+          onInstalledListUpdateWith:[StatusCache SharedStatusCache]
+          success:YES
+          error:nil];
      }];
 
     // --- --- --- --- --- --- [noti] node online timeup --- --- --- --- --- ---
