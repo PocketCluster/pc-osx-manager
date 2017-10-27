@@ -38,6 +38,8 @@ type Package struct {
 
     // Core Node architecture
     CoreArch        string    `gorm:"column:core_arch;type:VARCHAR(32)"         json:"core-arch"`
+    // Core Image Name
+    CoreImageName   string    `gorm:"column:core_image_name;type:VARCHAR(255)"  json:"core-image-name"`
     // Core Image Size
     CoreImageSize   string    `gorm:"column:core_image_size;type:VARCHAR(255)"  json:"core-image-size"`
     // Core Image Checksum
@@ -51,6 +53,8 @@ type Package struct {
 
     // Node Architecture
     NodeArch        string    `gorm:"column:node_arch;type:VARCHAR(32)"         json:"node-arch"`
+    // Node Image Name
+    NodeImageName   string    `gorm:"column:node_image_name;type:VARCHAR(255)"  json:"node-image-name"`
     // Node Image Size
     NodeImageSize   string    `gorm:"column:node_image_size;type:VARCHAR(255)"  json:"node-image-size"`
     // Node Image Checksum

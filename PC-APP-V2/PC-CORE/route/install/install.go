@@ -199,7 +199,7 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to make connection to " + "pc-node1"))
         }
-        err = dockertool.InstallImageFromRepository(cli, "pc-master:5000/arm64v8-ubuntu")
+        err = dockertool.InstallImageFromRepository(cli, pkg.NodeImageName)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync image to " + "pc-node1"))
         }
@@ -207,26 +207,24 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
         // --- --- --- --- --- setup node --- --- --- --- ---
         // data paths to build
         ndPath := strings.Split(pkg.NodeDataPath, "|")
-        log.Info("node data path %v", ndPath)
+        // ndpath setup commands
+        ndPathCmds := []string{}
+        for _, ndp := range ndPath {
+            ndPathCmds = append(ndPathCmds, fmt.Sprintf("mkdir -p %s", ndp))
+            ndPathCmds = append(ndPathCmds, fmt.Sprintf("chown -R %s:%s %s", luname, luname, ndp))
+            ndPathCmds = append(ndPathCmds, fmt.Sprintf("chmod -R 755 %s", ndp))
+        }
+        log.Infof("node data path commands %v", ndPathCmds)
 
         tNode := "pc-node1"
         c, err := tclient.MakeNewClient(sshCfg, uRoot.Login, tNode)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
         }
-        // data path ownership
-        ndOwner := fmt.Sprintf("chown -R %s:%s", luname, luname)
-        for _, ndp := range ndPath {
-            err = c.APISSH(context.TODO(), []string{"mkdir -p ", ndp}, uRoot.Password,false)
+        for _, ndpc := range ndPathCmds {
+            err = c.APISSH(context.TODO(), []string{ndpc}, uRoot.Password,false)
             if err != nil {
-                return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
-            }
-            err = c.APISSH(context.TODO(), []string{"chmod -R 755", ndp}, uRoot.Password,false)
-            if err != nil {
-                return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
-            }
-            err = c.APISSH(context.TODO(), []string{ndOwner, ndp}, uRoot.Password,false)
-            if err != nil {
+                log.Error(ndpc)
                 return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
             }
         }
