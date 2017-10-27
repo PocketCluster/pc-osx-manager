@@ -189,7 +189,13 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
         // --- --- --- --- --- setup core node --- --- --- --- ---
         // data paths to build
         cdPath := strings.Split(pkg.CoreDataPath, "|")
-        log.Info("core data path %v", cdPath)
+        cdPathCmds := []string{}
+        for _, cdp := range cdPath {
+            cdPathCmds = append(cdPathCmds, fmt.Sprintf("mkdir -p %s", cdp))
+            cdPathCmds = append(cdPathCmds, fmt.Sprintf("chown -R %s:%s %s", luname, luname, cdp))
+            cdPathCmds = append(cdPathCmds, fmt.Sprintf("chmod -R 755 %s", cdp))
+        }
+        log.Info("core data path %v", cdPathCmds)
 
 
         // --- --- --- --- --- install image to nodes --- --- --- --- ---
