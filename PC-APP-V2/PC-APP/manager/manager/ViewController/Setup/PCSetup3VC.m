@@ -188,11 +188,12 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
 
     //[self.stageControl shouldControlProgressFrom:self withParam:nil];
 
-    NSArray<Package *>* list = [[StatusCache SharedStatusCache] packageList];
-    if (_selectedIndex == -1 || (NSInteger)[list count] <= _selectedIndex ) {
+    NSArray<Package *>* pkgList = [[StatusCache SharedStatusCache] packageList];
+    if (_selectedIndex == -1 || (NSInteger)[pkgList count] <= _selectedIndex ) {
         return;
     }
-    if ([[list objectAtIndex:_selectedIndex] installed]) {
+    Package *targetPkg = [pkgList objectAtIndex:_selectedIndex];
+    if ([targetPkg installed]) {
         return;
     }
 
@@ -208,7 +209,7 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
          if ([[response valueForKeyPath:@"package-install.status"] boolValue]) {
              [ShowAlert
               showWarningAlertWithTitle:@"Installation Completed!"
-              message:@""];
+              message:[targetPkg packageDescription]];
 
          } else {
              [ShowAlert
