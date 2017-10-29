@@ -13,6 +13,7 @@ import (
     tclient "github.com/gravitational/teleport/lib/client"
 
     pcctx "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/model"
@@ -185,6 +186,14 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
 
         // --- --- --- --- --- install image to core --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Installing core image...")
+        ccli, err := dockertool.NewContainerClient("tcp://pc-core:2376", "1.24")
+        if err != nil {
+            return feedError(errors.WithMessage(err, "unable to make connection to pc-core"))
+        }
+        err = dockertool.InstallImageFromRepository(ccli, pkg.CoreImageName)
+        if err != nil {
+            return feedError(errors.WithMessage(err, "unable to sync image to " + defaults.PocketClusterCoreName))
+        }
 
         // --- --- --- --- --- setup core node --- --- --- --- ---
         // data paths to build
@@ -195,17 +204,32 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
             cdPathCmds = append(cdPathCmds, fmt.Sprintf("chown -R %s:%s %s", luname, luname, cdp))
             cdPathCmds = append(cdPathCmds, fmt.Sprintf("chmod -R 755 %s", cdp))
         }
-        log.Info("core data path %v", cdPathCmds)
+        log.Info("core data path commands %v", cdPathCmds)
 
+        cssh, err := tclient.MakeNewClient(sshCfg, uRoot.Login, defaults.PocketClusterCoreName)
+        if err != nil {
+            return feedError(errors.WithMessage(err, "unable to setup package to " + defaults.PocketClusterCoreName))
+        }
+        for _, cdpc := range cdPathCmds {
+            err = cssh.APISSH(context.TODO(), []string{cdpc}, uRoot.Password,false)
+            if err != nil {
+                log.Error(cdpc)
+                return feedError(errors.WithMessage(err, "unable to setup package to " + defaults.PocketClusterCoreName))
+            }
+        }
+        err = cssh.Logout()
+        if err != nil {
+            return feedError(errors.WithMessage(err, "unable to setup package to " + defaults.PocketClusterCoreName))
+        }
 
         // --- --- --- --- --- install image to nodes --- --- --- --- ---
         // TODO : we can request swarm server to do this job
         _ = makeMessageFeedBack(feeder, rpProgress, "Installing node image...")
-        cli, err := dockertool.NewContainerClient("tcp://pc-node1:2376", "1.24")
+        ncli, err := dockertool.NewContainerClient("tcp://pc-node1:2376", "1.24")
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to make connection to " + "pc-node1"))
         }
-        err = dockertool.InstallImageFromRepository(cli, pkg.NodeImageName)
+        err = dockertool.InstallImageFromRepository(ncli, pkg.NodeImageName)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync image to " + "pc-node1"))
         }
@@ -223,18 +247,18 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
         log.Infof("node data path commands %v", ndPathCmds)
 
         tNode := "pc-node1"
-        c, err := tclient.MakeNewClient(sshCfg, uRoot.Login, tNode)
+        nssh, err := tclient.MakeNewClient(sshCfg, uRoot.Login, tNode)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
         }
         for _, ndpc := range ndPathCmds {
-            err = c.APISSH(context.TODO(), []string{ndpc}, uRoot.Password,false)
+            err = nssh.APISSH(context.TODO(), []string{ndpc}, uRoot.Password,false)
             if err != nil {
                 log.Error(ndpc)
                 return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
             }
         }
-        err = c.Logout()
+        err = nssh.Logout()
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
         }
