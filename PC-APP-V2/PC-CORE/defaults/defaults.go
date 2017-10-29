@@ -56,6 +56,8 @@ const (
 
 const (
     PocketClusterCoreName      string = "pc-core"
+
+    PocketClusterCodeInteralAddr      = "127.0.0.1"
 )
 
 const (

@@ -285,7 +285,6 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             continue
                         }
                         meta.updateBeaconStatus(md)
-                        log.Infof("[HEALTH] beacon %v", md)
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
@@ -314,7 +313,6 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             continue
                         }
                         meta.updatePcsshStatus(md)
-                        log.Infof("[HEALTH] pcssh %v", md)
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
@@ -343,7 +341,6 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             continue
                         }
                         meta.updateOrchstStatus(md)
-                        log.Infof("[HEALTH] orchst %v", md)
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
