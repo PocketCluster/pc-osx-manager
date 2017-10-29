@@ -313,6 +313,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             continue
                         }
                         meta.updatePcsshStatus(md)
+                        log.Infof("[HEALTH] PCSSH META %v", md)
 
                         if meta.isReadyToReport() {
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)

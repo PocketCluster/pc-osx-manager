@@ -124,7 +124,7 @@ func OpenRecordGate(dataDir, recordFile string) (RecordGate, error) {
     }
 
     // TODO : disable when release
-    sess.LogMode(true)
+    //sess.LogMode(true)
 
     if !sess.HasTable(cmeta) {
         sess.CreateTable(cmeta)
