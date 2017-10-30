@@ -18,8 +18,6 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
 
 @interface NativeMenu()
 @property (nonatomic, strong, readwrite) NSStatusItem *statusItem;
-- (void) clusterStatusOn;
-- (void) clusterStatusOff;
 
 - (void) menuSelectedPref:(id)sender;
 - (void) menuSelectedCheckForUpdates:(id)sender;

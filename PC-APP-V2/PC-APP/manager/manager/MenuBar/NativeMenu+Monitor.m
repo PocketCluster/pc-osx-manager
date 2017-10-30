@@ -41,9 +41,8 @@
 
 // services online timeup
 - (void) onNotifiedWith:(StatusCache *)aCache serviceOnlineTimeup:(BOOL)isSuccess {
-
+    [self clusterStatusOn];
 }
-
 
 - (void) setupWithCheckingNodesMessage {
     NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];

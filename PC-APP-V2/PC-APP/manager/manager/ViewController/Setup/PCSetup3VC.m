@@ -194,6 +194,9 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
     }
     Package *targetPkg = [pkgList objectAtIndex:_selectedIndex];
     if ([targetPkg installed]) {
+        [ShowAlert
+         showWarningAlertWithTitle:@"Installed Package"
+         message:[targetPkg packageDescription]];
         return;
     }
 

@@ -13,6 +13,10 @@
 }
 @property (nonatomic, strong, readonly) NSStatusItem *statusItem;
 
+#pragma mark - Utility Funcs
+- (void) clusterStatusOn;
+- (void) clusterStatusOff;
+
 #pragma mark - update notification
 - (void) updateNewVersionAvailability:(BOOL)IsAvailable;
 
