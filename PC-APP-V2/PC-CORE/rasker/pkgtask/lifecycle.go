@@ -24,12 +24,13 @@ import (
 
 func InitPackageProcess(appLife rasker.RouteTasker, feeder route.ResponseFeeder) error {
 
-    // install a package
+    // start a package
     appLife.POST(routepath.RpathPackageStartup(), func(_, rpath, payload string) error {
         // 1. parse input package id
         var (
             reportC = make(chan service.Event)
             pkgID string = ""
+            pkg   *model.Package = nil
         )
         err := json.Unmarshal([]byte(payload), &struct {
             PkgID *string `json:"pkg-id"`
@@ -38,13 +39,22 @@ func InitPackageProcess(appLife rasker.RouteTasker, feeder route.ResponseFeeder)
             return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to specify package id"))
         }
 
+        // TODO check if package has started
+
+        pkgs, err := model.FindPackage("pkg_id = ?", pkgID)
+        if err != nil {
+            return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to specify package id"))
+        }
+        pkg = pkgs[0]
+        log.Infof("Package Meta Found %v", pkg)
+
         // 2. get the node list report
-        err = appLife.BindDiscreteEvent(ivent.IventReportNodeListResult, reportC)
+        err = appLife.BindDiscreteEvent(ivent.IventReportLiveNodesResult, reportC)
         if err != nil {
             return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to access node list report"))
         }
         nr := <- reportC
-        appLife.UntieDiscreteEvent(ivent.IventReportNodeListResult)
+        appLife.UntieDiscreteEvent(ivent.IventReportLiveNodesResult)
         nlist, ok := nr.Payload.([]map[string]string)
         if !ok {
             return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to access proper node list"))
@@ -71,8 +81,7 @@ func InitPackageProcess(appLife rasker.RouteTasker, feeder route.ResponseFeeder)
         project, err := docker.NewPocketProject(&docker.PocketContext{
             Context: &ctx.Context{
                 Context: project.Context{
-                    // TODO : package name
-                    ProjectName:  "pocket-hadoop",
+                    ProjectName: pkg.MenuName,
                 },
             },
             ClientOptions: opts,

@@ -224,7 +224,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     case <- nodeC: {
                         nodeList := beaconMan.RegisteredNodesList()
                         appLife.BroadcastEvent(service.Event{
-                            Name:ivent.IventReportNodeListResult,
+                            Name:ivent.IventReportLiveNodesResult,
                             Payload:nodeList})
                     }
                     // node status report service
@@ -251,7 +251,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
         service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
         service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
         service.BindEventWithService(ivent.IventNetworkAddressChange,      netC),
-        service.BindEventWithService(ivent.IventReportNodeListRequest,     nodeC),
+        service.BindEventWithService(ivent.IventReportLiveNodesRequest,    nodeC),
         service.BindEventWithService(ivent.IventMonitorNodeReqStatus,      statC),
 
         // service readiness checker

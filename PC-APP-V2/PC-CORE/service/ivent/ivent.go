@@ -36,8 +36,8 @@ const (
 
 
     // for package node list
-    IventReportNodeListRequest   string = "ivent.report.node.list.request"
-    IventReportNodeListResult    string = "ivent.report.node.list.result"
+    IventReportLiveNodesRequest  string = "ivent.report.live.nodes.request"
+    IventReportLiveNodesResult   string = "ivent.report.live.nodes.result"
 )
 
 // this is to broadcast masterctrl object w/ listener. It's shared with BeaconAgent + VBoxController
