@@ -11,6 +11,8 @@
 #import "NativeMenu+NewCluster.h"
 #import "NativeMenu+RunCluster.h"
 
+#import "PCRouter.h"
+
 @implementation NativeMenu(Monitor)
 
 // show initial message
@@ -169,7 +171,7 @@
              action:@selector(stopPackage:)
              keyEquivalent:@""];
         [smStop setTarget:self];
-        [smStart setRepresentedObject:pkg.packageID];
+        [smStop setRepresentedObject:pkg.packageID];
         [penu.submenu addItem:smStop];
 
         // submenu - open web port menu
@@ -181,17 +183,27 @@
         [smWeb setTarget:self];
         [smWeb setRepresentedObject:pkg.packageID];
         [penu.submenu addItem:smWeb];
-
+        
+        Log(@"package id %@", pkg.packageID);
+        
         [self.statusItem.menu insertItem:penu atIndex:(indexBegin + pndx)];
     }
 }
 
 - (void) startPackage:(NSMenuItem *)mPackage {
     Log(@"startPackage : %@", mPackage.representedObject);
+
+    [PCRouter
+     routeRequestPost:RPATH_PACKAGE_STARTUP
+     withRequestBody:@{@"pkg-id":mPackage.representedObject}];
 }
 
 - (void) stopPackage:(NSMenuItem *)mPackage {
     Log(@"stopPackage : %@", mPackage.representedObject);
+    
+    [PCRouter
+     routeRequestPost:RPATH_PACKAGE_KILL
+     withRequestBody:@{@"pkg-id":mPackage.representedObject}];
 }
 
 - (void) openWebConsole:(NSMenuItem *)mPackage {

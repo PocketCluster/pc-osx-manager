@@ -260,7 +260,11 @@ func main() {
 
                         // --- route path event ---
                         initcheck.InitRoutePathServices(appLife, theFeeder)
-                        pkgtask.InitPackageProcess(rasker.RouteTasker{
+                        pkgtask.InitPackageLifeCycle(rasker.RouteTasker{
+                            ServiceSupervisor: appLife.ServiceSupervisor,
+                            Router: appLife.Router},
+                            theFeeder)
+                        pkgtask.InitPackageKillCycle(rasker.RouteTasker{
                             ServiceSupervisor: appLife.ServiceSupervisor,
                             Router: appLife.Router},
                             theFeeder)

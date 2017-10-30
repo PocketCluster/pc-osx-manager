@@ -16,9 +16,14 @@ import (
 )
 
 const (
-    packageFeedbackStartup string = "package-start"
-    packageFeedbackProcess string = "package-proc"
-    packageFeedbackKill    string = "package-kill"
+    fbPackageStartup           string = "package-start"
+    fbPackageProcess           string = "package-proc"
+    fbPackageKill              string = "package-kill"
+
+    iventPackageKillPrefix     string = "ivent.rasker.package.kill."
+    raskerPackageStartupPrefix string = "rasker.pacakge.startup."
+    raskerPackageProcessPrefix string = "rasker.pacakge.process."
+    raskerPackageKillPrefix    string = "rasker.pacakge.kill."
 )
 
 func feedError(feeder route.ResponseFeeder, rpath, fpath string, irr error) error {
@@ -55,13 +60,6 @@ func newComposeClient() (*client.PocketClientOption, error) {
     }
     return client.NewPocketCientOption(caCert, hostCrt, hostKey, "tcp://pc-master:3376")
 }
-
-const (
-    iventPackageKillPrefix   string = "ivent.package.kill."
-    taskPackageStartupPrefix string = "task.pacakge.startup."
-    taskPackageProcessPrefix string = "task.pacakge.process."
-    taskPackageKillPrefix    string = "task.pacakge.kill."
-)
 
 func buildComposeTemplateWithNodeList(template []byte, nodeList []string) ([]byte, error) {
     const (

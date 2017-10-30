@@ -142,23 +142,22 @@
      addPostRequest:self
      onPath:@(RPATH_PACKAGE_STARTUP)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         // Log(@"%@ %@", path, response);
+         Log(@"%@ %@", path, response);
      }];
-    
+
     [[PCRouter sharedRouter]
      addPostRequest:self
      onPath:@(RPATH_PACKAGE_KILL)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         // Log(@"%@ %@", path, response);
+         Log(@"%@ %@", path, response);
      }];
-    
+
     [[PCRouter sharedRouter]
      addPostRequest:self
      onPath:@(RPATH_MONITOR_PACKAGE_PROCESS)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         // Log(@"%@ %@", path, response);
+         Log(@"%@ %@", path, response);
      }];
-
 
 
     /*
