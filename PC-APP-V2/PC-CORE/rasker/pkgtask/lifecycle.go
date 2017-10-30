@@ -55,7 +55,7 @@ func InitPackageProcess(appLife rasker.RouteTasker, feeder route.ResponseFeeder)
         }
         nr := <- reportC
         appLife.UntieDiscreteEvent(ivent.IventReportLiveNodesResult)
-        nlist, ok := nr.Payload.([]map[string]string)
+        nlist, ok := nr.Payload.([]string)
         if !ok {
             return feedError(feeder, rpath, packageFeedbackStartup, errors.WithMessage(err, "unable to access proper node list"))
         }
@@ -92,10 +92,10 @@ func InitPackageProcess(appLife rasker.RouteTasker, feeder route.ResponseFeeder)
         }
 
         var (
-            iventKillTag   string = fmt.Sprintf("%s%s", iventPackageKillPrefix, pkgID)
-            taskStartTag   string = fmt.Sprintf("%s%s", taskPackageStartupPrefix, pkgID)
-            taskProcessTag string = fmt.Sprintf("%s%s", taskPackageProcessPrefix, pkgID)
-            taskKillTag    string = fmt.Sprintf("%s%s", taskPackageKillPrefix, pkgID)
+            iventKillTag   string = fmt.Sprintf("%s-%s", iventPackageKillPrefix, pkgID)
+            taskStartTag   string = fmt.Sprintf("%s-%s", taskPackageStartupPrefix, pkgID)
+            taskProcessTag string = fmt.Sprintf("%s-%s", taskPackageProcessPrefix, pkgID)
+            taskKillTag    string = fmt.Sprintf("%s-%s", taskPackageKillPrefix, pkgID)
         )
 
         // --- --- --- --- --- --- --- --- --- --- --- --- package startup --- --- --- --- --- --- --- --- --- --- //

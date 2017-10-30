@@ -186,7 +186,7 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
 
         // --- --- --- --- --- install image to core --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Installing core image...")
-        ccli, err := dockertool.NewContainerClient("tcp://pc-core:2376", "1.24")
+        ccli, err := dockertool.NewContainerClient(fmt.Sprintf("tcp://%s:%s", defaults.PocketClusterCoreName, defaults.DefaultSecureDockerPort), "1.24")
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to make connection to pc-core"))
         }
@@ -224,8 +224,9 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
 
         // --- --- --- --- --- install image to nodes --- --- --- --- ---
         // TODO : we can request swarm server to do this job
+        tNode := "pc-node1"
         _ = makeMessageFeedBack(feeder, rpProgress, "Installing node image...")
-        ncli, err := dockertool.NewContainerClient("tcp://pc-node1:2376", "1.24")
+        ncli, err := dockertool.NewContainerClient(fmt.Sprintf("tcp://%s:%s", tNode, defaults.DefaultSecureDockerPort), "1.24")
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to make connection to " + "pc-node1"))
         }
@@ -246,7 +247,6 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
         }
         log.Infof("node data path commands %v", ndPathCmds)
 
-        tNode := "pc-node1"
         nssh, err := tclient.MakeNewClient(sshCfg, uRoot.Login, tNode)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))

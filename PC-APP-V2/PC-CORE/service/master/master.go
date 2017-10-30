@@ -222,7 +222,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     }
                     // package node list service
                     case <- nodeC: {
-                        nodeList := beaconMan.RegisteredNodesList()
+                        nodeList := beaconMan.ReportLiveNodes()
                         appLife.BroadcastEvent(service.Event{
                             Name:ivent.IventReportLiveNodesResult,
                             Payload:nodeList})

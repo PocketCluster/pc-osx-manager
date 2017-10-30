@@ -98,9 +98,9 @@ type BeaconManger interface {
     // dns service name
     AddressForName(name string) (string, error)
 
-    // For reporting to UI layer
-    // TODO : formalize return value with a struct
-    RegisteredNodesList() []map[string]string
+    // report live nodes for internal services
+    ReportLiveNodes() []string
+    // For reporting to health service
     ReportAllNodeStatus(ts int64) ivent.BeaconNodeStatusMeta
 }
 
@@ -275,8 +275,8 @@ func (b *beaconManger) AddressForName(name string) (string, error) {
 }
 
 // --- UI Layer Report --- //
-func (b *beaconManger) RegisteredNodesList() []map[string]string {
-    return fundRegisterdNodeStatus(b)
+func (b *beaconManger) ReportLiveNodes() []string {
+    return findLiveNodes(b)
 }
 
 func (b *beaconManger) ReportAllNodeStatus(ts int64) ivent.BeaconNodeStatusMeta {
@@ -442,10 +442,6 @@ func findBoundedNodesForSwarm(b *beaconManger) []string {
     b.Lock()
     defer b.Unlock()
 
-    const (
-        dockerPort string = "2376"
-    )
-
     var (
         nodeList []string = []string{}
         bLen int = len(b.beaconList)
@@ -456,13 +452,13 @@ func findBoundedNodesForSwarm(b *beaconManger) []string {
         if bc.CurrentState() == MasterBounded {
             // TODO : should we use FQDN here?
             nodeName := bc.SlaveNode().NodeName
-            nodeList = append(nodeList, fmt.Sprintf("%s:%s", nodeName, dockerPort))
+            nodeList = append(nodeList, fmt.Sprintf("%s:%s", nodeName, defaults.DefaultSecureDockerPort))
         }
     }
 
     // append core node
     if b.vboxCtrl.CurrentState() == mpkg.VBoxMasterBounded {
-        nodeList = append(nodeList, fmt.Sprintf("%s:%s", model.CoreNodeName, dockerPort))
+        nodeList = append(nodeList, fmt.Sprintf("%s:%s", model.CoreNodeName, defaults.DefaultSecureDockerPort))
     }
 
     return nodeList
@@ -506,6 +502,7 @@ func shutdownMasterBeacons(b *beaconManger) {
     b.notiReceiver = nil
 }
 
+/*
 func fundRegisterdNodeStatus(b *beaconManger) []map[string]string {
     b.Lock()
     defer b.Unlock()
@@ -567,6 +564,26 @@ func fundRegisterdNodeStatus(b *beaconManger) []map[string]string {
     }
 
     return regedNodes
+}
+*/
+
+func findLiveNodes(b *beaconManger) []string {
+    b.Lock()
+    defer b.Unlock()
+
+    var (
+        lnodes = []string{}
+    )
+    for i := range b.beaconList {
+        if b.beaconList[i].CurrentState() == MasterBounded {
+            lnodes = append(lnodes, b.beaconList[i].SlaveNode().NodeName)
+        }
+    }
+    // pc-core
+    if b.vboxCtrl.CurrentState() == mpkg.VBoxMasterBounded {
+        lnodes = append(lnodes, defaults.PocketClusterCoreName)
+    }
+    return lnodes
 }
 
 func findAllNodeStatus(b *beaconManger, ts int64) ivent.BeaconNodeStatusMeta {

@@ -11,6 +11,7 @@ import (
     "github.com/docker/libcompose/docker/client"
 
     "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/route"
 )
 
@@ -62,7 +63,10 @@ const (
     taskPackageKillPrefix    string = "task.pacakge.kill."
 )
 
-func buildComposeTemplateWithNodeList(template []byte, nodeList []map[string]string) ([]byte, error) {
+func buildComposeTemplateWithNodeList(template []byte, nodeList []string) ([]byte, error) {
+    const (
+        nodeNamePrefix = "pc-node"
+    )
     if len(nodeList) == 0 {
         return nil, errors.Errorf("unable to generate template with empty node list")
     }
@@ -72,15 +76,14 @@ func buildComposeTemplateWithNodeList(template []byte, nodeList []map[string]str
 
     // build node data
     var snodes = []pongo2.Context{}
-    for _, node := range nodeList {
-        nodeName := node["nodename"]
+    for _, nodeName := range nodeList {
 
         // we skip pc-core for now
-        if !strings.HasPrefix(nodeName, "pc-node") {
+        if !strings.HasPrefix(nodeName, nodeNamePrefix) {
             continue
         }
 
-        nidx := strings.Replace(nodeName,"pc-node", "", -1)
+        nidx := strings.Replace(nodeName, nodeNamePrefix, "", -1)
         nadr, err := strconv.Atoi(nidx)
         if err != nil {
             continue
@@ -98,8 +101,8 @@ func buildComposeTemplateWithNodeList(template []byte, nodeList []map[string]str
         return nil, errors.Errorf("unable to generate proper node list to initiate cluster")
     }
     data := pongo2.Context{
-        "corenode":   pongo2.Context{
-            "name": "pc-core",
+        "corenode": pongo2.Context{
+            "name": defaults.PocketClusterCoreName,
             "address": 1,
         },
         "slavenodes": snodes,

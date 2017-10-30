@@ -61,6 +61,10 @@ const (
 )
 
 const (
+    DefaultSecureDockerPort    string = "2376"
+)
+
+const (
     VBoxDefaultCoreBootImage   string = "pc-core.iso"
     VBoxDefualtCoreDiskName    string = "pc-core-hdd.vmdk"
     // 46 GB
