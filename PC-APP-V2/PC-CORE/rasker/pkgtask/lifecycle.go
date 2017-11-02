@@ -67,7 +67,6 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
             return feedError(feeder, rpath, fbPackageStartup, errors.WithMessage(err, "unable to access package template"))
         }
         cTempl, err := buildComposeTemplateWithNodeList(tmpl.Body, nlist)
-        log.Info(string(cTempl))
         if err != nil {
             return feedError(feeder, rpath, fbPackageStartup, errors.WithMessage(err, "unable to build package exec plan"))
         }
