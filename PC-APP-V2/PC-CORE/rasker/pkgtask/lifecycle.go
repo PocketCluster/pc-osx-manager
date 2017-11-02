@@ -67,8 +67,9 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
             return feedError(feeder, rpath, fbPackageStartup, errors.WithMessage(err, "unable to access package template"))
         }
         cTempl, err := buildComposeTemplateWithNodeList(tmpl.Body, nlist)
+        log.Info(string(cTempl))
         if err != nil {
-            return feedError(feeder, rpath, fbPackageStartup, errors.WithMessage(err, "unable to access package template"))
+            return feedError(feeder, rpath, fbPackageStartup, errors.WithMessage(err, "unable to build package exec plan"))
         }
 
         // 4. build client
@@ -78,6 +79,9 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
         }
 
         // 5. build package
+        iventKillTag   := fmt.Sprintf("%s%s", iventPackageKillPrefix,     pkgID)
+        taskProcessTag := fmt.Sprintf("%s%s", raskerPackageProcessPrefix, pkgID)
+        taskKillTag    := fmt.Sprintf("%s%s", raskerPackageKillPrefix,    pkgID)
         project, err := docker.NewPocketProject(&docker.PocketContext{
             Context: &ctx.Context{
                 Context: project.Context{
@@ -91,37 +95,6 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
             return feedError(feeder, rpath, fbPackageStartup, errors.WithMessage(err, "unable to create project"))
         }
 
-        var (
-            iventKillTag   string = fmt.Sprintf("%s%s", iventPackageKillPrefix, pkgID)
-            taskStartTag   string = fmt.Sprintf("%s%s", raskerPackageStartupPrefix, pkgID)
-            taskProcessTag string = fmt.Sprintf("%s%s", raskerPackageProcessPrefix, pkgID)
-            taskKillTag    string = fmt.Sprintf("%s%s", raskerPackageKillPrefix, pkgID)
-        )
-
-        // --- --- --- --- --- --- --- --- --- --- --- --- package startup --- --- --- --- --- --- --- --- --- --- //
-        appLife.RegisterServiceWithFuncs(
-            taskStartTag,
-            func() error {
-                // startup package
-                err = project.Up(context.TODO(), options.Up{})
-                if err != nil {
-                    return feedError(feeder, rpath, fbPackageStartup, errors.WithMessage(err, "unable to start package"))
-                }
-                // return feedback
-                data, err := json.Marshal(route.ReponseMessage{
-                    fbPackageStartup: {
-                        "status": true,
-                        "pkg-id" : pkgID,
-                    },
-                })
-                // this should never happen
-                if err != nil {
-                    log.Error(err.Error())
-                }
-                err = feeder.FeedResponseForPost(rpath, string(data))
-                return errors.WithStack(err)
-            })
-
         // --- --- --- --- --- --- --- --- --- --- --- --- package process list --- --- --- --- --- --- --- --- --- //
         killPsC := make(chan service.Event)
         appLife.RegisterServiceWithFuncs(
@@ -133,7 +106,6 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                     columns = []string{"Id", "Name", "Command", "State", "Ports"}
                     timer   = time.NewTicker(time.Second * 5)
                 )
-
                 // process list doesn't quit until signals comes in
                 for {
                     select {
@@ -190,10 +162,11 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                 // kill package
                 err = project.Kill(context.TODO(), "SIGINT", []string{}...)
                 if err != nil {
-                    return feedError(feeder, killPath, fbPackageKill, errors.WithMessage(err, "unable to stop package"))
+                    log.Error(err.Error())
+                    //return feedError(feeder, killPath, fbPackageKill, errors.WithMessage(err, "unable to stop package"))
                 }
 
-                // 6. kill package
+                // delete package
                 err = project.Delete(context.Background(), options.Delete{}, []string{}...)
                 if err != nil {
                     return feedError(feeder, killPath, fbPackageKill, errors.WithMessage(err, "unable to remove package residue"))
@@ -215,8 +188,26 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
             },
             service.BindEventWithService(iventKillTag, killSigC))
 
-        // we should not return anything since this is unnecessary as package startup will report success/failure of
-        // package startup status
-        return nil
+        // --- --- --- --- --- --- --- --- --- --- --- --- package startup --- --- --- --- --- --- --- --- --- --- //
+        // startup package
+        err = project.Up(context.TODO(), options.Up{})
+        if err != nil {
+            // kill monitor signal and delete
+            appLife.BroadcastEvent(service.Event{Name:fmt.Sprintf("%s%s", iventPackageKillPrefix, pkgID)})
+            return feedError(feeder, rpath, fbPackageStartup, errors.WithMessage(err, "unable to start package"))
+        }
+        // return feedback
+        data, err := json.Marshal(route.ReponseMessage{
+            fbPackageStartup: {
+                "status": true,
+                "pkg-id": pkgID,
+            },
+        })
+        // this should never happen
+        if err != nil {
+            log.Error(err.Error())
+        }
+        err = feeder.FeedResponseForPost(rpath, string(data))
+        return errors.WithStack(err)
     })
 }

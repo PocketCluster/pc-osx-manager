@@ -21,7 +21,6 @@ const (
     fbPackageKill              string = "package-kill"
 
     iventPackageKillPrefix     string = "ivent.rasker.package.kill."
-    raskerPackageStartupPrefix string = "rasker.pacakge.startup."
     raskerPackageProcessPrefix string = "rasker.pacakge.process."
     raskerPackageKillPrefix    string = "rasker.pacakge.kill."
 )
