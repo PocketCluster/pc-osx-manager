@@ -14,12 +14,14 @@ import (
     "github.com/docker/libcompose/project"
     "github.com/docker/libcompose/project/options"
 
+    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/rasker"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/service/ivent"
+    "github.com/stkim1/pc-core/utils/dockertool"
 )
 
 // initiate a package
@@ -59,6 +61,24 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
         nlist, ok := nr.Payload.([]string)
         if !ok {
             return feedError(feeder, rpath, fbPackageStartup, errors.WithMessage(err, "unable to access proper node list"))
+        }
+
+        // 2-a. clean up any previous residue
+        for _, node := range nlist {
+            if ccli, cerr := dockertool.NewContainerClient(fmt.Sprintf("tcp://%s:%s", node, defaults.DefaultSecureDockerPort), "1.24");
+            cerr != nil {
+                log.Error(err.Error())
+                return feedError(feeder, rpath, fbPackageStartup, errors.WithMessage(err, "unable to clean residue from the last run"))
+            } else {
+                if err := dockertool.CleanupContainer(ccli); err != nil {
+                    log.Errorf("container cleanup error %v", err.Error())
+                }
+                if err := dockertool.CleanupNetwork(ccli); err != nil {
+                    log.Errorf("network cleanup error %v", err.Error())
+                }
+                ccli.Close()
+                time.Sleep(time.Second)
+            }
         }
 
         // 3. load template
@@ -169,6 +189,23 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                 err = project.Delete(context.Background(), options.Delete{}, []string{}...)
                 if err != nil {
                     return feedError(feeder, killPath, fbPackageKill, errors.WithMessage(err, "unable to remove package residue"))
+                }
+                // delete container and network
+                // 2-a. clean up any previous residue
+                for _, node := range nlist {
+                    if ccli, cerr := dockertool.NewContainerClient(fmt.Sprintf("tcp://%s:%s", node, defaults.DefaultSecureDockerPort), "1.24");
+                        cerr != nil {
+                        log.Error(err.Error())
+                        return feedError(feeder, rpath, fbPackageStartup, errors.WithMessage(err, "unable to clean residue from the last run"))
+                    } else {
+                        if err := dockertool.CleanupContainer(ccli); err != nil {
+                            log.Errorf("container cleanup error %v", err.Error())
+                        }
+                        if err := dockertool.CleanupNetwork(ccli); err != nil {
+                            log.Errorf("network cleanup error %v", err.Error())
+                        }
+                        ccli.Close()
+                    }
                 }
 
                 // 7. return feedback
