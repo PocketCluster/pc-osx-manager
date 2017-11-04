@@ -9,6 +9,7 @@
 #import "AppDelegate.h"
 #import "MonitorStatus.h"
 #import "MonitorPackage.h"
+#import "MonitorExecution.h"
 
-@interface AppDelegate(MonitorDispenser) <MonitorStatus, MonitorPackage>
+@interface AppDelegate(MonitorDispenser) <MonitorStatus, MonitorPackage, MonitorExecution>
 @end

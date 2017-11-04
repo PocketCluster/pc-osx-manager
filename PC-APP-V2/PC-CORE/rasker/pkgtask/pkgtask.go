@@ -25,11 +25,12 @@ const (
     raskerPackageKillPrefix    string = "rasker.pacakge.kill."
 )
 
-func feedError(feeder route.ResponseFeeder, rpath, fpath string, irr error) error {
+func feedError(feeder route.ResponseFeeder, rpath, fpath, pkgID string, irr error) error {
     log.Error(irr.Error())
     data, frr := json.Marshal(route.ReponseMessage{
         fpath: {
             "status": false,
+            "pkg-id": pkgID,
             "error" : irr.Error(),
         },
     })

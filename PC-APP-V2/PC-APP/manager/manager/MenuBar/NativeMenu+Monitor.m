@@ -10,11 +10,11 @@
 #import "NativeMenu+Monitor.h"
 #import "NativeMenu+NewCluster.h"
 #import "NativeMenu+RunCluster.h"
-
-#import "PCRouter.h"
+#import "AppDelegate+Execution.h"
 
 @implementation NativeMenu(Monitor)
 
+#pragma mark - MonitorStatus
 // show initial message
 - (void) setupWithInitialCheckMessage {
     NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
@@ -108,7 +108,7 @@
     }
 }
 
-#pragma mark - package update
+#pragma mark - MonitorPackage
 - (void) onAvailableListUpdateWith:(StatusCache *)aCache success:(BOOL)isSuccess error:(NSString *)anErrMsg {
 }
 
@@ -184,26 +184,46 @@
         [smWeb setRepresentedObject:pkg.packageID];
         [penu.submenu addItem:smWeb];
         
-        Log(@"package id %@", pkg.packageID);
-        
         [self.statusItem.menu insertItem:penu atIndex:(indexBegin + pndx)];
     }
 }
 
-- (void) startPackage:(NSMenuItem *)mPackage {
-    Log(@"startPackage : %@", mPackage.representedObject);
+#pragma mark - MonitorExecution
+- (void) onExecutionStartup:(StatusCache *)aCache package:(NSString *)aPackageID {
 
-    [PCRouter
-     routeRequestPost:RPATH_PACKAGE_STARTUP
-     withRequestBody:@{@"pkg-id":mPackage.representedObject}];
+}
+
+- (void) didExecutionStartup:(StatusCache *)aCache
+                     package:(NSString *)aPackageID
+                     success:(BOOL)isSuccess
+                       error:(NSString *)anErrMsg {
+
+}
+
+- (void) onExecutionKill:(StatusCache *)aCache package:(NSString *)aPackageID {
+    
+}
+
+- (void) didExecutionKill:(StatusCache *)aCache
+                  package:(NSString *)aPackageID
+                  success:(BOOL)isSuccess
+                    error:(NSString *)anErrMsg {
+}
+
+- (void) onExecutionProcess:(StatusCache *)aCache
+                    package:(NSString *)aPackageID
+                    success:(BOOL)isSuccess
+                      error:(NSString *)anErrMsg {
+
+}
+
+#pragma mark - menu methods
+- (void) startPackage:(NSMenuItem *)mPackage {
+    [[AppDelegate sharedDelegate] startUpPackageWithID:mPackage.representedObject];
 }
 
 - (void) stopPackage:(NSMenuItem *)mPackage {
-    Log(@"stopPackage : %@", mPackage.representedObject);
-    
-    [PCRouter
-     routeRequestPost:RPATH_PACKAGE_KILL
-     withRequestBody:@{@"pkg-id":mPackage.representedObject}];
+    [[AppDelegate sharedDelegate] killPackageWithID:mPackage.representedObject];
 }
 
 - (void) openWebConsole:(NSMenuItem *)mPackage {

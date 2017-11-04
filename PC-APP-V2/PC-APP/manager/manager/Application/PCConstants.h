@@ -11,7 +11,3 @@
 extern NSString * const ADDRESS;
 extern NSString * const SLAVE_NODE_NAME;
 extern NSString * const kPCPrefDefaultTerm;
-extern NSString * const kRASPBERRY_MANAGER_NODE;
-extern NSString * const kPOCKET_CLUSTER_PACKAGE_PROCESS_STATUS;
-extern NSString * const kPOCKET_CLUSTER_PACKAGE_PROCESS_ISALIVE;
-extern NSString * const kPOCKET_CLUSTER_PACKAGE_IDENTIFICATION;

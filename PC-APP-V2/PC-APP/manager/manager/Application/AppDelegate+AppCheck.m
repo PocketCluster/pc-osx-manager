@@ -143,6 +143,37 @@
      onPath:@(RPATH_PACKAGE_STARTUP)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          Log(@"%@ %@", path, response);
+         
+         NSString *pkgID = [response valueForKeyPath:@"package-start.pkg-id"];
+
+         // if package fails to start
+         if (![[response valueForKeyPath:@"package-start.status"] boolValue]) {
+             NSString *error = [response valueForKeyPath:@"package-start.error"];
+             
+             // anytime a package fail to start, put them in ready state
+             [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecIdle];
+
+             [self
+              didExecutionStartup:[StatusCache SharedStatusCache]
+              package:pkgID
+              success:NO
+              error:error];
+
+             [ShowAlert
+              showWarningAlertWithTitle:@"Unable to Start"
+              message:error];
+
+             return;
+         }
+
+         // anytime a package fail to start, put them in ready state
+         [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecRun];
+
+         [self
+          didExecutionStartup:[StatusCache SharedStatusCache]
+          package:pkgID
+          success:YES
+          error:nil];
      }];
 
     [[PCRouter sharedRouter]

@@ -18,8 +18,6 @@
     BOOL _isFirstTime;
     BOOL _isUserAuthed;
 }
-+ (AppDelegate*)sharedDelegate;
-
 @property (nonatomic, strong) NSMutableArray<BaseWindowController *>* openWindows;
 @property (nonatomic, strong, readonly) NativeMenu *mainMenu;
 
@@ -28,5 +26,6 @@
 @property (nonatomic, readonly) BOOL isFirstTime;
 @property (nonatomic, readonly) BOOL isUserAuthed;
 
++ (AppDelegate*)sharedDelegate;
 @end
 

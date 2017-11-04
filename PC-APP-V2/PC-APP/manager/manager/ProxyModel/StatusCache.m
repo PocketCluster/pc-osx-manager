@@ -85,6 +85,22 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
     }
 }
 
+- (void) updatePackageExecState:(NSString *)aPacakgeID execState:(ExecState)state {
+    if (ISNULL_STRING(aPacakgeID)) {
+        Log(@"invalid package id to update state");
+        return;
+    }
+
+    @synchronized(self) {
+        for (Package *p in self.packageList) {
+            if ([[p packageID] isEqualToString:aPacakgeID]) {
+                [p updateExecState:state];
+                return;
+            }
+        }
+    }
+}
+
 #pragma mark - node status
 @dynamic isNodeListValid;
 @dynamic showOnlineNode;

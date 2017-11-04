@@ -24,7 +24,7 @@ func InitPackageKillCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
             PkgID *string `json:"pkg-id"`
         }{&pkgID})
         if err != nil || len(pkgID) == 0 {
-            return feedError(feeder, rpath, fbPackageKill, errors.WithMessage(err, "unable to specify package id"))
+            return feedError(feeder, rpath, fbPackageKill, pkgID, errors.WithMessage(err, "unable to specify package id"))
         }
 
         // broadcast kill signal

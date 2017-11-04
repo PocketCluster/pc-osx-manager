@@ -26,7 +26,7 @@
 #pragma mark - package status
 - (NSArray<Package *>*) packageList;
 - (void) updatePackageList:(NSArray<NSDictionary *>*)aPackageList;
-
+- (void) updatePackageExecState:(NSString *)aPacakgeID execState:(ExecState)state;
 
 #pragma mark - node status
 /*

@@ -181,4 +181,5 @@
      removeObserver:self
      name:NSWorkspaceDidWakeNotification object:NULL];
 }
+
 @end
