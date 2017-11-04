@@ -122,7 +122,6 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                 // cluster process list
                 var (
                     rptPath = routepath.RpathPackageProcess()
-                    columns = []string{"Id", "Name", "Command", "State", "Ports"}
                     timer   = time.NewTicker(time.Second * 5)
                 )
                 // process list doesn't quit until signals comes in
@@ -137,10 +136,12 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                             return nil
                         }
                         case <- timer.C: {
+                            /* FIXME : (2017/11/04) no process status gets produced. We need to fix docker engine + libcompose
                             allInfo, err := project.Ps(context.Background(), []string{}...)
                             if err != nil {
                                 feedError(feeder, rptPath, fbPackageProcess, errors.WithMessage(err, "unable to list cluster process"))
                             }
+                            columns := []string{"Id", "Name", "Command", "State", "Ports"}
                             pslist := allInfo.String(columns, false)
 
                             // return feedback
@@ -149,6 +150,18 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                                     "status":  true,
                                     "pkg-id":  pkgID,
                                     "process": pslist,
+                                },
+                            }) */
+
+                            // process feedback
+                            _, err := project.Ps(context.Background(), []string{}...)
+                            if err != nil {
+                                feedError(feeder, rptPath, fbPackageProcess, errors.WithMessage(err, "unable to list cluster process"))
+                            }
+                            data, err := json.Marshal(route.ReponseMessage{
+                                fbPackageProcess: {
+                                    "status":  true,
+                                    "pkg-id":  pkgID,
                                 },
                             })
                             if err != nil {
