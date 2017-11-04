@@ -6,11 +6,17 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
+/*
+ * package process status is self-explanatory. -ing state means it's in transition
+ * between ui command -> package is starting or stopping
+ */
 typedef enum execState {
-    ExecIdle = 0,
+    ExecIdle    = 0,
     ExecStarting,
+    ExecStarted,
     ExecRun,
     ExecStopping
+    // ExecStopped = ExecIdle
 } ExecState;
 
 @interface Package : NSObject

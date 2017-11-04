@@ -23,6 +23,8 @@
     }
     Log(@"startPackage : %@", aPackageID);
 
+    [[StatusCache SharedStatusCache] updatePackageExecState:aPackageID execState:ExecStarting];
+
     [self onExecutionStartup:[StatusCache SharedStatusCache] package:aPackageID];
 
     [[NSOperationQueue mainQueue]
@@ -39,6 +41,8 @@
         return;
     }
     Log(@"stopPackage : %@", aPackageID);
+
+    [[StatusCache SharedStatusCache] updatePackageExecState:aPackageID execState:ExecStopping];
 
     [self onExecutionKill:[StatusCache SharedStatusCache] package:aPackageID];
 

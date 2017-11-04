@@ -143,7 +143,7 @@
      onPath:@(RPATH_PACKAGE_STARTUP)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          Log(@"%@ %@", path, response);
-         
+
          NSString *pkgID = [response valueForKeyPath:@"package-start.pkg-id"];
 
          // if package fails to start
@@ -166,8 +166,8 @@
              return;
          }
 
-         // anytime a package fail to start, put them in ready state
-         [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecRun];
+         // package succeed to run
+         [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecStarted];
 
          [self
           didExecutionStartup:[StatusCache SharedStatusCache]
@@ -181,6 +181,33 @@
      onPath:@(RPATH_PACKAGE_KILL)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          Log(@"%@ %@", path, response);
+
+         NSString *pkgID = [response valueForKeyPath:@"package-kill.pkg-id"];
+
+         [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecIdle];
+
+         // if some reason, process listing fails
+         if (![[response valueForKeyPath:@"package-kill.status"] boolValue]) {
+             NSString *error = [response valueForKeyPath:@"package-kill.error"];
+
+             [self
+              didExecutionStartup:[StatusCache SharedStatusCache]
+              package:pkgID
+              success:NO
+              error:error];
+
+             [ShowAlert
+              showWarningAlertWithTitle:@"Package Stop Error"
+              message:error];
+
+         } else {
+             [self
+              didExecutionStartup:[StatusCache SharedStatusCache]
+              package:pkgID
+              success:YES
+              error:nil];
+
+         }
      }];
 
     [[PCRouter sharedRouter]
@@ -188,6 +215,27 @@
      onPath:@(RPATH_MONITOR_PACKAGE_PROCESS)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          Log(@"%@ %@", path, response);
+
+         NSString *pkgID = [response valueForKeyPath:@"package-proc.pkg-id"];
+
+         // even if package has error in listing process, keep the state running
+         [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecRun];
+
+         // if some reason, process listing fails
+         if (![[response valueForKeyPath:@"package-proc.status"] boolValue]) {
+             [self
+              didExecutionStartup:[StatusCache SharedStatusCache]
+              package:pkgID
+              success:NO
+              error:[response valueForKeyPath:@"package-proc.error"]];
+
+         } else {
+             [self
+              didExecutionStartup:[StatusCache SharedStatusCache]
+              package:pkgID
+              success:YES
+              error:nil];
+         }
      }];
 
 

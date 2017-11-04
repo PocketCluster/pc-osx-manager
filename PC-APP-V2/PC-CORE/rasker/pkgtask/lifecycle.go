@@ -114,6 +114,12 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
             return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "unable to create project"))
         }
 
+        // --- --- --- --- --- --- --- --- --- --- --- --- package startup --- --- --- --- --- --- --- --- --- --- //
+        // startup package. if anything goes wrong, stop and return the process.
+        if uerr := project.Up(context.TODO(), options.Up{}); uerr != nil {
+            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(uerr, "unable to start package"))
+        }
+
         // --- --- --- --- --- --- --- --- --- --- --- --- package process list --- --- --- --- --- --- --- --- --- //
         killPsC := make(chan service.Event)
         appLife.RegisterServiceWithFuncs(
@@ -240,14 +246,7 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
             service.BindEventWithService(iventKillTag, killSigC))
 
         // --- --- --- --- --- --- --- --- --- --- --- --- package startup --- --- --- --- --- --- --- --- --- --- //
-        // startup package
-        err = project.Up(context.TODO(), options.Up{})
-        if err != nil {
-            // kill monitor signal and delete
-            appLife.BroadcastEvent(service.Event{Name:fmt.Sprintf("%s%s", iventPackageKillPrefix, pkgID)})
-            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "unable to start package"))
-        }
-        // return feedback
+        // return startup feedback
         data, err := json.Marshal(route.ReponseMessage{
             fbPackageStartup: {
                 "status": true,
