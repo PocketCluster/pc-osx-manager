@@ -12,7 +12,6 @@
 #include "pc-core.h"
 
 @interface AppDelegate(WindowPrivate)
-- (void)updateProcessType;
 @end
 
 @implementation AppDelegate(Window)

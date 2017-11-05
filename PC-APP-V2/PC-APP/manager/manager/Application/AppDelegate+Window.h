@@ -12,4 +12,5 @@
 - (NSObject *) activeWindowByClassName:(NSString *)aClassName withResponder:(id)aResponder;
 - (void)addOpenWindow:(BaseWindowController *)window;
 - (void)removeOpenWindow:(id)window;
+- (void)updateProcessType;
 @end

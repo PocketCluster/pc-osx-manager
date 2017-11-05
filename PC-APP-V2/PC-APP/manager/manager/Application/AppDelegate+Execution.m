@@ -13,6 +13,7 @@
 #import "AppDelegate+MonitorDispenser.h"
 #import "AppDelegate+Execution.h"
 #import "AppDelegate+Window.h"
+#import "TransitionWC.h"
 
 @implementation AppDelegate(Execution)
 #pragma mark - Package Execution
@@ -30,6 +31,18 @@
         return;
     }
 
+    TransitionWC *twc =
+        [[TransitionWC alloc]
+         initWithPackageExecution:
+         [NSString stringWithFormat:@"Staring %@ ...", pkg.packageDescription]];
+
+    [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
+    [twc showWindow:self];
+    [twc bringToFront];
+
+    // add window to managed list
+    [self addOpenWindow:twc];
+    [self updateProcessType];
     [self onExecutionStartup:pkg];
 
     [[NSOperationQueue mainQueue]
@@ -53,6 +66,18 @@
         return;
     }
 
+    TransitionWC *twc =
+        [[TransitionWC alloc]
+         initWithPackageExecution:
+         [NSString stringWithFormat:@"Stopping %@ ...", pkg.packageDescription]];
+
+    [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
+    [twc showWindow:self];
+    [twc bringToFront];
+
+    // add window to managed list
+    [self addOpenWindow:twc];
+    [self updateProcessType];
     [self onExecutionKill:pkg];
 
     [[NSOperationQueue mainQueue]

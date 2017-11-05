@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0402F8A11FAEF4A1006B986A /* TransitionWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 0402F89F1FAEF4A1006B986A /* TransitionWC.m */; };
-		0402F8A21FAEF4A1006B986A /* TransitionWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0402F8A01FAEF4A1006B986A /* TransitionWC.xib */; };
 		04030F801F3D5C1E00EA793D /* NativeMenu+NewCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 04030F791F3D5C1E00EA793D /* NativeMenu+NewCluster.m */; };
 		04030F811F3D5C1E00EA793D /* NativeMenu+RunCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 04030F7B1F3D5C1E00EA793D /* NativeMenu+RunCluster.m */; };
 		04030F821F3D5C1E00EA793D /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 04030F7D1F3D5C1E00EA793D /* NativeMenu.m */; };
@@ -34,6 +32,8 @@
 		0441A4151BD8BEF100AABD7A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36411BD791F8004E0946 /* Foundation.framework */; };
 		0441A4171BD8BF3E00AABD7A /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4161BD8BF3E00AABD7A /* CoreServices.framework */; };
 		0447CABB1F47AD28003BB069 /* BaseSetupVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 0447CABA1F47AD28003BB069 /* BaseSetupVC.m */; };
+		044CDCC31FAF1DFB00E49209 /* TransitionWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 044CDCC11FAF1DFB00E49209 /* TransitionWC.m */; };
+		044CDCC41FAF1DFB00E49209 /* TransitionWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 044CDCC21FAF1DFB00E49209 /* TransitionWC.xib */; };
 		045BD3741F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.m in Sources */ = {isa = PBXBuildFile; fileRef = 045BD3731F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.m */; };
 		046A35B81BD783CE004E0946 /* BaseWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35B71BD783CE004E0946 /* BaseWindowController.m */; };
 		046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046A35C61BD7871B004E0946 /* AboutWindow.xib */; };
@@ -129,9 +129,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0402F89E1FAEF4A1006B986A /* TransitionWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TransitionWC.h; sourceTree = "<group>"; };
-		0402F89F1FAEF4A1006B986A /* TransitionWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TransitionWC.m; sourceTree = "<group>"; };
-		0402F8A01FAEF4A1006B986A /* TransitionWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TransitionWC.xib; sourceTree = "<group>"; };
 		04030F781F3D5C1E00EA793D /* NativeMenu+NewCluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NativeMenu+NewCluster.h"; sourceTree = "<group>"; };
 		04030F791F3D5C1E00EA793D /* NativeMenu+NewCluster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NativeMenu+NewCluster.m"; sourceTree = "<group>"; };
 		04030F7A1F3D5C1E00EA793D /* NativeMenu+RunCluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NativeMenu+RunCluster.h"; sourceTree = "<group>"; };
@@ -168,6 +165,9 @@
 		0447CAB91F47AD28003BB069 /* BaseSetupVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseSetupVC.h; sourceTree = "<group>"; };
 		0447CABA1F47AD28003BB069 /* BaseSetupVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseSetupVC.m; sourceTree = "<group>"; };
 		0447CABD1F47B1F6003BB069 /* NSGeometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSGeometry.h; sourceTree = "<group>"; };
+		044CDCC01FAF1DFB00E49209 /* TransitionWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TransitionWC.h; sourceTree = "<group>"; };
+		044CDCC11FAF1DFB00E49209 /* TransitionWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TransitionWC.m; sourceTree = "<group>"; };
+		044CDCC21FAF1DFB00E49209 /* TransitionWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TransitionWC.xib; sourceTree = "<group>"; };
 		04570BB01F40E3440047CCF9 /* PCRouteRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCRouteRequest.h; sourceTree = "<group>"; };
 		045BD3721F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+MonitorDispenser.h"; sourceTree = "<group>"; };
 		045BD3731F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+MonitorDispenser.m"; sourceTree = "<group>"; };
@@ -335,16 +335,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0402F89D1FAEF40D006B986A /* Transition */ = {
-			isa = PBXGroup;
-			children = (
-				0402F89E1FAEF4A1006B986A /* TransitionWC.h */,
-				0402F89F1FAEF4A1006B986A /* TransitionWC.m */,
-				0402F8A01FAEF4A1006B986A /* TransitionWC.xib */,
-			);
-			path = Transition;
-			sourceTree = "<group>";
-		};
 		04030F771F3D5C1E00EA793D /* MenuBar */ = {
 			isa = PBXGroup;
 			children = (
@@ -447,6 +437,16 @@
 			path = Geometry;
 			sourceTree = "<group>";
 		};
+		044CDCBF1FAF1DFB00E49209 /* Transition */ = {
+			isa = PBXGroup;
+			children = (
+				044CDCC01FAF1DFB00E49209 /* TransitionWC.h */,
+				044CDCC11FAF1DFB00E49209 /* TransitionWC.m */,
+				044CDCC21FAF1DFB00E49209 /* TransitionWC.xib */,
+			);
+			path = Transition;
+			sourceTree = "<group>";
+		};
 		0464AD491F3DE445000D323C /* Router */ = {
 			isa = PBXGroup;
 			children = (
@@ -474,7 +474,7 @@
 				040A9BE11F98470C0058F0EF /* Intro */,
 				046D31001F3D310C0081CC3E /* Preferences */,
 				046D310A1F3D32440081CC3E /* Setup */,
-				0402F89D1FAEF40D006B986A /* Transition */,
+				044CDCBF1FAF1DFB00E49209 /* Transition */,
 			);
 			name = WindowController;
 			path = manager/WindowController;
@@ -1007,7 +1007,7 @@
 				046D312B1F3D346B0081CC3E /* PCSetup3VC.xib in Resources */,
 				041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */,
 				04CA54A91F44900F00A7AF48 /* EULA.rtf in Resources */,
-				0402F8A21FAEF4A1006B986A /* TransitionWC.xib in Resources */,
+				044CDCC41FAF1DFB00E49209 /* TransitionWC.xib in Resources */,
 				046D31251F3D346B0081CC3E /* PCSetup1VC.xib in Resources */,
 				040A9BDA1F9836D70058F0EF /* UserCheckVC.xib in Resources */,
 				046A35D61BD7871B004E0946 /* AboutWindow.xib in Resources */,
@@ -1155,7 +1155,7 @@
 				04ADEBFE1FA02493006ACEB5 /* Package.m in Sources */,
 				043F47131F3E0C730078A0C1 /* AppDelegate+Window.m in Sources */,
 				04CA54BC1F44D49500A7AF48 /* BaseBrandView.m in Sources */,
-				0402F8A11FAEF4A1006B986A /* TransitionWC.m in Sources */,
+				044CDCC31FAF1DFB00E49209 /* TransitionWC.m in Sources */,
 				04CA54AE1F44AFF700A7AF48 /* AgreementVC.m in Sources */,
 				040A9BD91F9836D70058F0EF /* UserCheckVC.m in Sources */,
 				04CA54A61F447B1700A7AF48 /* AgreementWC.m in Sources */,

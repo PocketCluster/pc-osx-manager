@@ -16,6 +16,7 @@
 #import "NativeMenu+NewCluster.h"
 #import "NativeMenu+RunCluster.h"
 #import "NativeMenu+Monitor.h"
+#import "TransitionWC.h"
 
 @interface DebugWindow ()<PCRouteRequest>
 @end
@@ -156,5 +157,11 @@
     [[[AppDelegate sharedDelegate] mainMenu] updateNewVersionAvailability:YES];
 }
 
+- (IBAction)transition_01:(id)sender {
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"TransitionWC" withResponder:nil];
+}
 
+- (IBAction)transition_02:(id)sender {
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"TransitionWC" withResponder:nil];
+}
 @end

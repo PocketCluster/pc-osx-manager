@@ -13,12 +13,12 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" animationBehavior="default" id="F0z-JX-Cv5">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
-            <rect key="contentRect" x="196" y="240" width="574" height="318"/>
+            <rect key="contentRect" x="196" y="240" width="756" height="318"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
             <value key="minSize" type="size" width="574" height="318"/>
             <value key="maxSize" type="size" width="574" height="318"/>
             <view key="contentView" id="se5-gp-TjO">
-                <rect key="frame" x="0.0" y="0.0" width="574" height="318"/>
+                <rect key="frame" x="0.0" y="0.0" width="756" height="318"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nZt-MV-5wa">
@@ -171,6 +171,16 @@
                             <action selector="menu_01:" target="-2" id="jhp-1f-NHU"/>
                         </connections>
                     </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Rn6-fE-vz8">
+                        <rect key="frame" x="560" y="270" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[W] Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="DQi-ew-fWR">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="transition_01:" target="-2" id="zaI-89-7vA"/>
+                        </connections>
+                    </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DYG-T3-wv5">
                         <rect key="frame" x="378" y="204" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="[M] Start Nodes" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="P1T-jV-5Rm">
@@ -291,12 +301,22 @@
                             <action selector="setup_01:" target="-2" id="GcC-jr-IEJ"/>
                         </connections>
                     </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IgB-Ud-y83">
+                        <rect key="frame" x="560" y="237" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[W] Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="nzU-9T-nfJ">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="transition_02:" target="-2" id="zRc-uf-e58"/>
+                        </connections>
+                    </button>
                 </subviews>
             </view>
             <connections>
                 <outlet property="delegate" destination="-2" id="0bl-1N-AYu"/>
             </connections>
-            <point key="canvasLocation" x="280" y="23"/>
+            <point key="canvasLocation" x="371" y="23"/>
         </window>
     </objects>
 </document>

@@ -187,7 +187,16 @@ static void _updateExecMenuVisibility(NSMenuItem *aPackageMenu, ExecState aExecS
         [smStarting setTarget:self];
         [penu.submenu addItem:smStarting];
 
-        // submneu - stop
+        NSMenuItem *smWait =
+            [[NSMenuItem alloc]
+             initWithTitle:@"Onlining..."
+             action:nil
+             keyEquivalent:@""];
+        [smWait setTag:EXEC_STARTED];
+        [smWait setEnabled:NO];
+        [smWait setTarget:self];
+        [penu.submenu addItem:smWait];
+
         NSMenuItem *smStop =
             [[NSMenuItem alloc]
              initWithTitle:@"Stop"
@@ -240,13 +249,12 @@ static void _updateExecMenuVisibility(NSMenuItem *aPackageMenu, ExecState aExecS
 
 // We'll skip the `EXEC_STARING` until process report 'ok' satus
 - (void) didExecutionStartup:(Package *)aPackage success:(BOOL)isSuccess error:(NSString *)anErrMsg {
-    ExecState state = (isSuccess ? EXEC_STARTING : EXEC_IDLE);
     for (NSMenuItem *item in [self.statusItem.menu itemArray]) {
         if ([item tag] < PKG_TAG_BUMPER) {
             continue;
         }
         if ([(NSString *)[item representedObject] isEqualToString:[aPackage packageID]]) {
-            _updateExecMenuVisibility(item, state);
+            _updateExecMenuVisibility(item, [aPackage execState]);
             return;
         }
     }

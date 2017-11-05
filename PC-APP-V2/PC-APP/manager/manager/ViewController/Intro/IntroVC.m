@@ -20,7 +20,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+
     NSString *str = @"<div style=\"text-align:center;font-family:'Helvetica Neue';font-weight:100;font-size:38px;width:100%;\">PocketCluster</div><div style=\"text-align:center;font-family:Arial;font-size:13px;width:100%;\">Version {VERSION} - Early Evaluation</div>";
     str = [str stringByReplacingOccurrencesOfString:@"{VERSION}" withString:[[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleShortVersionString"]];
     str = [str stringByReplacingOccurrencesOfString:@"\n" withString:@"<br>"];
