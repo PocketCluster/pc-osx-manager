@@ -77,7 +77,6 @@
     }
 }
 
-
 // update services
 - (void) updateServiceStatusWith:(StatusCache *)aCache {
 
@@ -109,7 +108,7 @@
 }
 
 #pragma mark - MonitorPackage
-+ (void) _updateExecMenuStatus:(NSMenuItem *)aPackageMenu execState:(ExecState)aExecState {
+static void _updateExecMenuVisibility(NSMenuItem *aPackageMenu, ExecState aExecState) {
     // due to separator
     for (NSMenuItem *item in [aPackageMenu.submenu itemArray]) {
         if ([item tag] == aExecState) {
@@ -163,6 +162,7 @@
              action:nil
              keyEquivalent:@""];
         [penu setTag:PKG_TAG_BUILDER(pndx)];
+        [penu setRepresentedObject:pkg.packageID];
         [penu setHidden:hideMenu];
         [penu setSubmenu:[NSMenu new]];
 
@@ -219,45 +219,73 @@
         [smWeb setRepresentedObject:pkg.packageID];
         [penu.submenu addItem:smWeb];
 
-        [NativeMenu _updateExecMenuStatus:penu execState:[pkg execState]];
+        _updateExecMenuVisibility(penu, [pkg execState]);
 
         [self.statusItem.menu insertItem:penu atIndex:(indexBegin + pndx)];
     }
 }
 
 #pragma mark - MonitorExecution
-- (void) onExecutionStartup:(StatusCache *)aCache package:(NSString *)aPackageID {
-    // all the package list
-    NSArray<Package *>* plst = [aCache packageList];
-    for (Package *pkg in plst) {
-        if ([[pkg packageID] isEqualToString:aPackageID]) {
-
+- (void) onExecutionStartup:(Package *)aPackage {
+    for (NSMenuItem *item in [self.statusItem.menu itemArray]) {
+        if ([item tag] < PKG_TAG_BUMPER) {
+            continue;
+        }
+        if ([(NSString *)[item representedObject] isEqualToString:[aPackage packageID]]) {
+            _updateExecMenuVisibility(item, [aPackage execState]);
+            return;
         }
     }
 }
 
-- (void) didExecutionStartup:(StatusCache *)aCache
-                     package:(NSString *)aPackageID
-                     success:(BOOL)isSuccess
-                       error:(NSString *)anErrMsg {
-
+// We'll skip the `EXEC_STARING` until process report 'ok' satus
+- (void) didExecutionStartup:(Package *)aPackage success:(BOOL)isSuccess error:(NSString *)anErrMsg {
+    ExecState state = (isSuccess ? EXEC_STARTING : EXEC_IDLE);
+    for (NSMenuItem *item in [self.statusItem.menu itemArray]) {
+        if ([item tag] < PKG_TAG_BUMPER) {
+            continue;
+        }
+        if ([(NSString *)[item representedObject] isEqualToString:[aPackage packageID]]) {
+            _updateExecMenuVisibility(item, state);
+            return;
+        }
+    }
 }
 
-- (void) onExecutionKill:(StatusCache *)aCache package:(NSString *)aPackageID {
-    
+- (void) onExecutionKill:(Package *)aPackage {
+    for (NSMenuItem *item in [self.statusItem.menu itemArray]) {
+        if ([item tag] < PKG_TAG_BUMPER) {
+            continue;
+        }
+        if ([(NSString *)[item representedObject] isEqualToString:[aPackage packageID]]) {
+            _updateExecMenuVisibility(item, [aPackage execState]);
+            return;
+        }
+    }
 }
 
-- (void) didExecutionKill:(StatusCache *)aCache
-                  package:(NSString *)aPackageID
-                  success:(BOOL)isSuccess
-                    error:(NSString *)anErrMsg {
+- (void) didExecutionKill:(Package *)aPackage success:(BOOL)isSuccess error:(NSString *)anErrMsg {
+    for (NSMenuItem *item in [self.statusItem.menu itemArray]) {
+        if ([item tag] < PKG_TAG_BUMPER) {
+            continue;
+        }
+        if ([(NSString *)[item representedObject] isEqualToString:[aPackage packageID]]) {
+            _updateExecMenuVisibility(item, [aPackage execState]);
+            return;
+        }
+    }
 }
 
-- (void) onExecutionProcess:(StatusCache *)aCache
-                    package:(NSString *)aPackageID
-                    success:(BOOL)isSuccess
-                      error:(NSString *)anErrMsg {
-
+- (void) onExecutionProcess:(Package *)aPackage success:(BOOL)isSuccess error:(NSString *)anErrMsg {
+    for (NSMenuItem *item in [self.statusItem.menu itemArray]) {
+        if ([item tag] < PKG_TAG_BUMPER) {
+            continue;
+        }
+        if ([(NSString *)[item representedObject] isEqualToString:[aPackage packageID]]) {
+            _updateExecMenuVisibility(item, [aPackage execState]);
+            return;
+        }
+    }
 }
 
 #pragma mark - menu methods

@@ -12,6 +12,7 @@
 
 #import "AppDelegate+MonitorDispenser.h"
 #import "AppDelegate+Execution.h"
+#import "AppDelegate+Window.h"
 
 @implementation AppDelegate(Execution)
 #pragma mark - Package Execution
@@ -23,9 +24,13 @@
     }
     Log(@"startPackage : %@", aPackageID);
 
-    [[StatusCache SharedStatusCache] updatePackageExecState:aPackageID execState:ExecStarting];
+    Package *pkg = [[StatusCache SharedStatusCache] updatePackageExecState:aPackageID execState:ExecStarting];
+    if (pkg == nil) {
+        NSLog(@"[FATAL]. cannot find a package with id %@", aPackageID);
+        return;
+    }
 
-    [self onExecutionStartup:[StatusCache SharedStatusCache] package:aPackageID];
+    [self onExecutionStartup:pkg];
 
     [[NSOperationQueue mainQueue]
      addOperationWithBlock:^{
@@ -42,9 +47,13 @@
     }
     Log(@"stopPackage : %@", aPackageID);
 
-    [[StatusCache SharedStatusCache] updatePackageExecState:aPackageID execState:ExecStopping];
+    Package *pkg = [[StatusCache SharedStatusCache] updatePackageExecState:aPackageID execState:ExecStopping];
+    if (pkg == nil) {
+        NSLog(@"[FATAL]. cannot find a package with id %@", aPackageID);
+        return;
+    }
 
-    [self onExecutionKill:[StatusCache SharedStatusCache] package:aPackageID];
+    [self onExecutionKill:pkg];
 
     [[NSOperationQueue mainQueue]
      addOperationWithBlock:^{

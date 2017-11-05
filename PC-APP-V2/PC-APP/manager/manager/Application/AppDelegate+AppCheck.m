@@ -151,11 +151,14 @@
              NSString *error = [response valueForKeyPath:@"package-start.error"];
              
              // anytime a package fail to start, put them in ready state
-             [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecIdle];
+             Package *pkg = [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecIdle];
+             if (pkg == nil) {
+                 NSLog(@"[FATAL]. cannot find a package with id %@", pkgID);
+                 return;
+             }
 
              [self
-              didExecutionStartup:[StatusCache SharedStatusCache]
-              package:pkgID
+              didExecutionStartup:pkg
               success:NO
               error:error];
 
@@ -163,17 +166,19 @@
               showWarningAlertWithTitle:@"Unable to Start"
               message:error];
 
-             return;
+         } else {
+             // package succeed to run
+             Package *pkg = [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecStarted];
+             if (pkg == nil) {
+                 NSLog(@"[FATAL]. cannot find a package with id %@", pkgID);
+                 return;
+             }
+
+             [self
+              didExecutionStartup:pkg
+              success:YES
+              error:nil];
          }
-
-         // package succeed to run
-         [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecStarted];
-
-         [self
-          didExecutionStartup:[StatusCache SharedStatusCache]
-          package:pkgID
-          success:YES
-          error:nil];
      }];
 
     [[PCRouter sharedRouter]
@@ -183,16 +188,18 @@
          Log(@"%@ %@", path, response);
 
          NSString *pkgID = [response valueForKeyPath:@"package-kill.pkg-id"];
-
-         [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecIdle];
+         Package *pkg = [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecIdle];
+         if (pkg == nil) {
+             NSLog(@"[FATAL]. cannot find a package with id %@", pkgID);
+             return;
+         }
 
          // if some reason, process listing fails
          if (![[response valueForKeyPath:@"package-kill.status"] boolValue]) {
              NSString *error = [response valueForKeyPath:@"package-kill.error"];
 
              [self
-              didExecutionStartup:[StatusCache SharedStatusCache]
-              package:pkgID
+              didExecutionStartup:pkg
               success:NO
               error:error];
 
@@ -202,8 +209,7 @@
 
          } else {
              [self
-              didExecutionStartup:[StatusCache SharedStatusCache]
-              package:pkgID
+              didExecutionStartup:pkg
               success:YES
               error:nil];
 
@@ -219,20 +225,22 @@
          NSString *pkgID = [response valueForKeyPath:@"package-proc.pkg-id"];
 
          // even if package has error in listing process, keep the state running
-         [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecRun];
+         Package *pkg = [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecRun];
+         if (pkg == nil) {
+             NSLog(@"[FATAL]. cannot find a package with id %@", pkgID);
+             return;
+         }
 
          // if some reason, process listing fails
          if (![[response valueForKeyPath:@"package-proc.status"] boolValue]) {
              [self
-              didExecutionStartup:[StatusCache SharedStatusCache]
-              package:pkgID
+              didExecutionStartup:pkg
               success:NO
               error:[response valueForKeyPath:@"package-proc.error"]];
 
          } else {
              [self
-              didExecutionStartup:[StatusCache SharedStatusCache]
-              package:pkgID
+              didExecutionStartup:pkg
               success:YES
               error:nil];
          }

@@ -7,16 +7,17 @@
 //
 
 #import "StatusCache.h"
+#import "Package.h"
 
 @protocol MonitorExecution <NSObject>
 @required
-- (void) onExecutionStartup:(StatusCache *)aCache package:(NSString *)aPackageID;
+- (void) onExecutionStartup:(Package *)aPackage;
 
-- (void) didExecutionStartup:(StatusCache *)aCache package:(NSString *)aPackageID success:(BOOL)isSuccess error:(NSString *)anErrMsg;
+- (void) didExecutionStartup:(Package *)aPackage success:(BOOL)isSuccess error:(NSString *)anErrMsg;
 
-- (void) onExecutionKill:(StatusCache *)aCache package:(NSString *)aPackageID;
+- (void) onExecutionKill:(Package *)aPackage;
 
-- (void) didExecutionKill:(StatusCache *)aCache package:(NSString *)aPackageID success:(BOOL)isSuccess error:(NSString *)anErrMsg;
+- (void) didExecutionKill:(Package *)aPackage success:(BOOL)isSuccess error:(NSString *)anErrMsg;
 
-- (void) onExecutionProcess:(StatusCache *)aCache package:(NSString *)aPackageID success:(BOOL)isSuccess error:(NSString *)anErrMsg;
+- (void) onExecutionProcess:(Package *)aPackage success:(BOOL)isSuccess error:(NSString *)anErrMsg;
 @end

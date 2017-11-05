@@ -85,20 +85,22 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
     }
 }
 
-- (void) updatePackageExecState:(NSString *)aPacakgeID execState:(ExecState)state {
+// FIXME : there is possibility in which this returns a null package. make sure we fix this issue.
+- (Package *) updatePackageExecState:(NSString *)aPacakgeID execState:(ExecState)state {
     if (ISNULL_STRING(aPacakgeID)) {
         Log(@"invalid package id to update state");
-        return;
+        return nil;
     }
 
     @synchronized(self) {
         for (Package *p in self.packageList) {
             if ([[p packageID] isEqualToString:aPacakgeID]) {
                 [p updateExecState:state];
-                return;
+                return p;
             }
         }
     }
+    return nil;
 }
 
 #pragma mark - node status

@@ -138,34 +138,31 @@
 }
 
 #pragma mark - MonitorExecution
-- (void) onExecutionStartup:(StatusCache *)aCache package:(NSString *)aPackageID {
+- (void) onExecutionStartup:(Package *)aPackage {
     @synchronized(_openWindows) {
-        [self.mainMenu onExecutionStartup:aCache package:aPackageID];
+        [self.mainMenu onExecutionStartup:aPackage];
 
         for (NSObject<MonitorExecution> *window in _openWindows) {
             if ([window conformsToProtocol:@protocol(MonitorExecution)]) {
-                [window onExecutionStartup:aCache package:aPackageID];
+                [window onExecutionStartup:aPackage];
             }
         }
     }
 }
 
-- (void) didExecutionStartup:(StatusCache *)aCache
-                     package:(NSString *)aPackageID
+- (void) didExecutionStartup:(Package *)aPackage
                      success:(BOOL)isSuccess
                        error:(NSString *)anErrMsg {
     @synchronized(_openWindows) {
         [self.mainMenu
-         didExecutionStartup:aCache
-         package:aPackageID
+         didExecutionStartup:aPackage
          success:isSuccess
          error:anErrMsg];
 
         for (NSObject<MonitorExecution> *window in _openWindows) {
             if ([window conformsToProtocol:@protocol(MonitorExecution)]) {
                 [window
-                 didExecutionStartup:aCache
-                 package:aPackageID
+                 didExecutionStartup:aPackage
                  success:isSuccess
                  error:anErrMsg];
             }
@@ -173,34 +170,31 @@
     }
 }
 
-- (void) onExecutionKill:(StatusCache *)aCache package:(NSString *)aPackageID {
+- (void) onExecutionKill:(Package *)aPackage {
     @synchronized(_openWindows) {
-        [self.mainMenu onExecutionKill:aCache package:aPackageID];
+        [self.mainMenu onExecutionKill:aPackage];
 
         for (NSObject<MonitorExecution> *window in _openWindows) {
             if ([window conformsToProtocol:@protocol(MonitorExecution)]) {
-                [window onExecutionKill:aCache package:aPackageID];
+                [window onExecutionKill:aPackage];
             }
         }
     }
 }
 
-- (void) didExecutionKill:(StatusCache *)aCache
-                  package:(NSString *)aPackageID
+- (void) didExecutionKill:(Package *)aPackage
                   success:(BOOL)isSuccess
                     error:(NSString *)anErrMsg {
     @synchronized(_openWindows) {
         [self.mainMenu
-         didExecutionKill:aCache
-         package:aPackageID
+         didExecutionKill:aPackage
          success:isSuccess
          error:anErrMsg];
 
         for (NSObject<MonitorExecution> *window in _openWindows) {
             if ([window conformsToProtocol:@protocol(MonitorExecution)]) {
                 [window
-                 didExecutionKill:aCache
-                 package:aPackageID
+                 didExecutionKill:aPackage
                  success:isSuccess
                  error:anErrMsg];
             }
@@ -208,22 +202,19 @@
     }
 }
 
-- (void) onExecutionProcess:(StatusCache *)aCache
-                    package:(NSString *)aPackageID
+- (void) onExecutionProcess:(Package *)aPackage
                     success:(BOOL)isSuccess
                       error:(NSString *)anErrMsg {
     @synchronized(_openWindows) {
         [self.mainMenu
-         onExecutionProcess:aCache
-         package:aPackageID
+         onExecutionProcess:aPackage
          success:isSuccess
          error:anErrMsg];
 
         for (NSObject<MonitorExecution> *window in _openWindows) {
             if ([window conformsToProtocol:@protocol(MonitorExecution)]) {
                 [window
-                 onExecutionProcess:aCache
-                 package:aPackageID
+                 onExecutionProcess:aPackage
                  success:isSuccess
                  error:anErrMsg];
             }
