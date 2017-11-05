@@ -22,7 +22,7 @@ NSString * const kNodeImageSize      = @"node-image-size";
 @property (nonatomic, strong, readwrite) NSString *packageID;
 @property (nonatomic, strong, readwrite) NSString *menuName;
 @property (nonatomic, strong, readwrite) NSString *totalImageSize;
-@property (nonatomic, readwrite) ExecState state;
+@property (nonatomic, readwrite) ExecState execState;
 @end
 
 @implementation Package
@@ -80,6 +80,6 @@ NSString * const kNodeImageSize      = @"node-image-size";
 
 // execution state should only be handled separately
 - (void) updateExecState:(ExecState)state {
-    self.state = state;
+    self.execState = state;
 }
 @end

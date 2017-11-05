@@ -25,7 +25,7 @@ typedef enum execState {
 @property (nonatomic, readonly) NSString *packageDescription;
 @property (nonatomic, readonly) NSString *packageID;
 @property (nonatomic, readonly) NSString *menuName;
-@property (nonatomic, readonly) ExecState state;
+@property (nonatomic, readonly) ExecState execState;
 
 // all three below are in GB
 @property (nonatomic, readonly) NSString *totalImageSize;

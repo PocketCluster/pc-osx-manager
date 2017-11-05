@@ -18,7 +18,7 @@
 @implementation NativeMenu(RunCluster)
 
 - (void) setupMenuRunCluster {
-    
+
     NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
     [mStatus setTitle:@"Cluster Control"];
     [mStatus setEnabled:YES];

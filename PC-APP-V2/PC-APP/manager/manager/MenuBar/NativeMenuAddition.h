@@ -24,4 +24,13 @@ enum {
 #define PKG_TAG_BUMPER     1000
 #define PKG_TAG_BUILDER(x) (x + PKG_TAG_BUMPER)
 
+// this tags matches 1:1 with 'ExecState' so that one can easily sort out tags
+enum {
+    EXEC_IDLE = 0,
+    EXEC_STARTING,
+    EXEC_STARTED,
+    EXEC_RUN,
+    EXEC_STOPPING
+};
+
 #endif /* NativeMenuAddition_h */

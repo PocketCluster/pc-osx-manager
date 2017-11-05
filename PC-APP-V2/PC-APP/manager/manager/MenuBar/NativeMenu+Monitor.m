@@ -109,6 +109,18 @@
 }
 
 #pragma mark - MonitorPackage
++ (void) _updateExecMenuStatus:(NSMenuItem *)aPackageMenu execState:(ExecState)aExecState {
+    // due to separator
+    for (NSMenuItem *item in [aPackageMenu.submenu itemArray]) {
+        if ([item tag] == aExecState) {
+            [item setHidden:NO];
+        } else {
+            [item setHidden:YES];
+        }
+        [aPackageMenu.submenu itemChanged:item];
+    }
+}
+
 - (void) onAvailableListUpdateWith:(StatusCache *)aCache success:(BOOL)isSuccess error:(NSString *)anErrMsg {
 }
 
@@ -154,15 +166,26 @@
         [penu setHidden:hideMenu];
         [penu setSubmenu:[NSMenu new]];
 
-        // submenu - start
+        // --- submenu ---
         NSMenuItem *smStart =
             [[NSMenuItem alloc]
              initWithTitle:@"Start"
              action:@selector(startPackage:)
              keyEquivalent:@""];
+        [smStart setTag:EXEC_IDLE];
         [smStart setTarget:self];
         [smStart setRepresentedObject:pkg.packageID];
         [penu.submenu addItem:smStart];
+
+        NSMenuItem *smStarting =
+            [[NSMenuItem alloc]
+             initWithTitle:@"Starting Package..."
+             action:nil
+             keyEquivalent:@""];
+        [smStarting setTag:EXEC_STARTING];
+        [smStarting setEnabled:NO];
+        [smStarting setTarget:self];
+        [penu.submenu addItem:smStarting];
 
         // submneu - stop
         NSMenuItem *smStop =
@@ -170,9 +193,20 @@
              initWithTitle:@"Stop"
              action:@selector(stopPackage:)
              keyEquivalent:@""];
+        [smStop setTag:EXEC_RUN];
         [smStop setTarget:self];
         [smStop setRepresentedObject:pkg.packageID];
         [penu.submenu addItem:smStop];
+
+        NSMenuItem *smStopping =
+            [[NSMenuItem alloc]
+             initWithTitle:@"Stopping Package..."
+             action:nil
+             keyEquivalent:@""];
+        [smStopping setTag:EXEC_STOPPING];
+        [smStopping setEnabled:NO];
+        [smStopping setTarget:self];
+        [penu.submenu addItem:smStopping];
 
         // submenu - open web port menu
         NSMenuItem *smWeb =
@@ -180,17 +214,26 @@
              initWithTitle:@"Web Console"
              action:@selector(openWebConsole:)
              keyEquivalent:@""];
+        [smWeb setTag:EXEC_RUN];
         [smWeb setTarget:self];
         [smWeb setRepresentedObject:pkg.packageID];
         [penu.submenu addItem:smWeb];
-        
+
+        [NativeMenu _updateExecMenuStatus:penu execState:[pkg execState]];
+
         [self.statusItem.menu insertItem:penu atIndex:(indexBegin + pndx)];
     }
 }
 
 #pragma mark - MonitorExecution
 - (void) onExecutionStartup:(StatusCache *)aCache package:(NSString *)aPackageID {
+    // all the package list
+    NSArray<Package *>* plst = [aCache packageList];
+    for (Package *pkg in plst) {
+        if ([[pkg packageID] isEqualToString:aPackageID]) {
 
+        }
+    }
 }
 
 - (void) didExecutionStartup:(StatusCache *)aCache
