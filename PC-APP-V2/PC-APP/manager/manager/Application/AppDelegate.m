@@ -8,17 +8,18 @@
 
 #import <KSCrash/KSCrash.h>
 #import "Sentry.h"
-
-#import "NativeMenu.h"
 #include "pc-core.h"
+#import "StatusCache.h"
+#import "ShowAlert.h"
+#import "NativeMenu.h"
+#import "TransitionWC.h"
 
 #import "AppDelegate.h"
+#import "AppDelegate+AppCheck.h"
 #import "AppDelegate+Netmonitor.h"
 #import "AppDelegate+ResponseHandle.h"
 #import "AppDelegate+Sparkle.h"
-#import "AppDelegate+AppCheck.h"
-#import "StatusCache.h"
-
+#import "AppDelegate+Window.h"
 
 @interface AppDelegate ()<NSUserNotificationCenterDelegate>
 @property (nonatomic, strong, readwrite) NativeMenu *mainMenu;
@@ -117,9 +118,66 @@
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
-    //NSTerminateCancel;
-    //NSTerminateLater;
-    return NSTerminateNow;
+    /*
+     * there are three states where application termination could end up.
+     *
+     * 1. Basic service has not start : no authentification, application has expired, etc...
+     * 2. Basic service has started. : terminate service and terminate app
+     * 3. Installing application : you cannot terminate the application. Wait or cancel.
+     * 4. In transition where service, node started, or, package starting, stopping, (prevent app to stop)
+     * 4. Package is running. Ask user to stop package stop and terminate app.
+     */
+
+    // a. when nothing has happened, quit asap
+    if (![[StatusCache SharedStatusCache] isAppReady]) {
+        Log(@"application is not ready to run. exit now.");
+        return NSTerminateNow;
+    }
+    // b. filter out all the conditions where we cannot quit
+    if ([[StatusCache SharedStatusCache] isPackageRunning]) {
+        [ShowAlert
+         showWarningAlertWithTitle:@"Unable to Quit"
+         message:@"Please stop all packages first"];
+        return NSTerminateCancel;
+    }
+    if ([[StatusCache SharedStatusCache] isPkgInstalling]) {
+        [ShowAlert
+         showWarningAlertWithTitle:@"Unable to Quit"
+         message:@"A package is being installed..."];
+        return NSTerminateCancel;
+    }
+    if ([[StatusCache SharedStatusCache] isClusterSetup]) {
+        [ShowAlert
+         showWarningAlertWithTitle:@"Unable to Quit"
+         message:@"Cluster is being setup. Please wait."];
+        return NSTerminateCancel;
+    }
+    if (!([[StatusCache SharedStatusCache] isServiceReady] && [[StatusCache SharedStatusCache] isNodeListValid])) {
+        [ShowAlert
+         showWarningAlertWithTitle:@"Unable to Quit"
+         message:@"Cluster is being initiated. Please wait until it's ready to shutdown."];
+        return NSTerminateCancel;
+    }
+
+    /*
+     * 1) app is ready to run
+     * 2) basic service + node is checked
+     * 3) no package is running or being installed.
+     * 4) no cluster is being setup.
+     */
+
+    Log(@"closing down services...");
+    TransitionWC *twc = [[TransitionWC alloc] initWithPackageExecution:@"Shutting down cluster..."];
+    [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
+    [twc showWindow:self];
+    [twc bringToFront];
+
+    // add window to managed list
+    [self addOpenWindow:twc];
+    [self updateProcessType];
+
+    OpsCmdBaseServiceStop();
+    return NSTerminateLater;
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {

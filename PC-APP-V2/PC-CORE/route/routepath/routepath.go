@@ -67,3 +67,7 @@ func RpathNotiSrvcOnlineTimeup() string {
 func RpathNotiNodeOnlineTimeup() string {
     return C.GoString(C.RPATH_NOTI_NODE_ONLINE_TIMEUP)
 }
+
+func RpathAppPrepShutdown() string {
+    return C.GoString(C.RPATH_APP_SHUTDOWN_READY)
+}

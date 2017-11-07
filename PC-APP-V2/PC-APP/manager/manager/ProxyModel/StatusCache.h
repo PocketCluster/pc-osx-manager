@@ -24,9 +24,11 @@
 
 
 #pragma mark - package status
-- (NSArray<Package *>*) packageList;
+@property (nonatomic, readonly) BOOL isPackageRunning;
+@property (nonatomic, readonly) NSArray<Package *>* packageList;
 - (void) updatePackageList:(NSArray<NSDictionary *>*)aPackageList;
 - (Package *) updatePackageExecState:(NSString *)aPacakgeID execState:(ExecState)state;
+
 
 #pragma mark - node status
 /*
@@ -55,4 +57,15 @@
 // regular monitoring of internal services. When something is missing, it's a critical error. kill application
 - (void) refreshServiceStatus:(NSDictionary<NSString*, id>*)aServiceStatusList;
 
+
+#pragma mark - application status
+// this property should be used to indicate if app has passed auth state and ready to transition to the next state
+// whenever app is not ready and user wants to quit, exit immediately.
+@property (readwrite, getter=isAppReady, setter=setAppReady:) BOOL appReady;
+
+// there is a package being installed. Prevent app to quit
+@property (readwrite, getter=isPkgInstalling, setter=setPkgInstalling:) BOOL pkgInstalling;
+
+// cluster is being setup. Wait until all the process is over
+@property (readwrite, getter=isClusterSetup, setter=setClusterSetup:) BOOL clusterSetup;
 @end

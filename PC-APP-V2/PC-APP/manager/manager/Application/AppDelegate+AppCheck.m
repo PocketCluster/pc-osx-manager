@@ -119,8 +119,14 @@
          _isUserAuthed = isUserAuthed;
 
          if (_isUserAuthed) {
-             // TODO : choose appropriate menu
+             // setup ui state
              [belf setupWithStartServicesMessage];
+
+             // start basic menu
+
+             // set the app ready whenever service gets started
+             [[StatusCache SharedStatusCache] setAppReady:YES];
+
          } else {
              [ShowAlert
               showWarningAlertWithTitle:@"Your invitation is not valid"
@@ -409,6 +415,14 @@
          [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
      }];
 
+    // --- --- --- --- --- --- [monitor] service online timeup --- --- --- --- ---
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_APP_SHUTDOWN_READY)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         // we don't need to read this. Just shut down now
+         [[NSApplication sharedApplication] replyToApplicationShouldTerminate:YES];
+     }];
 }
 
 - (void) closeMonitors {
@@ -422,6 +436,8 @@
     [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_PACKAGE_LIST_INSTALLED)];
     [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_NOTI_NODE_ONLINE_TIMEUP)];
     [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_NOTI_SRVC_ONLINE_TIMEUP)];
+
+    [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_APP_SHUTDOWN_READY)];
 }
 
 @end

@@ -3,6 +3,8 @@ package main
 
 import "C"
 import (
+    "encoding/json"
+
     log "github.com/Sirupsen/logrus"
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
@@ -23,6 +25,7 @@ import (
     "github.com/stkim1/pc-core/route/initcheck"
     "github.com/stkim1/pc-core/route/install"
     "github.com/stkim1/pc-core/route/list"
+    "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/service/container"
     "github.com/stkim1/pc-core/service/dns"
@@ -316,6 +319,18 @@ func main() {
 
                     case operation.CmdBaseServiceStop: {
                         appLife.StopServices()
+                        // we send it's ok to quit signal to frontend
+                        data, err := json.Marshal(route.ReponseMessage{
+                            "app-shutdown-ready": {
+                                "status": true,
+                            },
+                        })
+                        if err == nil {
+                            err = theFeeder.FeedResponseForGet(routepath.RpathAppPrepShutdown(), string(data))
+                        }
+                        if err != nil {
+                            log.Errorf("[ERROR] unable to report app shutdown ready %v", err.Error())
+                        }
                         log.Debugf("[OP] %v", e.String())
                     }
 

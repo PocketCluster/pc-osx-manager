@@ -17,6 +17,7 @@
 #import "NativeMenu+RunCluster.h"
 #import "NativeMenu+Monitor.h"
 #import "TransitionWC.h"
+#import "StatusCache.h"
 
 @interface DebugWindow ()<PCRouteRequest>
 @end
@@ -28,6 +29,7 @@
 }
 
 - (IBAction)opsCmdBaseServiceStart:(id)sender {
+    [[StatusCache SharedStatusCache] setAppReady:YES];
     OpsCmdBaseServiceStart();
 }
 
@@ -163,5 +165,36 @@
 
 - (IBAction)transition_02:(id)sender {
     [[AppDelegate sharedDelegate] activeWindowByClassName:@"TransitionWC" withResponder:nil];
+}
+
+- (IBAction)terminate_01:(id)sender {
+    [[StatusCache SharedStatusCache] setAppReady:NO];
+}
+
+- (IBAction)terminate_02:(id)sender {
+    [[StatusCache SharedStatusCache] setAppReady:YES];
+}
+
+- (IBAction)terminate_03:(id)sender {
+    [[NSApplication sharedApplication] replyToApplicationShouldTerminate:YES];
+}
+
+- (IBAction)terminate_04:(id)sender {
+    BOOL installing = [[StatusCache SharedStatusCache] isPkgInstalling];
+    [[StatusCache SharedStatusCache] setPkgInstalling:!installing];
+}
+
+- (IBAction)terminate_05:(id)sender {
+    BOOL setup = [[StatusCache SharedStatusCache] isClusterSetup];
+    [[StatusCache SharedStatusCache] setClusterSetup:!setup];
+}
+
+- (IBAction)terminate_06:(id)sender {
+}
+
+- (IBAction)terminate_07:(id)sender {
+}
+
+- (IBAction)terminate_08:(id)sender {
 }
 @end

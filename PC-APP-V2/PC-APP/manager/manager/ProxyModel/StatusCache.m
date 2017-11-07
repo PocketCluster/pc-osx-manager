@@ -22,6 +22,10 @@
     
     __strong NSArray<NSString *>* _serviceList;
     BOOL _serviceReady;
+
+    BOOL _appReady;
+    BOOL _pkgInstalling;
+    BOOL _clusterSetup;
 }
 SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
@@ -53,8 +57,28 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
               @"service.vbox.master.control",
               @"service.vbox.master.listener"];
 
+        // set app status is not ready yet
+        _appReady = NO;
+
     }
     return self;
+}
+
+#pragma mark - package status
+@dynamic isPackageRunning;
+@dynamic packageList;
+
+- (BOOL) isPackageRunning {
+    BOOL running = NO;
+    @synchronized(self) {
+        for (Package *pkg in _packageList) {
+            if ([pkg execState] != ExecIdle) {
+                running = YES;
+                break;
+            }
+        }
+    }
+    return running;
 }
 
 - (NSArray<Package *>*) packageList {
@@ -201,4 +225,49 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
     }
 }
 
+#pragma mark - application status
+@dynamic appReady;
+- (BOOL) isAppReady {
+    BOOL ready = NO;
+    @synchronized(self) {
+        ready = _appReady;
+    }
+    return ready;
+}
+
+- (void) setAppReady:(BOOL)ready {
+    @synchronized(self) {
+        _appReady = ready;
+    }
+}
+
+@dynamic pkgInstalling;
+- (BOOL) isPkgInstalling {
+    BOOL installing = NO;
+    @synchronized(self) {
+        installing = _pkgInstalling;
+    }
+    return installing;
+}
+
+- (void) setPkgInstalling:(BOOL)installing {
+    @synchronized(self) {
+        _pkgInstalling = installing;
+    }
+}
+
+@dynamic clusterSetup;
+- (BOOL) isClusterSetup {
+    BOOL setup = NO;
+    @synchronized(self) {
+        setup = _clusterSetup;
+    }
+    return setup;
+}
+
+- (void) setClusterSetup:(BOOL)setup {
+    @synchronized(self) {
+        _clusterSetup = setup;
+    }
+}
 @end
