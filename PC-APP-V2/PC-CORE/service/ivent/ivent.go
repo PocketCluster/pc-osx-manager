@@ -33,7 +33,10 @@ const (
     IventMonitorNodeRespPcssh    string = "ivent.monitor.node.resp.pcssh"
     // monitor orchestration
     IventMonitorNodeRespOrchst   string = "ivent.monitor.node.resp.orchst"
-
+    // stop monitor process reqeust
+    IventMonitorStopRequest      string = "ivent.monitor.stop.request"
+    // monitor stopped
+    IventMonitorStopResult       string = "ivent.monitor.stop.result"
 
     // for package node list
     IventReportLiveNodesRequest  string = "ivent.report.live.nodes.request"

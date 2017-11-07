@@ -28,6 +28,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
         readyOrchstC = make(chan service.Event)
         readyVboxC   = make(chan service.Event)
         innerErrC    = make(chan service.Event)
+        stopMonitorC = make(chan service.Event)
     )
 
     appLife.RegisterServiceWithFuncs(
@@ -69,6 +70,9 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                 // ignore core node error. the only critical error for node report is core node death.
                 // make sure core node error reported to front-end after node oneline ticker fires
                 checkCoreError = false
+
+                // stop monitor request
+                shouldStop = false
             )
 
             // monitor pre-requisite services with timeout
@@ -201,6 +205,20 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                         nodeOnlineTimeup.Stop()
                         return nil
                     }
+                    // stop monitoring
+                    case <- stopMonitorC: {
+                        shouldStop = true
+                        sChkTimer.Stop()
+                        nStatTimer.Stop()
+                        nodeOnlineTimeup.Stop()
+
+                        // we return now
+                        if timedStat.isReadyToRequest() {
+                            log.Info("[HEALTH] stop monitoring...")
+                            appLife.BroadcastEvent(service.Event{Name:ivent.IventMonitorStopResult})
+                            return nil
+                        }
+                    }
 
                     // node should have been all online timeup (should fire only once forfrontend to prep)
                     case <- nodeOnlineTimeup.C: {
@@ -287,6 +305,11 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                         meta.updateBeaconStatus(md)
 
                         if meta.isReadyToReport() {
+                            if shouldStop {
+                                log.Info("[HEALTH] stop monitoring...")
+                                appLife.BroadcastEvent(service.Event{Name:ivent.IventMonitorStopResult})
+                                return nil
+                            }
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
                             err := reportNodeStats(meta, feeder, rpNodeStat, checkCoreError)
                             if err != nil {
@@ -316,6 +339,11 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                         log.Infof("[HEALTH] PCSSH META %v", md)
 
                         if meta.isReadyToReport() {
+                            if shouldStop {
+                                log.Info("[HEALTH] stop monitoring...")
+                                appLife.BroadcastEvent(service.Event{Name:ivent.IventMonitorStopResult})
+                                return nil
+                            }
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
                             err := reportNodeStats(meta, feeder, rpNodeStat, checkCoreError)
                             if err != nil {
@@ -344,6 +372,11 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                         meta.updateOrchstStatus(md)
 
                         if meta.isReadyToReport() {
+                            if shouldStop {
+                                log.Info("[HEALTH] stop monitoring...")
+                                appLife.BroadcastEvent(service.Event{Name:ivent.IventMonitorStopResult})
+                                return nil
+                            }
                             log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
                             err := reportNodeStats(meta, feeder, rpNodeStat, checkCoreError)
                             if err != nil {
@@ -371,5 +404,6 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
         service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,   readyVboxC),
 
         // internal error collector
-        service.BindEventWithService(ivent.IventInternalSpawnError,      innerErrC))
+        service.BindEventWithService(ivent.IventInternalSpawnError,      innerErrC),
+        service.BindEventWithService(ivent.IventMonitorStopRequest,      stopMonitorC))
 }

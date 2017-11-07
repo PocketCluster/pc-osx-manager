@@ -318,6 +318,15 @@ func main() {
                     }
 
                     case operation.CmdBaseServiceStop: {
+                        // stop monitor first
+                        resultC := make(chan service.Event)
+                        if err := appLife.BindDiscreteEvent(ivent.IventMonitorStopResult, resultC); err != nil {
+                            log.Error("[LIFE] unable to stop monitoring...")
+                        }
+                        // ask node list
+                        appLife.BroadcastEvent(service.Event{Name:ivent.IventMonitorStopRequest})
+                        <- resultC
+                        appLife.UntieDiscreteEvent(ivent.IventMonitorStopResult)
                         appLife.StopServices()
                         // we send it's ok to quit signal to frontend
                         data, err := json.Marshal(route.ReponseMessage{
