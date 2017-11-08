@@ -57,7 +57,7 @@
     // 0. set shutdown tag
     [[StatusCache SharedStatusCache] setShutdown:YES];
     
-    TransitionWC *twc = [[TransitionWC alloc] initWithPackageExecution:@"Shutting down cluster..."];
+    TransitionWC *twc = [[TransitionWC alloc] initWithPackageExecution:@"Shutting down cluster nodes and services..."];
     [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
     [twc showWindow:self];
     [twc bringToFront];
@@ -80,7 +80,7 @@
  * 4. In transition where service, node started, or, package starting, stopping, (prevent app to stop)
  * 4. Package is running. Ask user to stop package stop and terminate app.
  */
-- (NSApplicationTerminateReply)shouldOffline:(NSApplication *)sender {
+- (NSApplicationTerminateReply)shouldQuit:(NSApplication *)sender {
     // 0. if shutdown is triggered, wait for response from core
     if ([[StatusCache SharedStatusCache] isShutdown]) {
         Log(@"cluster is shutting down...");
@@ -95,26 +95,26 @@
     // 2. filter out all the conditions where we cannot quit
     if ([[StatusCache SharedStatusCache] isPackageRunning]) {
         [ShowAlert
-         showWarningAlertWithTitle:@"Unable to go Offline"
+         showWarningAlertWithTitle:@"Unable to go Quit"
          message:@"Please stop all packages first"];
         return NSTerminateCancel;
     }
     if ([[StatusCache SharedStatusCache] isPkgInstalling]) {
         [ShowAlert
-         showWarningAlertWithTitle:@"Unable to go Offline"
+         showWarningAlertWithTitle:@"Unable to go Quit"
          message:@"A package is being installed..."];
         return NSTerminateCancel;
     }
     if ([[StatusCache SharedStatusCache] isClusterSetup]) {
         [ShowAlert
-         showWarningAlertWithTitle:@"Unable to go Offline"
+         showWarningAlertWithTitle:@"Unable to go Quit"
          message:@"Cluster is being setup. Please wait."];
         return NSTerminateCancel;
     }
     if (!([[StatusCache SharedStatusCache] isServiceReady] && [[StatusCache SharedStatusCache] showOnlineNode])) {
         [ShowAlert
-         showWarningAlertWithTitle:@"Unable to go Offline"
-         message:@"Cluster is being initiated. Please wait until it's ready to go offline."];
+         showWarningAlertWithTitle:@"Unable to go Quit"
+         message:@"Cluster is being initiated. Please wait until it's ready to quit."];
         return NSTerminateCancel;
     }
 
@@ -124,7 +124,7 @@
      * 3) no package is running or being installed.
      * 4) no cluster is being setup.
      */
-    TransitionWC *twc = [[TransitionWC alloc] initWithPackageExecution:@"PocketCluster is going offline..."];
+    TransitionWC *twc = [[TransitionWC alloc] initWithPackageExecution:@"Preparing to quit ..."];
     [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
     [twc showWindow:self];
     [twc bringToFront];

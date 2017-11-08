@@ -116,7 +116,7 @@
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
-    return [self shouldOffline:sender];
+    return [self shouldQuit:sender];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {

@@ -119,14 +119,15 @@
          _isUserAuthed = isUserAuthed;
 
          if (_isUserAuthed) {
+             // show intro screen
+             [[AppDelegate sharedDelegate] activeWindowByClassName:@"IntroWC" withResponder:nil];
+
              // setup ui state
              [belf setupWithStartServicesMessage];
 
-             // start basic menu
-
              // set the app ready whenever service gets started
              [[StatusCache SharedStatusCache] setAppReady:YES];
-
+             
          } else {
              [ShowAlert
               showWarningAlertWithTitle:@"Your invitation is not valid"

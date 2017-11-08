@@ -11,5 +11,5 @@
 
 @interface AppDelegate(Shutdown)
 - (void) shutdownCluster;
-- (NSApplicationTerminateReply)shouldOffline:(NSApplication *)sender;
+- (NSApplicationTerminateReply)shouldQuit:(NSApplication *)sender;
 @end

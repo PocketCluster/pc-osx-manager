@@ -48,7 +48,7 @@ func main() {
             appCfg        *config.ServiceConfig = nil
             err           error                 = nil
             vboxCore      vboxglue.VBoxGlue     = nil
-//            IsContextInit bool                  = false
+            IsContextInit bool                  = false
         )
 
         for e := range appLife.Events() {
@@ -67,13 +67,32 @@ func main() {
                     }
                     switch e.Crosses(lifecycle.StageAlive) {
                         case lifecycle.CrossOn: {
-                            // this should happen only once in the lifetime of an application.
-                            // so we'll initialize our context here to have safe operation
-                            log.Debugf("[LIFE] initialize ApplicationContext...")
+                            if !IsContextInit {
+                                // this should happen only once in the lifetime of an application.
+                                // so we'll initialize our context here to have safe operation
 
-                            // this needs to be initialized before service loop initiated
-                            context.SharedHostContext()
-                            log.Debugf("[LIFE] app is now created, fully initialized %v", e.String())
+                                // this needs to be initialized before service loop initiated
+                                context.SharedHostContext()
+                                log.Debugf("[LIFE] context creation")
+
+                                // -- initial service path registration ---
+                                initcheck.InitApplicationCheck(appLife, theFeeder)
+                                pkgtask.InitPackageLifeCycle(rasker.RouteTasker{
+                                    ServiceSupervisor: appLife.ServiceSupervisor,
+                                    Router: appLife.Router},
+                                    theFeeder)
+                                pkgtask.InitPackageKillCycle(rasker.RouteTasker{
+                                    ServiceSupervisor: appLife.ServiceSupervisor,
+                                    Router: appLife.Router},
+                                    theFeeder)
+                                list.InitRouthPathListAvailable(appLife, theFeeder)
+                                list.InitRouthPathListInstalled(appLife, theFeeder)
+                                log.Debugf("[LIFE] service path registration")
+
+                                // make sure initialization happens only once
+                                IsContextInit = true
+                                log.Debugf("[LIFE] app is now created, fully initialized %v", e.String())
+                            }
                         }
                         case lifecycle.CrossOff: {
                             log.Debugf("[LIFE] app is inactive %v", e.String())
@@ -258,19 +277,8 @@ func main() {
                             continue
                         }
 
-                        // --- route path event ---
-                        initcheck.InitRoutePathServices(appLife, theFeeder)
-                        pkgtask.InitPackageLifeCycle(rasker.RouteTasker{
-                            ServiceSupervisor: appLife.ServiceSupervisor,
-                            Router: appLife.Router},
-                            theFeeder)
-                        pkgtask.InitPackageKillCycle(rasker.RouteTasker{
-                            ServiceSupervisor: appLife.ServiceSupervisor,
-                            Router: appLife.Router},
-                            theFeeder)
+                        // --- additional route path event ---
                         install.InitRoutePathInstallPackage(appLife, theFeeder, appCfg.PCSSH)
-                        list.InitRouthPathListAvailable(appLife, theFeeder)
-                        list.InitRouthPathListInstalled(appLife, theFeeder)
 
                         // --- net listeners ---
                         // vboxcontrol service comes first (as it's internal network listener)
@@ -317,7 +325,7 @@ func main() {
                     case operation.CmdBaseServiceStop: {
                         err := stopBaseService(appLife, theFeeder)
                         if err != nil {
-                            log.Errorf("[ERROR] unable to report app offline ready %v", err.Error())
+                            log.Errorf("[ERROR] unable to terminate app %v", err.Error())
                         }
                         log.Debugf("[OP] %v", e.String())
                     }

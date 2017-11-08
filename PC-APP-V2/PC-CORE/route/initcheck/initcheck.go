@@ -11,7 +11,7 @@ import (
     "github.com/stkim1/pc-core/vboxglue"
 )
 
-func InitRoutePathServices(appLife route.Router, feeder route.ResponseFeeder) {
+func InitApplicationCheck(appLife route.Router, feeder route.ResponseFeeder) {
 
     // check if this system is suitable to run
     appLife.GET(routepath.RpathSystemReadiness(), func(_, path, _ string) error {
