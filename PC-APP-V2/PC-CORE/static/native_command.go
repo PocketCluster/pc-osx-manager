@@ -23,6 +23,13 @@ func OpsCmdBaseServiceStop() {
     })
 }
 
+//export OpsCmdClusterShutdown
+func OpsCmdClusterShutdown() {
+    theApp.Send(operation.Operation{
+        Command:    operation.CmdClusterShutdown,
+    })
+}
+
 //export OpsCmdStorageStart
 func OpsCmdStorageStart() {
     theApp.Send(operation.Operation{

@@ -26,6 +26,7 @@ const (
     // Base Service start
     CmdBaseServiceStart     = iota
     CmdBaseServiceStop
+    CmdClusterShutdown
 
     // ETCD control
     CmdStorageStart

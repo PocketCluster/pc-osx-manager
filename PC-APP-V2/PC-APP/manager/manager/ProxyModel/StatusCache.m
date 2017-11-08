@@ -60,7 +60,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
         // set app status is not ready yet
         _appReady = NO;
-        _shutdown;
+        _shutdown = NO;
     }
     return self;
 }
@@ -203,7 +203,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
     BOOL online = NO;
     @synchronized(self) {
         for (Node *node in _nodeList) {
-            if ([node Registered] && [node isReady]) {
+            if ([node.Name hasPrefix:@"pc-node"] && [node Registered] && [node isReady]) {
                 online = YES;
                 break;
             }

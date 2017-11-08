@@ -3,8 +3,6 @@ package main
 
 import "C"
 import (
-    "encoding/json"
-
     log "github.com/Sirupsen/logrus"
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
@@ -25,7 +23,6 @@ import (
     "github.com/stkim1/pc-core/route/initcheck"
     "github.com/stkim1/pc-core/route/install"
     "github.com/stkim1/pc-core/route/list"
-    "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/service/container"
     "github.com/stkim1/pc-core/service/dns"
@@ -318,27 +315,16 @@ func main() {
                     }
 
                     case operation.CmdBaseServiceStop: {
-                        // stop monitor first
-                        resultC := make(chan service.Event)
-                        if err := appLife.BindDiscreteEvent(ivent.IventMonitorStopResult, resultC); err != nil {
-                            log.Error("[LIFE] unable to stop monitoring...")
-                        }
-                        // ask node list
-                        appLife.BroadcastEvent(service.Event{Name:ivent.IventMonitorStopRequest})
-                        <- resultC
-                        appLife.UntieDiscreteEvent(ivent.IventMonitorStopResult)
-                        appLife.StopServices()
-                        // we send it's ok to quit signal to frontend
-                        data, err := json.Marshal(route.ReponseMessage{
-                            "app-shutdown-ready": {
-                                "status": true,
-                            },
-                        })
-                        if err == nil {
-                            err = theFeeder.FeedResponseForGet(routepath.RpathAppPrepShutdown(), string(data))
-                        }
+                        err := stopBaseService(appLife, theFeeder)
                         if err != nil {
-                            log.Errorf("[ERROR] unable to report app shutdown ready %v", err.Error())
+                            log.Errorf("[ERROR] unable to report app offline ready %v", err.Error())
+                        }
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdClusterShutdown: {
+                        err := shutdownCluster(appLife, theFeeder, appCfg.PCSSH)
+                        if err != nil {
+                            log.Errorf("[ERROR] unable to shutdown cluster %v", err.Error())
                         }
                         log.Debugf("[OP] %v", e.String())
                     }

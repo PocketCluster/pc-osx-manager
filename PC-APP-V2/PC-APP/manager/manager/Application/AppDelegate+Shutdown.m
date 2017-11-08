@@ -66,7 +66,7 @@
     [self addOpenWindow:twc];
     [self updateProcessType];
     
-    OpsCmdBaseServiceStop();
+    OpsCmdClusterShutdown();
     [[NSApplication sharedApplication] terminate:nil];
     return;
 }
