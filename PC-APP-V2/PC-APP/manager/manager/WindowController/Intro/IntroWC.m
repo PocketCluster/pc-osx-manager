@@ -100,7 +100,7 @@
     // quickly filter out the worst case scenarios when 'node online timeup' noti has not fired
     if (![[StatusCache SharedStatusCache] showOnlineNode]) {
         if (![[StatusCache SharedStatusCache] isNodeListValid] || \
-            ![[StatusCache SharedStatusCache] isAllRegisteredNodesReady]) {
+            ![[StatusCache SharedStatusCache] isRegisteredNodesAllOnline]) {
             return;
         }
     }

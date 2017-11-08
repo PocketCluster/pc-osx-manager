@@ -86,7 +86,7 @@
 - (void) updateNodeStatusWith:(StatusCache *)aCache {
     // quickly filter out the worst case scenarios when 'node online timeup' noti has not fired
     if (![aCache showOnlineNode]) {
-        if (![aCache isNodeListValid] || ![aCache isAllRegisteredNodesReady]) {
+        if (![aCache isNodeListValid] || ![aCache isRegisteredNodesAllOnline]) {
             return;
         }
     }
@@ -129,7 +129,7 @@ static void _updateExecMenuVisibility(NSMenuItem *aPackageMenu, ExecState aExecS
     }
 
     BOOL hideMenu = YES;
-    if ([sCache isNodeListValid] && [sCache isAllRegisteredNodesReady] && [sCache hasSlaveNodes]) {
+    if ([sCache isNodeListValid] && [sCache isRegisteredNodesAllOnline] && [sCache hasSlaveNodes]) {
         hideMenu = NO;
     }
 

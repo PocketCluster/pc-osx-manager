@@ -46,8 +46,8 @@
 - (NSArray<Node *>*) nodeList;
 - (void) refreshNodList:(NSArray<NSDictionary *>*)aNodeList;
 - (BOOL) hasSlaveNodes;
-- (BOOL) isAllRegisteredNodesReady;
-
+- (BOOL) isRegisteredNodesAllOnline;
+- (BOOL) isAnySlaveNodeOnline;
 
 #pragma mark - service status
 // this property should be used to indicate if there is grave service error.
@@ -68,4 +68,7 @@
 
 // cluster is being setup. Wait until all the process is over
 @property (readwrite, getter=isClusterSetup, setter=setClusterSetup:) BOOL clusterSetup;
+
+// cluster is shutting down. (shutdown slave nodes as well)
+@property (readwrite, getter=isShutdown, setter=setShutdown:) BOOL shutdown;
 @end

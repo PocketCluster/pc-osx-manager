@@ -6,8 +6,9 @@
 //
 
 #import <Sparkle/Sparkle.h>
-#import "AppDelegate+Window.h"
 #import "StatusCache.h"
+#import "AppDelegate+Shutdown.h"
+#import "AppDelegate+Window.h"
 
 #import "NativeMenuAddition.h"
 #import "NativeMenu.h"
@@ -23,7 +24,8 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
 - (void) menuSelectedCheckForUpdates:(id)sender;
 - (void) menuSelectedSlack:(id)sender;
 - (void) menuSelectedAbout:(id)sender;
-- (void) menuSelectedQuit:(id)sender;
+- (void) menuSelectedShutdown:(id)sender;
+- (void) menuSelectedOffline:(id)sender;
 
 #ifdef DEBUG
 - (void)menuSelectedDebug:(id)sender;
@@ -103,20 +105,30 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
     [menuRoot addItem:[NSMenuItem separatorItem]];
 #endif
 
+    // shutdown
+    NSMenuItem *mShutdown = [[NSMenuItem alloc] initWithTitle:@"Shutdown" action:@selector(menuSelectedShutdown:) keyEquivalent:@""];
+    [mShutdown setTag:MENUITEM_SHUTDOWN];
+    [mShutdown setTarget:self];
+    [mShutdown setHidden:YES];
+//    [mShutdown setKeyEquivalentModifierMask: NSCommandKeyMask | NSShiftKeyMask];
+//    [mShutdown setKeyEquivalent:@"x"];
+    [menuRoot addItem:mShutdown];
+
     // quit menu
-    NSMenuItem *mQuit = [[NSMenuItem alloc] initWithTitle:@"Quit" action:@selector(menuSelectedQuit:) keyEquivalent:@""];
-    [mQuit setTag:MENUITEM_QUIT];
-    [mQuit setTarget:self];
-    [mQuit setHidden:YES];
-    [menuRoot addItem:mQuit];
-    
+    NSMenuItem *mOffline = [[NSMenuItem alloc] initWithTitle:@"Offline" action:@selector(menuSelectedOffline:) keyEquivalent:@""];
+    [mOffline setTag:MENUITEM_OFFLINE];
+    [mOffline setTarget:self];
+    [mOffline setHidden:YES];
+    [mOffline setKeyEquivalentModifierMask: NSCommandKeyMask];
+    [mOffline setKeyEquivalent:@"q"];
+    [menuRoot addItem:mOffline];
+
     // --- set  finalstatus ---
     NSStatusItem* status = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
     [status setHighlightMode:YES];
     [status setMenu:menuRoot];
     [self setStatusItem:status];
 }
-
 
 #pragma mark - Utility Funcs
 - (void) clusterStatusOn {
@@ -143,16 +155,25 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
 #pragma mark - Common Menu Handling
 - (void) setupCheckupMenu {
     // quit menu
-    NSMenuItem *mQuit = [self.statusItem.menu itemWithTag:MENUITEM_QUIT];
+    NSMenuItem *mQuit = [self.statusItem.menu itemWithTag:MENUITEM_OFFLINE];
     [mQuit setHidden:YES];
     [self.statusItem.menu itemChanged:mQuit];
 }
 
 - (void) setupOperationMenu {
-    // quit menu
-    NSMenuItem *mQuit = [self.statusItem.menu itemWithTag:MENUITEM_QUIT];
-    [mQuit setHidden:NO];
-    [self.statusItem.menu itemChanged:mQuit];
+    // shutdown
+    NSMenuItem *mShutdown = [self.statusItem.menu itemWithTag:MENUITEM_SHUTDOWN];
+    if ([[StatusCache SharedStatusCache] isAnySlaveNodeOnline]) {
+        [mShutdown setHidden:NO];
+    } else {
+        [mShutdown setHidden:YES];
+    }
+    [self.statusItem.menu itemChanged:mShutdown];
+
+    // offline menu
+    NSMenuItem *mOffline = [self.statusItem.menu itemWithTag:MENUITEM_OFFLINE];
+    [mOffline setHidden:NO];
+    [self.statusItem.menu itemChanged:mOffline];
 }
 
 - (void) menuSelectedPref:(id)sender {
@@ -176,7 +197,11 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
     [[AppDelegate sharedDelegate] activeWindowByClassName:@"AboutWindow" withResponder:self];
 }
 
-- (void)menuSelectedQuit:(id)sender {
+- (void) menuSelectedShutdown:(id)sender {
+    [[AppDelegate sharedDelegate] shutdownCluster];
+}
+
+- (void)menuSelectedOffline:(id)sender {
     [[NSApplication sharedApplication] terminate:self];
 }
 

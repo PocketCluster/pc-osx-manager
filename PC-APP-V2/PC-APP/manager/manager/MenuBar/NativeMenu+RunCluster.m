@@ -26,7 +26,7 @@
     [mStatus setTarget:nil];
 
     // show warning that some nodes are missing
-    if ([[StatusCache SharedStatusCache] isAllRegisteredNodesReady]) {
+    if ([[StatusCache SharedStatusCache] isRegisteredNodesAllOnline]) {
         [mStatus setImage:nil];
     } else {
         [mStatus setImage:[NSImage imageNamed:@"warning"]];

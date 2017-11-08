@@ -26,6 +26,7 @@
     BOOL _appReady;
     BOOL _pkgInstalling;
     BOOL _clusterSetup;
+    BOOL _shutdown;
 }
 SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
@@ -59,7 +60,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
         // set app status is not ready yet
         _appReady = NO;
-
+        _shutdown;
     }
     return self;
 }
@@ -185,16 +186,32 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
     return sExist;
 }
 
-- (BOOL) isAllRegisteredNodesReady {
+- (BOOL) isRegisteredNodesAllOnline {
+    BOOL all = YES;
     @synchronized(self) {
         for (Node *node in _nodeList) {
             if ([node Registered] && ![node isReady]) {
-                return NO;
+                all = NO;
+                break;
             }
         }
     }
-    return YES;
+    return all;
 }
+
+- (BOOL) isAnySlaveNodeOnline {
+    BOOL online = NO;
+    @synchronized(self) {
+        for (Node *node in _nodeList) {
+            if ([node Registered] && [node isReady]) {
+                online = YES;
+                break;
+            }
+        }
+    }
+    return online;
+}
+
 
 #pragma mark - service status
 @dynamic serviceReady;
@@ -270,4 +287,20 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
         _clusterSetup = setup;
     }
 }
+
+@dynamic shutdown;
+- (BOOL) isShutdown {
+    BOOL shutdown = NO;
+    @synchronized(self) {
+        shutdown = _shutdown;
+    }
+    return shutdown;
+}
+
+- (void) setShutdown:(BOOL)shutdown {
+    @synchronized(self) {
+        _shutdown = shutdown;
+    }
+}
+
 @end

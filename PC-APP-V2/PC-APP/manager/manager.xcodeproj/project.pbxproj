@@ -60,6 +60,7 @@
 		0470F7771FADE7A800B58649 /* AppDelegate+Execution.m in Sources */ = {isa = PBXBuildFile; fileRef = 0470F7761FADE7A800B58649 /* AppDelegate+Execution.m */; };
 		0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0486780E1BCF5FE20071594B /* Assets.xcassets */; };
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
+		048804661FB2EE3100F4EA05 /* AppDelegate+Shutdown.m in Sources */ = {isa = PBXBuildFile; fileRef = 048804651FB2EE3100F4EA05 /* AppDelegate+Shutdown.m */; };
 		048EF4B31F43C2C8003BEEF0 /* AppDelegate+AppCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = 048EF4B21F43C2C8003BEEF0 /* AppDelegate+AppCheck.m */; };
 		0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */; };
 		04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */; };
@@ -228,6 +229,8 @@
 		048678231BCF5FE20071594B /* managerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = managerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		048678271BCF5FE20071594B /* managerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = managerUITests.m; sourceTree = "<group>"; };
 		048678291BCF5FE20071594B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		048804641FB2EE3100F4EA05 /* AppDelegate+Shutdown.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Shutdown.h"; sourceTree = "<group>"; };
+		048804651FB2EE3100F4EA05 /* AppDelegate+Shutdown.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Shutdown.m"; sourceTree = "<group>"; };
 		048EF4B11F43C2C8003BEEF0 /* AppDelegate+AppCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+AppCheck.h"; sourceTree = "<group>"; };
 		048EF4B21F43C2C8003BEEF0 /* AppDelegate+AppCheck.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+AppCheck.m"; sourceTree = "<group>"; };
 		0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
@@ -410,20 +413,22 @@
 				04C585851BE5BF3B004B2839 /* PCConstants.m */,
 				0441A3D61BD8904100AABD7A /* AppDelegate.h */,
 				0441A3D71BD8904100AABD7A /* AppDelegate.m */,
-				04B3FB8C1F41133600A72834 /* AppDelegate+ResponseHandle.h */,
-				04B3FB8D1F41133600A72834 /* AppDelegate+ResponseHandle.m */,
+				048EF4B11F43C2C8003BEEF0 /* AppDelegate+AppCheck.h */,
+				048EF4B21F43C2C8003BEEF0 /* AppDelegate+AppCheck.m */,
+				0470F7751FADE7A800B58649 /* AppDelegate+Execution.h */,
+				0470F7761FADE7A800B58649 /* AppDelegate+Execution.m */,
+				045BD3721F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.h */,
+				045BD3731F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.m */,
 				04AD71C71E9B74E600DB6AE9 /* AppDelegate+Netmonitor.h */,
 				04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */,
+				04B3FB8C1F41133600A72834 /* AppDelegate+ResponseHandle.h */,
+				04B3FB8D1F41133600A72834 /* AppDelegate+ResponseHandle.m */,
+				048804641FB2EE3100F4EA05 /* AppDelegate+Shutdown.h */,
+				048804651FB2EE3100F4EA05 /* AppDelegate+Shutdown.m */,
 				04D5A48C1E9269AE0057012A /* AppDelegate+Sparkle.h */,
 				04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */,
 				043F47111F3E0C730078A0C1 /* AppDelegate+Window.h */,
 				043F47121F3E0C730078A0C1 /* AppDelegate+Window.m */,
-				048EF4B11F43C2C8003BEEF0 /* AppDelegate+AppCheck.h */,
-				048EF4B21F43C2C8003BEEF0 /* AppDelegate+AppCheck.m */,
-				045BD3721F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.h */,
-				045BD3731F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.m */,
-				0470F7751FADE7A800B58649 /* AppDelegate+Execution.h */,
-				0470F7761FADE7A800B58649 /* AppDelegate+Execution.m */,
 			);
 			name = Application;
 			path = manager/Application;
@@ -1117,6 +1122,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				048804661FB2EE3100F4EA05 /* AppDelegate+Shutdown.m in Sources */,
 				04030F811F3D5C1E00EA793D /* NativeMenu+RunCluster.m in Sources */,
 				04ADEBFF1FA02493006ACEB5 /* StatusCache.m in Sources */,
 				04DD160C1F40FD190080D025 /* PCRouter.m in Sources */,
