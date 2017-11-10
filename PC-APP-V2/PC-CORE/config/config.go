@@ -77,11 +77,11 @@ func InitServiceConfig() (*ServiceConfig, error) {
         // This is critical error. report it to UI and ask them to clean & re-install
         return nil, errors.WithStack(err)
     }
-    log.Infof("user %v should be created", uname)
+
     _, err = model.FindUserMetaWithLogin(uname)
     if err != nil {
         if err == model.NoItemFound {
-            log.Infof("user %v not found", uname)
+            log.Infof("user %v not found, should be created", uname)
             urr := model.UpsertUserMeta(model.NewUserMeta(uname))
             if urr != nil {
                 // This is critical error. report it to UI and ask them to clean & re-install
