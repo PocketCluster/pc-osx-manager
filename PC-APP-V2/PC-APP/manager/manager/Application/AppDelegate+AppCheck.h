@@ -9,8 +9,6 @@
 #import "AppDelegate.h"
 
 @interface AppDelegate(AppCheck)
-- (void) initCheck;
-
-- (void) startMonitors;
-- (void) closeMonitors;
+- (void) addInitCheckPath;
+- (void) delInitCheckPath;
 @end

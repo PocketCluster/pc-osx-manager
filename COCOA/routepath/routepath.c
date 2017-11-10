@@ -8,6 +8,8 @@
 
 #include "routepath.h"
 
+const char* RPATH_CONTEXT_INIT              = "/v1/monitor/system/context-init";
+const char* RPATH_NETWORK_INIT              = "/v1/monitor/system/network-init";
 const char* RPATH_SYSTEM_READINESS          = "/v1/inquiry/system/readiness";
 const char* RPATH_APP_EXPIRED               = "/v1/inquiry/app/expired";
 const char* RPATH_USER_AUTHED               = "/v1/inquiry/user/authed";

@@ -44,41 +44,42 @@ handleResponse(NSString* eventMethod, const char* path, const char* response) {
 
     // parse in the background
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        @autoreleasepool {
+            NSString *eventPath = \
+                [[NSString alloc]
+                     initWithBytesNoCopy:(void *)path
+                     length:strlen((const char*)path)
+                     encoding:NSUTF8StringEncoding
+                     freeWhenDone:YES];
 
-        NSString *eventPath = \
-            [[NSString alloc]
-                 initWithBytesNoCopy:(void *)path
-                 length:strlen((const char*)path)
-                 encoding:NSUTF8StringEncoding
-                 freeWhenDone:YES];
+            NSDictionary* eventResponse = nil;
+            if (response != NULL) {
 
-        NSDictionary* eventResponse = nil;
-        if (response != NULL) {
+                NSData *payloadData = \
+                    [[NSData alloc]
+                     initWithBytesNoCopy:(void *)response
+                     length:strlen((const char*)response)
+                     freeWhenDone:YES];
 
-            NSData *payloadData = \
-                [[NSData alloc]
-                 initWithBytesNoCopy:(void *)response
-                 length:strlen((const char*)response)
-                 freeWhenDone:YES];
-
-            NSError *error = nil;
-            eventResponse = \
-                [NSJSONSerialization
-                     JSONObjectWithData:payloadData
-                     options:NSJSONReadingMutableContainers
-                     error:&error];
-            if (error != nil) {
-                Log(@"%@", [error description]);
-                return;
+                NSError *error = nil;
+                eventResponse = \
+                    [NSJSONSerialization
+                         JSONObjectWithData:payloadData
+                         options:NSJSONReadingMutableContainers
+                         error:&error];
+                if (error != nil) {
+                    Log(@"%@", [error description]);
+                    return;
+                }
             }
-        }
 
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[PCRouter sharedRouter]
-             responseFor:eventMethod
-             onPath:eventPath
-             withPayload:eventResponse];
-        });
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[PCRouter sharedRouter]
+                 responseFor:eventMethod
+                 onPath:eventPath
+                 withPayload:eventResponse];
+            });
+        }
     });
 }
 

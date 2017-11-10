@@ -31,6 +31,8 @@
 		0441A4141BD8BEAA00AABD7A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4131BD8BEAA00AABD7A /* SystemConfiguration.framework */; };
 		0441A4151BD8BEF100AABD7A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36411BD791F8004E0946 /* Foundation.framework */; };
 		0441A4171BD8BF3E00AABD7A /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0441A4161BD8BF3E00AABD7A /* CoreServices.framework */; };
+		0444F52B1FB5179A00760503 /* AppDelegate+Routepath.m in Sources */ = {isa = PBXBuildFile; fileRef = 0444F52A1FB5179A00760503 /* AppDelegate+Routepath.m */; };
+		0444F52E1FB51F5B00760503 /* AppDelegate+AppCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = 0444F52D1FB51F5B00760503 /* AppDelegate+AppCheck.m */; };
 		0447CABB1F47AD28003BB069 /* BaseSetupVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 0447CABA1F47AD28003BB069 /* BaseSetupVC.m */; };
 		044CDCC31FAF1DFB00E49209 /* TransitionWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 044CDCC11FAF1DFB00E49209 /* TransitionWC.m */; };
 		044CDCC41FAF1DFB00E49209 /* TransitionWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 044CDCC21FAF1DFB00E49209 /* TransitionWC.xib */; };
@@ -61,7 +63,6 @@
 		0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0486780E1BCF5FE20071594B /* Assets.xcassets */; };
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
 		048804661FB2EE3100F4EA05 /* AppDelegate+Shutdown.m in Sources */ = {isa = PBXBuildFile; fileRef = 048804651FB2EE3100F4EA05 /* AppDelegate+Shutdown.m */; };
-		048EF4B31F43C2C8003BEEF0 /* AppDelegate+AppCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = 048EF4B21F43C2C8003BEEF0 /* AppDelegate+AppCheck.m */; };
 		0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */; };
 		04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */; };
 		04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */; };
@@ -163,6 +164,10 @@
 		0441A4111BD8BEA200AABD7A /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		0441A4131BD8BEAA00AABD7A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		0441A4161BD8BF3E00AABD7A /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
+		0444F5291FB5179A00760503 /* AppDelegate+Routepath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Routepath.h"; sourceTree = "<group>"; };
+		0444F52A1FB5179A00760503 /* AppDelegate+Routepath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Routepath.m"; sourceTree = "<group>"; };
+		0444F52C1FB51F5B00760503 /* AppDelegate+AppCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+AppCheck.h"; sourceTree = "<group>"; };
+		0444F52D1FB51F5B00760503 /* AppDelegate+AppCheck.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+AppCheck.m"; sourceTree = "<group>"; };
 		0447CAB91F47AD28003BB069 /* BaseSetupVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseSetupVC.h; sourceTree = "<group>"; };
 		0447CABA1F47AD28003BB069 /* BaseSetupVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseSetupVC.m; sourceTree = "<group>"; };
 		0447CABD1F47B1F6003BB069 /* NSGeometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSGeometry.h; sourceTree = "<group>"; };
@@ -231,8 +236,6 @@
 		048678291BCF5FE20071594B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		048804641FB2EE3100F4EA05 /* AppDelegate+Shutdown.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Shutdown.h"; sourceTree = "<group>"; };
 		048804651FB2EE3100F4EA05 /* AppDelegate+Shutdown.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Shutdown.m"; sourceTree = "<group>"; };
-		048EF4B11F43C2C8003BEEF0 /* AppDelegate+AppCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+AppCheck.h"; sourceTree = "<group>"; };
-		048EF4B21F43C2C8003BEEF0 /* AppDelegate+AppCheck.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+AppCheck.m"; sourceTree = "<group>"; };
 		0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		04AD71C31E9B749A00DB6AE9 /* VersionComparison.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VersionComparison.h; sourceTree = "<group>"; };
 		04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionComparison.m; sourceTree = "<group>"; };
@@ -413,8 +416,8 @@
 				04C585851BE5BF3B004B2839 /* PCConstants.m */,
 				0441A3D61BD8904100AABD7A /* AppDelegate.h */,
 				0441A3D71BD8904100AABD7A /* AppDelegate.m */,
-				048EF4B11F43C2C8003BEEF0 /* AppDelegate+AppCheck.h */,
-				048EF4B21F43C2C8003BEEF0 /* AppDelegate+AppCheck.m */,
+				0444F52C1FB51F5B00760503 /* AppDelegate+AppCheck.h */,
+				0444F52D1FB51F5B00760503 /* AppDelegate+AppCheck.m */,
 				0470F7751FADE7A800B58649 /* AppDelegate+Execution.h */,
 				0470F7761FADE7A800B58649 /* AppDelegate+Execution.m */,
 				045BD3721F9CEEB1003B19F4 /* AppDelegate+MonitorDispenser.h */,
@@ -423,6 +426,8 @@
 				04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */,
 				04B3FB8C1F41133600A72834 /* AppDelegate+ResponseHandle.h */,
 				04B3FB8D1F41133600A72834 /* AppDelegate+ResponseHandle.m */,
+				0444F5291FB5179A00760503 /* AppDelegate+Routepath.h */,
+				0444F52A1FB5179A00760503 /* AppDelegate+Routepath.m */,
 				048804641FB2EE3100F4EA05 /* AppDelegate+Shutdown.h */,
 				048804651FB2EE3100F4EA05 /* AppDelegate+Shutdown.m */,
 				04D5A48C1E9269AE0057012A /* AppDelegate+Sparkle.h */,
@@ -1130,13 +1135,13 @@
 				0447CABB1F47AD28003BB069 /* BaseSetupVC.m in Sources */,
 				046A361A1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */,
-				048EF4B31F43C2C8003BEEF0 /* AppDelegate+AppCheck.m in Sources */,
 				046D31041F3D310C0081CC3E /* PCPrefWC.m in Sources */,
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				04D5A48E1E9269AE0057012A /* AppDelegate+Sparkle.m in Sources */,
 				04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */,
 				04BEEEAF1F40832E008426A7 /* PCRouteTrie.m in Sources */,
 				04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */,
+				0444F52B1FB5179A00760503 /* AppDelegate+Routepath.m in Sources */,
 				04C6D60D1E7F9EDD0004837A /* NSDictionary+HTTPAddition.m in Sources */,
 				046A36231BD78AB8004E0946 /* timeutil.m in Sources */,
 				04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */,
@@ -1144,6 +1149,7 @@
 				046A36171BD78AB8004E0946 /* NSString+Random.m in Sources */,
 				046D312A1F3D346B0081CC3E /* PCSetup3VC.m in Sources */,
 				04DD160F1F4100570080D025 /* PCRoutePathConst.m in Sources */,
+				0444F52E1FB51F5B00760503 /* AppDelegate+AppCheck.m in Sources */,
 				046D31101F3D32440081CC3E /* DPSetupWC.m in Sources */,
 				046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				04ADEBFD1FA02493006ACEB5 /* Node.m in Sources */,

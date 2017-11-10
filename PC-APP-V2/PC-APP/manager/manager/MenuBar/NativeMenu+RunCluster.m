@@ -46,16 +46,16 @@
         [mStatus.submenu addItem:sInstall];
         [mStatus.submenu addItem:[NSMenuItem separatorItem]];
 
-        NSMenuItem *sStop =
+        NSMenuItem *sAdd =
             [[NSMenuItem alloc]
-             initWithTitle:@"Stop Cluster"
-             action:@selector(menuSelectedStopCluster:)
+             initWithTitle:@"Add Child Node"
+             action:nil
              keyEquivalent:@""];
-        [sStop setTarget:self];
-        [mStatus.submenu addItem:sStop];
+        [sAdd setTarget:self];
+        [sAdd setEnabled:NO];
+        [mStatus.submenu addItem:sAdd];
     }
     [self.statusItem.menu itemChanged:mStatus];
-
 
     // show package menu
     {

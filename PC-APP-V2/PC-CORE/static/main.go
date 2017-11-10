@@ -48,7 +48,7 @@ func main() {
             appCfg        *config.ServiceConfig = nil
             err           error                 = nil
             vboxCore      vboxglue.VBoxGlue     = nil
-            IsContextInit bool                  = false
+            IsContextInit, IsNetworkInit        = false, false
         )
 
         for e := range appLife.Events() {
@@ -68,6 +68,7 @@ func main() {
                     switch e.Crosses(lifecycle.StageAlive) {
                         case lifecycle.CrossOn: {
                             if !IsContextInit {
+                                IsContextInit = true
                                 // this should happen only once in the lifetime of an application.
                                 // so we'll initialize our context here to have safe operation
 
@@ -76,6 +77,7 @@ func main() {
                                 log.Debugf("[LIFE] context creation")
 
                                 // -- initial service path registration ---
+                                // by this time the response feeder should be initialized on frontend
                                 initcheck.InitApplicationCheck(appLife, theFeeder)
                                 pkgtask.InitPackageLifeCycle(rasker.RouteTasker{
                                     ServiceSupervisor: appLife.ServiceSupervisor,
@@ -89,8 +91,14 @@ func main() {
                                 list.InitRouthPathListInstalled(appLife, theFeeder)
                                 log.Debugf("[LIFE] service path registration")
 
+                                // (2017/11/10) we ought to have frontend check engine response, but then it complicated network monitoring.
+                                // So, we'll just give more time for context to be initialized for now.
+                                err := reportContextInit(appLife, theFeeder)
+                                if err != nil {
+                                    log.Errorf("[SYSCONTEXT] error in reporting network init %v", err.Error())
+                                }
+
                                 // make sure initialization happens only once
-                                IsContextInit = true
                                 log.Debugf("[LIFE] app is now created, fully initialized %v", e.String())
                             }
                         }
@@ -121,21 +129,30 @@ func main() {
                 case network.Event: {
                     switch e.NetworkEvent {
                         case network.NetworkChangeInterface: {
-                            log.Debugf("[NET] %v", e.String())
-
-                            // TODO check if service is running
-                            isSrvRun := len(appLife.ServiceList()) != 0
                             updated := context.SharedHostContext().UpdateNetworkInterfaces(e.HostInterfaces)
 
+                            // notify frontend to initiate the next move.
+                            if !IsNetworkInit {
+                                IsNetworkInit = true
+
+                                err := reportNetworkInit(appLife, theFeeder)
+                                if err != nil {
+                                    log.Errorf("[SYSNET] error in reporting network init %v", err.Error())
+                                }
+                            }
+
                             // services should be running before receiving event. Otherwise, service will not start
+                            // TODO check if service is running
+                            isSrvRun := len(appLife.ServiceList()) != 0
                             if isSrvRun && updated {
-                                log.Debugf("[NET] network address change event triggered")
+                                log.Debugf("[SYSNET] network address change event triggered")
                                 appLife.BroadcastEvent(service.Event{Name:ivent.IventNetworkAddressChange})
                             }
+                            log.Debugf("[SYSNET] %v", e.String())
                         }
                         case network.NetworkChangeGateway: {
-                            log.Debugf("[NET] %v", e.String())
                             context.SharedHostContext().UpdateNetworkGateways(e.HostGateways)
+                            log.Debugf("[NET] %v", e.String())
                         }
                     }
                 }

@@ -14,10 +14,12 @@
 
 #import "AppDelegate.h"
 #import "AppDelegate+AppCheck.h"
+#import "AppDelegate+MonitorDispenser.h"
 #import "AppDelegate+Netmonitor.h"
 #import "AppDelegate+ResponseHandle.h"
-#import "AppDelegate+Sparkle.h"
+#import "AppDelegate+Routepath.h"
 #import "AppDelegate+Shutdown.h"
+#import "AppDelegate+Sparkle.h"
 
 @interface AppDelegate ()<NSUserNotificationCenterDelegate>
 @property (nonatomic, strong, readwrite) NativeMenu *mainMenu;
@@ -31,10 +33,6 @@
 
 @implementation AppDelegate
 @synthesize openWindows = _openWindows;
-@synthesize isSystemReady = _isSystemReady;
-@synthesize isAppExpired = _isAppExpired;
-@synthesize isFirstTime = _isFirstTime;
-@synthesize isUserAuthed = _isUserAuthed;
 
 + (AppDelegate*) sharedDelegate {
     return (AppDelegate*)[[NSApplication sharedApplication] delegate];
@@ -56,23 +54,16 @@
     engineDebugOutput(0);
 #endif
 
-    // 4. make golang context (Golang side SharedContext should be init'ed now)
-    lifecycleAlive();
-    
-    // 5. bind feed to host
+    // 4. bind feed to host
     StartResponseFeed();
+    
+    // 5. make golang context (Golang side SharedContext should be init'ed now)
+    // (2017/11/10) we ought to check engine response, but then it complicated network monitoring.
+    // So, we'll just give more time for context to be initialized for now
+    lifecycleAlive();
     
     // 6. register awake/sleep notification
     [self addSleepNotifications];
-    
-    // 7. very first, initial network status refresh ->
-    //   a. This has to be done after 'lifecycleAlive()' is called to get golang context inited
-    //   b. UI element should *NOT* be concerned as warning, error will be *SAFELY* ignored if there is no UI element to receive.
-    Log(@"\n[NET] REFRESHING INTERFACE...\n");
-    interface_status_with_callback(&PCUpdateInterfaceList);
-    gateway_status_with_callback(&PCUpdateGatewayList);
-    // now let interface to be updated
-    [self.interfaceStatus startMonitoring];
 
     // 8.UI
     //   a. opened window list
@@ -84,27 +75,33 @@
 
     // 9. setup application mode
     [[NSRunningApplication currentApplication] activateWithOptions:(NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps)];
-    //[self.window makeKeyAndOrderFront:self];
 
+    // 10. show initial check message status
+    [self setupWithInitialCheckMessage];
     /// --- now, system base notifications are all set --- ///
-    
-    // 10. initialize updates
+
+    // 11. initialize updates
     // !!!(we might need to do after init check)
     [[SUUpdater sharedUpdater] setDelegate:self];
     [[SUUpdater sharedUpdater] setSendsSystemProfile:NO];
     [[SUUpdater sharedUpdater] checkForUpdateInformation];
 
-    // 11. finalize app ready
+    // 12. finalize app ready
     lifecycleVisible();
     Log(@"Application Started. Let's begin initial check");
 
-    // 12. Monitor system health
-    [self startMonitors];
+    // 13. Monitor system health
+    [self addRoutePath];
 
-    // 13. begin app ready sequence
-    // this might update OSX side as well, so we need UI to be working beforehand.
-    // Plus, it delayed execution give a room to golang to be initialized
-    [self initCheck];
+    // 14. Monitor init System check
+    [self addInitCheckPath];
+
+    // 15. this will trigger chain of initial checks.
+    // Initially it was a separated [self initCheck]. it goes into init check sequence.
+    Log(@"\n[NET] REFRESHING INTERFACE...\n");
+    interface_status_with_callback(&PCUpdateInterfaceList);
+    gateway_status_with_callback(&PCUpdateGatewayList);
+    [self.interfaceStatus startMonitoring];
 }
 
 - (void)applicationDidHide:(NSNotification *)aNotification {
@@ -122,18 +119,21 @@
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     [self.interfaceStatus stopMonitoring];
     self.interfaceStatus = nil;
-    
+
+    // remove init check path
+    [self delInitCheckPath];
+
+    // close monitoring
+    [self delRoutePath];
+
     // stop sleep notification
     [self removeSleepNotifications];
     
-    // close monitoring
-    [self closeMonitors];
+    // stop lifecycle
+    lifecycleDead();
     
     // Stop host feed
     StopResponseFeed();
-    
-    // stop lifecycle
-    lifecycleDead();
 }
 
 // Sent to the delegate when a running application receives a remote notification.

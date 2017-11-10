@@ -16,6 +16,34 @@ import (
     "github.com/stkim1/pc-core/service/ivent"
 )
 
+// report context initialization prep status
+func reportContextInit(appLife *appMainLife, feeder route.ResponseFeeder) error {
+    data, err := json.Marshal(route.ReponseMessage{
+        "sys-context-init": {
+            "status": true,
+        },
+    })
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    err = feeder.FeedResponseForGet(routepath.RpathSystemContextInit(), string(data))
+    return errors.WithStack(err)
+}
+
+// report network initialization prep status
+func reportNetworkInit(appLife *appMainLife, feeder route.ResponseFeeder) error {
+    data, err := json.Marshal(route.ReponseMessage{
+        "sys-network-init": {
+            "status": true,
+        },
+    })
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    err = feeder.FeedResponseForGet(routepath.RpathSystemNetworkInit(), string(data))
+    return errors.WithStack(err)
+}
+
 // stop baseservice
 func stopBaseService(appLife *appMainLife, feeder route.ResponseFeeder) error {
     // binf channel

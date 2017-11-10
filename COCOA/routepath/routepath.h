@@ -9,6 +9,8 @@
 #ifndef __ROUTEPATH_H__
 #define __ROUTEPATH_H__
 
+extern const char* RPATH_CONTEXT_INIT;
+extern const char* RPATH_NETWORK_INIT;
 extern const char* RPATH_SYSTEM_READINESS;
 extern const char* RPATH_APP_EXPIRED;
 extern const char* RPATH_USER_AUTHED;

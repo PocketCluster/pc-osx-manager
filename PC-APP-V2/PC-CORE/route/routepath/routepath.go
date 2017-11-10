@@ -8,6 +8,14 @@ package routepath
 */
 import "C"
 
+func RpathSystemContextInit() string {
+    return C.GoString(C.RPATH_CONTEXT_INIT)
+}
+
+func RpathSystemNetworkInit() string {
+    return C.GoString(C.RPATH_NETWORK_INIT)
+}
+
 func RpathSystemReadiness() string {
     return C.GoString(C.RPATH_SYSTEM_READINESS)
 }
