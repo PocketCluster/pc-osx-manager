@@ -207,9 +207,9 @@
     }
 
     if (holder != nil) {
-        Log(@"b4 removal length %ld", [reqList count]);
+//        Log(@"b4 removal length %ld", [reqList count]);
         [reqList removeObject:holder];
-        Log(@"a4 removal length %ld", [reqList count]);
+//        Log(@"a4 removal length %ld", [reqList count]);
     }
 }
 

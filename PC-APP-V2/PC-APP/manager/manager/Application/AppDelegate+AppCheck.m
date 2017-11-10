@@ -46,7 +46,7 @@
 
          } else {
              [ShowAlert
-              showWarningAlertWithTitle:@"Unable to Start PocketCluster"
+              showTerminationAlertWithTitle:@"Unable to Start PocketCluster"
               message:[response valueForKeyPath:@"sys-network-init.error"]];
 
          }
@@ -66,7 +66,7 @@
 
          } else {
              [ShowAlert
-              showWarningAlertWithTitle:@"Unable to run PocketCluster"
+              showTerminationAlertWithTitle:@"Unable to run PocketCluster"
               message:[response valueForKeyPath:@"syscheck.error"]];
 
          }
@@ -85,14 +85,14 @@
              NSString *warning = [response valueForKeyPath:@"expired.warning"];
              if (warning != nil) {
                  [ShowAlert
-                  showWarningAlertWithTitle:@"PocketCluster Expiration"
+                  showTerminationAlertWithTitle:@"PocketCluster Expiration"
                   message:warning];
              }
              [PCRouter routeRequestGet:RPATH_SYSTEM_IS_FIRST_RUN];
 
          } else {
              [ShowAlert
-              showWarningAlertWithTitle:@"PocketCluster Expiration"
+              showTerminationAlertWithTitle:@"PocketCluster Expiration"
               message:[response valueForKeyPath:@"expired.error"]];
 
          }
@@ -137,7 +137,7 @@
 
          } else {
              [ShowAlert
-              showWarningAlertWithTitle:@"Your invitation is not valid"
+              showTerminationAlertWithTitle:@"Your invitation is not valid"
               message:[response valueForKeyPath:@"user-auth.error"]];
 
          }

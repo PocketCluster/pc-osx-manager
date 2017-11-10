@@ -100,6 +100,8 @@ func main() {
 
                                 // make sure initialization happens only once
                                 log.Debugf("[LIFE] app is now created, fully initialized %v", e.String())
+                            } else {
+
                             }
                         }
                         case lifecycle.CrossOff: {
@@ -344,12 +346,20 @@ func main() {
                         if err != nil {
                             log.Errorf("[ERROR] unable to terminate app %v", err.Error())
                         }
+                        err = model.CloseRecordGate()
+                        if err != nil {
+                            log.Errorf("[ERROR] error in closing storage %v", err.Error())
+                        }
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdClusterShutdown: {
                         err := shutdownCluster(appLife, theFeeder, appCfg.PCSSH)
                         if err != nil {
                             log.Errorf("[ERROR] unable to shutdown cluster %v", err.Error())
+                        }
+                        err = model.CloseRecordGate()
+                        if err != nil {
+                            log.Errorf("[ERROR] error in closing storage %v", err.Error())
                         }
                         log.Debugf("[OP] %v", e.String())
                     }

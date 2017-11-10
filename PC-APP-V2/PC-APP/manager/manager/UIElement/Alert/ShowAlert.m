@@ -26,4 +26,25 @@
     [alert setAlertStyle:NSWarningAlertStyle];
     [alert runModal];
 }
+
++ (void) showTerminationAlertWithTitle:(NSString *)aTitle message:(NSString *)aMessage {
+    if (ISNULL_STRING(aTitle)) {
+        return;
+    }
+    if (ISNULL_STRING(aMessage)) {
+        return;
+    }
+
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert addButtonWithTitle:@"Quit"];
+    //[alert addButtonWithTitle:@"Cancel"];
+    [alert setMessageText:aTitle];
+    [alert setInformativeText:aMessage];
+    [alert setAlertStyle:NSWarningAlertStyle];
+
+    NSInteger result = [alert runModal];
+    if ( result == NSAlertFirstButtonReturn ) {
+        [[NSApplication sharedApplication] terminate:nil];
+    }
+}
 @end
