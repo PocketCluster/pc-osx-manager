@@ -9,6 +9,7 @@ import (
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+    "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
@@ -32,11 +33,26 @@ func reportContextInit(appLife *appMainLife, feeder route.ResponseFeeder) error 
 
 // report network initialization prep status
 func reportNetworkInit(appLife *appMainLife, feeder route.ResponseFeeder) error {
-    data, err := json.Marshal(route.ReponseMessage{
-        "sys-network-init": {
-            "status": true,
-        },
-    })
+    var (
+        message route.ReponseMessage
+    )
+    _, err := context.SharedHostContext().HostPrimaryInterfaceShortName()
+    if err != nil {
+        message = route.ReponseMessage{
+            "sys-network-init": {
+                "status": false,
+                "error": err.Error(),
+            },
+        }
+    } else {
+        message = route.ReponseMessage{
+            "sys-network-init": {
+                "status": true,
+            },
+        }
+    }
+
+    data, err := json.Marshal(message)
     if err != nil {
         return errors.WithStack(err)
     }

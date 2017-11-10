@@ -86,7 +86,6 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCRouter, sharedRouter);
 
 + (void) routeRequestPost:(const char*)aPath withRequestBody:(NSDictionary *)aRequestBody {
     NSAssert([NSThread isMainThread], @"Request should only be made in Main Thread!");
-
     if (aPath == NULL || strlen(aPath) == 0) {
         return;
     }
@@ -94,25 +93,26 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(PCRouter, sharedRouter);
         return;
     }
 
-    NSError *error = nil;
-    NSData *data = [NSJSONSerialization dataWithJSONObject:aRequestBody options:0 error:&error];
-    if (error != nil) {
-        Log(@"%@", [error description]);
-        return;
-    }
-    
-    size_t payload_len = [data length];
-    char *payload = (char *) malloc (sizeof(char) * payload_len + 1);
-    // fill the buffer with termination
-    memset(payload, '\0', payload_len + 1);
-    // copy json data to payload
-    memcpy(payload, [data bytes], payload_len);
-    
-    Log(@"routeRequestPost aPath[%s], aRequestBody[%s]\n", aPath, payload);
-    
-    RouteRequestPost((char *)aPath, payload);
-    // free the payload as it's cocoa's response to handle memory
-    free(payload);
-}
+    @autoreleasepool {
+        NSError *error = nil;
+        NSData *data = [NSJSONSerialization dataWithJSONObject:aRequestBody options:0 error:&error];
+        if (error != nil) {
+            Log(@"%@", [error description]);
+            return;
+        }
 
+        size_t payload_len = [data length];
+        char *payload = (char *) malloc (sizeof(char) * payload_len + 1);
+        // fill the buffer with termination
+        memset(payload, '\0', payload_len + 1);
+        // copy json data to payload
+        memcpy(payload, [data bytes], payload_len);
+
+        Log(@"routeRequestPost aPath[%s], aRequestBody[%s]\n", aPath, payload);
+
+        RouteRequestPost((char *)aPath, payload);
+        // free the payload as it's cocoa's response to handle memory
+        free(payload);
+    }
+}
 @end
