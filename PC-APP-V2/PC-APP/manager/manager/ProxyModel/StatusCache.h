@@ -42,6 +42,8 @@
 @property (readonly) BOOL isNodeListValid;
 // this property indicates whether frontend can display what's happening in online nodes
 @property (readwrite, getter=showOnlineNode, setter=setShowOnlineNode:) BOOL showOnlineNode;
+// this indicates a critical error
+@property (readwrite, getter=isNodeError, setter=setNodeError:) NSString *nodeError;
 
 - (NSArray<Node *>*) nodeList;
 - (void) refreshNodList:(NSArray<NSDictionary *>*)aNodeList;
@@ -53,6 +55,8 @@
 // this property should be used to indicate if there is grave service error.
 // Whenever service is not ready for whatever reason, kill application as it's a critical error
 @property (readwrite, getter=isServiceReady, setter=setServiceReady:) BOOL serviceReady;
+// this indicate there is a critical error
+@property (readwrite, getter=isServiceError, setter=setServiceError:) NSString *serviceError;
 
 // regular monitoring of internal services. When something is missing, it's a critical error. kill application
 - (void) refreshServiceStatus:(NSDictionary<NSString*, id>*)aServiceStatusList;

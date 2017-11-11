@@ -19,9 +19,11 @@
     __strong NSMutableArray<Node *>* _nodeList;
     BOOL _nodeListValid;
     BOOL _showOnlineNode;
-    
+    __strong NSString *_nodeError;
+
     __strong NSArray<NSString *>* _serviceList;
     BOOL _serviceReady;
+    __strong NSString *_serviceError;
 
     BOOL _appReady;
     BOOL _pkgInstalling;
@@ -36,6 +38,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
         _packageList = [NSMutableArray<Package *> arrayWithCapacity:0];
 
         _nodeList = [NSMutableArray<Node *> arrayWithCapacity:0];
+        _nodeError = nil;
 
         // (2017/10/16) this list should be updated whenever necessary
         _serviceList = \
@@ -57,6 +60,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
               @"service.pcssh.server.proxy",
               @"service.vbox.master.control",
               @"service.vbox.master.listener"];
+        _serviceError = nil;
 
         // set app status is not ready yet
         _appReady = NO;
@@ -131,6 +135,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 #pragma mark - node status
 @dynamic isNodeListValid;
 @dynamic showOnlineNode;
+@dynamic nodeError;
 
 - (BOOL) isNodeListValid {
     BOOL isValid = NO;
@@ -151,6 +156,22 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 - (void) setShowOnlineNode:(BOOL)show {
     @synchronized(self) {
         _showOnlineNode = show;
+    }
+}
+
+- (NSString *) isNodeError {
+    __weak NSString *error = nil;
+    @synchronized(self) {
+        if (_nodeError != nil ) {
+            error = _nodeError;
+        }
+    }
+    return error;
+}
+
+- (void) setNodeError:(NSString *)error {
+    @synchronized(self) {
+        _nodeError = error;
     }
 }
 
@@ -215,6 +236,8 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
 #pragma mark - service status
 @dynamic serviceReady;
+@dynamic serviceError;
+
 - (BOOL) isServiceReady {
     BOOL isReady = NO;
     @synchronized(self) {
@@ -226,6 +249,20 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 - (void) setServiceReady:(BOOL)serviceReady {
     @synchronized(self) {
         _serviceReady = serviceReady;
+    }
+}
+
+- (NSString *)isServiceError {
+    __weak NSString *error = nil;
+    @synchronized(self) {
+        error = _serviceError;
+    }
+    return error;
+}
+
+- (void) setServiceError:(NSString *)error {
+    @synchronized(self) {
+        _serviceError = error;
     }
 }
 
