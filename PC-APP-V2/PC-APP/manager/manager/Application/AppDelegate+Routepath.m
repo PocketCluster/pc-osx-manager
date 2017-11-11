@@ -140,8 +140,8 @@
      onPath:@(RPATH_PACKAGE_LIST_AVAILABLE)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
+         // (2017/10/25) package related error message display should be handled in UI part
          if (![[response valueForKeyPath:@"package-available.status"] boolValue]) {
-             // (2017/10/25) package related error message display should be handled in UI part
              [belf
               onInstalledListUpdateWith:[StatusCache SharedStatusCache]
               success:NO
@@ -165,8 +165,8 @@
      onPath:@(RPATH_PACKAGE_LIST_INSTALLED)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
+         // (2017/10/25) package related error message display should be handled in UI part
          if (![[response valueForKeyPath:@"package-installed.status"] boolValue]) {
-             // (2017/10/25) package related error message display should be handled in UI part
              [belf
               onInstalledListUpdateWith:[StatusCache SharedStatusCache]
               success:NO

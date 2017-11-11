@@ -22,6 +22,10 @@
         return YES;
     }
 
+    // if app is not ready
+    if (![aCache isAppReady]) {
+        return NO;
+    }
     // service is not ready
     if (![aCache timeUpServiceReady]) {
         return NO;
@@ -157,10 +161,7 @@ static void _updateExecMenuVisibility(NSMenuItem *aPackageMenu, ExecState aExecS
         return;
     }
 
-    BOOL hideMenu = YES;
-    if ([sCache isNodeListValid] && [sCache isRegisteredNodesAllOnline] && [sCache hasSlaveNodes]) {
-        hideMenu = NO;
-    }
+    BOOL hideMenu = ![self _activateMenuBeforeNodeTimeup:sCache];
 
     NSInteger indexBegin = ([self.statusItem.menu
                              indexOfItem:[self.statusItem.menu

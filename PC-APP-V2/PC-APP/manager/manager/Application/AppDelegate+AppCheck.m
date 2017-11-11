@@ -136,7 +136,7 @@
              [[StatusCache SharedStatusCache] setAppReady:YES];
 
              // start basic service
-             OpsCmdBaseServiceStart();
+//             OpsCmdBaseServiceStart();
 
          } else {
              [ShowAlert

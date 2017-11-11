@@ -6,6 +6,7 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
+#import "ShowAlert.h"
 #import "StatusCache.h"
 #import "AppDelegate+Window.h"
 
@@ -13,48 +14,112 @@
 #import "NativeMenu+Operation.h"
 
 @interface NativeMenu(OperationPrivate)
+- (void) menuSelectedShowError:(id)sender;
 - (void) menuSelectedNewCluster:(id)sender;
 - (void) menuSelectedInstallPackage:(id)sender;
 @end
 
 @implementation NativeMenu(Operation)
 
-#pragma mark - Setup Cluster
-- (void) setupMenuNewCluster:(StatusCache *)aCache {
-    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
-    [mStatus setTitle:@"Build Cluster"];
-    [mStatus setEnabled:YES];
-    [mStatus setAction:@selector(menuSelectedNewCluster:)];
-    [mStatus setTarget:self];
-    [mStatus setSubmenu:nil];
-    [self.statusItem.menu itemChanged:mStatus];
-
-    [self setupOperationMenu];
+- (void) menuSelectedShowError:(id)sender {
+    NSString *srvcError = [[StatusCache SharedStatusCache] serviceError];
+    NSString *nodeError = [[StatusCache SharedStatusCache] nodeError];
+    
+    // check service warning
+    if (srvcError != nil) {
+        [ShowAlert
+         showWarningAlertWithTitle:@"Unable to setup a cluster"
+         message:srvcError];
+        return;
+    }
+    // check node warning
+    if (nodeError != nil) {
+        [ShowAlert
+         showWarningAlertWithTitle:@"Unable to setup a cluster"
+         message:nodeError];
+        return;
+    }
 }
 
 - (void) menuSelectedNewCluster:(id)sender {
 }
 
+- (void) menuSelectedInstallPackage:(id)sender {
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"PCPkgInstallWC" withResponder:nil];
+}
+
+#pragma mark - Setup Cluster
+- (void) setupMenuNewCluster:(StatusCache *)aCache {
+    NSString *srvcError = [aCache serviceError];
+    NSString *nodeError = [aCache nodeError];
+    BOOL error = NO;
+
+    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
+    [mStatus setTitle:@"Build Cluster"];
+    [mStatus setEnabled:YES];
+    [mStatus setTarget:self];
+    [mStatus setSubmenu:nil];
+
+    // check service warning
+    if (srvcError != nil) {
+        [mStatus setImage:[NSImage imageNamed:@"cancel"]];
+        error = YES;
+    }
+    // check node warning
+    if (nodeError != nil) {
+        [mStatus setImage:[NSImage imageNamed:@"cancel"]];
+        error = YES;
+    }
+    // setup menu accordingly
+    if (error) {
+        [mStatus setAction:@selector(menuSelectedShowError:)];
+    } else {
+        [mStatus setAction:@selector(menuSelectedNewCluster:)];
+    }
+    [self.statusItem.menu itemChanged:mStatus];
+
+    [self setupOperationMenu];
+}
+
 #pragma mark - Run Cluster
 - (void) setupMenuRunCluster:(StatusCache *)aCache {
 
+    NSString *nodeError = [aCache nodeError];
+    NSString *srvcError = [aCache serviceError];
+    BOOL error = NO;
+    
     NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
     [mStatus setTitle:@"Cluster Control"];
     [mStatus setEnabled:YES];
-    [mStatus setAction:nil];
-    [mStatus setTarget:nil];
 
-    // show warning that some nodes are missing
+    // check warning -> error
     if ([[StatusCache SharedStatusCache] isRegisteredNodesAllOnline]) {
         [mStatus setImage:nil];
     } else {
         [mStatus setImage:[NSImage imageNamed:@"warning"]];
     }
+    // check service warning
+    if (srvcError != nil) {
+        [mStatus setImage:[NSImage imageNamed:@"cancel"]];
+        error = YES;
+    }
+    // check node warning
+    if (nodeError != nil) {
+        [mStatus setImage:[NSImage imageNamed:@"cancel"]];
+        error = YES;
+    }
 
     // setup submenu
-    if ([mStatus submenu] == nil) {
-        [mStatus setSubmenu:[NSMenu new]];
+    if (error) {
+        [mStatus setAction:@selector(menuSelectedShowError:)];
+        [mStatus setTarget:self];
+        [mStatus setSubmenu:nil];
 
+    } else if (!error && [mStatus submenu] == nil) {
+        [mStatus setAction:nil];
+        [mStatus setTarget:nil];
+        [mStatus setSubmenu:[NSMenu new]];
+        
         NSMenuItem *sInstall =
             [[NSMenuItem alloc]
              initWithTitle:@"Install Package"
@@ -90,10 +155,6 @@
     }
 
     [self setupOperationMenu];
-}
-
-- (void) menuSelectedInstallPackage:(id)sender {
-    [[AppDelegate sharedDelegate] activeWindowByClassName:@"PCPkgInstallWC" withResponder:nil];
 }
 
 @end

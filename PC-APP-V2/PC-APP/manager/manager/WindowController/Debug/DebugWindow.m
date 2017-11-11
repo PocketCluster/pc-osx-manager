@@ -6,17 +6,20 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
-#import "DebugWindow.h"
 
 #import "pc-core.h"
-#import "AppDelegate+Window.h"
-#import "ShowAlert.h"
 #import "PCRouter.h"
 #import "PCRoutePathConst.h"
+#import "StatusCache.h"
+
+#import "ShowAlert.h"
 #import "NativeMenu+Operation.h"
 #import "NativeMenu+Monitor.h"
 #import "TransitionWC.h"
-#import "StatusCache.h"
+#import "AppDelegate+MonitorDispenser.h"
+#import "AppDelegate+Window.h"
+
+#import "DebugWindow.h"
 
 @interface DebugWindow ()<PCRouteRequest>
 @end
@@ -132,31 +135,112 @@
 }
 
 - (IBAction)menu_01:(id)sender {
-    [[[AppDelegate sharedDelegate] mainMenu] setupWithInitialCheckMessage];
+    [[StatusCache SharedStatusCache] setAppReady:YES];
+    [[AppDelegate sharedDelegate] setupWithInitialCheckMessage];
 }
 
 - (IBAction)menu_02:(id)sender {
-    [[[AppDelegate sharedDelegate] mainMenu] setupWithStartServicesMessage];
+    [[AppDelegate sharedDelegate] setupWithStartServicesMessage];
 }
 
 - (IBAction)menu_03:(id)sender {
-    [[[AppDelegate sharedDelegate] mainMenu] setupWithCheckingNodesMessage];
+    [[AppDelegate sharedDelegate] setupWithCheckingNodesMessage];
 }
 
+// timeup service ok
 - (IBAction)menu_04:(id)sender {
-    [[[AppDelegate sharedDelegate] mainMenu] setupMenuNewCluster:[StatusCache SharedStatusCache]];
+
+    // only indicates a time mark pass
+    [[StatusCache SharedStatusCache] setTimeUpServiceReady:YES];
+
+    // setup state and notify those who need to listen
+    [[StatusCache SharedStatusCache] setServiceError:nil];
+
+    // complete notifying service online status
+    [[AppDelegate sharedDelegate] onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:YES];
+
+    // ask installed package status???
+    // [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
 }
 
+// update service ok
 - (IBAction)menu_05:(id)sender {
-    [[[AppDelegate sharedDelegate] mainMenu] setupMenuRunCluster:[StatusCache SharedStatusCache]];
+     [[StatusCache SharedStatusCache]
+      refreshServiceStatus:
+        @{@"service.beacon.catcher":@1,
+          @"service.beacon.location.read":@1,
+          @"service.beacon.location.write":@1,
+          @"service.beacon.master":@1,
+          @"service.discovery.server":@1,
+          @"service.internal.node.name.control":@1,
+          @"service.internal.node.name.server":@1,
+          @"service.monitor.system.health":@1,
+          @"service.orchst.control":@1,
+          @"service.orchst.registry":@1,
+          @"service.orchst.server":@1,
+          @"service.pcssh.authority":@1,
+          @"service.pcssh.conn.admin":@1,
+          @"service.pcssh.conn.proxy":@1,
+          @"service.pcssh.server.auth":@1,
+          @"service.pcssh.server.proxy":@1,
+          @"service.vbox.master.control":@1,
+          @"service.vbox.master.listener":@1}];
+
+     [[AppDelegate sharedDelegate] updateServiceStatusWith:[StatusCache SharedStatusCache]];
 }
 
+// timeup node ok
 - (IBAction)menu_06:(id)sender {
+    // setup state and notify those who need to listen
+    [[StatusCache SharedStatusCache] setTimeUpNodeOnline:YES];
+
+    // complete notifying service online status
+    [[AppDelegate sharedDelegate] onNotifiedWith:[StatusCache SharedStatusCache] nodeOnlineTimeup:YES];
 }
 
+// update node ok
 - (IBAction)menu_07:(id)sender {
-    [[[AppDelegate sharedDelegate] mainMenu] updateNewVersionAvailability:YES];
+    [[StatusCache SharedStatusCache] setNodeError:nil];
+
+    [[StatusCache SharedStatusCache] refreshNodList:
+     @[@{@"name":@"pc-core",
+         @"mac":@"12345",
+         @"rgstd":@TRUE,
+         @"bound":@TRUE,
+         @"pcssh":@TRUE,
+         @"orchst":@TRUE}]];
+
+    [[AppDelegate sharedDelegate] updateNodeStatusWith:[StatusCache SharedStatusCache]];
 }
+
+// timeup service fail
+- (IBAction)menu_08:(id)sender {
+}
+
+// update service fail
+- (IBAction)menu_09:(id)sender {
+}
+
+// timeup node fail
+- (IBAction)menu_10:(id)sender {
+}
+
+// update node fail
+- (IBAction)menu_11:(id)sender {
+}
+
+- (IBAction)top_menu_01:(id)sender {
+}
+
+- (IBAction)top_menu_02:(id)sender {
+}
+
+- (IBAction)top_menu_03:(id)sender {
+}
+
+- (IBAction)top_menu_04:(id)sender {
+}
+
 
 - (IBAction)transition_01:(id)sender {
     [[AppDelegate sharedDelegate] activeWindowByClassName:@"TransitionWC" withResponder:nil];
