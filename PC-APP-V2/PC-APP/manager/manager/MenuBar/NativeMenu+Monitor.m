@@ -69,7 +69,11 @@
 
 // services online timeup
 - (void) onNotifiedWith:(StatusCache *)aCache serviceOnlineTimeup:(BOOL)isSuccess {
-    [self clusterStatusOn];
+    if ([aCache serviceError] != nil) {
+        [self clusterStatusOn];
+    } else {
+        [self clusterStatusOff];
+    }
 }
 
 - (void) setupWithCheckingNodesMessage {

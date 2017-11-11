@@ -46,7 +46,7 @@
 //     ONLY INDICATES AN IMPORTANT TIMEMARK IS PASSED
 @property (readonly) BOOL isNodeListValid;
 // THIS INDICATES A CRITICAL ERROR (**CHECK IF THIS PROPERTY IS NULL**)
-@property (readwrite, getter=isNodeError, setter=setNodeError:) NSString *nodeError;
+@property (readwrite, getter=nodeError, setter=setNodeError:) NSString *nodeError;
 
 - (NSArray<Node *>*) nodeList;
 - (void) refreshNodList:(NSArray<NSDictionary *>*)aNodeList;
@@ -60,7 +60,7 @@
 //     ONLY INDICATES AN IMPORTANT TIMEMARK IS PASSED
 @property (readwrite, getter=timeUpServiceReady, setter=setTimeUpServiceReady:) BOOL timeUpServiceReady;
 // THIS INDICATE THERE IS A CRITICAL ERROR. (**CHECK IF THIS PROPERTY IS NULL**)
-@property (readwrite, getter=isServiceError, setter=setServiceError:) NSString *serviceError;
+@property (readwrite, getter=serviceError, setter=setServiceError:) NSString *serviceError;
 
 // regular monitoring of internal services. When something is missing, it's a critical error. kill application
 - (void) refreshServiceStatus:(NSDictionary<NSString*, id>*)aServiceStatusList;

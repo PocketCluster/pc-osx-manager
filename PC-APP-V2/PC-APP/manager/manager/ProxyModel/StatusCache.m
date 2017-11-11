@@ -166,7 +166,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
     }
 }
 
-- (NSString *) isNodeError {
+- (NSString *) nodeError {
     __weak NSString *error = nil;
     @synchronized(self) {
         if (_nodeError != nil ) {
@@ -259,7 +259,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
     }
 }
 
-- (NSString *)isServiceError {
+- (NSString *) serviceError {
     __weak NSString *error = nil;
     @synchronized(self) {
         error = _serviceError;
