@@ -10,6 +10,8 @@
 #import "SynthesizeSingleton.h"
 #import "NullStringChecker.h"
 
+static NSString * const kServiceMissingError = @"One or more services fail to online. Please quit and restart PocketCluster.";
+
 @interface StatusCache()
 @end
 
@@ -17,13 +19,13 @@
     __strong NSMutableArray<Package *>* _packageList;
 
     __strong NSMutableArray<Node *>* _nodeList;
-    BOOL _nodeListValid;
-    BOOL _showOnlineNode;
     __strong NSString *_nodeError;
+    BOOL _nodeListValid;
+    BOOL _timeUpNodeOnline;
 
     __strong NSArray<NSString *>* _serviceList;
-    BOOL _serviceReady;
     __strong NSString *_serviceError;
+    BOOL _timeUpServiceReady;
 
     BOOL _appReady;
     BOOL _pkgInstalling;
@@ -39,6 +41,8 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
         _nodeList = [NSMutableArray<Node *> arrayWithCapacity:0];
         _nodeError = nil;
+        _nodeListValid = NO;
+        _timeUpNodeOnline = NO;
 
         // (2017/10/16) this list should be updated whenever necessary
         _serviceList = \
@@ -61,9 +65,12 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
               @"service.vbox.master.control",
               @"service.vbox.master.listener"];
         _serviceError = nil;
+        _timeUpServiceReady = NO;
 
         // set app status is not ready yet
         _appReady = NO;
+        _pkgInstalling = NO;
+        _clusterSetup = NO;
         _shutdown = NO;
     }
     return self;
@@ -134,7 +141,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
 #pragma mark - node status
 @dynamic isNodeListValid;
-@dynamic showOnlineNode;
+@dynamic timeUpNodeOnline;
 @dynamic nodeError;
 
 - (BOOL) isNodeListValid {
@@ -145,17 +152,17 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
     return isValid;
 }
 
-- (BOOL) showOnlineNode {
+- (BOOL) timeUpNodeOnline {
     BOOL show = NO;
     @synchronized(self) {
-        show = _showOnlineNode;
+        show = _timeUpNodeOnline;
     }
     return show;
 }
 
-- (void) setShowOnlineNode:(BOOL)show {
+- (void) setTimeUpNodeOnline:(BOOL)show {
     @synchronized(self) {
-        _showOnlineNode = show;
+        _timeUpNodeOnline = show;
     }
 }
 
@@ -235,20 +242,20 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
 
 #pragma mark - service status
-@dynamic serviceReady;
+@dynamic timeUpServiceReady;
 @dynamic serviceError;
 
-- (BOOL) isServiceReady {
-    BOOL isReady = NO;
+- (BOOL) timeUpServiceReady {
+    BOOL ready = NO;
     @synchronized(self) {
-        isReady = _serviceReady;
+        ready = _timeUpServiceReady;
     }
-    return isReady;
+    return ready;
 }
 
-- (void) setServiceReady:(BOOL)serviceReady {
+- (void) setTimeUpServiceReady:(BOOL)ready {
     @synchronized(self) {
-        _serviceReady = serviceReady;
+        _timeUpServiceReady = ready;
     }
 }
 
@@ -268,14 +275,17 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 
 - (void) refreshServiceStatus:(NSDictionary<NSString*, id>*)aServiceStatusList {
     @synchronized(self) {
+        BOOL error = NO;
         for (NSString *sname in _serviceList) {
             id srvc = [aServiceStatusList objectForKey:sname];
             if (srvc == nil || [srvc intValue] != 1) {
-                _serviceReady = NO;
-                return;
+                error = YES;
+                break;
             }
         }
-        _serviceReady = YES;
+        if (error) {
+            _serviceError = kServiceMissingError;
+        }
     }
 }
 

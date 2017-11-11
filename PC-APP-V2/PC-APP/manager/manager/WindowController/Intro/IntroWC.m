@@ -98,7 +98,7 @@
 - (void) updateNodeStatusWith:(StatusCache *)aCache {
     
     // quickly filter out the worst case scenarios when 'node online timeup' noti has not fired
-    if (![[StatusCache SharedStatusCache] showOnlineNode]) {
+    if (![[StatusCache SharedStatusCache] timeUpNodeOnline]) {
         if (![[StatusCache SharedStatusCache] isNodeListValid] || \
             ![[StatusCache SharedStatusCache] isRegisteredNodesAllOnline]) {
             return;

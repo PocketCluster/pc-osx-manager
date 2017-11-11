@@ -13,8 +13,7 @@
 #import "ShowAlert.h"
 #import "PCRouter.h"
 #import "PCRoutePathConst.h"
-#import "NativeMenu+NewCluster.h"
-#import "NativeMenu+RunCluster.h"
+#import "NativeMenu+Operation.h"
 #import "NativeMenu+Monitor.h"
 #import "TransitionWC.h"
 #import "StatusCache.h"
@@ -145,11 +144,11 @@
 }
 
 - (IBAction)menu_04:(id)sender {
-    [[[AppDelegate sharedDelegate] mainMenu] setupMenuNewCluster];
+    [[[AppDelegate sharedDelegate] mainMenu] setupMenuNewCluster:[StatusCache SharedStatusCache]];
 }
 
 - (IBAction)menu_05:(id)sender {
-    [[[AppDelegate sharedDelegate] mainMenu] setupMenuRunCluster];
+    [[[AppDelegate sharedDelegate] mainMenu] setupMenuRunCluster:[StatusCache SharedStatusCache]];
 }
 
 - (IBAction)menu_06:(id)sender {

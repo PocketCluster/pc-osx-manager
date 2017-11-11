@@ -41,7 +41,7 @@
          message:@"Cluster is being setup. Please wait."];
         return;
     }
-    if (!([[StatusCache SharedStatusCache] isServiceReady] && [[StatusCache SharedStatusCache] showOnlineNode])) {
+    if (!([[StatusCache SharedStatusCache] timeUpServiceReady] && [[StatusCache SharedStatusCache] timeUpNodeOnline])) {
         [ShowAlert
          showWarningAlertWithTitle:@"Unable to Shutdown"
          message:@"Cluster is being initiated. Please wait until it's ready to shutdown."];
@@ -111,7 +111,7 @@
          message:@"Cluster is being setup. Please wait."];
         return NSTerminateCancel;
     }
-    if (!([[StatusCache SharedStatusCache] isServiceReady] && [[StatusCache SharedStatusCache] showOnlineNode])) {
+    if (!([[StatusCache SharedStatusCache] timeUpServiceReady] && [[StatusCache SharedStatusCache] timeUpNodeOnline])) {
         [ShowAlert
          showWarningAlertWithTitle:@"Unable to go Quit"
          message:@"Cluster is being initiated. Please wait until it's ready to quit."];

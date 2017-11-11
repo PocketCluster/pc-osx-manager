@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		04030F801F3D5C1E00EA793D /* NativeMenu+NewCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 04030F791F3D5C1E00EA793D /* NativeMenu+NewCluster.m */; };
-		04030F811F3D5C1E00EA793D /* NativeMenu+RunCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 04030F7B1F3D5C1E00EA793D /* NativeMenu+RunCluster.m */; };
 		04030F821F3D5C1E00EA793D /* NativeMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 04030F7D1F3D5C1E00EA793D /* NativeMenu.m */; };
 		040A9BD91F9836D70058F0EF /* UserCheckVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 040A9BD71F9836D70058F0EF /* UserCheckVC.m */; };
 		040A9BDA1F9836D70058F0EF /* UserCheckVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 040A9BD81F9836D70058F0EF /* UserCheckVC.xib */; };
@@ -91,6 +89,7 @@
 		04CAE2E71E9B8A4900B23B22 /* DebugWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04CAE2E51E9B8A4900B23B22 /* DebugWindow.m */; };
 		04CAE2E81E9B8A4900B23B22 /* DebugWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04CAE2E61E9B8A4900B23B22 /* DebugWindow.xib */; };
 		04D5A48E1E9269AE0057012A /* AppDelegate+Sparkle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */; };
+		04DCDDE51FB6DE730074FE16 /* NativeMenu+Operation.m in Sources */ = {isa = PBXBuildFile; fileRef = 04DCDDE41FB6DE730074FE16 /* NativeMenu+Operation.m */; };
 		04DD160C1F40FD190080D025 /* PCRouter.m in Sources */ = {isa = PBXBuildFile; fileRef = 04DD160B1F40FD190080D025 /* PCRouter.m */; };
 		04DD160F1F4100570080D025 /* PCRoutePathConst.m in Sources */ = {isa = PBXBuildFile; fileRef = 04DD160E1F4100570080D025 /* PCRoutePathConst.m */; };
 		04E51DC01BDC88E3001F1F22 /* Resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 04E51DBF1BDC88E3001F1F22 /* Resources.bundle */; };
@@ -131,10 +130,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		04030F781F3D5C1E00EA793D /* NativeMenu+NewCluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NativeMenu+NewCluster.h"; sourceTree = "<group>"; };
-		04030F791F3D5C1E00EA793D /* NativeMenu+NewCluster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NativeMenu+NewCluster.m"; sourceTree = "<group>"; };
-		04030F7A1F3D5C1E00EA793D /* NativeMenu+RunCluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NativeMenu+RunCluster.h"; sourceTree = "<group>"; };
-		04030F7B1F3D5C1E00EA793D /* NativeMenu+RunCluster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NativeMenu+RunCluster.m"; sourceTree = "<group>"; };
 		04030F7C1F3D5C1E00EA793D /* NativeMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NativeMenu.h; sourceTree = "<group>"; };
 		04030F7D1F3D5C1E00EA793D /* NativeMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NativeMenu.m; sourceTree = "<group>"; };
 		040A9BD61F9836D70058F0EF /* UserCheckVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserCheckVC.h; sourceTree = "<group>"; };
@@ -287,6 +282,8 @@
 		04CAE2E61E9B8A4900B23B22 /* DebugWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DebugWindow.xib; sourceTree = "<group>"; };
 		04D5A48C1E9269AE0057012A /* AppDelegate+Sparkle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Sparkle.h"; sourceTree = "<group>"; };
 		04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Sparkle.m"; sourceTree = "<group>"; };
+		04DCDDE31FB6DE730074FE16 /* NativeMenu+Operation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NativeMenu+Operation.h"; sourceTree = "<group>"; };
+		04DCDDE41FB6DE730074FE16 /* NativeMenu+Operation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NativeMenu+Operation.m"; sourceTree = "<group>"; };
 		04DD160A1F40FD190080D025 /* PCRouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCRouter.h; sourceTree = "<group>"; };
 		04DD160B1F40FD190080D025 /* PCRouter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCRouter.m; sourceTree = "<group>"; };
 		04DD160D1F41000A0080D025 /* PCRoutePathConst.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCRoutePathConst.h; sourceTree = "<group>"; };
@@ -349,10 +346,8 @@
 				04030F7D1F3D5C1E00EA793D /* NativeMenu.m */,
 				04B7C8A31F9C72C7000ECEEC /* NativeMenu+Monitor.h */,
 				04B7C8A41F9C72C7000ECEEC /* NativeMenu+Monitor.m */,
-				04030F781F3D5C1E00EA793D /* NativeMenu+NewCluster.h */,
-				04030F791F3D5C1E00EA793D /* NativeMenu+NewCluster.m */,
-				04030F7A1F3D5C1E00EA793D /* NativeMenu+RunCluster.h */,
-				04030F7B1F3D5C1E00EA793D /* NativeMenu+RunCluster.m */,
+				04DCDDE31FB6DE730074FE16 /* NativeMenu+Operation.h */,
+				04DCDDE41FB6DE730074FE16 /* NativeMenu+Operation.m */,
 			);
 			name = MenuBar;
 			path = manager/MenuBar;
@@ -1128,7 +1123,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				048804661FB2EE3100F4EA05 /* AppDelegate+Shutdown.m in Sources */,
-				04030F811F3D5C1E00EA793D /* NativeMenu+RunCluster.m in Sources */,
+				04DCDDE51FB6DE730074FE16 /* NativeMenu+Operation.m in Sources */,
 				04ADEBFF1FA02493006ACEB5 /* StatusCache.m in Sources */,
 				04DD160C1F40FD190080D025 /* PCRouter.m in Sources */,
 				04BC73831E8A2E910079BD77 /* AboutWindow.m in Sources */,
@@ -1162,7 +1157,6 @@
 				0416326C1F48EA850057BE5D /* SSSelectableToolbar.m in Sources */,
 				0441A3E31BD8904100AABD7A /* main.m in Sources */,
 				04B379731F48C60B0080DBEA /* BaseWindow.m in Sources */,
-				04030F801F3D5C1E00EA793D /* NativeMenu+NewCluster.m in Sources */,
 				0416326D1F48EA850057BE5D /* SSSelectableToolbarItem.m in Sources */,
 				04ADEBFE1FA02493006ACEB5 /* Package.m in Sources */,
 				043F47131F3E0C730078A0C1 /* AppDelegate+Window.m in Sources */,

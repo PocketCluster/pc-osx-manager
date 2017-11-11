@@ -8,13 +8,39 @@
 
 #import "NativeMenuAddition.h"
 #import "NativeMenu+Monitor.h"
-#import "NativeMenu+NewCluster.h"
-#import "NativeMenu+RunCluster.h"
+#import "NativeMenu+Operation.h"
 #import "AppDelegate+Execution.h"
 
-@implementation NativeMenu(Monitor)
+@interface NativeMenu(MonitorPrivate)
+- (BOOL) _activateMenuBeforeNodeTimeup:(StatusCache *)aCache;
+@end
 
+@implementation NativeMenu(Monitor)
+- (BOOL) _activateMenuBeforeNodeTimeup:(StatusCache *)aCache {
+    // if node online timeup is set, say yes
+    if ([aCache timeUpNodeOnline]) {
+        return YES;
+    }
+
+    // service is not ready
+    if (![aCache timeUpServiceReady]) {
+        return NO;
+    }
+    // invalid node list
+    if (![aCache isNodeListValid]) {
+        return NO;
+    }
+    // if all nodes are not up
+    if (![aCache isRegisteredNodesAllOnline]) {
+        return NO;
+    }
+
+    return YES;
+}
+
+// methods are inversely aligned with what appears in AppDelegate+Routepath.m
 #pragma mark - MonitorStatus
+
 // show initial message
 - (void) setupWithInitialCheckMessage {
     NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
@@ -58,52 +84,51 @@
     [self setupCheckupMenu];
 }
 
-// nodes online timeup
-- (void) onNotifiedWith:(StatusCache *)aCache nodeOnlineTimeup:(BOOL)isSuccess {
-    // -- as 'node online timeup' noti should have been kicked, check strict manner --
-    // node list should be valid at this point
-    if (![aCache isNodeListValid] || !isSuccess) {
+// update services
+- (void) updateServiceStatusWith:(StatusCache *)aCache {
+    // quickly filter out the worst case scenarios when 'node online timeup' noti has not fired
+    if (![self _activateMenuBeforeNodeTimeup:aCache]) {
         return;
     }
-
+    
     // show existing cluster and display package
     if ([aCache hasSlaveNodes]) {
-        [self setupMenuRunCluster];
-
-    // build new cluster
+        [self setupMenuRunCluster:aCache];
+        
+        // build new cluster
     } else {
-        [self setupMenuNewCluster];
-
+        [self setupMenuNewCluster:aCache];
+        
     }
 }
 
-// update services
-- (void) updateServiceStatusWith:(StatusCache *)aCache {
+// nodes online timeup. After node online time is up, show status anyway.
+- (void) onNotifiedWith:(StatusCache *)aCache nodeOnlineTimeup:(BOOL)isSuccess {
+    // show existing cluster and display package
+    if ([aCache hasSlaveNodes]) {
+        [self setupMenuRunCluster:aCache];
 
+    // build new cluster
+    } else {
+        [self setupMenuNewCluster:aCache];
+
+    }
 }
 
 // update nodes
 - (void) updateNodeStatusWith:(StatusCache *)aCache {
     // quickly filter out the worst case scenarios when 'node online timeup' noti has not fired
-    if (![aCache showOnlineNode]) {
-        if (![aCache isNodeListValid] || ![aCache isRegisteredNodesAllOnline]) {
-            return;
-        }
-    }
-
-    // -- as 'node online timeup' noti should have been kicked, check strict manner --
-    // node list should be valid at this point
-    if (![aCache isNodeListValid]) {
+    if (![self _activateMenuBeforeNodeTimeup:aCache]) {
         return;
     }
 
     // show existing cluster and display package
     if ([aCache hasSlaveNodes]) {
-        [self setupMenuRunCluster];
+        [self setupMenuRunCluster:aCache];
 
     // build new cluster
     } else {
-        [self setupMenuNewCluster];
+        [self setupMenuNewCluster:aCache];
     }
 }
 

@@ -34,15 +34,18 @@
 /*
  * isNodeListValid: sets to true when it's firstly updated.
  *
- * showOnlineNode: sets to true when 'node online timeup' notification sets
+ * timeUpNodeOnline: sets to true when 'node online timeup' notification sets
  *
- * isNodeListValid -> showOnlineNode order
+ * isNodeListValid -> timeUpNodeOnline order
  */
-// this property indicates whether node list has ever been updated. only necessary at beginning
+
+// this property indicates whether frontend can display what's happening in online nodes.
+@property (readwrite, getter=timeUpNodeOnline, setter=setTimeUpNodeOnline:) BOOL timeUpNodeOnline;
+// THIS PROPERTY INDICATES WHETHER NODE LIST HAS EVER BEEN UPDATED.
+//     ONLY SET THE VALUE AT BEGINNING (AppDelegate+Routepath.m)
+//     ONLY INDICATES AN IMPORTANT TIMEMARK IS PASSED
 @property (readonly) BOOL isNodeListValid;
-// this property indicates whether frontend can display what's happening in online nodes
-@property (readwrite, getter=showOnlineNode, setter=setShowOnlineNode:) BOOL showOnlineNode;
-// this indicates a critical error
+// THIS INDICATES A CRITICAL ERROR (**CHECK IF THIS PROPERTY IS NULL**)
 @property (readwrite, getter=isNodeError, setter=setNodeError:) NSString *nodeError;
 
 - (NSArray<Node *>*) nodeList;
@@ -52,10 +55,11 @@
 - (BOOL) isAnySlaveNodeOnline;
 
 #pragma mark - service status
-// this property should be used to indicate if there is grave service error.
-// Whenever service is not ready for whatever reason, kill application as it's a critical error
-@property (readwrite, getter=isServiceReady, setter=setServiceReady:) BOOL serviceReady;
-// this indicate there is a critical error
+// INDICATES WHETHER THERE SERVICE ONLINE IS TIMED UP.
+//     ONLY SET THE VALUE AT BEGINNING (AppDelegate+Routepath.m)
+//     ONLY INDICATES AN IMPORTANT TIMEMARK IS PASSED
+@property (readwrite, getter=timeUpServiceReady, setter=setTimeUpServiceReady:) BOOL timeUpServiceReady;
+// THIS INDICATE THERE IS A CRITICAL ERROR. (**CHECK IF THIS PROPERTY IS NULL**)
 @property (readwrite, getter=isServiceError, setter=setServiceError:) NSString *serviceError;
 
 // regular monitoring of internal services. When something is missing, it's a critical error. kill application

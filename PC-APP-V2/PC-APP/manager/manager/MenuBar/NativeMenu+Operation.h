@@ -7,7 +7,9 @@
 //
 
 #import "NativeMenu.h"
+#import "StatusCache.h"
 
-@interface NativeMenu(NewCluster)
-- (void) setupMenuNewCluster;
+@interface NativeMenu(Operation)
+- (void) setupMenuNewCluster:(StatusCache *)aCache;
+- (void) setupMenuRunCluster:(StatusCache *)aCache;
 @end

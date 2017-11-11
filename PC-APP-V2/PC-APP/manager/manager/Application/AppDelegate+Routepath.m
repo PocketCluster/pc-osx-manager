@@ -207,7 +207,7 @@
      onPath:@(RPATH_MONITOR_NODE_STATUS)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         // this is a critical error. alert user and disable application
+         /*** THIS IS A CRITICAL ERROR. ALERT USER AND DISABLE APPLICATION ***/
          if (![[response valueForKeyPath:@"node-stat.status"] boolValue]) {
              NSString *error = [response valueForKeyPath:@"node-stat.error"];
              [[StatusCache SharedStatusCache] setNodeError:error];
@@ -217,10 +217,11 @@
              [[StatusCache SharedStatusCache] setNodeError:nil];
          }
 
-         // handle errors first then update UI
+         // refresh node status. Unlike service list, node list is available all the time
          NSArray<NSDictionary*>* rnodes = [response valueForKeyPath:@"node-stat.nodes"];
          [[StatusCache SharedStatusCache] refreshNodList:rnodes];
 
+         // handle errors first then update UI
          [belf updateNodeStatusWith:[StatusCache SharedStatusCache]];
      }];
 
@@ -232,7 +233,7 @@
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
          // setup state and notify those who need to listen
-         [[StatusCache SharedStatusCache] setShowOnlineNode:YES];
+         [[StatusCache SharedStatusCache] setTimeUpNodeOnline:YES];
 
          // complete notifying service online status
          [belf onNotifiedWith:[StatusCache SharedStatusCache] nodeOnlineTimeup:YES];
@@ -245,28 +246,20 @@
      onPath:@(RPATH_MONITOR_SERVICE_STATUS)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         // this is a critical error. alert user and disable application
+         /*** THIS IS A CRITICAL ERROR. ALERT USER AND DISABLE APPLICATION ***/
          if (![[response valueForKeyPath:@"srvc-stat.status"] boolValue]) {
              NSString *error = [response valueForKeyPath:@"srvc-stat.error"];
-             [[StatusCache SharedStatusCache] setServiceReady:NO];
              [[StatusCache SharedStatusCache] setServiceError:error];
              Log(@"critical service error %@", error);
 
+         // refresh service status. Unlike node list, service list is unavailable when there is an error.
          } else {
-             // refresh service status
              NSDictionary<NSString*, id>* rsrvcs = [response valueForKeyPath:@"srvc-stat.srvcs"];
              [[StatusCache SharedStatusCache] refreshServiceStatus:rsrvcs];
 
-             // this is a critical error. alert user and disable application
-             if (![[StatusCache SharedStatusCache] isServiceReady]) {
-                 [[StatusCache SharedStatusCache]
-                  setServiceError:@"one or more services fail to online. Please quit and relaunch PocketCluster"];
-
-             } else {
-                 [[StatusCache SharedStatusCache] setServiceError:nil];
-             }
          }
 
+         // handle errors first then update UI
          [belf updateServiceStatusWith:[StatusCache SharedStatusCache]];
      }];
 
@@ -277,10 +270,13 @@
      onPath:@(RPATH_NOTI_SRVC_ONLINE_TIMEUP)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-          // this is a critical error. alert user and disable application
+         // only indicates a time mark pass
+         [[StatusCache SharedStatusCache] setTimeUpServiceReady:YES];
+         
+         /*** THIS IS A CRITICAL ERROR. ALERT USER AND DISABLE APPLICATION ***/
          if (![[response valueForKeyPath:@"srvc-timeup.status"] boolValue]) {
+
              NSString *error = [response valueForKeyPath:@"srvc-timeup.error"];
-             [[StatusCache SharedStatusCache] setServiceReady:NO];
              [[StatusCache SharedStatusCache] setServiceError:error];
              Log(@"service online failure %@", error);
 
@@ -288,7 +284,6 @@
 
          } else {
              // setup state and notify those who need to listen
-             [[StatusCache SharedStatusCache] setServiceReady:YES];
              [[StatusCache SharedStatusCache] setServiceError:nil];
 
              // complete notifying service online status

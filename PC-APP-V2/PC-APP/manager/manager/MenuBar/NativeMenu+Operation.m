@@ -1,5 +1,5 @@
 //
-//  NativeMenu+StopCluster.m
+//  NativeMenu+NewCluster.m
 //  manager
 //
 //  Created by Almighty Kim on 8/11/17.
@@ -8,16 +8,35 @@
 
 #import "StatusCache.h"
 #import "AppDelegate+Window.h"
-#import "NativeMenuAddition.h"
-#import "NativeMenu+RunCluster.h"
 
-@interface NativeMenu(RunClusterPrivate)
-- (void) menuSelectedStopCluster:(id)sender;
+#import "NativeMenuAddition.h"
+#import "NativeMenu+Operation.h"
+
+@interface NativeMenu(OperationPrivate)
+- (void) menuSelectedNewCluster:(id)sender;
+- (void) menuSelectedInstallPackage:(id)sender;
 @end
 
-@implementation NativeMenu(RunCluster)
+@implementation NativeMenu(Operation)
 
-- (void) setupMenuRunCluster {
+#pragma mark - Setup Cluster
+- (void) setupMenuNewCluster:(StatusCache *)aCache {
+    NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
+    [mStatus setTitle:@"Build Cluster"];
+    [mStatus setEnabled:YES];
+    [mStatus setAction:@selector(menuSelectedNewCluster:)];
+    [mStatus setTarget:self];
+    [mStatus setSubmenu:nil];
+    [self.statusItem.menu itemChanged:mStatus];
+
+    [self setupOperationMenu];
+}
+
+- (void) menuSelectedNewCluster:(id)sender {
+}
+
+#pragma mark - Run Cluster
+- (void) setupMenuRunCluster:(StatusCache *)aCache {
 
     NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
     [mStatus setTitle:@"Cluster Control"];
@@ -77,7 +96,4 @@
     [[AppDelegate sharedDelegate] activeWindowByClassName:@"PCPkgInstallWC" withResponder:nil];
 }
 
-- (void) menuSelectedStopCluster:(id)sender {
-    
-}
 @end
