@@ -95,12 +95,6 @@
     [mStatus setTitle:@"Cluster Control"];
     [mStatus setEnabled:YES];
 
-    // check warning -> error
-    if ([[StatusCache SharedStatusCache] isRegisteredNodesAllOnline]) {
-        [mStatus setImage:nil];
-    } else {
-        [mStatus setImage:[NSImage imageNamed:@"warning"]];
-    }
     // check service warning
     if (srvcError != nil) {
         [mStatus setImage:[NSImage imageNamed:@"cancel"]];
@@ -118,29 +112,40 @@
         [mStatus setTarget:self];
         [mStatus setSubmenu:nil];
 
-    } else if (!error && [mStatus submenu] == nil) {
-        [mStatus setAction:nil];
-        [mStatus setTarget:nil];
-        [mStatus setSubmenu:[NSMenu new]];
-        
-        NSMenuItem *sInstall =
-            [[NSMenuItem alloc]
-             initWithTitle:@"Install Package"
-             action:@selector(menuSelectedInstallPackage:)
-             keyEquivalent:@""];
+    } else {
 
-        [sInstall setTarget:self];
-        [mStatus.submenu addItem:sInstall];
-        [mStatus.submenu addItem:[NSMenuItem separatorItem]];
+        // check warning -> error
+        if ([[StatusCache SharedStatusCache] isRegisteredNodesAllOnline]) {
+            [mStatus setImage:nil];
+        } else {
+            [mStatus setImage:[NSImage imageNamed:@"warning"]];
+        }
 
-        NSMenuItem *sAdd =
-            [[NSMenuItem alloc]
-             initWithTitle:@"Add Child Node"
-             action:nil
-             keyEquivalent:@""];
-        [sAdd setTarget:self];
-        [sAdd setEnabled:NO];
-        [mStatus.submenu addItem:sAdd];
+        // build submenu
+        if ([mStatus submenu] == nil) {
+            [mStatus setAction:nil];
+            [mStatus setTarget:nil];
+            [mStatus setSubmenu:[NSMenu new]];
+            
+            NSMenuItem *sInstall =
+                [[NSMenuItem alloc]
+                 initWithTitle:@"Install Package"
+                 action:@selector(menuSelectedInstallPackage:)
+                 keyEquivalent:@""];
+
+            [sInstall setTarget:self];
+            [mStatus.submenu addItem:sInstall];
+            [mStatus.submenu addItem:[NSMenuItem separatorItem]];
+
+            NSMenuItem *sAdd =
+                [[NSMenuItem alloc]
+                 initWithTitle:@"Add Child Node"
+                 action:nil
+                 keyEquivalent:@""];
+            [sAdd setTarget:self];
+            [sAdd setEnabled:NO];
+            [mStatus.submenu addItem:sAdd];
+        }
     }
     [self.statusItem.menu itemChanged:mStatus];
 
