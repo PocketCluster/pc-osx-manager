@@ -11,6 +11,7 @@
 #import "NullStringChecker.h"
 
 static NSString * const kServiceMissingError = @"One or more services fail to online. Please quit and restart PocketCluster.";
+static NSString * const kNodeAllOfflineError = @"All slave nodes are offline. Please power them up.";
 
 @interface StatusCache()
 @end
@@ -198,6 +199,14 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
         for (NSDictionary* node in aNodeList) {
             [_nodeList addObject:[[Node alloc] initWithDictionary:node]];
         }
+    }
+
+    // (2017/11/12) this indicates that there is slave registered, but no slave is online
+    // this is an error need to be handled in core engine
+    BOOL hasSlave = [self hasSlaveNodes];
+    BOOL anyOnline = [self isAnySlaveNodeOnline];
+    if (hasSlave && !anyOnline) {
+        _nodeError = kNodeAllOfflineError;
     }
 }
 
