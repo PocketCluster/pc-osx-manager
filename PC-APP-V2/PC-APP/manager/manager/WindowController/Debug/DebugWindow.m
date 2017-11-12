@@ -22,12 +22,14 @@
 #import "DebugWindow.h"
 
 @interface DebugWindow ()<PCRouteRequest>
+@property (nonatomic, strong, readwrite) NSArray<NSDictionary *>* nodeList;
 @end
 
 @implementation DebugWindow
 
 - (void)windowDidLoad {
     [super windowDidLoad];
+    self.nodeList = nil;
 }
 
 - (IBAction)opsCmdBaseServiceStart:(id)sender {
@@ -134,6 +136,12 @@
              @"error" : @"need inviation code check"}}];
 }
 
+// show update sign
+- (IBAction)show_update_sign:(id)sender {
+    [[[AppDelegate sharedDelegate] mainMenu] updateNewVersionAvailability:YES];
+}
+
+
 - (IBAction)menu_01:(id)sender {
     [[StatusCache SharedStatusCache] setAppReady:YES];
     [[AppDelegate sharedDelegate] setupWithInitialCheckMessage];
@@ -202,13 +210,17 @@
 - (IBAction)menu_07:(id)sender {
     [[StatusCache SharedStatusCache] setNodeError:nil];
 
-    [[StatusCache SharedStatusCache] refreshNodList:
-     @[@{@"name":@"pc-core",
-         @"mac":@"12345",
-         @"rgstd":@TRUE,
-         @"bound":@TRUE,
-         @"pcssh":@TRUE,
-         @"orchst":@TRUE}]];
+    if ([self nodeList] == nil) {
+        [[StatusCache SharedStatusCache] refreshNodList:
+         @[@{@"name":@"pc-core",
+             @"mac":@"12345",
+             @"rgstd":@TRUE,
+             @"bound":@TRUE,
+             @"pcssh":@TRUE,
+             @"orchst":@TRUE}]];
+    } else {
+        [[StatusCache SharedStatusCache] refreshNodList:[self nodeList]];
+    }
 
     [[AppDelegate sharedDelegate] updateNodeStatusWith:[StatusCache SharedStatusCache]];
 }
@@ -243,39 +255,106 @@
 - (IBAction)menu_10:(id)sender {
     [[StatusCache SharedStatusCache] setNodeError:@"test monitor node fail"];
 
-    [[StatusCache SharedStatusCache] refreshNodList:
-     @[@{@"name":@"pc-core",
-         @"mac":@"12345",
-         @"rgstd":@FALSE,
-         @"bound":@TRUE,
-         @"pcssh":@FALSE,
-         @"orchst":@TRUE}]];
+    if ([self nodeList] == nil) {
+        [[StatusCache SharedStatusCache] refreshNodList:
+         @[@{@"name":@"pc-core",
+             @"mac":@"12345",
+             @"rgstd":@FALSE,
+             @"bound":@TRUE,
+             @"pcssh":@FALSE,
+             @"orchst":@TRUE}]];
+    } else {
+        [[StatusCache SharedStatusCache] refreshNodList:[self nodeList]];
+    }
 
     [[AppDelegate sharedDelegate] updateNodeStatusWith:[StatusCache SharedStatusCache]];
 }
 
 // clean all error
 - (IBAction)menu_11:(id)sender {
-    [[StatusCache SharedStatusCache] setNodeError:nil];
     [[StatusCache SharedStatusCache] setServiceError:nil];
+    [[StatusCache SharedStatusCache] setNodeError:nil];
 }
 
 // reset all timeup
 - (IBAction)menu_12:(id)sender {
+    [[StatusCache SharedStatusCache] setTimeUpServiceReady:NO];
+    [[StatusCache SharedStatusCache] setTimeUpNodeOnline:NO];
 }
 
-- (IBAction)top_menu_01:(id)sender {
+// no slave up
+- (IBAction)env_setup_01:(id)sender {
+    self.nodeList = \
+        @[@{@"name":@"pc-core",
+            @"mac":@"12345",
+            @"rgstd":@TRUE,
+            @"bound":@TRUE,
+            @"pcssh":@TRUE,
+            @"orchst":@TRUE},
+          @{@"name":@"pc-node1",
+            @"mac":@"12345",
+            @"rgstd":@FALSE,
+            @"bound":@FALSE,
+            @"pcssh":@FALSE,
+            @"orchst":@TRUE},
+          @{@"name":@"pc-node2",
+            @"mac":@"12345",
+            @"rgstd":@FALSE,
+            @"bound":@FALSE,
+            @"pcssh":@FALSE,
+            @"orchst":@FALSE}];
 }
 
-- (IBAction)top_menu_02:(id)sender {
+// core + 1 node
+- (IBAction)env_setup_02:(id)sender {
+    self.nodeList = \
+        @[@{@"name":@"pc-core",
+            @"mac":@"12345",
+            @"rgstd":@TRUE,
+            @"bound":@TRUE,
+            @"pcssh":@TRUE,
+            @"orchst":@TRUE},
+          @{@"name":@"pc-node1",
+            @"mac":@"12345",
+            @"rgstd":@FALSE,
+            @"bound":@FALSE,
+            @"pcssh":@FALSE,
+            @"orchst":@FALSE},
+          @{@"name":@"pc-node2",
+            @"mac":@"12345",
+            @"rgstd":@TRUE,
+            @"bound":@TRUE,
+            @"pcssh":@TRUE,
+            @"orchst":@TRUE}];
 }
 
-- (IBAction)top_menu_03:(id)sender {
+// all nodes up
+- (IBAction)env_setup_03:(id)sender {
+    self.nodeList = \
+        @[@{@"name":@"pc-core",
+            @"mac":@"12345",
+            @"rgstd":@TRUE,
+            @"bound":@TRUE,
+            @"pcssh":@TRUE,
+            @"orchst":@TRUE},
+          @{@"name":@"pc-node1",
+            @"mac":@"12345",
+            @"rgstd":@TRUE,
+            @"bound":@TRUE,
+            @"pcssh":@TRUE,
+            @"orchst":@TRUE},
+          @{@"name":@"pc-node2",
+            @"mac":@"12345",
+            @"rgstd":@TRUE,
+            @"bound":@TRUE,
+            @"pcssh":@TRUE,
+            @"orchst":@TRUE}];
 }
 
-- (IBAction)top_menu_04:(id)sender {
+// node clean
+- (IBAction)env_setup_04:(id)sender {
+    self.nodeList = nil;
 }
-
 
 - (IBAction)transition_01:(id)sender {
     [[AppDelegate sharedDelegate] activeWindowByClassName:@"TransitionWC" withResponder:nil];
