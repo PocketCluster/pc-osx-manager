@@ -273,7 +273,7 @@
          // only indicates a time mark pass
          [[StatusCache SharedStatusCache] setTimeUpServiceReady:YES];
          
-         /*** THIS IS A CRITICAL ERROR. ALERT USER AND DISABLE APPLICATION ***/
+         /*** THIS IS A CRITICAL ERROR. ALERT USER AND KILL APPLICATION ***/
          if (![[response valueForKeyPath:@"srvc-timeup.status"] boolValue]) {
 
              NSString *error = [response valueForKeyPath:@"srvc-timeup.error"];
@@ -287,6 +287,7 @@
              // (set the node timeup flag so termination process could begin)
              [[StatusCache SharedStatusCache] setTimeUpNodeOnline:YES];
 
+             // this supposed to be in 
              [ShowAlert
               showTerminationAlertWithTitle:@"PocketCluster Startup Error"
               message:error];

@@ -6,10 +6,12 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
+#import "ShowAlert.h"
+#import "AppDelegate+Execution.h"
+
 #import "NativeMenuAddition.h"
 #import "NativeMenu+Monitor.h"
 #import "NativeMenu+Operation.h"
-#import "AppDelegate+Execution.h"
 
 @interface NativeMenu(MonitorPrivate)
 - (BOOL) _activateMenuBeforeNodeTimeup:(StatusCache *)aCache;

@@ -6,6 +6,7 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
+#import "ShowAlert.h"
 #import "StepStage.h"
 #import "IntroVC.h"
 #import "IntroWC.h"
@@ -108,17 +109,24 @@
 - (void) updateNodeStatusWith:(StatusCache *)aCache {
     
     // quickly filter out the worst case scenarios when 'node online timeup' noti has not fired
-    if (![[StatusCache SharedStatusCache] timeUpNodeOnline]) {
-        if (![[StatusCache SharedStatusCache] isNodeListValid] || \
-            ![[StatusCache SharedStatusCache] isRegisteredNodesAllOnline]) {
+    // same of [NativeMenu _activateMenuBeforeNodeTimeup:]
+    if (![aCache timeUpNodeOnline]) {
+        // if app is not ready
+        if (![aCache isAppReady]) {
             return;
         }
-    }
-    
-    // -- as 'node online timeup' noti should have been kicked, check strict manner --
-    // node list should be valid at this point
-    if (![[StatusCache SharedStatusCache] isNodeListValid]) {
-        return;
+        // service is not ready
+        if (![aCache timeUpServiceReady]) {
+            return;
+        }
+        // invalid node list
+        if (![aCache isNodeListValid]) {
+            return;
+        }
+        // if all nodes are not up
+        if (![aCache isRegisteredNodesAllOnline]) {
+            return;
+        }
     }
     
     WEAK_SELF(self);
