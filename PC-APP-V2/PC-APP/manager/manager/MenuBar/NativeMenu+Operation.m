@@ -60,6 +60,9 @@
     [mStatus setTarget:self];
     [mStatus setSubmenu:nil];
 
+    // firstly clear error image
+    [mStatus setImage:nil];
+
     // check service warning
     if (srvcError != nil) {
         [mStatus setImage:[NSImage imageNamed:@"cancel"]];

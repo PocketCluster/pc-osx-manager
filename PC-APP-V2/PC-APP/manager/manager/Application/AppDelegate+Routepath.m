@@ -277,10 +277,19 @@
          if (![[response valueForKeyPath:@"srvc-timeup.status"] boolValue]) {
 
              NSString *error = [response valueForKeyPath:@"srvc-timeup.error"];
-             [[StatusCache SharedStatusCache] setServiceError:error];
              Log(@"service online failure %@", error);
 
+             [[StatusCache SharedStatusCache] setServiceError:error];
+
              [belf onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:NO];
+
+             // once this happens there is no way to fix this. just alert and kill the app.
+             // (set the node timeup flag so termination process could begin)
+             [[StatusCache SharedStatusCache] setTimeUpNodeOnline:YES];
+
+             [ShowAlert
+              showTerminationAlertWithTitle:@"PocketCluster Startup Error"
+              message:error];
 
          } else {
              // setup state and notify those who need to listen

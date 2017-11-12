@@ -15,8 +15,8 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <rect key="contentRect" x="196" y="240" width="756" height="645"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
-            <value key="minSize" type="size" width="574" height="318"/>
-            <value key="maxSize" type="size" width="574" height="318"/>
+            <value key="minSize" type="size" width="756" height="645"/>
+            <value key="maxSize" type="size" width="756" height="645"/>
             <view key="contentView" id="se5-gp-TjO">
                 <rect key="frame" x="0.0" y="0.0" width="756" height="645"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -172,21 +172,21 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OsX-ZO-fia">
-                        <rect key="frame" x="560" y="235" width="182" height="32"/>
+                        <rect key="frame" x="560" y="247" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="[M] New Cluster" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Ch6-PV-Mvz">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Fw-ue-HuN">
-                        <rect key="frame" x="560" y="202" width="182" height="32"/>
+                        <rect key="frame" x="560" y="214" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="[M] Run Cluster" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="mlt-VY-5Sy">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QhG-Zi-dJq">
-                        <rect key="frame" x="560" y="268" width="182" height="32"/>
+                        <rect key="frame" x="560" y="280" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="[M] Show Update Sign" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="W5h-Oa-0gl">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -313,24 +313,14 @@
                         </connections>
                     </button>
                     <box verticalHuggingPriority="750" fixedFrame="YES" title="Box" boxType="separator" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="7k1-vv-Hxe">
-                        <rect key="frame" x="25" y="320" width="711" height="5"/>
+                        <rect key="frame" x="16" y="326" width="720" height="5"/>
                         <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
                         <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                         <font key="titleFont" metaFont="system"/>
                     </box>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7RJ-U1-0iI">
-                        <rect key="frame" x="9" y="268" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="[M] initCheck" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="3U6-Ni-G0M">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="menu_01:" target="-2" id="boy-au-bEa"/>
-                        </connections>
-                    </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DYG-T3-wv5">
-                        <rect key="frame" x="9" y="136" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="[M] update srvc ok" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="P1T-jV-5Rm">
+                        <rect key="frame" x="9" y="148" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[M] monitor srvc ok" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="P1T-jV-5Rm">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
@@ -339,7 +329,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WKK-Vf-BRo">
-                        <rect key="frame" x="9" y="103" width="182" height="32"/>
+                        <rect key="frame" x="9" y="115" width="364" height="32"/>
                         <buttonCell key="cell" type="push" title="[M] timeup node ok" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="KLS-aD-tCf">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -348,19 +338,19 @@
                             <action selector="menu_06:" target="-2" id="pLK-di-BLF"/>
                         </connections>
                     </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JDI-Ug-kAg">
-                        <rect key="frame" x="191" y="103" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="[M] timeup node fail" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="N18-l8-tWd">
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8gy-Lw-o2a">
+                        <rect key="frame" x="9" y="49" width="364" height="32"/>
+                        <buttonCell key="cell" type="push" title="[M] clean all error" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Lws-ga-6Ya">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="menu_10:" target="-2" id="xcC-oM-Vr1"/>
+                            <action selector="menu_11:" target="-2" id="IJY-Qe-hP7"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bcK-uN-WrZ">
-                        <rect key="frame" x="9" y="70" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="[M] update node ok" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Wnr-We-Mqi">
+                        <rect key="frame" x="9" y="82" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[M] monitor node ok" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Wnr-We-Mqi">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
@@ -368,18 +358,8 @@
                             <action selector="menu_07:" target="-2" id="0mx-i0-w1C"/>
                         </connections>
                     </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7l7-Ig-eRO">
-                        <rect key="frame" x="9" y="235" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="[M] Start Services" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="jo3-aP-5Gd">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="menu_02:" target="-2" id="Tzi-zh-KZ8"/>
-                        </connections>
-                    </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QaB-fo-fPG">
-                        <rect key="frame" x="191" y="169" width="182" height="32"/>
+                        <rect key="frame" x="191" y="181" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="[M] timeup srvc fail" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="k0t-fV-SNu">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -388,19 +368,9 @@
                             <action selector="menu_08:" target="-2" id="Sdh-up-fZC"/>
                         </connections>
                     </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hs9-pm-eZI">
-                        <rect key="frame" x="9" y="202" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="[M] check node" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="rax-gg-cJm">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="menu_03:" target="-2" id="Akq-3k-MdP"/>
-                        </connections>
-                    </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JFo-8t-PBX">
-                        <rect key="frame" x="191" y="136" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="[M] update srvc fail" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="k0N-xH-pic">
+                        <rect key="frame" x="191" y="148" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[M] monitor srvc fail" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="k0N-xH-pic">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
@@ -409,7 +379,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wqY-oF-F7m">
-                        <rect key="frame" x="9" y="169" width="182" height="32"/>
+                        <rect key="frame" x="9" y="181" width="182" height="32"/>
                         <buttonCell key="cell" type="push" title="[M] timeup srvc ok" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="1RF-fP-3wm">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -419,13 +389,53 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VlI-KU-8nQ">
-                        <rect key="frame" x="191" y="70" width="182" height="32"/>
-                        <buttonCell key="cell" type="push" title="[M] update node fail" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="lyY-yr-p22">
+                        <rect key="frame" x="191" y="82" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[M] monitor node fail" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="lyY-yr-p22">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="menu_11:" target="-2" id="tpq-k1-JgC"/>
+                            <action selector="menu_10:" target="-2" id="RKA-aa-adx"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eUK-li-fPN">
+                        <rect key="frame" x="10" y="13" width="364" height="32"/>
+                        <buttonCell key="cell" type="push" title="[M] clean all timeup flag" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="fic-V0-rKh">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="menu_12:" target="-2" id="BKU-GV-wPJ"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7RJ-U1-0iI">
+                        <rect key="frame" x="101" y="280" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[M] initCheck" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="3U6-Ni-G0M">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="menu_01:" target="-2" id="boy-au-bEa"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7l7-Ig-eRO">
+                        <rect key="frame" x="101" y="247" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[M] Start Services" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="jo3-aP-5Gd">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="menu_02:" target="-2" id="Tzi-zh-KZ8"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hs9-pm-eZI">
+                        <rect key="frame" x="101" y="214" width="182" height="32"/>
+                        <buttonCell key="cell" type="push" title="[M] check node" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="rax-gg-cJm">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="menu_03:" target="-2" id="Akq-3k-MdP"/>
                         </connections>
                     </button>
                 </subviews>

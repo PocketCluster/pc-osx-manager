@@ -124,7 +124,7 @@
      * 3) no package is running or being installed.
      * 4) no cluster is being setup.
      */
-    TransitionWC *twc = [[TransitionWC alloc] initWithPackageExecution:@"Preparing to quit ..."];
+    TransitionWC *twc = [[TransitionWC alloc] initWithPackageExecution:@"Closing down services ..."];
     [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
     [twc showWindow:self];
     [twc bringToFront];

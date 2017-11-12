@@ -74,9 +74,14 @@
 // services online timeup
 - (void) onNotifiedWith:(StatusCache *)aCache serviceOnlineTimeup:(BOOL)isSuccess {
     if ([aCache serviceError] != nil) {
-        [self clusterStatusOn];
-    } else {
         [self clusterStatusOff];
+
+        NSMenuItem *mStatus = [self.statusItem.menu itemWithTag:MENUITEM_TOP_STATUS];
+        [mStatus setTitle:@"Shutting down..."];
+        [self.statusItem.menu itemChanged:mStatus];
+
+    } else {
+        [self clusterStatusOn];
     }
 }
 

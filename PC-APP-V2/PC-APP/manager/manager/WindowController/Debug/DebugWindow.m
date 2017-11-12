@@ -163,7 +163,7 @@
     // [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
 }
 
-// update service ok
+// monitor service ok
 - (IBAction)menu_05:(id)sender {
      [[StatusCache SharedStatusCache]
       refreshServiceStatus:
@@ -198,7 +198,7 @@
     [[AppDelegate sharedDelegate] onNotifiedWith:[StatusCache SharedStatusCache] nodeOnlineTimeup:YES];
 }
 
-// update node ok
+// monitor node ok
 - (IBAction)menu_07:(id)sender {
     [[StatusCache SharedStatusCache] setNodeError:nil];
 
@@ -215,18 +215,53 @@
 
 // timeup service fail
 - (IBAction)menu_08:(id)sender {
+    // only indicates a time mark pass
+    [[StatusCache SharedStatusCache] setTimeUpServiceReady:YES];
+
+    [[StatusCache SharedStatusCache] setServiceError:@"test service error"];
+
+    [[AppDelegate sharedDelegate] onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:NO];
+
+    // once this happens there is no way to fix this. just alert and kill the app.
+    // (set the node timeup flag so termination process could begin)
+    [[StatusCache SharedStatusCache] setTimeUpNodeOnline:YES];
+
+    [ShowAlert
+     showTerminationAlertWithTitle:@"PocketCluster Startup Error"
+     message:@"test service error"];
 }
 
-// update service fail
+// monitor service fail
 - (IBAction)menu_09:(id)sender {
+    [[StatusCache SharedStatusCache] setServiceError:@"test service error"];
+
+    // handle errors first then update UI
+    [[AppDelegate sharedDelegate] updateServiceStatusWith:[StatusCache SharedStatusCache]];
 }
 
-// timeup node fail
+// monitor node fail
 - (IBAction)menu_10:(id)sender {
+    [[StatusCache SharedStatusCache] setNodeError:@"test monitor node fail"];
+
+    [[StatusCache SharedStatusCache] refreshNodList:
+     @[@{@"name":@"pc-core",
+         @"mac":@"12345",
+         @"rgstd":@FALSE,
+         @"bound":@TRUE,
+         @"pcssh":@FALSE,
+         @"orchst":@TRUE}]];
+
+    [[AppDelegate sharedDelegate] updateNodeStatusWith:[StatusCache SharedStatusCache]];
 }
 
-// update node fail
+// clean all error
 - (IBAction)menu_11:(id)sender {
+    [[StatusCache SharedStatusCache] setNodeError:nil];
+    [[StatusCache SharedStatusCache] setServiceError:nil];
+}
+
+// reset all timeup
+- (IBAction)menu_12:(id)sender {
 }
 
 - (IBAction)top_menu_01:(id)sender {

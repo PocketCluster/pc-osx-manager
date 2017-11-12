@@ -75,6 +75,16 @@
 
 // services online timeup
 - (void) onNotifiedWith:(StatusCache *)aCache serviceOnlineTimeup:(BOOL)isSuccess {
+
+    if ([aCache serviceError] != nil) {
+        WEAK_SELF(self);
+        [[NSOperationQueue mainQueue]
+         addOperationWithBlock:^{
+             if(belf){
+                 [belf close];
+             }
+         }];
+    }
 }
 
 // nodes online timeup
