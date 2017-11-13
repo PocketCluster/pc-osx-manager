@@ -87,4 +87,61 @@
     [[self.viewControllers objectAtIndex:prevIndex] didControl:self progressFrom:aStep withResult:nil];
 }
 
+
+#pragma mark - MonitorAppCheck
+
+// check system readiness
+- (void) didAppCheckSystemReadiness:(BOOL)isReady {
+}
+
+// check app has been expried
+- (void) didAppCheckAppExpiration:(BOOL)isExpired {
+}
+
+// check if first time run
+- (void) didAppCheckIsFirstRun:(BOOL)isFirstRun {
+}
+
+// check if user is authed
+- (void) didAppCheckUserAuthed:(BOOL)isUserAuthed {
+}
+
+#pragma mark - MonitorStatus
+// show initial message
+- (void) setupWithInitialCheckMessage {
+    
+}
+
+// show "service starting" message.
+- (void) setupWithStartServicesMessage {
+    
+}
+
+// services online timeup. Display service status. This is paired method that
+// needs to be initiated by previous call to `setupWithStartServicesMessage`
+- (void) onNotifiedWith:(StatusCache *)aCache serviceOnlineTimeup:(BOOL)isSuccess {
+    
+}
+
+// show "checking nodes" message
+- (void) setupWithCheckingNodesMessage {
+    
+}
+
+// nodes online timeup. Display node state no matter what. This is paired method that
+// needs to be initiated by previous call to `setupWithCheckingNodesMessage`
+- (void) onNotifiedWith:(StatusCache *)aCache nodeOnlineTimeup:(BOOL)isSuccess {
+    
+}
+
+// update services
+- (void) updateServiceStatusWith:(StatusCache *)aCache {
+    
+}
+
+// update nodes
+- (void) updateNodeStatusWith:(StatusCache *)aCache {
+    
+}
+
 @end

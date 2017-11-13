@@ -8,6 +8,8 @@
 
 #import "BaseWindowController.h"
 #import "StepStage.h"
+#import "MonitorAppCheck.h"
+#import "MonitorStatus.h"
 
-@interface AgreementWC : BaseWindowController <StepControl>
+@interface AgreementWC : BaseWindowController <MonitorAppCheck, MonitorStatus, StepControl>
 @end

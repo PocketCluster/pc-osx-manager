@@ -61,6 +61,8 @@
          Log(@"%@ %@", path, response);
 
          BOOL isSystemReady = [[response valueForKeyPath:@"syscheck.status"] boolValue];
+         [belf didAppCheckSystemReadiness:isSystemReady];
+
          if (isSystemReady) {
              [PCRouter routeRequestGet:RPATH_APP_EXPIRED];
 
@@ -81,6 +83,8 @@
          Log(@"%@ %@", path, response);
          
          BOOL isAppExpired = [[response valueForKeyPath:@"expired.status"] boolValue];
+         [belf didAppCheckAppExpiration:isAppExpired];
+
          if (!isAppExpired) {
              NSString *warning = [response valueForKeyPath:@"expired.warning"];
              if (warning != nil) {
@@ -108,6 +112,8 @@
 
          // show agreement
          BOOL isFirstRun = [[response valueForKeyPath:@"firsttime.status"] boolValue];
+         [belf didAppCheckIsFirstRun:isFirstRun];
+
          [[StatusCache SharedStatusCache] setFirstRun:isFirstRun];
 
          if (isFirstRun) {
@@ -130,6 +136,8 @@
          Log(@"%@ %@", path, response);
 
          BOOL isUserAuthed = [[response valueForKeyPath:@"user-auth.status"] boolValue];
+         [belf didAppCheckUserAuthed:isUserAuthed];
+
          if ([[StatusCache SharedStatusCache] isFirstRun]) {
              if (isUserAuthed) {
 

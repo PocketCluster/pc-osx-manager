@@ -280,6 +280,7 @@
 		04CAE2E41E9B8A4900B23B22 /* DebugWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DebugWindow.h; sourceTree = "<group>"; };
 		04CAE2E51E9B8A4900B23B22 /* DebugWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DebugWindow.m; sourceTree = "<group>"; };
 		04CAE2E61E9B8A4900B23B22 /* DebugWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DebugWindow.xib; sourceTree = "<group>"; };
+		04D1D9BE1FB9CEB3004C2E79 /* MonitorAppCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MonitorAppCheck.h; sourceTree = "<group>"; };
 		04D5A48C1E9269AE0057012A /* AppDelegate+Sparkle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Sparkle.h"; sourceTree = "<group>"; };
 		04D5A48D1E9269AE0057012A /* AppDelegate+Sparkle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Sparkle.m"; sourceTree = "<group>"; };
 		04DCDDE31FB6DE730074FE16 /* NativeMenu+Operation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NativeMenu+Operation.h"; sourceTree = "<group>"; };
@@ -790,6 +791,7 @@
 		04B7C89D1F9C66B5000ECEEC /* Monitor */ = {
 			isa = PBXGroup;
 			children = (
+				04D1D9BE1FB9CEB3004C2E79 /* MonitorAppCheck.h */,
 				04B7C89E1F9C66B5000ECEEC /* MonitorStatus.h */,
 				04B7C89F1F9C68F8000ECEEC /* MonitorPackage.h */,
 				0470F7711FADCF7200B58649 /* MonitorExecution.h */,

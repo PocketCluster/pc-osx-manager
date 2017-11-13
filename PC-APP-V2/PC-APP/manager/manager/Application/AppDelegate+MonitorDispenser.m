@@ -11,6 +11,51 @@
 
 @implementation AppDelegate(MonitorDispenser)
 
+#pragma mark - MonitorAppCheck
+// check system readiness
+- (void) didAppCheckSystemReadiness:(BOOL)isReady {
+    @synchronized(_openWindows) {
+        for (NSObject<MonitorAppCheck> *window in _openWindows) {
+            if ([window conformsToProtocol:@protocol(MonitorAppCheck)]) {
+                [window didAppCheckSystemReadiness:isReady];
+            }
+        }
+    }
+}
+
+// check app has been expried
+- (void) didAppCheckAppExpiration:(BOOL)isExpired {
+    @synchronized(_openWindows) {
+        for (NSObject<MonitorAppCheck> *window in _openWindows) {
+            if ([window conformsToProtocol:@protocol(MonitorAppCheck)]) {
+                [window didAppCheckAppExpiration:isExpired];
+            }
+        }
+    }
+}
+
+// check if first time run
+- (void) didAppCheckIsFirstRun:(BOOL)isFirstRun {
+    @synchronized(_openWindows) {
+        for (NSObject<MonitorAppCheck> *window in _openWindows) {
+            if ([window conformsToProtocol:@protocol(MonitorAppCheck)]) {
+                [window didAppCheckIsFirstRun:isFirstRun];
+            }
+        }
+    }
+}
+
+// check if user is authed
+- (void) didAppCheckUserAuthed:(BOOL)isUserAuthed {
+    @synchronized(_openWindows) {
+        for (NSObject<MonitorAppCheck> *window in _openWindows) {
+            if ([window conformsToProtocol:@protocol(MonitorAppCheck)]) {
+                [window didAppCheckUserAuthed:isUserAuthed];
+            }
+        }
+    }
+}
+
 #pragma mark - MonitorStatus
 - (void) setupWithInitialCheckMessage {
     @synchronized(_openWindows) {
@@ -23,7 +68,6 @@
         }
     }
 }
-
 
 - (void) setupWithStartServicesMessage {
     @synchronized(_openWindows) {
