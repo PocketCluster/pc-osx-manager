@@ -67,6 +67,9 @@
 
 
 #pragma mark - application status
+// this property should be used to indicate if app is firstly run.
+@property (readwrite, getter=isFirstRun, setter=setFirstRun:) BOOL firstRun;
+
 // this property should be used to indicate if app has passed auth state and ready to transition to the next state
 // whenever app is not ready and user wants to quit, exit immediately.
 @property (readwrite, getter=isAppReady, setter=setAppReady:) BOOL appReady;

@@ -28,6 +28,7 @@ static NSString * const kNodeAllOfflineError = @"All slave nodes are offline. Pl
     __strong NSString *_serviceError;
     BOOL _timeUpServiceReady;
 
+    BOOL _firstRun;
     BOOL _appReady;
     BOOL _pkgInstalling;
     BOOL _clusterSetup;
@@ -69,6 +70,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
         _timeUpServiceReady = NO;
 
         // set app status is not ready yet
+        _firstRun = NO;
         _appReady = NO;
         _pkgInstalling = NO;
         _clusterSetup = NO;
@@ -300,6 +302,21 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
 }
 
 #pragma mark - application status
+@dynamic firstRun;
+- (BOOL) isFirstRun {
+    BOOL first = NO;
+    @synchronized(self) {
+        first = _firstRun;
+    }
+    return first;
+}
+
+- (void) setFirstRun:(BOOL)first {
+    @synchronized(self) {
+        _firstRun = first;
+    }
+}
+
 @dynamic appReady;
 - (BOOL) isAppReady {
     BOOL ready = NO;

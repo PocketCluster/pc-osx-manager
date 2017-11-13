@@ -108,6 +108,8 @@
 
          // show agreement
          BOOL isFirstRun = [[response valueForKeyPath:@"firsttime.status"] boolValue];
+         [[StatusCache SharedStatusCache] setFirstRun:isFirstRun];
+
          if (isFirstRun) {
              [belf activeWindowByClassName:@"AgreementWC" withResponder:nil];
 
@@ -130,14 +132,18 @@
          BOOL isUserAuthed = [[response valueForKeyPath:@"user-auth.status"] boolValue];
          if (isUserAuthed) {
 
-             // setup ui state
-             [belf setupWithStartServicesMessage];
+             if ([[StatusCache SharedStatusCache] isFirstRun]) {
 
-             // set the app ready whenever service gets started
-             [[StatusCache SharedStatusCache] setAppReady:YES];
+             } else {
+                 // setup ui state
+                 [belf setupWithStartServicesMessage];
 
-             // start basic service
-//             OpsCmdBaseServiceStart();
+                 // set the app ready whenever service gets started
+                 [[StatusCache SharedStatusCache] setAppReady:YES];
+
+                 // start basic service
+                 // OpsCmdBaseServiceStart();
+             }
 
          } else {
              [ShowAlert
