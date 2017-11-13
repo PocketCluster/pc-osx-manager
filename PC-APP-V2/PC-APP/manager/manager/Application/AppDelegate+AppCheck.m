@@ -130,11 +130,14 @@
          Log(@"%@ %@", path, response);
 
          BOOL isUserAuthed = [[response valueForKeyPath:@"user-auth.status"] boolValue];
-         if (isUserAuthed) {
-
-             if ([[StatusCache SharedStatusCache] isFirstRun]) {
+         if ([[StatusCache SharedStatusCache] isFirstRun]) {
+             if (isUserAuthed) {
 
              } else {
+
+             }
+         } else {
+             if (isUserAuthed) {
                  // setup ui state
                  [belf setupWithStartServicesMessage];
 
@@ -143,13 +146,11 @@
 
                  // start basic service
                  // OpsCmdBaseServiceStart();
+             } else {
+                 [ShowAlert
+                  showTerminationAlertWithTitle:@"Invalid Invitation"
+                  message:[response valueForKeyPath:@"user-auth.error"]];
              }
-
-         } else {
-             [ShowAlert
-              showTerminationAlertWithTitle:@"Invalid Invitation"
-              message:[response valueForKeyPath:@"user-auth.error"]];
-
          }
      }];
 }
