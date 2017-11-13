@@ -46,7 +46,7 @@
 
          } else {
              [ShowAlert
-              showTerminationAlertWithTitle:@"Unable to Start PocketCluster"
+              showTerminationAlertWithTitle:@"Network Error"
               message:[response valueForKeyPath:@"sys-network-init.error"]];
 
          }
@@ -106,13 +106,16 @@
 
          Log(@"%@ %@", path, response);
 
+         // show agreement
          BOOL isFirstRun = [[response valueForKeyPath:@"firsttime.status"] boolValue];
          if (isFirstRun) {
              [belf activeWindowByClassName:@"AgreementWC" withResponder:nil];
 
+         // show intro screen
          } else {
-             [PCRouter routeRequestGet:RPATH_USER_AUTHED];
+             [belf activeWindowByClassName:@"IntroWC" withResponder:nil];
 
+             [PCRouter routeRequestGet:RPATH_USER_AUTHED];
          }
      }];
 
@@ -126,8 +129,6 @@
 
          BOOL isUserAuthed = [[response valueForKeyPath:@"user-auth.status"] boolValue];
          if (isUserAuthed) {
-             // show intro screen
-             [[AppDelegate sharedDelegate] activeWindowByClassName:@"IntroWC" withResponder:nil];
 
              // setup ui state
              [belf setupWithStartServicesMessage];
@@ -140,7 +141,7 @@
 
          } else {
              [ShowAlert
-              showTerminationAlertWithTitle:@"Your invitation is not valid"
+              showTerminationAlertWithTitle:@"Invalid Invitation"
               message:[response valueForKeyPath:@"user-auth.error"]];
 
          }

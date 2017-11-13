@@ -777,9 +777,9 @@
 		04B7B8AB1F43AF0300FD0907 /* UIElement */ = {
 			isa = PBXGroup;
 			children = (
+				04B7C89D1F9C66B5000ECEEC /* Monitor */,
 				04CA54B51F44D47E00A7AF48 /* Alert */,
 				04CA54B81F44D47E00A7AF48 /* BaseBrandView */,
-				04B7C89D1F9C66B5000ECEEC /* Monitor */,
 				04CA54BE1F44E36A00A7AF48 /* StepStages */,
 				04B379701F48C60B0080DBEA /* Window */,
 			);
