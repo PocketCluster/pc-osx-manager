@@ -12,4 +12,8 @@
 @interface NativeMenu(Operation)
 - (void) setupMenuNewCluster:(StatusCache *)aCache;
 - (void) setupMenuRunCluster:(StatusCache *)aCache;
+
+- (void) startPackage:(NSMenuItem *)mPackage;
+- (void) stopPackage:(NSMenuItem *)mPackage;
+- (void) openWebConsole:(NSMenuItem *)mPackage;
 @end

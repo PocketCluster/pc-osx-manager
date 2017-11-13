@@ -201,8 +201,9 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
         }
     }
 
-    // (2017/11/12) this indicates that there is slave registered, but no slave is online
-    // this is an error need to be handled in core engine
+    // (2017/11/12)
+    // TODO : this indicates that there is slave registered, but no slave is online
+    //        this is an error needed to be handled in core engine
     BOOL hasSlave = [self hasSlaveNodes];
     BOOL anyOnline = [self isAnySlaveNodeOnline];
     if (hasSlave && !anyOnline) {

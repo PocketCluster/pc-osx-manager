@@ -7,7 +7,6 @@
 //
 
 #import "ShowAlert.h"
-#import "AppDelegate+Execution.h"
 
 #import "NativeMenuAddition.h"
 #import "NativeMenu+Monitor.h"
@@ -333,16 +332,4 @@ static void _updateExecMenuVisibility(NSMenuItem *aPackageMenu, ExecState aExecS
     }
 }
 
-#pragma mark - menu methods
-- (void) startPackage:(NSMenuItem *)mPackage {
-    [[AppDelegate sharedDelegate] startUpPackageWithID:mPackage.representedObject];
-}
-
-- (void) stopPackage:(NSMenuItem *)mPackage {
-    [[AppDelegate sharedDelegate] killPackageWithID:mPackage.representedObject];
-}
-
-- (void) openWebConsole:(NSMenuItem *)mPackage {
-    Log(@"openWebConsole : %@", mPackage.representedObject);
-}
 @end

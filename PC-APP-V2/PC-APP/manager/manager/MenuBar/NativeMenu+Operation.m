@@ -8,6 +8,7 @@
 
 #import "ShowAlert.h"
 #import "StatusCache.h"
+#import "AppDelegate+Execution.h"
 #import "AppDelegate+Window.h"
 
 #import "NativeMenuAddition.h"
@@ -81,7 +82,6 @@
         return;
     }
 }
-
 
 #pragma mark - Run Cluster
 - (void) setupMenuRunCluster:(StatusCache *)aCache {
@@ -188,4 +188,34 @@
     }
 }
 
+#pragma mark - Run Package
+- (void) startPackage:(NSMenuItem *)mPackage {
+    NSString *srvcError = [[StatusCache SharedStatusCache] serviceError];
+    NSString *nodeError = [[StatusCache SharedStatusCache] nodeError];
+    
+    // check service warning
+    if (srvcError != nil) {
+        [ShowAlert
+         showWarningAlertWithTitle:@"Unable to Start"
+         message:srvcError];
+        return;
+    }
+    // check node warning
+    if (nodeError != nil) {
+        [ShowAlert
+         showWarningAlertWithTitle:@"Unable to Start"
+         message:nodeError];
+        return;
+    }
+
+    [[AppDelegate sharedDelegate] startUpPackageWithID:mPackage.representedObject];
+}
+
+- (void) stopPackage:(NSMenuItem *)mPackage {
+    [[AppDelegate sharedDelegate] killPackageWithID:mPackage.representedObject];
+}
+
+- (void) openWebConsole:(NSMenuItem *)mPackage {
+    Log(@"openWebConsole : %@", mPackage.representedObject);
+}
 @end
