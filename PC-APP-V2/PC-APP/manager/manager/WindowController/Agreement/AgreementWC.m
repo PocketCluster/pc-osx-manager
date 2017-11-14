@@ -15,11 +15,22 @@
 
 #import "AgreementWC.h"
 
+enum {
+    SETUPVC_AGREEMENT = 0,
+    SETUPVC_USER_CHECK,
+    SETUPVC_INTRO,
+    SETUPVC_BUILD_CLUSTER,
+    SETUPVC_INSTALL_PKG,
+    SETUPVC_COUNT,
+};
+
 @interface AgreementWC ()
 @property (nonatomic, strong) NSArray<NSViewController<StageStep> *>* viewControllers;
 @end
 
-@implementation AgreementWC
+@implementation AgreementWC {
+    NSUInteger _vcIndex;
+}
 
 - (instancetype) initWithWindowNibName:(NSString *)windowNibName {
     self = [super initWithWindowNibName:windowNibName];
@@ -30,6 +41,9 @@
               [[PCSetup1VC alloc] initWithStageControl:self nibName:@"PCSetup1VC" bundle:[NSBundle mainBundle]],
               [[PCSetup2VC alloc] initWithStageControl:self nibName:@"PCSetup2VC" bundle:[NSBundle mainBundle]],
               [[PCSetup3VC alloc] initWithStageControl:self nibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]]];
+
+        // current index
+        _vcIndex = 0;
     }
     return self;
 }
@@ -41,8 +55,8 @@
 - (void)windowDidLoad {
     [super windowDidLoad];
     
-    [self.window setTitle:[[self.viewControllers objectAtIndex:0] title]];
-    [[self.window contentView] addSubview:[[self.viewControllers objectAtIndex:0] view]];
+    [self.window setTitle:[[self.viewControllers objectAtIndex:_vcIndex] title]];
+    [[self.window contentView] addSubview:[[self.viewControllers objectAtIndex:_vcIndex] view]];
 }
 
 #pragma mark - Stage Control
@@ -59,6 +73,9 @@
         return;
     }
 
+    // save index
+    _vcIndex = nextIndex;
+
     [[[self.viewControllers objectAtIndex:prevIndex] view] removeFromSuperview];
     [self.window setTitle:[[self.viewControllers objectAtIndex:nextIndex] title]];
     [[self.window contentView] addSubview:[[self.viewControllers objectAtIndex:nextIndex] view]];
@@ -67,7 +84,16 @@
 }
 
 -(void)shouldControlRevertFrom:(NSObject<StageStep> *)aStep withParam:(NSDictionary *)aParam {
+    NSViewController<StageStep> *prevStep = (NSViewController<StageStep> *)aStep;
+    NSUInteger prevIndex = [self.viewControllers indexOfObject:prevStep];
 
+    if (prevIndex <= SETUPVC_USER_CHECK) {
+        [[NSApplication sharedApplication] terminate:nil];
+    } else {
+        [self close];
+    }
+
+#ifdef _REWIND_PAGES_
     NSViewController<StageStep> *prevStep = (NSViewController<StageStep> *)aStep;
     NSUInteger prevIndex = [self.viewControllers indexOfObject:prevStep];
     NSUInteger nextIndex = 0;
@@ -84,8 +110,9 @@
     [[[self.viewControllers objectAtIndex:prevIndex] view] removeFromSuperview];
     [self.window setTitle:[[self.viewControllers objectAtIndex:nextIndex] title]];
     [[self.window contentView] addSubview:[[self.viewControllers objectAtIndex:nextIndex] view]];
-    
+
     [[self.viewControllers objectAtIndex:prevIndex] didControl:self progressFrom:aStep withResult:nil];
+#endif
 }
 
 
