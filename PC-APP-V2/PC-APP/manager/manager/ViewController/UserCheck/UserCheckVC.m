@@ -6,9 +6,11 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
+#import "ShowAlert.h"
 #import "UserCheckVC.h"
 #import "PCRouter.h"
 #import "NullStringChecker.h"
+#import "NSString+EmailForm.h"
 
 @interface UserCheckVC ()
 -(void)_disableControls;
@@ -39,13 +41,17 @@
 -(IBAction)check:(id)sender {
     NSString *email = [self.fieldEmail stringValue];
     NSString *code =  [self.fieldCode stringValue];
-    
-    if (ISNULL_STRING(email)) {
-        
+
+    if (ISNULL_STRING(email) || ![email isValidEmailForm]) {
+        [ShowAlert
+         showWarningAlertWithTitle:@"Invalid Email Address"
+         message:@"Please provide valid email address"];
         return;
     }
     if (ISNULL_STRING(code)) {
-        
+        [ShowAlert
+         showWarningAlertWithTitle:@"Invalid Invitation"
+         message:@"Please provide valid invitation code"];
         return;
     }
 

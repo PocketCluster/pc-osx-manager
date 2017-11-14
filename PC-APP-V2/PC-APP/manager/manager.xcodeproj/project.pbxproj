@@ -61,6 +61,7 @@
 		0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0486780E1BCF5FE20071594B /* Assets.xcassets */; };
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
 		048804661FB2EE3100F4EA05 /* AppDelegate+Shutdown.m in Sources */ = {isa = PBXBuildFile; fileRef = 048804651FB2EE3100F4EA05 /* AppDelegate+Shutdown.m */; };
+		0496AAD71FBADF910019F24E /* NSString+EmailForm.m in Sources */ = {isa = PBXBuildFile; fileRef = 0496AAD61FBADF910019F24E /* NSString+EmailForm.m */; };
 		0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */; };
 		04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */; };
 		04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */; };
@@ -231,6 +232,8 @@
 		048678291BCF5FE20071594B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		048804641FB2EE3100F4EA05 /* AppDelegate+Shutdown.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Shutdown.h"; sourceTree = "<group>"; };
 		048804651FB2EE3100F4EA05 /* AppDelegate+Shutdown.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Shutdown.m"; sourceTree = "<group>"; };
+		0496AAD51FBADF910019F24E /* NSString+EmailForm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+EmailForm.h"; sourceTree = "<group>"; };
+		0496AAD61FBADF910019F24E /* NSString+EmailForm.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+EmailForm.m"; sourceTree = "<group>"; };
 		0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		04AD71C31E9B749A00DB6AE9 /* VersionComparison.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VersionComparison.h; sourceTree = "<group>"; };
 		04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionComparison.m; sourceTree = "<group>"; };
@@ -561,6 +564,7 @@
 		046A35F31BD78AB8004E0946 /* String */ = {
 			isa = PBXGroup;
 			children = (
+				0496AAD41FBADF6D0019F24E /* EmailForm */,
 				046A35F41BD78AB8004E0946 /* NullStringCheck */,
 				046A35F61BD78AB8004E0946 /* RandomString */,
 				046A35F91BD78AB8004E0946 /* StringEncoding */,
@@ -652,9 +656,9 @@
 				0447CAB91F47AD28003BB069 /* BaseSetupVC.h */,
 				0447CABA1F47AD28003BB069 /* BaseSetupVC.m */,
 				04CA54AA1F44AFD100A7AF48 /* Agreement */,
-				040A9BDB1F9837590058F0EF /* Intro */,
-				046D31131F3D346B0081CC3E /* Setup */,
 				040A9BD51F9836D70058F0EF /* UserCheck */,
+				046D31131F3D346B0081CC3E /* Setup */,
+				040A9BDB1F9837590058F0EF /* Intro */,
 			);
 			name = ViewController;
 			path = manager/ViewController;
@@ -739,6 +743,15 @@
 				048678291BCF5FE20071594B /* Info.plist */,
 			);
 			path = managerUITests;
+			sourceTree = "<group>";
+		};
+		0496AAD41FBADF6D0019F24E /* EmailForm */ = {
+			isa = PBXGroup;
+			children = (
+				0496AAD51FBADF910019F24E /* NSString+EmailForm.h */,
+				0496AAD61FBADF910019F24E /* NSString+EmailForm.m */,
+			);
+			path = EmailForm;
 			sourceTree = "<group>";
 		};
 		04AD71C01E9B749A00DB6AE9 /* Util */ = {
@@ -1176,6 +1189,7 @@
 				046D31241F3D346B0081CC3E /* PCSetup1VC.m in Sources */,
 				04BD309E1F3E4B2D00509B21 /* PCSetup2VC.m in Sources */,
 				046D310E1F3D32440081CC3E /* PCPkgInstallWC.m in Sources */,
+				0496AAD71FBADF910019F24E /* NSString+EmailForm.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
