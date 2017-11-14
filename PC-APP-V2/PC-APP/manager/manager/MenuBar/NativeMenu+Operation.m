@@ -61,6 +61,12 @@
 }
 
 - (void) menuSelectedNewCluster:(id)sender {
+    BaseWindowController *isAgreement = [[AppDelegate sharedDelegate] findWindowControllerByClassName:@"AgreementWC" withResponder:nil];
+    if (isAgreement != nil) {
+        return;
+    }
+
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"DPSetupWC" withResponder:nil];
 }
 
 - (void) menuSelectedNewClusterError:(NSMenuItem *)aMenu {

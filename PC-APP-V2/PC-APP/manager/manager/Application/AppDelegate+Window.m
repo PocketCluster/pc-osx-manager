@@ -40,7 +40,6 @@
     @synchronized(_openWindows) {
 
         for (BaseWindowController* window in _openWindows) {
-
             if ([[window class] isSubclassOfClass:[BaseWindowController class]] &&\
                 [[window className] isEqualToString:aClassName]) {
                 Log(@"found an obj by the class name %@", aClassName);
@@ -80,6 +79,26 @@
 
         return window;
     }
+}
+
+- (BaseWindowController *)findWindowControllerByClassName:(NSString *)aClassName withResponder:(id)aResponder {
+    // there is no compromise
+    assert([NSThread isMainThread]);
+
+    @synchronized(_openWindows) {
+        for (BaseWindowController* window in _openWindows) {
+            if ([[window class] isSubclassOfClass:[BaseWindowController class]] &&\
+                [[window className] isEqualToString:aClassName]) {
+                Log(@"found an obj by the class name %@", aClassName);
+                [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
+                [window showWindow:aResponder];
+                [window bringToFront];
+                return window;
+            }
+        }
+    }
+
+    return nil;
 }
 
 - (void)addOpenWindow:(id)window {

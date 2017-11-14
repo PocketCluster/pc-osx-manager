@@ -10,6 +10,7 @@
 
 @interface AppDelegate(Window)
 - (NSObject *) activeWindowByClassName:(NSString *)aClassName withResponder:(id)aResponder;
+- (BaseWindowController *)findWindowControllerByClassName:(NSString *)aClassName withResponder:(id)aResponder;
 - (void)addOpenWindow:(BaseWindowController *)window;
 - (void)removeOpenWindow:(id)window;
 - (void)updateProcessType;
