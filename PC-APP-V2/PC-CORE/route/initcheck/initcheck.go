@@ -144,7 +144,11 @@ func InitApplicationCheck(appLife route.Router, feeder route.ResponseFeeder) {
     })
 
     // check if user is authenticated
-    appLife.GET(routepath.RpathUserAuthed(), func(_, path, _ string) error {
+    appLife.POST(routepath.RpathUserAuthed(), func(_, path, payload string) error {
+        // TODO : get the payload and check auth
+
+
+        // return auth check value
         data, err := json.Marshal(route.ReponseMessage{
             "user-auth": {
                 "status": true,
@@ -154,7 +158,7 @@ func InitApplicationCheck(appLife route.Router, feeder route.ResponseFeeder) {
             log.Debugf(err.Error())
             return errors.WithStack(err)
         }
-        err = feeder.FeedResponseForGet(path, string(data))
+        err = feeder.FeedResponseForPost(path, string(data))
         if err != nil {
             return errors.WithStack(err)
         }

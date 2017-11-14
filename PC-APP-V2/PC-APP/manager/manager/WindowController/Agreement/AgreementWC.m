@@ -104,44 +104,42 @@
 
 // check if user is authed
 - (void) didAppCheckUserAuthed:(BOOL)isUserAuthed {
+    if (!isUserAuthed) {
+        [(UserCheckVC *)[self.viewControllers objectAtIndex:1] enableControls];
+    } else {
+        [(UserCheckVC *)[self.viewControllers objectAtIndex:1] proceedToNext];
+    }
 }
 
 #pragma mark - MonitorStatus
 // show initial message
 - (void) setupWithInitialCheckMessage {
-    
 }
 
 // show "service starting" message.
 - (void) setupWithStartServicesMessage {
-    
 }
 
 // services online timeup. Display service status. This is paired method that
 // needs to be initiated by previous call to `setupWithStartServicesMessage`
 - (void) onNotifiedWith:(StatusCache *)aCache serviceOnlineTimeup:(BOOL)isSuccess {
-    
 }
 
 // show "checking nodes" message
 - (void) setupWithCheckingNodesMessage {
-    
 }
 
 // nodes online timeup. Display node state no matter what. This is paired method that
 // needs to be initiated by previous call to `setupWithCheckingNodesMessage`
 - (void) onNotifiedWith:(StatusCache *)aCache nodeOnlineTimeup:(BOOL)isSuccess {
-    
 }
 
 // update services
 - (void) updateServiceStatusWith:(StatusCache *)aCache {
-    
 }
 
 // update nodes
 - (void) updateNodeStatusWith:(StatusCache *)aCache {
-    
 }
 
 @end

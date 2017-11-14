@@ -123,13 +123,15 @@
          } else {
              [belf activeWindowByClassName:@"IntroWC" withResponder:nil];
 
-             [PCRouter routeRequestGet:RPATH_USER_AUTHED];
+             [PCRouter
+              routeRequestPost:RPATH_USER_AUTHED
+              withRequestBody:@{@"email":@"testemail", @"code":@"testcode"}];
          }
      }];
 
     /*** checking user authed ***/
     [[PCRouter sharedRouter]
-     addGetRequest:self
+     addPostRequest:self
      onPath:@(RPATH_USER_AUTHED)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
@@ -169,6 +171,6 @@
     [[PCRouter sharedRouter] delGetRequest:self onPath:@(RPATH_SYSTEM_READINESS)];
     [[PCRouter sharedRouter] delGetRequest:self onPath:@(RPATH_APP_EXPIRED)];
     [[PCRouter sharedRouter] delGetRequest:self onPath:@(RPATH_SYSTEM_IS_FIRST_RUN)];
-    [[PCRouter sharedRouter] delGetRequest:self onPath:@(RPATH_USER_AUTHED)];
+    [[PCRouter sharedRouter] delPostRequest:self onPath:@(RPATH_USER_AUTHED)];
 }
 @end

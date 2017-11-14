@@ -9,12 +9,15 @@
 #import "BaseSetupVC.h"
 
 @interface UserCheckVC : BaseSetupVC
-@property (nonatomic, weak) IBOutlet NSProgressIndicator *progress;
+@property (nonatomic, strong) IBOutlet NSView *pannel;
 @property (nonatomic, weak) IBOutlet NSTextField *fieldEmail;
 @property (nonatomic, weak) IBOutlet NSTextField *fieldCode;
 @property (nonatomic, weak) IBOutlet NSButton *btnCheck;
 @property (nonatomic, weak) IBOutlet NSButton *btnCancel;
+@property (nonatomic, weak) NSProgressIndicator *circularProgress;
 
--(IBAction)check:(id)sender;
--(IBAction)cancel:(id)sender;
+- (IBAction) check:(id)sender;
+- (IBAction) cancel:(id)sender;
+- (void) proceedToNext;
+- (void) enableControls;
 @end

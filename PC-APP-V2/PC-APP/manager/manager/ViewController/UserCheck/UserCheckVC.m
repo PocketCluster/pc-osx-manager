@@ -7,9 +7,10 @@
 //
 
 #import "UserCheckVC.h"
+#import "PCRouter.h"
+#import "NullStringChecker.h"
 
 @interface UserCheckVC ()
--(void)_enableControls;
 -(void)_disableControls;
 @end
 
@@ -17,14 +18,14 @@
 
 -(void) finishConstruction {
     [super finishConstruction];
-    [self setTitle:@"Invitation Check"];
+    [self setTitle:@"PocketCluster Invitation"];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    [[((BaseBrandView *)self.view) contentBox] removeFromSuperview];
-    ((BaseBrandView *)self.view).contentBox = nil;
+    [[((BaseBrandView *)self.view) contentBox] addSubview:self.pannel];
+    self.pannel = nil;
 }
 
 - (void)viewDidAppear {
@@ -36,9 +37,23 @@
 }
 
 -(IBAction)check:(id)sender {
-    [self.stageControl shouldControlProgressFrom:self withParam:nil];
+    NSString *email = [self.fieldEmail stringValue];
+    NSString *code =  [self.fieldCode stringValue];
     
-//    [self _disableControls];
+    if (ISNULL_STRING(email)) {
+        
+        return;
+    }
+    if (ISNULL_STRING(code)) {
+        
+        return;
+    }
+
+    [self _disableControls];
+
+    [PCRouter
+     routeRequestPost:RPATH_USER_AUTHED
+     withRequestBody:@{@"email":email, @"code":code}];
 }
 
 -(IBAction)cancel:(id)sender {
@@ -61,18 +76,39 @@
 }
 
 #pragma mark - Controls
--(void)_enableControls {
-    [self.progress setHidden:YES];
-    [self.progress stopAnimation:nil];
+- (void) proceedToNext {
+    [self.stageControl shouldControlProgressFrom:self withParam:nil];
+}
+
+-(void) enableControls {
+    [self.circularProgress setHidden:YES];
+    [self.circularProgress stopAnimation:nil];
+    [self.circularProgress displayIfNeeded];
+    [self.circularProgress removeFromSuperview];
+    [self setCircularProgress:nil];
+
+    [self.fieldEmail setEnabled:YES];
+    [self.fieldCode setEnabled:YES];
     [self.btnCancel setEnabled:YES];
     [self.btnCheck setEnabled:YES];
 }
 
--(void)_disableControls {
-    [self.progress setHidden:NO];
-    [self.progress startAnimation:nil];
+-(void) _disableControls {
+    [self.fieldEmail setEnabled:NO];
+    [self.fieldCode setEnabled:NO];
     [self.btnCancel setEnabled:NO];
     [self.btnCheck setEnabled:NO];
+
+    NSProgressIndicator *ind = [[NSProgressIndicator alloc] initWithFrame:(NSRect){{20.0, 20.0}, {16.0, 16.0}}];
+    [ind setControlSize:NSSmallControlSize];
+    [ind setStyle:NSProgressIndicatorSpinningStyle];
+    [ind setHidden:NO];
+    [ind setIndeterminate:YES];
+    [ind startAnimation:self];
+    [ind displayIfNeeded];
+
+    [self.view addSubview:ind];
+    [self setCircularProgress:ind];
 }
 
 @end
