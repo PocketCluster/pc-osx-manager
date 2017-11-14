@@ -11,3 +11,7 @@
 extern NSString * const ADDRESS;
 extern NSString * const SLAVE_NODE_NAME;
 extern NSString * const kPCPrefDefaultTerm;
+
+extern NSString * const kAppCheckMessageInit;
+extern NSString * const kAppCheckMessageSrvcStart;
+extern NSString * const kAppCheckMessageCheckingNode;

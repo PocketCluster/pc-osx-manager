@@ -76,10 +76,6 @@
 }
 
 #pragma mark - Controls
-- (void) proceedToNext {
-    [self.stageControl shouldControlProgressFrom:self withParam:nil];
-}
-
 -(void) enableControls {
     [self.circularProgress setHidden:YES];
     [self.circularProgress stopAnimation:nil];
@@ -102,12 +98,12 @@
     NSProgressIndicator *ind = [[NSProgressIndicator alloc] initWithFrame:(NSRect){{20.0, 20.0}, {16.0, 16.0}}];
     [ind setControlSize:NSSmallControlSize];
     [ind setStyle:NSProgressIndicatorSpinningStyle];
+    [self.view addSubview:ind];
     [ind setHidden:NO];
     [ind setIndeterminate:YES];
     [ind startAnimation:self];
     [ind displayIfNeeded];
 
-    [self.view addSubview:ind];
     [self setCircularProgress:ind];
 }
 

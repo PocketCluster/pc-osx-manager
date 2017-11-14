@@ -6,6 +6,7 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
+#import "PCConstants.h"
 #import "AgreementVC.h"
 #import "UserCheckVC.h"
 #import "PCSetup1VC.h"
@@ -104,20 +105,22 @@
 
 // check if user is authed
 - (void) didAppCheckUserAuthed:(BOOL)isUserAuthed {
-    if (!isUserAuthed) {
-        [(UserCheckVC *)[self.viewControllers objectAtIndex:1] enableControls];
+    if (isUserAuthed) {
+        [self shouldControlProgressFrom:[self.viewControllers objectAtIndex:1] withParam:nil];
     } else {
-        [(UserCheckVC *)[self.viewControllers objectAtIndex:1] proceedToNext];
+        [(UserCheckVC *)[self.viewControllers objectAtIndex:1] enableControls];
     }
 }
 
 #pragma mark - MonitorStatus
 // show initial message
 - (void) setupWithInitialCheckMessage {
+    [[(PCSetup1VC *)[self.viewControllers objectAtIndex:2] progressLabel] setStringValue:kAppCheckMessageInit];
 }
 
 // show "service starting" message.
 - (void) setupWithStartServicesMessage {
+    [[(PCSetup1VC *)[self.viewControllers objectAtIndex:2] progressLabel] setStringValue:kAppCheckMessageSrvcStart];
 }
 
 // services online timeup. Display service status. This is paired method that
@@ -127,6 +130,7 @@
 
 // show "checking nodes" message
 - (void) setupWithCheckingNodesMessage {
+    [[(PCSetup1VC *)[self.viewControllers objectAtIndex:2] progressLabel] setStringValue:kAppCheckMessageCheckingNode];
 }
 
 // nodes online timeup. Display node state no matter what. This is paired method that
@@ -140,6 +144,11 @@
 
 // update nodes
 - (void) updateNodeStatusWith:(StatusCache *)aCache {
+    if (![aCache activateMenuBeforeNodeTimeup]) {
+        return;
+    }
+
+    [[(PCSetup1VC *)[self.viewControllers objectAtIndex:2] progressLabel] setStringValue:@"Ready to Setup a Raspberry Pi cluster"];
 }
 
 @end

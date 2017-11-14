@@ -6,6 +6,7 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
+#import "PCConstants.h"
 #import "ShowAlert.h"
 #import "StepStage.h"
 #import "IntroVC.h"
@@ -62,16 +63,12 @@
 #pragma mark - update message
 // show initial message
 - (void) setupWithInitialCheckMessage {
-    [self.viewController.progressLabel setStringValue:@"Initializing..."];
+    [self.viewController.progressLabel setStringValue:kAppCheckMessageInit];
 }
 
 // show "service starting..." message
 - (void) setupWithStartServicesMessage {
-    [self.viewController.progressLabel setStringValue:@"Starting Services..."];
-}
-
-- (void) setupWithCheckingNodesMessage {
-    [self.viewController.progressLabel setStringValue:@"Checking Nodes..."];
+    [self.viewController.progressLabel setStringValue:kAppCheckMessageSrvcStart];
 }
 
 // services online timeup
@@ -86,6 +83,10 @@
              }
          }];
     }
+}
+
+- (void) setupWithCheckingNodesMessage {
+    [self.viewController.progressLabel setStringValue:kAppCheckMessageCheckingNode];
 }
 
 // nodes online timeup
@@ -107,28 +108,11 @@
 
 // update nodes
 - (void) updateNodeStatusWith:(StatusCache *)aCache {
-    
     // quickly filter out the worst case scenarios when 'node online timeup' noti has not fired
-    // same of [NativeMenu _activateMenuBeforeNodeTimeup:]
-    if (![aCache timeUpNodeOnline]) {
-        // if app is not ready
-        if (![aCache isAppReady]) {
-            return;
-        }
-        // service is not ready
-        if (![aCache timeUpServiceReady]) {
-            return;
-        }
-        // invalid node list
-        if (![aCache isNodeListValid]) {
-            return;
-        }
-        // if all nodes are not up
-        if (![aCache isRegisteredNodesAllOnline]) {
-            return;
-        }
+    if (![aCache activateMenuBeforeNodeTimeup]) {
+        return;
     }
-    
+
     WEAK_SELF(self);
 
     [[NSOperationQueue mainQueue]

@@ -140,22 +140,21 @@
          BOOL isUserAuthed = [[response valueForKeyPath:@"user-auth.status"] boolValue];
          [belf didAppCheckUserAuthed:isUserAuthed];
 
-         if ([[StatusCache SharedStatusCache] isFirstRun]) {
-             if (isUserAuthed) {
+         if (isUserAuthed) {
+             // setup ui state
+             [belf setupWithStartServicesMessage];
+             
+             // set the app ready whenever service gets started
+             [[StatusCache SharedStatusCache] setAppReady:YES];
+             
+             // start basic service
+             // OpsCmdBaseServiceStart();
 
-             } else {
-
-             }
          } else {
-             if (isUserAuthed) {
-                 // setup ui state
-                 [belf setupWithStartServicesMessage];
-
-                 // set the app ready whenever service gets started
-                 [[StatusCache SharedStatusCache] setAppReady:YES];
-
-                 // start basic service
-                 // OpsCmdBaseServiceStart();
+             if ([[StatusCache SharedStatusCache] isFirstRun]) {
+                 [ShowAlert
+                  showWarningAlertWithTitle:@"Invalid Invitation"
+                  message:[response valueForKeyPath:@"user-auth.error"]];
              } else {
                  [ShowAlert
                   showTerminationAlertWithTitle:@"Invalid Invitation"

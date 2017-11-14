@@ -82,4 +82,8 @@
 
 // cluster is shutting down. (shutdown slave nodes as well)
 @property (readwrite, getter=isShutdown, setter=setShutdown:) BOOL shutdown;
+
+#pragma mark - Util
+// this indicate that we can activate cluster menu before node timeup comes in
+- (BOOL) activateMenuBeforeNodeTimeup;
 @end

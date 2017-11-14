@@ -377,4 +377,31 @@ SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(StatusCache, SharedStatusCache);
     }
 }
 
+#pragma mark - Util
+- (BOOL) activateMenuBeforeNodeTimeup {
+    // if node online timeup is set, say yes
+    if ([self timeUpNodeOnline]) {
+        return YES;
+    }
+
+    // if app is not ready
+    if (![self isAppReady]) {
+        return NO;
+    }
+    // service is not ready
+    if (![self timeUpServiceReady]) {
+        return NO;
+    }
+    // invalid node list
+    if (![self isNodeListValid]) {
+        return NO;
+    }
+    // if all nodes are not up
+    if (![self isRegisteredNodesAllOnline]) {
+        return NO;
+    }
+
+    return YES;
+}
+
 @end

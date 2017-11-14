@@ -166,13 +166,15 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
     [self.progressBar   displayIfNeeded];
 
     NSProgressIndicator *ind = [[NSProgressIndicator alloc] initWithFrame:(NSRect){{20.0, 20.0}, {16.0, 16.0}}];
+    [ind setControlSize:NSSmallControlSize];
     [ind setStyle:NSProgressIndicatorSpinningStyle];
     [self.view addSubview:ind];
-    [self setCircularProgress:ind];
     [ind setHidden:NO];
     [ind setIndeterminate:YES];
     [ind startAnimation:self];
     [ind displayIfNeeded];
+
+    [self setCircularProgress:ind];
 
     _isInstalling = YES;
 }

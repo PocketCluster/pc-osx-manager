@@ -13,36 +13,9 @@
 #import "NativeMenu+Operation.h"
 
 @interface NativeMenu(MonitorPrivate)
-- (BOOL) _activateMenuBeforeNodeTimeup:(StatusCache *)aCache;
 @end
 
 @implementation NativeMenu(Monitor)
-- (BOOL) _activateMenuBeforeNodeTimeup:(StatusCache *)aCache {
-    // if node online timeup is set, say yes
-    if ([aCache timeUpNodeOnline]) {
-        return YES;
-    }
-
-    // if app is not ready
-    if (![aCache isAppReady]) {
-        return NO;
-    }
-    // service is not ready
-    if (![aCache timeUpServiceReady]) {
-        return NO;
-    }
-    // invalid node list
-    if (![aCache isNodeListValid]) {
-        return NO;
-    }
-    // if all nodes are not up
-    if (![aCache isRegisteredNodesAllOnline]) {
-        return NO;
-    }
-
-    return YES;
-}
-
 // methods are inversely aligned with what appears in AppDelegate+Routepath.m
 #pragma mark - MonitorStatus
 
@@ -101,7 +74,7 @@
 // update services
 - (void) updateServiceStatusWith:(StatusCache *)aCache {
     // quickly filter out the worst case scenarios when 'node online timeup' noti has not fired
-    if (![self _activateMenuBeforeNodeTimeup:aCache]) {
+    if (![aCache activateMenuBeforeNodeTimeup]) {
         return;
     }
     
@@ -132,7 +105,7 @@
 // update nodes
 - (void) updateNodeStatusWith:(StatusCache *)aCache {
     // quickly filter out the worst case scenarios when 'node online timeup' noti has not fired
-    if (![self _activateMenuBeforeNodeTimeup:aCache]) {
+    if (![aCache activateMenuBeforeNodeTimeup]) {
         return;
     }
 
@@ -167,7 +140,7 @@ static void _updateExecMenuVisibility(NSMenuItem *aPackageMenu, ExecState aExecS
         return;
     }
 
-    BOOL hideMenu = ![self _activateMenuBeforeNodeTimeup:sCache];
+    BOOL hideMenu = ![sCache activateMenuBeforeNodeTimeup];
 
     NSInteger indexBegin = ([self.statusItem.menu
                              indexOfItem:[self.statusItem.menu

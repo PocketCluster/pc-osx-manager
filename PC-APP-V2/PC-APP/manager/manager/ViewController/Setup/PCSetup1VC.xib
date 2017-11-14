@@ -6,7 +6,10 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="PCSetup1VC">
             <connections>
+                <outlet property="btnCancel" destination="pt5-fX-gTM" id="PhR-Gw-rP0"/>
+                <outlet property="btnSetup" destination="mwi-j1-l5r" id="hfn-H1-q0A"/>
                 <outlet property="pannel" destination="zcl-mb-VEB" id="hhy-QN-cnh"/>
+                <outlet property="progressLabel" destination="4Es-Nc-GRF" id="c0g-fe-PYc"/>
                 <outlet property="view" destination="OKK-tK-SCj" id="SDe-SC-JIq"/>
             </connections>
         </customObject>
@@ -21,8 +24,8 @@
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="raspberry" id="IWU-0V-nOV"/>
                 </imageView>
                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4Es-Nc-GRF">
-                    <rect key="frame" x="20" y="57" width="360" height="40"/>
-                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="center" title="Setup a Raspberry Pi cluster" id="Cwg-Qb-AJ8">
+                    <rect key="frame" x="115" y="80" width="171" height="17"/>
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="center" title="Initializing PocketCluster..." id="Cwg-Qb-AJ8">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>

@@ -18,6 +18,5 @@
 
 - (IBAction) check:(id)sender;
 - (IBAction) cancel:(id)sender;
-- (void) proceedToNext;
 - (void) enableControls;
 @end
