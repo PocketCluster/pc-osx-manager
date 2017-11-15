@@ -51,7 +51,9 @@ echo "Compile and produce object files"
 if [[ ${VERBOSE} -eq 1 ]]; then
     CGO_ENABLED=1 CC=clang ${GO} build -v -x -ldflags '-v -s -w -tmpdir '${GG_BUILD}' -linkmode external' ./...
 else
-    CGO_ENABLED=1 CC=clang ${GO} build -ldflags '-s -w -tmpdir '${GG_BUILD}' -linkmode external' ./...
+    # (2017/11/15) -v=2 link flag is added to unused method removal
+    # https://go-review.googlesource.com/c/go/+/20483
+    CGO_ENABLED=1 CC=clang ${GO} build -ldflags '-s -w -v=2 -tmpdir '${GG_BUILD}' -linkmode external' ./...
 fi
 
 echo "Combine the object files into a static library"
