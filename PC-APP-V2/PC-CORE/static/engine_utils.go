@@ -10,6 +10,7 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
@@ -57,6 +58,32 @@ func reportNetworkInit(appLife *appMainLife, feeder route.ResponseFeeder) error 
         return errors.WithStack(err)
     }
     err = feeder.FeedResponseForGet(routepath.RpathSystemNetworkInit(), string(data))
+    return errors.WithStack(err)
+}
+
+// setup base users
+func setupBaseUsers(pcsshCfg *tervice.PocketConfig) error {
+    cli, err := sshadmin.OpenAdminClientWithAuthService(pcsshCfg)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    roots, err := model.FindUserMetaWithLogin("root")
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    err = sshadmin.CreateTeleportUser(cli, "root", roots[0].Password)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    uname, err := context.SharedHostContext().LoginUserName()
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    lusers, err := model.FindUserMetaWithLogin(uname)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    err = sshadmin.CreateTeleportUser(cli, uname, lusers[0].Password)
     return errors.WithStack(err)
 }
 
@@ -131,3 +158,4 @@ func shutdownCluster(appLife *appMainLife, feeder route.ResponseFeeder, pcsshCfg
 
     return stopBaseService(appLife, feeder)
 }
+

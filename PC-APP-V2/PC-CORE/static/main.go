@@ -189,6 +189,9 @@ func main() {
 
                     case operation.CmdBaseServiceStart: {
 
+                        // check if this is the first run
+                        var isFirstTimeRun = context.SharedHostContext().CheckIsFistTimeExecution()
+
                         /*
                          * health monitor monitors every error and internal service spawn external listeners
                          * Any error happens in initializing internal service is critical one.
@@ -296,10 +299,7 @@ func main() {
                             continue
                         }
 
-                        // --- additional route path event ---
-                        install.InitRoutePathInstallPackage(appLife, theFeeder, appCfg.PCSSH)
-
-                        // --- net listeners ---
+                        // --- internal listeners ---
                         // vboxcontrol service comes first (as it's internal network listener)
                         // (DEP netchange, NODEP service)
                         err = vbox.InitVboxCoreReportService(appLife, cid)
@@ -311,8 +311,45 @@ func main() {
                             continue
                         }
 
-                        // - then initiate the external listeners -
+                        // up until this point everything has to be executed fast as other services are waiting with timeout.
+                        // after this, we can take time to start up, and open external listener once everyone is all ready.
 
+                        // --- additional route path event ---
+                        install.InitRoutePathInstallPackage(appLife, theFeeder, appCfg.PCSSH)
+
+                        // --- initialize environment ---
+                        // (user setup, vbox core init/ start)
+                        if isFirstTimeRun {
+                            err = setupBaseUsers(appCfg.PCSSH)
+                            if err != nil {
+                                log.Error(err)
+                                appLife.BroadcastEvent(service.Event{
+                                    Name:ivent.IventInternalSpawnError,
+                                    Payload:err})
+                                continue
+                            }
+
+                            vboxCore, err = initializeVboxCore(appCfg.PCSSH)
+                            if err != nil {
+                                log.Error(err)
+                                appLife.BroadcastEvent(service.Event{
+                                    Name:ivent.IventInternalSpawnError,
+                                    Payload:err})
+                                continue
+                            }
+                        } else {
+                            vboxCore, err = startVboxCore()
+                            if err != nil {
+                                log.Error(err)
+                                appLife.BroadcastEvent(service.Event{
+                                    Name:ivent.IventInternalSpawnError,
+                                    Payload:err})
+                                continue
+                            }
+                        }
+
+
+                        // --- external listeners ---
                         // beacon locator service needs to initiated after master beacon
                         // (NODEP netchange, NODEP service)
                         // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
@@ -342,7 +379,11 @@ func main() {
                     }
 
                     case operation.CmdBaseServiceStop: {
-                        err := stopBaseService(appLife, theFeeder)
+                        err := stopVboxCore(vboxCore)
+                        if err != nil {
+                            log.Errorf("[ERROR] unable to close core node %v", err.Error())
+                        }
+                        err = stopBaseService(appLife, theFeeder)
                         if err != nil {
                             log.Errorf("[ERROR] unable to terminate app %v", err.Error())
                         }
@@ -356,6 +397,10 @@ func main() {
                         err := shutdownCluster(appLife, theFeeder, appCfg.PCSSH)
                         if err != nil {
                             log.Errorf("[ERROR] unable to shutdown cluster %v", err.Error())
+                        }
+                        err = stopVboxCore(vboxCore)
+                        if err != nil {
+                            log.Errorf("[ERROR] unable to close core node %v", err.Error())
                         }
                         err = model.CloseRecordGate()
                         if err != nil {
