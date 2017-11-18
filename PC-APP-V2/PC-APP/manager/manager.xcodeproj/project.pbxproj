@@ -63,6 +63,7 @@
 		048804661FB2EE3100F4EA05 /* AppDelegate+Shutdown.m in Sources */ = {isa = PBXBuildFile; fileRef = 048804651FB2EE3100F4EA05 /* AppDelegate+Shutdown.m */; };
 		0496AAD71FBADF910019F24E /* NSString+EmailForm.m in Sources */ = {isa = PBXBuildFile; fileRef = 0496AAD61FBADF910019F24E /* NSString+EmailForm.m */; };
 		0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */; };
+		04A408B41FBFD1E000CBF7B9 /* BFPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 04A408B31FBFD1E000CBF7B9 /* BFPageControl.m */; };
 		04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */; };
 		04AD71C91E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C81E9B74E600DB6AE9 /* AppDelegate+Netmonitor.m */; };
 		04ADEBFC1FA02493006ACEB5 /* Cluster.m in Sources */ = {isa = PBXBuildFile; fileRef = 04ADEBF51FA02493006ACEB5 /* Cluster.m */; };
@@ -235,6 +236,8 @@
 		0496AAD51FBADF910019F24E /* NSString+EmailForm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+EmailForm.h"; sourceTree = "<group>"; };
 		0496AAD61FBADF910019F24E /* NSString+EmailForm.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+EmailForm.m"; sourceTree = "<group>"; };
 		0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
+		04A408B21FBFD1E000CBF7B9 /* BFPageControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BFPageControl.h; sourceTree = "<group>"; };
+		04A408B31FBFD1E000CBF7B9 /* BFPageControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BFPageControl.m; sourceTree = "<group>"; };
 		04AD71C31E9B749A00DB6AE9 /* VersionComparison.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VersionComparison.h; sourceTree = "<group>"; };
 		04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionComparison.m; sourceTree = "<group>"; };
 		04AD71C71E9B74E600DB6AE9 /* AppDelegate+Netmonitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Netmonitor.h"; sourceTree = "<group>"; };
@@ -390,6 +393,7 @@
 		041632641F48EA850057BE5D /* Vendors */ = {
 			isa = PBXGroup;
 			children = (
+				04A408B11FBFD1E000CBF7B9 /* BFPageControl */,
 				041632651F48EA850057BE5D /* SSSelectableToolbar */,
 			);
 			name = Vendors;
@@ -752,6 +756,15 @@
 				0496AAD61FBADF910019F24E /* NSString+EmailForm.m */,
 			);
 			path = EmailForm;
+			sourceTree = "<group>";
+		};
+		04A408B11FBFD1E000CBF7B9 /* BFPageControl */ = {
+			isa = PBXGroup;
+			children = (
+				04A408B21FBFD1E000CBF7B9 /* BFPageControl.h */,
+				04A408B31FBFD1E000CBF7B9 /* BFPageControl.m */,
+			);
+			path = BFPageControl;
 			sourceTree = "<group>";
 		};
 		04AD71C01E9B749A00DB6AE9 /* Util */ = {
@@ -1173,6 +1186,7 @@
 				0441A3E31BD8904100AABD7A /* main.m in Sources */,
 				04B379731F48C60B0080DBEA /* BaseWindow.m in Sources */,
 				0416326D1F48EA850057BE5D /* SSSelectableToolbarItem.m in Sources */,
+				04A408B41FBFD1E000CBF7B9 /* BFPageControl.m in Sources */,
 				04ADEBFE1FA02493006ACEB5 /* Package.m in Sources */,
 				043F47131F3E0C730078A0C1 /* AppDelegate+Window.m in Sources */,
 				04CA54BC1F44D49500A7AF48 /* BaseBrandView.m in Sources */,

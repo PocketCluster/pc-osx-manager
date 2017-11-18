@@ -33,6 +33,7 @@
 - (void)viewDidAppear {
     [super viewDidAppear];
 
+//    [self.view.window setInitialFirstResponder:[self fieldEmail]];
     [self.fieldEmail becomeFirstResponder];
     [self.fieldEmail selectText:self];
     [[self.fieldEmail currentEditor] setSelectedRange:NSMakeRange([[self.fieldEmail stringValue] length], 0)];
