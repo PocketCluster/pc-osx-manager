@@ -1,28 +1,28 @@
 //
-//  DPSetupWC.m
+//  NodeSetupWC.m
 //  manager
 //
-//  Created by Almighty Kim on 10/21/15.
-//  Copyright © 2015 io.pocketcluster. All rights reserved.
+//  Created by Almighty Kim on 11/18/17.
+//  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
-#import "PCSetup1VC.h"
 #import "PCSetup2VC.h"
+#import "PCSetup3VC.h"
 
-#import "DPSetupWC.h"
+#import "NodeSetupWC.h"
 
-@interface DPSetupWC()
+@interface NodeSetupWC ()
 @property (nonatomic, strong) NSArray<NSViewController<StageStep> *>* viewControllers;
 @end
 
-@implementation DPSetupWC
+@implementation NodeSetupWC
 
 - (instancetype) initWithWindowNibName:(NSString *)windowNibName {
     self = [super initWithWindowNibName:windowNibName];
     if (self != nil) {
         self.viewControllers =
-            @[[[PCSetup1VC alloc] initWithStageControl:self nibName:@"PCSetup1VC" bundle:[NSBundle mainBundle]],
-              [[PCSetup2VC alloc] initWithStageControl:self nibName:@"PCSetup2VC" bundle:[NSBundle mainBundle]]];
+        @[[[PCSetup2VC alloc] initWithStageControl:self nibName:@"PCSetup2VC" bundle:[NSBundle mainBundle]],
+          [[PCSetup3VC alloc] initWithStageControl:self nibName:@"PCSetup3VC" bundle:[NSBundle mainBundle]]];
     }
     return self;
 }

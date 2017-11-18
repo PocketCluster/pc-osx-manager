@@ -51,8 +51,6 @@
 		046D31051F3D310C0081CC3E /* PCPrefWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D31031F3D310C0081CC3E /* PCPrefWC.xib */; };
 		046D310E1F3D32440081CC3E /* PCPkgInstallWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D31081F3D32440081CC3E /* PCPkgInstallWC.m */; };
 		046D310F1F3D32440081CC3E /* PCPkgInstallWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D31091F3D32440081CC3E /* PCPkgInstallWC.xib */; };
-		046D31101F3D32440081CC3E /* DPSetupWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D310C1F3D32440081CC3E /* DPSetupWC.m */; };
-		046D31111F3D32440081CC3E /* DPSetupWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D310D1F3D32440081CC3E /* DPSetupWC.xib */; };
 		046D31241F3D346B0081CC3E /* PCSetup1VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D31151F3D346B0081CC3E /* PCSetup1VC.m */; };
 		046D31251F3D346B0081CC3E /* PCSetup1VC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 046D31161F3D346B0081CC3E /* PCSetup1VC.xib */; };
 		046D312A1F3D346B0081CC3E /* PCSetup3VC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D311E1F3D346B0081CC3E /* PCSetup3VC.m */; };
@@ -70,6 +68,8 @@
 		04ADEBFD1FA02493006ACEB5 /* Node.m in Sources */ = {isa = PBXBuildFile; fileRef = 04ADEBF71FA02493006ACEB5 /* Node.m */; };
 		04ADEBFE1FA02493006ACEB5 /* Package.m in Sources */ = {isa = PBXBuildFile; fileRef = 04ADEBF91FA02493006ACEB5 /* Package.m */; };
 		04ADEBFF1FA02493006ACEB5 /* StatusCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 04ADEBFB1FA02493006ACEB5 /* StatusCache.m */; };
+		04B002751FC07349004CE704 /* NodeSetupWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B002731FC07349004CE704 /* NodeSetupWC.m */; };
+		04B002761FC07349004CE704 /* NodeSetupWC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04B002741FC07349004CE704 /* NodeSetupWC.xib */; };
 		04B379731F48C60B0080DBEA /* BaseWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B379721F48C60B0080DBEA /* BaseWindow.m */; };
 		04B3FB8E1F41133600A72834 /* AppDelegate+ResponseHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B3FB8D1F41133600A72834 /* AppDelegate+ResponseHandle.m */; };
 		04B7C8A51F9C72C7000ECEEC /* NativeMenu+Monitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B7C8A41F9C72C7000ECEEC /* NativeMenu+Monitor.m */; };
@@ -208,9 +208,6 @@
 		046D31071F3D32440081CC3E /* PCPkgInstallWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCPkgInstallWC.h; sourceTree = "<group>"; };
 		046D31081F3D32440081CC3E /* PCPkgInstallWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCPkgInstallWC.m; sourceTree = "<group>"; };
 		046D31091F3D32440081CC3E /* PCPkgInstallWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCPkgInstallWC.xib; sourceTree = "<group>"; };
-		046D310B1F3D32440081CC3E /* DPSetupWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DPSetupWC.h; sourceTree = "<group>"; };
-		046D310C1F3D32440081CC3E /* DPSetupWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DPSetupWC.m; sourceTree = "<group>"; };
-		046D310D1F3D32440081CC3E /* DPSetupWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DPSetupWC.xib; sourceTree = "<group>"; };
 		046D31141F3D346B0081CC3E /* PCSetup1VC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCSetup1VC.h; sourceTree = "<group>"; };
 		046D31151F3D346B0081CC3E /* PCSetup1VC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCSetup1VC.m; sourceTree = "<group>"; };
 		046D31161F3D346B0081CC3E /* PCSetup1VC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PCSetup1VC.xib; sourceTree = "<group>"; };
@@ -250,6 +247,9 @@
 		04ADEBF91FA02493006ACEB5 /* Package.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Package.m; sourceTree = "<group>"; };
 		04ADEBFA1FA02493006ACEB5 /* StatusCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusCache.h; sourceTree = "<group>"; };
 		04ADEBFB1FA02493006ACEB5 /* StatusCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StatusCache.m; sourceTree = "<group>"; };
+		04B002721FC07349004CE704 /* NodeSetupWC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NodeSetupWC.h; sourceTree = "<group>"; };
+		04B002731FC07349004CE704 /* NodeSetupWC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NodeSetupWC.m; sourceTree = "<group>"; };
+		04B002741FC07349004CE704 /* NodeSetupWC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NodeSetupWC.xib; sourceTree = "<group>"; };
 		04B379711F48C60B0080DBEA /* BaseWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseWindow.h; sourceTree = "<group>"; };
 		04B379721F48C60B0080DBEA /* BaseWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseWindow.m; sourceTree = "<group>"; };
 		04B3FB8C1F41133600A72834 /* AppDelegate+ResponseHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+ResponseHandle.h"; sourceTree = "<group>"; };
@@ -647,9 +647,9 @@
 		046D310A1F3D32440081CC3E /* Setup */ = {
 			isa = PBXGroup;
 			children = (
-				046D310B1F3D32440081CC3E /* DPSetupWC.h */,
-				046D310C1F3D32440081CC3E /* DPSetupWC.m */,
-				046D310D1F3D32440081CC3E /* DPSetupWC.xib */,
+				04B002721FC07349004CE704 /* NodeSetupWC.h */,
+				04B002731FC07349004CE704 /* NodeSetupWC.m */,
+				04B002741FC07349004CE704 /* NodeSetupWC.xib */,
 			);
 			path = Setup;
 			sourceTree = "<group>";
@@ -1035,7 +1035,6 @@
 				0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */,
 				04CA54AF1F44AFF700A7AF48 /* AgreementVC.xib in Resources */,
 				040A9BEB1F98482E0058F0EF /* IntroWC.xib in Resources */,
-				046D31111F3D32440081CC3E /* DPSetupWC.xib in Resources */,
 				0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */,
 				046D312B1F3D346B0081CC3E /* PCSetup3VC.xib in Resources */,
 				041FB3B71BD0F3FA0027136F /* InfoPlist.strings in Resources */,
@@ -1051,6 +1050,7 @@
 				04CAE2E81E9B8A4900B23B22 /* DebugWindow.xib in Resources */,
 				046D310F1F3D32440081CC3E /* PCPkgInstallWC.xib in Resources */,
 				040A9BE01F9837670058F0EF /* IntroVC.xib in Resources */,
+				04B002761FC07349004CE704 /* NodeSetupWC.xib in Resources */,
 				04CA54A71F447B1700A7AF48 /* AgreementWC.xib in Resources */,
 				046D31051F3D310C0081CC3E /* PCPrefWC.xib in Resources */,
 			);
@@ -1159,6 +1159,7 @@
 				046A361A1BD78AB8004E0946 /* NSString+Encoding.m in Sources */,
 				0441A3E01BD8904100AABD7A /* AppDelegate.m in Sources */,
 				046D31041F3D310C0081CC3E /* PCPrefWC.m in Sources */,
+				04B002751FC07349004CE704 /* NodeSetupWC.m in Sources */,
 				046A36111BD78AB8004E0946 /* DrawingUtils.m in Sources */,
 				04D5A48E1E9269AE0057012A /* AppDelegate+Sparkle.m in Sources */,
 				04C585861BE5BF3B004B2839 /* PCConstants.m in Sources */,
@@ -1173,7 +1174,6 @@
 				046D312A1F3D346B0081CC3E /* PCSetup3VC.m in Sources */,
 				04DD160F1F4100570080D025 /* PCRoutePathConst.m in Sources */,
 				0444F52E1FB51F5B00760503 /* AppDelegate+AppCheck.m in Sources */,
-				046D31101F3D32440081CC3E /* DPSetupWC.m in Sources */,
 				046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */,
 				04ADEBFD1FA02493006ACEB5 /* Node.m in Sources */,
 				046A36141BD78AB8004E0946 /* NSDateAdditions.m in Sources */,

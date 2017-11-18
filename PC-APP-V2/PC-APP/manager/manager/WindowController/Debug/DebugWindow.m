@@ -91,7 +91,7 @@
 }
 
 - (IBAction)setup_03:(id)sender {
-    [[AppDelegate sharedDelegate] activeWindowByClassName:@"DPSetupWC" withResponder:nil];
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"NodeSetupWC" withResponder:nil];
 }
 
 - (IBAction)setup_04:(id)sender {    

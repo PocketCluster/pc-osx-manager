@@ -4,14 +4,14 @@
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9532"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="DPSetupWC">
+        <customObject id="-2" userLabel="File's Owner" customClass="NodeSetupWC">
             <connections>
-                <outlet property="window" destination="F0z-JX-Cv5" id="gIp-Ho-8D9"/>
+                <outlet property="window" destination="FVn-Mi-ZQ2" id="Iwi-0u-M6P"/>
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
-        <window allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" animationBehavior="default" id="F0z-JX-Cv5">
+        <window allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" animationBehavior="default" id="FVn-Mi-ZQ2">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <rect key="contentRect" x="485" y="333" width="580" height="420"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
@@ -19,12 +19,12 @@
             <value key="maxSize" type="size" width="580" height="420"/>
             <value key="minFullScreenContentSize" type="size" width="580" height="420"/>
             <value key="maxFullScreenContentSize" type="size" width="580" height="420"/>
-            <view key="contentView" id="se5-gp-TjO">
+            <view key="contentView" id="Ehm-tw-KIc">
                 <rect key="frame" x="0.0" y="0.0" width="580" height="420"/>
                 <autoresizingMask key="autoresizingMask"/>
             </view>
             <connections>
-                <outlet property="delegate" destination="-2" id="0bl-1N-AYu"/>
+                <outlet property="delegate" destination="-2" id="uBg-ku-4vP"/>
             </connections>
         </window>
     </objects>

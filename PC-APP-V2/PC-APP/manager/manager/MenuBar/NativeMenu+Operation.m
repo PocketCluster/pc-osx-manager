@@ -66,7 +66,7 @@
         return;
     }
 
-    [[AppDelegate sharedDelegate] activeWindowByClassName:@"DPSetupWC" withResponder:nil];
+    [[AppDelegate sharedDelegate] activeWindowByClassName:@"NodeSetupWC" withResponder:nil];
 }
 
 - (void) menuSelectedNewClusterError:(NSMenuItem *)aMenu {
