@@ -32,7 +32,8 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
             }
             default: {
                 if masterctrl.TransitionFailureLimit <= errorCount {
-                    log.Debugf("[VBOXLSTN] error count exceeds 5. Let's close connection and return")
+                    log.Errorf("[VBOXLSTN] error count exceeds %v. Let's close connection and return",
+                        masterctrl.TransitionFailureLimit)
                     ctrl.HandleCoreDisconnection(time.Now())
                     return errors.WithStack(conn.Close())
                 }
@@ -59,21 +60,21 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
                         errorCount++
                     }
 */
-                    log.Debugf("[VBOXLSTN] read error (%v)", err.Error())
+                    log.Errorf("[VBOXLSTN] read error (%v)", err.Error())
                     errorCount++
                     continue
                 }
 
                 sendPkg, err = ctrl.ReadCoreMetaAndMakeMasterAck(conn.RemoteAddr(), recvPkg[:count], time.Now())
                 if err != nil {
-                    log.Debugf("[VBOXLSTN] [%s] ctrl meta error (%v)", ctrl.CurrentState().String(), err.Error())
+                    log.Errorf("[VBOXLSTN] [%s] ctrl meta error (%v)", ctrl.CurrentState().String(), err.Error())
                     sendPkg = eofMsg
                 }
 
                 // write to core
                 count, err = conn.Write(sendPkg)
                 if err != nil {
-                    log.Debugf("[VBOXLSTN] write error (%v)", err.Error())
+                    log.Errorf("[VBOXLSTN] write error (%v)", err.Error())
                     errorCount++
                     continue
                 }
@@ -104,12 +105,19 @@ func InitVboxCoreReportService(appLife service.ServiceSupervisor, clusterID stri
             // masterctrl.VBoxMasterControl
             cc := <- ctrlObjC
             vbc, ok := cc.Payload.(*ivent.VboxCtrlBrcstObj)
-            if !ok {
-                log.Debugf("[ERR] invalid VBoxMasterControl type")
-                return errors.Errorf("[ERR] invalid VBoxMasterControl type")
+            if ok {
+                ctrl, ok = vbc.VBoxMasterControl.(masterctrl.VBoxMasterControl)
+                if !ok {
+                    return errors.Errorf("[VBOXLSTN] invalid VBoxMasterControl type")
+                }
+                listen, ok = vbc.Listener.(net.Listener)
+                if !ok {
+                    return errors.Errorf("[VBOXLSTN] invalid listener type")
+                }
+                log.Infof("[VBOXLSTN] VBoxMasterControl + listener received ok")
+            } else {
+                return errors.Errorf("[VBOXLSTN] invalid VBoxMasterControl type")
             }
-            ctrl = vbc.VBoxMasterControl
-            listen = vbc.Listener
 
             log.Debugf("[VBOXLSTN] VBox Core Listener service started... %s", ctrl.CurrentState().String())
             for {
@@ -154,7 +162,7 @@ func InitVboxCoreReportService(appLife service.ServiceSupervisor, clusterID stri
             coreNode = model.RetrieveCoreNode()
             _, err = coreNode.GetAuthToken()
             if err != nil {
-                return errors.Errorf("[ERR] core node should have auth token at this point")
+                return errors.Errorf("[VBOXCTRL] (ERR) core node should have auth token at this point")
             }
             prvkey, err = context.SharedHostContext().MasterVBoxCtrlPrivateKey()
             if err != nil {

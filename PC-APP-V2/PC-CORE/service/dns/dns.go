@@ -3,6 +3,7 @@ package dns
 import (
     "net"
     "strings"
+    "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/miekg/dns"
@@ -84,10 +85,6 @@ func locaNodeName(beaconMan beacon.BeaconManger, w dns.ResponseWriter, req *dns.
 }
 
 func InitPocketNameService(appLife service.ServiceSupervisor, clusterID string) error {
-    const (
-        iventNameServerInstanceSpawn string = "ivent.name.server.instance.spawn"
-    )
-
     nameServerC := make(chan service.Event)
     appLife.RegisterServiceWithFuncs(
         operation.ServiceInternalNodeNameServer,
@@ -100,27 +97,46 @@ func InitPocketNameService(appLife service.ServiceSupervisor, clusterID string) 
             log.Debugf("[NAME-SERVICE] start service...")
             return errors.WithStack(udpServer.ActivateAndServe())
         },
-        service.BindEventWithService(iventNameServerInstanceSpawn, nameServerC))
+        service.BindEventWithService(ivent.IventNameServerInstanceSpawn, nameServerC))
 
     beaconManC := make(chan service.Event)
     appLife.RegisterServiceWithFuncs(
-        operation.ServiceInternalNodeNameOperation,
+        operation.ServiceInternalNodeNameControl,
         func() error {
             var (
                 udpServer = &dns.Server {
                     Addr:    "127.0.0.1:10059",
                     Net:     "udp",
                 }
-                udpPacketConn *net.UDPConn = nil
-                udpAddr *net.UDPAddr = nil
-                err error = nil
+                failtimout       *time.Ticker = time.NewTicker(time.Minute)
+                udpPacketConn    *net.UDPConn = nil
+                udpAddr          *net.UDPAddr = nil
+                beaconMan beacon.BeaconManger = nil
+                err error                     = nil
             )
-            // wait for beacon manager to come up
-            be := <- beaconManC
-            beaconMan, ok := be.Payload.(beacon.BeaconManger)
-            if !ok {
-                return errors.Errorf("[ERR] invalid beacon manager type")
+
+            // monitor beacon agent
+            select {
+                case <-failtimout.C: {
+                    // cleanup resources
+                    failtimout.Stop()
+                    udpServer.Shutdown()
+                    return errors.Errorf("[ERR] unable to detect beacon agent")
+                }
+                // wait for beacon manager to come up
+                case be := <- beaconManC: {
+                    bm, ok := be.Payload.(beacon.BeaconManger)
+                    if bm != nil && ok {
+                        beaconMan = bm
+                    } else {
+                        return errors.Errorf("[ERR] invalid beacon manager type")
+                    }
+                }
             }
+
+            failtimout.Stop()
+            log.Infof("[NAME-SERVICE] service ready to start...")
+            // setup dns handler
             dns.HandleFunc(".", func(w dns.ResponseWriter, req *dns.Msg) {
                 locaNodeName(beaconMan, w, req)
             })
@@ -137,7 +153,9 @@ func InitPocketNameService(appLife service.ServiceSupervisor, clusterID string) 
             udpServer.PacketConn = udpPacketConn
 
             // send udp server to operation
-            appLife.BroadcastEvent(service.Event{Name:iventNameServerInstanceSpawn, Payload: udpServer})
+            appLife.BroadcastEvent(service.Event{
+                Name:ivent.IventNameServerInstanceSpawn,
+                Payload:udpServer})
 
             // wait for stop event
             <- appLife.StopChannel()

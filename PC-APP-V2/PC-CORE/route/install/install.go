@@ -5,7 +5,7 @@ import (
     "encoding/json"
     "fmt"
     "os/user"
-    "time"
+    "strings"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
@@ -13,17 +13,15 @@ import (
     tclient "github.com/gravitational/teleport/lib/client"
 
     pcctx "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/utils/dockertool"
+    "github.com/stkim1/pc-core/utils/apireq"
 )
 
-const (
-    timeout = time.Duration(10 * time.Second)
-)
-
-func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeeder, sshCfg *tervice.PocketConfig) {
+func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeeder, sshCfg *tervice.PocketConfig) {
     // install a package
     appLife.POST(routepath.RpathPackageInstall(), func(_, rpath, payload string) error {
         var (
@@ -46,13 +44,13 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
                 return irr
             }
 
-            pkg        *model.Package
-            uRoot      *model.UserMeta
-            rpProgress string = routepath.RpathPackageInstallProgress()
-            pkgID      string = ""
-            repoList          = []string{}
-            stopC             = make(chan struct{})
-            client            = newClient(timeout, false)
+            rpProgress = routepath.RpathPackageInstallProgress()
+            stopC      = make(chan struct{})
+            client     = apireq.NewClient(apireq.ConnTimeout, false)
+            repoList   = []string{}
+            pkg        *model.Package = nil
+            uRoot      *model.UserMeta = nil
+            pkgID      = ""
         )
 
         // 0. find registry destination first
@@ -70,6 +68,8 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
         }
 
         // TODO 2. check if service is already running
+
+        // TODO 3. check if this package has been installed
 
         // 3. pick up the first package & we are ready to patch.
         pkgs, err := model.FindPackage("pkg_id = ?", pkgID)
@@ -99,11 +99,11 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
 
         // --- --- --- --- --- download meta first --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Downloading package information...")
-        metaReq, err := newRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.MetaURL), false)
+        metaReq, err := apireq.NewRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.MetaURL), false)
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access package meta data"))
         }
-        metaData, err := readRequest(metaReq, client)
+        metaData, err := apireq.ReadRequest(metaReq, client)
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access package meta data"))
         }
@@ -129,11 +129,11 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
 
         //  --- --- --- --- --- download repo list --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Checking image repositories...")
-        repoReq, err := newRequest("https://api.pocketcluster.io/service/v014/package/repo", false)
+        repoReq, err := apireq.NewRequest("https://api.pocketcluster.io/service/v014/package/repo", false)
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access repository list"))
         }
-        repoData, err := readRequest(repoReq, client)
+        repoData, err := apireq.ReadRequest(repoReq, client)
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access repository list"))
         }
@@ -148,11 +148,11 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
 
         //  --- --- --- --- --- download core sync --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Downloading core image...")
-        cSyncReq, err := newRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.CoreImageSync), true)
+        cSyncReq, err := apireq.NewRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.CoreImageSync), true)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync core image"))
         }
-        cSyncData, err := readRequest(cSyncReq, client)
+        cSyncData, err := apireq.ReadRequest(cSyncReq, client)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync core image"))
         }
@@ -167,11 +167,11 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
 
         //  --- --- --- --- --- download node sync --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Downloading node image...")
-        nSyncReq, err := newRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.NodeImageSync), true)
+        nSyncReq, err := apireq.NewRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.NodeImageSync), true)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync node image"))
         }
-        nSyncData, err := readRequest(nSyncReq, client)
+        nSyncData, err := apireq.ReadRequest(nSyncReq, client)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync node image"))
         }
@@ -186,33 +186,95 @@ func InitInstallPackageRoutePath(appLife route.Router, feeder route.ResponseFeed
 
         // --- --- --- --- --- install image to core --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Installing core image...")
+        ccli, err := dockertool.NewContainerClient(fmt.Sprintf("tcp://%s:%s", defaults.PocketClusterCoreName, defaults.DefaultSecureDockerPort), "1.24")
+        if err != nil {
+            return feedError(errors.WithMessage(err, "unable to make connection to pc-core"))
+        }
+        err = dockertool.InstallImageFromRepository(ccli, pkg.CoreImageName)
+        if err != nil {
+            return feedError(errors.WithMessage(err, "unable to sync image to " + defaults.PocketClusterCoreName))
+        }
+
+        // --- --- --- --- --- setup core node --- --- --- --- ---
+        // data paths to build
+        cdPath := strings.Split(pkg.CoreDataPath, "|")
+        cdPathCmds := []string{}
+        for _, cdp := range cdPath {
+            cdPathCmds = append(cdPathCmds, fmt.Sprintf("mkdir -p %s", cdp))
+            cdPathCmds = append(cdPathCmds, fmt.Sprintf("chown -R %s:%s %s", luname, luname, cdp))
+            cdPathCmds = append(cdPathCmds, fmt.Sprintf("chmod -R 755 %s", cdp))
+        }
+        log.Info("core data path commands %v", cdPathCmds)
+
+        cssh, err := tclient.MakeNewClient(sshCfg, uRoot.Login, defaults.PocketClusterCoreName)
+        if err != nil {
+            return feedError(errors.WithMessage(err, "unable to setup package to " + defaults.PocketClusterCoreName))
+        }
+        for _, cdpc := range cdPathCmds {
+            err = cssh.APISSH(context.TODO(), []string{cdpc}, uRoot.Password,false)
+            if err != nil {
+                log.Error(cdpc)
+                return feedError(errors.WithMessage(err, "unable to setup package to " + defaults.PocketClusterCoreName))
+            }
+        }
+        err = cssh.Logout()
+        if err != nil {
+            return feedError(errors.WithMessage(err, "unable to setup package to " + defaults.PocketClusterCoreName))
+        }
 
         // --- --- --- --- --- install image to nodes --- --- --- --- ---
+        // TODO : we can request swarm server to do this job
+        tNode := "pc-node1"
         _ = makeMessageFeedBack(feeder, rpProgress, "Installing node image...")
-        cli, err := dockertool.NewContainerClient("tcp://pc-node1:2376", "1.24")
+        ncli, err := dockertool.NewContainerClient(fmt.Sprintf("tcp://%s:%s", tNode, defaults.DefaultSecureDockerPort), "1.24")
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to make connection to " + "pc-node1"))
         }
-        err = dockertool.InstallImageFromRepository(cli, "pc-master:5000/arm64v8-ubuntu")
+        err = dockertool.InstallImageFromRepository(ncli, pkg.NodeImageName)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync image to " + "pc-node1"))
         }
 
         // --- --- --- --- --- setup node --- --- --- --- ---
-        tNode := "pc-node1"
-        c, err := tclient.MakeNewClient(sshCfg, uRoot.Login, tNode)
+        // data paths to build
+        ndPath := strings.Split(pkg.NodeDataPath, "|")
+        // ndpath setup commands
+        ndPathCmds := []string{}
+        for _, ndp := range ndPath {
+            ndPathCmds = append(ndPathCmds, fmt.Sprintf("mkdir -p %s", ndp))
+            ndPathCmds = append(ndPathCmds, fmt.Sprintf("chown -R %s:%s %s", luname, luname, ndp))
+            ndPathCmds = append(ndPathCmds, fmt.Sprintf("chmod -R 755 %s", ndp))
+        }
+        log.Infof("node data path commands %v", ndPathCmds)
+
+        nssh, err := tclient.MakeNewClient(sshCfg, uRoot.Login, tNode)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
         }
-        err = c.APISSH(context.TODO(), []string{"mkdir -p /pocket/basic/package"}, "1524rmfo",false)
-        if err != nil {
-            return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
+        for _, ndpc := range ndPathCmds {
+            err = nssh.APISSH(context.TODO(), []string{ndpc}, uRoot.Password,false)
+            if err != nil {
+                log.Error(ndpc)
+                return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
+            }
         }
-        err = c.Logout()
+        err = nssh.Logout()
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to setup package to " + tNode))
         }
 
+        // --- --- --- --- --- make installed package record --- --- --- --- ---
+        err = model.UpsertRecords([]*model.PkgRecord{
+            {
+                AppVer: pkg.AppVer,
+                PkgID:  pkg.PkgID,
+                PkgVer: pkg.PkgVer,
+                PkgChksum: pkg.PkgChksum,
+            },
+        })
+        if err != nil {
+            return feedError(errors.WithMessage(err, "unable to record package history" + pkg.Name))
+        }
 
         // --- --- --- --- --- install image to nodes --- --- --- --- ---
         data, err := json.Marshal(route.ReponseMessage{

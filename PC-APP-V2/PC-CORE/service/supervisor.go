@@ -329,7 +329,7 @@ func (s *srvcSupervisor) runService(service Service) {
                     }
                     ss.eventWaiters[sw.eventName] = nwaiters
                 }
-                log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] waiter [%s] cleaned", srv.Tag(), srv, sw.eventName)
+//                log.Debugf("[SUPERVISOR] ['%s' | %v] waiter [%s] cleaned", srv.Tag(), srv, sw.eventName)
             }
 
             // cleanup service itself
@@ -344,12 +344,12 @@ func (s *srvcSupervisor) runService(service Service) {
             if err != nil {
                 log.Debug(errors.WithStack(err))
             }
-            log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] removed", srv.Tag(), srv)
+            log.Debugf("[SUPERVISOR] ['%s'] removed", srv.Tag())
         }
         // this runs service
         srvcRunner = func(ss *srvcSupervisor, waitSync *sync.WaitGroup, srv Service, cleanup func(as *srvcSupervisor, srv Service)) {
 
-            log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] started", srv.Tag(), srv)
+            log.Debugf("[SUPERVISOR] ['%s'] started", srv.Tag())
 
             srv.setRunning()
             err := srv.serve()
@@ -360,7 +360,7 @@ func (s *srvcSupervisor) runService(service Service) {
             srv.setStopped()
             waitSync.Done()
 
-            log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] exited", srv.Tag(), srv)
+            log.Debugf("[SUPERVISOR] ['%s'] exited", srv.Tag())
         }
     )
 
@@ -374,7 +374,7 @@ func (s *srvcSupervisor) registerService(srv Service) error {
 
     s.services = append(s.services, srv)
 
-    log.Debugf("[SUPERVISOR-SERVICE] ['%s' | %v] added", srv.Tag(), srv)
+    log.Debugf("[SUPERVISOR] ['%s'] added", srv.Tag())
 
     if s.state == stateStarted {
         s.runService(srv)

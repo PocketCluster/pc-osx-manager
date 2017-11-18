@@ -7,25 +7,26 @@ import (
 type CommandType int32
 
 const(
-    ServiceBeaconCatcher             string = "service.beacon.catcher"
-    ServiceBeaconLocationRead        string = "service.beacon.location.read"
-    ServiceBeaconLocationWrite       string = "service.beacon.location.write"
-    ServiceBeaconMaster              string = "service.beacon.master"
-    ServiceOrchestrationServer       string = "service.orchestration.server"
-    ServiceOrchestrationOperation    string = "service.orchestration.operation"
-    ServiceStorageProcess            string = "service.storage.process"
-    ServiceContainerRegistry         string = "service.container.registry"
-    ServiceInternalNodeNameServer    string = "service.internal.node.name.server"
-    ServiceInternalNodeNameOperation string = "service.internal.node.name.operation"
-    ServiceVBoxMasterControl         string = "service.vbox.master.control"
-    ServiceVBoxMasterListener        string = "service.vbox.master.listener"
-    ServiceMonitorSystemHealth       string = "service.monitor.system.health"
+    ServiceBeaconCatcher           string = "service.beacon.catcher"
+    ServiceBeaconLocationRead      string = "service.beacon.location.read"
+    ServiceBeaconLocationWrite     string = "service.beacon.location.write"
+    ServiceBeaconMaster            string = "service.beacon.master"
+    ServiceOrchstServer            string = "service.orchst.server"
+    ServiceOrchstControl           string = "service.orchst.control"
+    ServiceOrchstRegistry          string = "service.orchst.registry"
+    ServiceDiscoveryServer         string = "service.discovery.server"
+    ServiceInternalNodeNameServer  string = "service.internal.node.name.server"
+    ServiceInternalNodeNameControl string = "service.internal.node.name.control"
+    ServiceVBoxMasterControl       string = "service.vbox.master.control"
+    ServiceVBoxMasterListener      string = "service.vbox.master.listener"
+    ServiceMonitorSystemHealth     string = "service.monitor.system.health"
 )
 
 const (
     // Base Service start
     CmdBaseServiceStart     = iota
     CmdBaseServiceStop
+    CmdClusterShutdown
 
     // ETCD control
     CmdStorageStart

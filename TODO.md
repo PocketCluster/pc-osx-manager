@@ -8,9 +8,14 @@
 
 - [ ] MUSL ARM64 w/ GOLANG
 - [ ] TinyCore ARM64 (from Busybox)
-
+- [ ] Have a UI queue to stack ui requests so that duplicated requests will not cause double execution
 
 ### V0.1.4
+- [ ] Occational Error `[HEALTH] [ERR] cannot fetch node status from pcssh w/ invalid data {0 <nil> []}`
+- [ ] `health` check service should count *ETCD*, *Registry* service startup as well.
+- [ ] make sure `interface` building tips from [`S39hostname`](/PC-APP-V1/pc-rpi-agent/S39hostname) being applied to [PocketAgent](/PC-APP-V1/pc-rpi-agent).
+- [ ] Close health monitor + external net listener first before close any other services so that supervisor won't crash
+- [ ] Fix External net listener open timing (after all services are ready)
 - [ ] Fix Teleport generate log in Log directory
 - [ ] `CoreNode`, `SlaveNode` : `LastAlive` data for health check on OSX. Save the last alive time to report in OSX.
 - [ ] `CoreNode` set `SlaveID` with `MachineID`.
@@ -62,6 +67,19 @@
 - [-] Use FQDN name for certification and name server ( e.g. `pc-core.Q1oqc1921lq.cluster.pocketcluster.io` )
   * `pc-master` queries to main DNS.
 
+
+#### UI Layer
+- [ ] check `pc-core` & `pc-nodes` connections for
+  1. teleport clients
+  2. swarm nodes
+  3. beacon/locator
+- [ ] UI mode flow
+  0. sign up
+  1. setup cluster / restart cluster
+  2. install a package
+  3. run a package
+  4. turn off the package
+  5. turn off cluster
 
 #### VirtualBox
 - [x] get the actual core count

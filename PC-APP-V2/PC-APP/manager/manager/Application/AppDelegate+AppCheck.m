@@ -6,10 +6,12 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
+#include "pc-core.h"
 #import "PCRouter.h"
 #import "ShowAlert.h"
-#import "NativeMenu+NewCluster.h"
+#import "StatusCache.h"
 
+#import "AppDelegate+MonitorDispenser.h"
 #import "AppDelegate+Window.h"
 #import "AppDelegate+AppCheck.h"
 
@@ -18,169 +20,156 @@
 
 @implementation AppDelegate(AppCheck)
 
-- (void) initCheck {
-
+- (void) addInitCheckPath {
     WEAK_SELF(self);
-    
-    NSString *pathSystemReady = [NSString stringWithUTF8String:RPATH_SYSTEM_READINESS];
-    NSString *pathAppExpired  = [NSString stringWithUTF8String:RPATH_APP_EXPIRED];
-    NSString *pathUserAuthed  = [NSString stringWithUTF8String:RPATH_USER_AUTHED];
-    NSString *pathIsFirstRun  = [NSString stringWithUTF8String:RPATH_SYSTEM_IS_FIRST_RUN];
-    
-    /*** checking system readiness ***/
+
+    /*** checking system context readiness ***/
+    // this is to trigger network initialization, but that would put pointers complicated situation.
     [[PCRouter sharedRouter]
      addGetRequest:self
-     onPath:pathSystemReady
+     onPath:@(RPATH_CONTEXT_INIT)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+          Log(@"%@ %@", path, response);
+     }];
+
+    /*** checking system network interface and readiness ***/
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_NETWORK_INIT)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
          Log(@"%@ %@", path, response);
 
-         BOOL isSystemReady = [[[response objectForKey:@"syscheck"] objectForKey:@"status"] boolValue];
-         _isSystemReady = isSystemReady;
+         BOOL isNetworkReady = [[response valueForKeyPath:@"sys-network-init.status"] boolValue];
+         if (isNetworkReady) {
+             [PCRouter routeRequestGet:RPATH_SYSTEM_READINESS];
+
+         } else {
+             [ShowAlert
+              showTerminationAlertWithTitle:@"Network Error"
+              message:[response valueForKeyPath:@"sys-network-init.error"]];
+
+         }
+     }];
+    
+    /*** checking system readiness ***/
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_SYSTEM_READINESS)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+
+         Log(@"%@ %@", path, response);
+
+         BOOL isSystemReady = [[response valueForKeyPath:@"syscheck.status"] boolValue];
+         [belf didAppCheckSystemReadiness:isSystemReady];
 
          if (isSystemReady) {
              [PCRouter routeRequestGet:RPATH_APP_EXPIRED];
-         } else {
-             [[PCRouter sharedRouter] delGetRequest:belf onPath:pathAppExpired];
-             [[PCRouter sharedRouter] delGetRequest:belf onPath:pathIsFirstRun];
-             [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
 
+         } else {
              [ShowAlert
-              showWarningAlertWithTitle:@"Unable to run PocketCluster"
-              message:[[response objectForKey:@"syscheck"] objectForKey:@"error"]];
+              showTerminationAlertWithTitle:@"Unable to run PocketCluster"
+              message:[response valueForKeyPath:@"syscheck.error"]];
+
          }
-         
-         [[PCRouter sharedRouter] delGetRequest:belf onPath:pathSystemReady];
      }];
 
     /*** checking app expired ***/
     [[PCRouter sharedRouter]
      addGetRequest:self
-     onPath:pathAppExpired
+     onPath:@(RPATH_APP_EXPIRED)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
          Log(@"%@ %@", path, response);
          
-         BOOL isAppExpired = [[[response objectForKey:@"expired"] objectForKey:@"status"] boolValue];
-         _isAppExpired = isAppExpired;
-         
+         BOOL isAppExpired = [[response valueForKeyPath:@"expired.status"] boolValue];
+         [belf didAppCheckAppExpiration:isAppExpired];
+
          if (!isAppExpired) {
-             NSString *warning = [[response objectForKey:@"expired"] objectForKey:@"warning"];
+             NSString *warning = [response valueForKeyPath:@"expired.warning"];
              if (warning != nil) {
                  [ShowAlert
-                  showWarningAlertWithTitle:@"PocketCluster Expiration"
+                  showTerminationAlertWithTitle:@"PocketCluster Expiration"
                   message:warning];
              }
-
              [PCRouter routeRequestGet:RPATH_SYSTEM_IS_FIRST_RUN];
+
          } else {
-             [[PCRouter sharedRouter] delGetRequest:belf onPath:pathIsFirstRun];
-             [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
-
              [ShowAlert
-              showWarningAlertWithTitle:@"PocketCluster Expiration"
-              message:[[response objectForKey:@"expired"] objectForKey:@"error"]];
-         }
+              showTerminationAlertWithTitle:@"PocketCluster Expiration"
+              message:[response valueForKeyPath:@"expired.error"]];
 
-         [[PCRouter sharedRouter] delGetRequest:belf onPath:pathAppExpired];
+         }
      }];
 
     /*** checking if first time ***/
     [[PCRouter sharedRouter]
      addGetRequest:self
-     onPath:pathIsFirstRun
+     onPath:@(RPATH_SYSTEM_IS_FIRST_RUN)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
          Log(@"%@ %@", path, response);
 
-         BOOL isFirstRun = [[[response objectForKey:@"firsttime"] objectForKey:@"status"] boolValue];
-         _isFirstTime = isFirstRun;
+         // show agreement
+         BOOL isFirstRun = [[response valueForKeyPath:@"firsttime.status"] boolValue];
+         [belf didAppCheckIsFirstRun:isFirstRun];
+
+         [[StatusCache SharedStatusCache] setFirstRun:isFirstRun];
 
          if (isFirstRun) {
              [belf activeWindowByClassName:@"AgreementWC" withResponder:nil];
-             [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
+
+         // show intro screen
          } else {
-             [PCRouter routeRequestGet:RPATH_USER_AUTHED];
+             [belf activeWindowByClassName:@"IntroWC" withResponder:nil];
 
+             [PCRouter
+              routeRequestPost:RPATH_USER_AUTHED
+              withRequestBody:@{@"email":@"testemail", @"code":@"testcode"}];
          }
-
-         [[PCRouter sharedRouter] delGetRequest:belf onPath:pathIsFirstRun];
      }];
 
     /*** checking user authed ***/
     [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:pathUserAuthed
+     addPostRequest:self
+     onPath:@(RPATH_USER_AUTHED)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
          Log(@"%@ %@", path, response);
 
-         BOOL isUserAuthed = [[[response objectForKey:@"user-auth"] objectForKey:@"status"] boolValue];
-         _isUserAuthed = isUserAuthed;
+         BOOL isUserAuthed = [[response valueForKeyPath:@"user-auth.status"] boolValue];
+         [belf didAppCheckUserAuthed:isUserAuthed];
 
-         if (_isUserAuthed) {
-             // TODO : choose appropriate menu
-             [belf.mainMenu setupMenuNewCluster];
+         if (isUserAuthed) {
+             // setup ui state
+             [belf setupWithStartServicesMessage];
+             
+             // set the app ready whenever service gets started
+             [[StatusCache SharedStatusCache] setAppReady:YES];
+             
+             // start basic service
+             // OpsCmdBaseServiceStart();
+
          } else {
-             [ShowAlert
-              showWarningAlertWithTitle:@"Your invitation is not valid"
-              message:[[response objectForKey:@"user-auth"] objectForKey:@"error"]];
+             if ([[StatusCache SharedStatusCache] isFirstRun]) {
+                 [ShowAlert
+                  showWarningAlertWithTitle:@"Invalid Invitation"
+                  message:[response valueForKeyPath:@"user-auth.error"]];
+             } else {
+                 [ShowAlert
+                  showTerminationAlertWithTitle:@"Invalid Invitation"
+                  message:[response valueForKeyPath:@"user-auth.error"]];
+             }
          }
-         
-         [[PCRouter sharedRouter] delGetRequest:belf onPath:pathUserAuthed];
      }];
-
-    [PCRouter routeRequestGet:RPATH_SYSTEM_READINESS];
 }
 
-- (void) systemMon {
-//    WEAK_SELF(self);
-
-    NSString *rpUnregNodes = [NSString stringWithUTF8String:RPATH_MONITOR_NODE_UNREGISTERED];
-    NSString *rpRegNodes   = [NSString stringWithUTF8String:RPATH_MONITOR_NODE_REGISTERED];
-    NSString *rpSrvStat    = [NSString stringWithUTF8String:RPATH_MONITOR_SERVICE_STATUS];
-
-    [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:rpUnregNodes
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-//         Log(@"%@ %@", path, response);
-     }];
-
-    [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:rpRegNodes
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-//         Log(@"%@ %@", path, response);
-     }];
-
-    [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:rpSrvStat
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) { 
- /*
-        Log(@"%@ %@", path, response);
-        ({
-          "service.beacon.catcher" = 1;
-          "service.beacon.location.read" = 1;
-          "service.beacon.location.write" = 1;
-          "service.beacon.master" = 1;
-          "service.container.registry" = 1;
-          "service.internal.node.name.operation" = 1;
-          "service.internal.node.name.server" = 1;
-          "service.monitor.system.health" = 1;
-          "service.pcssh.authority" = 1;
-          "service.pcssh.conn.admin" = 1;
-          "service.pcssh.conn.proxy" = 1;
-          "service.pcssh.server.auth" = 1;
-          "service.pcssh.server.proxy" = 1;
-          "service.storage.process" = 1;
-          "service.swarm.embedded.operation" = 1;
-          "service.swarm.embedded.server" = 1;
-          "service.vbox.master.control" = 1;
-          "service.vbox.master.listener" = 1;
-        })
-*/
-     }];
+- (void) delInitCheckPath {
+    [[PCRouter sharedRouter] delGetRequest:self onPath:@(RPATH_CONTEXT_INIT)];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:@(RPATH_NETWORK_INIT)];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:@(RPATH_SYSTEM_READINESS)];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:@(RPATH_APP_EXPIRED)];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:@(RPATH_SYSTEM_IS_FIRST_RUN)];
+    [[PCRouter sharedRouter] delPostRequest:self onPath:@(RPATH_USER_AUTHED)];
 }
 @end

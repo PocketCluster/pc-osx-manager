@@ -8,6 +8,7 @@
 
 #import "BaseWindowController.h"
 #import "StepStage.h"
+#import "MonitorPackage.h"
 
-@interface PCPkgInstallWC : BaseWindowController <StepControl>
+@interface PCPkgInstallWC : BaseWindowController <NSWindowDelegate, StepControl, MonitorPackage>
 @end

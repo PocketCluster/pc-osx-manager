@@ -18,6 +18,7 @@ import (
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/model"
+    "github.com/stkim1/pc-core/service/ivent"
 )
 import (
     "github.com/davecgh/go-spew/spew"
@@ -97,9 +98,10 @@ type BeaconManger interface {
     // dns service name
     AddressForName(name string) (string, error)
 
-    // For reporting to UI layer
-    // TODO : formalize return value with a struct
-    RegisteredNodesList() []map[string]string
+    // report live nodes for internal services
+    ReportLiveNodes() []string
+    // For reporting to health service
+    ReportAllNodeStatus(ts int64) ivent.BeaconNodeStatusMeta
 }
 
 // We might not need a locking mechanism as "select" statement will choose only "one input" at a time.
@@ -273,8 +275,12 @@ func (b *beaconManger) AddressForName(name string) (string, error) {
 }
 
 // --- UI Layer Report --- //
-func (b *beaconManger) RegisteredNodesList() []map[string]string {
-    return fundRegisterdNodeStatus(b)
+func (b *beaconManger) ReportLiveNodes() []string {
+    return findLiveNodes(b)
+}
+
+func (b *beaconManger) ReportAllNodeStatus(ts int64) ivent.BeaconNodeStatusMeta {
+    return findAllNodeStatus(b, ts)
 }
 
 // --- Swarm Discovery Methods --- //
@@ -436,10 +442,6 @@ func findBoundedNodesForSwarm(b *beaconManger) []string {
     b.Lock()
     defer b.Unlock()
 
-    const (
-        dockerPort string = "2376"
-    )
-
     var (
         nodeList []string = []string{}
         bLen int = len(b.beaconList)
@@ -450,13 +452,13 @@ func findBoundedNodesForSwarm(b *beaconManger) []string {
         if bc.CurrentState() == MasterBounded {
             // TODO : should we use FQDN here?
             nodeName := bc.SlaveNode().NodeName
-            nodeList = append(nodeList, fmt.Sprintf("%s:%s", nodeName, dockerPort))
+            nodeList = append(nodeList, fmt.Sprintf("%s:%s", nodeName, defaults.DefaultSecureDockerPort))
         }
     }
 
     // append core node
     if b.vboxCtrl.CurrentState() == mpkg.VBoxMasterBounded {
-        nodeList = append(nodeList, fmt.Sprintf("%s:%s", model.CoreNodeName, dockerPort))
+        nodeList = append(nodeList, fmt.Sprintf("%s:%s", model.CoreNodeName, defaults.DefaultSecureDockerPort))
     }
 
     return nodeList
@@ -500,6 +502,7 @@ func shutdownMasterBeacons(b *beaconManger) {
     b.notiReceiver = nil
 }
 
+/*
 func fundRegisterdNodeStatus(b *beaconManger) []map[string]string {
     b.Lock()
     defer b.Unlock()
@@ -561,4 +564,72 @@ func fundRegisterdNodeStatus(b *beaconManger) []map[string]string {
     }
 
     return regedNodes
+}
+*/
+
+func findLiveNodes(b *beaconManger) []string {
+    b.Lock()
+    defer b.Unlock()
+
+    var (
+        lnodes = []string{}
+    )
+    for i := range b.beaconList {
+        if b.beaconList[i].CurrentState() == MasterBounded {
+            lnodes = append(lnodes, b.beaconList[i].SlaveNode().NodeName)
+        }
+    }
+    // pc-core
+    if b.vboxCtrl.CurrentState() == mpkg.VBoxMasterBounded {
+        lnodes = append(lnodes, defaults.PocketClusterCoreName)
+    }
+    return lnodes
+}
+
+func findAllNodeStatus(b *beaconManger, ts int64) ivent.BeaconNodeStatusMeta {
+    b.Lock()
+    defer b.Unlock()
+
+    var (
+        nList = []ivent.BeaconNodeStatusInfo{}
+        bLen  = len(b.beaconList)
+    )
+
+    for i := 0; i < bLen; i++ {
+        var (
+            bc = b.beaconList[i]
+            node = bc.SlaveNode()
+        )
+        nState := ivent.BeaconNodeStatusInfo{
+            Name:       node.NodeName,
+            MacAddr:    node.SlaveID,
+            Registered: true,
+            Bounded:    bool(bc.CurrentState() == MasterBounded),
+        }
+        ip4, err := node.IP4AddrString()
+        if err == nil {
+            nState.IPAddr = ip4
+        }
+        nList = append(nList, nState)
+    }
+
+    // finally add core node
+    cNode := b.vboxCtrl.GetCoreNode()
+    if cNode != nil {
+        cState := ivent.BeaconNodeStatusInfo{
+            Name:        cNode.NodeName,
+            Registered:  true,
+            Bounded:     bool(b.vboxCtrl.CurrentState() == mpkg.VBoxMasterBounded),
+        }
+        ip4, err := cNode.IP4AddrString()
+        if err == nil {
+            cState.IPAddr = ip4
+        }
+        nList = append(nList, cState)
+    }
+
+    return ivent.BeaconNodeStatusMeta{
+        TimeStamp: ts,
+        Nodes:     nList,
+    }
 }

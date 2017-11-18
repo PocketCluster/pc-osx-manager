@@ -100,7 +100,7 @@ func NewSwarmService(context *SwarmContext) (*SwarmService, error) {
     }
 
     primary := api.NewPrimary(cl, context.tlsConfig, &statusHandler{cl, nil, nil}, context.debug, context.cors)
-    server, err := newStoppableServiceForSingleHost(context, primary)
+    server, err := newStoppableServiceForSingleHost(context, primary, cl)
     if err != nil {
         return nil, errors.WithStack(err)
     }

@@ -16,7 +16,7 @@ import (
 
 var (
     // ItemNotFound
-    NoItemFound       = &ngError{"[ERR] NotFound: No items are found"}
+    NoItemFound       = &ngError{"[ERR] no item found"}
 
     gate *dbGate      = nil
     gateLock          = sync.Mutex{}
@@ -71,7 +71,17 @@ func OpenRecordGate(dataDir, recordFile string) (RecordGate, error) {
     gateLock.Lock()
     defer gateLock.Unlock()
 
-    var err error = nil
+    var (
+        cmeta = &ClusterMeta{}
+        umeta = &UserMeta{}
+        snode = &SlaveNode{}
+        cnode = &CoreNode{}
+        pkgck = &Package{}
+        precd = &PkgRecord{}
+        tmplt = &TemplateMeta{}
+
+        err error = nil
+    )
 
     // TODO : This is a good place to migrate & load encryption plugin
 
@@ -114,42 +124,48 @@ func OpenRecordGate(dataDir, recordFile string) (RecordGate, error) {
     }
 
     // TODO : disable when release
-    sess.LogMode(true)
+    //sess.LogMode(true)
 
-    if !sess.HasTable(&ClusterMeta{}) {
-        sess.CreateTable(&ClusterMeta{})
+    if !sess.HasTable(cmeta) {
+        sess.CreateTable(cmeta)
     } else {
-        sess.AutoMigrate(&ClusterMeta{})
+        sess.AutoMigrate(cmeta)
     }
 
-    if !sess.HasTable(&UserMeta{}) {
-        sess.CreateTable(&UserMeta{})
+    if !sess.HasTable(umeta) {
+        sess.CreateTable(umeta)
     } else {
-        sess.AutoMigrate(&UserMeta{})
+        sess.AutoMigrate(umeta)
     }
 
-    if !sess.HasTable(&SlaveNode{}) {
-        sess.CreateTable(&SlaveNode{})
+    if !sess.HasTable(snode) {
+        sess.CreateTable(snode)
     } else {
-        sess.AutoMigrate(&SlaveNode{})
+        sess.AutoMigrate(snode)
     }
 
-    if !sess.HasTable(&CoreNode{}) {
-        sess.CreateTable(&CoreNode{})
+    if !sess.HasTable(cnode) {
+        sess.CreateTable(cnode)
     } else {
-        sess.AutoMigrate(&CoreNode{})
+        sess.AutoMigrate(cnode)
     }
 
-    if !sess.HasTable(&Package{}) {
-        sess.CreateTable(&Package{})
+    if !sess.HasTable(pkgck) {
+        sess.CreateTable(pkgck)
     } else {
-        sess.AutoMigrate(&Package{})
+        sess.AutoMigrate(pkgck)
     }
 
-    if !sess.HasTable(&TemplateMeta{}) {
-        sess.CreateTable(&TemplateMeta{})
+    if !sess.HasTable(precd) {
+        sess.CreateTable(precd)
     } else {
-        sess.AutoMigrate(&TemplateMeta{})
+        sess.AutoMigrate(precd)
+    }
+
+    if !sess.HasTable(tmplt) {
+        sess.CreateTable(tmplt)
+    } else {
+        sess.AutoMigrate(tmplt)
     }
 
     gate = &dbGate{

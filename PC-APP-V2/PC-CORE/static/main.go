@@ -17,9 +17,12 @@ import (
     "github.com/stkim1/pc-core/extlib/pcssh/sshproc"
     "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
     "github.com/stkim1/pc-core/model"
+    "github.com/stkim1/pc-core/rasker"
+    "github.com/stkim1/pc-core/rasker/pkgtask"
     "github.com/stkim1/pc-core/route"
-    "github.com/stkim1/pc-core/route/install"
     "github.com/stkim1/pc-core/route/initcheck"
+    "github.com/stkim1/pc-core/route/install"
+    "github.com/stkim1/pc-core/route/list"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/service/container"
     "github.com/stkim1/pc-core/service/dns"
@@ -45,7 +48,7 @@ func main() {
             appCfg        *config.ServiceConfig = nil
             err           error                 = nil
             vboxCore      vboxglue.VBoxGlue     = nil
-            IsContextInit bool                  = false
+            IsContextInit, IsNetworkInit        = false, false
         )
 
         for e := range appLife.Events() {
@@ -64,19 +67,42 @@ func main() {
                     }
                     switch e.Crosses(lifecycle.StageAlive) {
                         case lifecycle.CrossOn: {
-                            // this should happen only once in the lifetime of an application.
-                            // so we'll initialize our context here to have safe operation
                             if !IsContextInit {
-                                log.Debugf("[LIFE] initialize ApplicationContext...")
+                                IsContextInit = true
+                                // this should happen only once in the lifetime of an application.
+                                // so we'll initialize our context here to have safe operation
+
                                 // this needs to be initialized before service loop initiated
                                 context.SharedHostContext()
-                                initcheck.InitRoutePathServices(appLife, theFeeder)
-                                install.InitInstallListRouthPath(appLife, theFeeder)
+                                log.Debugf("[LIFE] context creation")
 
-                                IsContextInit = true
+                                // -- initial service path registration ---
+                                // by this time the response feeder should be initialized on frontend
+                                initcheck.InitApplicationCheck(appLife, theFeeder)
+                                pkgtask.InitPackageLifeCycle(rasker.RouteTasker{
+                                    ServiceSupervisor: appLife.ServiceSupervisor,
+                                    Router: appLife.Router},
+                                    theFeeder)
+                                pkgtask.InitPackageKillCycle(rasker.RouteTasker{
+                                    ServiceSupervisor: appLife.ServiceSupervisor,
+                                    Router: appLife.Router},
+                                    theFeeder)
+                                list.InitRouthPathListAvailable(appLife, theFeeder)
+                                list.InitRouthPathListInstalled(appLife, theFeeder)
+                                log.Debugf("[LIFE] service path registration")
+
+                                // (2017/11/10) we ought to have frontend check engine response, but then it complicated network monitoring.
+                                // So, we'll just give more time for context to be initialized for now.
+                                err := reportContextInit(appLife, theFeeder)
+                                if err != nil {
+                                    log.Errorf("[SYSCONTEXT] error in reporting network init %v", err.Error())
+                                }
+
+                                // make sure initialization happens only once
+                                log.Debugf("[LIFE] app is now created, fully initialized %v", e.String())
+                            } else {
+
                             }
-
-                            log.Debugf("[LIFE] app is now created, fully initialized %v", e.String())
                         }
                         case lifecycle.CrossOff: {
                             log.Debugf("[LIFE] app is inactive %v", e.String())
@@ -105,21 +131,30 @@ func main() {
                 case network.Event: {
                     switch e.NetworkEvent {
                         case network.NetworkChangeInterface: {
-                            log.Debugf("[NET] %v", e.String())
-
-                            // TODO check if service is running
-                            isSrvRun := len(appLife.ServiceList()) != 0
                             updated := context.SharedHostContext().UpdateNetworkInterfaces(e.HostInterfaces)
 
+                            // notify frontend to initiate the next move.
+                            if !IsNetworkInit {
+                                IsNetworkInit = true
+
+                                err := reportNetworkInit(appLife, theFeeder)
+                                if err != nil {
+                                    log.Errorf("[SYSNET] error in reporting network init %v", err.Error())
+                                }
+                            }
+
                             // services should be running before receiving event. Otherwise, service will not start
+                            // TODO check if service is running
+                            isSrvRun := len(appLife.ServiceList()) != 0
                             if isSrvRun && updated {
-                                log.Debugf("[NET] network address change event triggered")
+                                log.Debugf("[SYSNET] network address change event triggered")
                                 appLife.BroadcastEvent(service.Event{Name:ivent.IventNetworkAddressChange})
                             }
+                            log.Debugf("[SYSNET] %v", e.String())
                         }
                         case network.NetworkChangeGateway: {
-                            log.Debugf("[NET] %v", e.String())
                             context.SharedHostContext().UpdateNetworkGateways(e.HostGateways)
+                            log.Debugf("[NET] %v", e.String())
                         }
                     }
                 }
@@ -154,39 +189,60 @@ func main() {
 
                     case operation.CmdBaseServiceStart: {
 
+                        // check if this is the first run
+                        var isFirstTimeRun = context.SharedHostContext().CheckIsFistTimeExecution()
+
+                        /*
+                         * health monitor monitors every error and internal service spawn external listeners
+                         * Any error happens in initializing internal service is critical one.
+                         *
+                         * (health monitor doesn't return any error)
+                         * (NODEP netchange, DEP beacon, orchst, pcssh, vbox, discovery, registry)
+                         */
+                        health.InitSystemHealthMonitor(appLife, theFeeder)
+
                         // config should be setup after acquiring ip address on wifi
                         // This should run only once
                         appCfg, err = config.InitServiceConfig()
                         if err != nil {
-                            // TODO send error report
-                            log.Debugf("[LIFE] CRITICAL ERROR %v", err)
+                            log.Error(err)
+                            appLife.BroadcastEvent(service.Event{
+                                Name:ivent.IventInternalSpawnError,
+                                Payload:err})
                             continue
                         }
-                        // TODO : move this initializer after network initiated
-                        install.InitInstallPackageRoutePath(appLife, theFeeder, appCfg.PCSSH)
 
+                        // --- acquire critical information ---
                         // TODO check all the status before start
-
-                        // --- acquire informations ---
-                        // get cluster id
-                        cid, err := context.SharedHostContext().MasterAgentName()
-                        if err != nil {
-                            log.Debug(err)
-                            continue
-                        }
                         // get primary interface bsd name
                         iname, err := context.SharedHostContext().HostPrimaryInterfaceShortName()
                         if err != nil {
-                            log.Debug(err)
+                            log.Error(err)
+                            appLife.BroadcastEvent(service.Event{
+                                Name:ivent.IventInternalSpawnError,
+                                Payload:err})
                             continue
                         }
 
-                        // --- role service sequence ---
+                        // get cluster id
+                        cid, err := context.SharedHostContext().MasterAgentName()
+                        if err != nil {
+                            log.Error(err)
+                            appLife.BroadcastEvent(service.Event{
+                                Name:ivent.IventInternalSpawnError,
+                                Payload:err})
+                            continue
+                        }
+
+                        // --- services ---
                         // storage service
                         // (NODEP netchange, NODEP services)
-                        err = container.InitStorageServie(appLife, appCfg.ETCD)
+                        err = container.InitDiscoveryService(appLife, appCfg.ETCD)
                         if err != nil {
-                            log.Debug(err)
+                            log.Error(err)
+                            appLife.BroadcastEvent(service.Event{
+                                Name:ivent.IventInternalSpawnError,
+                                Payload:err})
                             continue
                         }
 
@@ -194,24 +250,10 @@ func main() {
                         // (NODEP netchange, NODEP services)
                         err = container.InitRegistryService(appLife, appCfg.REG)
                         if err != nil {
-                            log.Debug(err)
-                            continue
-                        }
-
-                        // search catcher service
-                        // (DEP netchange, NODEP services)
-                        // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
-                        _, err = mcast.NewSearchCatcher(appLife.ServiceSupervisor, iname)
-                        if err != nil {
-                            log.Debug(err)
-                            continue
-                        }
-                        // beacon locator service
-                        // (NODEP netchange, NODEP service)
-                        // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
-                        _, err = ucast.NewBeaconLocator(appLife.ServiceSupervisor)
-                        if err != nil {
-                            log.Debug(err)
+                            log.Error(err)
+                            appLife.BroadcastEvent(service.Event{
+                                Name:ivent.IventInternalSpawnError,
+                                Payload:err})
                             continue
                         }
 
@@ -223,11 +265,14 @@ func main() {
                             continue
                         }
 
-                        // swarm service
+                        // orcst service
                         // (NODEP netchange, DEP master beacon service)
-                        err = container.InitSwarmService(appLife)
+                        err = container.InitOrchstService(appLife)
                         if err != nil {
-                            log.Debug(err)
+                            log.Error(err)
+                            appLife.BroadcastEvent(service.Event{
+                                Name:ivent.IventInternalSpawnError,
+                                Payload:err})
                             continue
                         }
 
@@ -235,15 +280,10 @@ func main() {
                         // (DEP netchange, DEP vboxcontrol + teleport service)
                         err = master.InitMasterBeaconService(appLife, cid, appCfg.PCSSH)
                         if err != nil {
-                            log.Debug(err)
-                            continue
-                        }
-
-                        // vboxcontrol service
-                        // (DEP netchange, NODEP service)
-                        err = vbox.InitVboxCoreReportService(appLife, cid)
-                        if err != nil {
-                            log.Debug(err)
+                            log.Error(err)
+                            appLife.BroadcastEvent(service.Event{
+                                Name:ivent.IventInternalSpawnError,
+                                Payload:err})
                             continue
                         }
 
@@ -252,13 +292,85 @@ func main() {
                         // TODO : need to hold teleport instance from GC -> not necessary as it embeds service instance???
                         _, err = sshproc.NewEmbeddedMasterProcess(appLife.ServiceSupervisor, appCfg.PCSSH)
                         if err != nil {
-                            log.Debug(err)
+                            log.Error(err)
+                            appLife.BroadcastEvent(service.Event{
+                                Name:ivent.IventInternalSpawnError,
+                                Payload:err})
                             continue
                         }
 
-                        err = health.InitSystemHealthMonitor(appLife, theFeeder)
+                        // --- internal listeners ---
+                        // vboxcontrol service comes first (as it's internal network listener)
+                        // (DEP netchange, NODEP service)
+                        err = vbox.InitVboxCoreReportService(appLife, cid)
                         if err != nil {
-                            log.Debug(err)
+                            log.Error(err)
+                            appLife.BroadcastEvent(service.Event{
+                                Name:ivent.IventInternalSpawnError,
+                                Payload:err})
+                            continue
+                        }
+
+                        // up until this point everything has to be executed fast as other services are waiting with timeout.
+                        // after this, we can take time to start up, and open external listener once everyone is all ready.
+
+                        // --- additional route path event ---
+                        install.InitRoutePathInstallPackage(appLife, theFeeder, appCfg.PCSSH)
+
+                        // --- initialize environment ---
+                        // (user setup, vbox core init/ start)
+                        if isFirstTimeRun {
+                            err = setupBaseUsers(appCfg.PCSSH)
+                            if err != nil {
+                                log.Error(err)
+                                appLife.BroadcastEvent(service.Event{
+                                    Name:ivent.IventInternalSpawnError,
+                                    Payload:err})
+                                continue
+                            }
+
+                            vboxCore, err = initializeVboxCore(appCfg.PCSSH)
+                            if err != nil {
+                                log.Error(err)
+                                appLife.BroadcastEvent(service.Event{
+                                    Name:ivent.IventInternalSpawnError,
+                                    Payload:err})
+                                continue
+                            }
+                        } else {
+                            vboxCore, err = startVboxCore()
+                            if err != nil {
+                                log.Error(err)
+                                appLife.BroadcastEvent(service.Event{
+                                    Name:ivent.IventInternalSpawnError,
+                                    Payload:err})
+                                continue
+                            }
+                        }
+
+
+                        // --- external listeners ---
+                        // beacon locator service needs to initiated after master beacon
+                        // (NODEP netchange, NODEP service)
+                        // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
+                        _, err = ucast.NewBeaconLocator(appLife.ServiceSupervisor)
+                        if err != nil {
+                            log.Error(err)
+                            appLife.BroadcastEvent(service.Event{
+                                Name:ivent.IventInternalSpawnError,
+                                Payload:err})
+                            continue
+                        }
+
+                        // search catcher service needs to initiated after master beacon
+                        // (DEP netchange, NODEP services)
+                        // TODO : need to hold beacon instance from GC -> not necessary as it embeds service instance???
+                        _, err = mcast.NewSearchCatcher(appLife.ServiceSupervisor, iname)
+                        if err != nil {
+                            log.Error(err)
+                            appLife.BroadcastEvent(service.Event{
+                                Name:ivent.IventInternalSpawnError,
+                                Payload:err})
                             continue
                         }
 
@@ -267,14 +379,40 @@ func main() {
                     }
 
                     case operation.CmdBaseServiceStop: {
-                        appLife.StopServices()
+                        err := stopVboxCore(vboxCore)
+                        if err != nil {
+                            log.Errorf("[ERROR] unable to close core node %v", err.Error())
+                        }
+                        err = stopBaseService(appLife, theFeeder)
+                        if err != nil {
+                            log.Errorf("[ERROR] unable to terminate app %v", err.Error())
+                        }
+                        err = model.CloseRecordGate()
+                        if err != nil {
+                            log.Errorf("[ERROR] error in closing storage %v", err.Error())
+                        }
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdClusterShutdown: {
+                        err := shutdownCluster(appLife, theFeeder, appCfg.PCSSH)
+                        if err != nil {
+                            log.Errorf("[ERROR] unable to shutdown cluster %v", err.Error())
+                        }
+                        err = stopVboxCore(vboxCore)
+                        if err != nil {
+                            log.Errorf("[ERROR] unable to close core node %v", err.Error())
+                        }
+                        err = model.CloseRecordGate()
+                        if err != nil {
+                            log.Errorf("[ERROR] error in closing storage %v", err.Error())
+                        }
                         log.Debugf("[OP] %v", e.String())
                     }
 
                     /// STORAGE ///
 
                     case operation.CmdStorageStart: {
-                        err = container.InitStorageServie(appLife, appCfg.ETCD)
+                        err = container.InitDiscoveryService(appLife, appCfg.ETCD)
                         if err != nil {
                             log.Debug(err)
                             continue
@@ -469,15 +607,6 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdDebug4: {
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdDebug5: {
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdDebug6: {
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdDebug7: {
                         // update process
                         roots, err := model.FindUserMetaWithLogin("root")
                         if err != nil {
@@ -507,8 +636,17 @@ func main() {
                         if err != nil {
                             log.Errorf("ERROR : %v", err.Error())
                         }
-
                         clt.Logout()
+
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug5: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug6: {
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdDebug7: {
                         log.Debugf("[OP] %v", e.String())
                     }
 

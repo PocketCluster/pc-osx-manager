@@ -9,19 +9,27 @@
 #ifndef __ROUTEPATH_H__
 #define __ROUTEPATH_H__
 
+extern const char* RPATH_CONTEXT_INIT;
+extern const char* RPATH_NETWORK_INIT;
 extern const char* RPATH_SYSTEM_READINESS;
 extern const char* RPATH_APP_EXPIRED;
 extern const char* RPATH_USER_AUTHED;
 extern const char* RPATH_SYSTEM_IS_FIRST_RUN;
-extern const char* RPATH_PACKAGE_LIST;
+
+extern const char* RPATH_PACKAGE_LIST_AVAILABLE;
+extern const char* RPATH_PACKAGE_LIST_INSTALLED;
 extern const char* RPATH_PACKAGE_INSTALL;
 extern const char* RPATH_PACKAGE_INSTALL_PROGRESS;
 extern const char* RPATH_PACKAGE_STARTUP;
 extern const char* RPATH_PACKAGE_KILL;
-extern const char* RPATH_MONITOR_PACKAGE_PROCESS;
 
-extern const char* RPATH_MONITOR_NODE_REGISTERED;
-extern const char* RPATH_MONITOR_NODE_UNREGISTERED;
+extern const char* RPATH_MONITOR_PACKAGE_PROCESS;
 extern const char* RPATH_MONITOR_SERVICE_STATUS;
+extern const char* RPATH_MONITOR_NODE_STATUS;
+
+extern const char* RPATH_NOTI_SRVC_ONLINE_TIMEUP;
+extern const char* RPATH_NOTI_NODE_ONLINE_TIMEUP;
+
+extern const char* RPATH_APP_SHUTDOWN_READY;
 
 #endif /* routepath.h */

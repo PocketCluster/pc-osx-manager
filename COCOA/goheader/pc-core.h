@@ -5,7 +5,7 @@
 /* Start of preamble from import "C" comments.  */
 
 
-#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_debug.go"
+#line 4 "/Users/almightykim/Workspace/pc-osx-manager/PC-APP-V2/PC-CORE/static/native_command.go"
 
 
 
@@ -91,6 +91,8 @@ extern "C" {
 extern void OpsCmdBaseServiceStart();
 
 extern void OpsCmdBaseServiceStop();
+
+extern void OpsCmdClusterShutdown();
 
 extern void OpsCmdStorageStart();
 

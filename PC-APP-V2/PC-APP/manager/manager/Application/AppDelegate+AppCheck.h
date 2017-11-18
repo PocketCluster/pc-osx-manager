@@ -9,6 +9,6 @@
 #import "AppDelegate.h"
 
 @interface AppDelegate(AppCheck)
-- (void) initCheck;
-- (void) systemMon;
+- (void) addInitCheckPath;
+- (void) delInitCheckPath;
 @end
