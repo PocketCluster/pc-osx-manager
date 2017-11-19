@@ -60,9 +60,6 @@ func (r *registerManager) MonitoringMasterSearchData(searchD mcast.CastPack, ts 
         log.Debugf("[SEARCH-RX] this packet belong to other master | usm.DiscoveryAgent.MasterBoundAgent %v | b.clusterID %v", usm.MasterBoundAgent, b.clusterID)
         return nil
     }
-
-
-
     return nil
 }
 

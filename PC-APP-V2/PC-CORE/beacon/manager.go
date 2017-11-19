@@ -167,9 +167,9 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts tim
     return nil
 }
 
+// only takes registered node packet. otherwise reject everything
 func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.Time) error {
     var (
-        bcFound bool            = false
         mc MasterBeacon         = nil
         err error               = nil
         slave *model.SlaveNode  = nil
@@ -185,8 +185,8 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
     log.Debugf("[SEARCH-RX] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
 
     // this packet looks for something else
-    if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != b.clusterID {
-        log.Debugf("[SEARCH-RX] this packet belong to other master | usm.DiscoveryAgent.MasterBoundAgent %v | b.clusterID %v", usm.MasterBoundAgent, b.clusterID)
+    if len(usm.MasterBoundAgent) == 0 || usm.MasterBoundAgent != b.clusterID {
+        log.Debugf("[SEARCH-RX] Node Cluster ID %v | ClusterID %v", usm.MasterBoundAgent, b.clusterID)
         return nil
     }
 
@@ -201,31 +201,18 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
 
             // this beacons are created and waiting for an input
             state = bc.CurrentState()
+            // TODO : check when slave sate can be MasterInit
             if state == MasterInit || state == MasterBindBroken {
-                log.Debugf("[SEARCH-NODE-FOUND] (%s | %s) ", bc.SlaveNode().SlaveID, bc.CurrentState().String())
+                log.Debugf("[SEARCH-RX] NODE-FOUND S(%s) M(%s) ", usm.SlaveID, bc.CurrentState().String())
                 return bc.TransitionWithSlaveMeta(&searchD.Address, usm, ts)
             }
 
-            // if beacon is not in searching state, then mark and we've found target
-            bcFound = true
-            break
+            // if beacon is not in searching state, then this is a series error
+            return errors.Errorf("[SEARCH-RX] node is in illegal state.")
         }
     }
 
-    // since we've not found, create new beacon
-    if !bcFound {
-        slave = model.NewSlaveNode(b)
-        // we'll ignore message for now
-        b.notiReceiver.BeaconEventPrepareJoin(slave)
-        mc, err = NewMasterBeacon(MasterInit, slave, b.commChannel, b)
-        if err != nil {
-            return errors.WithStack(err)
-        }
-        insertMasterBeacon(b, mc)
-        return mc.TransitionWithSlaveMeta(&searchD.Address, usm, ts)
-    }
-
-    return errors.Errorf("[SEARCH-ERR] TransitionWithSearchData reaches at the end. *this should never happen, and might be a malicious attempt*")
+    return errors.Errorf("[SEARCH-ERR] S(%s) not found in registerd node. *this should never happen, and might be a malicious attempt*", usm.SlaveID)
 }
 
 func (b *beaconManger) TransitionWithTimestamp(ts time.Time) error {
