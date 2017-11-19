@@ -1,33 +1,34 @@
 package beacon
 
 import (
-    "fmt"
-    "sync"
+    "net"
     "time"
 
-    "github.com/docker/docker/pkg/discovery"
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/davecgh/go-spew/spew"
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
-    "github.com/stkim1/pc-vbox-comm/masterctrl"
-    mpkg "github.com/stkim1/pc-vbox-comm/masterctrl/pkg"
     "github.com/stkim1/pc-node-agent/slagent"
 
-    "github.com/stkim1/pc-core/context"
-    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/model"
-    "github.com/stkim1/pc-core/service/ivent"
 )
 
 type RegisterManger interface {
     MonitoringMasterSearchData(searchD mcast.CastPack, ts time.Time) error
+    RegisterMonitoredNodes(ts time.Time) error
+    GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPack, ts time.Time) error
+}
+
+type monitorMeta struct {
+    net.UDPAddr
+    *slagent.PocketSlaveAgentMeta
 }
 
 type registerManager struct {
     *beaconManger
+    nodeList []monitorMeta
 }
 
 func NewNodeRegisterManager(master BeaconManger) (RegisterManger, error) {
@@ -35,56 +36,13 @@ func NewNodeRegisterManager(master BeaconManger) (RegisterManger, error) {
     if !ok {
         return nil, errors.Errorf("invalid meanager type")
     }
-    return &registerManager{bm}, nil
+    return &registerManager{
+        beaconManger: bm,
+        nodeList: make([]monitorMeta, 0),
+        }, nil
 }
 
 /*
-func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts time.Time) error {
-    var (
-        err error = nil
-        usm *slagent.PocketSlaveAgentMeta = nil
-    )
-
-    // suppose we've sort out what this is.
-    usm, err = slagent.UnpackedSlaveMeta(beaconD.Message)
-    if err != nil {
-        return errors.WithStack(err)
-    }
-
-    log.Debugf("[BEACON-RX] %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
-
-    // this packet looks for something else
-    if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != b.clusterID {
-        return nil
-    }
-
-    // remove discarded beacon
-    pruneBeaconList(b)
-
-    // check if beacon for this packet exists
-    var bLen int = len(b.beaconList)
-    for i := 0; i < bLen; i++  {
-        bc := b.beaconList[i]
-        if bc.SlaveNode().SlaveID == usm.SlaveID {
-            switch bc.CurrentState() {
-                case MasterInit:
-                    fallthrough
-                case MasterBindBroken:
-                    fallthrough
-                case MasterDiscarded: {
-                    log.Debugf("[BEACON-ERR] (%s):[%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().SlaveID)
-                    return nil
-                }
-                default: {
-                    return bc.TransitionWithSlaveMeta(&beaconD.Address, usm, ts)
-                }
-            }
-        }
-    }
-
-    return nil
-}
-
 func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.Time) error {
     var (
         bcFound bool            = false
@@ -148,33 +106,146 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
 }
 */
 
-
 func (r *registerManager) MonitoringMasterSearchData(searchD mcast.CastPack, ts time.Time) error {
+    usm, err := slagent.UnpackedSlaveMeta(searchD.Message)
+    if err != nil {
+        // (Ignore) there are way too many unpackable packages.
+        return nil
+    }
+    if len(usm.MasterBoundAgent) != 0 {
+        // this is registered to a master
+        return nil
+    }
+
+    log.Debugf("[SEARCH-MON-RX] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
+
+    // remove discarded beacon
+    pruneBeaconList(r.beaconManger)
+
+    // check if beacon for this packet exists
+    var bLen int = len(r.beaconManger.beaconList)
+    for i := 0; i < bLen; i++  {
+        bc := r.beaconManger.beaconList[i]
+        if bc.SlaveNode().SlaveID == usm.SlaveID {
+            return errors.Errorf("[SEARCH-MON-RX] node %v should not exist", usm.SlaveID)
+        }
+    }
+    // add the packet to monitor list
+    r.nodeList = append(r.nodeList,
+        monitorMeta{
+            UDPAddr: searchD.Address,
+            PocketSlaveAgentMeta: usm,
+        })
+    return nil
+}
+
+func (r *registerManager) RegisterMonitoredNodes(ts time.Time) error {
+    var nLen = len(r.nodeList)
+    for i := 0; i < nLen; i++ {
+        n := r.nodeList[i]
+
+        slave := model.NewSlaveNode(r.beaconManger)
+        // we'll ignore message for now
+        r.beaconManger.notiReceiver.BeaconEventPrepareJoin(slave)
+        mc, err := NewMasterBeacon(MasterInit, slave, r.beaconManger.commChannel, r.beaconManger)
+        if err != nil {
+            log.Errorf("[REGISTER-TX] %v", err.Error())
+            continue
+        }
+        insertMasterBeacon(r.beaconManger, mc)
+        err = mc.TransitionWithSlaveMeta(&n.UDPAddr, n.PocketSlaveAgentMeta, ts)
+        if err != nil {
+            log.Errorf("[REGISTER-TX] %v", err.Error())
+        }
+    }
+
+    return nil
+}
+
+/*
+func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts time.Time) error {
     var (
-        bcFound bool            = false
-        mc MasterBeacon         = nil
-        err error               = nil
-        slave *model.SlaveNode  = nil
+        err error = nil
         usm *slagent.PocketSlaveAgentMeta = nil
-        state MasterBeaconState = MasterBounded
     )
 
-    usm, err = slagent.UnpackedSlaveMeta(searchD.Message)
+    // suppose we've sort out what this is.
+    usm, err = slagent.UnpackedSlaveMeta(beaconD.Message)
     if err != nil {
         return errors.WithStack(err)
     }
 
-    log.Debugf("[SEARCH-RX] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
+    log.Debugf("[BEACON-RX] %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
 
-    // this doesn't belong the master
-    if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != r.clusterID {
-        log.Debugf("[SEARCH-RX] this packet belong to other master | usm.DiscoveryAgent.MasterBoundAgent %v | b.clusterID %v", usm.MasterBoundAgent, b.clusterID)
+    // this packet looks for something else
+    if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != b.clusterID {
         return nil
     }
+
+    // remove discarded beacon
+    pruneBeaconList(b)
+
+    // check if beacon for this packet exists
+    var bLen int = len(b.beaconList)
+    for i := 0; i < bLen; i++  {
+        bc := b.beaconList[i]
+        if bc.SlaveNode().SlaveID == usm.SlaveID {
+            switch bc.CurrentState() {
+                case MasterInit:
+                    fallthrough
+                case MasterBindBroken:
+                    fallthrough
+                case MasterDiscarded: {
+                    log.Debugf("[BEACON-ERR] (%s):[%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().SlaveID)
+                    return nil
+                }
+                default: {
+                    return bc.TransitionWithSlaveMeta(&beaconD.Address, usm, ts)
+                }
+            }
+        }
+    }
+
     return nil
 }
+*/
 
-func (r *registerManager) RegisterNewSlaveNode() error {
+func (r *registerManager) GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPack, ts time.Time) error {
+    // (Ignore) there are way too many unpackable packages.
+    usm, err := slagent.UnpackedSlaveMeta(beaconD.Message)
+    if err != nil {
+        return nil
+    }
+    // this packet looks for something else
+    if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != r.beaconManger.clusterID {
+        return nil
+    }
+
+    log.Debugf("[REGISTER-RX] %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
+
+    // remove discarded beacon
+    pruneBeaconList(r.beaconManger)
+
+    // check if beacon for this packet exists
+    var bLen int = len(r.beaconManger.beaconList)
+    for i := 0; i < bLen; i++  {
+        bc := r.beaconManger.beaconList[i]
+        if bc.SlaveNode().SlaveID == usm.SlaveID {
+            switch bc.CurrentState() {
+                case MasterInit:
+                    fallthrough
+                case MasterBindBroken:
+                    fallthrough
+                case MasterDiscarded: {
+                    log.Debugf("[REGISTER-RX] (%s):[%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().SlaveID)
+                    return nil
+                }
+                default: {
+                    return bc.TransitionWithSlaveMeta(&beaconD.Address, usm, ts)
+                }
+            }
+        }
+    }
 
     return nil
 }
