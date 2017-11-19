@@ -20,9 +20,6 @@ import (
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/service/ivent"
 )
-import (
-    "github.com/davecgh/go-spew/spew"
-)
 
 type BeaconEventNotification interface {
     BeaconEventPrepareJoin(slave *model.SlaveNode) error
@@ -122,21 +119,18 @@ func (b *beaconManger) Sanitize(s *model.SlaveNode) error {
 }
 
 func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts time.Time) error {
-    var (
-        err error = nil
-        usm *slagent.PocketSlaveAgentMeta = nil
-    )
-
     // suppose we've sort out what this is.
-    usm, err = slagent.UnpackedSlaveMeta(beaconD.Message)
+    usm, err := slagent.UnpackedSlaveMeta(beaconD.Message)
     if err != nil {
-        return errors.WithStack(err)
+        // (Ignore) there are way too many unpackable packages.
+        return nil
     }
 
-    log.Debugf("[BEACON-RX] %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
+    //log.Debugf("[BEACON-RX] %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
+    log.Debugf("[BEACON-RX] Node (%v|%v)", beaconD.Address.IP.String(), usm.SlaveID)
 
-    // this packet looks for something else
-    if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != b.clusterID {
+    if len(usm.MasterBoundAgent) != 0 || usm.MasterBoundAgent != b.clusterID {
+        // since this come from a node belonged to other master or unregistered, just ignore it
         return nil
     }
 
@@ -153,9 +147,11 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts tim
                     fallthrough
                 case MasterBindBroken:
                     fallthrough
+
+                // TODO filter out modes necessary for registration
+
                 case MasterDiscarded: {
-                    log.Debugf("[BEACON-ERR] (%s):[%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().SlaveID)
-                    return nil
+                    return errors.Errorf("[BEACON-RX] (%s):[%s] We've found beacon for this packet, but this should be handled in registration or search-recovery", bc.CurrentState().String(), usm.SlaveID)
                 }
                 default: {
                     return bc.TransitionWithSlaveMeta(&beaconD.Address, usm, ts)
@@ -164,29 +160,23 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts tim
         }
     }
 
-    return nil
+    return errors.Errorf("[BEACON-RX] S(%s) is registered, but in illegal mode.", usm.SlaveID)
 }
 
 // only takes registered node packet. otherwise reject everything
 func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.Time) error {
-    var (
-        mc MasterBeacon         = nil
-        err error               = nil
-        slave *model.SlaveNode  = nil
-        usm *slagent.PocketSlaveAgentMeta = nil
-        state MasterBeaconState = MasterBounded
-    )
-
-    usm, err = slagent.UnpackedSlaveMeta(searchD.Message)
+    usm, err := slagent.UnpackedSlaveMeta(searchD.Message)
     if err != nil {
-        return errors.WithStack(err)
+        // (Ignore) there are way too many unpackable packages.
+        return nil
     }
 
-    log.Debugf("[SEARCH-RX] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
+    //log.Debugf("[SEARCH-RX] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
+    log.Debugf("[SEARCH-RX] Node (%v|%v)", searchD.Address.IP.String(), usm.SlaveID)
 
     // this packet looks for something else
     if len(usm.MasterBoundAgent) == 0 || usm.MasterBoundAgent != b.clusterID {
-        log.Debugf("[SEARCH-RX] Node Cluster ID %v | ClusterID %v", usm.MasterBoundAgent, b.clusterID)
+        // since this come from a node belonged to other master or unregistered, just ignore it
         return nil
     }
 
@@ -200,7 +190,8 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
         if bc.SlaveNode().SlaveID == usm.SlaveID {
 
             // this beacons are created and waiting for an input
-            state = bc.CurrentState()
+            state := bc.CurrentState()
+
             // TODO : check when slave sate can be MasterInit
             if state == MasterInit || state == MasterBindBroken {
                 log.Debugf("[SEARCH-RX] NODE-FOUND S(%s) M(%s) ", usm.SlaveID, bc.CurrentState().String())
@@ -208,11 +199,11 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
             }
 
             // if beacon is not in searching state, then this is a series error
-            return errors.Errorf("[SEARCH-RX] node is in illegal state.")
+            return errors.Errorf("[SEARCH-RX] node is in illegal state (%s).", bc.CurrentState().String())
         }
     }
 
-    return errors.Errorf("[SEARCH-ERR] S(%s) not found in registerd node. *this should never happen, and might be a malicious attempt*", usm.SlaveID)
+    return errors.Errorf("[SEARCH-RX] S(%s) not found in registerd node. *this should never happen, and might be a malicious attempt*", usm.SlaveID)
 }
 
 func (b *beaconManger) TransitionWithTimestamp(ts time.Time) error {

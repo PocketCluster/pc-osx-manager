@@ -38,32 +38,53 @@ func NewNodeRegisterManager(master BeaconManger) (RegisterManger, error) {
     return &registerManager{bm}, nil
 }
 
-func (r *registerManager) MonitoringMasterSearchData(searchD mcast.CastPack, ts time.Time) error {
+/*
+func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts time.Time) error {
     var (
-        bcFound bool            = false
-        mc MasterBeacon         = nil
-        err error               = nil
-        slave *model.SlaveNode  = nil
+        err error = nil
         usm *slagent.PocketSlaveAgentMeta = nil
-        state MasterBeaconState = MasterBounded
     )
 
-    usm, err = slagent.UnpackedSlaveMeta(searchD.Message)
+    // suppose we've sort out what this is.
+    usm, err = slagent.UnpackedSlaveMeta(beaconD.Message)
     if err != nil {
         return errors.WithStack(err)
     }
 
-    log.Debugf("[SEARCH-RX] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
+    log.Debugf("[BEACON-RX] %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
 
-    // this doesn't belong the master
-    if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != r.clusterID {
-        log.Debugf("[SEARCH-RX] this packet belong to other master | usm.DiscoveryAgent.MasterBoundAgent %v | b.clusterID %v", usm.MasterBoundAgent, b.clusterID)
+    // this packet looks for something else
+    if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != b.clusterID {
         return nil
     }
+
+    // remove discarded beacon
+    pruneBeaconList(b)
+
+    // check if beacon for this packet exists
+    var bLen int = len(b.beaconList)
+    for i := 0; i < bLen; i++  {
+        bc := b.beaconList[i]
+        if bc.SlaveNode().SlaveID == usm.SlaveID {
+            switch bc.CurrentState() {
+                case MasterInit:
+                    fallthrough
+                case MasterBindBroken:
+                    fallthrough
+                case MasterDiscarded: {
+                    log.Debugf("[BEACON-ERR] (%s):[%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().SlaveID)
+                    return nil
+                }
+                default: {
+                    return bc.TransitionWithSlaveMeta(&beaconD.Address, usm, ts)
+                }
+            }
+        }
+    }
+
     return nil
 }
 
-/*
 func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.Time) error {
     var (
         bcFound bool            = false
@@ -126,6 +147,32 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
     return errors.Errorf("[SEARCH-ERR] TransitionWithSearchData reaches at the end. *this should never happen, and might be a malicious attempt*")
 }
 */
+
+
+func (r *registerManager) MonitoringMasterSearchData(searchD mcast.CastPack, ts time.Time) error {
+    var (
+        bcFound bool            = false
+        mc MasterBeacon         = nil
+        err error               = nil
+        slave *model.SlaveNode  = nil
+        usm *slagent.PocketSlaveAgentMeta = nil
+        state MasterBeaconState = MasterBounded
+    )
+
+    usm, err = slagent.UnpackedSlaveMeta(searchD.Message)
+    if err != nil {
+        return errors.WithStack(err)
+    }
+
+    log.Debugf("[SEARCH-RX] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
+
+    // this doesn't belong the master
+    if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != r.clusterID {
+        log.Debugf("[SEARCH-RX] this packet belong to other master | usm.DiscoveryAgent.MasterBoundAgent %v | b.clusterID %v", usm.MasterBoundAgent, b.clusterID)
+        return nil
+    }
+    return nil
+}
 
 func (r *registerManager) RegisterNewSlaveNode() error {
 
