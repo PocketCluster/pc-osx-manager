@@ -232,13 +232,20 @@ func (r *registerManager) GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPa
         bc := r.beaconManger.beaconList[i]
         if bc.SlaveNode().SlaveID == usm.SlaveID {
             switch bc.CurrentState() {
+                case MasterDiscarded:
+                    fallthrough
+                // should be in registration
                 case MasterInit:
                     fallthrough
+                // should be in recovery
                 case MasterBindBroken:
                     fallthrough
-                case MasterDiscarded: {
-                    log.Debugf("[REGISTER-RX] (%s):[%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().SlaveID)
-                    return nil
+                // should be in bind
+                case MasterBindRecovery:
+                    fallthrough
+                // should be in bind
+                case MasterBounded: {
+                    return errors.Errorf("[REGISTER-RX] Node (%v|%v|%v) in illegal state", usm.SlaveID, bc.CurrentState().String(), beaconD.Address.IP.String())
                 }
                 default: {
                     return bc.TransitionWithSlaveMeta(&beaconD.Address, usm, ts)
@@ -247,5 +254,5 @@ func (r *registerManager) GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPa
         }
     }
 
-    return nil
+    return errors.Errorf("[REGISTER-RX] Node(%v|%v) unregistered node with same cluster id. *should never happen*", usm.SlaveID, beaconD.Address.IP.String())
 }
