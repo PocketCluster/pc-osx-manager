@@ -200,7 +200,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     case b := <-beaconC: {
                         bp, ok := b.Payload.(ucast.BeaconPack)
                         if ok {
-                            err = beaconMan.TransitionWithBeaconData(bp, time.Now())
+                            err = beaconMan.BindNodeWithBeaconData(bp, time.Now())
                             if err != nil {
                                 log.Debugf("[AGENT] BEACON-RX Error : %v", err)
                             }
@@ -209,7 +209,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     case s := <-searchC: {
                         cp, ok := s.Payload.(mcast.CastPack)
                         if ok {
-                            err = beaconMan.TransitionWithSearchData(cp, time.Now())
+                            err = beaconMan.RecoverNodeWithSearchData(cp, time.Now())
                             if err != nil {
                                 log.Debugf("[AGENT] SEARCH-RX Error : %v", err)
                             }
