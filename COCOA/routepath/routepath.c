@@ -22,6 +22,12 @@ const char* RPATH_PACKAGE_INSTALL_PROGRESS  = "/v1/monitor/package/install";
 const char* RPATH_PACKAGE_STARTUP           = "/v1/cmd/package/startup";
 const char* RPATH_PACKAGE_KILL              = "/v1/cmd/package/kill";
 
+const char* RPATH_NODE_REG_START            = "/v1/cmd/node/registration/start";
+const char* RPATH_NODE_UNREG_LIST           = "/v1/monitor/node/unregistered";
+const char* RPATH_NODE_REG_CANDIDATE        = "/v1/cmd/node/registration/candidate";
+const char* RPATH_NODE_REG_CONFIRM          = "/v1/inquiry/node/registration/confirmed";
+const char* RPATH_NODE_REG_STOP             = "/v1/cmd/node/registration/start";
+
 const char* RPATH_MONITOR_PACKAGE_PROCESS   = "/v1/monitor/package/process";
 const char* RPATH_MONITOR_SERVICE_STATUS    = "/v1/monitor/service/status";
 const char* RPATH_MONITOR_NODE_STATUS       = "/v1/monitor/node/status";

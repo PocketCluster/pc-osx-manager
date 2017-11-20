@@ -23,6 +23,12 @@ extern const char* RPATH_PACKAGE_INSTALL_PROGRESS;
 extern const char* RPATH_PACKAGE_STARTUP;
 extern const char* RPATH_PACKAGE_KILL;
 
+extern const char* RPATH_NODE_REG_START;
+extern const char* RPATH_NODE_UNREG_LIST;
+extern const char* RPATH_NODE_REG_CANDIDATE;
+extern const char* RPATH_NODE_REG_CONFIRM;
+extern const char* RPATH_NODE_REG_STOP;
+
 extern const char* RPATH_MONITOR_PACKAGE_PROCESS;
 extern const char* RPATH_MONITOR_SERVICE_STATUS;
 extern const char* RPATH_MONITOR_NODE_STATUS;

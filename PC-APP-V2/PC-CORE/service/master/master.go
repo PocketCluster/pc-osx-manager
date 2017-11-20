@@ -73,6 +73,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
         netC    = make(chan service.Event)
         nodeC   = make(chan service.Event)
         statC   = make(chan service.Event)
+        bManC   = make(chan service.Event)
     )
     appLife.RegisterServiceWithFuncs(
         operation.ServiceBeaconMaster,
@@ -197,6 +198,23 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                             log.Debug(err.Error())
                         }
                     }
+                    // node status report service
+                    case re := <- statC: {
+                        ts, ok := re.Payload.(int64)
+                        if !ok {
+                            appLife.BroadcastEvent(service.Event{
+                                Name:    ivent.IventMonitorNodeRespBeacon,
+                                Payload: ivent.BeaconNodeStatusMeta{
+                                    TimeStamp: ts,
+                                    Error:     errors.Errorf("[AGENT] inaccurate timestamp"),
+                                }})
+                        }
+                        // need unregistered node, registered node, bounded node
+                        nodeStat := beaconMan.ReportAllNodeStatus(ts)
+                        appLife.BroadcastEvent(service.Event{
+                            Name:ivent.IventMonitorNodeRespBeacon,
+                            Payload:nodeStat})
+                    }
                     case b := <-beaconC: {
                         bp, ok := b.Payload.(ucast.BeaconPack)
                         if ok {
@@ -227,36 +245,29 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                             Name:ivent.IventReportLiveNodesResult,
                             Payload:nodeList})
                     }
-                    // node status report service
-                    case re := <- statC: {
-                        ts, ok := re.Payload.(int64)
-                        if !ok {
-                            appLife.BroadcastEvent(service.Event{
-                                Name:    ivent.IventMonitorNodeRespBeacon,
-                                Payload: ivent.BeaconNodeStatusMeta{
-                                    TimeStamp: ts,
-                                    Error:     errors.Errorf("[AGENT] inaccurate timestamp"),
-                                }})
-                        }
-                        // need unregistered node, registered node, bounded node
-                        nodeStat := beaconMan.ReportAllNodeStatus(ts)
+                    // when registration manager ask beacon mananger instance
+                    case <- bManC: {
                         appLife.BroadcastEvent(service.Event{
-                            Name:ivent.IventMonitorNodeRespBeacon,
-                            Payload:nodeStat})
+                            Name:ivent.IventBeaconManagerSpawn,
+                            Payload:beaconMan})
                     }
                 }
             }
             return nil
         },
+        // service readiness checker
+        service.BindEventWithService(ivent.IventPcsshProxyInstanceSpawn,   teleC),
+        service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,     vboxC),
+
+        // monitoring
+        service.BindEventWithService(ivent.IventMonitorNodeReqStatus,      statC),
         service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
         service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
         service.BindEventWithService(ivent.IventNetworkAddressChange,      netC),
-        service.BindEventWithService(ivent.IventReportLiveNodesRequest,    nodeC),
-        service.BindEventWithService(ivent.IventMonitorNodeReqStatus,      statC),
 
-        // service readiness checker
-        service.BindEventWithService(ivent.IventPcsshProxyInstanceSpawn,   teleC),
-        service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,     vboxC))
+        // request
+        service.BindEventWithService(ivent.IventReportLiveNodesRequest,    nodeC),
+        service.BindEventWithService(ivent.IventBeaconManagerRequest,      bManC))
 
     return nil
 }

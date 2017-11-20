@@ -241,12 +241,15 @@ func (r *registerManager) GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPa
                 case MasterBindBroken:
                     fallthrough
                 // should be in bind
-                case MasterBindRecovery:
-                    fallthrough
-                // should be in bind
-                case MasterBounded: {
+                case MasterBindRecovery: {
                     return errors.Errorf("[REGISTER-RX] Node (%v|%v|%v) in illegal state", usm.SlaveID, bc.CurrentState().String(), beaconD.Address.IP.String())
                 }
+
+                // we need to monitor this to make sure the node we try to bind has been bound successfully
+                case MasterBounded: {
+                    log.Debugf("[REGISTER-RX] Node (%v|%v|%v) check if bound ok", usm.SlaveID, bc.CurrentState().String(), beaconD.Address.IP.String())
+                }
+
                 default: {
                     return bc.TransitionWithSlaveMeta(&beaconD.Address, usm, ts)
                 }

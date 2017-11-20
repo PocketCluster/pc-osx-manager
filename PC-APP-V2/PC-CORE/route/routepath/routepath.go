@@ -60,6 +60,26 @@ func RpathPackageProcess() string {
     return C.GoString(C.RPATH_MONITOR_PACKAGE_PROCESS)
 }
 
+func RpathNodeRegStart() string {
+    return C.GoString(C.RPATH_NODE_REG_START)
+}
+
+func RpathNodeUnregList() string {
+    return C.GoString(C.RPATH_NODE_UNREG_LIST)
+}
+
+func RpathNodeRegCandiate() string {
+    return C.GoString(C.RPATH_NODE_REG_CANDIDATE)
+}
+
+func RpathNodeRegConfirm() string {
+    return C.GoString(C.RPATH_NODE_REG_CONFIRM)
+}
+
+func RpathNodeRegStop() string {
+    return C.GoString(C.RPATH_NODE_REG_STOP)
+}
+
 func RpathMonitorServiceStatus() string {
     return C.GoString(C.RPATH_MONITOR_SERVICE_STATUS)
 }
