@@ -1,7 +1,6 @@
 package regnode
 
 import (
-    "encoding/json"
     "time"
 
     log "github.com/Sirupsen/logrus"
@@ -17,43 +16,9 @@ import (
     "github.com/stkim1/pc-core/service/ivent"
 )
 
-func feedPostError(feeder route.ResponseFeeder, rpath, fpath string, irr error) error {
-    log.Error(irr.Error())
-    data, frr := json.Marshal(route.ReponseMessage{
-        fpath: {
-            "status": false,
-            "error" : irr.Error(),
-        },
-    })
-    // this should never happen
-    if frr != nil {
-        log.Error(frr.Error())
-    }
-    frr = feeder.FeedResponseForPost(rpath, string(data))
-    if frr != nil {
-        log.Error(frr.Error())
-    }
-    return irr
-}
-
-func feedGetError(feeder route.ResponseFeeder, rpath, fpath string, irr error) error {
-    log.Error(irr.Error())
-    data, frr := json.Marshal(route.ReponseMessage{
-        fpath: {
-            "status": false,
-            "error" : irr.Error(),
-        },
-    })
-    // this should never happen
-    if frr != nil {
-        log.Error(frr.Error())
-    }
-    frr = feeder.FeedResponseForGet(rpath, string(data))
-    if frr != nil {
-        log.Error(frr.Error())
-    }
-    return irr
-}
+const (
+    raskerNodeRegisterCycle string = "rasker.node.register.cycle"
+)
 
 func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeeder) error {
     return appLife.GET(routepath.RpathNodeRegStart(), func(_, rpath, _ string) error {
@@ -63,9 +28,10 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
             bManC   = make(chan service.Event)
         )
         appLife.RegisterServiceWithFuncs(
-            "",
+            raskerNodeRegisterCycle,
             func() error {
                 var (
+                    rpUnregNodeList = routepath.RpathNodeUnregList()
                     regMan beacon.RegisterManger = nil
                     beaconMan beacon.BeaconManger = nil
                     rptTick *time.Ticker = nil
@@ -79,29 +45,38 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
                 if bm != nil && ok {
                     beaconMan = bm
                 } else {
-                    return feedGetError(feeder, rpath, "", errors.Errorf("[REG-MAN] invalid beacon manager"))
+                    return feedGetError(feeder, rpath, "node-reg-start", errors.Errorf("[REGISTER] invalid beacon manager"))
                 }
 
                 regMan, err = beacon.NewNodeRegisterManager(beaconMan)
                 if err != nil {
-                    return feedGetError(feeder, rpath, "", err)
+                    return feedGetError(feeder, rpath, "node-reg-start", err)
                 }
-                rptTick = time.NewTicker(time.Second * 3)
+                rptTick = time.NewTicker(time.Second * 4)
+                log.Debugf("[REGISTER] started")
                 for {
                     select {
                         case <- appLife.StopChannel(): {
                             rptTick.Stop()
+                            log.Debugf("[REGISTER] stopped")
                             return nil
                         }
-                        case <- rptTick.C: {
-
+                        case ts := <- rptTick.C: {
+                            list, err := regMan.UnregisteredNodeList(ts)
+                            if err != nil {
+                                return feedGetError(feeder, rpUnregNodeList, "node-unreged",err)
+                            }
+                            err = feedGetMessage(feeder, rpUnregNodeList, "node-unreged", "unreged-list", list)
+                            if err != nil {
+                                log.Debugf("[REGISTER] unregistered node report error : %v", err)
+                            }
                         }
                         case b := <-beaconC: {
                             bp, ok := b.Payload.(ucast.BeaconPack)
                             if ok {
                                 err := regMan.GuideNodeRegistrationWithBeacon(bp, time.Now())
                                 if err != nil {
-                                    log.Debugf("[AGENT] BEACON-RX Error : %v", err)
+                                    log.Debugf("[REGISTER] BEACON-RX Error : %v", err)
                                 }
                             }
                         }
@@ -110,7 +85,7 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
                             if ok {
                                 err := regMan.MonitoringMasterSearchData(cp, time.Now())
                                 if err != nil {
-                                    log.Debugf("[AGENT] SEARCH-RX Error : %v", err)
+                                    log.Debugf("[REGISTER] SEARCH-RX Error : %v", err)
                                 }
                             }
                         }

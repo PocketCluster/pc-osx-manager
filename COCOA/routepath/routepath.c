@@ -29,8 +29,8 @@ const char* RPATH_NODE_REG_CONFIRM          = "/v1/inquiry/node/registration/con
 const char* RPATH_NODE_REG_STOP             = "/v1/cmd/node/registration/start";
 
 const char* RPATH_MONITOR_PACKAGE_PROCESS   = "/v1/monitor/package/process";
-const char* RPATH_MONITOR_SERVICE_STATUS    = "/v1/monitor/service/status";
 const char* RPATH_MONITOR_NODE_STATUS       = "/v1/monitor/node/status";
+const char* RPATH_MONITOR_SERVICE_STATUS    = "/v1/monitor/service/status";
 
 const char* RPATH_NOTI_SRVC_ONLINE_TIMEUP   = "/v1/noti/srvc/online-timeup";
 const char* RPATH_NOTI_NODE_ONLINE_TIMEUP   = "/v1/noti/node/online-timeup";

@@ -2,33 +2,46 @@ package beacon
 
 import (
     "net"
+    "sync"
     "time"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
-    "github.com/davecgh/go-spew/spew"
 
     "github.com/stkim1/udpnet/ucast"
     "github.com/stkim1/udpnet/mcast"
-    "github.com/stkim1/pc-node-agent/slagent"
 
+    "github.com/stkim1/pc-node-agent/slagent"
+    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/model"
+)
+import (
+    "github.com/davecgh/go-spew/spew"
+)
+
+const (
+    unregNodeRefreshPeriod time.Duration = time.Duration(UnboundedTimeout * 4)
 )
 
 type RegisterManger interface {
     MonitoringMasterSearchData(searchD mcast.CastPack, ts time.Time) error
+    UnregisteredNodeList(ts time.Time) ([]map[string]string, error)
     RegisterMonitoredNodes(ts time.Time) error
     GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPack, ts time.Time) error
 }
 
 type monitorMeta struct {
+    addedTS time.Time
     net.UDPAddr
     *slagent.PocketSlaveAgentMeta
 }
 
 type registerManager struct {
+    sync.Mutex
+
+    isRegisteringNode bool
+    nodeList          []monitorMeta
     *beaconManger
-    nodeList []monitorMeta
 }
 
 func NewNodeRegisterManager(master BeaconManger) (RegisterManger, error) {
@@ -37,8 +50,9 @@ func NewNodeRegisterManager(master BeaconManger) (RegisterManger, error) {
         return nil, errors.Errorf("invalid meanager type")
     }
     return &registerManager{
-        beaconManger: bm,
-        nodeList: make([]monitorMeta, 0),
+        isRegisteringNode: false,
+        beaconManger:      bm,
+        nodeList:          make([]monitorMeta, 0),
         }, nil
 }
 
@@ -117,29 +131,85 @@ func (r *registerManager) MonitoringMasterSearchData(searchD mcast.CastPack, ts 
         return nil
     }
 
-    log.Debugf("[SEARCH-MON-RX] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
+    log.Debugf("[REGISTER-RX] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
 
     // remove discarded beacon
     pruneBeaconList(r.beaconManger)
 
-    // check if beacon for this packet exists
+    // check if total node slots are filled
     var bLen int = len(r.beaconManger.beaconList)
+    if defaults.TotalPossibleSlaveNodeCount <= bLen {
+        return errors.Errorf("[REGISTER-RX] cannot exceed total possible node count")
+    }
+    // check if beacon for this packet exists
     for i := 0; i < bLen; i++  {
         bc := r.beaconManger.beaconList[i]
         if bc.SlaveNode().SlaveID == usm.SlaveID {
-            return errors.Errorf("[SEARCH-MON-RX] node %v should not exist", usm.SlaveID)
+            return errors.Errorf("[REGISTER-RX] node %v should not exist", usm.SlaveID)
         }
     }
-    // add the packet to monitor list
-    r.nodeList = append(r.nodeList,
-        monitorMeta{
-            UDPAddr: searchD.Address,
-            PocketSlaveAgentMeta: usm,
-        })
+
+    // protect nodelist, isNodeFilled
+    r.Lock()
+    defer r.Unlock()
+
+    if r.isRegisteringNode {
+        return errors.Errorf("[REGISTER-RX] node registration is underway. please try another batch after finishing this round.")
+    }
+
+    /*
+     * monitoring takes all the available, unregistered node on the net, refreshing the list for 4 unbounded packet frame (12sec)
+     */
+    var (
+        nl = make([]monitorMeta, 0)
+        nLen = len(r.nodeList)
+    )
+    // take only fresh, unidentical ones
+    for i := 0; i < nLen; i++ {
+        n := r.nodeList[i]
+        if ts.Sub(n.addedTS) < unregNodeRefreshPeriod && n.SlaveID != usm.SlaveID {
+            nl = append(nl, n)
+        }
+    }
+    // now add this packet
+    r.nodeList = append(nl, monitorMeta {
+        addedTS: ts,
+        UDPAddr: searchD.Address,
+        PocketSlaveAgentMeta: usm,
+    })
     return nil
 }
 
+
+func (r *registerManager) UnregisteredNodeList(ts time.Time) ([]map[string]string, error) {
+    var list = make([]map[string]string, 0)
+
+    // protect nodelist
+    r.Lock()
+    defer r.Unlock()
+
+    var nLen int = len(r.nodeList)
+    for i := 0; i < nLen; i++ {
+        n := r.nodeList[i]
+        list = append(list,
+            map[string]string{
+                "mac":  n.SlaveID,
+                "addr": n.UDPAddr.IP.String(),
+            })
+    }
+
+    return list, nil
+}
+
 func (r *registerManager) RegisterMonitoredNodes(ts time.Time) error {
+    // protect nodelist, isNodeFilled
+    r.Lock()
+    defer r.Unlock()
+
+    // no more registration
+    r.isRegisteringNode = true
+
+    // select the ones to be registered
     var nLen = len(r.nodeList)
     for i := 0; i < nLen; i++ {
         n := r.nodeList[i]
