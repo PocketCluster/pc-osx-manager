@@ -45,8 +45,9 @@ const (
     IventReportLiveNodesResult   string = "ivent.report.live.nodes.result"
 
 
-    // registration manager ask beacon mananger instance -> IventBeaconManagerSpawn
-    IventBeaconManagerRequest    string = "ivent.beacon.manager.request"
+    // registration manager ask beacon mananger instance IventLiveBeaconManagerReq -> IventLiveBeaconManagerRlt
+    IventLiveBeaconManagerReq    string = "ivent.live.beacon.manager.request"
+    IventLiveBeaconManagerRslt   string = "ivent.live.beacon.manager.result"
 )
 
 // this is to broadcast masterctrl object w/ listener. It's shared with BeaconAgent + VBoxController

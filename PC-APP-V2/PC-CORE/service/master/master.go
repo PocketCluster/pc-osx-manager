@@ -247,8 +247,9 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     }
                     // when registration manager ask beacon mananger instance
                     case <- bManC: {
+                        time.Sleep(time.Millisecond * 100)
                         appLife.BroadcastEvent(service.Event{
-                            Name:ivent.IventBeaconManagerSpawn,
+                            Name:ivent.IventLiveBeaconManagerRslt,
                             Payload:beaconMan})
                     }
                 }
@@ -267,7 +268,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
 
         // request
         service.BindEventWithService(ivent.IventReportLiveNodesRequest,    nodeC),
-        service.BindEventWithService(ivent.IventBeaconManagerRequest,      bManC))
+        service.BindEventWithService(ivent.IventLiveBeaconManagerReq,      bManC))
 
     return nil
 }

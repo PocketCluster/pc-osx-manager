@@ -6,10 +6,11 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
+#import "PCRouter.h"
 #import "PCSetup2VC.h"
 #import "PCConstants.h"
 
-@interface PCSetup2VC ()
+@interface PCSetup2VC ()<PCRouteRequest>
 @property (nonatomic, strong) NSMutableArray *nodeList;
 @end
 
@@ -18,6 +19,50 @@
 - (void) finishConstruction {
     [super finishConstruction];
     [self setTitle:@"Build Cluster"];
+    
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_NODE_REG_START)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         Log(@"path %@ response %@", path, response);
+     }];
+
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_NODE_UNREG_LIST)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         Log(@"path %@ response %@", path, response);
+     }];
+
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_NODE_REG_START)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         Log(@"path %@ response %@", path, response);
+     }];
+
+    [[PCRouter sharedRouter]
+     addPostRequest:self
+     onPath:@(RPATH_NODE_REG_CANDIDATE)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         Log(@"path %@ response %@", path, response);
+     }];
+
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_NODE_REG_CONFIRM)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         Log(@"path %@ response %@", path, response);
+     }];
+
+    [[PCRouter sharedRouter]
+     addGetRequest:self
+     onPath:@(RPATH_NODE_REG_STOP)
+     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+         Log(@"path %@ response %@", path, response);
+     }];
+
+    [PCRouter routeRequestGet:RPATH_NODE_REG_START];
 }
 
 - (void) viewDidLoad {

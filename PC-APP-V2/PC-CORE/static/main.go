@@ -19,6 +19,7 @@ import (
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/rasker"
     "github.com/stkim1/pc-core/rasker/pkgtask"
+    "github.com/stkim1/pc-core/rasker/regnode"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/initcheck"
     "github.com/stkim1/pc-core/route/install"
@@ -84,6 +85,10 @@ func main() {
                                     Router: appLife.Router},
                                     theFeeder)
                                 pkgtask.InitPackageKillCycle(rasker.RouteTasker{
+                                    ServiceSupervisor: appLife.ServiceSupervisor,
+                                    Router: appLife.Router},
+                                    theFeeder)
+                                regnode.InitNodeRegisterCycle(rasker.RouteTasker{
                                     ServiceSupervisor: appLife.ServiceSupervisor,
                                     Router: appLife.Router},
                                     theFeeder)

@@ -17,12 +17,16 @@ import (
 )
 
 const (
+    iventNodeRegisterCandid string = "ivent.node.register.candidate"
+    iventNodeRegisterStop   string = "ivent.node.register.stop"
     raskerNodeRegisterCycle string = "rasker.node.register.cycle"
 )
 
 func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeeder) error {
     return appLife.GET(routepath.RpathNodeRegStart(), func(_, rpath, _ string) error {
         var (
+            candidC = make(chan service.Event)
+            stopC   = make(chan service.Event)
             beaconC = make(chan service.Event)
             searchC = make(chan service.Event)
             bManC   = make(chan service.Event)
@@ -39,7 +43,9 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
                 )
 
                 // we need beacon master here
-                appLife.BroadcastEvent(service.Event{Name:ivent.IventBeaconManagerRequest})
+
+                log.Debugf("[REGISTER] request agent instance")
+                appLife.BroadcastEvent(service.Event{Name:ivent.IventLiveBeaconManagerReq})
                 be := <- bManC
                 bm, ok := be.Payload.(beacon.BeaconManger)
                 if bm != nil && ok {
@@ -60,6 +66,14 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
                             rptTick.Stop()
                             log.Debugf("[REGISTER] stopped")
                             return nil
+                        }
+                        case <- stopC: {
+                            rptTick.Stop()
+                            log.Debugf("[REGISTER] stopped")
+                            return nil
+                        }
+                        case <- candidC: {
+
                         }
                         case ts := <- rptTick.C: {
                             list, err := regMan.UnregisteredNodeList(ts)
@@ -92,9 +106,11 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
                     }
                 }
             },
+            service.BindEventWithService(iventNodeRegisterCandid,              candidC),
+            service.BindEventWithService(iventNodeRegisterStop,                stopC),
             service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
             service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
-            service.BindEventWithService(ivent.IventBeaconManagerSpawn,        bManC))
+            service.BindEventWithService(ivent.IventLiveBeaconManagerRslt,     bManC))
         return nil
     })
 }
