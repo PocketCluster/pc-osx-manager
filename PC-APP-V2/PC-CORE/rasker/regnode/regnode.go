@@ -76,30 +76,27 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
 
                         }
                         case ts := <- rptTick.C: {
-                            list, err := regMan.UnregisteredNodeList(ts)
-                            if err != nil {
-                                return feedGetError(feeder, rpUnregNodeList, "node-unreged",err)
-                            }
-                            err = feedGetMessage(feeder, rpUnregNodeList, "node-unreged", "unreged-list", list)
-                            if err != nil {
-                                log.Debugf("[REGISTER] unregistered node report error : %v", err)
+                            list := regMan.UnregisteredNodeList(ts)
+                            lrr := feedGetMessage(feeder, rpUnregNodeList, "node-unreged", "unreged-list", list)
+                            if lrr != nil {
+                                log.Debugf("[REGISTER] unregistered node report error : %v", lrr)
                             }
                         }
                         case b := <-beaconC: {
                             bp, ok := b.Payload.(ucast.BeaconPack)
                             if ok {
-                                err := regMan.GuideNodeRegistrationWithBeacon(bp, time.Now())
-                                if err != nil {
-                                    log.Debugf("[REGISTER] BEACON-RX Error : %v", err)
+                                brr := regMan.GuideNodeRegistrationWithBeacon(bp, time.Now())
+                                if brr != nil {
+                                    log.Debugf("[REGISTER] BEACON-RX Error : %v", brr)
                                 }
                             }
                         }
                         case s := <-searchC: {
                             cp, ok := s.Payload.(mcast.CastPack)
                             if ok {
-                                err := regMan.MonitoringMasterSearchData(cp, time.Now())
-                                if err != nil {
-                                    log.Debugf("[REGISTER] SEARCH-RX Error : %v", err)
+                                srr := regMan.MonitoringMasterSearchData(cp, time.Now())
+                                if srr != nil {
+                                    log.Debugf("[REGISTER] SEARCH-RX Error : %v", srr)
                                 }
                             }
                         }

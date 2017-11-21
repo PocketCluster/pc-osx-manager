@@ -2,6 +2,7 @@ package beacon
 
 import (
     "net"
+    "sort"
     "sync"
     "time"
 
@@ -14,6 +15,7 @@ import (
     "github.com/stkim1/pc-node-agent/slagent"
     "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/model"
+    "github.com/stkim1/pc-core/utils/math"
 )
 import (
     "github.com/davecgh/go-spew/spew"
@@ -25,22 +27,37 @@ const (
 
 type RegisterManger interface {
     MonitoringMasterSearchData(searchD mcast.CastPack, ts time.Time) error
-    UnregisteredNodeList(ts time.Time) ([]map[string]string, error)
+    UnregisteredNodeList(ts time.Time) []map[string]string
     RegisterMonitoredNodes(ts time.Time) error
     GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPack, ts time.Time) error
 }
 
-type monitorMeta struct {
+type monitoredNodeMeta struct {
     addedTS time.Time
     net.UDPAddr
     *slagent.PocketSlaveAgentMeta
+}
+
+type monitoredNodes []monitoredNodeMeta
+
+func (m monitoredNodes) Len() int {
+    return len(m)
+}
+
+func (m monitoredNodes) Swap(i, j int) {
+    m[i], m[j] = m[j], m[i]
+}
+
+func (m monitoredNodes) Less(i, j int) bool {
+    //m[i] < m[j]
+    return m[i].addedTS.Before(m[j].addedTS)
 }
 
 type registerManager struct {
     sync.Mutex
 
     isRegisteringNode bool
-    nodeList          []monitorMeta
+    monitorList       monitoredNodes
     *beaconManger
 }
 
@@ -52,7 +69,7 @@ func NewNodeRegisterManager(master BeaconManger) (RegisterManger, error) {
     return &registerManager{
         isRegisteringNode: false,
         beaconManger:      bm,
-        nodeList:          make([]monitorMeta, 0),
+        monitorList:       make(monitoredNodes, 0),
         }, nil
 }
 
@@ -161,18 +178,18 @@ func (r *registerManager) MonitoringMasterSearchData(searchD mcast.CastPack, ts 
      * monitoring takes all the available, unregistered node on the net, refreshing the list for 4 unbounded packet frame (12sec)
      */
     var (
-        nl = make([]monitorMeta, 0)
-        nLen = len(r.nodeList)
+        nl = make(monitoredNodes, 0)
+        nLen = len(r.monitorList)
     )
     // take only fresh, unidentical ones
     for i := 0; i < nLen; i++ {
-        n := r.nodeList[i]
+        n := r.monitorList[i]
         if ts.Sub(n.addedTS) < unregNodeRefreshPeriod && n.SlaveID != usm.SlaveID {
             nl = append(nl, n)
         }
     }
     // now add this packet
-    r.nodeList = append(nl, monitorMeta {
+    r.monitorList = append(nl, monitoredNodeMeta{
         addedTS: ts,
         UDPAddr: searchD.Address,
         PocketSlaveAgentMeta: usm,
@@ -181,24 +198,40 @@ func (r *registerManager) MonitoringMasterSearchData(searchD mcast.CastPack, ts 
 }
 
 
-func (r *registerManager) UnregisteredNodeList(ts time.Time) ([]map[string]string, error) {
-    var list = make([]map[string]string, 0)
-
+func (r *registerManager) UnregisteredNodeList(ts time.Time) []map[string]string {
     // protect nodelist
     r.Lock()
     defer r.Unlock()
 
-    var nLen int = len(r.nodeList)
-    for i := 0; i < nLen; i++ {
-        n := r.nodeList[i]
-        list = append(list,
+    var (
+        list = make([]map[string]string, 0)
+        availCount = defaults.TotalPossibleSlaveNodeCount - len(r.beaconList)
+        actualCount = math.MaxInt(availCount, len(r.monitorList))
+    )
+
+    // check available slot again
+    if availCount <= 0 {
+        return list
+    }
+    // count the minimal number of unregistered node
+    if actualCount <= 0 {
+        return list
+    }
+
+    sort.Sort(sort.Reverse(r.monitorList))
+    log.Debugf("node list\n%v", r.monitorList)
+
+    for i := 0; i < actualCount; i++ {
+        n := r.monitorList[i]
+        list = append(
+            list,
             map[string]string{
                 "mac":  n.SlaveID,
                 "addr": n.UDPAddr.IP.String(),
             })
     }
 
-    return list, nil
+    return list
 }
 
 func (r *registerManager) RegisterMonitoredNodes(ts time.Time) error {
@@ -206,13 +239,31 @@ func (r *registerManager) RegisterMonitoredNodes(ts time.Time) error {
     r.Lock()
     defer r.Unlock()
 
+    var (
+        availCount = defaults.TotalPossibleSlaveNodeCount - len(r.beaconList)
+        actualCount = math.MaxInt(availCount, len(r.monitorList))
+    )
+    if r.isRegisteringNode {
+        return errors.Errorf("[REGISTER] node registration is underway. please try another batch after finishing this round.")
+    }
+    // check available slot again
+    if availCount <= 0 {
+        return errors.Errorf("[REGISTER] cannot exceed possible node count")
+    }
+    // count the minimal number of unregistered node
+    if actualCount <= 0 {
+        return errors.Errorf("[REGISTER] no node to register")
+    }
+
     // no more registration
     r.isRegisteringNode = true
 
+    // sort node list
+    sort.Sort(sort.Reverse(r.monitorList))
+
     // select the ones to be registered
-    var nLen = len(r.nodeList)
-    for i := 0; i < nLen; i++ {
-        n := r.nodeList[i]
+    for i := 0; i < actualCount; i++ {
+        n := r.monitorList[i]
 
         slave := model.NewSlaveNode(r.beaconManger)
         // we'll ignore message for now
