@@ -15,4 +15,5 @@
 
 - (instancetype) initWithStageControl:(NSObject<StepControl> *)aControl nibName:(NSString *)aNibName bundle:(NSBundle *)aBundle;
 - (void)finishConstruction;
+- (void)prepareDestruction;
 @end

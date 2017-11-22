@@ -49,6 +49,7 @@ enum {
 }
 
 - (void) dealloc {
+    [self.viewControllers makeObjectsPerformSelector:@selector(prepareDestruction)];
     self.viewControllers = nil;
 }
 

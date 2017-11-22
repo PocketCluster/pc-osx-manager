@@ -23,7 +23,9 @@
 }
 
 - (void)finishConstruction {
+}
 
+- (void)prepareDestruction {
 }
 
 - (void)dealloc {
