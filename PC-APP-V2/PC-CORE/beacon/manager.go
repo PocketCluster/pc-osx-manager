@@ -124,7 +124,7 @@ func (b *beaconManger) BindNodeWithBeaconData(beaconD ucast.BeaconPack, ts time.
         // (Ignore) there are way too many unpackable packages.
         return nil
     }
-    if len(usm.MasterBoundAgent) != 0 || usm.MasterBoundAgent != b.clusterID {
+    if len(usm.MasterBoundAgent) == 0 || usm.MasterBoundAgent != b.clusterID {
         // (Ignore) since this come from a node belonged to other master or unregistered.
         return nil
     }
@@ -146,7 +146,7 @@ func (b *beaconManger) BindNodeWithBeaconData(beaconD ucast.BeaconPack, ts time.
 
             state := bc.CurrentState()
             if state == MasterBindRecovery || state == MasterBounded {
-                //log.Debugf("[BEACON-RX] Node (%v|%v|%v) FOUND", usm.SlaveID, bc.CurrentState().String(), searchD.Address.IP.String())
+                log.Debugf("[BEACON-RX] Node (%v|%v|%v) FOUND", usm.SlaveID, bc.CurrentState().String(), beaconD.Address.IP.String())
                 return bc.TransitionWithSlaveMeta(&beaconD.Address, usm, ts)
             }
 
