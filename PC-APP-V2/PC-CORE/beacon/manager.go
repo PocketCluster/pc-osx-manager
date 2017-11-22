@@ -133,7 +133,12 @@ func (b *beaconManger) BindNodeWithBeaconData(beaconD ucast.BeaconPack, ts time.
     pruneBeaconList(b)
 
     // check if beacon for this packet exists
-    var bLen int = len(b.beaconList)
+    var bLen int = beaconSize(b)
+
+    /*** protect b.beaconList as it could be accessed from registration manager ***/
+    b.Lock()
+    defer b.Unlock()
+
     for i := 0; i < bLen; i++  {
         bc := b.beaconList[i]
 
@@ -168,7 +173,12 @@ func (b *beaconManger) RecoverNodeWithSearchData(searchD mcast.CastPack, ts time
     pruneBeaconList(b)
 
     // check if beacon for this packet exists
-    var bLen int = len(b.beaconList)
+    var bLen int = beaconSize(b)
+
+    /*** protect b.beaconList as it could be accessed from registration manager ***/
+    b.Lock()
+    defer b.Unlock()
+
     for i := 0; i < bLen; i++  {
         bc := b.beaconList[i]
 
@@ -194,7 +204,12 @@ func (b *beaconManger) TransitionWithTimestamp(ts time.Time) error {
     pruneBeaconList(b)
 
     // check if beacon for this packet exists
-    var bLen int = len(b.beaconList)
+    var bLen int = beaconSize(b)
+
+    /*** protect b.beaconList as it could be accessed from registration manager ***/
+    b.Lock()
+    defer b.Unlock()
+
     for i := 0; i < bLen; i++  {
         bc := b.beaconList[i]
         err = bc.TransitionWithTimestamp(ts)
@@ -330,7 +345,14 @@ func (b *beaconManger) OnStateTranstionFailure(state MasterBeaconState, slave *m
     return nil
 }
 
-// --- private static methods --- //
+
+// --- * --- * --- * --- * --- * --- * --- *  private static methods --- * --- * --- * --- * --- * --- * --- * --- //
+func beaconSize(b *beaconManger) int {
+    b.Lock()
+    defer b.Unlock()
+
+    return len(b.beaconList)
+}
 
 func pruneBeaconList(b *beaconManger) {
     b.Lock()

@@ -154,10 +154,18 @@ func (r *registerManager) MonitoringMasterSearchData(searchD mcast.CastPack, ts 
     pruneBeaconList(r.beaconManger)
 
     // check if total node slots are filled
-    var bLen int = len(r.beaconManger.beaconList)
+    var bLen int = beaconSize(r.beaconManger)
     if defaults.TotalPossibleSlaveNodeCount <= bLen {
         return errors.Errorf("[REGISTER-RX] cannot exceed total possible node count")
     }
+
+    /*
+     * protect b.beaconList as it could be accessed from registration manager
+     * this is double lock. be very careful with lock order "Lock beaconList" -> "Lock monitorList"
+     */
+    r.beaconManger.Lock()
+    defer r.beaconManger.Unlock()
+
     // check if beacon for this packet exists
     for i := 0; i < bLen; i++  {
         bc := r.beaconManger.beaconList[i]
@@ -166,7 +174,9 @@ func (r *registerManager) MonitoringMasterSearchData(searchD mcast.CastPack, ts 
         }
     }
 
-    // protect nodelist, isNodeFilled
+    /*
+     * protect nodelist, isNodeFilled.
+     */
     r.Lock()
     defer r.Unlock()
 
@@ -199,21 +209,23 @@ func (r *registerManager) MonitoringMasterSearchData(searchD mcast.CastPack, ts 
 
 
 func (r *registerManager) UnregisteredNodeList(ts time.Time) []map[string]string {
-    // protect nodelist
-    r.Lock()
-    defer r.Unlock()
-
     var (
         list = make([]map[string]string, 0)
-        availCount = defaults.TotalPossibleSlaveNodeCount - len(r.beaconList)
-        actualCount = math.MaxInt(availCount, len(r.monitorList))
+        availCount = defaults.TotalPossibleSlaveNodeCount - beaconSize(r.beaconManger)
     )
-
     // check available slot again
     if availCount <= 0 {
         return list
     }
+
+    /*
+     * protect nodelist, isNodeFilled. as this func doesn't access beaconList, it's not necessary to lock beaconManager
+     */
+    r.Lock()
+    defer r.Unlock()
+
     // count the minimal number of unregistered node
+    var actualCount = math.MaxInt(availCount, len(r.monitorList))
     if actualCount <= 0 {
         return list
     }
@@ -235,27 +247,36 @@ func (r *registerManager) UnregisteredNodeList(ts time.Time) []map[string]string
 }
 
 func (r *registerManager) RegisterMonitoredNodes(ts time.Time) error {
-    // protect nodelist, isNodeFilled
-    r.Lock()
-    defer r.Unlock()
-
-    var (
-        availCount = defaults.TotalPossibleSlaveNodeCount - len(r.beaconList)
-        actualCount = math.MaxInt(availCount, len(r.monitorList))
-    )
-    if r.isRegisteringNode {
-        return errors.Errorf("[REGISTER] node registration is underway. please try another batch after finishing this round.")
-    }
     // check available slot again
+    var availCount = defaults.TotalPossibleSlaveNodeCount - beaconSize(r.beaconManger)
     if availCount <= 0 {
         return errors.Errorf("[REGISTER] cannot exceed possible node count")
     }
+
+    /*
+     * protect b.beaconList as it could be accessed from registration manager
+     * this is double lock. be very careful with lock order "Lock beaconList" -> "Lock monitorList"
+     * we need to place it before monitorList lock as we'll modify beaconList
+     */
+    r.beaconManger.Lock()
+    defer r.beaconManger.Unlock()
+
+    /*
+     * protect nodelist, isNodeFilled.
+     */
+    r.Lock()
+    defer r.Unlock()
+
     // count the minimal number of unregistered node
+    var actualCount = math.MaxInt(availCount, len(r.monitorList))
     if actualCount <= 0 {
         return errors.Errorf("[REGISTER] no node to register")
     }
 
     // no more registration
+    if r.isRegisteringNode {
+        return errors.Errorf("[REGISTER] node registration is underway. please try another batch after finishing this round.")
+    }
     r.isRegisteringNode = true
 
     // sort node list
@@ -273,7 +294,10 @@ func (r *registerManager) RegisterMonitoredNodes(ts time.Time) error {
             log.Errorf("[REGISTER-TX] %v", err.Error())
             continue
         }
-        insertMasterBeacon(r.beaconManger, mc)
+        // FIXME : "inserMasterBeacon" is supposed to be called, but due to previously committed lock order, we'll expose naked beaconList
+        //insertMasterBeacon(r.beaconManger, mc)
+        r.beaconManger.beaconList = append(r.beaconManger.beaconList, mc)
+
         err = mc.TransitionWithSlaveMeta(&n.UDPAddr, n.PocketSlaveAgentMeta, ts)
         if err != nil {
             log.Errorf("[REGISTER-TX] %v", err.Error())
@@ -348,7 +372,15 @@ func (r *registerManager) GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPa
     pruneBeaconList(r.beaconManger)
 
     // check if beacon for this packet exists
-    var bLen int = len(r.beaconManger.beaconList)
+    var bLen int = beaconSize(r.beaconManger)
+
+    /*
+     * protect b.beaconList as it could be accessed from registration manager
+     * this is double lock. be very careful with lock order
+     */
+    r.beaconManger.Lock()
+    defer r.beaconManger.Unlock()
+
     for i := 0; i < bLen; i++  {
         bc := r.beaconManger.beaconList[i]
         if bc.SlaveNode().SlaveID == usm.SlaveID {
@@ -369,6 +401,7 @@ func (r *registerManager) GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPa
                 // we need to monitor this to make sure the node we try to bind has been bound successfully
                 case MasterBounded: {
                     log.Debugf("[REGISTER-RX] Node (%v|%v|%v) check if bound ok", usm.SlaveID, bc.CurrentState().String(), beaconD.Address.IP.String())
+                    return nil
                 }
 
                 default: {
