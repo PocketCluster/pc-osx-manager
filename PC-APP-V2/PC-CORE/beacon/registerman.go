@@ -1,6 +1,7 @@
 package beacon
 
 import (
+    "fmt"
     "net"
     "sort"
     "sync"
@@ -22,7 +23,7 @@ import (
 )
 
 const (
-    unregNodeRefreshPeriod time.Duration = time.Duration(UnboundedTimeout * 4)
+    unregNodeRefreshPeriod time.Duration = time.Duration(UnboundedTimeout * 3)
 )
 
 type RegisterManger interface {
@@ -211,7 +212,8 @@ func (r *registerManager) MonitoringMasterSearchData(searchD mcast.CastPack, ts 
 func (r *registerManager) UnregisteredNodeList(ts time.Time) []map[string]string {
     var (
         list = make([]map[string]string, 0)
-        availCount = defaults.TotalPossibleSlaveNodeCount - beaconSize(r.beaconManger)
+        nodeCount = beaconSize(r.beaconManger)
+        availCount = defaults.TotalPossibleSlaveNodeCount - nodeCount
     )
     // check available slot again
     if availCount <= 0 {
@@ -230,19 +232,28 @@ func (r *registerManager) UnregisteredNodeList(ts time.Time) []map[string]string
         return list
     }
 
+    nl := make(monitoredNodes, 0)
     sort.Sort(sort.Reverse(r.monitorList))
-    log.Debugf("node list\n%v", r.monitorList)
-
     for i := 0; i < actualCount; i++ {
         n := r.monitorList[i]
+
+        // if node is too old, then skip
+        if unregNodeRefreshPeriod <= ts.Sub(n.addedTS) {
+            continue
+        }
+
+        // save valid node
+        nl = append(nl, n)
         list = append(
             list,
             map[string]string{
+                "name": fmt.Sprintf("pc-node%d", nodeCount + i + 1),
                 "mac":  n.SlaveID,
                 "addr": n.UDPAddr.IP.String(),
             })
     }
-
+    // remove stale nodes
+    r.monitorList = nl
     return list
 }
 
