@@ -225,7 +225,7 @@ func (r *registerManager) UnregisteredNodeList(ts time.Time) []map[string]string
     defer r.Unlock()
 
     // count the minimal number of unregistered node
-    var actualCount = math.MaxInt(availCount, len(r.monitorList))
+    var actualCount = math.MinInt(availCount, len(r.monitorList))
     if actualCount <= 0 {
         return list
     }
@@ -268,7 +268,7 @@ func (r *registerManager) RegisterMonitoredNodes(ts time.Time) error {
     defer r.Unlock()
 
     // count the minimal number of unregistered node
-    var actualCount = math.MaxInt(availCount, len(r.monitorList))
+    var actualCount = math.MinInt(availCount, len(r.monitorList))
     if actualCount <= 0 {
         return errors.Errorf("[REGISTER] no node to register")
     }
