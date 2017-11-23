@@ -32,6 +32,11 @@
     self.stageControl = nil;
 }
 
+#pragma mark - NSWindowDelegate
+- (BOOL)windowShouldClose:(NSWindow *)sender {
+    return YES;
+}
+
 #pragma mark - StageStep
 -(void)didControl:(NSObject<StepControl> *)aControl progressFrom:(NSObject<StageStep> *)aStep withResult:(NSDictionary *)aResult {
 }

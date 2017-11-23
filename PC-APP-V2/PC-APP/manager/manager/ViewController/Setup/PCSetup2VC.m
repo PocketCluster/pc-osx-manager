@@ -11,6 +11,9 @@
 #import "PCSetup2VC.h"
 #import "PCConstants.h"
 
+static NSString * const kNameColTag = @"nameCol";
+static NSString * const kAddrColTag = @"addrCol";
+
 @interface PCSetup2VC ()<PCRouteRequest>
 @property (nonatomic, strong) NSArray *nodeList;
 @end
@@ -93,27 +96,42 @@
     self.pannel = nil;
 }
 
+- (void) viewDidAppear {
+    [super viewDidAppear];
+    Log(@"%s", __PRETTY_FUNCTION__);
+}
+
+- (void) viewDidDisappear {
+    [super viewDidDisappear];
+    Log(@"%s", __PRETTY_FUNCTION__);
+}
+
+#pragma mark - NSWindowDelegate
+- (BOOL)windowShouldClose:(NSWindow *)sender {
+    
+    return YES;
+}
+
 #pragma mark - NSTableViewDataSourceDelegate
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView {
     return [self.nodeList count];
 }
 
-- (nullable id)tableView:(NSTableView *)tableView objectValueForTableColumn:(nullable NSTableColumn *)tableColumn row:(NSInteger)row {
-    return [self.nodeList objectAtIndex:row];
+- (nullable id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(nullable NSTableColumn *)aTableColumn row:(NSInteger)row {
+    if (aTableView == nil) {
+        return nil;
+    }
+    NSDictionary *node = [self.nodeList objectAtIndex:row];
+    if ([[aTableColumn identifier] isEqualToString:kNameColTag]) {
+        return [node valueForKey:@"name"];
+    }
+    if ([[aTableColumn identifier] isEqualToString:kAddrColTag]) {
+        return [node valueForKey:@"addr"];
+    }
+    return nil;
 }
 
 #pragma mark - NSTableViewDelegate
--(NSView *)tableView:(NSTableView *)aTableView viewForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)row{
-    NSDictionary *nd = [self.nodeList objectAtIndex:row];
-    NSTableCellView *nv = [aTableView makeViewWithIdentifier:@"nodeview" owner:self];
-    if([aTableColumn.identifier isEqualToString:@"nodename"]){
-        [nv.textField setStringValue:[nd valueForKey:@"name"]];
-    }else{
-        [nv.textField setStringValue:[nd valueForKey:@"addr"]];
-    }
-    return nv;
-}
-
 - (BOOL)selectionShouldChangeInTableView:(NSTableView *)tableView {
     return NO;
 }
@@ -137,6 +155,9 @@
 }
 
 -(IBAction)cancel:(id)sender {
+    [PCRouter routeRequestGet:RPATH_NODE_REG_STOP];
+    return;
+
     [self.stageControl shouldControlRevertFrom:self withParam:nil];
 }
 

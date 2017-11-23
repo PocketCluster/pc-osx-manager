@@ -76,8 +76,8 @@ static NSString * const kSizeColTag = @"sizeCol";
     Package *pkg = [[[StatusCache SharedStatusCache] packageList] objectAtIndex:row];
     if ([[aTableColumn identifier] isEqualToString:kPkgColTag]) {
         return pkg.packageDescription;
-
-    } else if ([[aTableColumn identifier] isEqualToString:kSizeColTag]) {
+    }
+    if ([[aTableColumn identifier] isEqualToString:kSizeColTag]) {
         return pkg.totalImageSize;
     }
     return nil;
