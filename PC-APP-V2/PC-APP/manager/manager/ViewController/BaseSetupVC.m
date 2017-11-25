@@ -38,11 +38,13 @@
 }
 
 #pragma mark - StageStep
--(void)didControl:(NSObject<StepControl> *)aControl progressFrom:(NSObject<StageStep> *)aStep withResult:(NSDictionary *)aResult {
+- (void) control:(NSObject<StepControl> *)aControl askedProgressWithParam:(NSDictionary *)aParam {
+}
+- (void) didControl:(NSObject<StepControl> *)aControl progressedFrom:(NSObject<StageStep> *)aStep withResult:(NSDictionary *)aResult {
 }
 
--(void)didControl:(NSObject<StepControl> *)aControl revertFrom:(NSObject<StageStep> *)aStep withResult:(NSDictionary *)aResult {
+- (void) control:(NSObject<StepControl> *)aControl askedRevertWithParam:(NSDictionary *)aParam {
 }
-
-
+- (void) didControl:(NSObject<StepControl> *)aControl revertedFrom:(NSObject<StageStep> *)aStep withResult:(NSDictionary *)aResult {
+}
 @end

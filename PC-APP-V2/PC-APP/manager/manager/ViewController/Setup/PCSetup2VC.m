@@ -116,7 +116,12 @@ static NSString * const kAddrColTag = @"addrCol";
 
 #pragma mark - NSWindowDelegate
 - (BOOL)windowShouldClose:(NSWindow *)sender {
-    
+    if ([[StatusCache SharedStatusCache] isClusterSetup]) {
+        [ShowAlert
+         showWarningAlertWithTitle:@"Please do not close window"
+         message:@"Please wait until cluster setup is completed"];
+        return NO;
+    }
     return YES;
 }
 
@@ -148,9 +153,20 @@ static NSString * const kAddrColTag = @"addrCol";
     return NO;
 }
 
-#pragma mark - UI Control
+#pragma mark - StageStep
+- (void) control:(NSObject<StepControl> *)aControl askedProgressWithParam:(NSDictionary *)aParam {
+    // start registration rasker
+    [PCRouter routeRequestGet:RPATH_NODE_REG_START];
+}
+- (void) didControl:(NSObject<StepControl> *)aControl progressedFrom:(NSObject<StageStep> *)aStep withResult:(NSDictionary *)aResult {
+}
 
-#pragma mark - Setup UI states
+- (void) control:(NSObject<StepControl> *)aControl askedRevertWithParam:(NSDictionary *)aParam {
+}
+- (void) didControl:(NSObject<StepControl> *)aControl revertedFrom:(NSObject<StageStep> *)aStep withResult:(NSDictionary *)aResult {
+}
+
+#pragma mark - UI Control
 - (void)_enableControls {
     [self.btnBuild setEnabled:YES];
     [self.btnCancel setEnabled:YES];
