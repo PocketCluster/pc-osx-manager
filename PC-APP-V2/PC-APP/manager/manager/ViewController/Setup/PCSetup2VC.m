@@ -6,16 +6,20 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
+#import "PCConstants.h"
+#import "StatusCache.h"
+
 #import "ShowAlert.h"
 #import "PCRouter.h"
 #import "PCSetup2VC.h"
-#import "PCConstants.h"
 
 static NSString * const kNameColTag = @"nameCol";
 static NSString * const kAddrColTag = @"addrCol";
 
 @interface PCSetup2VC ()<PCRouteRequest>
 @property (nonatomic, strong) NSArray *nodeList;
+- (void)_enableControls;
+- (void)_disableControls;
 @end
 
 @implementation PCSetup2VC
@@ -32,7 +36,7 @@ static NSString * const kAddrColTag = @"addrCol";
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          if (![[response valueForKeyPath:@"node-reg-start.status"] boolValue]) {
              [ShowAlert
-              showTerminationAlertWithTitle:@"Unable to add new node"
+              showWarningAlertWithTitle:@"Unable to add new node"
               message:[response valueForKeyPath:@"node-reg-start.error"]];
          }
      }];
@@ -49,11 +53,22 @@ static NSString * const kAddrColTag = @"addrCol";
      }];
 
     [[PCRouter sharedRouter]
-     addPostRequest:self
+     addGetRequest:self
      onPath:@(RPATH_NODE_REG_CANDIDATE)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
+
          Log(@"path %@ response %@", path, response);
-         if (belf != nil) {
+
+         if (![[response valueForKeyPath:@"node-reg-candidate.status"] boolValue]) {
+             [[StatusCache SharedStatusCache] setClusterSetup:NO];
+
+             if (belf != nil) {
+                 [belf _enableControls];
+             }
+
+             [ShowAlert
+              showWarningAlertWithTitle:@"Unable to add new node"
+              message:[response valueForKeyPath:@"node-reg-candidate.error"]];
          }
      }];
 
@@ -61,17 +76,24 @@ static NSString * const kAddrColTag = @"addrCol";
      addGetRequest:self
      onPath:@(RPATH_NODE_REG_CONFIRM)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         Log(@"path %@ response %@", path, response);
-         if (belf != nil) {
-         }
-     }];
 
-    [[PCRouter sharedRouter]
-     addGetRequest:self
-     onPath:@(RPATH_NODE_REG_STOP)
-     withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
          Log(@"path %@ response %@", path, response);
+
+         [[StatusCache SharedStatusCache] setClusterSetup:NO];
+
          if (belf != nil) {
+             [self _enableControls];
+         }
+
+         if (![[response valueForKeyPath:@"node-reg-confirm.status"] boolValue]) {
+             [ShowAlert
+              showWarningAlertWithTitle:@"Unable to add new node"
+              message:[response valueForKeyPath:@"node-reg-confirm.error"]];
+
+         } else {
+             if (belf != nil) {
+                 [belf.stageControl shouldControlProgressFrom:belf withParam:nil];
+             }
          }
      }];
 }
@@ -79,11 +101,10 @@ static NSString * const kAddrColTag = @"addrCol";
 - (void) prepareDestruction {
     [super prepareDestruction];
 
-    [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_NODE_REG_START)];
-    [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_NODE_UNREG_LIST)];
-    [[PCRouter sharedRouter] delPostRequest:self onPath:@(RPATH_NODE_REG_CANDIDATE)];
-    [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_NODE_REG_CONFIRM)];
-    [[PCRouter sharedRouter] delGetRequest:self  onPath:@(RPATH_NODE_REG_STOP)];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:@(RPATH_NODE_REG_START)];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:@(RPATH_NODE_UNREG_LIST)];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:@(RPATH_NODE_REG_CANDIDATE)];
+    [[PCRouter sharedRouter] delGetRequest:self onPath:@(RPATH_NODE_REG_CONFIRM)];
 }
 
 - (void) viewDidLoad {
@@ -91,16 +112,6 @@ static NSString * const kAddrColTag = @"addrCol";
     
     [[((BaseBrandView *)self.view) contentBox] addSubview:self.pannel];
     self.pannel = nil;
-}
-
-- (void) viewDidAppear {
-    [super viewDidAppear];
-    Log(@"%s", __PRETTY_FUNCTION__);
-}
-
-- (void) viewDidDisappear {
-    [super viewDidDisappear];
-    Log(@"%s", __PRETTY_FUNCTION__);
 }
 
 #pragma mark - NSWindowDelegate
@@ -137,21 +148,53 @@ static NSString * const kAddrColTag = @"addrCol";
     return NO;
 }
 
+#pragma mark - UI Control
+
+#pragma mark - Setup UI states
+- (void)_enableControls {
+    [self.btnBuild setEnabled:YES];
+    [self.btnCancel setEnabled:YES];
+
+    [self.circularProgress setHidden:YES];
+    [self.circularProgress stopAnimation:nil];
+    [self.circularProgress displayIfNeeded];
+    [self.circularProgress removeFromSuperview];
+    [self setCircularProgress:nil];
+}
+
+- (void)_disableControls {
+    [self.btnBuild setEnabled:NO];
+    [self.btnCancel setEnabled:NO];
+
+    NSProgressIndicator *ind = [[NSProgressIndicator alloc] initWithFrame:(NSRect){{20.0, 20.0}, {16.0, 16.0}}];
+    [ind setControlSize:NSSmallControlSize];
+    [ind setStyle:NSProgressIndicatorSpinningStyle];
+    [self.view addSubview:ind];
+    [ind setHidden:NO];
+    [ind setIndeterminate:YES];
+    [ind startAnimation:self];
+    [ind displayIfNeeded];
+    
+    [self setCircularProgress:ind];
+}
+
 #pragma mark - IBACTION
 -(IBAction)build:(id)sender {
-    [PCRouter routeRequestGet:RPATH_NODE_REG_START];
-    return;
-    
-    [self.stageControl shouldControlProgressFrom:self withParam:nil];
-
     // return if there is no node
     if ([self.nodeList count] == 0){
-        // NSAlert
         return;
     }
+    [self _disableControls];
+
+    // enter into cluster setup status
+    [[StatusCache SharedStatusCache] setClusterSetup:YES];
+
+    // send registration signal to engine
+    [PCRouter routeRequestGet:RPATH_NODE_REG_CANDIDATE];
 }
 
 -(IBAction)cancel:(id)sender {
+
     [PCRouter routeRequestGet:RPATH_NODE_REG_STOP];
     return;
 

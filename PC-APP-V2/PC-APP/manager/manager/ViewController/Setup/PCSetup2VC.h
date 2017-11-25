@@ -10,7 +10,7 @@
 
 @interface PCSetup2VC : BaseSetupVC <NSTableViewDataSource, NSTableViewDelegate>
 @property (nonatomic, strong) IBOutlet NSView *pannel;
-@property (nonatomic, weak) IBOutlet NSProgressIndicator *progress;
+@property (nonatomic, weak) IBOutlet NSProgressIndicator *circularProgress;
 @property (nonatomic, weak) IBOutlet NSTableView *nodeTable;
 @property (nonatomic, weak) IBOutlet NSButton *btnBuild;
 @property (nonatomic, weak) IBOutlet NSButton *btnCancel;

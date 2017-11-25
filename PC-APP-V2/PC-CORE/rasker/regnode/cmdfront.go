@@ -27,22 +27,17 @@ func InitNodeRegisterStop(appLife rasker.RouteTasker,  feeder route.ResponseFeed
 }
 
 func InitNodeRegisterCanidate(appLife rasker.RouteTasker,  feeder route.ResponseFeeder) error {
-    return appLife.POST(routepath.RpathNodeRegCandiate(), func(_, rpath, payload string) error {
-        var (
-            candid = make([]string, 0)
-            err error = nil
-        )
-        err = json.Unmarshal([]byte(payload), &struct {
-            Candidates *[]string `json:"candidates"`
-        }{&candid})
-        if err != nil || len(candid) == 0 {
-            return feedPostError(feeder, rpath, "node-reg-candidate", errors.WithMessage(err, "unable to identify candidate nodes"))
-        }
-
+    return appLife.GET(routepath.RpathNodeRegCandiate(), func(_, rpath, _ string) error {
         // broadcast stop signal
-        appLife.BroadcastEvent(service.Event{
-            Name:iventNodeRegisterCandid,
-            Payload:candid})
-        return nil
+        appLife.BroadcastEvent(service.Event{Name:iventNodeRegisterCandid})
+        data, err := json.Marshal(route.ReponseMessage{
+            "node-reg-candidate": {
+                "status": true,
+            },
+        })
+        if err != nil {
+            return errors.WithStack(err)
+        }
+        return feeder.FeedResponseForGet(rpath, string(data))
     })
 }

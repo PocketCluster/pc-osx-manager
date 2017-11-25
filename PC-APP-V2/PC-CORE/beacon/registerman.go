@@ -18,9 +18,6 @@ import (
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/utils/math"
 )
-import (
-    "github.com/davecgh/go-spew/spew"
-)
 
 const (
     unregNodeRefreshPeriod time.Duration = time.Duration(UnboundedTimeout * 3)
@@ -149,7 +146,8 @@ func (r *registerManager) MonitoringMasterSearchData(searchD mcast.CastPack, ts 
         return nil
     }
 
-    log.Debugf("[REGISTER-RX] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
+    //log.Debugf("[REGISTER-RX] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
+    log.Debugf("[REGISTER-RX] %v ", searchD.Address.IP.String())
 
     // remove discarded beacon
     pruneBeaconList(r.beaconManger)
@@ -377,7 +375,8 @@ func (r *registerManager) GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPa
         return nil
     }
 
-    log.Debugf("[REGISTER-RX] %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
+    //log.Debugf("[REGISTER-RX] %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
+    log.Debugf("[REGISTER-RX] %v", beaconD.Address.IP.String())
 
     // remove discarded beacon
     pruneBeaconList(r.beaconManger)

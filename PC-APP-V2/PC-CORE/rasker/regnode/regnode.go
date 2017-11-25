@@ -72,11 +72,8 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
                             log.Debugf("[REGISTER] stopped")
                             return nil
                         }
-                        case ce := <- candidC: {
-                            candid, ok := ce.Payload.([]string)
-                            if ok {
-                                log.Debug("candidates list %v", candid)
-                            }
+                        case <- candidC: {
+                            log.Debug("[REGISTER] time to register nodes")
                         }
                         case ts := <- rptTick.C: {
                             list := regMan.UnregisteredNodeList(ts)

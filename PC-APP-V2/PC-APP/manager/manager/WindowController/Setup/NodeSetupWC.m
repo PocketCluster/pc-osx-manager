@@ -39,6 +39,11 @@
     [[self.window contentView] addSubview:[[self.viewControllers objectAtIndex:0] view]];
 }
 
+#pragma mark - NSWindowDelegate
+- (BOOL)windowShouldClose:(NSWindow *)sender {
+    return YES;
+}
+
 #pragma mark - Stage Control
 -(void)shouldControlProgressFrom:(NSObject<StageStep> *)aStep withParam:(NSDictionary *)aParam {
     
