@@ -30,7 +30,6 @@ static NSString * const kAddrColTag = @"addrCol";
      addGetRequest:self
      onPath:@(RPATH_NODE_REG_START)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         Log(@"path %@ response %@", path, response);
          if (![[response valueForKeyPath:@"node-reg-start.status"] boolValue]) {
              [ShowAlert
               showTerminationAlertWithTitle:@"Unable to add new node"
@@ -42,9 +41,7 @@ static NSString * const kAddrColTag = @"addrCol";
      addGetRequest:self
      onPath:@(RPATH_NODE_UNREG_LIST)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-         Log(@"path %@ response %@", path, response);
-
-         NSArray<NSDictionary *>* list = [response valueForKeyPath:@""];
+         NSArray<NSDictionary *>* list = [response valueForKeyPath:@"node-unreged.unreged-list"];
          if (belf != nil) {
              [belf setNodeList:list];
              [[belf nodeTable] reloadData];
