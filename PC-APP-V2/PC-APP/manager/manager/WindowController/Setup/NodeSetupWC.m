@@ -6,6 +6,7 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
+#import "BaseSetupVC.h"
 #import "PCSetup2VC.h"
 #import "PCSetup3VC.h"
 
@@ -49,7 +50,7 @@
 
 #pragma mark - NSWindowDelegate
 - (BOOL)windowShouldClose:(NSWindow *)sender {
-    return YES;
+    return [(BaseSetupVC *)[self.viewControllers objectAtIndex:_vcIndex] windowShouldClose:sender];
 }
 
 #pragma mark - Stage Control

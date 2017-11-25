@@ -91,7 +91,9 @@ static NSString * const kAddrColTag = @"addrCol";
               message:[response valueForKeyPath:@"node-reg-confirm.error"]];
 
          } else {
+
              if (belf != nil) {
+                 [PCRouter routeRequestGet:RPATH_NODE_REG_STOP];
                  [belf.stageControl shouldControlProgressFrom:belf withParam:nil];
              }
          }
@@ -118,10 +120,11 @@ static NSString * const kAddrColTag = @"addrCol";
 - (BOOL)windowShouldClose:(NSWindow *)sender {
     if ([[StatusCache SharedStatusCache] isClusterSetup]) {
         [ShowAlert
-         showWarningAlertWithTitle:@"Please do not close window"
+         showWarningAlertWithTitle:@"Please do not close Window"
          message:@"Please wait until cluster setup is completed"];
         return NO;
     }
+    [PCRouter routeRequestGet:RPATH_NODE_REG_STOP];
     return YES;
 }
 
@@ -210,10 +213,7 @@ static NSString * const kAddrColTag = @"addrCol";
 }
 
 -(IBAction)cancel:(id)sender {
-
     [PCRouter routeRequestGet:RPATH_NODE_REG_STOP];
-    return;
-
     [self.stageControl shouldControlRevertFrom:self withParam:nil];
 }
 

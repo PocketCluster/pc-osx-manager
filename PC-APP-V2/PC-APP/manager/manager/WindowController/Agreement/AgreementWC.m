@@ -6,6 +6,7 @@
 //  Copyright © 2017 io.pocketcluster. All rights reserved.
 //
 
+#import "BaseSetupVC.h"
 #import "PCConstants.h"
 #import "AgreementVC.h"
 #import "UserCheckVC.h"
@@ -61,6 +62,11 @@ enum {
 
     [self.window setTitle:[[self.viewControllers objectAtIndex:_vcIndex] title]];
     [[self.window contentView] addSubview:[[self.viewControllers objectAtIndex:_vcIndex] view]];
+}
+
+#pragma mark - NSWindowDelegate
+- (BOOL)windowShouldClose:(NSWindow *)sender {
+    return [(BaseSetupVC *)[self.viewControllers objectAtIndex:_vcIndex] windowShouldClose:sender];
 }
 
 #pragma mark - Stage Control
