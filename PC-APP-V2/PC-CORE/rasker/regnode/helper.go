@@ -58,6 +58,20 @@ func feedGetMessage(feeder route.ResponseFeeder, rpath, fpath, ppath string, fda
     return feeder.FeedResponseForGet(rpath, string(data))
 }
 
+func feedGetOkMessage(feeder route.ResponseFeeder, rpath, fpath string) error {
+    data, frr := json.Marshal(route.ReponseMessage{
+        fpath: {
+            "status": true,
+        },
+    })
+    // this should never happen
+    if frr != nil {
+        log.Error(frr.Error())
+    }
+    return feeder.FeedResponseForGet(rpath, string(data))
+}
+
+
 func feedPostMessage(feeder route.ResponseFeeder, rpath, fpath, ppath string, fdata interface{}) error {
     data, frr := json.Marshal(route.ReponseMessage{
         fpath: {

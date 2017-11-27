@@ -28,16 +28,8 @@ func InitNodeRegisterStop(appLife rasker.RouteTasker,  feeder route.ResponseFeed
 
 func InitNodeRegisterCanidate(appLife rasker.RouteTasker,  feeder route.ResponseFeeder) error {
     return appLife.GET(routepath.RpathNodeRegCandiate(), func(_, rpath, _ string) error {
-        // broadcast stop signal
+        // broadcast register candidate signal
         appLife.BroadcastEvent(service.Event{Name:iventNodeRegisterCandid})
-        data, err := json.Marshal(route.ReponseMessage{
-            "node-reg-candidate": {
-                "status": true,
-            },
-        })
-        if err != nil {
-            return errors.WithStack(err)
-        }
-        return feeder.FeedResponseForGet(rpath, string(data))
+        return nil
     })
 }

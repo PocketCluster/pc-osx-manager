@@ -36,10 +36,13 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
             func() error {
                 var (
                     rpUnregNodeList = routepath.RpathNodeUnregList()
+                    rpNodeRegCnfrm  = routepath.RpathNodeRegConfirm()
+                    rpNodeRegCandid = routepath.RpathNodeRegCandiate()
                     regMan beacon.RegisterManger = nil
                     beaconMan beacon.BeaconManger = nil
                     rptTick *time.Ticker = nil
                     err error = nil
+                    isRegistering bool = false
                 )
 
                 // we need beacon master here
@@ -59,27 +62,53 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
                     return feedGetError(feeder, rpath, "node-reg-start", err)
                 }
                 rptTick = time.NewTicker(time.Second * 4)
+                defer rptTick.Stop()
                 log.Debugf("[REGISTER] started")
                 for {
                     select {
                         case <- appLife.StopChannel(): {
-                            rptTick.Stop()
                             log.Debugf("[REGISTER] stopped")
                             return nil
                         }
                         case <- stopC: {
-                            rptTick.Stop()
                             log.Debugf("[REGISTER] stopped")
                             return nil
                         }
                         case <- candidC: {
                             log.Debug("[REGISTER] time to register nodes")
+                            if isRegistering {
+                                rerr := regMan.RegisterMonitoredNodes(time.Now())
+                                if rerr == nil {
+                                    isRegistering = true
+                                    frr := feedGetOkMessage(feeder, rpNodeRegCandid, "node-reg-candidate")
+                                    if frr != nil {
+                                        log.Errorf("[REGISTER] node registration success feedback fail %v", frr.Error())
+                                    }
+                                    log.Debug("[REGISTER] node registration goes well")
+                                } else {
+                                    frr := feedGetError(feeder, rpNodeRegCandid, "node-reg-candidate", errors.Errorf("[REGISTER] invalid beacon manager"))
+                                    if frr != nil {
+                                        log.Errorf("[REGISTER] node registration failure feedback fail %v", frr.Error())
+                                    }
+                                    log.Errorf("[REGISTER] node registration failed %v", rerr.Error())
+                                }
+                            }
                         }
                         case ts := <- rptTick.C: {
                             list := regMan.UnregisteredNodeList(ts)
                             lrr := feedGetMessage(feeder, rpUnregNodeList, "node-unreged", "unreged-list", list)
                             if lrr != nil {
-                                log.Debugf("[REGISTER] unregistered node report error : %v", lrr)
+                                log.Debugf("[REGISTER] unregistered node report error : %v", lrr.Error())
+                            }
+                            if isRegistering {
+                                if regMan.IsAllNodeRegistered(ts) {
+                                    log.Debugf("[REGISTER] stopped")
+                                    return feedGetOkMessage(feeder, rpNodeRegCnfrm, "node-reg-confirm")
+                                }
+                                if regMan.IsRegistrationTimedOut(ts) {
+                                    log.Debugf("[REGISTER] stopped")
+                                    return feedGetError(feeder, rpNodeRegCnfrm, "node-reg-confirm", errors.Errorf("[REGISTER] confirmation timeout failure. some node does not report."))
+                                }
                             }
                         }
                         case b := <-beaconC: {
