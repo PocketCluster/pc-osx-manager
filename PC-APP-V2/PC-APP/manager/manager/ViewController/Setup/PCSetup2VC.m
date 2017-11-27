@@ -90,11 +90,14 @@ static NSString * const kAddrColTag = @"addrCol";
               showWarningAlertWithTitle:@"Unable to add new node"
               message:[response valueForKeyPath:@"node-reg-confirm.error"]];
 
+             if (belf != nil) {
+                 [belf.stageControl shouldControlProgressFrom:belf withParam:@{@"BUILD_SUCCESS":@NO}];
+             }
+
          } else {
 
              if (belf != nil) {
-                 [PCRouter routeRequestGet:RPATH_NODE_REG_STOP];
-                 [belf.stageControl shouldControlProgressFrom:belf withParam:nil];
+                 [belf.stageControl shouldControlProgressFrom:belf withParam:@{@"BUILD_SUCCESS":@TRUE}];
              }
          }
      }];
