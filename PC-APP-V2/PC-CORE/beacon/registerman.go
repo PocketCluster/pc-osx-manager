@@ -31,6 +31,7 @@ type RegisterManger interface {
 }
 
 type monitoredNodeMeta struct {
+    isRegistered bool
     addedTS time.Time
     net.UDPAddr
     *slagent.PocketSlaveAgentMeta
@@ -54,6 +55,7 @@ func (m monitoredNodes) Less(i, j int) bool {
 type registerManager struct {
     sync.Mutex
 
+    registerTimemark  time.Time
     isRegisteringNode bool
     monitorList       monitoredNodes
     *beaconManger
@@ -335,6 +337,7 @@ func (r *registerManager) RegisterMonitoredNodes(ts time.Time) error {
 
     // this is the node that are to be registered
     r.monitorList = nl
+    r.registerTimemark = time.Now()
 
     return nil
 }
@@ -444,6 +447,13 @@ func (r *registerManager) GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPa
 
                 // we need to monitor this to make sure the node we try to bind has been bound successfully
                 case MasterBounded: {
+                    var mLen = len(r.monitorList)
+                    for i := 0; i < mLen; i++ {
+                        if r.monitorList[i].SlaveID == usm.SlaveID {
+                            r.monitorList[i].isRegistered = true
+                            break
+                        }
+                    }
                     log.Debugf("[REGISTER-RX] Node (%v|%v|%v) check if bound ok", usm.SlaveID, bc.CurrentState().String(), beaconD.Address.IP.String())
                     return nil
                 }
