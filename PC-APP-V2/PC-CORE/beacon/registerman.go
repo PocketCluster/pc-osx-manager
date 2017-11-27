@@ -27,6 +27,8 @@ type RegisterManger interface {
     MonitoringMasterSearchData(searchD mcast.CastPack, ts time.Time) error
     UnregisteredNodeList(ts time.Time) []map[string]string
     RegisterMonitoredNodes(ts time.Time) error
+    IsAllNodeRegistered(ts time.Time) bool
+    IsRegistrationTimedOut(ts time.Time) bool
     GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPack, ts time.Time) error
 }
 
@@ -340,6 +342,41 @@ func (r *registerManager) RegisterMonitoredNodes(ts time.Time) error {
     r.registerTimemark = time.Now()
 
     return nil
+}
+
+func (r *registerManager) IsAllNodeRegistered(ts time.Time) bool {
+    r.Lock()
+    defer r.Unlock()
+
+    // check if all node is registered
+    var (
+        isAllDone = true
+        mLen = len(r.monitorList)
+    )
+    // if node is not being registered
+    if !r.isRegisteringNode {
+        return false
+    }
+    for i := 0; i < mLen; i++ {
+        if !r.monitorList[i].isRegistered {
+            isAllDone = false
+            break
+        }
+    }
+    return isAllDone
+}
+
+func (r *registerManager) IsRegistrationTimedOut(ts time.Time) bool {
+    r.Lock()
+    defer r.Unlock()
+
+    if !r.isRegisteringNode {
+        return false
+    }
+    if ts.Sub(r.registerTimemark) <= time.Minute {
+        return false
+    }
+    return true
 }
 
 /*
