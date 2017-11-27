@@ -224,7 +224,25 @@ func (r *registerManager) UnregisteredNodeList(ts time.Time) []map[string]string
     r.Lock()
     defer r.Unlock()
 
-    // count the minimal number of unregistered node
+    // --- registration is underway. Do not modify the monitor list ---
+    if r.isRegisteringNode {
+        var mLen = len(r.monitorList)
+        for i := 0; i < mLen; i++ {
+            n := r.monitorList[i]
+
+            list = append(
+                list,
+                map[string]string{
+                    "name": fmt.Sprintf("pc-node%d", nodeCount + i + 1),
+                    "mac":  n.SlaveID,
+                    "addr": n.UDPAddr.IP.String(),
+                })
+        }
+
+        return list
+    }
+
+    // --- as we are not registering, count the minimal number of unregistered node ---
     var actualCount = math.MinInt(availCount, len(r.monitorList))
     if actualCount <= 0 {
         return list
@@ -288,12 +306,14 @@ func (r *registerManager) RegisterMonitoredNodes(ts time.Time) error {
     }
     r.isRegisteringNode = true
 
-    // sort node list
+    // prepare final node list, sort node list, select the ones to be registered for actualCount Slot
+    nl := make(monitoredNodes, 0)
     sort.Sort(sort.Reverse(r.monitorList))
-
-    // select the ones to be registered
     for i := 0; i < actualCount; i++ {
         n := r.monitorList[i]
+
+        // save valid node
+        nl = append(nl, n)
 
         slave := model.NewSlaveNode(r.beaconManger)
         // we'll ignore message for now
@@ -312,6 +332,9 @@ func (r *registerManager) RegisterMonitoredNodes(ts time.Time) error {
             log.Errorf("[REGISTER-TX] %v", err.Error())
         }
     }
+
+    // this is the node that are to be registered
+    r.monitorList = nl
 
     return nil
 }
@@ -390,6 +413,17 @@ func (r *registerManager) GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPa
      */
     r.beaconManger.Lock()
     defer r.beaconManger.Unlock()
+
+    /*
+     * protect nodelist, isNodeFilled.
+     */
+    r.Lock()
+    defer r.Unlock()
+
+    // no more registration
+    if !r.isRegisteringNode {
+        return errors.Errorf("[REGISTER-RX] node registration is not triggered")
+    }
 
     for i := 0; i < bLen; i++  {
         bc := r.beaconManger.beaconList[i]
