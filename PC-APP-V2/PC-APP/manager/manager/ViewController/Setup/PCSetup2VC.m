@@ -15,6 +15,7 @@
 
 static NSString * const kNameColTag = @"nameCol";
 static NSString * const kAddrColTag = @"addrCol";
+NSString * const kClusterSetupResult = @"SETUP_SUCCESS";
 
 @interface PCSetup2VC ()<PCRouteRequest>
 @property (nonatomic, strong) NSArray *nodeList;
@@ -91,13 +92,13 @@ static NSString * const kAddrColTag = @"addrCol";
               message:[response valueForKeyPath:@"node-reg-confirm.error"]];
 
              if (belf != nil) {
-                 [belf.stageControl shouldControlProgressFrom:belf withParam:@{@"BUILD_SUCCESS":@NO}];
+                 [belf.stageControl shouldControlProgressFrom:belf withParam:@{kClusterSetupResult:@NO}];
              }
 
          } else {
 
              if (belf != nil) {
-                 [belf.stageControl shouldControlProgressFrom:belf withParam:@{@"BUILD_SUCCESS":@TRUE}];
+                 [belf.stageControl shouldControlProgressFrom:belf withParam:@{kClusterSetupResult:@TRUE}];
              }
          }
      }];

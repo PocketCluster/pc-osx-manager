@@ -60,7 +60,7 @@ type registerManager struct {
     registerTimemark  time.Time
     isRegisteringNode bool
     monitorList       monitoredNodes
-    *beaconManger
+    beaconManger      *beaconManger
 }
 
 func NewNodeRegisterManager(master BeaconManger) (RegisterManger, error) {
@@ -178,7 +178,7 @@ func (r *registerManager) MonitoringMasterSearchData(searchD mcast.CastPack, ts 
     }
 
     /*
-     * protect nodelist, isNodeFilled.
+     * protect nodelist, isNodeFilled, registerTimemark
      */
     r.Lock()
     defer r.Unlock()
@@ -293,7 +293,7 @@ func (r *registerManager) RegisterMonitoredNodes(ts time.Time) error {
     defer r.beaconManger.Unlock()
 
     /*
-     * protect nodelist, isNodeFilled.
+     * protect nodelist, isNodeFilled, registerTimemark
      */
     r.Lock()
     defer r.Unlock()
@@ -344,11 +344,11 @@ func (r *registerManager) RegisterMonitoredNodes(ts time.Time) error {
     return nil
 }
 
+// check if all nodes are registered
 func (r *registerManager) IsAllNodeRegistered(ts time.Time) bool {
     r.Lock()
     defer r.Unlock()
 
-    // check if all node is registered
     var (
         isAllDone = true
         mLen = len(r.monitorList)

@@ -76,7 +76,7 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
                         }
                         case <- candidC: {
                             log.Debug("[REGISTER] time to register nodes")
-                            if isRegistering {
+                            if !isRegistering {
                                 rerr := regMan.RegisterMonitoredNodes(time.Now())
                                 if rerr == nil {
                                     isRegistering = true
