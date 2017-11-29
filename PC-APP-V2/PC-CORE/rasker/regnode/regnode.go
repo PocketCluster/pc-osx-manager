@@ -62,35 +62,35 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
                     return feedGetError(feeder, rpath, "node-reg-start", err)
                 }
                 rptTick = time.NewTicker(time.Second * 4)
-                defer rptTick.Stop()
                 log.Debugf("[REGISTER] started")
                 for {
                     select {
                         case <- appLife.StopChannel(): {
                             log.Debugf("[REGISTER] stopped")
+                            rptTick.Stop()
                             return nil
                         }
                         case <- stopC: {
                             log.Debugf("[REGISTER] stopped")
+                            rptTick.Stop()
                             return nil
                         }
                         case <- candidC: {
-                            log.Debug("[REGISTER] time to register nodes")
                             if !isRegistering {
                                 rerr := regMan.RegisterMonitoredNodes(time.Now())
                                 if rerr == nil {
+                                    log.Debug("[REGISTER] node registration went ok")
                                     isRegistering = true
                                     frr := feedGetOkMessage(feeder, rpNodeRegCandid, "node-reg-candidate")
                                     if frr != nil {
                                         log.Errorf("[REGISTER] node registration success feedback fail %v", frr.Error())
                                     }
-                                    log.Debug("[REGISTER] node registration goes well")
                                 } else {
+                                    log.Errorf("[REGISTER] node registration failed %v", rerr.Error())
                                     frr := feedGetError(feeder, rpNodeRegCandid, "node-reg-candidate", errors.Errorf("[REGISTER] invalid beacon manager"))
                                     if frr != nil {
                                         log.Errorf("[REGISTER] node registration failure feedback fail %v", frr.Error())
                                     }
-                                    log.Errorf("[REGISTER] node registration failed %v", rerr.Error())
                                 }
                             }
                         }
@@ -102,11 +102,13 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
                             }
                             if isRegistering {
                                 if regMan.IsAllNodeRegistered(ts) {
-                                    log.Debugf("[REGISTER] stopped")
+                                    log.Debugf("[REGISTER] stopped. every node is all registered")
+                                    rptTick.Stop()
                                     return feedGetOkMessage(feeder, rpNodeRegCnfrm, "node-reg-confirm")
                                 }
                                 if regMan.IsRegistrationTimedOut(ts) {
-                                    log.Debugf("[REGISTER] stopped")
+                                    log.Debugf("[REGISTER] stopped. registration timeout")
+                                    rptTick.Stop()
                                     return feedGetError(feeder, rpNodeRegCnfrm, "node-reg-confirm", errors.Errorf("[REGISTER] confirmation timeout failure. some node does not report."))
                                 }
                             }

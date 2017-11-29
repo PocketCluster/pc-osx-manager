@@ -452,13 +452,13 @@ func (r *registerManager) GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPa
      * this is double lock. be very careful with lock order
      */
     r.beaconManger.Lock()
-    defer r.beaconManger.Unlock()
+    //defer r.beaconManger.Unlock()
 
     /*
      * protect nodelist, isNodeFilled.
      */
     r.Lock()
-    defer r.Unlock()
+    //defer r.Unlock()
 
     // no more registration
     if !r.isRegisteringNode {
@@ -471,7 +471,7 @@ func (r *registerManager) GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPa
             switch bc.CurrentState() {
                 case MasterDiscarded:
                     fallthrough
-                // should be in registration
+                // should be only in registration phase
                 case MasterInit:
                     fallthrough
                 // should be in recovery
@@ -479,6 +479,8 @@ func (r *registerManager) GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPa
                     fallthrough
                 // should be in bind
                 case MasterBindRecovery: {
+                    r.Unlock()
+                    r.beaconManger.Unlock()
                     return errors.Errorf("[REGISTER-RX] Node (%v|%v|%v) in illegal state", usm.SlaveID, bc.CurrentState().String(), beaconD.Address.IP.String())
                 }
 
@@ -492,15 +494,23 @@ func (r *registerManager) GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPa
                         }
                     }
                     log.Debugf("[REGISTER-RX] Node (%v|%v|%v) check if bound ok", usm.SlaveID, bc.CurrentState().String(), beaconD.Address.IP.String())
+                    r.Unlock()
+                    r.beaconManger.Unlock()
                     return nil
                 }
 
                 default: {
+                    // FIXME : we'll still have a race condition. This indeed need an re-architecturing
+                    log.Debugf("[REGISTER-RX] Node (%v|%v|%v) make registration transition", usm.SlaveID, bc.CurrentState().String(), beaconD.Address.IP.String())
+                    r.Unlock()
+                    r.beaconManger.Unlock()
                     return bc.TransitionWithSlaveMeta(&beaconD.Address, usm, ts)
                 }
             }
         }
     }
 
+    r.Unlock()
+    r.beaconManger.Unlock()
     return errors.Errorf("[REGISTER-RX] Node(%v|%v) unregistered node with same cluster id. *should never happen*", usm.SlaveID, beaconD.Address.IP.String())
 }
