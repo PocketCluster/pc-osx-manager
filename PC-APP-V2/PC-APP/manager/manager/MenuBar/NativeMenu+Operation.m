@@ -142,6 +142,7 @@
             [mStatus.submenu addItem:sInstall];
             [mStatus.submenu addItem:[NSMenuItem separatorItem]];
 
+#ifdef __ALLOW_NODE_ADDITION__
             NSMenuItem *sAdd =
                 [[NSMenuItem alloc]
                  initWithTitle:@"Add Child Node"
@@ -150,6 +151,8 @@
             [sAdd setTarget:self];
             [sAdd setEnabled:NO];
             [mStatus.submenu addItem:sAdd];
+#endif
+
         }
     }
     [self.statusItem.menu itemChanged:mStatus];
