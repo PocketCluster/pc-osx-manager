@@ -82,10 +82,6 @@ NSString * const kClusterSetupResult = @"SETUP_SUCCESS";
 
          [[StatusCache SharedStatusCache] setClusterSetup:NO];
 
-         if (belf != nil) {
-             [self _enableControls];
-         }
-
          if (![[response valueForKeyPath:@"node-reg-confirm.status"] boolValue]) {
              [ShowAlert
               showAlertMessageWithTitle:@"Unable to add new node"
@@ -93,6 +89,7 @@ NSString * const kClusterSetupResult = @"SETUP_SUCCESS";
               action:^(NSInteger result) {
                   if (belf != nil) {
                       [belf.stageControl shouldControlProgressFrom:belf withParam:@{kClusterSetupResult:@NO}];
+                      [belf _enableControls];
                   }
               }];
 
