@@ -47,4 +47,25 @@
         [[NSApplication sharedApplication] terminate:nil];
     }
 }
+
++ (void) showAlertMessageWithTitle:(NSString *)aTitle message:(NSString *)aMessage action:(void (^)(NSInteger result))anAction {
+    if (ISNULL_STRING(aTitle)) {
+        return;
+    }
+    if (ISNULL_STRING(aMessage)) {
+        return;
+    }
+
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert addButtonWithTitle:@"OK"];
+    //[alert addButtonWithTitle:@"Cancel"];
+    [alert setMessageText:aTitle];
+    [alert setInformativeText:aMessage];
+    [alert setAlertStyle:NSWarningAlertStyle];
+
+    NSInteger result = [alert runModal];
+    if (anAction != nil) {
+        anAction(result);
+    }
+}
 @end

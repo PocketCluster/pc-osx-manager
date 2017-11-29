@@ -88,18 +88,23 @@ NSString * const kClusterSetupResult = @"SETUP_SUCCESS";
 
          if (![[response valueForKeyPath:@"node-reg-confirm.status"] boolValue]) {
              [ShowAlert
-              showWarningAlertWithTitle:@"Unable to add new node"
-              message:[response valueForKeyPath:@"node-reg-confirm.error"]];
-
-             if (belf != nil) {
-                 [belf.stageControl shouldControlProgressFrom:belf withParam:@{kClusterSetupResult:@NO}];
-             }
+              showAlertMessageWithTitle:@"Unable to add new node"
+              message:[response valueForKeyPath:@"node-reg-confirm.error"]
+              action:^(NSInteger result) {
+                  if (belf != nil) {
+                      [belf.stageControl shouldControlProgressFrom:belf withParam:@{kClusterSetupResult:@NO}];
+                  }
+              }];
 
          } else {
-
-             if (belf != nil) {
-                 [belf.stageControl shouldControlProgressFrom:belf withParam:@{kClusterSetupResult:@TRUE}];
-             }
+             [ShowAlert
+              showAlertMessageWithTitle:@"Setup Successful!"
+              message:@"Cluster is successfully setup."
+              action:^(NSInteger result) {
+                  if (belf != nil) {
+                      [belf.stageControl shouldControlProgressFrom:belf withParam:@{kClusterSetupResult:@TRUE}];
+                  }
+              }];
          }
      }];
 }
