@@ -6,6 +6,7 @@
 //
 
 #import <Sparkle/Sparkle.h>
+#import "NullStringChecker.h"
 #import "StatusCache.h"
 #import "AppDelegate+Shutdown.h"
 #import "AppDelegate+Window.h"
@@ -190,7 +191,12 @@ static NSString * const UPDATE_TITLE_INITIATE_CHECKING = @"Check for Updates";
 }
 
 - (void) menuSelectedSlack:(id)sender {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://pocketcluster.slack.com/"]];
+    NSString *slackPath = [[NSWorkspace sharedWorkspace] fullPathForApplication:@"Slack"];
+    if (ISNULL_STRING(slackPath)) {
+        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://pocketcluster.slack.com/"]];
+    } else {
+        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"slack://channel?id=C0AHR6N2G&team=T0AHV0ZLG"]];
+    }
 }
 
 - (void)menuSelectedAbout:(id)sender {
