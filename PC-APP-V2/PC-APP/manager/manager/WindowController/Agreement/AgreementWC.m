@@ -139,7 +139,6 @@ enum {
 
 
 #pragma mark - MonitorAppCheck
-
 // check system readiness
 - (void) didAppCheckSystemReadiness:(BOOL)isReady {
 }
@@ -197,7 +196,25 @@ enum {
         return;
     }
 
-    [[(PCSetup1VC *)[self.viewControllers objectAtIndex:2] progressLabel] setStringValue:@"Ready to Setup a Raspberry Pi cluster"];
+    [[(PCSetup1VC *)[self.viewControllers objectAtIndex:2] progressLabel] setStringValue:@"Ready to setup a cluster"];
 }
 
+#pragma mark - Monitoring Package
+// this show all the available package from api backend
+- (void) onAvailableListUpdateWith:(StatusCache *)aCache success:(BOOL)isSuccess error:(NSString *)anErrMsg {
+    for (id<MonitorPackage> vc in self.viewControllers) {
+        if ([vc conformsToProtocol:@protocol(MonitorPackage)]) {
+            [vc onAvailableListUpdateWith:aCache success:isSuccess error:anErrMsg];
+        }
+    }
+}
+
+// this show all the installed package in the system
+- (void) onInstalledListUpdateWith:(StatusCache *)aCache success:(BOOL)isSuccess error:(NSString *)anErrMsg {
+    for (id<MonitorPackage> vc in self.viewControllers) {
+        if ([vc conformsToProtocol:@protocol(MonitorPackage)]) {
+            [vc onInstalledListUpdateWith:aCache success:isSuccess error:anErrMsg];
+        }
+    }
+}
 @end

@@ -11,5 +11,5 @@
 #import "MonitorAppCheck.h"
 #import "MonitorStatus.h"
 
-@interface AgreementWC : BaseWindowController <MonitorAppCheck, MonitorStatus, StepControl>
+@interface AgreementWC : BaseWindowController <StepControl, MonitorAppCheck, MonitorStatus, MonitorPackage>
 @end
