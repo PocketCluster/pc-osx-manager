@@ -9,5 +9,5 @@
 #import "BaseWindowController.h"
 #import "StepStage.h"
 
-@interface NodeSetupWC : BaseWindowController <StepControl>
+@interface NodeSetupWC : BaseWindowController <StepControl, MonitorPackage>
 @end

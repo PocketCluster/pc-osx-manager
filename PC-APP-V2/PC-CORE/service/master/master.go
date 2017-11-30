@@ -73,6 +73,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
         netC    = make(chan service.Event)
         nodeC   = make(chan service.Event)
         statC   = make(chan service.Event)
+        bManC   = make(chan service.Event)
     )
     appLife.RegisterServiceWithFuncs(
         operation.ServiceBeaconMaster,
@@ -94,7 +95,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     }
                     return true
                 }
-                failtimout         *time.Ticker = time.NewTicker(time.Minute)
+                failtimout        *time.Ticker = time.NewTicker(time.Minute)
                 timer             *time.Ticker = time.NewTicker(time.Second)
                 beaconMan  beacon.BeaconManger = nil
                 vmctrl     masterctrl.VBoxMasterControl
@@ -197,36 +198,6 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                             log.Debug(err.Error())
                         }
                     }
-                    case b := <-beaconC: {
-                        bp, ok := b.Payload.(ucast.BeaconPack)
-                        if ok {
-                            err = beaconMan.TransitionWithBeaconData(bp, time.Now())
-                            if err != nil {
-                                log.Debugf("[AGENT] BEACON-RX Error : %v", err)
-                            }
-                        }
-                    }
-                    case s := <-searchC: {
-                        cp, ok := s.Payload.(mcast.CastPack)
-                        if ok {
-                            err = beaconMan.TransitionWithSearchData(cp, time.Now())
-                            if err != nil {
-                                log.Debugf("[AGENT] SEARCH-RX Error : %v", err)
-                            }
-                        }
-                    }
-                    // network monitor event
-                    case <- netC: {
-                        // TODO update primary address
-                        log.Debugf("[AGENT] Host Address changed")
-                    }
-                    // package node list service
-                    case <- nodeC: {
-                        nodeList := beaconMan.ReportLiveNodes()
-                        appLife.BroadcastEvent(service.Event{
-                            Name:ivent.IventReportLiveNodesResult,
-                            Payload:nodeList})
-                    }
                     // node status report service
                     case re := <- statC: {
                         ts, ok := re.Payload.(int64)
@@ -244,19 +215,60 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                             Name:ivent.IventMonitorNodeRespBeacon,
                             Payload:nodeStat})
                     }
+                    case b := <-beaconC: {
+                        bp, ok := b.Payload.(ucast.BeaconPack)
+                        if ok {
+                            err = beaconMan.BindNodeWithBeaconData(bp, time.Now())
+                            if err != nil {
+                                log.Debugf("[AGENT] BEACON-RX Error : %v", err)
+                            }
+                        }
+                    }
+                    case s := <-searchC: {
+                        cp, ok := s.Payload.(mcast.CastPack)
+                        if ok {
+                            err = beaconMan.RecoverNodeWithSearchData(cp, time.Now())
+                            if err != nil {
+                                log.Debugf("[AGENT] SEARCH-RX Error : %v", err)
+                            }
+                        }
+                    }
+                    // network monitor event
+                    case <- netC: {
+                        // TODO update primary address
+                        log.Debugf("[AGENT] Host Address changed")
+                    }
+                    // package node list service
+                    case <- nodeC: {
+                        nodeList := beaconMan.ReportLiveNodes()
+                        appLife.BroadcastEvent(service.Event{
+                            Name:ivent.IventReportLiveNodesResult,
+                            Payload:nodeList})
+                    }
+                    // when registration manager ask beacon mananger instance
+                    case <- bManC: {
+                        time.Sleep(time.Millisecond * 100)
+                        appLife.BroadcastEvent(service.Event{
+                            Name:ivent.IventLiveBeaconManagerRslt,
+                            Payload:beaconMan})
+                    }
                 }
             }
             return nil
         },
+        // service readiness checker
+        service.BindEventWithService(ivent.IventPcsshProxyInstanceSpawn,   teleC),
+        service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,     vboxC),
+
+        // monitoring
+        service.BindEventWithService(ivent.IventMonitorNodeReqStatus,      statC),
         service.BindEventWithService(ucast.EventBeaconCoreLocationReceive, beaconC),
         service.BindEventWithService(mcast.EventBeaconCoreSearchReceive,   searchC),
         service.BindEventWithService(ivent.IventNetworkAddressChange,      netC),
-        service.BindEventWithService(ivent.IventReportLiveNodesRequest,    nodeC),
-        service.BindEventWithService(ivent.IventMonitorNodeReqStatus,      statC),
 
-        // service readiness checker
-        service.BindEventWithService(ivent.IventPcsshProxyInstanceSpawn,   teleC),
-        service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn,     vboxC))
+        // request
+        service.BindEventWithService(ivent.IventReportLiveNodesRequest,    nodeC),
+        service.BindEventWithService(ivent.IventLiveBeaconManagerReq,      bManC))
 
     return nil
 }

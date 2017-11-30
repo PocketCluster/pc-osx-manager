@@ -65,6 +65,10 @@ const (
 )
 
 const (
+    TotalPossibleSlaveNodeCount int = 4
+)
+
+const (
     VBoxDefaultCoreBootImage   string = "pc-core.iso"
     VBoxDefualtCoreDiskName    string = "pc-core-hdd.vmdk"
     // 46 GB

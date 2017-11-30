@@ -20,6 +20,7 @@ const (
     IventOrchstInstanceSpawn     string = "ivent.orchst.instance.spawn"
     IventVboxCtrlInstanceSpawn   string = "ivent.vbox.ctrl.instance.spawn"
 
+
     // internal service spawn error for health monitor.
     // Only to be fired from "github.com/stkim1/pc-core/static/main.go" or initialization
     IventInternalSpawnError      string = "ivent.internal.spawn.error"
@@ -38,9 +39,15 @@ const (
     // monitor stopped
     IventMonitorStopResult       string = "ivent.monitor.stop.result"
 
+
     // for package node list
     IventReportLiveNodesRequest  string = "ivent.report.live.nodes.request"
     IventReportLiveNodesResult   string = "ivent.report.live.nodes.result"
+
+
+    // registration manager ask beacon mananger instance IventLiveBeaconManagerReq -> IventLiveBeaconManagerRlt
+    IventLiveBeaconManagerReq    string = "ivent.live.beacon.manager.request"
+    IventLiveBeaconManagerRslt   string = "ivent.live.beacon.manager.result"
 )
 
 // this is to broadcast masterctrl object w/ listener. It's shared with BeaconAgent + VBoxController

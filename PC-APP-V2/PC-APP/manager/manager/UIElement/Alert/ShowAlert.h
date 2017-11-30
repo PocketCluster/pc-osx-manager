@@ -9,4 +9,5 @@
 @interface ShowAlert : NSObject
 + (void) showWarningAlertWithTitle:(NSString *)aTitle message:(NSString *)aMessage;
 + (void) showTerminationAlertWithTitle:(NSString *)aTitle message:(NSString *)aMessage;
++ (void) showAlertMessageWithTitle:(NSString *)aTitle message:(NSString *)aMessage action:(void (^)(NSInteger result))anAction;
 @end

@@ -68,14 +68,14 @@
 }
 
 #pragma mark - StageStep
--(void)didControl:(NSObject<StepControl> *)aControl progressFrom:(NSObject<StageStep> *)aStep withResult:(NSDictionary *)aResult {
+-(void)didControl:(NSObject<StepControl> *)aControl progressedFrom:(NSObject<StageStep> *)aStep withResult:(NSDictionary *)aResult {
     if (aStep != self) {
         Log(@"this is not identical step!");
         return;
     }
 }
 
--(void)didControl:(NSObject<StepControl> *)aControl revertFrom:(NSObject<StageStep> *)aStep withResult:(NSDictionary *)aResult {
+-(void)didControl:(NSObject<StepControl> *)aControl revertedFrom:(NSObject<StageStep> *)aStep withResult:(NSDictionary *)aResult {
     if (aStep != self) {
         Log(@"this is not identical step!");
         return;

@@ -20,9 +20,6 @@ import (
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/service/ivent"
 )
-import (
-    "github.com/davecgh/go-spew/spew"
-)
 
 type BeaconEventNotification interface {
     BeaconEventPrepareJoin(slave *model.SlaveNode) error
@@ -86,8 +83,8 @@ func NewBeaconManager(cid string, vbox masterctrl.VBoxMasterControl, noti Beacon
 }
 
 type BeaconManger interface {
-    TransitionWithBeaconData(beaconD ucast.BeaconPack, ts time.Time) error
-    TransitionWithSearchData(searchD mcast.CastPack, ts time.Time) error
+    BindNodeWithBeaconData(beaconD ucast.BeaconPack, ts time.Time) error
+    RecoverNodeWithSearchData(searchD mcast.CastPack, ts time.Time) error
     TransitionWithTimestamp(ts time.Time) error
     Shutdown() error
 
@@ -121,22 +118,14 @@ func (b *beaconManger) Sanitize(s *model.SlaveNode) error {
     return nil
 }
 
-func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts time.Time) error {
-    var (
-        err error = nil
-        usm *slagent.PocketSlaveAgentMeta = nil
-    )
-
-    // suppose we've sort out what this is.
-    usm, err = slagent.UnpackedSlaveMeta(beaconD.Message)
+func (b *beaconManger) BindNodeWithBeaconData(beaconD ucast.BeaconPack, ts time.Time) error {
+    usm, err := slagent.UnpackedSlaveMeta(beaconD.Message)
     if err != nil {
-        return errors.WithStack(err)
+        // (Ignore) there are way too many unpackable packages.
+        return nil
     }
-
-    log.Debugf("[BEACON-RX] %v\n%v", beaconD.Address.IP.String(), spew.Sdump(usm))
-
-    // this packet looks for something else
-    if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != b.clusterID {
+    if len(usm.MasterBoundAgent) == 0 || usm.MasterBoundAgent != b.clusterID {
+        // (Ignore) since this come from a node belonged to other master or unregistered.
         return nil
     }
 
@@ -144,49 +133,39 @@ func (b *beaconManger) TransitionWithBeaconData(beaconD ucast.BeaconPack, ts tim
     pruneBeaconList(b)
 
     // check if beacon for this packet exists
-    var bLen int = len(b.beaconList)
+    var bLen int = beaconSize(b)
+
+    /*** protect b.beaconList as it could be accessed from registration manager ***/
+    b.Lock()
+    defer b.Unlock()
+
     for i := 0; i < bLen; i++  {
         bc := b.beaconList[i]
+
         if bc.SlaveNode().SlaveID == usm.SlaveID {
-            switch bc.CurrentState() {
-                case MasterInit:
-                    fallthrough
-                case MasterBindBroken:
-                    fallthrough
-                case MasterDiscarded: {
-                    log.Debugf("[BEACON-ERR] (%s):[%s] We've found beacon for this packet, but they are not in proper mode.", bc.CurrentState().String(), bc.SlaveNode().SlaveID)
-                    return nil
-                }
-                default: {
-                    return bc.TransitionWithSlaveMeta(&beaconD.Address, usm, ts)
-                }
+
+            state := bc.CurrentState()
+            if state == MasterBindRecovery || state == MasterBounded {
+                log.Debugf("[BEACON-RX] Node (%v|%v|%v) FOUND", usm.SlaveID, bc.CurrentState().String(), beaconD.Address.IP.String())
+                return bc.TransitionWithSlaveMeta(&beaconD.Address, usm, ts)
             }
+
+            return errors.Errorf("[BEACON-RX] Node (%v|%v|%v) in illegal state", usm.SlaveID, bc.CurrentState().String(), beaconD.Address.IP.String())
         }
     }
 
-    return nil
+    return errors.Errorf("[BEACON-RX] Node(%v|%v) unregistered node with same cluster id. *should never happen*", usm.SlaveID, beaconD.Address.IP.String())
 }
 
-func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.Time) error {
-    var (
-        bcFound bool            = false
-        mc MasterBeacon         = nil
-        err error               = nil
-        slave *model.SlaveNode  = nil
-        usm *slagent.PocketSlaveAgentMeta = nil
-        state MasterBeaconState = MasterBounded
-    )
-
-    usm, err = slagent.UnpackedSlaveMeta(searchD.Message)
+// only takes registered node packet. otherwise reject everything
+func (b *beaconManger) RecoverNodeWithSearchData(searchD mcast.CastPack, ts time.Time) error {
+    usm, err := slagent.UnpackedSlaveMeta(searchD.Message)
     if err != nil {
-        return errors.WithStack(err)
+        // (Ignore) there are way too many unpackable packages.
+        return nil
     }
-
-    log.Debugf("[SEARCH-RX] %v\n%v ", searchD.Address.IP.String(), spew.Sdump(usm))
-
-    // this packet looks for something else
-    if len(usm.MasterBoundAgent) != 0 && usm.MasterBoundAgent != b.clusterID {
-        log.Debugf("[SEARCH-RX] this packet belong to other master | usm.DiscoveryAgent.MasterBoundAgent %v | b.clusterID %v", usm.MasterBoundAgent, b.clusterID)
+    if len(usm.MasterBoundAgent) == 0 || usm.MasterBoundAgent != b.clusterID {
+        // (Ignore) since this come from a node belonged to other master or unregistered.
         return nil
     }
 
@@ -194,38 +173,28 @@ func (b *beaconManger) TransitionWithSearchData(searchD mcast.CastPack, ts time.
     pruneBeaconList(b)
 
     // check if beacon for this packet exists
-    var bLen int = len(b.beaconList)
+    var bLen int = beaconSize(b)
+
+    /*** protect b.beaconList as it could be accessed from registration manager ***/
+    b.Lock()
+    defer b.Unlock()
+
     for i := 0; i < bLen; i++  {
         bc := b.beaconList[i]
+
+        // this beacon is waiting for an inputs
         if bc.SlaveNode().SlaveID == usm.SlaveID {
 
-            // this beacons are created and waiting for an input
-            state = bc.CurrentState()
-            if state == MasterInit || state == MasterBindBroken {
-                log.Debugf("[SEARCH-NODE-FOUND] (%s | %s) ", bc.SlaveNode().SlaveID, bc.CurrentState().String())
+            if bc.CurrentState() == MasterBindBroken {
+                log.Debugf("[SEARCH-RX] Node (%v|%v|%v) FOUND", usm.SlaveID, bc.CurrentState().String(), searchD.Address.IP.String())
                 return bc.TransitionWithSlaveMeta(&searchD.Address, usm, ts)
             }
 
-            // if beacon is not in searching state, then mark and we've found target
-            bcFound = true
-            break
+            return errors.Errorf("[SEARCH-RX] Node (%v|%v|%v) in illegal mode", usm.SlaveID, bc.CurrentState().String(), searchD.Address.IP.String())
         }
     }
 
-    // since we've not found, create new beacon
-    if !bcFound {
-        slave = model.NewSlaveNode(b)
-        // we'll ignore message for now
-        b.notiReceiver.BeaconEventPrepareJoin(slave)
-        mc, err = NewMasterBeacon(MasterInit, slave, b.commChannel, b)
-        if err != nil {
-            return errors.WithStack(err)
-        }
-        insertMasterBeacon(b, mc)
-        return mc.TransitionWithSlaveMeta(&searchD.Address, usm, ts)
-    }
-
-    return errors.Errorf("[SEARCH-ERR] TransitionWithSearchData reaches at the end. *this should never happen, and might be a malicious attempt*")
+    return errors.Errorf("[SEARCH-RX] Node (%v|%v) unregisterd node with same cluster id. *should never happen*", usm.SlaveID, searchD.Address.IP.String())
 }
 
 func (b *beaconManger) TransitionWithTimestamp(ts time.Time) error {
@@ -235,7 +204,12 @@ func (b *beaconManger) TransitionWithTimestamp(ts time.Time) error {
     pruneBeaconList(b)
 
     // check if beacon for this packet exists
-    var bLen int = len(b.beaconList)
+    var bLen int = beaconSize(b)
+
+    /*** protect b.beaconList as it could be accessed from registration manager ***/
+    b.Lock()
+    defer b.Unlock()
+
     for i := 0; i < bLen; i++  {
         bc := b.beaconList[i]
         err = bc.TransitionWithTimestamp(ts)
@@ -371,7 +345,14 @@ func (b *beaconManger) OnStateTranstionFailure(state MasterBeaconState, slave *m
     return nil
 }
 
-// --- private static methods --- //
+
+// --- * --- * --- * --- * --- * --- * --- *  private static methods --- * --- * --- * --- * --- * --- * --- * --- //
+func beaconSize(b *beaconManger) int {
+    b.Lock()
+    defer b.Unlock()
+
+    return len(b.beaconList)
+}
 
 func pruneBeaconList(b *beaconManger) {
     b.Lock()

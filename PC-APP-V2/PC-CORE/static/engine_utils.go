@@ -87,36 +87,8 @@ func setupBaseUsers(pcsshCfg *tervice.PocketConfig) error {
     return errors.WithStack(err)
 }
 
-// stop baseservice
-func stopBaseService(appLife *appMainLife, feeder route.ResponseFeeder) error {
-    // binf channel
-    resultC := make(chan service.Event)
-    err := appLife.BindDiscreteEvent(ivent.IventMonitorStopResult, resultC)
-    if err != nil {
-        return errors.WithMessage(err,"[LIFE] unable to stop monitoring...")
-    }
-
-    // ask node list
-    appLife.BroadcastEvent(service.Event{Name:ivent.IventMonitorStopRequest})
-    <- resultC
-    appLife.UntieDiscreteEvent(ivent.IventMonitorStopResult)
-    appLife.StopServices()
-
-    // we send it's ok to quit signal to frontend
-    data, err := json.Marshal(route.ReponseMessage{
-        "app-shutdown-ready": {
-            "status": true,
-        },
-    })
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    err = feeder.FeedResponseForGet(routepath.RpathAppPrepShutdown(), string(data))
-    return errors.WithStack(err)
-}
-
 // shutdown nodes and stop services
-func shutdownCluster(appLife *appMainLife, feeder route.ResponseFeeder, pcsshCfg *tervice.PocketConfig) error {
+func shutdownSlaveNodes(appLife *appMainLife, pcsshCfg *tervice.PocketConfig) error {
     // find root user
     roots, err := model.FindUserMetaWithLogin("root")
     if err != nil {
@@ -156,6 +128,32 @@ func shutdownCluster(appLife *appMainLife, feeder route.ResponseFeeder, pcsshCfg
         clt.Logout()
     }
 
-    return stopBaseService(appLife, feeder)
+    return nil
 }
 
+// stop baseservice
+func stopHealthMonitor(appLife *appMainLife) error {
+    // stop health and wait
+    resultC := make(chan service.Event)
+    err := appLife.BindDiscreteEvent(ivent.IventMonitorStopResult, resultC)
+    if err != nil {
+        return errors.WithMessage(err,"[LIFE] unable to stop monitoring...")
+    }
+    appLife.BroadcastEvent(service.Event{Name:ivent.IventMonitorStopRequest})
+    <- resultC
+    return appLife.UntieDiscreteEvent(ivent.IventMonitorStopResult)
+}
+
+func feedShutdownReadySignal(feeder route.ResponseFeeder) error {
+    // we send it's ok to quit signal to frontend
+    data, err := json.Marshal(route.ReponseMessage{
+        "app-shutdown-ready": {
+            "status": true,
+        },
+    })
+    if err != nil {
+        return errors.WithStack(err)
+    }
+    err = feeder.FeedResponseForGet(routepath.RpathAppPrepShutdown(), string(data))
+    return errors.WithStack(err)
+}

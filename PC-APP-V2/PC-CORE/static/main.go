@@ -19,6 +19,7 @@ import (
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/rasker"
     "github.com/stkim1/pc-core/rasker/pkgtask"
+    "github.com/stkim1/pc-core/rasker/regnode"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/initcheck"
     "github.com/stkim1/pc-core/route/install"
@@ -87,8 +88,25 @@ func main() {
                                     ServiceSupervisor: appLife.ServiceSupervisor,
                                     Router: appLife.Router},
                                     theFeeder)
+
+                                // package list
                                 list.InitRouthPathListAvailable(appLife, theFeeder)
                                 list.InitRouthPathListInstalled(appLife, theFeeder)
+
+                                // node registration
+                                regnode.InitNodeRegisterCycle(rasker.RouteTasker{
+                                    ServiceSupervisor: appLife.ServiceSupervisor,
+                                    Router: appLife.Router},
+                                    theFeeder)
+                                regnode.InitNodeRegisterStop(rasker.RouteTasker{
+                                    ServiceSupervisor: appLife.ServiceSupervisor,
+                                    Router: appLife.Router},
+                                    theFeeder)
+                                regnode.InitNodeRegisterCanidate(rasker.RouteTasker{
+                                    ServiceSupervisor: appLife.ServiceSupervisor,
+                                    Router: appLife.Router},
+                                    theFeeder)
+
                                 log.Debugf("[LIFE] service path registration")
 
                                 // (2017/11/10) we ought to have frontend check engine response, but then it complicated network monitoring.
@@ -100,8 +118,6 @@ func main() {
 
                                 // make sure initialization happens only once
                                 log.Debugf("[LIFE] app is now created, fully initialized %v", e.String())
-                            } else {
-
                             }
                         }
                         case lifecycle.CrossOff: {
@@ -379,30 +395,52 @@ func main() {
                     }
 
                     case operation.CmdBaseServiceStop: {
-                        err := stopVboxCore(vboxCore)
-                        if err != nil {
-                            log.Errorf("[ERROR] unable to close core node %v", err.Error())
-                        }
-                        err = stopBaseService(appLife, theFeeder)
+                        err := stopHealthMonitor(appLife)
                         if err != nil {
                             log.Errorf("[ERROR] unable to terminate app %v", err.Error())
                         }
-                        err = model.CloseRecordGate()
+                        // as we close service and shutdown vbox core, we'll have chance to clean up docker-compose task
+                        err = appLife.StopServices()
                         if err != nil {
-                            log.Errorf("[ERROR] error in closing storage %v", err.Error())
-                        }
-                        log.Debugf("[OP] %v", e.String())
-                    }
-                    case operation.CmdClusterShutdown: {
-                        err := shutdownCluster(appLife, theFeeder, appCfg.PCSSH)
-                        if err != nil {
-                            log.Errorf("[ERROR] unable to shutdown cluster %v", err.Error())
+                            log.Errorf("[ERROR] unable to close core node %v", err.Error())
                         }
                         err = stopVboxCore(vboxCore)
                         if err != nil {
                             log.Errorf("[ERROR] unable to close core node %v", err.Error())
                         }
                         err = model.CloseRecordGate()
+                        if err != nil {
+                            log.Errorf("[ERROR] error in closing storage %v", err.Error())
+                        }
+                        err = feedShutdownReadySignal(theFeeder)
+                        if err != nil {
+                            log.Errorf("[ERROR] error in closing storage %v", err.Error())
+                        }
+                        log.Debugf("[OP] %v", e.String())
+                    }
+                    case operation.CmdClusterShutdown: {
+                        err := shutdownSlaveNodes(appLife, appCfg.PCSSH)
+                        if err != nil {
+                            log.Errorf("[ERROR] unable to shutdown cluster %v", err.Error())
+                        }
+                        err = stopHealthMonitor(appLife)
+                        if err != nil {
+                            log.Errorf("[ERROR] unable to terminate app %v", err.Error())
+                        }
+                        // as we close service and shutdown vbox core, we'll have chance to clean up docker-compose task
+                        err = appLife.StopServices()
+                        if err != nil {
+                            log.Errorf("[ERROR] unable to close core node %v", err.Error())
+                        }
+                        err = stopVboxCore(vboxCore)
+                        if err != nil {
+                            log.Errorf("[ERROR] unable to close core node %v", err.Error())
+                        }
+                        err = model.CloseRecordGate()
+                        if err != nil {
+                            log.Errorf("[ERROR] error in closing storage %v", err.Error())
+                        }
+                        err = feedShutdownReadySignal(theFeeder)
                         if err != nil {
                             log.Errorf("[ERROR] error in closing storage %v", err.Error())
                         }

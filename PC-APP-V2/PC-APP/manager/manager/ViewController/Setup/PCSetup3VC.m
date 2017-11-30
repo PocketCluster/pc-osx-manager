@@ -23,14 +23,14 @@ static NSString * const kSizeColTag = @"sizeCol";
 
 @implementation PCSetup3VC {
     NSInteger _selectedIndex;
-    BOOL      _isInstalling;
 }
 
 - (void) finishConstruction {
     [super finishConstruction];
     [self setTitle:@"Install Package"];
 
-    _isInstalling = NO;
+    // reset selected index
+    _selectedIndex = -1;
 }
 
 - (void) viewDidLoad {
@@ -42,19 +42,11 @@ static NSString * const kSizeColTag = @"sizeCol";
 
 - (void) viewDidAppear {
     [super viewDidAppear];
-
-    // reset selected index
-    _selectedIndex = -1;
-
-    // TODO : checking user authed
-
-    [self _disableControls];
-    [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_AVAILABLE];
 }
 
 #pragma mark - NSWindowDelegate
 - (BOOL)windowShouldClose:(NSWindow *)sender {
-    if (_isInstalling) {
+    if ([[StatusCache SharedStatusCache] isPkgInstalling]) {
         [ShowAlert
          showWarningAlertWithTitle:@"Please wait until the install finishes"
          message:@"The installation takes some time. We'll let you know as soon as it's done."];
@@ -76,8 +68,8 @@ static NSString * const kSizeColTag = @"sizeCol";
     Package *pkg = [[[StatusCache SharedStatusCache] packageList] objectAtIndex:row];
     if ([[aTableColumn identifier] isEqualToString:kPkgColTag]) {
         return pkg.packageDescription;
-
-    } else if ([[aTableColumn identifier] isEqualToString:kSizeColTag]) {
+    }
+    if ([[aTableColumn identifier] isEqualToString:kSizeColTag]) {
         return pkg.totalImageSize;
     }
     return nil;
@@ -111,10 +103,24 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
     return anIndex;
 }
 
+#pragma mark - StageStep
+- (void) control:(NSObject<StepControl> *)aControl askedProgressWithParam:(NSDictionary *)aParam {
+    // TODO : checking user authed
+
+    [self _disableControls];
+    [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_AVAILABLE];
+}
+- (void) didControl:(NSObject<StepControl> *)aControl progressedFrom:(NSObject<StageStep> *)aStep withResult:(NSDictionary *)aResult {
+}
+
+- (void) control:(NSObject<StepControl> *)aControl askedRevertWithParam:(NSDictionary *)aParam {
+}
+- (void) didControl:(NSObject<StepControl> *)aControl revertedFrom:(NSObject<StageStep> *)aStep withResult:(NSDictionary *)aResult {
+}
+
 #pragma mark - Monitoring Package
 // this show all the available package from api backend
 - (void) onAvailableListUpdateWith:(StatusCache *)aCache success:(BOOL)isSuccess error:(NSString *)anErrMsg {
-
     NSArray<Package *> *list = [aCache packageList];
     if (isSuccess && list != nil && [list count]) {
         [self.packageTable reloadData];
@@ -145,6 +151,8 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
 
 #pragma mark - Setup UI states
 - (void)_enableControls {
+    [[StatusCache SharedStatusCache] setPkgInstalling:NO];
+
     [self.btnInstall    setEnabled:YES];
     [self.btnCancel     setEnabled:YES];
     [self.progressLabel setStringValue:@""];
@@ -155,11 +163,11 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
     [self.circularProgress displayIfNeeded];
     [self.circularProgress removeFromSuperview];
     [self setCircularProgress:nil];
-
-    _isInstalling = NO;
 }
 
 - (void)_disableControls {
+    [[StatusCache SharedStatusCache] setPkgInstalling:YES];
+
     [self.btnInstall    setEnabled:NO];
     [self.btnCancel     setEnabled:NO];
     [self.progressLabel setStringValue:@""];
@@ -175,8 +183,6 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
     [ind displayIfNeeded];
 
     [self setCircularProgress:ind];
-
-    _isInstalling = YES;
 }
 
 #pragma mark - IBACTION
