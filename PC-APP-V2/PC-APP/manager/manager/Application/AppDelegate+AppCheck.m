@@ -148,7 +148,7 @@
              [[StatusCache SharedStatusCache] setAppReady:YES];
 
              // start basic service
-             // OpsCmdBaseServiceStart();
+             OpsCmdBaseServiceStart();
 
          } else {
              if ([[StatusCache SharedStatusCache] isFirstRun]) {
