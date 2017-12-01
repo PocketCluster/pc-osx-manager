@@ -238,7 +238,7 @@ func (s *srvcSupervisor) fanOut() {
             case event := <-s.eventsC: {
                 waiters := s.getWaiters(event.Name)
                 for _, waiter := range waiters {
-                    s.notifyWaiter(waiter, event)
+                    go s.notifyWaiter(waiter, event)
                 }
             }
         }
