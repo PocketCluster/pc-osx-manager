@@ -234,6 +234,87 @@ func (s *SupervisorSuite) Test_Multiple_Service_Receive_Event(c *C) {
     close(eventLatch)
 }
 
+
+func (s *SupervisorSuite) Test_Multiple_Service_Receive_SameEvent_With_Different_Delay_Response(c *C) {
+    var(
+        exitChecker1 string = ""
+        exitChecker2 string = ""
+
+        eventLatch1 = make(chan string)
+        eventLatch2 = make(chan string)
+
+        eventC1    = make(chan Event)
+        eventC2    = make(chan Event)
+    )
+    err := s.app.StartServices()
+    c.Assert(err, IsNil)
+
+    err = s.app.RegisterServiceWithFuncs(
+        testService1,
+        func() error {
+            for {
+                select {
+                    case e := <-eventC1: {
+                        eventLatch1 <- e.Payload.(string)
+                    }
+                    case <- s.app.StopChannel(): {
+                        exitChecker1 = exitValue
+                        return nil
+                    }
+                    default:
+                }
+            }
+        },
+        BindEventWithService(testEvent1, eventC1))
+    c.Assert(err, IsNil)
+    c.Assert(s.app.serviceCount(), Equals, 1)
+
+    err = s.app.RegisterServiceWithFuncs(
+        testService2,
+        func() error {
+            for {
+                select {
+                    case e := <-eventC2: {
+                        eventLatch2 <- e.Payload.(string)
+                    }
+                    case <- s.app.StopChannel(): {
+                        exitChecker2 = exitValue
+                        return nil
+                    }
+                    default:
+                }
+            }
+        },
+        BindEventWithService(testEvent1, eventC2))
+    c.Assert(err, IsNil)
+    c.Assert(s.app.serviceCount(), Equals, 2)
+
+    s.app.BroadcastEvent(Event{Name:testEvent1, Payload:testValue1})
+    c.Assert(<-eventLatch2, Equals, testValue1)
+    time.Sleep(time.Second)
+    s.app.BroadcastEvent(Event{Name:testEvent1, Payload:testValue1})
+    c.Assert(<-eventLatch2, Equals, testValue1)
+    time.Sleep(time.Second)
+
+    // before checking the first signal, we'll fire another one to make sure system doesn't go down
+    c.Assert(<-eventLatch1, Equals, testValue1)
+    c.Assert(<-eventLatch1, Equals, testValue1)
+
+    err = s.app.StopServices()
+    c.Assert(err, IsNil)
+    c.Check(exitChecker1, Equals, exitValue)
+    c.Check(exitChecker2, Equals, exitValue)
+    c.Assert(s.app.serviceCount(), Equals, 0)
+
+    // check if water queue is empty
+    c.Assert(len(s.app.(*srvcSupervisor).eventWaiters), Equals, 1)
+    c.Assert(len(s.app.(*srvcSupervisor).eventWaiters[testEvent1]), Equals, 0)
+
+    // close everything
+    close(eventLatch1)
+    close(eventLatch2)
+}
+
 func (s *SupervisorSuite) Test_Service_And_Individual_Exchange_Event(c *C) {
     var(
         exitChecker1 string = ""

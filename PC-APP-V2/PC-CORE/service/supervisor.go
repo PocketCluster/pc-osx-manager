@@ -222,6 +222,9 @@ func (s *srvcSupervisor) getWaiters(eventName string) []*waiter {
 
 func (s *srvcSupervisor) notifyWaiter(w *waiter, evt Event) {
     select {
+        // when the supervisor is stopped, no notification will be made
+        case <- s.stoppedC:
+        // otherwise deliver event
         case w.eventC <- evt:
     }
 }
