@@ -42,6 +42,10 @@
 - [ ] Look carefully `etcd` TLS configuration behave with `docker-compose` connected.
   * At initial, etcd `network/bridged` API point isn't available and dockerd complains. This seems to be normal though.
   * <https://dims-devguide.readthedocs.io/en/latest/dockerdatacenter.html>
+- [ ] **Slave** : Uninterrupt Setup Issues
+  * `partprobe` to reload reformatted partition
+  * `/etc/resolv.conf` to preset localhost as nameserver
+  * `/etc/ssl/certs/ca-certificate.crt` to be refreshed and reconfigured for update
 - [ ] **Slave** : Remove unnecessary `const` in `slagent` package such as `SLAVE_CLUSTER_MEMBERS`
 - [ ] **Slave** : Remove unnecessary `field` in `PocketSlaveDiscovery` & `PocketSlaveDiscovery` struct
 - [ ] **Slave** : search logic in master `Beacon` package
@@ -49,6 +53,7 @@
 - [ ] **Slave** <-> Master `timezone` incompatibility
 - [ ] **Slave** : config should be able to tell if Slave node is bounded or not by reading config
 - [ ] **Slave** : After changing hostname, please updata `/etc/hosts`
+- [ ] **Core**  : Setup the certificate in the way the debug `vagrant` host and `pc-core` VBox host can co-exist for image push && pull
 - [ ] _Master_ interface refresh logic
 - [ ] _Master_ SQLite encryption
 - [ ] _Master_ Remove unnecessary `const` & `field` in `msagent` package
