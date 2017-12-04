@@ -75,3 +75,7 @@ const (
     //VBoxDefualtCoreDiskSize    uint   = 128000
     VBoxDefualtCoreDiskSize    uint   = 46000
 )
+
+const (
+    PocketClusterAPIHost       string = "https://api.pocketcluster.io"
+)

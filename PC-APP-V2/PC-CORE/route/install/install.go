@@ -99,7 +99,7 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
 
         // --- --- --- --- --- download meta first --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Downloading package information...")
-        metaReq, err := apireq.NewRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.MetaURL), false)
+        metaReq, err := apireq.NewRequest(fmt.Sprintf("%s%s", defaults.PocketClusterAPIHost, pkg.MetaURL), false)
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access package meta data"))
         }
@@ -129,7 +129,7 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
 
         //  --- --- --- --- --- download repo list --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Checking image repositories...")
-        repoReq, err := apireq.NewRequest("https://api.pocketcluster.io/service/v014/package/repo", false)
+        repoReq, err := apireq.NewRequest(fmt.Sprintf("%s/service/v014/package/repo", defaults.PocketClusterAPIHost), false)
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access repository list"))
         }
@@ -148,7 +148,7 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
 
         //  --- --- --- --- --- download core sync --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Downloading core image...")
-        cSyncReq, err := apireq.NewRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.CoreImageSync), true)
+        cSyncReq, err := apireq.NewRequest(fmt.Sprintf("%s%s", defaults.PocketClusterAPIHost, pkg.CoreImageSync), true)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync core image"))
         }
@@ -167,7 +167,7 @@ func InitRoutePathInstallPackage(appLife route.Router, feeder route.ResponseFeed
 
         //  --- --- --- --- --- download node sync --- --- --- --- ---
         _ = makeMessageFeedBack(feeder, rpProgress, "Downloading node image...")
-        nSyncReq, err := apireq.NewRequest(fmt.Sprintf("https://api.pocketcluster.io%s", pkg.NodeImageSync), true)
+        nSyncReq, err := apireq.NewRequest(fmt.Sprintf("%s%s", defaults.PocketClusterAPIHost, pkg.NodeImageSync), true)
         if err != nil {
             return feedError(errors.WithMessage(err, "unable to sync node image"))
         }
