@@ -48,6 +48,7 @@
 }
 
 -(void)shouldControlRevertFrom:(NSObject<StageStep> *)aStep withParam:(NSDictionary *)aParam {
+    [self close];
 }
 
 #pragma mark - MonitorPackage
