@@ -462,6 +462,8 @@ func (r *registerManager) GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPa
 
     // no more registration
     if !r.isRegisteringNode {
+        r.Unlock()
+        r.beaconManger.Unlock()
         return errors.Errorf("[REGISTER-RX] node registration is not triggered")
     }
 
