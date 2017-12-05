@@ -18,11 +18,11 @@ import (
     "github.com/stkim1/pc-core/extlib/pcssh/sshadmin"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/rasker"
+    "github.com/stkim1/pc-core/rasker/install"
     "github.com/stkim1/pc-core/rasker/pkgtask"
     "github.com/stkim1/pc-core/rasker/regnode"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/initcheck"
-    "github.com/stkim1/pc-core/route/install"
     "github.com/stkim1/pc-core/route/list"
     "github.com/stkim1/pc-core/service"
     "github.com/stkim1/pc-core/service/container"
@@ -331,7 +331,11 @@ func main() {
                         // after this, we can take time to start up, and open external listener once everyone is all ready.
 
                         // --- additional route path event ---
-                        install.InitRoutePathInstallPackage(appLife, theFeeder, appCfg.PCSSH)
+                        install.InitRoutePathInstallPackage(
+                            rasker.RouteTasker{
+                                ServiceSupervisor: appLife.ServiceSupervisor,
+                                Router: appLife.Router},
+                            theFeeder, appCfg.PCSSH)
 
                         // --- initialize environment ---
                         // (user setup, vbox core init/ start)
