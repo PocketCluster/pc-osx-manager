@@ -53,6 +53,7 @@
 - [ ] **Slave** <-> Master `timezone` incompatibility
 - [ ] **Slave** : config should be able to tell if Slave node is bounded or not by reading config
 - [ ] **Slave** : After changing hostname, please updata `/etc/hosts`
+- [ ] **Slave** : config `/etc/resolve.conf` to add local host as a name server
 - [ ] **Core**  : Setup the certificate in the way the debug `vagrant` host and `pc-core` VBox host can co-exist for image push && pull
 - [ ] _Master_ interface refresh logic
 - [ ] _Master_ SQLite encryption
