@@ -206,7 +206,7 @@ func InitRoutePathInstallPackage(appLife rasker.RouteTasker, feeder route.Respon
                 case defaults.PocketClusterCoreName: {
                     // --- --- --- --- --- install image to core --- --- --- --- ---
                     _ = makeMessageFeedBack(feeder, rpProgress, "Installing core image...")
-                    ccli, err := dockertool.NewContainerClient(fmt.Sprintf("tcp://%s:%s", defaults.PocketClusterCoreName, defaults.DefaultSecureDockerPort), "1.24")
+                    ccli, err := dockertool.NewContainerClient(fmt.Sprintf("tcp://%s:%s", defaults.PocketClusterCoreName, defaults.DefaultSecureDockerPort), "1.26")
                     if err != nil {
                         return feedError(errors.WithMessage(err, "unable to make connection to pc-core"))
                     }
@@ -250,7 +250,7 @@ func InitRoutePathInstallPackage(appLife rasker.RouteTasker, feeder route.Respon
                 default: {
                     // --- --- --- --- --- install image to nodes --- --- --- --- ---
                     _ = makeMessageFeedBack(feeder, rpProgress, fmt.Sprintf("Installing node image to %v", tNode))
-                    ncli, err := dockertool.NewContainerClient(fmt.Sprintf("tcp://%s:%s", tNode, defaults.DefaultSecureDockerPort), "1.24")
+                    ncli, err := dockertool.NewContainerClient(fmt.Sprintf("tcp://%s:%s", tNode, defaults.DefaultSecureDockerPort), "1.26")
                     if err != nil {
                         return feedError(errors.WithMessage(err, "unable to make connection to " + tNode))
                     }
