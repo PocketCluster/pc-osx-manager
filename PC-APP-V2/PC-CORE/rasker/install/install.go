@@ -249,7 +249,7 @@ func InitRoutePathInstallPackage(appLife rasker.RouteTasker, feeder route.Respon
 
                 default: {
                     // --- --- --- --- --- install image to nodes --- --- --- --- ---
-                    _ = makeMessageFeedBack(feeder, rpProgress, "Installing node image to " + tNode)
+                    _ = makeMessageFeedBack(feeder, rpProgress, fmt.Sprintf("Installing node image to %v", tNode))
                     ncli, err := dockertool.NewContainerClient(fmt.Sprintf("tcp://%s:%s", tNode, defaults.DefaultSecureDockerPort), "1.24")
                     if err != nil {
                         return feedError(errors.WithMessage(err, "unable to make connection to " + "pc-node1"))
