@@ -281,12 +281,14 @@ func NewRegistrySampleConfig() *configuration.Configuration {
             }                           `yaml:"manifests,omitempty"`
         } {}
 
+        /* (2018/01/14) this is omitted due to distribution downgraded to d22e09a6686c32be8c17b684b639da4b90efe320
         // Policy configures registry policy options.
         policy = struct {
             Repository struct {
                 Classes []string        `yaml:"classes"`
             }                           `yaml:"repository,omitempty"`
         } {}
+        */
     )
 
     return &configuration.Configuration {
@@ -304,7 +306,7 @@ func NewRegistrySampleConfig() *configuration.Configuration {
         Proxy:          configuration.Proxy{},
         Compatibility:  compatibility,
         Validation:     validation,
-        Policy:         policy,
+        // Policy:         policy,
     }
 }
 
