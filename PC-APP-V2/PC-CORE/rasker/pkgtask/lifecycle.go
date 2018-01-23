@@ -60,15 +60,14 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
         appLife.UntieDiscreteEvent(ivent.IventReportLiveNodesResult)
         nlist, ok := nr.Payload.([]string)
         if !ok {
-            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "unable to access proper node list"))
+            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.New("unable to access proper node list"))
         }
 
         // 2-a. clean up any previous residue
         for _, node := range nlist {
             if ccli, cerr := dockertool.NewContainerClient(fmt.Sprintf("tcp://%s:%s", node, defaults.DefaultSecureDockerPort), "1.24");
             cerr != nil {
-                log.Error(err.Error())
-                return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "unable to clean residue from the last run"))
+                return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(cerr, "unable to clean residue from the last run"))
             } else {
                 if err := dockertool.CleanupContainer(ccli); err != nil {
                     log.Errorf("container cleanup error %v", err.Error())

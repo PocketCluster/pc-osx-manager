@@ -47,11 +47,11 @@
               didExecutionStartup:pkg
               success:NO
               error:error];
-
+#if 0
              [ShowAlert
               showWarningAlertWithTitle:@"Unable to Start Package"
               message:error];
-
+#endif
          } else {
              // package succeed to run
              Package *pkg = [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecStarted];
@@ -89,11 +89,11 @@
               didExecutionStartup:pkg
               success:NO
               error:error];
-
+#if 0
              [ShowAlert
               showWarningAlertWithTitle:@"Package Stop Error"
               message:error];
-
+#endif
          } else {
              [self
               didExecutionStartup:pkg
@@ -286,12 +286,12 @@
              // once this happens there is no way to fix this. just alert and kill the app.
              // (set the node timeup flag so termination process could begin)
              [[StatusCache SharedStatusCache] setTimeUpNodeOnline:YES];
-
+#if 0
              // this supposed to be in 
              [ShowAlert
               showTerminationAlertWithTitle:@"PocketCluster Startup Error"
               message:error];
-
+#endif
          } else {
              // setup state and notify those who need to listen
              [[StatusCache SharedStatusCache] setServiceError:nil];
