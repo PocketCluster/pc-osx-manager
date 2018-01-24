@@ -42,15 +42,21 @@
                  return;
              }
 
-             [self
-              didExecutionStartup:pkg
-              success:NO
-              error:error];
+             [[NSOperationQueue mainQueue]
+              addOperationWithBlock:^{
+                  if(belf){
+                      [belf
+                       didExecutionStartup:pkg
+                       success:NO
+                       error:error];
+                  }
 #if 0
-             [ShowAlert
-              showWarningAlertWithTitle:@"Unable to Start Package"
-              message:error];
+                  [ShowAlert
+                   showWarningAlertWithTitle:@"Unable to Start Package"
+                   message:error];
 #endif
+              }];
+
          } else {
              // package succeed to run
              Package *pkg = [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecStarted];
@@ -59,10 +65,15 @@
                  return;
              }
 
-             [self
-              didExecutionStartup:pkg
-              success:YES
-              error:nil];
+             [[NSOperationQueue mainQueue]
+              addOperationWithBlock:^{
+                  if(belf){
+                      [belf
+                       didExecutionStartup:pkg
+                       success:YES
+                       error:nil];
+                  }
+              }];
          }
      }];
 
@@ -84,21 +95,31 @@
          if (![[response valueForKeyPath:@"package-kill.status"] boolValue]) {
              NSString *error = [response valueForKeyPath:@"package-kill.error"];
 
-             [self
-              didExecutionStartup:pkg
-              success:NO
-              error:error];
+             [[NSOperationQueue mainQueue]
+              addOperationWithBlock:^{
+                  if(belf){
+                      [belf
+                       didExecutionKill:pkg
+                       success:NO
+                       error:error];
+                  }
 #if 0
-             [ShowAlert
-              showWarningAlertWithTitle:@"Package Stop Error"
-              message:error];
+                  [ShowAlert
+                   showWarningAlertWithTitle:@"Package Stop Error"
+                   message:error];
 #endif
-         } else {
-             [self
-              didExecutionStartup:pkg
-              success:YES
-              error:nil];
+              }];
 
+         } else {
+             [[NSOperationQueue mainQueue]
+              addOperationWithBlock:^{
+                  if(belf){
+                      [belf
+                       didExecutionKill:pkg
+                       success:YES
+                       error:nil];
+                  }
+              }];
          }
      }];
 
@@ -120,16 +141,26 @@
 
          // if some reason, process listing fails
          if (![[response valueForKeyPath:@"package-proc.status"] boolValue]) {
-             [self
-              didExecutionStartup:pkg
-              success:NO
-              error:[response valueForKeyPath:@"package-proc.error"]];
+             [[NSOperationQueue mainQueue]
+              addOperationWithBlock:^{
+                  if(belf){
+                      [belf
+                       onExecutionProcess:pkg
+                       success:NO
+                       error:[response valueForKeyPath:@"package-proc.error"]];
+                  }
+              }];
 
          } else {
-             [self
-              didExecutionStartup:pkg
-              success:YES
-              error:nil];
+             [[NSOperationQueue mainQueue]
+              addOperationWithBlock:^{
+                  if(belf){
+                      [belf
+                       onExecutionProcess:pkg
+                       success:YES
+                       error:nil];
+                  }
+              }];
          }
      }];
 
@@ -141,21 +172,31 @@
 
          // (2017/10/25) package related error message display should be handled in UI part
          if (![[response valueForKeyPath:@"package-available.status"] boolValue]) {
-             [belf
-              onInstalledListUpdateWith:[StatusCache SharedStatusCache]
-              success:NO
-              error:[response valueForKeyPath:@"package-available.error"]];
+             [[NSOperationQueue mainQueue]
+              addOperationWithBlock:^{
+                  if(belf){
+                      [belf
+                       onInstalledListUpdateWith:[StatusCache SharedStatusCache]
+                       success:NO
+                       error:[response valueForKeyPath:@"package-available.error"]];
+                  }
+              }];
 
-             return;
+         } else {
+             [[StatusCache SharedStatusCache]
+              updatePackageList:[response valueForKeyPath:@"package-available.list"]];
+
+             [[NSOperationQueue mainQueue]
+              addOperationWithBlock:^{
+                  if(belf){
+                      [belf
+                       onInstalledListUpdateWith:[StatusCache SharedStatusCache]
+                       success:YES
+                       error:nil];
+                  }
+              }];
+
          }
-
-         [[StatusCache SharedStatusCache]
-          updatePackageList:[response valueForKeyPath:@"package-available.list"]];
-
-         [belf
-          onInstalledListUpdateWith:[StatusCache SharedStatusCache]
-          success:YES
-          error:nil];
      }];
 
     // --- --- --- --- --- --- [inquiry] package installed list --- --- --- --- --- --- --
@@ -166,21 +207,30 @@
 
          // (2017/10/25) package related error message display should be handled in UI part
          if (![[response valueForKeyPath:@"package-installed.status"] boolValue]) {
-             [belf
-              onInstalledListUpdateWith:[StatusCache SharedStatusCache]
-              success:NO
-              error:[response valueForKeyPath:@"package-installed.error"]];
+             [[NSOperationQueue mainQueue]
+              addOperationWithBlock:^{
+                  if(belf){
+                      [belf
+                       onInstalledListUpdateWith:[StatusCache SharedStatusCache]
+                       success:NO
+                       error:[response valueForKeyPath:@"package-installed.error"]];
+                  }
+              }];
 
-             return;
+         } else {
+             [[StatusCache SharedStatusCache]
+              updatePackageList:[response valueForKeyPath:@"package-installed.list"]];
+
+             [[NSOperationQueue mainQueue]
+              addOperationWithBlock:^{
+                  if(belf){
+                      [belf
+                       onInstalledListUpdateWith:[StatusCache SharedStatusCache]
+                       success:YES
+                       error:nil];
+                  }
+              }];
          }
-
-         [[StatusCache SharedStatusCache]
-          updatePackageList:[response valueForKeyPath:@"package-installed.list"]];
-
-         [belf
-          onInstalledListUpdateWith:[StatusCache SharedStatusCache]
-          success:YES
-          error:nil];
      }];
 
     /*
@@ -220,8 +270,14 @@
          NSArray<NSDictionary*>* rnodes = [response valueForKeyPath:@"node-stat.nodes"];
          [[StatusCache SharedStatusCache] refreshNodList:rnodes];
 
-         // handle errors first then update UI
-         [belf updateNodeStatusWith:[StatusCache SharedStatusCache]];
+         [[NSOperationQueue mainQueue]
+          addOperationWithBlock:^{
+              if(belf){
+                  // handle errors first then update UI
+                  [belf updateNodeStatusWith:[StatusCache SharedStatusCache]];
+              }
+          }];
+
      }];
 
     // --- --- --- --- --- --- [noti] node online timeup --- --- --- --- --- ---
@@ -234,8 +290,13 @@
          // setup state and notify those who need to listen
          [[StatusCache SharedStatusCache] setTimeUpNodeOnline:YES];
 
-         // complete notifying service online status
-         [belf onNotifiedWith:[StatusCache SharedStatusCache] nodeOnlineTimeup:YES];
+         [[NSOperationQueue mainQueue]
+          addOperationWithBlock:^{
+              if(belf){
+                  // complete notifying service online status
+                  [belf onNotifiedWith:[StatusCache SharedStatusCache] nodeOnlineTimeup:YES];
+              }
+          }];
      }];
 
     // --- --- --- --- --- --- [monitors] service --- --- --- --- --- --- --- --
@@ -258,8 +319,13 @@
 
          }
 
-         // handle errors first then update UI
-         [belf updateServiceStatusWith:[StatusCache SharedStatusCache]];
+         [[NSOperationQueue mainQueue]
+          addOperationWithBlock:^{
+              if(belf){
+                  // handle errors first then update UI
+                  [belf updateServiceStatusWith:[StatusCache SharedStatusCache]];
+              }
+          }];
      }];
 
     // --- --- --- --- --- --- [noti] service online timeup --- --- --- --- ---
@@ -280,7 +346,12 @@
 
              [[StatusCache SharedStatusCache] setServiceError:error];
 
-             [belf onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:NO];
+             [[NSOperationQueue mainQueue]
+              addOperationWithBlock:^{
+                  if(belf){
+                      [belf onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:NO];
+                  }
+              }];
 
              // once this happens there is no way to fix this. just alert and kill the app.
              // (set the node timeup flag so termination process could begin)
@@ -295,11 +366,16 @@
              // setup state and notify those who need to listen
              [[StatusCache SharedStatusCache] setServiceError:nil];
 
-             // complete notifying service online status
-             [belf onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:YES];
+             [[NSOperationQueue mainQueue]
+              addOperationWithBlock:^{
+                  if(belf){
+                      // complete notifying service online status
+                      [belf onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:YES];
 
-             // initiate node checking status
-             [belf setupWithCheckingNodesMessage];
+                      // initiate node checking status
+                      [belf setupWithCheckingNodesMessage];
+                  }
+              }];
 
              // ask installed package status
              [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
