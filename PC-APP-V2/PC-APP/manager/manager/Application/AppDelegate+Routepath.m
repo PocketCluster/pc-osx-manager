@@ -19,7 +19,6 @@
 @implementation AppDelegate(Routepath)
 
 - (void) addRoutePath {
-    WEAK_SELF(self);
 
     // --- --- --- --- --- --- package start/kill/ps --- --- --- --- --- --- ---
     [[PCRouter sharedRouter]
@@ -42,7 +41,7 @@
                  return;
              }
 
-             [belf
+             [self
               didExecutionStartup:pkg
               success:NO
               error:error];
@@ -59,7 +58,7 @@
                  return;
              }
 
-             [belf
+             [self
               didExecutionStartup:pkg
               success:YES
               error:nil];
@@ -84,7 +83,7 @@
          if (![[response valueForKeyPath:@"package-kill.status"] boolValue]) {
              NSString *error = [response valueForKeyPath:@"package-kill.error"];
 
-             [belf
+             [self
               didExecutionStartup:pkg
               success:NO
               error:error];
@@ -94,7 +93,7 @@
               message:error];
 #endif
          } else {
-             [belf
+             [self
               didExecutionStartup:pkg
               success:YES
               error:nil];
@@ -119,13 +118,13 @@
 
          // if some reason, process listing fails
          if (![[response valueForKeyPath:@"package-proc.status"] boolValue]) {
-             [belf
+             [self
               didExecutionStartup:pkg
               success:NO
               error:[response valueForKeyPath:@"package-proc.error"]];
 
          } else {
-             [belf
+             [self
               didExecutionStartup:pkg
               success:YES
               error:nil];
@@ -140,7 +139,7 @@
 
          // (2017/10/25) package related error message display should be handled in UI part
          if (![[response valueForKeyPath:@"package-available.status"] boolValue]) {
-             [belf
+             [self
               onInstalledListUpdateWith:[StatusCache SharedStatusCache]
               success:NO
               error:[response valueForKeyPath:@"package-available.error"]];
@@ -149,7 +148,7 @@
              [[StatusCache SharedStatusCache]
               updatePackageList:[response valueForKeyPath:@"package-available.list"]];
              
-             [belf
+             [self
               onInstalledListUpdateWith:[StatusCache SharedStatusCache]
               success:YES
               error:nil];
@@ -164,7 +163,7 @@
 
          // (2017/10/25) package related error message display should be handled in UI part
          if (![[response valueForKeyPath:@"package-installed.status"] boolValue]) {
-             [belf
+             [self
               onInstalledListUpdateWith:[StatusCache SharedStatusCache]
               success:NO
               error:[response valueForKeyPath:@"package-installed.error"]];
@@ -173,7 +172,7 @@
              [[StatusCache SharedStatusCache]
               updatePackageList:[response valueForKeyPath:@"package-installed.list"]];
 
-             [belf
+             [self
               onInstalledListUpdateWith:[StatusCache SharedStatusCache]
               success:YES
               error:nil];
@@ -219,7 +218,7 @@
          [[StatusCache SharedStatusCache] refreshNodList:rnodes];
 
          // handle errors first then update UI
-         [belf updateNodeStatusWith:[StatusCache SharedStatusCache]];
+         [self updateNodeStatusWith:[StatusCache SharedStatusCache]];
      }];
 
     // --- --- --- --- --- --- [noti] node online timeup --- --- --- --- --- ---
@@ -233,7 +232,7 @@
          [[StatusCache SharedStatusCache] setTimeUpNodeOnline:YES];
 
          // complete notifying service online status
-         [belf onNotifiedWith:[StatusCache SharedStatusCache] nodeOnlineTimeup:YES];
+         [self onNotifiedWith:[StatusCache SharedStatusCache] nodeOnlineTimeup:YES];
 
      }];
 
@@ -258,7 +257,7 @@
          }
 
          // handle errors first then update UI
-         [belf updateServiceStatusWith:[StatusCache SharedStatusCache]];
+         [self updateServiceStatusWith:[StatusCache SharedStatusCache]];
 
      }];
 
@@ -279,7 +278,7 @@
 
              [[StatusCache SharedStatusCache] setServiceError:error];
 
-             [belf onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:NO];
+             [self onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:NO];
 
              // once this happens there is no way to fix this. just alert and kill the app.
              // (set the node timeup flag so termination process could begin)
@@ -296,10 +295,10 @@
              [[StatusCache SharedStatusCache] setServiceError:nil];
 
              // complete notifying service online status
-             [belf onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:YES];
+             [self onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:YES];
 
              // initiate node checking status
-             [belf setupWithCheckingNodesMessage];
+             [self setupWithCheckingNodesMessage];
 
              // ask installed package status
              [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
