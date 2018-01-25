@@ -2,15 +2,14 @@
 <document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9532" systemVersion="14F2511" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9532"/>
-        <plugIn identifier="com.apple.WebKitIBPlugin" version="9532"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="IntroVC">
             <connections>
                 <outlet property="circularProgress" destination="Nnb-gj-J5t" id="3GZ-ZD-LKs"/>
                 <outlet property="progressLabel" destination="LNU-0d-1Ut" id="el5-g8-enu"/>
+                <outlet property="versionLabel" destination="9Hw-sG-3oX" id="5ej-M1-SYF"/>
                 <outlet property="view" destination="wWD-IO-Uhx" id="l8w-9V-8dQ"/>
-                <outlet property="webView" destination="h9j-ep-frg" id="GNu-5R-93Y"/>
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
@@ -23,15 +22,6 @@
                     <rect key="frame" x="226" y="194" width="128" height="128"/>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" image="AppIcon" id="3Ig-HA-VEg"/>
                 </imageView>
-                <webView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="h9j-ep-frg">
-                    <rect key="frame" x="0.0" y="66" width="580" height="128"/>
-                    <webPreferences key="preferences" defaultFontSize="12" defaultFixedFontSize="12">
-                        <nil key="identifier"/>
-                    </webPreferences>
-                    <connections>
-                        <outlet property="policyDelegate" destination="-2" id="T1j-R4-HlT"/>
-                    </connections>
-                </webView>
                 <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LNU-0d-1Ut">
                     <rect key="frame" x="0.0" y="46" width="580" height="20"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" id="g7v-r1-ZpG">
@@ -43,6 +33,22 @@
                 <progressIndicator horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="Nnb-gj-J5t">
                     <rect key="frame" x="282" y="20" width="16" height="16"/>
                 </progressIndicator>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="paw-d3-0xZ">
+                    <rect key="frame" x="0.0" y="127" width="582" height="60"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="PocketCluster" id="J99-7F-mxz">
+                        <font key="font" size="38" name="HelveticaNeue-UltraLight"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Hw-sG-3oX">
+                    <rect key="frame" x="-2" y="112" width="584" height="27"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Label" id="NoE-aM-Lr8">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
             </subviews>
             <point key="canvasLocation" x="734" y="193"/>
         </customView>

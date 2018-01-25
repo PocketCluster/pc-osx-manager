@@ -45,11 +45,7 @@
               didExecutionStartup:pkg
               success:NO
               error:error];
-#if 0
-             [ShowAlert
-              showWarningAlertWithTitle:@"Unable to Start Package"
-              message:error];
-#endif
+
          } else {
              // package succeed to run
              Package *pkg = [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecStarted];
@@ -84,17 +80,13 @@
              NSString *error = [response valueForKeyPath:@"package-kill.error"];
 
              [self
-              didExecutionStartup:pkg
+              didExecutionKill:pkg
               success:NO
               error:error];
-#if 0
-             [ShowAlert
-              showWarningAlertWithTitle:@"Package Stop Error"
-              message:error];
-#endif
+
          } else {
              [self
-              didExecutionStartup:pkg
+              didExecutionKill:pkg
               success:YES
               error:nil];
          }
@@ -119,13 +111,13 @@
          // if some reason, process listing fails
          if (![[response valueForKeyPath:@"package-proc.status"] boolValue]) {
              [self
-              didExecutionStartup:pkg
+              onExecutionProcess:pkg
               success:NO
               error:[response valueForKeyPath:@"package-proc.error"]];
 
          } else {
              [self
-              didExecutionStartup:pkg
+              onExecutionProcess:pkg
               success:YES
               error:nil];
          }
