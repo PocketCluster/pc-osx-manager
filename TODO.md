@@ -42,6 +42,7 @@
 - [ ] Look carefully `etcd` TLS configuration behave with `docker-compose` connected.
   * At initial, etcd `network/bridged` API point isn't available and dockerd complains. This seems to be normal though.
   * <https://dims-devguide.readthedocs.io/en/latest/dockerdatacenter.html>
+- [ ] **Slave** : Install unarchiver / uncompressor for future update  
 - [ ] **Slave** : Uninterrupt Setup Issues
   * `partprobe` to reload reformatted partition
   * `/etc/resolv.conf` to preset localhost as nameserver
