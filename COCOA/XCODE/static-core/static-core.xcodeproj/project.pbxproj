@@ -43,6 +43,7 @@
 		0444AD861F4787F000F79CA7 /* PCBundleInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 0444AD841F4787F000F79CA7 /* PCBundleInfo.m */; };
 		047E41801F34AF4C0044F5DB /* host.h in Headers */ = {isa = PBXBuildFile; fileRef = 047E417F1F34AF4C0044F5DB /* host.h */; };
 		047E41821F34AF560044F5DB /* host.c in Sources */ = {isa = PBXBuildFile; fileRef = 047E41811F34AF560044F5DB /* host.c */; };
+		0486C62F201CD75F003F2EF5 /* VBoxCAPI_v5_2.h in Headers */ = {isa = PBXBuildFile; fileRef = 0486C62E201CD75F003F2EF5 /* VBoxCAPI_v5_2.h */; };
 		04937E631F3A4BF000128295 /* console.h in Headers */ = {isa = PBXBuildFile; fileRef = 04937E621F3A4BF000128295 /* console.h */; };
 		04AF5FD91F3200E1009DBD2B /* bios_settings.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FB51F3200E1009DBD2B /* bios_settings.h */; };
 		04AF5FDA1F3200E1009DBD2B /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FB61F3200E1009DBD2B /* common.h */; };
@@ -58,7 +59,6 @@
 		04AF5FE51F3200E1009DBD2B /* system_properties.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FC11F3200E1009DBD2B /* system_properties.h */; };
 		04AF5FE61F3200E1009DBD2B /* usb_controller.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FC21F3200E1009DBD2B /* usb_controller.h */; };
 		04AF5FE71F3200E1009DBD2B /* vbox.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FC31F3200E1009DBD2B /* vbox.h */; };
-		04AF5FE81F3200E1009DBD2B /* VBoxCAPI_v5_1.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FC41F3200E1009DBD2B /* VBoxCAPI_v5_1.h */; };
 		04AF5FE91F3200E1009DBD2B /* VBoxCAPIGlue.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AF5FC51F3200E1009DBD2B /* VBoxCAPIGlue.h */; };
 		04AF5FEA1F3200E1009DBD2B /* bios_settings.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FC71F3200E1009DBD2B /* bios_settings.c */; };
 		04AF5FEB1F3200E1009DBD2B /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 04AF5FC81F3200E1009DBD2B /* console.c */; };
@@ -125,6 +125,7 @@
 		0444AD841F4787F000F79CA7 /* PCBundleInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCBundleInfo.m; sourceTree = "<group>"; };
 		047E417F1F34AF4C0044F5DB /* host.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = host.h; sourceTree = "<group>"; };
 		047E41811F34AF560044F5DB /* host.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = host.c; sourceTree = "<group>"; };
+		0486C62E201CD75F003F2EF5 /* VBoxCAPI_v5_2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VBoxCAPI_v5_2.h; sourceTree = "<group>"; };
 		04937E621F3A4BF000128295 /* console.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = console.h; sourceTree = "<group>"; };
 		04AF5FB51F3200E1009DBD2B /* bios_settings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bios_settings.h; sourceTree = "<group>"; };
 		04AF5FB61F3200E1009DBD2B /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
@@ -140,7 +141,6 @@
 		04AF5FC11F3200E1009DBD2B /* system_properties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = system_properties.h; sourceTree = "<group>"; };
 		04AF5FC21F3200E1009DBD2B /* usb_controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = usb_controller.h; sourceTree = "<group>"; };
 		04AF5FC31F3200E1009DBD2B /* vbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vbox.h; sourceTree = "<group>"; };
-		04AF5FC41F3200E1009DBD2B /* VBoxCAPI_v5_1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VBoxCAPI_v5_1.h; sourceTree = "<group>"; };
 		04AF5FC51F3200E1009DBD2B /* VBoxCAPIGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VBoxCAPIGlue.h; sourceTree = "<group>"; };
 		04AF5FC71F3200E1009DBD2B /* bios_settings.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bios_settings.c; sourceTree = "<group>"; };
 		04AF5FC81F3200E1009DBD2B /* console.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = console.c; sourceTree = "<group>"; };
@@ -410,7 +410,7 @@
 				04AF5FC11F3200E1009DBD2B /* system_properties.h */,
 				04AF5FC21F3200E1009DBD2B /* usb_controller.h */,
 				04AF5FC31F3200E1009DBD2B /* vbox.h */,
-				04AF5FC41F3200E1009DBD2B /* VBoxCAPI_v5_1.h */,
+				0486C62E201CD75F003F2EF5 /* VBoxCAPI_v5_2.h */,
 				04AF5FC51F3200E1009DBD2B /* VBoxCAPIGlue.h */,
 			);
 			path = include;
@@ -493,13 +493,13 @@
 			files = (
 				04259BEB1E7F80940071648E /* NSFileManager+DirectoryLocations.h in Headers */,
 				04AF5FE91F3200E1009DBD2B /* VBoxCAPIGlue.h in Headers */,
-				04AF5FE81F3200E1009DBD2B /* VBoxCAPI_v5_1.h in Headers */,
 				04259BE91E7F80940071648E /* NSBundle+DirectoryPath.h in Headers */,
 				04AF5FE61F3200E1009DBD2B /* usb_controller.h in Headers */,
 				04AF5FE21F3200E1009DBD2B /* progress.h in Headers */,
 				04AF5FE31F3200E1009DBD2B /* session.h in Headers */,
 				04AF5FE41F3200E1009DBD2B /* storage_controller.h in Headers */,
 				04259C001E7F80950071648E /* DeviceSerialNumber.h in Headers */,
+				0486C62F201CD75F003F2EF5 /* VBoxCAPI_v5_2.h in Headers */,
 				04AF5FE71F3200E1009DBD2B /* vbox.h in Headers */,
 				047E41801F34AF4C0044F5DB /* host.h in Headers */,
 				04259BED1E7F80940071648E /* NSResourcePath.h in Headers */,
