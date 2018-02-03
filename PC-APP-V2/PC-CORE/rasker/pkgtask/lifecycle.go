@@ -203,6 +203,9 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                     //return feedError(feeder, killPath, fbPackageKill, errors.WithMessage(err, "unable to stop package"))
                 }
 
+                /*
+                //TODO : before delete, make sure at least pc-core's container is in "Exited" state
+
                 // delete package
                 err = project.Delete(context.Background(), options.Delete{}, []string{}...)
                 if err != nil {
@@ -227,6 +230,8 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                         ccli.Close()
                     }
                 }
+
+                */
 
                 // 7. return feedback
                 data, err := json.Marshal(route.ReponseMessage{
