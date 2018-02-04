@@ -141,7 +141,8 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                             return nil
                         }
                         case <- timer.C: {
-                            /* FIXME : (2017/11/04) no process status gets produced. We need to fix docker engine + libcompose
+/*
+                            // FIXME : (2017/11/04) no process status gets produced. We need to fix docker engine + libcompose
                             allInfo, err := project.Ps(context.Background(), []string{}...)
                             if err != nil {
                                 feedError(feeder, rptPath, fbPackageProcess, errors.WithMessage(err, "unable to list cluster process"))
@@ -156,13 +157,15 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                                     "pkg-id":  pkgID,
                                     "process": pslist,
                                 },
-                            }) */
+                            })
+*/
 
                             // process feedback
                             _, err := project.Ps(context.Background(), []string{}...)
                             if err != nil {
                                 feedError(feeder, rptPath, fbPackageProcess, pkgID, errors.WithMessage(err, "unable to list cluster process"))
                             }
+
                             data, err := json.Marshal(route.ReponseMessage{
                                 fbPackageProcess: {
                                     "status":  true,
@@ -196,16 +199,31 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                     case <- killSigC:
                 }
 
-                // kill package
+/*
+                // kill package or stop. this is deprecated
                 err = project.Kill(context.TODO(), "SIGINT", []string{}...)
+                err = project.Stop(context.TODO(), 30, []string{}...)
+*/
+
+                // stop + rm : 'stop' gives you a grace period and 'rm' delete remaing container
+                err = project.Down(context.TODO(),
+                    options.Down{
+                        // Remove data volumes
+                        RemoveVolume:  false,
+                        // type may be one of: 'all' to remove all images, or 'local' to remove only images that don't have an custom name set by the `image` field"
+                        //RemoveImages:,
+                        // Remove containers for services not defined in the Compose file
+                        RemoveOrphans: true,
+                    },
+                    []string{}...)
                 if err != nil {
                     log.Error(err.Error())
                     //return feedError(feeder, killPath, fbPackageKill, errors.WithMessage(err, "unable to stop package"))
                 }
 
-                /*
-                //TODO : before delete, make sure at least pc-core's container is in "Exited" state
-
+/*
+                //TODO : before deleting, make sure at least pc-core's container is in "Exited" state.
+                //TODO : 'Down' command takes care of them indeed!
                 // delete package
                 err = project.Delete(context.Background(), options.Delete{}, []string{}...)
                 if err != nil {
@@ -230,8 +248,7 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                         ccli.Close()
                     }
                 }
-
-                */
+*/
 
                 // 7. return feedback
                 data, err := json.Marshal(route.ReponseMessage{
