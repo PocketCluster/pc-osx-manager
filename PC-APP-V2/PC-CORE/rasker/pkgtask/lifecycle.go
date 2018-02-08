@@ -72,13 +72,16 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                 if err := dockertool.CleanupContainer(ccli); err != nil {
                     log.Errorf("container cleanup error %v", err.Error())
                 }
+                time.Sleep(time.Second)
                 if err := dockertool.CleanupNetwork(ccli); err != nil {
                     log.Errorf("network cleanup error %v", err.Error())
                 }
-                ccli.Close()
                 time.Sleep(time.Second)
+                ccli.Close()
             }
         }
+        // let things settle down a bit
+        time.Sleep(time.Second * 3)
 
         // 3. load template
         tmpl, err := model.FindTemplateWithPackageID(pkgID)
@@ -199,13 +202,7 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                     case <- killSigC:
                 }
 
-/*
-                // kill package or stop. this is deprecated
-                err = project.Kill(context.TODO(), "SIGINT", []string{}...)
-                err = project.Stop(context.TODO(), 30, []string{}...)
-*/
-
-                // stop + rm : 'stop' gives you a grace period and 'rm' delete remaing container
+                // Down = stop + rm : 'stop' gives you a grace period and 'rm' delete remaing container
                 err = project.Down(context.TODO(),
                     options.Down{
                         // Remove data volumes
@@ -221,14 +218,6 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                     //return feedError(feeder, killPath, fbPackageKill, errors.WithMessage(err, "unable to stop package"))
                 }
 
-/*
-                //TODO : before deleting, make sure at least pc-core's container is in "Exited" state.
-                //TODO : 'Down' command takes care of them indeed!
-                // delete package
-                err = project.Delete(context.Background(), options.Delete{}, []string{}...)
-                if err != nil {
-                    return feedError(feeder, killPath, fbPackageKill, pkgID, errors.WithMessage(err, "unable to remove package residue"))
-                }
                 // delete container and network
                 // 2-a. clean up any previous residue
                 for _, node := range nlist {
@@ -242,13 +231,16 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                         if err := dockertool.CleanupContainer(ccli); err != nil {
                             log.Errorf("container cleanup error %v", err.Error())
                         }
+                        time.Sleep(time.Second)
                         if err := dockertool.CleanupNetwork(ccli); err != nil {
                             log.Errorf("network cleanup error %v", err.Error())
                         }
+                        time.Sleep(time.Second)
                         ccli.Close()
                     }
                 }
-*/
+                // need time to sync
+                time.Sleep(time.Second * 3)
 
                 // 7. return feedback
                 data, err := json.Marshal(route.ReponseMessage{
