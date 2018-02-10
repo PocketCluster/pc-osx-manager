@@ -7,10 +7,12 @@ import (
     "github.com/stkim1/pc-core/msagent"
     "github.com/stkim1/udpnet/ucast"
 )
+/*
 import (
     log "github.com/Sirupsen/logrus"
     "github.com/davecgh/go-spew/spew"
 )
+*/
 
 type SlaveLocatingState int
 const (
@@ -136,8 +138,7 @@ func (sl *slaveLocator) TranstionWithMasterBeacon(bp ucast.BeaconPack, slaveTime
     }
 
     // TODO : should we check MasterBindAgent here?
-
-    log.Debugf("[BEACON-RX] RECEIVED\n %v \n %v", spew.Sdump(bp.Address), spew.Sdump(meta))
+    //log.Debugf("[BEACON-RX] RECEIVED\n %v \n %v", spew.Sdump(bp.Address), spew.Sdump(meta))
 
     sl.state, err = sl.state.MasterMetaTransition(meta, slaveTimestamp)
     if err != nil {
