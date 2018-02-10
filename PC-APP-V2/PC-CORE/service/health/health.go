@@ -303,7 +303,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             continue
                         }
                         meta.updateBeaconStatus(md)
-                        log.Infof("[HEALTH] BEACON META %v", md)
+                        //log.Infof("[HEALTH] BEACON META %v", md)
 
                         if meta.isReadyToReport() {
                             if shouldStop {
@@ -337,7 +337,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             continue
                         }
                         meta.updatePcsshStatus(md)
-                        log.Infof("[HEALTH] PCSSH META %v", md)
+                        //log.Infof("[HEALTH] PCSSH META %v", md)
 
                         if meta.isReadyToReport() {
                             if shouldStop {
@@ -371,7 +371,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                             continue
                         }
                         meta.updateOrchstStatus(md)
-                        log.Infof("[HEALTH] ORCHST META %v", md)
+                        //log.Infof("[HEALTH] ORCHST META %v", md)
 
                         if meta.isReadyToReport() {
                             if shouldStop {
