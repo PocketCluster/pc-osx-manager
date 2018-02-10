@@ -14,8 +14,8 @@ import (
 
 const (
     // 30 second waiting context
-    deadline = time.Second * time.Duration(5)
-    timeout  = time.Second * time.Duration(8)
+    deadline = time.Second * time.Duration(3)
+    timeout  = time.Second * time.Duration(5)
 )
 
 // all container cleanup

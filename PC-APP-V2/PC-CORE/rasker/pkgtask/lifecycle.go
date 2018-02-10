@@ -72,11 +72,11 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                 if err := dockertool.CleanupContainer(ccli); err != nil {
                     log.Errorf("container cleanup error %v", err.Error())
                 }
-                if err := dockertool.CleanupNetwork(ccli); err != nil {
-                    log.Errorf("network cleanup error %v", err.Error())
-                }
                 if err := dockertool.CleanupVolume(ccli); err != nil {
                     log.Errorf("volume cleanup error %v", err.Error())
+                }
+                if err := dockertool.CleanupNetwork(ccli); err != nil {
+                    log.Errorf("network cleanup error %v", err.Error())
                 }
                 ccli.Close()
             }
@@ -232,11 +232,11 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                         if err := dockertool.CleanupContainer(ccli); err != nil {
                             log.Errorf("container cleanup error %v", err.Error())
                         }
-                        if err := dockertool.CleanupNetwork(ccli); err != nil {
-                            log.Errorf("network cleanup error %v", err.Error())
-                        }
                         if err := dockertool.CleanupVolume(ccli); err != nil {
                             log.Errorf("volume cleanup error %v", err.Error())
+                        }
+                        if err := dockertool.CleanupNetwork(ccli); err != nil {
+                            log.Errorf("network cleanup error %v", err.Error())
                         }
                         ccli.Close()
                     }
