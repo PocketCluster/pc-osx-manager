@@ -72,16 +72,17 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                 if err := dockertool.CleanupContainer(ccli); err != nil {
                     log.Errorf("container cleanup error %v", err.Error())
                 }
-                time.Sleep(time.Second)
                 if err := dockertool.CleanupNetwork(ccli); err != nil {
                     log.Errorf("network cleanup error %v", err.Error())
                 }
-                time.Sleep(time.Second)
+                if err := dockertool.CleanupVolume(ccli); err != nil {
+                    log.Errorf("volume cleanup error %v", err.Error())
+                }
                 ccli.Close()
             }
         }
-        // let things settle down a bit
-        time.Sleep(time.Second * 3)
+        // give some time for cleanup ops to settle
+        time.Sleep(time.Second * time.Duration(3))
 
         // 3. load template
         tmpl, err := model.FindTemplateWithPackageID(pkgID)
@@ -231,16 +232,15 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                         if err := dockertool.CleanupContainer(ccli); err != nil {
                             log.Errorf("container cleanup error %v", err.Error())
                         }
-                        time.Sleep(time.Second)
                         if err := dockertool.CleanupNetwork(ccli); err != nil {
                             log.Errorf("network cleanup error %v", err.Error())
                         }
-                        time.Sleep(time.Second)
+                        if err := dockertool.CleanupVolume(ccli); err != nil {
+                            log.Errorf("volume cleanup error %v", err.Error())
+                        }
                         ccli.Close()
                     }
                 }
-                // need time to sync
-                time.Sleep(time.Second * 3)
 
                 // 7. return feedback
                 data, err := json.Marshal(route.ReponseMessage{
