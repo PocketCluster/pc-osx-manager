@@ -5,6 +5,7 @@ import (
     "io/ioutil"
     "os"
     "path"
+    "path/filepath"
 
     "github.com/pkg/errors"
     "github.com/stkim1/pcrypto"
@@ -20,6 +21,11 @@ const (
     SYSTEM_AUTH_CERT_NATIVE_FILE string = "/etc/ssl/certs/ca-certificates.crt"
     SYSTEM_AUTH_CERT_BACKUP_PATH string = "/etc/pocket/backup/"
     SYSTEM_AUTH_CERT_BACKUP_FILE string = SYSTEM_AUTH_CERT_BACKUP_PATH + "ca-certificates" + pcrypto.FileExtCertificate
+
+    // CUSTOM CERTIFATE CONFIG
+    CUSTOM_CERT_AUTH_PATH        string = "/usr/local/share/ca­certificates/"
+    // the key file name should be "pc_node_engine_auth.acr". Due to accepted extention ".crt", we'll use custom name
+    CUSTOM_CERT_AUTH_FILE        string = "pc_node_engine_auth.crt"
 )
 
 func dockerEnvContent() []byte {
@@ -150,4 +156,33 @@ func AppendAuthCertFowardSystemCertAuthority(rootPath string) error {
     // write it to system certificate
     err = ioutil.WriteFile(systemAuthCertNativeFile, updatedCert, os.FileMode(0644))
     return errors.WithStack(err)
+}
+
+// --- Custom Cert Path and File --- //
+func dirPathCustomCertAuth(rootPath string) string {
+    return filepath.Join(rootPath, CUSTOM_CERT_AUTH_PATH)
+}
+
+func filePathCustomCertAuth(rootPath string) string {
+    return filepath.Join(dirPathCustomCertAuth(rootPath), CUSTOM_CERT_AUTH_FILE)
+}
+
+func CopyCertAuthForwardCustomCertStorage(rootPath string) error {
+    var (
+        slaveAuthCertFile       string = FilePathSlaveEngineAuthCert(rootPath)
+        slaveCustomCertAuthPath string = dirPathCustomCertAuth(rootPath)
+        slaveCustomCertAuthFile string = filePathCustomCertAuth(rootPath)
+    )
+    // original cert auth should exist
+    if _, err := os.Stat(slaveAuthCertFile); os.IsNotExist(err) {
+        return errors.WithStack(err)
+    }
+    // check if custom cert auth storage path exists. if DNE, build the full-path
+    if _, err := os.Stat(slaveCustomCertAuthPath); os.IsNotExist(err) {
+        if err := os.MkdirAll(slaveCustomCertAuthPath, cert_path_permission); err != nil {
+            return errors.WithStack(err)
+        }
+    }
+    // copy cert auth file to custom location so next upgrade will not mess up the cert system
+    return copyFile(slaveAuthCertFile, slaveCustomCertAuthFile)
 }

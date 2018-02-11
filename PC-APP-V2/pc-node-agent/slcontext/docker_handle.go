@@ -44,5 +44,10 @@ func DockerEnvironemtPostProcess(certPack *auth.PocketResponseAuthKeyCert) error
         log.Debugf(err.Error())
         return err
     }
+    err = config.CopyCertAuthForwardCustomCertStorage("")
+    if err != nil {
+        log.Debugf(err.Error())
+        return err
+    }
     return nil
 }
