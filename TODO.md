@@ -42,13 +42,13 @@
 - [ ] Look carefully `etcd` TLS configuration behave with `docker-compose` connected.
   * At initial, etcd `network/bridged` API point isn't available and dockerd complains. This seems to be normal though.
   * <https://dims-devguide.readthedocs.io/en/latest/dockerdatacenter.html>
-- [ ] **Slave** : prune docker volume/network/plugin
-- [ ] **Slave** : `apparmor`, `libseccomp2` and other docker runtime deps.  
+- [x] **Slave** : prune docker volume/network/plugin
+- [x] **Slave** : `apparmor`, `libseccomp2` and other docker runtime deps.  
 - [ ] **Slave** : make sure AUFS can handle more than 42 layers. 
   * `CONFIG_AUFS_FS=y CONFIG_AUFS_BRANCH_MAX_127=y`  
 - [ ] **Slave** : don't forget to install `kmod` for docker to start  
-- [ ] **Slave** : Install `aufs-tools` for `auplink`
-- [ ] **Slave** : Install unarchiver / uncompressor for future update  
+- [x] **Slave** : Install `aufs-tools` for `auplink`
+- [x] **Slave** : Install unarchiver / uncompressor for future update  
 - [ ] **Slave** : Uninterrupt Setup Issues
   * `partprobe` to reload reformatted partition
   * `/etc/resolv.conf` to preset localhost as nameserver
