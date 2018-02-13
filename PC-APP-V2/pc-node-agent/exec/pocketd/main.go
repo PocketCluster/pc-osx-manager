@@ -11,6 +11,7 @@ import (
     logrusSyslog "github.com/Sirupsen/logrus/hooks/syslog"
     "github.com/gravitational/teleport/lib/sshutils/scp"
     nodeagent "github.com/stkim1/pc-node-agent"
+    "github.com/stkim1/pc-node-agent/utils/disk"
 )
 
 const (
@@ -92,7 +93,37 @@ func main() {
 
             // sfdisk
             case modePartition: {
+                log.SetLevel(log.DebugLevel)
 
+                // get the disk layout
+                layout, err := disk.DumpDiskLayout("/dev/mmcblk0")
+                if err != nil {
+                    log.Debug(err)
+                }
+
+                // Total Disk Sector Count
+                sectorTotalCount, err := disk.TotalDiskSectorCount("mmcblk0")
+                if err != nil {
+                    log.Debug(err)
+                }
+
+                // Hardware Disk Sector Size
+                sectorUnitSize, err := disk.DiskSectorSizeInByte("mmcblk0")
+                if err != nil {
+                    log.Debug(err)
+                }
+
+                // physical memory size
+                phymem, err := disk.TotalPhysicalMemSizeInByte()
+                if err != nil {
+                    log.Debug(err)
+                }
+
+                newLayout := disk.ReformatDiskLayout(layout, sectorTotalCount, sectorUnitSize, phymem, 4)
+                err = disk.RepartitionDisk("/dev/mmcblk0", newLayout)
+                if err != nil {
+                    log.Debug(err)
+                }
             }
 
             // and rest of stuff
