@@ -189,26 +189,27 @@ func (s *slaveContext) ReloadConfiguration() error {
 // No other place can execute this
 func (s *slaveContext) SaveConfiguration() error {
     // master pubkey
-    mpubkey, err := s.GetMasterPublicKey()
-    if err != nil {
+    if mpubkey, err := s.GetMasterPublicKey(); err != nil {
+        return errors.WithStack(err)
+    } else {
+        s.config.SaveMasterPublicKey(mpubkey)
+    }
+    // save slave node name to hostname
+    if err := s.config.SaveHostname(); err != nil {
         return errors.WithStack(err)
     }
-    s.config.SaveMasterPublicKey(mpubkey)
-
-    // TODO : (2017-05-15) we'll re-evaluate this option later. For not, this is none critical
+    // update hosts
+    if err := s.config.UpdateHostsFile(); err != nil {
+        return errors.WithStack(err)
+    }
 /*
     // slave network interface
-    err = s.config.SaveFixedNetworkInterface()
-    if err != nil {
+    TODO : (2017-05-15) we'll re-evaluate this option later. For not, this is none critical
+    if err = s.config.SaveFixedNetworkInterface(); err != nil {
         return errors.WithStack(err)
     }
 */
-    // save slave node name to hostname
-    err = s.config.SaveHostname()
-    if err != nil {
-        return errors.WithStack(err)
-    }
-    // whole slave config
+    // save slave config into yaml
     return s.config.SaveSlaveConfig()
 }
 

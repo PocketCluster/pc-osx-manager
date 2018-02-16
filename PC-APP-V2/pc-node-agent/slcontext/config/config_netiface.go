@@ -3,7 +3,10 @@ package config
 import (
     "fmt"
     "io/ioutil"
+    "path/filepath"
     "strings"
+
+    "github.com/pkg/errors"
 )
 
 // ------ NETWORK INTERFACES ------
@@ -30,8 +33,6 @@ const (
 
 const (
     network_iface_file     string = "/etc/network/interfaces"
-    hostaddr_file          string = "/etc/hosts"
-    resolve_conf_file      string = "/etc/resolv.conf"
 )
 
 // --- network interface redefinition
@@ -96,14 +97,17 @@ func _fixateNetworkInterfaces(slaveConfig *SlaveConfigSection, ifaceData []strin
 }
 
 func (c *PocketSlaveConfig) SaveFixedNetworkInterface() error {
-    var ifaceFilePath string = c.rootPath + network_iface_file
-    ifaceFileContent, err := ioutil.ReadFile(ifaceFilePath)
-    var ifaceData []string = strings.Split(string(ifaceFileContent),"\n")
+    var (
+        ifaceFilePath = filepath.Join(c.rootPath, network_iface_file)
+        ifaceFileContent, err = ioutil.ReadFile(ifaceFilePath)
+    )
     if err != nil {
-        return err
+        return errors.WithStack(err)
     }
-
-    var fixedIfaceData []string = _fixateNetworkInterfaces(c.SlaveSection, ifaceData)
-    var fixedIfaceContent []byte = []byte(strings.Join(fixedIfaceData, "\n"))
+    var (
+        ifaceData = strings.Split(string(ifaceFileContent),"\n")
+        fixedIfaceData = _fixateNetworkInterfaces(c.SlaveSection, ifaceData)
+        fixedIfaceContent = []byte(strings.Join(fixedIfaceData, "\n"))
+    )
     return ioutil.WriteFile(ifaceFilePath, fixedIfaceContent, 0644)
 }
