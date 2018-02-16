@@ -282,7 +282,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                                 Name: ivent.IventMonitorNodeReqStatus,
                                 Payload: tmark,
                             })
-                            log.Infof("[HEALTH] ->> (%v) new stat request made", tmark)
+                            //log.Infof("[HEALTH] ->> (%v) new stat request made", tmark)
                         }
                     }
 
@@ -311,7 +311,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                                 appLife.BroadcastEvent(service.Event{Name:ivent.IventMonitorStopResult})
                                 return nil
                             }
-                            log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
+                            //log.Errorf("[HEALTH] <<- (%v) ready to report", md.TimeStamp)
                             err := reportNodeStats(meta, feeder, rpNodeStat, checkCoreError)
                             if err != nil {
                                 log.Errorf("[HEALTH] [ERR] unable to report node stat %v", err)
