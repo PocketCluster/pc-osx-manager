@@ -14,10 +14,6 @@ import (
     "github.com/stkim1/pc-node-agent/pcssh/sshproc"
 )
 
-import (
-    "github.com/davecgh/go-spew/spew"
-)
-
 func initAgentService(app service.AppSupervisor) error {
     var (
 
@@ -25,7 +21,7 @@ func initAgentService(app service.AppSupervisor) error {
         dhcpC   = make(chan service.Event)
 
         searchTx = func(data []byte) error {
-            log.Debugf("[SEARCH-TX] %v", time.Now())
+            //log.Debugf("[SEARCH-TX] %v", time.Now())
             app.BroadcastEvent(
                 service.Event{
                     Name:       mcast.EventBeaconNodeSearchSend,
@@ -37,7 +33,7 @@ func initAgentService(app service.AppSupervisor) error {
         }
 
         beaconTx = func(target string, data []byte) error {
-            log.Debugf("[BEACON-TX] %v TO : %v", time.Now(), target)
+            //log.Debugf("[BEACON-TX] %v TO : %v", time.Now(), target)
             app.BroadcastEvent(
                 service.Event{
                     Name:       ucast.EventBeaconNodeLocationSend,
@@ -51,7 +47,7 @@ func initAgentService(app service.AppSupervisor) error {
 
         transitEvent = func (state locator.SlaveLocatingState, ts time.Time, transOk bool) error {
             if transOk {
-                log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | SUCCESS ", ts, state.String())
+                //log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | SUCCESS ", ts, state.String())
                 switch state {
                     case locator.SlaveCryptoCheck: {
                         app.RunNamedService(servicePcsshInit)
@@ -67,7 +63,7 @@ func initAgentService(app service.AppSupervisor) error {
                 }
 
             } else {
-                log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | FAILED ", ts, state.String())
+                //log.Debugf("(INFO) [%v] BeaconEventTranstion -> %v | FAILED ", ts, state.String())
                 switch state {
                     case locator.SlaveBounded: {
                         app.BroadcastEvent(service.Event{Name:sshproc.EventNodeSSHServiceStop})
@@ -105,37 +101,38 @@ func initAgentService(app service.AppSupervisor) error {
             defer loc.Shutdown()
             defer timer.Stop()
 
-            log.Debugf("[AGENT] starting agent service...")
+            log.Debugf("[POCKET] starting agent service...")
 
             for {
                 select {
-                case <- app.StopChannel(): {
-                    return nil
-                }
-                case <- timer.C: {
-                    err = loc.TranstionWithTimestamp(time.Now())
-                    if err != nil {
-                        log.Debugf(err.Error())
+                    case <- app.StopChannel(): {
+                        return nil
                     }
-                }
-                case evt := <-beaconC: {
-                    mp, mk := evt.Payload.(ucast.BeaconPack)
-                    if mk {
-                        err = loc.TranstionWithMasterBeacon(mp, time.Now())
+                    case <- timer.C: {
+                        err = loc.TranstionWithTimestamp(time.Now())
                         if err != nil {
-                            log.Debug(err.Error())
+                            log.Debugf(err.Error())
                         }
                     }
-                }
-                case dvt := <- dhcpC: {
-                    log.Debugf("[DHCP] RECEIVED\n %v", spew.Sdump(dvt.Payload))
-                }
+                    case evt := <-beaconC: {
+                        mp, mk := evt.Payload.(ucast.BeaconPack)
+                        if mk {
+                            err = loc.TranstionWithMasterBeacon(mp, time.Now())
+                            if err != nil {
+                                log.Debug(err.Error())
+                            }
+                        }
+                    }
+                    case _ = <- dhcpC: {
+                        //log.Debugf("[DHCP] RECEIVED\n %v", spew.Sdump(dvt.Payload))
+                        log.Debugf("[POCKET] dhcp renewal")
+                    }
                 }
             }
             return nil
         }
         exitFunc = func(_ func(interface{})) error {
-            log.Debugf("[AGENT] close agent service...")
+            log.Debugf("[POCKET] close agent service...")
             return nil
         }
     )
