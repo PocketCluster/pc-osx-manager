@@ -43,9 +43,7 @@ func initLogger() {
 }
 
 func main() {
-    // TODO activate syslog hook b4 release
-    //initLogger()
-    log.SetLevel(log.DebugLevel)
+    initLogger()
 
     // pocket agent daemon
     if len(os.Args) == 1 {
@@ -61,6 +59,34 @@ func main() {
                 err := runDhcpAgentReport()
                 if err != nil {
                     log.Error(err.Error())
+                }
+            }
+            // sfdisk
+            case modePartition: {
+                // get the disk layout
+                layout, err := disk.DumpDiskLayout("/dev/mmcblk0")
+                if err != nil {
+                    log.Debug(err)
+                }
+                // Total Disk Sector Count
+                sectorTotalCount, err := disk.TotalDiskSectorCount("mmcblk0")
+                if err != nil {
+                    log.Debug(err)
+                }
+                // Hardware Disk Sector Size
+                sectorUnitSize, err := disk.DiskSectorSizeInByte("mmcblk0")
+                if err != nil {
+                    log.Debug(err)
+                }
+                // physical memory size
+                phymem, err := disk.TotalPhysicalMemSizeInByte()
+                if err != nil {
+                    log.Debug(err)
+                }
+                newLayout := disk.ReformatDiskLayout(layout, sectorTotalCount, sectorUnitSize, phymem, 4)
+                err = disk.RepartitionDisk("/dev/mmcblk0", newLayout)
+                if err != nil {
+                    log.Debug(err)
                 }
             }
             case modeVerCheck: {
@@ -90,36 +116,6 @@ func main() {
                     log.Error(err.Error())
                 }
             }
-
-            // sfdisk
-            case modePartition: {
-                // get the disk layout
-                layout, err := disk.DumpDiskLayout("/dev/mmcblk0")
-                if err != nil {
-                    log.Debug(err)
-                }
-                // Total Disk Sector Count
-                sectorTotalCount, err := disk.TotalDiskSectorCount("mmcblk0")
-                if err != nil {
-                    log.Debug(err)
-                }
-                // Hardware Disk Sector Size
-                sectorUnitSize, err := disk.DiskSectorSizeInByte("mmcblk0")
-                if err != nil {
-                    log.Debug(err)
-                }
-                // physical memory size
-                phymem, err := disk.TotalPhysicalMemSizeInByte()
-                if err != nil {
-                    log.Debug(err)
-                }
-                newLayout := disk.ReformatDiskLayout(layout, sectorTotalCount, sectorUnitSize, phymem, 4)
-                err = disk.RepartitionDisk("/dev/mmcblk0", newLayout)
-                if err != nil {
-                    log.Debug(err)
-                }
-            }
-
             // and rest of stuff
             default: {
                 os.Exit(2)
