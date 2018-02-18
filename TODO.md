@@ -42,13 +42,9 @@
 - [ ] Look carefully `etcd` TLS configuration behave with `docker-compose` connected.
   * At initial, etcd `network/bridged` API point isn't available and dockerd complains. This seems to be normal though.
   * <https://dims-devguide.readthedocs.io/en/latest/dockerdatacenter.html>
-- [x] **Slave** : prune docker volume/network/plugin
-- [x] **Slave** : `apparmor`, `libseccomp2` and other docker runtime deps.  
+- [ ] **Slave** : with `pocketd` on and `nameserver 127.0.0.1` entry in `resolv.conf`, system cannot properly resolve domain name. this need to be fixed. Look `DNS` entry in [`pocket-document`](https://github.com/stkim1/pocket-document)
 - [ ] **Slave** : make sure AUFS can handle more than 42 layers. 
   * `CONFIG_AUFS_FS=y CONFIG_AUFS_BRANCH_MAX_127=y`  
-- [ ] **Slave** : don't forget to install `kmod` for docker to start  
-- [x] **Slave** : Install `aufs-tools` for `auplink`
-- [x] **Slave** : Install unarchiver / uncompressor for future update  
 - [ ] **Slave** : Uninterrupt Setup Issues
   * `partprobe` to reload reformatted partition
   * `/etc/resolv.conf` to preset localhost as nameserver
@@ -66,6 +62,11 @@
 - [ ] _Master_ SQLite encryption
 - [ ] _Master_ Remove unnecessary `const` & `field` in `msagent` package
 - [ ] [_RPI_] cannot acquire proper interface name from netifaces for default gateway
+- [x] **Slave** : prune docker volume/network/plugin
+- [x] **Slave** : `apparmor`, `libseccomp2` and other docker runtime deps.  
+- [x] **Slave** : Install `aufs-tools` for `auplink`
+- [x] **Slave** : Install unarchiver / uncompressor for future update  
+- [x] **Slave** : don't forget to install `kmod` for docker to start  
 - [x] Provide `pc-master` DNS for `docker-compose`
 - [x] [_ODROID_] netmask format fix for network/interfaces (`ffffff00` -> `255.255.255.0`)
 - [x] Vagrant Fix Network Interface Order (eth0 : internal/ eth1 : external)
