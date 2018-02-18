@@ -30,6 +30,6 @@ func (c *PocketSlaveConfig) UpdateHostsFile() error {
             hostsData = append(hostsData, hl)
         }
     }
-    hostsData = append(hostsData, fmt.Sprintf("127.0.1.1    %s", c.SlaveSection.SlaveNodeName))
+    hostsData = append(hostsData, fmt.Sprintf("127.0.1.1    %s %s", c.SlaveSection.SlaveNodeName, c.SlaveSection.SlaveNodeName))
     return ioutil.WriteFile(hostsFile, []byte(strings.Join(hostsData, "\n")), 0644)
 }
