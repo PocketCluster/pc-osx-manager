@@ -303,6 +303,19 @@ func main() {
                             continue
                         }
 
+                        if isFirstTimeRun {
+                            // base user and vbox core setup
+                            // (DEP teleport service)
+                            err = setupBaseUsersWithVboxCore(appLife, appCfg.PCSSH)
+                            if err != nil {
+                                log.Error(err)
+                                appLife.BroadcastEvent(service.Event{
+                                    Name:ivent.IventInternalSpawnError,
+                                    Payload:err})
+                                continue
+                            }
+                        }
+
                         // teleport service
                         // (DEP netchange, NODEP services)
                         // TODO : need to hold teleport instance from GC -> not necessary as it embeds service instance???
@@ -337,38 +350,6 @@ func main() {
                                 Router: appLife.Router},
                             theFeeder, appCfg.PCSSH)
 
-                        // --- initialize environment ---
-                        // (user setup, vbox core init/ start)
-                        if isFirstTimeRun {
-                            err = setupBaseUsers(appCfg.PCSSH)
-                            if err != nil {
-                                log.Error(err)
-                                appLife.BroadcastEvent(service.Event{
-                                    Name:ivent.IventInternalSpawnError,
-                                    Payload:err})
-                                continue
-                            }
-
-                            vboxCore, err = initializeVboxCore(appCfg.PCSSH)
-                            if err != nil {
-                                log.Error(err)
-                                appLife.BroadcastEvent(service.Event{
-                                    Name:ivent.IventInternalSpawnError,
-                                    Payload:err})
-                                continue
-                            }
-                        } else {
-                            vboxCore, err = startVboxCore()
-                            if err != nil {
-                                log.Error(err)
-                                appLife.BroadcastEvent(service.Event{
-                                    Name:ivent.IventInternalSpawnError,
-                                    Payload:err})
-                                continue
-                            }
-                        }
-
-
                         // --- external listeners ---
                         // beacon locator service needs to initiated after master beacon
                         // (NODEP netchange, NODEP service)
@@ -394,7 +375,37 @@ func main() {
                             continue
                         }
 
+                        // start services
                         appLife.StartServices()
+
+                        // if this is the first time run, then wait for setup completed and start vbox core
+                        if isFirstTimeRun {
+                            reportC := make(chan service.Event)
+                            if err := appLife.BindDiscreteEvent(ivent.IventSetupUsersAndVboxCore, reportC); err != nil {
+                                log.Error(err)
+                                appLife.BroadcastEvent(service.Event{
+                                    Name:    ivent.IventInternalSpawnError,
+                                    Payload: err})
+                                continue
+                            }
+                            sdone := <-reportC
+                            appLife.UntieDiscreteEvent(ivent.IventSetupUsersAndVboxCore)
+                            if err, ok := sdone.Payload.(error); !ok || err != nil {
+                                log.Error("unable launch vbox core due to setup error")
+                                appLife.BroadcastEvent(service.Event{
+                                    Name:    ivent.IventInternalSpawnError,
+                                    Payload: err})
+                                continue
+                            }
+                        }
+                        vboxCore, err = startVboxCore()
+                        if err != nil {
+                            log.Error(err)
+                            appLife.BroadcastEvent(service.Event{
+                                Name:ivent.IventInternalSpawnError,
+                                Payload:err})
+                            continue
+                        }
                         log.Debugf("[OP] %v", e.String())
                     }
 
