@@ -695,6 +695,12 @@ func main() {
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdDebug5: {
+                        vcore, err := vboxglue.NewGOVboxGlue()
+                        if err != nil {
+                            log.Debug(err.Error())
+                            continue
+                        }
+                        log.Debugf("Virtualbox Core AppVersion %v | APIVersion %v", vcore.AppVersion(), vcore.APIVersion())
                         log.Debugf("[OP] %v", e.String())
                     }
                     case operation.CmdDebug6: {
