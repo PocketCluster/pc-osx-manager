@@ -390,8 +390,9 @@ func main() {
                             }
                             sdone := <-reportC
                             appLife.UntieDiscreteEvent(ivent.IventSetupUsersAndVboxCore)
-                            if err, ok := sdone.Payload.(error); !ok || err != nil {
-                                log.Error("unable launch vbox core due to setup error")
+                            if sdone.Payload != nil {
+                                err := sdone.Payload.(error)
+                                log.Errorf("unable launch vbox core due to setup error %s", err.Error())
                                 appLife.BroadcastEvent(service.Event{
                                     Name:    ivent.IventInternalSpawnError,
                                     Payload: err})
