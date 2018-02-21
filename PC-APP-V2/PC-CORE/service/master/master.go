@@ -95,7 +95,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     }
                     return true
                 }
-                failtimeout *time.Ticker        = time.NewTicker(time.Minute)
+                failtimeout *time.Ticker        = time.NewTicker(time.Minute * 3)
                 timer       *time.Ticker        = time.NewTicker(time.Second)
                 beaconMan   beacon.BeaconManger = nil
                 vmctrl      masterctrl.VBoxMasterControl

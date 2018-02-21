@@ -108,7 +108,7 @@ func InitPocketNameService(appLife service.ServiceSupervisor, clusterID string) 
                     Addr:    "127.0.0.1:10059",
                     Net:     "udp",
                 }
-                failtimeout   *time.Ticker        = time.NewTicker(time.Minute)
+                failtimeout   *time.Ticker        = time.NewTicker(time.Minute * 3)
                 udpPacketConn *net.UDPConn        = nil
                 udpAddr       *net.UDPAddr        = nil
                 beaconMan     beacon.BeaconManger = nil
