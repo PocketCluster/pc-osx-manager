@@ -49,7 +49,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                 nStatTimer  = time.NewTicker(time.Second * 10)
                 // this is to wait timer for other services to start. Especially for this timeout, we'll give 90 secs
                 // this also works as a timeout for core node to boot. make sure core node boot in 90 sec
-                failtimeout = time.NewTicker(time.Minute * 5)
+                failtimeout = time.NewTicker(time.Second * 90)
                 // app start timeup counter. This should only be triggered after 1 minute
                 nodeOnlineTimeup *time.Ticker = nil
 

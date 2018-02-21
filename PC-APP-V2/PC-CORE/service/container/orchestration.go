@@ -100,7 +100,7 @@ func InitOrchstService(appLife service.ServiceSupervisor) error {
         func() error {
             var (
                 beaconMan   beacon.BeaconManger = nil
-                failtimeout *time.Ticker        = time.NewTicker(time.Minute * 3)
+                failtimeout *time.Ticker        = time.NewTicker(time.Minute)
             )
 
             // wait becon agent

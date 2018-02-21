@@ -331,13 +331,15 @@ func main() {
                         // --- internal listeners ---
                         // vboxcontrol service comes first (as it's internal network listener)
                         // (DEP netchange, NODEP service)
-                        err = vbox.InitVboxCoreReportService(appLife, cid)
-                        if err != nil {
-                            log.Error(err)
-                            appLife.BroadcastEvent(service.Event{
-                                Name:ivent.IventInternalSpawnError,
-                                Payload:err})
-                            continue
+                        if !isFirstTimeRun {
+                            err = vbox.InitVboxCoreReportService(appLife, cid)
+                            if err != nil {
+                                log.Error(err)
+                                appLife.BroadcastEvent(service.Event{
+                                    Name:ivent.IventInternalSpawnError,
+                                    Payload:err})
+                                continue
+                            }
                         }
 
                         // up until this point everything has to be executed fast as other services are waiting with timeout.
@@ -396,6 +398,14 @@ func main() {
                                 appLife.BroadcastEvent(service.Event{
                                     Name:    ivent.IventInternalSpawnError,
                                     Payload: err})
+                                continue
+                            }
+                            err = vbox.InitVboxCoreReportService(appLife, cid)
+                            if err != nil {
+                                log.Error(err)
+                                appLife.BroadcastEvent(service.Event{
+                                    Name:ivent.IventInternalSpawnError,
+                                    Payload:err})
                                 continue
                             }
                         }
