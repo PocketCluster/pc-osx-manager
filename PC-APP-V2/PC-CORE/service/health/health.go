@@ -49,7 +49,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                 nStatTimer  = time.NewTicker(time.Second * 10)
                 // this is to wait timer for other services to start. Especially for this timeout, we'll give 90 secs
                 // this also works as a timeout for core node to boot. make sure core node boot in 90 sec
-                failTimeout = time.NewTicker(time.Second * 90)
+                failtimeout = time.NewTicker(time.Second * 90)
                 // app start timeup counter. This should only be triggered after 1 minute
                 nodeOnlineTimeup *time.Ticker = nil
 
@@ -78,8 +78,8 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
             // monitor pre-requisite services with timeout
             for {
                 select {
-                    case <- failTimeout.C: {
-                        failTimeout.Stop()
+                    case <- failtimeout.C: {
+                        failtimeout.Stop()
                         sChkTimer.Stop()
                         nStatTimer.Stop()
 
@@ -100,7 +100,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
                     // !!! Any error happens in initializing internal service is critical one. !!!
                     // provide feedback upon receiving one and stop application
                     case ee := <-innerErrC: {
-                        failTimeout.Stop()
+                        failtimeout.Stop()
                         sChkTimer.Stop()
                         nStatTimer.Stop()
 
@@ -183,7 +183,7 @@ func InitSystemHealthMonitor(appLife service.ServiceSupervisor, feeder route.Res
             }
 
             monstart:
-            failTimeout.Stop()
+            failtimeout.Stop()
             // notify frontend that all services started as intented
             data, err := json.Marshal(route.ReponseMessage{"srvc-timeup": {"status": true}})
             if err != nil {

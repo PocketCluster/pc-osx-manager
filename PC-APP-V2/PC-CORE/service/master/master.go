@@ -95,19 +95,19 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     }
                     return true
                 }
-                failtimout        *time.Ticker = time.NewTicker(time.Minute)
-                timer             *time.Ticker = time.NewTicker(time.Second)
-                beaconMan  beacon.BeaconManger = nil
-                vmctrl     masterctrl.VBoxMasterControl
-                err        error               = nil
+                failtimeout *time.Ticker        = time.NewTicker(time.Minute)
+                timer       *time.Ticker        = time.NewTicker(time.Second)
+                beaconMan   beacon.BeaconManger = nil
+                vmctrl      masterctrl.VBoxMasterControl
+                err         error               = nil
             )
 
             // wait pre-requisites to start
             for {
                 select {
                     // fail to start service after one minute
-                    case <- failtimout.C: {
-                        failtimout.Stop()
+                    case <- failtimeout.C: {
+                        failtimeout.Stop()
                         timer.Stop()
                         beaconRoute.terminate()
                         log.Errorf("[AGENT] fail to start agent service")
@@ -144,8 +144,8 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
             }
 
             buildagent:
-            // stop failtimout
-            failtimout.Stop()
+            // stop failtimeout
+            failtimeout.Stop()
             // beacon manager
             beaconMan, err = beacon.NewBeaconManagerWithFunc(
                 clusterID,
