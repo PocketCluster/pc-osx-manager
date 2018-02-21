@@ -197,6 +197,7 @@ enum {
     }
 
     [[(PCSetup1VC *)[self.viewControllers objectAtIndex:2] progressLabel] setStringValue:@"Ready to setup a cluster"];
+    [(PCSetup1VC *)[self.viewControllers objectAtIndex:2] enableControls];
 }
 
 #pragma mark - Monitoring Package
