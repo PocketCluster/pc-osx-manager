@@ -140,10 +140,13 @@ selectionIndexesForProposedSelection:(NSIndexSet *)anIndex {
     if (isSuccess && list != nil && [list count]) {
         [self.packageTable reloadData];
 
+#if 0
+    // this should not be an error as installed package could be 0
     } else {
         [ShowAlert
          showWarningAlertWithTitle:@"Unable to confirm installed package"
          message:anErrMsg];
+#endif
     }
 
     [self _enableControls];
