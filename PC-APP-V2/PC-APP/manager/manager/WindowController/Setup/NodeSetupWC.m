@@ -91,7 +91,7 @@
     if (1 <= prevIndex) {
         nextIndex = prevIndex - 1;
     } else {
-        Log(@"end of control");
+        [self close];
         return;
     }
 
