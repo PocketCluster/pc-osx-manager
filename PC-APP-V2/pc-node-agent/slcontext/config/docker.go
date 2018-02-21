@@ -170,8 +170,10 @@ func filePathCustomCertAuth(rootPath string) string {
 func CopyCertAuthForwardCustomCertStorage(rootPath string) error {
     var (
         slaveAuthCertFile       string = FilePathSlaveEngineAuthCert(rootPath)
-        slaveCustomCertAuthPath string = dirPathCustomCertAuth(rootPath)
-        slaveCustomCertAuthFile string = filePathCustomCertAuth(rootPath)
+        // /usr/local/share/ca­certificates/
+        slaveCustomCertAuthPath string = "\x2f\x75\x73\x72\x2f\x6c\x6f\x63\x61\x6c\x2f\x73\x68\x61\x72\x65\x2f\x63\x61\x2d\x63\x65\x72\x74\x69\x66\x69\x63\x61\x74\x65\x73\x2f"
+        // /usr/local/share/ca­certificates/pc_node_engine_auth.crt
+        slaveCustomCertAuthFile string = "\x2f\x75\x73\x72\x2f\x6c\x6f\x63\x61\x6c\x2f\x73\x68\x61\x72\x65\x2f\x63\x61\x2d\x63\x65\x72\x74\x69\x66\x69\x63\x61\x74\x65\x73\x2f\x70\x63\x5f\x6e\x6f\x64\x65\x5f\x65\x6e\x67\x69\x6e\x65\x5f\x61\x75\x74\x68\x2e\x63\x72\x74"
     )
     // original cert auth should exist
     if _, err := os.Stat(slaveAuthCertFile); os.IsNotExist(err) {
