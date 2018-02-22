@@ -2,6 +2,7 @@ package slcontext
 
 import (
     "io/ioutil"
+    "os/exec"
 
     log "github.com/Sirupsen/logrus"
 
@@ -45,6 +46,16 @@ func DockerEnvironemtPostProcess(certPack *auth.PocketResponseAuthKeyCert) error
         return err
     }
     err = config.CopyCertAuthForwardCustomCertStorage("")
+    if err != nil {
+        log.Debugf(err.Error())
+        return err
+    }
+    err = exec.Command("/usr/sbin/service", "networking", "restart").Run()
+    if err != nil {
+        log.Debugf(err.Error())
+        return err
+    }
+    err = exec.Command("/usr/sbin/service", "docker", "restart").Run()
     if err != nil {
         log.Debugf(err.Error())
         return err
