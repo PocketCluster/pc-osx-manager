@@ -44,7 +44,6 @@
 		046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FE1BD78AB8004E0946 /* NSString+Contain.m */; };
 		046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36011BD78AB8004E0946 /* MSWeakTimer.m */; };
 		046A36231BD78AB8004E0946 /* timeutil.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36041BD78AB8004E0946 /* timeutil.m */; };
-		046A36451BD79343004E0946 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36441BD79343004E0946 /* WebKit.framework */; };
 		046A36461BD7934D004E0946 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A363F1BD791F3004E0946 /* Security.framework */; };
 		046A36481BD79359004E0946 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36471BD79359004E0946 /* Cocoa.framework */; };
 		046D31041F3D310C0081CC3E /* PCPrefWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D31021F3D310C0081CC3E /* PCPrefWC.m */; };
@@ -323,7 +322,6 @@
 				04F705701BD7A9B700829651 /* IOKit.framework in Frameworks */,
 				046A36481BD79359004E0946 /* Cocoa.framework in Frameworks */,
 				046A36461BD7934D004E0946 /* Security.framework in Frameworks */,
-				046A36451BD79343004E0946 /* WebKit.framework in Frameworks */,
 				89580BEF40BDD88F96DECDEE /* Pods_PocketCluster.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
