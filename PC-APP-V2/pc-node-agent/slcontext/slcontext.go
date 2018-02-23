@@ -2,6 +2,7 @@ package slcontext
 
 import (
     "fmt"
+    "os/exec"
     "sync"
 
     log "github.com/Sirupsen/logrus"
@@ -209,6 +210,10 @@ func (s *slaveContext) SaveConfiguration() error {
         return errors.WithStack(err)
     }
 */
+    // update linux hostname with systemd
+    if err := exec.Command("/usr/bin/hostnamectl", "set-hostname", s.config.SlaveSection.SlaveNodeName).Run(); err != nil {
+        return errors.WithStack(err)
+    }
     // save slave config into yaml
     return s.config.SaveSlaveConfig()
 }

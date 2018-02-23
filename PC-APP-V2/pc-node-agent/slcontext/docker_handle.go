@@ -50,11 +50,6 @@ func DockerEnvironemtPostProcess(certPack *auth.PocketResponseAuthKeyCert) error
         log.Debugf(err.Error())
         return err
     }
-    err = exec.Command("/usr/sbin/service", "networking", "restart").Run()
-    if err != nil {
-        log.Debugf(err.Error())
-        return err
-    }
     err = exec.Command("/usr/sbin/service", "docker", "restart").Run()
     if err != nil {
         log.Debugf(err.Error())
