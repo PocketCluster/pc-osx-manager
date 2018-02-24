@@ -29,6 +29,7 @@ type RegisterManger interface {
     RegisterMonitoredNodes(ts time.Time) error
     IsAllNodeRegistered(ts time.Time) bool
     IsRegistrationTimedOut(ts time.Time) bool
+    IsRegistering() bool
     GuideNodeRegistrationWithBeacon(beaconD ucast.BeaconPack, ts time.Time) error
 }
 
@@ -229,6 +230,7 @@ func (r *registerManager) UnregisteredNodeList(ts time.Time) []map[string]string
     defer r.Unlock()
 
     // --- registration is underway. Do not modify the monitor list ---
+    // FIXME : this stupid logic causes node name to be appeared increased by 1 during registration state. Need solid fix
     if r.isRegisteringNode {
         var mLen = len(r.monitorList)
         for i := 0; i < mLen; i++ {
@@ -377,6 +379,13 @@ func (r *registerManager) IsRegistrationTimedOut(ts time.Time) bool {
         return false
     }
     return true
+}
+
+func (r *registerManager) IsRegistering() bool {
+    r.Lock()
+    defer r.Unlock()
+
+    return r.isRegisteringNode
 }
 
 /*
