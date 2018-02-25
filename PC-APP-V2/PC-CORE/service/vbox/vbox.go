@@ -89,6 +89,7 @@ func handleConnection(ctrl masterctrl.VBoxMasterControl, conn net.Conn, stopC <-
 func InitVboxCoreReportService(appLife service.ServiceSupervisor, clusterID string) error {
     var (
         ctrlObjC  = make(chan service.Event)
+        coreAddrC = make(chan service.Event)
         netC      = make(chan service.Event)
     )
 
@@ -126,6 +127,19 @@ func InitVboxCoreReportService(appLife service.ServiceSupervisor, clusterID stri
                         log.Debugf("[VBOXLSTN] VBox Core listener shutdown...")
                         return nil
                     }
+                    case <- coreAddrC: {
+                        if addr, err := ctrl.GetCoreNode().IP4AddrString(); err != nil {
+                            appLife.BroadcastEvent(service.Event{
+                                Name:    ivent.IventReportCoreAddrResult,
+                                Payload: err,
+                            })
+                        } else {
+                            appLife.BroadcastEvent(service.Event{
+                                Name:    ivent.IventReportCoreAddrResult,
+                                Payload: addr,
+                            })
+                        }
+                    }
                     default: {
                         conn, err = listen.Accept()
                         if err != nil {
@@ -143,7 +157,8 @@ func InitVboxCoreReportService(appLife service.ServiceSupervisor, clusterID stri
             }
             return nil
         },
-        service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn, ctrlObjC))
+        service.BindEventWithService(ivent.IventVboxCtrlInstanceSpawn, ctrlObjC),
+        service.BindEventWithService(ivent.IventReportLiveNodesRequest, coreAddrC))
 
     appLife.RegisterServiceWithFuncs(
         operation.ServiceVBoxMasterControl,

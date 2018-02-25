@@ -19,6 +19,7 @@ import (
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/rasker"
     "github.com/stkim1/pc-core/rasker/install"
+    "github.com/stkim1/pc-core/rasker/pkglist"
     "github.com/stkim1/pc-core/rasker/pkgtask"
     "github.com/stkim1/pc-core/rasker/regnode"
     "github.com/stkim1/pc-core/route"
@@ -89,9 +90,13 @@ func main() {
                                     Router: appLife.Router},
                                     theFeeder)
 
-                                // package list
+                                // package list from backend
                                 list.InitRouthPathListAvailable(appLife, theFeeder)
-                                list.InitRouthPathListInstalled(appLife, theFeeder)
+
+                                // installed package list
+                                pkglist.InitRouthPathListInstalled(rasker.RouteTasker{
+                                    ServiceSupervisor: appLife.ServiceSupervisor,
+                                    Router: appLife.Router}, theFeeder)
 
                                 // node registration
                                 regnode.InitNodeRegisterCycle(rasker.RouteTasker{

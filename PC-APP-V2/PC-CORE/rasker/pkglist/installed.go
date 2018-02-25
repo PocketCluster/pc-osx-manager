@@ -1,17 +1,22 @@
-package list
+package pkglist
 
 import (
     "encoding/json"
+    "fmt"
+    "strings"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/model"
+    "github.com/stkim1/pc-core/rasker"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
+    "github.com/stkim1/pc-core/service"
+    "github.com/stkim1/pc-core/service/ivent"
 )
 
 // read available package list from backend
-func InitRouthPathListInstalled(appLife route.Router, feeder route.ResponseFeeder) {
+func InitRouthPathListInstalled(appLife rasker.RouteTasker, feeder route.ResponseFeeder) {
     // get the list of available packages
     appLife.GET(routepath.RpathPackageListInstalled(), func(_, rpath, _ string) error {
         var (
@@ -32,7 +37,8 @@ func InitRouthPathListInstalled(appLife route.Router, feeder route.ResponseFeede
                 return errors.WithStack(irr)
             }
 
-            pkgList = []map[string]interface{}{}
+            coreAddrC = make(chan service.Event)
+            pkgList []map[string]interface{} = nil
         )
 
         // update package doesn't return error when there is packages to update.
@@ -40,17 +46,43 @@ func InitRouthPathListInstalled(appLife route.Router, feeder route.ResponseFeede
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access installed packages"))
         }
+
+        // acquire core external address
+        if err = appLife.BindDiscreteEvent(ivent.IventReportCoreAddrResult, coreAddrC); err != nil {
+            return feedError(errors.WithMessage(err, "Unable to install package due to invalid node status"))
+        }
+        appLife.BroadcastEvent(service.Event{Name:ivent.IventReportCoreAddrRequest})
+        cr := <- coreAddrC
+        appLife.UntieDiscreteEvent(ivent.IventReportCoreAddrResult)
+        coreAddr, ok := cr.Payload.(string)
+        if !ok {
+            return feedError(errors.WithMessage(cr.Payload.(error), "Unable to acquire core node address"))
+        }
+
         for i, _ := range recs {
             r := recs[i]
 
             if pkgs, err := model.FindPackage("pkg_id = ?", r.PkgID); err == nil && len(pkgs) != 0 {
-                p := pkgs[0]
+                var (
+                    aPkg                         = pkgs[0]
+                    consoles []map[string]string = nil
+                )
+                for _, prt := range strings.Split(aPkg.WebPorts, "|") {
+                    pds := strings.Split(prt, "!")
+                    consoles = append(
+                        consoles,
+                        map[string]string {
+                            "address": fmt.Sprintf("%s%s:%s", pds[0], coreAddr, pds[1]),
+                            "name":    pds[2],
+                        })
+                }
 
                 pkgList = append(pkgList, map[string]interface{} {
-                    "package-id" : p.PkgID,
-                    "description": p.Description,
+                    "package-id" : aPkg.PkgID,
+                    "description": aPkg.Description,
                     "installed":   true,
-                    "menu-name":   p.MenuName,
+                    "menu-name":   aPkg.MenuName,
+                    "consoles":    consoles,
                 })
             }
         }

@@ -35,8 +35,8 @@ func InitRouthPathListAvailable(appLife route.Router, feeder route.ResponseFeede
                 return errors.WithStack(irr)
             }
 
-            pkgList = []map[string]interface{}{}
-            pkgs    = []*model.Package{}
+            pkgList []map[string]interface{} = nil
+            pkgs    []*model.Package = nil
         )
         req, err := apireq.NewRequest(fmt.Sprintf("%s/service/v014/package/list", defaults.PocketClusterAPIHost), false)
         if err != nil {
