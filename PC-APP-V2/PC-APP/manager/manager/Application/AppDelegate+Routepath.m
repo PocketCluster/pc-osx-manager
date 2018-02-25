@@ -26,8 +26,6 @@
      onPath:@(RPATH_PACKAGE_STARTUP)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         //Log(@"%@ %@", path, response);
-
          NSString *pkgID = [response valueForKeyPath:@"package-start.pkg-id"];
 
          // if package fails to start
@@ -66,8 +64,6 @@
      onPath:@(RPATH_PACKAGE_KILL)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         //Log(@"%@ %@", path, response);
-
          NSString *pkgID = [response valueForKeyPath:@"package-kill.pkg-id"];
          Package *pkg = [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecIdle];
          if (pkg == nil) {
@@ -96,8 +92,6 @@
      addPostRequest:self
      onPath:@(RPATH_MONITOR_PACKAGE_PROCESS)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-
-         //Log(@"%@ %@", path, response);
 
          NSString *pkgID = [response valueForKeyPath:@"package-proc.pkg-id"];
 
@@ -152,8 +146,6 @@
      addGetRequest:self
      onPath:@(RPATH_PACKAGE_LIST_INSTALLED)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-
-         Log(@"%@ %@", path, response);
 
          // (2017/10/25) package related error message display should be handled in UI part
          if (![[response valueForKeyPath:@"package-installed.status"] boolValue]) {
