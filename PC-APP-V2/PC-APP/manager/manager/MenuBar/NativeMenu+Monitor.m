@@ -227,16 +227,15 @@ static void _updateExecMenuVisibility(NSMenuItem *aPackageMenu, ExecState aExecS
         [penu.submenu addItem:smStopping];
 
         // submenu - open web port menu
-        NSArray<NSDictionary*> *consoles = [pkg valueForKey:@"consoles"];
-        for (NSDictionary* c in consoles) {
+        for (Console* c in pkg.consoles) {
             NSMenuItem *smWeb =
                 [[NSMenuItem alloc]
-                 initWithTitle:[c valueForKey:@"name"]
+                 initWithTitle:c.name
                  action:@selector(openWebConsole:)
                  keyEquivalent:@""];
                 [smWeb setTag:EXEC_RUN];
                 [smWeb setTarget:self];
-                [smWeb setRepresentedObject:[c valueForKey:@"address"]];
+                [smWeb setRepresentedObject:c.address];
             [penu.submenu addItem:smWeb];
         }
 

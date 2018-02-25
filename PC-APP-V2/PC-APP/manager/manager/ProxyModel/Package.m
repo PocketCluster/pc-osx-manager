@@ -15,6 +15,26 @@ NSString * const kInstalled          = @"installed";
 NSString * const kMenuName           = @"menu-name";
 NSString * const kCoreImageSize      = @"core-image-size";
 NSString * const kNodeImageSize      = @"node-image-size";
+NSString * const kConsoles           = @"consoles";
+NSString * const kAddress            = @"address";
+NSString * const kName               = @"name";
+
+@interface Console()
+- (instancetype) initWithConsoleDict:(NSDictionary *)aConsoleDict;
+@property (nonatomic, strong, readwrite) NSString *address;
+@property (nonatomic, strong, readwrite) NSString *name;
+@end
+
+@implementation Console
+- (instancetype) initWithConsoleDict:(NSDictionary *)aConsoleDict {
+    self = [super init];
+    if (self) {
+        self.address = [aConsoleDict objectForKey:kAddress];
+        self.name    = [aConsoleDict objectForKey:kName];
+    }
+    return self;
+}
+@end
 
 @interface Package()
 @property (nonatomic, readwrite) BOOL installed;
@@ -22,6 +42,7 @@ NSString * const kNodeImageSize      = @"node-image-size";
 @property (nonatomic, strong, readwrite) NSString *packageID;
 @property (nonatomic, strong, readwrite) NSString *menuName;
 @property (nonatomic, strong, readwrite) NSString *totalImageSize;
+@property (nonatomic, strong, readwrite) NSArray<Console *>* consoles;
 @property (nonatomic, readwrite) ExecState execState;
 @end
 
@@ -61,6 +82,13 @@ NSString * const kNodeImageSize      = @"node-image-size";
         } else {
             pkg.totalImageSize = nil;
         }
+
+        // package consoles
+        NSMutableArray<Console *> *pConsoles = [NSMutableArray<Console *> arrayWithCapacity:0];
+        for (NSDictionary *c in (NSArray<NSDictionary*>*)[dict objectForKey:kConsoles]) {
+            [pConsoles addObject:[[Console alloc] initWithConsoleDict:c]];
+        }
+        pkg.consoles = pConsoles;
 
         [packages addObject:pkg];
     }
