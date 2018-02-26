@@ -228,7 +228,7 @@ func InitRoutePathInstallPackage(appLife rasker.RouteTasker, feeder route.Respon
                         //cdPathCmds = append(cdPathCmds, fmt.Sprintf("chown -R %s:%s %s", luname, luname, cdp))
                         //cdPathCmds = append(cdPathCmds, fmt.Sprintf("chmod -R 755 %s", cdp))
                     }
-                    log.Info("core data path commands %v", cdPathCmds)
+                    log.Infof("core data path commands %v", cdPathCmds)
 
                     cssh, err := tclient.MakeNewClient(sshCfg, uRoot.Login, defaults.PocketClusterCoreName)
                     if err != nil {
