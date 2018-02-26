@@ -218,7 +218,7 @@ func InitRoutePathInstallPackage(appLife rasker.RouteTasker, feeder route.Respon
                     // --- --- --- --- --- setup core node --- --- --- --- ---
                     // data paths to build
                     cdPath := strings.Split(pkg.CoreDataPath, "|")
-                    cdPathCmds := []string{}
+                    var cdPathCmds []string = nil
                     for _, cdp := range cdPath {
                         cdPathCmds = append(cdPathCmds, fmt.Sprintf("mkdir -p %s", cdp))
                         /*
@@ -263,7 +263,7 @@ func InitRoutePathInstallPackage(appLife rasker.RouteTasker, feeder route.Respon
                     // data paths to build
                     ndPath := strings.Split(pkg.NodeDataPath, "|")
                     // ndpath setup commands
-                    ndPathCmds := []string{}
+                    var ndPathCmds []string = nil
                     for _, ndp := range ndPath {
                         ndPathCmds = append(ndPathCmds, fmt.Sprintf("mkdir -p %s", ndp))
                         ndPathCmds = append(ndPathCmds, fmt.Sprintf("chown -R %s:%s %s", luname, luname, ndp))
