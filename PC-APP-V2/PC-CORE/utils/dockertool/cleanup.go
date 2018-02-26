@@ -28,15 +28,15 @@ func CleanupContainer(cli *client.Client) error {
     }
     for _, c := range containers {
         if err := cli.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{Force:true}); err != nil {
-            log.Errorf("container cleanup error %v", err.Error())
+            log.Errorf("[CONTAINER] container cleanup error %v", err.Error())
         }
     }
     select {
         case <- time.After(timeout): {
-            return errors.Errorf("container cleanup timeout")
+            return errors.Errorf("[CONTAINER] container cleanup timeout")
         }
         case <- ctx.Done(): {
-            log.Info("container cleanup ok")
+            log.Info("[CONTAINER] container cleanup ok")
             return nil
         }
     }
@@ -61,16 +61,16 @@ func CleanupNetwork(cli *client.Client) error {
     for _, n := range networks {
         if n.Scope == "global" {
             if err := cli.NetworkRemove(ctx, n.ID); err != nil {
-                log.Errorf("network cleanup error %v", err.Error())
+                log.Errorf("[CONTAINER] network cleanup error %v", err.Error())
             }
         }
     }
     select {
         case <- time.After(timeout): {
-            return errors.Errorf("network cleanup timeout")
+            return errors.Errorf("[CONTAINER] network cleanup timeout")
         }
         case <- ctx.Done(): {
-            log.Info("network cleanup ok")
+            log.Info("[CONTAINER] network cleanup ok")
             return nil
         }
     }
@@ -93,10 +93,10 @@ func CleanupVolume(cli *client.Client) error {
     }
     select {
         case <- time.After(timeout): {
-            return errors.Errorf("volume pruning timeout")
+            return errors.Errorf("[CONTAINER] volume pruning timeout")
         }
         case <- ctx.Done(): {
-            log.Info("volume cleanup ok")
+            log.Info("[CONTAINER] volume cleanup ok")
             return nil
         }
     }
