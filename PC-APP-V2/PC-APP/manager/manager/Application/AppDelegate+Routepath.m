@@ -220,6 +220,7 @@
          // complete notifying service online status
          [self onNotifiedWith:[StatusCache SharedStatusCache] nodeOnlineTimeup:YES];
 
+         // FIXME: we're supposed to ask installed menu package but menu cannot read package running status and that could mess things up.
          // ask installed package status
          [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
      }];
@@ -247,6 +248,12 @@
          // handle errors first then update UI
          [self updateServiceStatusWith:[StatusCache SharedStatusCache]];
 
+         // FIXME: we're supposed to ask installed menu package but menu cannot
+         // read running package status and that could mess things up and put
+         // things in unpredicatble state when re-queried in node online due
+         //
+         // ask installed package status
+         //[PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
      }];
 
     // --- --- --- --- --- --- [noti] service online timeup --- --- --- --- ---
@@ -288,6 +295,7 @@
              // initiate node checking status
              [self setupWithCheckingNodesMessage];
 
+             // FIXME: we're supposed to ask installed menu package but menu cannot read package running status and that could mess things up.
              // ask installed package status
              [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
          }
