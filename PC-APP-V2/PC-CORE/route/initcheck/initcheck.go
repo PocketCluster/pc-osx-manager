@@ -2,13 +2,16 @@ package initcheck
 
 import (
     "encoding/json"
+    "fmt"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
     "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/vboxglue"
+    "github.com/stkim1/pc-core/utils/apireq"
 )
 
 func InitApplicationCheck(appLife route.Router, feeder route.ResponseFeeder) {
@@ -145,23 +148,84 @@ func InitApplicationCheck(appLife route.Router, feeder route.ResponseFeeder) {
 
     // check if user is authenticated
     appLife.POST(routepath.RpathUserAuthed(), func(_, path, payload string) error {
-        // TODO : get the payload and check auth
+        var (
+            invitation, autherr string
+            status bool = false
+        )
 
+        // 1. parse input package id
+        err := json.Unmarshal([]byte(payload), &struct {
+            PkgID *string `json:"invitation"`
+        }{&invitation})
+        if err != nil || len(invitation) != 24 {
+            data, _ := json.Marshal(route.ReponseMessage{
+                "user-auth": {
+                    "status": false,
+                    "error":  "invalid invitation code. please provide valid one",
+                },
+            })
+            feeder.FeedResponseForPost(path, string(data))
+            return err
+        }
 
-        // return auth check value
-        data, err := json.Marshal(route.ReponseMessage{
+        // 2. build request
+        req, err := apireq.NewRequest(fmt.Sprintf("%s/service/v014/auth/check", defaults.PocketClusterAPIHost), false)
+        if err != nil {
+            log.Error(err.Error())
+            data, _ := json.Marshal(route.ReponseMessage{
+                "user-auth": {
+                    "status": false,
+                    "error": "unable to connect service. please try again",
+                },
+            })
+            feeder.FeedResponseForPost(path, string(data))
+            return err
+        }
+
+        // 3. connect to service
+        client := apireq.NewClient(apireq.ConnTimeout, true)
+        resp, err := apireq.ReadRequest(req, client)
+        if err != nil {
+            log.Error(err.Error())
+            data, _ := json.Marshal(route.ReponseMessage{
+                "user-auth": {
+                    "status": false,
+                    "error":  "unable to connect service. please try again",
+                },
+            })
+            feeder.FeedResponseForPost(path, string(data))
+            return err
+        }
+
+        // 4. read response
+        err = json.Unmarshal(resp, &struct {
+            AuthError *string `json:"error"`
+        }{&autherr})
+        if err != nil {
+            log.Error(err.Error())
+            data, _ := json.Marshal(route.ReponseMessage{
+                "user-auth": {
+                    "status": false,
+                    "error":  "invalid response from service. please try again",
+                },
+            })
+            feeder.FeedResponseForPost(path, string(data))
+            return err
+        }
+
+        // 5. return auth check value
+        if len(autherr) == 0 {
+            status = true
+        } else {
+            status = false
+        }
+        data, _ := json.Marshal(route.ReponseMessage{
             "user-auth": {
-                "status": true,
+                "status": status,
+                "error": autherr,
             },
         })
-        if err != nil {
-            log.Debugf(err.Error())
-            return errors.WithStack(err)
-        }
-        err = feeder.FeedResponseForPost(path, string(data))
-        if err != nil {
-            return errors.WithStack(err)
-        }
+        feeder.FeedResponseForPost(path, string(data))
         return nil
     })
 }

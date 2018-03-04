@@ -125,7 +125,7 @@
 
              [PCRouter
               routeRequestPost:RPATH_USER_AUTHED
-              withRequestBody:@{@"email":@"testemail", @"code":@"testcode"}];
+              withRequestBody:@{@"invitation":@"VAPT-QUV9-YFGM-84RD-ILOF"}];
          }
      }];
 

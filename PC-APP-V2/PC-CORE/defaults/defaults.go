@@ -77,9 +77,9 @@ const (
 )
 
 const (
-//    PocketClusterAPIHost       string = "https://api.pocketcluster.io"
-//    PocketClusterCDNProto      string = "https://"
+    PocketClusterAPIHost       string = "https://api.pocketcluster.io"
+    PocketClusterCDNProto      string = "https://"
 
-    PocketClusterAPIHost       string = "http://dev-local.homelocal:8080"
-    PocketClusterCDNProto      string = "http://"
+//    PocketClusterAPIHost       string = "http://dev-local.homelocal:8080"
+//    PocketClusterCDNProto      string = "http://"
 )

@@ -10,14 +10,23 @@
 #import "UserCheckVC.h"
 #import "PCRouter.h"
 #import "NullStringChecker.h"
-#import "NSString+EmailForm.h"
 
 @interface UserCheckVC ()
 -(void)_disableControls;
 @end
 
-@implementation UserCheckVC
+static bool
+is_valid_invitation(NSString* invitation) {
+    static NSString * const check_pattern = @"^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$";
+    if ISNULL_STRING(invitation) {
+        return false;
+    }
+    return [[NSPredicate
+             predicateWithFormat:@"SELF MATCHES %@", check_pattern]
+            evaluateWithObject:invitation];
+}
 
+@implementation UserCheckVC
 -(void) finishConstruction {
     [super finishConstruction];
     [self setTitle:@"PocketCluster Invitation"];
@@ -33,25 +42,17 @@
 - (void)viewDidAppear {
     [super viewDidAppear];
 
-//    [self.view.window setInitialFirstResponder:[self fieldEmail]];
-    [self.fieldEmail becomeFirstResponder];
-    [self.fieldEmail selectText:self];
-    [[self.fieldEmail currentEditor] setSelectedRange:NSMakeRange([[self.fieldEmail stringValue] length], 0)];
+    [self.view.window setInitialFirstResponder:[self fieldCode]];
+    [self.fieldCode becomeFirstResponder];
+    [self.fieldCode selectText:self];
+    [[self.fieldCode currentEditor] setSelectedRange:NSMakeRange([[self.fieldCode stringValue] length], 0)];
 }
 
 -(IBAction)check:(id)sender {
-    NSString *email = [self.fieldEmail stringValue];
-    NSString *code =  [self.fieldCode stringValue];
-
-    if (ISNULL_STRING(email) || ![email isValidEmailForm]) {
+    NSString *invitation =  [self.fieldCode stringValue];
+    if (!is_valid_invitation(invitation)) {
         [ShowAlert
-         showWarningAlertWithTitle:@"Invalid Email Address"
-         message:@"Please provide valid email address"];
-        return;
-    }
-    if (ISNULL_STRING(code)) {
-        [ShowAlert
-         showWarningAlertWithTitle:@"Invalid Invitation"
+         showWarningAlertWithTitle:@"Invalid Code"
          message:@"Please provide valid invitation code"];
         return;
     }
@@ -60,10 +61,10 @@
 
     [PCRouter
      routeRequestPost:RPATH_USER_AUTHED
-     withRequestBody:@{@"email":email, @"code":code}];
+     withRequestBody:@{@"invitation":invitation}];
 }
 
--(IBAction)cancel:(id)sender {
+-(IBAction) cancel:(id)sender {
     [self.stageControl shouldControlRevertFrom:self withParam:nil];
 }
 
@@ -90,14 +91,12 @@
     [self.circularProgress removeFromSuperview];
     [self setCircularProgress:nil];
 
-    [self.fieldEmail setEnabled:YES];
     [self.fieldCode setEnabled:YES];
     [self.btnCancel setEnabled:YES];
     [self.btnCheck setEnabled:YES];
 }
 
 -(void) _disableControls {
-    [self.fieldEmail setEnabled:NO];
     [self.fieldCode setEnabled:NO];
     [self.btnCancel setEnabled:NO];
     [self.btnCheck setEnabled:NO];
