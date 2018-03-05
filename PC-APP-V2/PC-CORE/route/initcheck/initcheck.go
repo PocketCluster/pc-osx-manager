@@ -160,12 +160,13 @@ func InitApplicationCheck(appLife route.Router, feeder route.ResponseFeeder) {
 
         // 1. parse input package id
         err := json.Unmarshal([]byte(payload), &struct {
-            PkgID *string `json:"invitation"`
+            Invitation *string `json:"invitation"`
         }{&invitation})
         if err != nil || len(invitation) != 24 {
             data, _ := json.Marshal(route.ReponseMessage{
                 "user-auth": {
                     "status": false,
+                    "invitation": invitation,
                     "error":  "invalid invitation code. please provide valid one",
                 },
             })
@@ -193,6 +194,7 @@ func InitApplicationCheck(appLife route.Router, feeder route.ResponseFeeder) {
             data, _ := json.Marshal(route.ReponseMessage{
                 "user-auth": {
                     "status": false,
+                    "invitation": invitation,
                     "error":  "unable to connect service. please try again",
                 },
             })
@@ -208,6 +210,7 @@ func InitApplicationCheck(appLife route.Router, feeder route.ResponseFeeder) {
             data, _ := json.Marshal(route.ReponseMessage{
                 "user-auth": {
                     "status": false,
+                    "invitation": invitation,
                     "error":  "invalid response from service. please try again",
                 },
             })
@@ -224,6 +227,7 @@ func InitApplicationCheck(appLife route.Router, feeder route.ResponseFeeder) {
         data, _ := json.Marshal(route.ReponseMessage{
             "user-auth": {
                 "status": status,
+                "invitation": invitation,
                 "error": autherr,
             },
         })

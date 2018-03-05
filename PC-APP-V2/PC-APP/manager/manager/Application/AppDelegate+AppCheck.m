@@ -7,6 +7,7 @@
 //
 
 #include "pc-core.h"
+#import "PCConstants.h"
 #import "PCRouter.h"
 #import "ShowAlert.h"
 #import "StatusCache.h"
@@ -115,9 +116,10 @@
          } else {
              [belf activeWindowByClassName:@"IntroWC" withResponder:nil];
 
+             NSString *invitation = [[NSUserDefaults standardUserDefaults] stringForKey:kAppCheckInvitationCode];
              [PCRouter
               routeRequestPost:RPATH_USER_AUTHED
-              withRequestBody:@{@"invitation":@"CKUU-IOKO-WSUN-VEDP-FMPC"}];
+              withRequestBody:@{@"invitation":invitation}];
          }
      }];
 
@@ -126,8 +128,6 @@
      addPostRequest:self
      onPath:@(RPATH_USER_AUTHED)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-
-         Log(@"%@ %@", path, response);
 
          BOOL isUserAuthed = [[response valueForKeyPath:@"user-auth.status"] boolValue];
          [belf didAppCheckUserAuthed:isUserAuthed];
@@ -138,6 +138,14 @@
 
              // set the app ready whenever service gets started
              [[StatusCache SharedStatusCache] setAppReady:YES];
+
+             // if this is the first time run, we should remove old settings, and save invitation code
+             if ([[StatusCache SharedStatusCache] isFirstRun]) {
+                 NSString *invitation = [response valueForKeyPath:@"user-auth.invitation"];
+                 [[NSUserDefaults standardUserDefaults] removePersistentDomainForName:[[NSBundle mainBundle] bundleIdentifier]];
+                 [[NSUserDefaults standardUserDefaults] setObject:invitation forKey:kAppCheckInvitationCode];
+                 [[NSUserDefaults standardUserDefaults] synchronize];
+             }
 
              // start basic service
 //             OpsCmdBaseServiceStart();
