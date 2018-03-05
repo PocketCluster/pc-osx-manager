@@ -19,6 +19,7 @@ type HostContextSysResource interface {
     HostActiveProcessorCount() uint
     HostPhysicalMemorySize() uint
     HostPhysicalCoreCount() uint
+    HostDeviceSerial() string
     HostStorageSpaceStatus() (total uint, available uint)
 }
 
@@ -27,6 +28,7 @@ type hostSysResource struct {
     activeProcessorCount    uint
     physicalMemorySize      uint64
     physicalCoreCount       uint
+    deviceSerial            string
 }
 
 func (ctx *hostSysResource) HostProcessorCount() uint {
@@ -45,6 +47,10 @@ func (ctx *hostSysResource) HostPhysicalMemorySize() uint {
 
 func (ctx *hostSysResource) HostPhysicalCoreCount() uint {
     return ctx.physicalCoreCount
+}
+
+func (ctx *hostSysResource) HostDeviceSerial() string {
+    return ctx.deviceSerial
 }
 
 // size in GigaByte (GB)

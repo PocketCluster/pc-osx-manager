@@ -38,8 +38,6 @@
      onPath:@(RPATH_NETWORK_INIT)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         Log(@"%@ %@", path, response);
-
          BOOL isNetworkReady = [[response valueForKeyPath:@"sys-network-init.status"] boolValue];
          if (isNetworkReady) {
              [PCRouter routeRequestGet:RPATH_SYSTEM_READINESS];
@@ -57,8 +55,6 @@
      addGetRequest:self
      onPath:@(RPATH_SYSTEM_READINESS)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-
-         Log(@"%@ %@", path, response);
 
          BOOL isSystemReady = [[response valueForKeyPath:@"syscheck.status"] boolValue];
          [belf didAppCheckSystemReadiness:isSystemReady];
@@ -80,8 +76,6 @@
      onPath:@(RPATH_APP_EXPIRED)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         Log(@"%@ %@", path, response);
-         
          BOOL isAppExpired = [[response valueForKeyPath:@"expired.status"] boolValue];
          [belf didAppCheckAppExpiration:isAppExpired];
 
@@ -108,8 +102,6 @@
      onPath:@(RPATH_SYSTEM_IS_FIRST_RUN)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         Log(@"%@ %@", path, response);
-
          // show agreement
          BOOL isFirstRun = [[response valueForKeyPath:@"firsttime.status"] boolValue];
          [belf didAppCheckIsFirstRun:isFirstRun];
@@ -125,7 +117,7 @@
 
              [PCRouter
               routeRequestPost:RPATH_USER_AUTHED
-              withRequestBody:@{@"invitation":@"VAPT-QUV9-YFGM-84RD-ILOF"}];
+              withRequestBody:@{@"invitation":@"CKUU-IOKO-WSUN-VEDP-FMPC"}];
          }
      }];
 
@@ -148,7 +140,7 @@
              [[StatusCache SharedStatusCache] setAppReady:YES];
 
              // start basic service
-             OpsCmdBaseServiceStart();
+//             OpsCmdBaseServiceStart();
 
          } else {
              if ([[StatusCache SharedStatusCache] isFirstRun]) {

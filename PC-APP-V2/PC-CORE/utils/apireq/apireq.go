@@ -42,9 +42,21 @@ func ReadRequest(req *http.Request, client *http.Client) ([]byte, error) {
     if err != nil {
         return nil, errors.WithStack(err)
     }
-    defer resp.Body.Close()
-    if resp.StatusCode != 200 {
-        return nil, errors.Errorf("protocol status : %d", resp.StatusCode)
+
+    if resp.StatusCode == 200 {
+        if resp.Body == nil {
+            return nil, errors.Errorf("invalid null service response")
+        } else {
+            defer resp.Body.Close()
+            return ioutil.ReadAll(resp.Body)
+        }
     }
-    return ioutil.ReadAll(resp.Body)
+
+    if resp.Body == nil {
+        return nil, errors.Errorf("service response with code %d", resp.StatusCode)
+    } else {
+        defer resp.Body.Close()
+        body, _ := ioutil.ReadAll(resp.Body)
+        return body, errors.Errorf("service response with code %d", resp.StatusCode)
+    }
 }

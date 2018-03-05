@@ -3,9 +3,14 @@ package initcheck
 import (
     "encoding/json"
     "fmt"
+    "net/http"
+    "net/url"
+    "strings"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+    "golang.org/x/crypto/ripemd160"
+
     "github.com/stkim1/pc-core/context"
     "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/route"
@@ -168,25 +173,23 @@ func InitApplicationCheck(appLife route.Router, feeder route.ResponseFeeder) {
             return err
         }
 
-        // 2. build request
-        req, err := apireq.NewRequest(fmt.Sprintf("%s/service/v014/auth/check", defaults.PocketClusterAPIHost), false)
-        if err != nil {
-            log.Error(err.Error())
-            data, _ := json.Marshal(route.ReponseMessage{
-                "user-auth": {
-                    "status": false,
-                    "error": "unable to connect service. please try again",
-                },
-            })
-            feeder.FeedResponseForPost(path, string(data))
-            return err
-        }
+        // 2. connect to service
+        val := url.Values{}
+        rh := ripemd160.New()
+        rh.Write([]byte(invitation))
+        val.Set("invitation", fmt.Sprintf("%x", rh.Sum(nil)))
 
-        // 3. connect to service
+        rh.Reset()
+        rh.Write([]byte(context.SharedHostContext().HostDeviceSerial()))
+        val.Set("device", fmt.Sprintf("%x", rh.Sum(nil)))
+
+        req, _ :=  http.NewRequest("POST", fmt.Sprintf("%s/service/v014/auth/check", defaults.PocketClusterAPIHost), strings.NewReader(val.Encode()))
+        req.Header.Add("User-Agent", "PocketCluster/0.1.4 (OSX)")
+        req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+        req.ProtoAtLeast(1, 1)
         client := apireq.NewClient(apireq.ConnTimeout, true)
         resp, err := apireq.ReadRequest(req, client)
         if err != nil {
-            log.Error(err.Error())
             data, _ := json.Marshal(route.ReponseMessage{
                 "user-auth": {
                     "status": false,
@@ -197,12 +200,11 @@ func InitApplicationCheck(appLife route.Router, feeder route.ResponseFeeder) {
             return err
         }
 
-        // 4. read response
+        // 3. read response
         err = json.Unmarshal(resp, &struct {
             AuthError *string `json:"error"`
         }{&autherr})
         if err != nil {
-            log.Error(err.Error())
             data, _ := json.Marshal(route.ReponseMessage{
                 "user-auth": {
                     "status": false,
@@ -213,7 +215,7 @@ func InitApplicationCheck(appLife route.Router, feeder route.ResponseFeeder) {
             return err
         }
 
-        // 5. return auth check value
+        // 4. return auth check value
         if len(autherr) == 0 {
             status = true
         } else {
