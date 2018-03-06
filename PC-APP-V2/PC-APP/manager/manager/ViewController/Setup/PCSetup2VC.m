@@ -58,8 +58,6 @@ NSString * const kClusterSetupResult = @"SETUP_SUCCESS";
      onPath:@(RPATH_NODE_REG_CANDIDATE)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         Log(@"path %@ response %@", path, response);
-
          if (![[response valueForKeyPath:@"node-reg-candidate.status"] boolValue]) {
              [[StatusCache SharedStatusCache] setClusterSetup:NO];
 
@@ -77,8 +75,6 @@ NSString * const kClusterSetupResult = @"SETUP_SUCCESS";
      addGetRequest:self
      onPath:@(RPATH_NODE_REG_CONFIRM)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-
-         Log(@"path %@ response %@", path, response);
 
          [[StatusCache SharedStatusCache] setClusterSetup:NO];
 
