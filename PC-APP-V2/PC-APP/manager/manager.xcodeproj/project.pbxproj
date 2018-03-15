@@ -1353,7 +1353,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/manager",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
@@ -1390,7 +1390,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/manager",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
