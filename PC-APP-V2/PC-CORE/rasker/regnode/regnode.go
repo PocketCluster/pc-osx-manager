@@ -42,7 +42,6 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
                     beaconMan beacon.BeaconManger = nil
                     rptTick *time.Ticker = nil
                     err error = nil
-                    isRegistering bool = false
                 )
 
                 // we need beacon master here
@@ -76,31 +75,23 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
                             return nil
                         }
                         case <- candidC: {
-                            if !isRegistering {
-                                rerr := regMan.RegisterMonitoredNodes(time.Now())
-                                if rerr == nil {
-                                    log.Debug("[REGISTER] node registration went ok")
-                                    isRegistering = true
-                                    frr := feedGetOkMessage(feeder, rpNodeRegCandid, "node-reg-candidate")
-                                    if frr != nil {
-                                        log.Errorf("[REGISTER] node registration success feedback fail %v", frr.Error())
-                                    }
-                                } else {
-                                    log.Errorf("[REGISTER] node registration failed %v", rerr.Error())
-                                    frr := feedGetError(feeder, rpNodeRegCandid, "node-reg-candidate", errors.Errorf("[REGISTER] invalid beacon manager"))
-                                    if frr != nil {
-                                        log.Errorf("[REGISTER] node registration failure feedback fail %v", frr.Error())
-                                    }
+                            if regMan.IsRegistering() {
+                                continue
+                            }
+                            if rerr := regMan.RegisterMonitoredNodes(time.Now()); rerr == nil {
+                                log.Debug("[REGISTER] node registration went ok")
+                                if frr := feedGetOkMessage(feeder, rpNodeRegCandid, "node-reg-candidate"); frr != nil {
+                                    log.Errorf("[REGISTER] node registration success feedback fail %v", frr.Error())
+                                }
+                            } else {
+                                log.Errorf("[REGISTER] node registration failed %v", rerr.Error())
+                                if frr := feedGetError(feeder, rpNodeRegCandid, "node-reg-candidate", errors.Errorf("[REGISTER] invalid beacon manager")); frr != nil {
+                                    log.Errorf("[REGISTER] node registration failure feedback fail %v", frr.Error())
                                 }
                             }
                         }
                         case ts := <- rptTick.C: {
-                            list := regMan.UnregisteredNodeList(ts)
-                            lrr := feedGetMessage(feeder, rpUnregNodeList, "node-unreged", "unreged-list", list)
-                            if lrr != nil {
-                                log.Debugf("[REGISTER] unregistered node report error : %v", lrr.Error())
-                            }
-                            if isRegistering {
+                            if regMan.IsRegistering() {
                                 if regMan.IsAllNodeRegistered(ts) {
                                     log.Debugf("[REGISTER] stopped. every node is all registered")
                                     rptTick.Stop()
@@ -111,9 +102,18 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
                                     rptTick.Stop()
                                     return feedGetError(feeder, rpNodeRegCnfrm, "node-reg-confirm", errors.Errorf("[REGISTER] confirmation timeout failure. some node does not report."))
                                 }
+                            } else {
+                                // FIXME : this is an easy fix. we need a serious fix on register manager at beacon
+                                list := regMan.UnregisteredNodeList(ts)
+                                if lrr := feedGetMessage(feeder, rpUnregNodeList, "node-unreged", "unreged-list", list); lrr != nil {
+                                    log.Debugf("[REGISTER] unregistered node report error : %v", lrr.Error())
+                                }
                             }
                         }
                         case b := <-beaconC: {
+                            if !regMan.IsRegistering() {
+                                continue
+                            }
                             bp, ok := b.Payload.(ucast.BeaconPack)
                             if ok {
                                 brr := regMan.GuideNodeRegistrationWithBeacon(bp, time.Now())
@@ -123,6 +123,9 @@ func InitNodeRegisterCycle(appLife rasker.RouteTasker, feeder route.ResponseFeed
                             }
                         }
                         case s := <-searchC: {
+                            if regMan.IsRegistering() {
+                                continue
+                            }
                             cp, ok := s.Payload.(mcast.CastPack)
                             if ok {
                                 srr := regMan.MonitoringMasterSearchData(cp, time.Now())

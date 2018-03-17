@@ -108,18 +108,18 @@ func InitPocketNameService(appLife service.ServiceSupervisor, clusterID string) 
                     Addr:    "127.0.0.1:10059",
                     Net:     "udp",
                 }
-                failtimout       *time.Ticker = time.NewTicker(time.Minute)
-                udpPacketConn    *net.UDPConn = nil
-                udpAddr          *net.UDPAddr = nil
-                beaconMan beacon.BeaconManger = nil
-                err error                     = nil
+                failtimeout   *time.Ticker        = time.NewTicker(time.Minute)
+                udpPacketConn *net.UDPConn        = nil
+                udpAddr       *net.UDPAddr        = nil
+                beaconMan     beacon.BeaconManger = nil
+                err           error               = nil
             )
 
             // monitor beacon agent
             select {
-                case <-failtimout.C: {
+                case <-failtimeout.C: {
                     // cleanup resources
-                    failtimout.Stop()
+                    failtimeout.Stop()
                     udpServer.Shutdown()
                     return errors.Errorf("[ERR] unable to detect beacon agent")
                 }
@@ -134,7 +134,7 @@ func InitPocketNameService(appLife service.ServiceSupervisor, clusterID string) 
                 }
             }
 
-            failtimout.Stop()
+            failtimeout.Stop()
             log.Infof("[NAME-SERVICE] service ready to start...")
             // setup dns handler
             dns.HandleFunc(".", func(w dns.ResponseWriter, req *dns.Msg) {

@@ -30,6 +30,8 @@ type Package struct {
     MenuName        string    `gorm:"column:menu_name;type:VARCHAR(255)"        json:"menu-name"`
     // Description
     Description     string    `gorm:"column:description;type:VARCHAR(255)"      json:"description"`
+    // web ports
+    WebPorts        string    `gorm:"column:web_ports;type:VARCHAR(255)"        json:"web-ports"`
 
     // Package Meta URL
     MetaURL         string    `gorm:"column:meta_url;type:VARCHAR(255)"         json:"meta-url"`

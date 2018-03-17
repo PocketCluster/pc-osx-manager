@@ -24,6 +24,7 @@
 }
 
 - (void) dealloc {
+    [self.viewController prepareDestruction];
     self.viewController = nil;
 }
 
@@ -32,6 +33,9 @@
 
     [self.window setTitle:[self.viewController title]];
     [[self.window contentView] addSubview:[self.viewController view]];
+
+    // prepare the first viewcontroller
+    [self.viewController control:self askedProgressWithParam:nil];
 }
 
 #pragma mark - NSWindowDelegate
@@ -44,6 +48,7 @@
 }
 
 -(void)shouldControlRevertFrom:(NSObject<StageStep> *)aStep withParam:(NSDictionary *)aParam {
+    [self close];
 }
 
 #pragma mark - MonitorPackage

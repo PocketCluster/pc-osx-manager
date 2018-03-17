@@ -7,7 +7,6 @@
 //
 
 #import "PCRouter.h"
-#import "ShowAlert.h"
 #import "StatusCache.h"
 
 #import "AppDelegate+MonitorDispenser.h"
@@ -20,15 +19,12 @@
 @implementation AppDelegate(Routepath)
 
 - (void) addRoutePath {
-    WEAK_SELF(self);
 
     // --- --- --- --- --- --- package start/kill/ps --- --- --- --- --- --- ---
     [[PCRouter sharedRouter]
      addPostRequest:self
      onPath:@(RPATH_PACKAGE_STARTUP)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-
-         Log(@"%@ %@", path, response);
 
          NSString *pkgID = [response valueForKeyPath:@"package-start.pkg-id"];
 
@@ -47,10 +43,6 @@
               didExecutionStartup:pkg
               success:NO
               error:error];
-
-             [ShowAlert
-              showWarningAlertWithTitle:@"Unable to Start Package"
-              message:error];
 
          } else {
              // package succeed to run
@@ -72,8 +64,6 @@
      onPath:@(RPATH_PACKAGE_KILL)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         Log(@"%@ %@", path, response);
-
          NSString *pkgID = [response valueForKeyPath:@"package-kill.pkg-id"];
          Package *pkg = [[StatusCache SharedStatusCache] updatePackageExecState:pkgID execState:ExecIdle];
          if (pkg == nil) {
@@ -86,20 +76,15 @@
              NSString *error = [response valueForKeyPath:@"package-kill.error"];
 
              [self
-              didExecutionStartup:pkg
+              didExecutionKill:pkg
               success:NO
               error:error];
 
-             [ShowAlert
-              showWarningAlertWithTitle:@"Package Stop Error"
-              message:error];
-
          } else {
              [self
-              didExecutionStartup:pkg
+              didExecutionKill:pkg
               success:YES
               error:nil];
-
          }
      }];
 
@@ -107,8 +92,6 @@
      addPostRequest:self
      onPath:@(RPATH_MONITOR_PACKAGE_PROCESS)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-
-         Log(@"%@ %@", path, response);
 
          NSString *pkgID = [response valueForKeyPath:@"package-proc.pkg-id"];
 
@@ -122,13 +105,13 @@
          // if some reason, process listing fails
          if (![[response valueForKeyPath:@"package-proc.status"] boolValue]) {
              [self
-              didExecutionStartup:pkg
+              onExecutionProcess:pkg
               success:NO
               error:[response valueForKeyPath:@"package-proc.error"]];
 
          } else {
              [self
-              didExecutionStartup:pkg
+              onExecutionProcess:pkg
               success:YES
               error:nil];
          }
@@ -142,21 +125,20 @@
 
          // (2017/10/25) package related error message display should be handled in UI part
          if (![[response valueForKeyPath:@"package-available.status"] boolValue]) {
-             [belf
+             [self
               onInstalledListUpdateWith:[StatusCache SharedStatusCache]
               success:NO
               error:[response valueForKeyPath:@"package-available.error"]];
 
-             return;
+         } else {
+             [[StatusCache SharedStatusCache]
+              updatePackageList:[response valueForKeyPath:@"package-available.list"]];
+             
+             [self
+              onInstalledListUpdateWith:[StatusCache SharedStatusCache]
+              success:YES
+              error:nil];
          }
-
-         [[StatusCache SharedStatusCache]
-          updatePackageList:[response valueForKeyPath:@"package-available.list"]];
-
-         [belf
-          onInstalledListUpdateWith:[StatusCache SharedStatusCache]
-          success:YES
-          error:nil];
      }];
 
     // --- --- --- --- --- --- [inquiry] package installed list --- --- --- --- --- --- --
@@ -167,21 +149,21 @@
 
          // (2017/10/25) package related error message display should be handled in UI part
          if (![[response valueForKeyPath:@"package-installed.status"] boolValue]) {
-             [belf
+             [self
               onInstalledListUpdateWith:[StatusCache SharedStatusCache]
               success:NO
               error:[response valueForKeyPath:@"package-installed.error"]];
 
-             return;
+         } else {
+             [[StatusCache SharedStatusCache]
+              updatePackageList:[response valueForKeyPath:@"package-installed.list"]];
+
+             [self
+              onInstalledListUpdateWith:[StatusCache SharedStatusCache]
+              success:YES
+              error:nil];
+
          }
-
-         [[StatusCache SharedStatusCache]
-          updatePackageList:[response valueForKeyPath:@"package-installed.list"]];
-
-         [belf
-          onInstalledListUpdateWith:[StatusCache SharedStatusCache]
-          success:YES
-          error:nil];
      }];
 
     /*
@@ -222,7 +204,7 @@
          [[StatusCache SharedStatusCache] refreshNodList:rnodes];
 
          // handle errors first then update UI
-         [belf updateNodeStatusWith:[StatusCache SharedStatusCache]];
+         [self updateNodeStatusWith:[StatusCache SharedStatusCache]];
      }];
 
     // --- --- --- --- --- --- [noti] node online timeup --- --- --- --- --- ---
@@ -236,7 +218,11 @@
          [[StatusCache SharedStatusCache] setTimeUpNodeOnline:YES];
 
          // complete notifying service online status
-         [belf onNotifiedWith:[StatusCache SharedStatusCache] nodeOnlineTimeup:YES];
+         [self onNotifiedWith:[StatusCache SharedStatusCache] nodeOnlineTimeup:YES];
+
+         // FIXME: we're supposed to ask installed menu package but menu cannot read package running status and that could mess things up.
+         // ask installed package status
+         [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
      }];
 
     // --- --- --- --- --- --- [monitors] service --- --- --- --- --- --- --- --
@@ -260,7 +246,14 @@
          }
 
          // handle errors first then update UI
-         [belf updateServiceStatusWith:[StatusCache SharedStatusCache]];
+         [self updateServiceStatusWith:[StatusCache SharedStatusCache]];
+
+         // FIXME: we're supposed to ask installed menu package but menu cannot
+         // read running package status and that could mess things up and put
+         // things in unpredicatble state when re-queried in node online due
+         //
+         // ask installed package status
+         //[PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
      }];
 
     // --- --- --- --- --- --- [noti] service online timeup --- --- --- --- ---
@@ -275,36 +268,36 @@
          
          /*** THIS IS A CRITICAL ERROR. ALERT USER AND KILL APPLICATION ***/
          if (![[response valueForKeyPath:@"srvc-timeup.status"] boolValue]) {
-
              NSString *error = [response valueForKeyPath:@"srvc-timeup.error"];
              Log(@"service online failure %@", error);
 
              [[StatusCache SharedStatusCache] setServiceError:error];
 
-             [belf onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:NO];
+             [self onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:NO];
 
              // once this happens there is no way to fix this. just alert and kill the app.
              // (set the node timeup flag so termination process could begin)
              [[StatusCache SharedStatusCache] setTimeUpNodeOnline:YES];
-
+#if 0
              // this supposed to be in 
              [ShowAlert
               showTerminationAlertWithTitle:@"PocketCluster Startup Error"
               message:error];
+#endif
 
          } else {
              // setup state and notify those who need to listen
              [[StatusCache SharedStatusCache] setServiceError:nil];
 
              // complete notifying service online status
-             [belf onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:YES];
+             [self onNotifiedWith:[StatusCache SharedStatusCache] serviceOnlineTimeup:YES];
 
              // initiate node checking status
-             [belf setupWithCheckingNodesMessage];
+             [self setupWithCheckingNodesMessage];
 
+             // FIXME: we're supposed to ask installed menu package but menu cannot read package running status and that could mess things up.
              // ask installed package status
              [PCRouter routeRequestGet:RPATH_PACKAGE_LIST_INSTALLED];
-
          }
      }];
 

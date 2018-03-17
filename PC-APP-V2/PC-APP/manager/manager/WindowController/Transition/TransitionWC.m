@@ -32,46 +32,48 @@
     [self.window setShowsToolbarButton:NO];
     self.window.styleMask |= NSFullSizeContentViewWindowMask;
 
-    NSString *str = @"<div style=\"display:-webkit-flexbox;display:-webkit-flex;display:flex;-webkit-flex-align:center;-webkit-align-items:center;align-items:center;vertical-align:middle;height:100%;\"><span style=\"font-family:'Helvetica Neue';font-weight:100;font-size:22px;width:100%;text-align:center;\">{PACKAGE_STATE}</span></div>";
-    if (!ISNULL_STRING(self.packageTransition)) {
-        str = [str stringByReplacingOccurrencesOfString:@"{PACKAGE_STATE}" withString:self.packageTransition];
-    }
-
-    [self.webView setDrawsBackground:NO];
-    [self.webView.mainFrame loadHTMLString:str baseURL:nil];
+    [self.packageLabel setStringValue:[self packageTransition]];
     [self.circularProgress startAnimation:self];
     [self.circularProgress displayIfNeeded];
-}
-
-#pragma mark - WebView Delegate
-- (void)webView:(WebView*)webView decidePolicyForNavigationAction:(NSDictionary*)actionInformation request:(NSURLRequest*)request frame:(WebFrame*)frame decisionListener:(id<WebPolicyDecisionListener>)listener {
-    NSString *host = [[request URL] host];
-    if(host) {
-        [[NSWorkspace sharedWorkspace] openURL:[request URL]];
-    } else {
-        [listener use];
-    }
-}
-
-- (void)use {
-}
-
-- (void)download {
-}
-
-- (void)ignore {
 }
 
 #pragma mark - MonitorExecution
 - (void) onExecutionStartup:(Package *)aPackage {}
 - (void) didExecutionStartup:(Package *)aPackage success:(BOOL)isSuccess error:(NSString *)anErrMsg {
-    [self close];
+    if (isSuccess) {
+        [self close];
+    } else {
+        [self.circularProgress setHidden:YES];
+        [self.circularProgress stopAnimation:nil];
+        [self.circularProgress displayIfNeeded];
+        [self.circularProgress removeFromSuperview];
+        [self setCircularProgress:nil];
+
+        [self.errorLabel setStringValue:anErrMsg];
+        [self.closeBtn setHidden:NO];
+    }
 }
 
 - (void) onExecutionKill:(Package *)aPackage {}
 - (void) didExecutionKill:(Package *)aPackage success:(BOOL)isSuccess error:(NSString *)anErrMsg {
-    [self close];
+    if (isSuccess) {
+        [self close];
+    } else {
+        [self.circularProgress setHidden:YES];
+        [self.circularProgress stopAnimation:nil];
+        [self.circularProgress displayIfNeeded];
+        [self.circularProgress removeFromSuperview];
+        [self setCircularProgress:nil];
+
+        [self.errorLabel setStringValue:anErrMsg];
+        [self.closeBtn setHidden:NO];
+    }
 }
 
 - (void) onExecutionProcess:(Package *)aPackage success:(BOOL)isSuccess error:(NSString *)anErrMsg {}
+
+#pragma mark - Button Method
+- (IBAction) closeWindow:(id)sender {
+    [self close];
+}
 @end

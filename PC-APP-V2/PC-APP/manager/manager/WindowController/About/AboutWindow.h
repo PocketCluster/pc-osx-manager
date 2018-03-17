@@ -5,15 +5,10 @@
 //  Copyright (c) 2015,2017 PocketCluster. All rights reserved.
 //
 
-#import <WebKit/WebKit.h>
 #import "BaseWindowController.h"
 
-@interface AboutWindow : BaseWindowController <WebPolicyDecisionListener
-#if __MAC_OS_X_VERSION_MAX_ALLOWED >= __MAC_10_11
-, WebPolicyDelegate, WebFrameLoadDelegate, WebUIDelegate
-#endif
->
+@interface AboutWindow : BaseWindowController
+@property (nonatomic, weak) IBOutlet NSTextField *copyright;
 
-@property (weak) IBOutlet WebView *webView;
-
+-(IBAction)homepage:(id)sender;
 @end

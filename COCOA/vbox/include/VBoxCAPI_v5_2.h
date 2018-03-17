@@ -45,6 +45,9 @@
 #ifdef _WIN32
 # pragma warning(push)
 # pragma warning(disable:4668 4255) /* -Wall and windows.h */
+# if _MSC_VER >= 1800 /*RT_MSC_VER_VC120*/
+#  pragma warning(disable:4005) /* sdk/v7.1/include/sal_supp.h(57) : warning C4005: '__useHeader' : macro redefinition */
+# endif
 # undef COBJMACROS
 # define COBJMACROS
 # include "Windows.h"
@@ -1182,6 +1185,7 @@ interface IVFSExplorer;
 interface ICertificate;
 interface IAppliance;
 interface IVirtualSystemDescription;
+interface IUnattended;
 interface IBIOSSettings;
 interface IPCIAddress;
 interface IPCIDeviceAttachment;
@@ -1274,6 +1278,7 @@ interface IKeyboardLedsChangedEvent;
 interface IStateChangedEvent;
 interface IAdditionsStateChangedEvent;
 interface INetworkAdapterChangedEvent;
+interface IAudioAdapterChangedEvent;
 interface ISerialPortChangedEvent;
 interface IParallelPortChangedEvent;
 interface IStorageControllerChangedEvent;
@@ -1328,6 +1333,9 @@ interface INATNetworkCreationDeletionEvent;
 interface INATNetworkSettingEvent;
 interface INATNetworkPortForwardEvent;
 interface IHostNameResolutionConfigurationChangeEvent;
+interface IProgressEvent;
+interface IProgressPercentageChangedEvent;
+interface IProgressTaskCompletedEvent;
 
 typedef interface IVirtualBoxErrorInfo IVirtualBoxErrorInfo;
 typedef interface INATNetwork INATNetwork;
@@ -1337,6 +1345,7 @@ typedef interface IVFSExplorer IVFSExplorer;
 typedef interface ICertificate ICertificate;
 typedef interface IAppliance IAppliance;
 typedef interface IVirtualSystemDescription IVirtualSystemDescription;
+typedef interface IUnattended IUnattended;
 typedef interface IBIOSSettings IBIOSSettings;
 typedef interface IPCIAddress IPCIAddress;
 typedef interface IPCIDeviceAttachment IPCIDeviceAttachment;
@@ -1429,6 +1438,7 @@ typedef interface IKeyboardLedsChangedEvent IKeyboardLedsChangedEvent;
 typedef interface IStateChangedEvent IStateChangedEvent;
 typedef interface IAdditionsStateChangedEvent IAdditionsStateChangedEvent;
 typedef interface INetworkAdapterChangedEvent INetworkAdapterChangedEvent;
+typedef interface IAudioAdapterChangedEvent IAudioAdapterChangedEvent;
 typedef interface ISerialPortChangedEvent ISerialPortChangedEvent;
 typedef interface IParallelPortChangedEvent IParallelPortChangedEvent;
 typedef interface IStorageControllerChangedEvent IStorageControllerChangedEvent;
@@ -1483,6 +1493,9 @@ typedef interface INATNetworkCreationDeletionEvent INATNetworkCreationDeletionEv
 typedef interface INATNetworkSettingEvent INATNetworkSettingEvent;
 typedef interface INATNetworkPortForwardEvent INATNetworkPortForwardEvent;
 typedef interface IHostNameResolutionConfigurationChangeEvent IHostNameResolutionConfigurationChangeEvent;
+typedef interface IProgressEvent IProgressEvent;
+typedef interface IProgressPercentageChangedEvent IProgressPercentageChangedEvent;
+typedef interface IProgressTaskCompletedEvent IProgressTaskCompletedEvent;
 
 /* Start of enum SettingsVersion declaration */
 #define SETTINGSVERSION_IID_STR "b4cc23c2-96f2-419d-830b-bd13c1135dfb"
@@ -1511,6 +1524,7 @@ typedef enum SettingsVersion
     SettingsVersion_v1_14 = 16,
     SettingsVersion_v1_15 = 17,
     SettingsVersion_v1_16 = 18,
+    SettingsVersion_v1_17 = 19,
     SettingsVersion_Future = 99999
 } SettingsVersion;
 /* End of enum SettingsVersion declaration */
@@ -1604,7 +1618,9 @@ typedef enum CPUPropertyType
     CPUPropertyType_LongMode = 2,
     CPUPropertyType_TripleFaultReset = 3,
     CPUPropertyType_APIC = 4,
-    CPUPropertyType_X2APIC = 5
+    CPUPropertyType_X2APIC = 5,
+    CPUPropertyType_IBPBOnVMExit = 6,
+    CPUPropertyType_IBPBOnVMEntry = 7
 } CPUPropertyType;
 /* End of enum CPUPropertyType declaration */
 #define CPUPropertyType_T PRUint32
@@ -2254,10 +2270,10 @@ typedef enum HostNetworkInterfaceType
 
 
 /* Start of enum AdditionsFacilityType declaration */
-#define ADDITIONSFACILITYTYPE_IID_STR "98f7f957-89fb-49b6-a3b1-31e3285eb1d8"
+#define ADDITIONSFACILITYTYPE_IID_STR "c4b10d74-dd48-4ff4-9a40-785a2a389ade"
 #define ADDITIONSFACILITYTYPE_IID { \
-    0x98f7f957, 0x89fb, 0x49b6, \
-    { 0xa3, 0xb1, 0x31, 0xe3, 0x28, 0x5e, 0xb1, 0xd8 } \
+    0xc4b10d74, 0xdd48, 0x4ff4, \
+    { 0x9a, 0x40, 0x78, 0x5a, 0x2a, 0x38, 0x9a, 0xde } \
 }
 typedef enum AdditionsFacilityType
 {
@@ -2268,6 +2284,7 @@ typedef enum AdditionsFacilityType
     AdditionsFacilityType_VBoxTrayClient = 101,
     AdditionsFacilityType_Seamless = 1000,
     AdditionsFacilityType_Graphics = 1100,
+    AdditionsFacilityType_MonitorAttach = 1101,
     AdditionsFacilityType_All = 2147483646
 } AdditionsFacilityType;
 /* End of enum AdditionsFacilityType declaration */
@@ -3099,15 +3116,16 @@ typedef enum GuestMonitorStatus
 
 
 /* Start of enum ScreenLayoutMode declaration */
-#define SCREENLAYOUTMODE_IID_STR "9a982f4f-b815-4802-8539-d0b46435a7b7"
+#define SCREENLAYOUTMODE_IID_STR "c7a9ee66-cfed-438b-9f8c-d3adf7588a4d"
 #define SCREENLAYOUTMODE_IID { \
-    0x9a982f4f, 0xb815, 0x4802, \
-    { 0x85, 0x39, 0xd0, 0xb4, 0x64, 0x35, 0xa7, 0xb7 } \
+    0xc7a9ee66, 0xcfed, 0x438b, \
+    { 0x9f, 0x8c, 0xd3, 0xad, 0xf7, 0x58, 0x8a, 0x4d } \
 }
 typedef enum ScreenLayoutMode
 {
     ScreenLayoutMode_Apply = 0,
-    ScreenLayoutMode_Reset = 1
+    ScreenLayoutMode_Reset = 1,
+    ScreenLayoutMode_Attach = 2
 } ScreenLayoutMode;
 /* End of enum ScreenLayoutMode declaration */
 #define ScreenLayoutMode_T PRUint32
@@ -3537,7 +3555,10 @@ typedef enum VBoxEventType
     VBoxEventType_OnHostNameResolutionConfigurationChange = 94,
     VBoxEventType_OnSnapshotRestored = 95,
     VBoxEventType_OnMediumConfigChanged = 96,
-    VBoxEventType_Last = 97
+    VBoxEventType_OnAudioAdapterChanged = 97,
+    VBoxEventType_OnProgressPercentageChanged = 98,
+    VBoxEventType_OnProgressTaskCompleted = 99,
+    VBoxEventType_Last = 100
 } VBoxEventType;
 /* End of enum VBoxEventType declaration */
 #define VBoxEventType_T PRUint32
@@ -4168,10 +4189,10 @@ interface IDHCPServer
 
 
 /* Start of struct IVirtualBox declaration */
-#define IVIRTUALBOX_IID_STR "0169423f-46b4-cde9-91af-1e9d5b6cd945"
+#define IVIRTUALBOX_IID_STR "9570b9d5-f1a1-448a-10c5-e12f5285adad"
 #define IVIRTUALBOX_IID { \
-    0x0169423f, 0x46b4, 0xcde9, \
-    { 0x91, 0xaf, 0x1e, 0x9d, 0x5b, 0x6c, 0xd9, 0x45 } \
+    0x9570b9d5, 0xf1a1, 0x448a, \
+    { 0x10, 0xc5, 0xe1, 0x2f, 0x52, 0x85, 0xad, 0xad } \
 }
 /* COM compatibility */
 VBOX_EXTERN_CONST(nsIID, IID_IVirtualBox);
@@ -4310,6 +4331,11 @@ struct IVirtualBox_vtbl
     nsresult (*CreateAppliance)(
         IVirtualBox *pThis,
         IAppliance * * appliance
+    );
+
+    nsresult (*CreateUnattendedInstaller)(
+        IVirtualBox *pThis,
+        IUnattended * * unattended
     );
 
     nsresult (*CreateMedium)(
@@ -4570,6 +4596,11 @@ struct IVirtualBoxVtbl
         IAppliance * * appliance
     );
 
+    nsresult (*CreateUnattendedInstaller)(
+        IVirtualBox *pThis,
+        IUnattended * * unattended
+    );
+
     nsresult (*CreateMedium)(
         IVirtualBox *pThis,
         PRUnichar * format,
@@ -4751,6 +4782,7 @@ struct IVirtualBoxVtbl
 #define IVirtualBox_GetMachinesByGroups(p, aGroups, aMachines) ((p)->lpVtbl->GetMachinesByGroups(p, aGroups, aMachines))
 #define IVirtualBox_GetMachineStates(p, aMachines, aStates) ((p)->lpVtbl->GetMachineStates(p, aMachines, aStates))
 #define IVirtualBox_CreateAppliance(p, aAppliance) ((p)->lpVtbl->CreateAppliance(p, aAppliance))
+#define IVirtualBox_CreateUnattendedInstaller(p, aUnattended) ((p)->lpVtbl->CreateUnattendedInstaller(p, aUnattended))
 #define IVirtualBox_CreateMedium(p, aFormat, aLocation, aAccessMode, aADeviceTypeType, aMedium) ((p)->lpVtbl->CreateMedium(p, aFormat, aLocation, aAccessMode, aADeviceTypeType, aMedium))
 #define IVirtualBox_OpenMedium(p, aLocation, aDeviceType, aAccessMode, aForceNewUuid, aMedium) ((p)->lpVtbl->OpenMedium(p, aLocation, aDeviceType, aAccessMode, aForceNewUuid, aMedium))
 #define IVirtualBox_GetGuestOSType(p, aId, aType) ((p)->lpVtbl->GetGuestOSType(p, aId, aType))
@@ -5602,6 +5634,408 @@ interface IVirtualSystemDescription
 /* End of struct IVirtualSystemDescription declaration */
 
 
+/* Start of struct IUnattended declaration */
+#define IUNATTENDED_IID_STR "6f89464f-7193-426c-a41f-522e8f537fa0"
+#define IUNATTENDED_IID { \
+    0x6f89464f, 0x7193, 0x426c, \
+    { 0xa4, 0x1f, 0x52, 0x2e, 0x8f, 0x53, 0x7f, 0xa0 } \
+}
+/* COM compatibility */
+VBOX_EXTERN_CONST(nsIID, IID_IUnattended);
+#ifndef VBOX_WITH_GLUE
+struct IUnattended_vtbl
+{
+    struct nsISupports_vtbl nsisupports;
+
+    nsresult (*GetIsoPath)(IUnattended *pThis, PRUnichar * *isoPath);
+    nsresult (*SetIsoPath)(IUnattended *pThis, PRUnichar * isoPath);
+
+    nsresult (*GetMachine)(IUnattended *pThis, IMachine * *machine);
+    nsresult (*SetMachine)(IUnattended *pThis, IMachine * machine);
+
+    nsresult (*GetUser)(IUnattended *pThis, PRUnichar * *user);
+    nsresult (*SetUser)(IUnattended *pThis, PRUnichar * user);
+
+    nsresult (*GetPassword)(IUnattended *pThis, PRUnichar * *password);
+    nsresult (*SetPassword)(IUnattended *pThis, PRUnichar * password);
+
+    nsresult (*GetFullUserName)(IUnattended *pThis, PRUnichar * *fullUserName);
+    nsresult (*SetFullUserName)(IUnattended *pThis, PRUnichar * fullUserName);
+
+    nsresult (*GetProductKey)(IUnattended *pThis, PRUnichar * *productKey);
+    nsresult (*SetProductKey)(IUnattended *pThis, PRUnichar * productKey);
+
+    nsresult (*GetAdditionsIsoPath)(IUnattended *pThis, PRUnichar * *additionsIsoPath);
+    nsresult (*SetAdditionsIsoPath)(IUnattended *pThis, PRUnichar * additionsIsoPath);
+
+    nsresult (*GetInstallGuestAdditions)(IUnattended *pThis, PRBool *installGuestAdditions);
+    nsresult (*SetInstallGuestAdditions)(IUnattended *pThis, PRBool installGuestAdditions);
+
+    nsresult (*GetValidationKitIsoPath)(IUnattended *pThis, PRUnichar * *validationKitIsoPath);
+    nsresult (*SetValidationKitIsoPath)(IUnattended *pThis, PRUnichar * validationKitIsoPath);
+
+    nsresult (*GetInstallTestExecService)(IUnattended *pThis, PRBool *installTestExecService);
+    nsresult (*SetInstallTestExecService)(IUnattended *pThis, PRBool installTestExecService);
+
+    nsresult (*GetTimeZone)(IUnattended *pThis, PRUnichar * *timeZone);
+    nsresult (*SetTimeZone)(IUnattended *pThis, PRUnichar * timeZone);
+
+    nsresult (*GetLocale)(IUnattended *pThis, PRUnichar * *locale);
+    nsresult (*SetLocale)(IUnattended *pThis, PRUnichar * locale);
+
+    nsresult (*GetLanguage)(IUnattended *pThis, PRUnichar * *language);
+    nsresult (*SetLanguage)(IUnattended *pThis, PRUnichar * language);
+
+    nsresult (*GetCountry)(IUnattended *pThis, PRUnichar * *country);
+    nsresult (*SetCountry)(IUnattended *pThis, PRUnichar * country);
+
+    nsresult (*GetProxy)(IUnattended *pThis, PRUnichar * *proxy);
+    nsresult (*SetProxy)(IUnattended *pThis, PRUnichar * proxy);
+
+    nsresult (*GetPackageSelectionAdjustments)(IUnattended *pThis, PRUnichar * *packageSelectionAdjustments);
+    nsresult (*SetPackageSelectionAdjustments)(IUnattended *pThis, PRUnichar * packageSelectionAdjustments);
+
+    nsresult (*GetHostname)(IUnattended *pThis, PRUnichar * *hostname);
+    nsresult (*SetHostname)(IUnattended *pThis, PRUnichar * hostname);
+
+    nsresult (*GetAuxiliaryBasePath)(IUnattended *pThis, PRUnichar * *auxiliaryBasePath);
+    nsresult (*SetAuxiliaryBasePath)(IUnattended *pThis, PRUnichar * auxiliaryBasePath);
+
+    nsresult (*GetImageIndex)(IUnattended *pThis, PRUint32 *imageIndex);
+    nsresult (*SetImageIndex)(IUnattended *pThis, PRUint32 imageIndex);
+
+    nsresult (*GetScriptTemplatePath)(IUnattended *pThis, PRUnichar * *scriptTemplatePath);
+    nsresult (*SetScriptTemplatePath)(IUnattended *pThis, PRUnichar * scriptTemplatePath);
+
+    nsresult (*GetPostInstallScriptTemplatePath)(IUnattended *pThis, PRUnichar * *postInstallScriptTemplatePath);
+    nsresult (*SetPostInstallScriptTemplatePath)(IUnattended *pThis, PRUnichar * postInstallScriptTemplatePath);
+
+    nsresult (*GetPostInstallCommand)(IUnattended *pThis, PRUnichar * *postInstallCommand);
+    nsresult (*SetPostInstallCommand)(IUnattended *pThis, PRUnichar * postInstallCommand);
+
+    nsresult (*GetExtraInstallKernelParameters)(IUnattended *pThis, PRUnichar * *extraInstallKernelParameters);
+    nsresult (*SetExtraInstallKernelParameters)(IUnattended *pThis, PRUnichar * extraInstallKernelParameters);
+
+    nsresult (*GetDetectedOSTypeId)(IUnattended *pThis, PRUnichar * *detectedOSTypeId);
+
+    nsresult (*GetDetectedOSVersion)(IUnattended *pThis, PRUnichar * *detectedOSVersion);
+
+    nsresult (*GetDetectedOSFlavor)(IUnattended *pThis, PRUnichar * *detectedOSFlavor);
+
+    nsresult (*GetDetectedOSLanguages)(IUnattended *pThis, PRUnichar * *detectedOSLanguages);
+
+    nsresult (*GetDetectedOSHints)(IUnattended *pThis, PRUnichar * *detectedOSHints);
+
+    nsresult (*GetInternalAndReservedAttribute1IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute2IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute3IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute4IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute5IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute6IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute7IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute8IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute9IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute10IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute11IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute12IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute13IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute14IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute15IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute16IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*DetectIsoOS)(IUnattended *pThis );
+
+    nsresult (*Prepare)(IUnattended *pThis );
+
+    nsresult (*ConstructMedia)(IUnattended *pThis );
+
+    nsresult (*ReconfigureVM)(IUnattended *pThis );
+
+    nsresult (*Done)(IUnattended *pThis );
+
+    nsresult (*InternalAndReservedMethod1IUnattended)(IUnattended *pThis);
+
+    nsresult (*InternalAndReservedMethod2IUnattended)(IUnattended *pThis);
+
+    nsresult (*InternalAndReservedMethod3IUnattended)(IUnattended *pThis);
+
+    nsresult (*InternalAndReservedMethod4IUnattended)(IUnattended *pThis);
+
+};
+#else /* VBOX_WITH_GLUE */
+struct IUnattendedVtbl
+{
+    nsresult (*QueryInterface)(IUnattended *pThis, const nsID *iid, void **resultp);
+    nsrefcnt (*AddRef)(IUnattended *pThis);
+    nsrefcnt (*Release)(IUnattended *pThis);
+    nsresult (*GetIsoPath)(IUnattended *pThis, PRUnichar * *isoPath);
+    nsresult (*SetIsoPath)(IUnattended *pThis, PRUnichar * isoPath);
+
+    nsresult (*GetMachine)(IUnattended *pThis, IMachine * *machine);
+    nsresult (*SetMachine)(IUnattended *pThis, IMachine * machine);
+
+    nsresult (*GetUser)(IUnattended *pThis, PRUnichar * *user);
+    nsresult (*SetUser)(IUnattended *pThis, PRUnichar * user);
+
+    nsresult (*GetPassword)(IUnattended *pThis, PRUnichar * *password);
+    nsresult (*SetPassword)(IUnattended *pThis, PRUnichar * password);
+
+    nsresult (*GetFullUserName)(IUnattended *pThis, PRUnichar * *fullUserName);
+    nsresult (*SetFullUserName)(IUnattended *pThis, PRUnichar * fullUserName);
+
+    nsresult (*GetProductKey)(IUnattended *pThis, PRUnichar * *productKey);
+    nsresult (*SetProductKey)(IUnattended *pThis, PRUnichar * productKey);
+
+    nsresult (*GetAdditionsIsoPath)(IUnattended *pThis, PRUnichar * *additionsIsoPath);
+    nsresult (*SetAdditionsIsoPath)(IUnattended *pThis, PRUnichar * additionsIsoPath);
+
+    nsresult (*GetInstallGuestAdditions)(IUnattended *pThis, PRBool *installGuestAdditions);
+    nsresult (*SetInstallGuestAdditions)(IUnattended *pThis, PRBool installGuestAdditions);
+
+    nsresult (*GetValidationKitIsoPath)(IUnattended *pThis, PRUnichar * *validationKitIsoPath);
+    nsresult (*SetValidationKitIsoPath)(IUnattended *pThis, PRUnichar * validationKitIsoPath);
+
+    nsresult (*GetInstallTestExecService)(IUnattended *pThis, PRBool *installTestExecService);
+    nsresult (*SetInstallTestExecService)(IUnattended *pThis, PRBool installTestExecService);
+
+    nsresult (*GetTimeZone)(IUnattended *pThis, PRUnichar * *timeZone);
+    nsresult (*SetTimeZone)(IUnattended *pThis, PRUnichar * timeZone);
+
+    nsresult (*GetLocale)(IUnattended *pThis, PRUnichar * *locale);
+    nsresult (*SetLocale)(IUnattended *pThis, PRUnichar * locale);
+
+    nsresult (*GetLanguage)(IUnattended *pThis, PRUnichar * *language);
+    nsresult (*SetLanguage)(IUnattended *pThis, PRUnichar * language);
+
+    nsresult (*GetCountry)(IUnattended *pThis, PRUnichar * *country);
+    nsresult (*SetCountry)(IUnattended *pThis, PRUnichar * country);
+
+    nsresult (*GetProxy)(IUnattended *pThis, PRUnichar * *proxy);
+    nsresult (*SetProxy)(IUnattended *pThis, PRUnichar * proxy);
+
+    nsresult (*GetPackageSelectionAdjustments)(IUnattended *pThis, PRUnichar * *packageSelectionAdjustments);
+    nsresult (*SetPackageSelectionAdjustments)(IUnattended *pThis, PRUnichar * packageSelectionAdjustments);
+
+    nsresult (*GetHostname)(IUnattended *pThis, PRUnichar * *hostname);
+    nsresult (*SetHostname)(IUnattended *pThis, PRUnichar * hostname);
+
+    nsresult (*GetAuxiliaryBasePath)(IUnattended *pThis, PRUnichar * *auxiliaryBasePath);
+    nsresult (*SetAuxiliaryBasePath)(IUnattended *pThis, PRUnichar * auxiliaryBasePath);
+
+    nsresult (*GetImageIndex)(IUnattended *pThis, PRUint32 *imageIndex);
+    nsresult (*SetImageIndex)(IUnattended *pThis, PRUint32 imageIndex);
+
+    nsresult (*GetScriptTemplatePath)(IUnattended *pThis, PRUnichar * *scriptTemplatePath);
+    nsresult (*SetScriptTemplatePath)(IUnattended *pThis, PRUnichar * scriptTemplatePath);
+
+    nsresult (*GetPostInstallScriptTemplatePath)(IUnattended *pThis, PRUnichar * *postInstallScriptTemplatePath);
+    nsresult (*SetPostInstallScriptTemplatePath)(IUnattended *pThis, PRUnichar * postInstallScriptTemplatePath);
+
+    nsresult (*GetPostInstallCommand)(IUnattended *pThis, PRUnichar * *postInstallCommand);
+    nsresult (*SetPostInstallCommand)(IUnattended *pThis, PRUnichar * postInstallCommand);
+
+    nsresult (*GetExtraInstallKernelParameters)(IUnattended *pThis, PRUnichar * *extraInstallKernelParameters);
+    nsresult (*SetExtraInstallKernelParameters)(IUnattended *pThis, PRUnichar * extraInstallKernelParameters);
+
+    nsresult (*GetDetectedOSTypeId)(IUnattended *pThis, PRUnichar * *detectedOSTypeId);
+
+    nsresult (*GetDetectedOSVersion)(IUnattended *pThis, PRUnichar * *detectedOSVersion);
+
+    nsresult (*GetDetectedOSFlavor)(IUnattended *pThis, PRUnichar * *detectedOSFlavor);
+
+    nsresult (*GetDetectedOSLanguages)(IUnattended *pThis, PRUnichar * *detectedOSLanguages);
+
+    nsresult (*GetDetectedOSHints)(IUnattended *pThis, PRUnichar * *detectedOSHints);
+
+    nsresult (*GetInternalAndReservedAttribute1IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute2IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute3IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute4IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute5IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute6IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute7IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute8IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute9IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute10IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute11IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute12IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute13IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute14IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute15IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*GetInternalAndReservedAttribute16IUnattended)(IUnattended *pThis, PRUint32 *reserved);
+
+    nsresult (*DetectIsoOS)(IUnattended *pThis );
+
+    nsresult (*Prepare)(IUnattended *pThis );
+
+    nsresult (*ConstructMedia)(IUnattended *pThis );
+
+    nsresult (*ReconfigureVM)(IUnattended *pThis );
+
+    nsresult (*Done)(IUnattended *pThis );
+
+    nsresult (*InternalAndReservedMethod1IUnattended)(IUnattended *pThis);
+
+    nsresult (*InternalAndReservedMethod2IUnattended)(IUnattended *pThis);
+
+    nsresult (*InternalAndReservedMethod3IUnattended)(IUnattended *pThis);
+
+    nsresult (*InternalAndReservedMethod4IUnattended)(IUnattended *pThis);
+
+};
+#define IUnattended_QueryInterface(p, iid, resultp) ((p)->lpVtbl->QueryInterface(p, iid, resultp))
+#define IUnattended_AddRef(p) ((p)->lpVtbl->AddRef(p))
+#define IUnattended_Release(p) ((p)->lpVtbl->Release(p))
+#define IUnattended_get_IsoPath(p, aIsoPath) ((p)->lpVtbl->GetIsoPath(p, aIsoPath))
+#define IUnattended_GetIsoPath(p, aIsoPath) ((p)->lpVtbl->GetIsoPath(p, aIsoPath))
+#define IUnattended_put_IsoPath(p, aIsoPath) ((p)->lpVtbl->SetIsoPath(p, aIsoPath))
+#define IUnattended_SetIsoPath(p, aIsoPath) ((p)->lpVtbl->SetIsoPath(p, aIsoPath))
+#define IUnattended_get_Machine(p, aMachine) ((p)->lpVtbl->GetMachine(p, aMachine))
+#define IUnattended_GetMachine(p, aMachine) ((p)->lpVtbl->GetMachine(p, aMachine))
+#define IUnattended_put_Machine(p, aMachine) ((p)->lpVtbl->SetMachine(p, aMachine))
+#define IUnattended_SetMachine(p, aMachine) ((p)->lpVtbl->SetMachine(p, aMachine))
+#define IUnattended_get_User(p, aUser) ((p)->lpVtbl->GetUser(p, aUser))
+#define IUnattended_GetUser(p, aUser) ((p)->lpVtbl->GetUser(p, aUser))
+#define IUnattended_put_User(p, aUser) ((p)->lpVtbl->SetUser(p, aUser))
+#define IUnattended_SetUser(p, aUser) ((p)->lpVtbl->SetUser(p, aUser))
+#define IUnattended_get_Password(p, aPassword) ((p)->lpVtbl->GetPassword(p, aPassword))
+#define IUnattended_GetPassword(p, aPassword) ((p)->lpVtbl->GetPassword(p, aPassword))
+#define IUnattended_put_Password(p, aPassword) ((p)->lpVtbl->SetPassword(p, aPassword))
+#define IUnattended_SetPassword(p, aPassword) ((p)->lpVtbl->SetPassword(p, aPassword))
+#define IUnattended_get_FullUserName(p, aFullUserName) ((p)->lpVtbl->GetFullUserName(p, aFullUserName))
+#define IUnattended_GetFullUserName(p, aFullUserName) ((p)->lpVtbl->GetFullUserName(p, aFullUserName))
+#define IUnattended_put_FullUserName(p, aFullUserName) ((p)->lpVtbl->SetFullUserName(p, aFullUserName))
+#define IUnattended_SetFullUserName(p, aFullUserName) ((p)->lpVtbl->SetFullUserName(p, aFullUserName))
+#define IUnattended_get_ProductKey(p, aProductKey) ((p)->lpVtbl->GetProductKey(p, aProductKey))
+#define IUnattended_GetProductKey(p, aProductKey) ((p)->lpVtbl->GetProductKey(p, aProductKey))
+#define IUnattended_put_ProductKey(p, aProductKey) ((p)->lpVtbl->SetProductKey(p, aProductKey))
+#define IUnattended_SetProductKey(p, aProductKey) ((p)->lpVtbl->SetProductKey(p, aProductKey))
+#define IUnattended_get_AdditionsIsoPath(p, aAdditionsIsoPath) ((p)->lpVtbl->GetAdditionsIsoPath(p, aAdditionsIsoPath))
+#define IUnattended_GetAdditionsIsoPath(p, aAdditionsIsoPath) ((p)->lpVtbl->GetAdditionsIsoPath(p, aAdditionsIsoPath))
+#define IUnattended_put_AdditionsIsoPath(p, aAdditionsIsoPath) ((p)->lpVtbl->SetAdditionsIsoPath(p, aAdditionsIsoPath))
+#define IUnattended_SetAdditionsIsoPath(p, aAdditionsIsoPath) ((p)->lpVtbl->SetAdditionsIsoPath(p, aAdditionsIsoPath))
+#define IUnattended_get_InstallGuestAdditions(p, aInstallGuestAdditions) ((p)->lpVtbl->GetInstallGuestAdditions(p, aInstallGuestAdditions))
+#define IUnattended_GetInstallGuestAdditions(p, aInstallGuestAdditions) ((p)->lpVtbl->GetInstallGuestAdditions(p, aInstallGuestAdditions))
+#define IUnattended_put_InstallGuestAdditions(p, aInstallGuestAdditions) ((p)->lpVtbl->SetInstallGuestAdditions(p, aInstallGuestAdditions))
+#define IUnattended_SetInstallGuestAdditions(p, aInstallGuestAdditions) ((p)->lpVtbl->SetInstallGuestAdditions(p, aInstallGuestAdditions))
+#define IUnattended_get_ValidationKitIsoPath(p, aValidationKitIsoPath) ((p)->lpVtbl->GetValidationKitIsoPath(p, aValidationKitIsoPath))
+#define IUnattended_GetValidationKitIsoPath(p, aValidationKitIsoPath) ((p)->lpVtbl->GetValidationKitIsoPath(p, aValidationKitIsoPath))
+#define IUnattended_put_ValidationKitIsoPath(p, aValidationKitIsoPath) ((p)->lpVtbl->SetValidationKitIsoPath(p, aValidationKitIsoPath))
+#define IUnattended_SetValidationKitIsoPath(p, aValidationKitIsoPath) ((p)->lpVtbl->SetValidationKitIsoPath(p, aValidationKitIsoPath))
+#define IUnattended_get_InstallTestExecService(p, aInstallTestExecService) ((p)->lpVtbl->GetInstallTestExecService(p, aInstallTestExecService))
+#define IUnattended_GetInstallTestExecService(p, aInstallTestExecService) ((p)->lpVtbl->GetInstallTestExecService(p, aInstallTestExecService))
+#define IUnattended_put_InstallTestExecService(p, aInstallTestExecService) ((p)->lpVtbl->SetInstallTestExecService(p, aInstallTestExecService))
+#define IUnattended_SetInstallTestExecService(p, aInstallTestExecService) ((p)->lpVtbl->SetInstallTestExecService(p, aInstallTestExecService))
+#define IUnattended_get_TimeZone(p, aTimeZone) ((p)->lpVtbl->GetTimeZone(p, aTimeZone))
+#define IUnattended_GetTimeZone(p, aTimeZone) ((p)->lpVtbl->GetTimeZone(p, aTimeZone))
+#define IUnattended_put_TimeZone(p, aTimeZone) ((p)->lpVtbl->SetTimeZone(p, aTimeZone))
+#define IUnattended_SetTimeZone(p, aTimeZone) ((p)->lpVtbl->SetTimeZone(p, aTimeZone))
+#define IUnattended_get_Locale(p, aLocale) ((p)->lpVtbl->GetLocale(p, aLocale))
+#define IUnattended_GetLocale(p, aLocale) ((p)->lpVtbl->GetLocale(p, aLocale))
+#define IUnattended_put_Locale(p, aLocale) ((p)->lpVtbl->SetLocale(p, aLocale))
+#define IUnattended_SetLocale(p, aLocale) ((p)->lpVtbl->SetLocale(p, aLocale))
+#define IUnattended_get_Language(p, aLanguage) ((p)->lpVtbl->GetLanguage(p, aLanguage))
+#define IUnattended_GetLanguage(p, aLanguage) ((p)->lpVtbl->GetLanguage(p, aLanguage))
+#define IUnattended_put_Language(p, aLanguage) ((p)->lpVtbl->SetLanguage(p, aLanguage))
+#define IUnattended_SetLanguage(p, aLanguage) ((p)->lpVtbl->SetLanguage(p, aLanguage))
+#define IUnattended_get_Country(p, aCountry) ((p)->lpVtbl->GetCountry(p, aCountry))
+#define IUnattended_GetCountry(p, aCountry) ((p)->lpVtbl->GetCountry(p, aCountry))
+#define IUnattended_put_Country(p, aCountry) ((p)->lpVtbl->SetCountry(p, aCountry))
+#define IUnattended_SetCountry(p, aCountry) ((p)->lpVtbl->SetCountry(p, aCountry))
+#define IUnattended_get_Proxy(p, aProxy) ((p)->lpVtbl->GetProxy(p, aProxy))
+#define IUnattended_GetProxy(p, aProxy) ((p)->lpVtbl->GetProxy(p, aProxy))
+#define IUnattended_put_Proxy(p, aProxy) ((p)->lpVtbl->SetProxy(p, aProxy))
+#define IUnattended_SetProxy(p, aProxy) ((p)->lpVtbl->SetProxy(p, aProxy))
+#define IUnattended_get_PackageSelectionAdjustments(p, aPackageSelectionAdjustments) ((p)->lpVtbl->GetPackageSelectionAdjustments(p, aPackageSelectionAdjustments))
+#define IUnattended_GetPackageSelectionAdjustments(p, aPackageSelectionAdjustments) ((p)->lpVtbl->GetPackageSelectionAdjustments(p, aPackageSelectionAdjustments))
+#define IUnattended_put_PackageSelectionAdjustments(p, aPackageSelectionAdjustments) ((p)->lpVtbl->SetPackageSelectionAdjustments(p, aPackageSelectionAdjustments))
+#define IUnattended_SetPackageSelectionAdjustments(p, aPackageSelectionAdjustments) ((p)->lpVtbl->SetPackageSelectionAdjustments(p, aPackageSelectionAdjustments))
+#define IUnattended_get_Hostname(p, aHostname) ((p)->lpVtbl->GetHostname(p, aHostname))
+#define IUnattended_GetHostname(p, aHostname) ((p)->lpVtbl->GetHostname(p, aHostname))
+#define IUnattended_put_Hostname(p, aHostname) ((p)->lpVtbl->SetHostname(p, aHostname))
+#define IUnattended_SetHostname(p, aHostname) ((p)->lpVtbl->SetHostname(p, aHostname))
+#define IUnattended_get_AuxiliaryBasePath(p, aAuxiliaryBasePath) ((p)->lpVtbl->GetAuxiliaryBasePath(p, aAuxiliaryBasePath))
+#define IUnattended_GetAuxiliaryBasePath(p, aAuxiliaryBasePath) ((p)->lpVtbl->GetAuxiliaryBasePath(p, aAuxiliaryBasePath))
+#define IUnattended_put_AuxiliaryBasePath(p, aAuxiliaryBasePath) ((p)->lpVtbl->SetAuxiliaryBasePath(p, aAuxiliaryBasePath))
+#define IUnattended_SetAuxiliaryBasePath(p, aAuxiliaryBasePath) ((p)->lpVtbl->SetAuxiliaryBasePath(p, aAuxiliaryBasePath))
+#define IUnattended_get_ImageIndex(p, aImageIndex) ((p)->lpVtbl->GetImageIndex(p, aImageIndex))
+#define IUnattended_GetImageIndex(p, aImageIndex) ((p)->lpVtbl->GetImageIndex(p, aImageIndex))
+#define IUnattended_put_ImageIndex(p, aImageIndex) ((p)->lpVtbl->SetImageIndex(p, aImageIndex))
+#define IUnattended_SetImageIndex(p, aImageIndex) ((p)->lpVtbl->SetImageIndex(p, aImageIndex))
+#define IUnattended_get_ScriptTemplatePath(p, aScriptTemplatePath) ((p)->lpVtbl->GetScriptTemplatePath(p, aScriptTemplatePath))
+#define IUnattended_GetScriptTemplatePath(p, aScriptTemplatePath) ((p)->lpVtbl->GetScriptTemplatePath(p, aScriptTemplatePath))
+#define IUnattended_put_ScriptTemplatePath(p, aScriptTemplatePath) ((p)->lpVtbl->SetScriptTemplatePath(p, aScriptTemplatePath))
+#define IUnattended_SetScriptTemplatePath(p, aScriptTemplatePath) ((p)->lpVtbl->SetScriptTemplatePath(p, aScriptTemplatePath))
+#define IUnattended_get_PostInstallScriptTemplatePath(p, aPostInstallScriptTemplatePath) ((p)->lpVtbl->GetPostInstallScriptTemplatePath(p, aPostInstallScriptTemplatePath))
+#define IUnattended_GetPostInstallScriptTemplatePath(p, aPostInstallScriptTemplatePath) ((p)->lpVtbl->GetPostInstallScriptTemplatePath(p, aPostInstallScriptTemplatePath))
+#define IUnattended_put_PostInstallScriptTemplatePath(p, aPostInstallScriptTemplatePath) ((p)->lpVtbl->SetPostInstallScriptTemplatePath(p, aPostInstallScriptTemplatePath))
+#define IUnattended_SetPostInstallScriptTemplatePath(p, aPostInstallScriptTemplatePath) ((p)->lpVtbl->SetPostInstallScriptTemplatePath(p, aPostInstallScriptTemplatePath))
+#define IUnattended_get_PostInstallCommand(p, aPostInstallCommand) ((p)->lpVtbl->GetPostInstallCommand(p, aPostInstallCommand))
+#define IUnattended_GetPostInstallCommand(p, aPostInstallCommand) ((p)->lpVtbl->GetPostInstallCommand(p, aPostInstallCommand))
+#define IUnattended_put_PostInstallCommand(p, aPostInstallCommand) ((p)->lpVtbl->SetPostInstallCommand(p, aPostInstallCommand))
+#define IUnattended_SetPostInstallCommand(p, aPostInstallCommand) ((p)->lpVtbl->SetPostInstallCommand(p, aPostInstallCommand))
+#define IUnattended_get_ExtraInstallKernelParameters(p, aExtraInstallKernelParameters) ((p)->lpVtbl->GetExtraInstallKernelParameters(p, aExtraInstallKernelParameters))
+#define IUnattended_GetExtraInstallKernelParameters(p, aExtraInstallKernelParameters) ((p)->lpVtbl->GetExtraInstallKernelParameters(p, aExtraInstallKernelParameters))
+#define IUnattended_put_ExtraInstallKernelParameters(p, aExtraInstallKernelParameters) ((p)->lpVtbl->SetExtraInstallKernelParameters(p, aExtraInstallKernelParameters))
+#define IUnattended_SetExtraInstallKernelParameters(p, aExtraInstallKernelParameters) ((p)->lpVtbl->SetExtraInstallKernelParameters(p, aExtraInstallKernelParameters))
+#define IUnattended_get_DetectedOSTypeId(p, aDetectedOSTypeId) ((p)->lpVtbl->GetDetectedOSTypeId(p, aDetectedOSTypeId))
+#define IUnattended_GetDetectedOSTypeId(p, aDetectedOSTypeId) ((p)->lpVtbl->GetDetectedOSTypeId(p, aDetectedOSTypeId))
+#define IUnattended_get_DetectedOSVersion(p, aDetectedOSVersion) ((p)->lpVtbl->GetDetectedOSVersion(p, aDetectedOSVersion))
+#define IUnattended_GetDetectedOSVersion(p, aDetectedOSVersion) ((p)->lpVtbl->GetDetectedOSVersion(p, aDetectedOSVersion))
+#define IUnattended_get_DetectedOSFlavor(p, aDetectedOSFlavor) ((p)->lpVtbl->GetDetectedOSFlavor(p, aDetectedOSFlavor))
+#define IUnattended_GetDetectedOSFlavor(p, aDetectedOSFlavor) ((p)->lpVtbl->GetDetectedOSFlavor(p, aDetectedOSFlavor))
+#define IUnattended_get_DetectedOSLanguages(p, aDetectedOSLanguages) ((p)->lpVtbl->GetDetectedOSLanguages(p, aDetectedOSLanguages))
+#define IUnattended_GetDetectedOSLanguages(p, aDetectedOSLanguages) ((p)->lpVtbl->GetDetectedOSLanguages(p, aDetectedOSLanguages))
+#define IUnattended_get_DetectedOSHints(p, aDetectedOSHints) ((p)->lpVtbl->GetDetectedOSHints(p, aDetectedOSHints))
+#define IUnattended_GetDetectedOSHints(p, aDetectedOSHints) ((p)->lpVtbl->GetDetectedOSHints(p, aDetectedOSHints))
+#define IUnattended_DetectIsoOS(p) ((p)->lpVtbl->DetectIsoOS(p))
+#define IUnattended_Prepare(p) ((p)->lpVtbl->Prepare(p))
+#define IUnattended_ConstructMedia(p) ((p)->lpVtbl->ConstructMedia(p))
+#define IUnattended_ReconfigureVM(p) ((p)->lpVtbl->ReconfigureVM(p))
+#define IUnattended_Done(p) ((p)->lpVtbl->Done(p))
+#endif /* VBOX_WITH_GLUE */
+
+interface IUnattended
+{
+#ifndef VBOX_WITH_GLUE
+    struct IUnattended_vtbl *vtbl;
+#else /* VBOX_WITH_GLUE */
+    CONST_VTBL struct IUnattendedVtbl *lpVtbl;
+#endif /* VBOX_WITH_GLUE */
+};
+/* End of struct IUnattended declaration */
+
+
 /* Start of struct IBIOSSettings declaration */
 #define IBIOSSETTINGS_IID_STR "f13f667d-3624-4ac5-99c1-3d982ebd8d98"
 #define IBIOSSETTINGS_IID { \
@@ -5932,10 +6366,10 @@ interface IPCIDeviceAttachment
 
 
 /* Start of struct IMachine declaration */
-#define IMACHINE_IID_STR "b2547866-a0a1-4391-8b86-6952d82efaa0"
+#define IMACHINE_IID_STR "85cd948e-a71f-4289-281e-0ca7ad48cd89"
 #define IMACHINE_IID { \
-    0xb2547866, 0xa0a1, 0x4391, \
-    { 0x8b, 0x86, 0x69, 0x52, 0xd8, 0x2e, 0xfa, 0xa0 } \
+    0x85cd948e, 0xa71f, 0x4289, \
+    { 0x28, 0x1e, 0x0c, 0xa7, 0xad, 0x48, 0xcd, 0x89 } \
 }
 /* COM compatibility */
 VBOX_EXTERN_CONST(nsIID, IID_IMachine);
@@ -6201,8 +6635,6 @@ struct IMachine_vtbl
 
     nsresult (*GetInternalAndReservedAttribute9IMachine)(IMachine *pThis, PRUint32 *reserved);
 
-    nsresult (*GetInternalAndReservedAttribute10IMachine)(IMachine *pThis, PRUint32 *reserved);
-
     nsresult (*LockMachine)(
         IMachine *pThis,
         ISession * session,
@@ -6463,9 +6895,21 @@ struct IMachine_vtbl
         PRBool value
     );
 
+    nsresult (*GetCPUIDLeafByOrdinal)(
+        IMachine *pThis,
+        PRUint32 ordinal,
+        PRUint32 * idx,
+        PRUint32 * idxSub,
+        PRUint32 * valEax,
+        PRUint32 * valEbx,
+        PRUint32 * valEcx,
+        PRUint32 * valEdx
+    );
+
     nsresult (*GetCPUIDLeaf)(
         IMachine *pThis,
-        PRUint32 id,
+        PRUint32 idx,
+        PRUint32 idxSub,
         PRUint32 * valEax,
         PRUint32 * valEbx,
         PRUint32 * valEcx,
@@ -6474,7 +6918,8 @@ struct IMachine_vtbl
 
     nsresult (*SetCPUIDLeaf)(
         IMachine *pThis,
-        PRUint32 id,
+        PRUint32 idx,
+        PRUint32 idxSub,
         PRUint32 valEax,
         PRUint32 valEbx,
         PRUint32 valEcx,
@@ -6483,7 +6928,8 @@ struct IMachine_vtbl
 
     nsresult (*RemoveCPUIDLeaf)(
         IMachine *pThis,
-        PRUint32 id
+        PRUint32 idx,
+        PRUint32 idxSub
     );
 
     nsresult (*RemoveAllCPUIDLeaves)(IMachine *pThis );
@@ -6760,8 +7206,6 @@ struct IMachine_vtbl
     nsresult (*InternalAndReservedMethod5IMachine)(IMachine *pThis);
 
     nsresult (*InternalAndReservedMethod6IMachine)(IMachine *pThis);
-
-    nsresult (*InternalAndReservedMethod7IMachine)(IMachine *pThis);
 
 };
 #else /* VBOX_WITH_GLUE */
@@ -7027,8 +7471,6 @@ struct IMachineVtbl
 
     nsresult (*GetInternalAndReservedAttribute9IMachine)(IMachine *pThis, PRUint32 *reserved);
 
-    nsresult (*GetInternalAndReservedAttribute10IMachine)(IMachine *pThis, PRUint32 *reserved);
-
     nsresult (*LockMachine)(
         IMachine *pThis,
         ISession * session,
@@ -7289,9 +7731,21 @@ struct IMachineVtbl
         PRBool value
     );
 
+    nsresult (*GetCPUIDLeafByOrdinal)(
+        IMachine *pThis,
+        PRUint32 ordinal,
+        PRUint32 * idx,
+        PRUint32 * idxSub,
+        PRUint32 * valEax,
+        PRUint32 * valEbx,
+        PRUint32 * valEcx,
+        PRUint32 * valEdx
+    );
+
     nsresult (*GetCPUIDLeaf)(
         IMachine *pThis,
-        PRUint32 id,
+        PRUint32 idx,
+        PRUint32 idxSub,
         PRUint32 * valEax,
         PRUint32 * valEbx,
         PRUint32 * valEcx,
@@ -7300,7 +7754,8 @@ struct IMachineVtbl
 
     nsresult (*SetCPUIDLeaf)(
         IMachine *pThis,
-        PRUint32 id,
+        PRUint32 idx,
+        PRUint32 idxSub,
         PRUint32 valEax,
         PRUint32 valEbx,
         PRUint32 valEcx,
@@ -7309,7 +7764,8 @@ struct IMachineVtbl
 
     nsresult (*RemoveCPUIDLeaf)(
         IMachine *pThis,
-        PRUint32 id
+        PRUint32 idx,
+        PRUint32 idxSub
     );
 
     nsresult (*RemoveAllCPUIDLeaves)(IMachine *pThis );
@@ -7586,8 +8042,6 @@ struct IMachineVtbl
     nsresult (*InternalAndReservedMethod5IMachine)(IMachine *pThis);
 
     nsresult (*InternalAndReservedMethod6IMachine)(IMachine *pThis);
-
-    nsresult (*InternalAndReservedMethod7IMachine)(IMachine *pThis);
 
 };
 #define IMachine_QueryInterface(p, iid, resultp) ((p)->lpVtbl->QueryInterface(p, iid, resultp))
@@ -7931,9 +8385,10 @@ struct IMachineVtbl
 #define IMachine_SetExtraData(p, aKey, aValue) ((p)->lpVtbl->SetExtraData(p, aKey, aValue))
 #define IMachine_GetCPUProperty(p, aProperty, aValue) ((p)->lpVtbl->GetCPUProperty(p, aProperty, aValue))
 #define IMachine_SetCPUProperty(p, aProperty, aValue) ((p)->lpVtbl->SetCPUProperty(p, aProperty, aValue))
-#define IMachine_GetCPUIDLeaf(p, aId, aValEax, aValEbx, aValEcx, aValEdx) ((p)->lpVtbl->GetCPUIDLeaf(p, aId, aValEax, aValEbx, aValEcx, aValEdx))
-#define IMachine_SetCPUIDLeaf(p, aId, aValEax, aValEbx, aValEcx, aValEdx) ((p)->lpVtbl->SetCPUIDLeaf(p, aId, aValEax, aValEbx, aValEcx, aValEdx))
-#define IMachine_RemoveCPUIDLeaf(p, aId) ((p)->lpVtbl->RemoveCPUIDLeaf(p, aId))
+#define IMachine_GetCPUIDLeafByOrdinal(p, aOrdinal, aIdx, aIdxSub, aValEax, aValEbx, aValEcx, aValEdx) ((p)->lpVtbl->GetCPUIDLeafByOrdinal(p, aOrdinal, aIdx, aIdxSub, aValEax, aValEbx, aValEcx, aValEdx))
+#define IMachine_GetCPUIDLeaf(p, aIdx, aIdxSub, aValEax, aValEbx, aValEcx, aValEdx) ((p)->lpVtbl->GetCPUIDLeaf(p, aIdx, aIdxSub, aValEax, aValEbx, aValEcx, aValEdx))
+#define IMachine_SetCPUIDLeaf(p, aIdx, aIdxSub, aValEax, aValEbx, aValEcx, aValEdx) ((p)->lpVtbl->SetCPUIDLeaf(p, aIdx, aIdxSub, aValEax, aValEbx, aValEcx, aValEdx))
+#define IMachine_RemoveCPUIDLeaf(p, aIdx, aIdxSub) ((p)->lpVtbl->RemoveCPUIDLeaf(p, aIdx, aIdxSub))
 #define IMachine_RemoveAllCPUIDLeaves(p) ((p)->lpVtbl->RemoveAllCPUIDLeaves(p))
 #define IMachine_GetHWVirtExProperty(p, aProperty, aValue) ((p)->lpVtbl->GetHWVirtExProperty(p, aProperty, aValue))
 #define IMachine_SetHWVirtExProperty(p, aProperty, aValue) ((p)->lpVtbl->SetHWVirtExProperty(p, aProperty, aValue))
@@ -8728,6 +9183,8 @@ struct IHostNetworkInterface_vtbl
 
     nsresult (*GetInterfaceType)(IHostNetworkInterface *pThis, PRUint32 *interfaceType);
 
+    nsresult (*GetWireless)(IHostNetworkInterface *pThis, PRBool *wireless);
+
     nsresult (*GetInternalAndReservedAttribute1IHostNetworkInterface)(IHostNetworkInterface *pThis, PRUint32 *reserved);
 
     nsresult (*GetInternalAndReservedAttribute2IHostNetworkInterface)(IHostNetworkInterface *pThis, PRUint32 *reserved);
@@ -8791,6 +9248,8 @@ struct IHostNetworkInterfaceVtbl
 
     nsresult (*GetInterfaceType)(IHostNetworkInterface *pThis, PRUint32 *interfaceType);
 
+    nsresult (*GetWireless)(IHostNetworkInterface *pThis, PRBool *wireless);
+
     nsresult (*GetInternalAndReservedAttribute1IHostNetworkInterface)(IHostNetworkInterface *pThis, PRUint32 *reserved);
 
     nsresult (*GetInternalAndReservedAttribute2IHostNetworkInterface)(IHostNetworkInterface *pThis, PRUint32 *reserved);
@@ -8851,6 +9310,8 @@ struct IHostNetworkInterfaceVtbl
 #define IHostNetworkInterface_GetStatus(p, aStatus) ((p)->lpVtbl->GetStatus(p, aStatus))
 #define IHostNetworkInterface_get_InterfaceType(p, aInterfaceType) ((p)->lpVtbl->GetInterfaceType(p, aInterfaceType))
 #define IHostNetworkInterface_GetInterfaceType(p, aInterfaceType) ((p)->lpVtbl->GetInterfaceType(p, aInterfaceType))
+#define IHostNetworkInterface_get_Wireless(p, aWireless) ((p)->lpVtbl->GetWireless(p, aWireless))
+#define IHostNetworkInterface_GetWireless(p, aWireless) ((p)->lpVtbl->GetWireless(p, aWireless))
 #define IHostNetworkInterface_EnableStaticIPConfig(p, aIPAddress, aNetworkMask) ((p)->lpVtbl->EnableStaticIPConfig(p, aIPAddress, aNetworkMask))
 #define IHostNetworkInterface_EnableStaticIPConfigV6(p, aIPV6Address, aIPV6NetworkMaskPrefixLength) ((p)->lpVtbl->EnableStaticIPConfigV6(p, aIPV6Address, aIPV6NetworkMaskPrefixLength))
 #define IHostNetworkInterface_EnableDynamicIPConfig(p) ((p)->lpVtbl->EnableDynamicIPConfig(p))
@@ -13332,10 +13793,10 @@ interface IGuest
 
 
 /* Start of struct IProgress declaration */
-#define IPROGRESS_IID_STR "77faf1c0-489d-b123-274c-5a95e77ab286"
+#define IPROGRESS_IID_STR "e0026dc0-0c55-47b1-aa64-d340a396b418"
 #define IPROGRESS_IID { \
-    0x77faf1c0, 0x489d, 0xb123, \
-    { 0x27, 0x4c, 0x5a, 0x95, 0xe7, 0x7a, 0xb2, 0x86 } \
+    0xe0026dc0, 0x0c55, 0x47b1, \
+    { 0xaa, 0x64, 0xd3, 0x40, 0xa3, 0x96, 0xb4, 0x18 } \
 }
 /* COM compatibility */
 VBOX_EXTERN_CONST(nsIID, IID_IProgress);
@@ -13376,6 +13837,8 @@ struct IProgress_vtbl
 
     nsresult (*GetTimeout)(IProgress *pThis, PRUint32 *timeout);
     nsresult (*SetTimeout)(IProgress *pThis, PRUint32 timeout);
+
+    nsresult (*GetEventSource)(IProgress *pThis, IEventSource * *eventSource);
 
     nsresult (*GetInternalAndReservedAttribute1IProgress)(IProgress *pThis, PRUint32 *reserved);
 
@@ -13452,6 +13915,8 @@ struct IProgressVtbl
     nsresult (*GetTimeout)(IProgress *pThis, PRUint32 *timeout);
     nsresult (*SetTimeout)(IProgress *pThis, PRUint32 timeout);
 
+    nsresult (*GetEventSource)(IProgress *pThis, IEventSource * *eventSource);
+
     nsresult (*GetInternalAndReservedAttribute1IProgress)(IProgress *pThis, PRUint32 *reserved);
 
     nsresult (*GetInternalAndReservedAttribute2IProgress)(IProgress *pThis, PRUint32 *reserved);
@@ -13525,6 +13990,8 @@ struct IProgressVtbl
 #define IProgress_GetTimeout(p, aTimeout) ((p)->lpVtbl->GetTimeout(p, aTimeout))
 #define IProgress_put_Timeout(p, aTimeout) ((p)->lpVtbl->SetTimeout(p, aTimeout))
 #define IProgress_SetTimeout(p, aTimeout) ((p)->lpVtbl->SetTimeout(p, aTimeout))
+#define IProgress_get_EventSource(p, aEventSource) ((p)->lpVtbl->GetEventSource(p, aEventSource))
+#define IProgress_GetEventSource(p, aEventSource) ((p)->lpVtbl->GetEventSource(p, aEventSource))
 #define IProgress_SetCurrentOperationProgress(p, aPercent) ((p)->lpVtbl->SetCurrentOperationProgress(p, aPercent))
 #define IProgress_SetNextOperation(p, aNextOperationDescription, aNextOperationsWeight) ((p)->lpVtbl->SetNextOperation(p, aNextOperationDescription, aNextOperationsWeight))
 #define IProgress_WaitForCompletion(p, aTimeout) ((p)->lpVtbl->WaitForCompletion(p, aTimeout))
@@ -15306,10 +15773,10 @@ interface IFramebufferOverlay
 
 
 /* Start of struct IGuestScreenInfo declaration */
-#define IGUESTSCREENINFO_IID_STR "5f99cd4d-bbd2-49ba-b24d-4b5b42fb4c3a"
+#define IGUESTSCREENINFO_IID_STR "6b2f98f8-9641-4397-854a-040439d0114b"
 #define IGUESTSCREENINFO_IID { \
-    0x5f99cd4d, 0xbbd2, 0x49ba, \
-    { 0xb2, 0x4d, 0x4b, 0x5b, 0x42, 0xfb, 0x4c, 0x3a } \
+    0x6b2f98f8, 0x9641, 0x4397, \
+    { 0x85, 0x4a, 0x04, 0x04, 0x39, 0xd0, 0x11, 0x4b } \
 }
 /* COM compatibility */
 VBOX_EXTERN_CONST(nsIID, IID_IGuestScreenInfo);
@@ -15336,6 +15803,8 @@ struct IGuestScreenInfo_vtbl
 
     nsresult (*GetBitsPerPixel)(IGuestScreenInfo *pThis, PRUint32 *bitsPerPixel);
 
+    nsresult (*GetExtendedInfo)(IGuestScreenInfo *pThis, PRUnichar * *extendedInfo);
+
 };
 #else /* VBOX_WITH_GLUE */
 struct IGuestScreenInfoVtbl
@@ -15361,6 +15830,8 @@ struct IGuestScreenInfoVtbl
 
     nsresult (*GetBitsPerPixel)(IGuestScreenInfo *pThis, PRUint32 *bitsPerPixel);
 
+    nsresult (*GetExtendedInfo)(IGuestScreenInfo *pThis, PRUnichar * *extendedInfo);
+
 };
 #define IGuestScreenInfo_QueryInterface(p, iid, resultp) ((p)->lpVtbl->QueryInterface(p, iid, resultp))
 #define IGuestScreenInfo_AddRef(p) ((p)->lpVtbl->AddRef(p))
@@ -15383,6 +15854,8 @@ struct IGuestScreenInfoVtbl
 #define IGuestScreenInfo_GetHeight(p, aHeight) ((p)->lpVtbl->GetHeight(p, aHeight))
 #define IGuestScreenInfo_get_BitsPerPixel(p, aBitsPerPixel) ((p)->lpVtbl->GetBitsPerPixel(p, aBitsPerPixel))
 #define IGuestScreenInfo_GetBitsPerPixel(p, aBitsPerPixel) ((p)->lpVtbl->GetBitsPerPixel(p, aBitsPerPixel))
+#define IGuestScreenInfo_get_ExtendedInfo(p, aExtendedInfo) ((p)->lpVtbl->GetExtendedInfo(p, aExtendedInfo))
+#define IGuestScreenInfo_GetExtendedInfo(p, aExtendedInfo) ((p)->lpVtbl->GetExtendedInfo(p, aExtendedInfo))
 #endif /* VBOX_WITH_GLUE */
 
 interface IGuestScreenInfo
@@ -15397,10 +15870,10 @@ interface IGuestScreenInfo
 
 
 /* Start of struct IDisplay declaration */
-#define IDISPLAY_IID_STR "02326f63-bcb3-4481-96e0-30d1c2ee97f6"
+#define IDISPLAY_IID_STR "76eed314-3c72-4bbb-95cf-5eb4947a4041"
 #define IDISPLAY_IID { \
-    0x02326f63, 0xbcb3, 0x4481, \
-    { 0x96, 0xe0, 0x30, 0xd1, 0xc2, 0xee, 0x97, 0xf6 } \
+    0x76eed314, 0x3c72, 0x4bbb, \
+    { 0x95, 0xcf, 0x5e, 0xb4, 0x94, 0x7a, 0x40, 0x41 } \
 }
 /* COM compatibility */
 VBOX_EXTERN_CONST(nsIID, IID_IDisplay);
@@ -15535,6 +16008,12 @@ struct IDisplay_vtbl
         PRUint32 screenLayoutMode,
         PRUint32 guestScreenInfoSize,
         IGuestScreenInfo ** guestScreenInfo
+    );
+
+    nsresult (*DetachScreens)(
+        IDisplay *pThis,
+        PRUint32 screenIdsSize,
+        PRInt32* screenIds
     );
 
     nsresult (*InternalAndReservedMethod1IDisplay)(IDisplay *pThis);
@@ -15680,6 +16159,12 @@ struct IDisplayVtbl
         IGuestScreenInfo ** guestScreenInfo
     );
 
+    nsresult (*DetachScreens)(
+        IDisplay *pThis,
+        PRUint32 screenIdsSize,
+        PRInt32* screenIds
+    );
+
     nsresult (*InternalAndReservedMethod1IDisplay)(IDisplay *pThis);
 
     nsresult (*InternalAndReservedMethod2IDisplay)(IDisplay *pThis);
@@ -15711,6 +16196,7 @@ struct IDisplayVtbl
 #define IDisplay_NotifyScaleFactorChange(p, aScreenId, aU32ScaleFactorWMultiplied, aU32ScaleFactorHMultiplied) ((p)->lpVtbl->NotifyScaleFactorChange(p, aScreenId, aU32ScaleFactorWMultiplied, aU32ScaleFactorHMultiplied))
 #define IDisplay_NotifyHiDPIOutputPolicyChange(p, aFUnscaledHiDPI) ((p)->lpVtbl->NotifyHiDPIOutputPolicyChange(p, aFUnscaledHiDPI))
 #define IDisplay_SetScreenLayout(p, aScreenLayoutMode, aGuestScreenInfo) ((p)->lpVtbl->SetScreenLayout(p, aScreenLayoutMode, aGuestScreenInfo))
+#define IDisplay_DetachScreens(p, aScreenIds) ((p)->lpVtbl->DetachScreens(p, aScreenIds))
 #endif /* VBOX_WITH_GLUE */
 
 interface IDisplay
@@ -21499,6 +21985,71 @@ interface INetworkAdapterChangedEvent
 /* End of struct INetworkAdapterChangedEvent declaration */
 
 
+/* Start of struct IAudioAdapterChangedEvent declaration */
+#define IAUDIOADAPTERCHANGEDEVENT_IID_STR "D5ABC823-04D0-4DB6-8D66-DC2F033120E1"
+#define IAUDIOADAPTERCHANGEDEVENT_IID { \
+    0xD5ABC823, 0x04D0, 0x4DB6, \
+    { 0x8D, 0x66, 0xDC, 0x2F, 0x03, 0x31, 0x20, 0xE1 } \
+}
+/* COM compatibility */
+VBOX_EXTERN_CONST(nsIID, IID_IAudioAdapterChangedEvent);
+#ifndef VBOX_WITH_GLUE
+struct IAudioAdapterChangedEvent_vtbl
+{
+    struct IEvent_vtbl ievent;
+
+    nsresult (*GetAudioAdapter)(IAudioAdapterChangedEvent *pThis, IAudioAdapter * *audioAdapter);
+
+};
+#else /* VBOX_WITH_GLUE */
+struct IAudioAdapterChangedEventVtbl
+{
+    nsresult (*QueryInterface)(IAudioAdapterChangedEvent *pThis, const nsID *iid, void **resultp);
+    nsrefcnt (*AddRef)(IAudioAdapterChangedEvent *pThis);
+    nsrefcnt (*Release)(IAudioAdapterChangedEvent *pThis);
+    nsresult (*GetType)(IAudioAdapterChangedEvent *pThis, PRUint32 *type);
+
+    nsresult (*GetSource)(IAudioAdapterChangedEvent *pThis, IEventSource * *source);
+
+    nsresult (*GetWaitable)(IAudioAdapterChangedEvent *pThis, PRBool *waitable);
+
+    nsresult (*SetProcessed)(IAudioAdapterChangedEvent *pThis );
+
+    nsresult (*WaitProcessed)(
+        IAudioAdapterChangedEvent *pThis,
+        PRInt32 timeout,
+        PRBool * result
+    );
+
+    nsresult (*GetAudioAdapter)(IAudioAdapterChangedEvent *pThis, IAudioAdapter * *audioAdapter);
+
+};
+#define IAudioAdapterChangedEvent_QueryInterface(p, iid, resultp) ((p)->lpVtbl->QueryInterface(p, iid, resultp))
+#define IAudioAdapterChangedEvent_AddRef(p) ((p)->lpVtbl->AddRef(p))
+#define IAudioAdapterChangedEvent_Release(p) ((p)->lpVtbl->Release(p))
+#define IAudioAdapterChangedEvent_get_Type(p, aType) ((p)->lpVtbl->GetType(p, aType))
+#define IAudioAdapterChangedEvent_GetType(p, aType) ((p)->lpVtbl->GetType(p, aType))
+#define IAudioAdapterChangedEvent_get_Source(p, aSource) ((p)->lpVtbl->GetSource(p, aSource))
+#define IAudioAdapterChangedEvent_GetSource(p, aSource) ((p)->lpVtbl->GetSource(p, aSource))
+#define IAudioAdapterChangedEvent_get_Waitable(p, aWaitable) ((p)->lpVtbl->GetWaitable(p, aWaitable))
+#define IAudioAdapterChangedEvent_GetWaitable(p, aWaitable) ((p)->lpVtbl->GetWaitable(p, aWaitable))
+#define IAudioAdapterChangedEvent_SetProcessed(p) ((p)->lpVtbl->SetProcessed(p))
+#define IAudioAdapterChangedEvent_WaitProcessed(p, aTimeout, aResult) ((p)->lpVtbl->WaitProcessed(p, aTimeout, aResult))
+#define IAudioAdapterChangedEvent_get_AudioAdapter(p, aAudioAdapter) ((p)->lpVtbl->GetAudioAdapter(p, aAudioAdapter))
+#define IAudioAdapterChangedEvent_GetAudioAdapter(p, aAudioAdapter) ((p)->lpVtbl->GetAudioAdapter(p, aAudioAdapter))
+#endif /* VBOX_WITH_GLUE */
+
+interface IAudioAdapterChangedEvent
+{
+#ifndef VBOX_WITH_GLUE
+    struct IAudioAdapterChangedEvent_vtbl *vtbl;
+#else /* VBOX_WITH_GLUE */
+    CONST_VTBL struct IAudioAdapterChangedEventVtbl *lpVtbl;
+#endif /* VBOX_WITH_GLUE */
+};
+/* End of struct IAudioAdapterChangedEvent declaration */
+
+
 /* Start of struct ISerialPortChangedEvent declaration */
 #define ISERIALPORTCHANGEDEVENT_IID_STR "3BA329DC-659C-488B-835C-4ECA7AE71C6C"
 #define ISERIALPORTCHANGEDEVENT_IID { \
@@ -25710,6 +26261,209 @@ interface IHostNameResolutionConfigurationChangeEvent
 #endif /* VBOX_WITH_GLUE */
 };
 /* End of struct IHostNameResolutionConfigurationChangeEvent declaration */
+
+
+/* Start of struct IProgressEvent declaration */
+#define IPROGRESSEVENT_IID_STR "daaf9016-1f04-4191-aa2f-1fac9646ae4c"
+#define IPROGRESSEVENT_IID { \
+    0xdaaf9016, 0x1f04, 0x4191, \
+    { 0xaa, 0x2f, 0x1f, 0xac, 0x96, 0x46, 0xae, 0x4c } \
+}
+/* COM compatibility */
+VBOX_EXTERN_CONST(nsIID, IID_IProgressEvent);
+#ifndef VBOX_WITH_GLUE
+struct IProgressEvent_vtbl
+{
+    struct IEvent_vtbl ievent;
+
+    nsresult (*GetProgressId)(IProgressEvent *pThis, PRUnichar * *progressId);
+
+};
+#else /* VBOX_WITH_GLUE */
+struct IProgressEventVtbl
+{
+    nsresult (*QueryInterface)(IProgressEvent *pThis, const nsID *iid, void **resultp);
+    nsrefcnt (*AddRef)(IProgressEvent *pThis);
+    nsrefcnt (*Release)(IProgressEvent *pThis);
+    nsresult (*GetType)(IProgressEvent *pThis, PRUint32 *type);
+
+    nsresult (*GetSource)(IProgressEvent *pThis, IEventSource * *source);
+
+    nsresult (*GetWaitable)(IProgressEvent *pThis, PRBool *waitable);
+
+    nsresult (*SetProcessed)(IProgressEvent *pThis );
+
+    nsresult (*WaitProcessed)(
+        IProgressEvent *pThis,
+        PRInt32 timeout,
+        PRBool * result
+    );
+
+    nsresult (*GetProgressId)(IProgressEvent *pThis, PRUnichar * *progressId);
+
+};
+#define IProgressEvent_QueryInterface(p, iid, resultp) ((p)->lpVtbl->QueryInterface(p, iid, resultp))
+#define IProgressEvent_AddRef(p) ((p)->lpVtbl->AddRef(p))
+#define IProgressEvent_Release(p) ((p)->lpVtbl->Release(p))
+#define IProgressEvent_get_Type(p, aType) ((p)->lpVtbl->GetType(p, aType))
+#define IProgressEvent_GetType(p, aType) ((p)->lpVtbl->GetType(p, aType))
+#define IProgressEvent_get_Source(p, aSource) ((p)->lpVtbl->GetSource(p, aSource))
+#define IProgressEvent_GetSource(p, aSource) ((p)->lpVtbl->GetSource(p, aSource))
+#define IProgressEvent_get_Waitable(p, aWaitable) ((p)->lpVtbl->GetWaitable(p, aWaitable))
+#define IProgressEvent_GetWaitable(p, aWaitable) ((p)->lpVtbl->GetWaitable(p, aWaitable))
+#define IProgressEvent_SetProcessed(p) ((p)->lpVtbl->SetProcessed(p))
+#define IProgressEvent_WaitProcessed(p, aTimeout, aResult) ((p)->lpVtbl->WaitProcessed(p, aTimeout, aResult))
+#define IProgressEvent_get_ProgressId(p, aProgressId) ((p)->lpVtbl->GetProgressId(p, aProgressId))
+#define IProgressEvent_GetProgressId(p, aProgressId) ((p)->lpVtbl->GetProgressId(p, aProgressId))
+#endif /* VBOX_WITH_GLUE */
+
+interface IProgressEvent
+{
+#ifndef VBOX_WITH_GLUE
+    struct IProgressEvent_vtbl *vtbl;
+#else /* VBOX_WITH_GLUE */
+    CONST_VTBL struct IProgressEventVtbl *lpVtbl;
+#endif /* VBOX_WITH_GLUE */
+};
+/* End of struct IProgressEvent declaration */
+
+
+/* Start of struct IProgressPercentageChangedEvent declaration */
+#define IPROGRESSPERCENTAGECHANGEDEVENT_IID_STR "f05d7e60-1bcf-4218-9807-04e036cc70f1"
+#define IPROGRESSPERCENTAGECHANGEDEVENT_IID { \
+    0xf05d7e60, 0x1bcf, 0x4218, \
+    { 0x98, 0x07, 0x04, 0xe0, 0x36, 0xcc, 0x70, 0xf1 } \
+}
+/* COM compatibility */
+VBOX_EXTERN_CONST(nsIID, IID_IProgressPercentageChangedEvent);
+#ifndef VBOX_WITH_GLUE
+struct IProgressPercentageChangedEvent_vtbl
+{
+    struct IProgressEvent_vtbl iprogressevent;
+
+    nsresult (*GetPercent)(IProgressPercentageChangedEvent *pThis, PRInt32 *percent);
+
+};
+#else /* VBOX_WITH_GLUE */
+struct IProgressPercentageChangedEventVtbl
+{
+    nsresult (*QueryInterface)(IProgressPercentageChangedEvent *pThis, const nsID *iid, void **resultp);
+    nsrefcnt (*AddRef)(IProgressPercentageChangedEvent *pThis);
+    nsrefcnt (*Release)(IProgressPercentageChangedEvent *pThis);
+    nsresult (*GetType)(IProgressPercentageChangedEvent *pThis, PRUint32 *type);
+
+    nsresult (*GetSource)(IProgressPercentageChangedEvent *pThis, IEventSource * *source);
+
+    nsresult (*GetWaitable)(IProgressPercentageChangedEvent *pThis, PRBool *waitable);
+
+    nsresult (*SetProcessed)(IProgressPercentageChangedEvent *pThis );
+
+    nsresult (*WaitProcessed)(
+        IProgressPercentageChangedEvent *pThis,
+        PRInt32 timeout,
+        PRBool * result
+    );
+
+    nsresult (*GetProgressId)(IProgressPercentageChangedEvent *pThis, PRUnichar * *progressId);
+
+    nsresult (*GetPercent)(IProgressPercentageChangedEvent *pThis, PRInt32 *percent);
+
+};
+#define IProgressPercentageChangedEvent_QueryInterface(p, iid, resultp) ((p)->lpVtbl->QueryInterface(p, iid, resultp))
+#define IProgressPercentageChangedEvent_AddRef(p) ((p)->lpVtbl->AddRef(p))
+#define IProgressPercentageChangedEvent_Release(p) ((p)->lpVtbl->Release(p))
+#define IProgressPercentageChangedEvent_get_Type(p, aType) ((p)->lpVtbl->GetType(p, aType))
+#define IProgressPercentageChangedEvent_GetType(p, aType) ((p)->lpVtbl->GetType(p, aType))
+#define IProgressPercentageChangedEvent_get_Source(p, aSource) ((p)->lpVtbl->GetSource(p, aSource))
+#define IProgressPercentageChangedEvent_GetSource(p, aSource) ((p)->lpVtbl->GetSource(p, aSource))
+#define IProgressPercentageChangedEvent_get_Waitable(p, aWaitable) ((p)->lpVtbl->GetWaitable(p, aWaitable))
+#define IProgressPercentageChangedEvent_GetWaitable(p, aWaitable) ((p)->lpVtbl->GetWaitable(p, aWaitable))
+#define IProgressPercentageChangedEvent_SetProcessed(p) ((p)->lpVtbl->SetProcessed(p))
+#define IProgressPercentageChangedEvent_WaitProcessed(p, aTimeout, aResult) ((p)->lpVtbl->WaitProcessed(p, aTimeout, aResult))
+#define IProgressPercentageChangedEvent_get_ProgressId(p, aProgressId) ((p)->lpVtbl->GetProgressId(p, aProgressId))
+#define IProgressPercentageChangedEvent_GetProgressId(p, aProgressId) ((p)->lpVtbl->GetProgressId(p, aProgressId))
+#define IProgressPercentageChangedEvent_get_Percent(p, aPercent) ((p)->lpVtbl->GetPercent(p, aPercent))
+#define IProgressPercentageChangedEvent_GetPercent(p, aPercent) ((p)->lpVtbl->GetPercent(p, aPercent))
+#endif /* VBOX_WITH_GLUE */
+
+interface IProgressPercentageChangedEvent
+{
+#ifndef VBOX_WITH_GLUE
+    struct IProgressPercentageChangedEvent_vtbl *vtbl;
+#else /* VBOX_WITH_GLUE */
+    CONST_VTBL struct IProgressPercentageChangedEventVtbl *lpVtbl;
+#endif /* VBOX_WITH_GLUE */
+};
+/* End of struct IProgressPercentageChangedEvent declaration */
+
+
+/* Start of struct IProgressTaskCompletedEvent declaration */
+#define IPROGRESSTASKCOMPLETEDEVENT_IID_STR "a5bbdb7d-8ce7-469f-a4c2-6476f581ff72"
+#define IPROGRESSTASKCOMPLETEDEVENT_IID { \
+    0xa5bbdb7d, 0x8ce7, 0x469f, \
+    { 0xa4, 0xc2, 0x64, 0x76, 0xf5, 0x81, 0xff, 0x72 } \
+}
+/* COM compatibility */
+VBOX_EXTERN_CONST(nsIID, IID_IProgressTaskCompletedEvent);
+#ifndef VBOX_WITH_GLUE
+struct IProgressTaskCompletedEvent_vtbl
+{
+    struct IProgressEvent_vtbl iprogressevent;
+
+    nsresult (*GetMidlDoesNotLikeEmptyInterfaces)(IProgressTaskCompletedEvent *pThis, PRBool *midlDoesNotLikeEmptyInterfaces);
+
+};
+#else /* VBOX_WITH_GLUE */
+struct IProgressTaskCompletedEventVtbl
+{
+    nsresult (*QueryInterface)(IProgressTaskCompletedEvent *pThis, const nsID *iid, void **resultp);
+    nsrefcnt (*AddRef)(IProgressTaskCompletedEvent *pThis);
+    nsrefcnt (*Release)(IProgressTaskCompletedEvent *pThis);
+    nsresult (*GetType)(IProgressTaskCompletedEvent *pThis, PRUint32 *type);
+
+    nsresult (*GetSource)(IProgressTaskCompletedEvent *pThis, IEventSource * *source);
+
+    nsresult (*GetWaitable)(IProgressTaskCompletedEvent *pThis, PRBool *waitable);
+
+    nsresult (*SetProcessed)(IProgressTaskCompletedEvent *pThis );
+
+    nsresult (*WaitProcessed)(
+        IProgressTaskCompletedEvent *pThis,
+        PRInt32 timeout,
+        PRBool * result
+    );
+
+    nsresult (*GetProgressId)(IProgressTaskCompletedEvent *pThis, PRUnichar * *progressId);
+
+    nsresult (*GetMidlDoesNotLikeEmptyInterfaces)(IProgressTaskCompletedEvent *pThis, PRBool *midlDoesNotLikeEmptyInterfaces);
+
+};
+#define IProgressTaskCompletedEvent_QueryInterface(p, iid, resultp) ((p)->lpVtbl->QueryInterface(p, iid, resultp))
+#define IProgressTaskCompletedEvent_AddRef(p) ((p)->lpVtbl->AddRef(p))
+#define IProgressTaskCompletedEvent_Release(p) ((p)->lpVtbl->Release(p))
+#define IProgressTaskCompletedEvent_get_Type(p, aType) ((p)->lpVtbl->GetType(p, aType))
+#define IProgressTaskCompletedEvent_GetType(p, aType) ((p)->lpVtbl->GetType(p, aType))
+#define IProgressTaskCompletedEvent_get_Source(p, aSource) ((p)->lpVtbl->GetSource(p, aSource))
+#define IProgressTaskCompletedEvent_GetSource(p, aSource) ((p)->lpVtbl->GetSource(p, aSource))
+#define IProgressTaskCompletedEvent_get_Waitable(p, aWaitable) ((p)->lpVtbl->GetWaitable(p, aWaitable))
+#define IProgressTaskCompletedEvent_GetWaitable(p, aWaitable) ((p)->lpVtbl->GetWaitable(p, aWaitable))
+#define IProgressTaskCompletedEvent_SetProcessed(p) ((p)->lpVtbl->SetProcessed(p))
+#define IProgressTaskCompletedEvent_WaitProcessed(p, aTimeout, aResult) ((p)->lpVtbl->WaitProcessed(p, aTimeout, aResult))
+#define IProgressTaskCompletedEvent_get_ProgressId(p, aProgressId) ((p)->lpVtbl->GetProgressId(p, aProgressId))
+#define IProgressTaskCompletedEvent_GetProgressId(p, aProgressId) ((p)->lpVtbl->GetProgressId(p, aProgressId))
+#define IProgressTaskCompletedEvent_get_MidlDoesNotLikeEmptyInterfaces(p, aMidlDoesNotLikeEmptyInterfaces) ((p)->lpVtbl->GetMidlDoesNotLikeEmptyInterfaces(p, aMidlDoesNotLikeEmptyInterfaces))
+#define IProgressTaskCompletedEvent_GetMidlDoesNotLikeEmptyInterfaces(p, aMidlDoesNotLikeEmptyInterfaces) ((p)->lpVtbl->GetMidlDoesNotLikeEmptyInterfaces(p, aMidlDoesNotLikeEmptyInterfaces))
+#endif /* VBOX_WITH_GLUE */
+
+interface IProgressTaskCompletedEvent
+{
+#ifndef VBOX_WITH_GLUE
+    struct IProgressTaskCompletedEvent_vtbl *vtbl;
+#else /* VBOX_WITH_GLUE */
+    CONST_VTBL struct IProgressTaskCompletedEventVtbl *lpVtbl;
+#endif /* VBOX_WITH_GLUE */
+};
+/* End of struct IProgressTaskCompletedEvent declaration */
 
 
 

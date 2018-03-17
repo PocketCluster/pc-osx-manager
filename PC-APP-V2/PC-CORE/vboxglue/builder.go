@@ -111,7 +111,7 @@ func BuildVboxCoreDisk(clusterID string, tcfg *tervice.PocketConfig) error {
     if err != nil {
         return errors.WithStack(err)
     }
-    md = vboxutil.NewMachineDisk(vmPath, defaults.VBoxDefualtCoreDiskName, defaults.VBoxDefualtCoreDiskSize, true)
+    md = vboxutil.NewMachineDisk(vmPath, defaults.VBoxDefualtCoreDiskName, defaults.VBoxDefualtCoreDiskSize, false)
     md.ClusterID = clusterID
     md.AuthToken = authToken
     md.UserName = userName

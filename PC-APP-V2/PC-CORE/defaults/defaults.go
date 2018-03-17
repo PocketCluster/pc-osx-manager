@@ -9,7 +9,7 @@ import (
 const (
     ApplicationVersion         string = "0.1.4"
 
-    ApplicationExpirationDate  string = "2018/01/01 00:00:00 -0000"
+    ApplicationExpirationDate  string = "2018/12/31 00:00:00 -0000"
 )
 
 const (
@@ -74,4 +74,12 @@ const (
     // 46 GB
     //VBoxDefualtCoreDiskSize    uint   = 128000
     VBoxDefualtCoreDiskSize    uint   = 46000
+)
+
+const (
+    PocketClusterAPIHost       string = "https://api.pocketcluster.io"
+    PocketClusterCDNProto      string = "https://"
+
+//    PocketClusterAPIHost       string = "http://dev-local.homelocal:8080"
+//    PocketClusterCDNProto      string = "http://"
 )

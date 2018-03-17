@@ -2,13 +2,21 @@ package initcheck
 
 import (
     "encoding/json"
+    "fmt"
+    "net/http"
+    "net/url"
+    "strings"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+    "golang.org/x/crypto/ripemd160"
+
     "github.com/stkim1/pc-core/context"
+    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
     "github.com/stkim1/pc-core/vboxglue"
+    "github.com/stkim1/pc-core/utils/apireq"
 )
 
 func InitApplicationCheck(appLife route.Router, feeder route.ResponseFeeder) {
@@ -145,23 +153,85 @@ func InitApplicationCheck(appLife route.Router, feeder route.ResponseFeeder) {
 
     // check if user is authenticated
     appLife.POST(routepath.RpathUserAuthed(), func(_, path, payload string) error {
-        // TODO : get the payload and check auth
+        var (
+            invitation, autherr string
+            status bool = false
+        )
 
+        // 1. parse input package id
+        err := json.Unmarshal([]byte(payload), &struct {
+            Invitation *string `json:"invitation"`
+        }{&invitation})
+        if err != nil || len(invitation) != 24 {
+            data, _ := json.Marshal(route.ReponseMessage{
+                "user-auth": {
+                    "status": false,
+                    "invitation": invitation,
+                    "error":  "invalid invitation code. please provide valid one",
+                },
+            })
+            feeder.FeedResponseForPost(path, string(data))
+            return err
+        }
 
-        // return auth check value
-        data, err := json.Marshal(route.ReponseMessage{
+        // 2. connect to service
+        val := url.Values{}
+        rh := ripemd160.New()
+        rh.Write([]byte(invitation))
+        val.Set("invitation", fmt.Sprintf("%x", rh.Sum(nil)))
+
+        rh.Reset()
+        rh.Write([]byte(context.SharedHostContext().HostDeviceSerial()))
+        val.Set("device", fmt.Sprintf("%x", rh.Sum(nil)))
+
+        req, _ :=  http.NewRequest("POST", fmt.Sprintf("%s/service/v014/auth/check", defaults.PocketClusterAPIHost), strings.NewReader(val.Encode()))
+        req.Header.Add("User-Agent", "PocketCluster/0.1.4 (OSX)")
+        req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+        req.ProtoAtLeast(1, 1)
+        client := apireq.NewClient(apireq.ConnTimeout, true)
+        resp, err := apireq.ReadRequest(req, client)
+        if err != nil {
+            data, _ := json.Marshal(route.ReponseMessage{
+                "user-auth": {
+                    "status": false,
+                    "invitation": invitation,
+                    "error":  "unable to connect service. please try again",
+                },
+            })
+            feeder.FeedResponseForPost(path, string(data))
+            return err
+        }
+
+        // 3. read response
+        err = json.Unmarshal(resp, &struct {
+            AuthError *string `json:"error"`
+        }{&autherr})
+        if err != nil {
+            data, _ := json.Marshal(route.ReponseMessage{
+                "user-auth": {
+                    "status": false,
+                    "invitation": invitation,
+                    "error":  "invalid response from service. please try again",
+                },
+            })
+            feeder.FeedResponseForPost(path, string(data))
+            return err
+        }
+
+        // 4. return auth check value
+        if len(autherr) == 0 {
+            status = true
+        } else {
+            status = false
+        }
+        data, _ := json.Marshal(route.ReponseMessage{
             "user-auth": {
-                "status": true,
+                "status": status,
+                "invitation": invitation,
+                "error": autherr,
             },
         })
-        if err != nil {
-            log.Debugf(err.Error())
-            return errors.WithStack(err)
-        }
-        err = feeder.FeedResponseForPost(path, string(data))
-        if err != nil {
-            return errors.WithStack(err)
-        }
+        feeder.FeedResponseForPost(path, string(data))
         return nil
     })
 }

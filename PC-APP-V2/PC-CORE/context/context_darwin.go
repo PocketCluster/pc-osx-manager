@@ -25,8 +25,7 @@ func (ctx *hostContext) RefreshStatus() error {
     ctx.physicalMemorySize          = findSystemPhysicalMemorySize()
     ctx.physicalCoreCount           = findSystemPhysicalCoreCount()
 
-    // (2017-05-21) This will be replaced with randomly generated 16 chars
-    //ctx.clusterPublicName         = findSerialNumber()
+    ctx.deviceSerial                = findSerialNumber()
     ctx.currentLanguageCode         = findCurrentLanguageCode()
     ctx.currentCountryCode          = findCurrentCountryCode()
 

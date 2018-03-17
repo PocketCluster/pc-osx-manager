@@ -37,22 +37,21 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
             PkgID *string `json:"pkg-id"`
         }{&pkgID})
         if err != nil {
-            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "unable to specify package id"))
+            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "[PACKAGE] unable to specify package id"))
         }
 
         // TODO check if package has started
 
         pkgs, err := model.FindPackage("pkg_id = ?", pkgID)
         if err != nil {
-            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "unable to specify package id"))
+            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "[PACKAGE] unable to specify package id"))
         }
         pkg = pkgs[0]
-        log.Infof("Package Meta Found %v", pkg)
 
         // 2. get the node list report
         err = appLife.BindDiscreteEvent(ivent.IventReportLiveNodesResult, reportC)
         if err != nil {
-            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "unable to access node list report"))
+            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "[PACKAGE] unable to access node list report"))
         }
         // ask node list
         appLife.BroadcastEvent(service.Event{Name:ivent.IventReportLiveNodesRequest})
@@ -60,41 +59,44 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
         appLife.UntieDiscreteEvent(ivent.IventReportLiveNodesResult)
         nlist, ok := nr.Payload.([]string)
         if !ok {
-            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "unable to access proper node list"))
+            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.New("[PACKAGE] unable to access proper node list"))
         }
 
         // 2-a. clean up any previous residue
         for _, node := range nlist {
             if ccli, cerr := dockertool.NewContainerClient(fmt.Sprintf("tcp://%s:%s", node, defaults.DefaultSecureDockerPort), "1.24");
             cerr != nil {
-                log.Error(err.Error())
-                return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "unable to clean residue from the last run"))
+                return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(cerr, "[PACKAGE] unable to clean residue from the last run"))
             } else {
                 if err := dockertool.CleanupContainer(ccli); err != nil {
-                    log.Errorf("container cleanup error %v", err.Error())
+                    log.Errorf("[PACKAGE] %v container cleanup error %v", node, err.Error())
+                }
+                if err := dockertool.CleanupVolume(ccli); err != nil {
+                    log.Errorf("[PACKAGE] %v volume cleanup error %v", node, err.Error())
                 }
                 if err := dockertool.CleanupNetwork(ccli); err != nil {
-                    log.Errorf("network cleanup error %v", err.Error())
+                    log.Errorf("[PACKAGE] %v network cleanup error %v", node, err.Error())
                 }
                 ccli.Close()
-                time.Sleep(time.Second)
             }
         }
+        // give some time for cleanup ops to settle
+        time.Sleep(time.Second * time.Duration(3))
 
         // 3. load template
         tmpl, err := model.FindTemplateWithPackageID(pkgID)
         if err != nil {
-            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "unable to access package template"))
+            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "[PACKAGE] unable to access package template"))
         }
         cTempl, err := buildComposeTemplateWithNodeList(tmpl.Body, nlist)
         if err != nil {
-            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "unable to build package exec plan"))
+            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "[PACKAGE] unable to build package exec plan"))
         }
 
         // 4. build client
         opts, err := newComposeClient()
         if err != nil {
-            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "unable to build orchestration client"))
+            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "[PACKAGE] unable to build orchestration client"))
         }
 
         // 5. build package
@@ -111,13 +113,13 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
             Manifest: cTempl,
         }, nil)
         if err != nil {
-            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "unable to create project"))
+            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "[PACKAGE] unable to create project"))
         }
 
         // --- --- --- --- --- --- --- --- --- --- --- --- package startup --- --- --- --- --- --- --- --- --- --- //
         // startup package. if anything goes wrong, stop and return the process.
         if uerr := project.Up(context.TODO(), options.Up{}); uerr != nil {
-            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(uerr, "unable to start package"))
+            return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(uerr, "[PACKAGE] unable to start package"))
         }
 
         // --- --- --- --- --- --- --- --- --- --- --- --- package process list --- --- --- --- --- --- --- --- --- //
@@ -142,7 +144,8 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                             return nil
                         }
                         case <- timer.C: {
-                            /* FIXME : (2017/11/04) no process status gets produced. We need to fix docker engine + libcompose
+/*
+                            // FIXME : (2017/11/04) no process status gets produced. We need to fix docker engine + libcompose
                             allInfo, err := project.Ps(context.Background(), []string{}...)
                             if err != nil {
                                 feedError(feeder, rptPath, fbPackageProcess, errors.WithMessage(err, "unable to list cluster process"))
@@ -157,13 +160,15 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                                     "pkg-id":  pkgID,
                                     "process": pslist,
                                 },
-                            }) */
+                            })
+*/
 
                             // process feedback
                             _, err := project.Ps(context.Background(), []string{}...)
                             if err != nil {
-                                feedError(feeder, rptPath, fbPackageProcess, pkgID, errors.WithMessage(err, "unable to list cluster process"))
+                                feedError(feeder, rptPath, fbPackageProcess, pkgID, errors.WithMessage(err, "[PACKAGE] unable to list cluster process"))
                             }
+
                             data, err := json.Marshal(route.ReponseMessage{
                                 fbPackageProcess: {
                                     "status":  true,
@@ -197,33 +202,37 @@ func InitPackageLifeCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
                     case <- killSigC:
                 }
 
-                // kill package
-                err = project.Kill(context.TODO(), "SIGINT", []string{}...)
+                // Down = stop + rm : 'stop' gives you a grace period and 'rm' delete remaing container
+                err = project.Down(context.TODO(),
+                    options.Down{
+                        // Remove data volumes
+                        RemoveVolume:  false,
+                        // type may be one of: 'all' to remove all images, or 'local' to remove only images that don't have an custom name set by the `image` field"
+                        //RemoveImages:,
+                        // Remove containers for services not defined in the Compose file
+                        RemoveOrphans: true,
+                    },
+                    []string{}...)
                 if err != nil {
                     log.Error(err.Error())
                     //return feedError(feeder, killPath, fbPackageKill, errors.WithMessage(err, "unable to stop package"))
                 }
 
-                // delete package
-                err = project.Delete(context.Background(), options.Delete{}, []string{}...)
-                if err != nil {
-                    return feedError(feeder, killPath, fbPackageKill, pkgID, errors.WithMessage(err, "unable to remove package residue"))
-                }
-                // delete container and network
-                // 2-a. clean up any previous residue
+                // 2-a. clean up last container, network, volume
                 for _, node := range nlist {
                     if ccli, cerr := dockertool.NewContainerClient(fmt.Sprintf("tcp://%s:%s", node, defaults.DefaultSecureDockerPort), "1.24");
                         cerr != nil {
-                        log.Error(errors.WithMessage(err, "unable to clean residue from the last run"))
-                        // we're to pass unreacheable node.
-                        // return feedError(feeder, rpath, fbPackageStartup, pkgID, errors.WithMessage(err, "unable to clean residue from the last run"))
+                        log.Error(errors.WithMessage(err, "[PACKAGE] unable to clean residue from the last run"))
                         continue
                     } else {
                         if err := dockertool.CleanupContainer(ccli); err != nil {
-                            log.Errorf("container cleanup error %v", err.Error())
+                            log.Errorf("[PACKAGE] %v container cleanup error %v", node, err.Error())
+                        }
+                        if err := dockertool.CleanupVolume(ccli); err != nil {
+                            log.Errorf("[PACKAGE] %v volume cleanup error %v", node, err.Error())
                         }
                         if err := dockertool.CleanupNetwork(ccli); err != nil {
-                            log.Errorf("network cleanup error %v", err.Error())
+                            log.Errorf("[PACKAGE] %v network cleanup error %v", node, err.Error())
                         }
                         ccli.Close()
                     }

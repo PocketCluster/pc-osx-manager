@@ -10,7 +10,6 @@
 
 @interface UserCheckVC : BaseSetupVC
 @property (nonatomic, strong) IBOutlet NSView *pannel;
-@property (nonatomic, weak) IBOutlet NSTextField *fieldEmail;
 @property (nonatomic, weak) IBOutlet NSTextField *fieldCode;
 @property (nonatomic, weak) IBOutlet NSButton *btnCheck;
 @property (nonatomic, weak) IBOutlet NSButton *btnCancel;

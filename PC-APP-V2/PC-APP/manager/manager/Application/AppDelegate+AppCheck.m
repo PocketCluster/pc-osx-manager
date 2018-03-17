@@ -7,6 +7,7 @@
 //
 
 #include "pc-core.h"
+#import "PCConstants.h"
 #import "PCRouter.h"
 #import "ShowAlert.h"
 #import "StatusCache.h"
@@ -38,8 +39,6 @@
      onPath:@(RPATH_NETWORK_INIT)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         Log(@"%@ %@", path, response);
-
          BOOL isNetworkReady = [[response valueForKeyPath:@"sys-network-init.status"] boolValue];
          if (isNetworkReady) {
              [PCRouter routeRequestGet:RPATH_SYSTEM_READINESS];
@@ -57,8 +56,6 @@
      addGetRequest:self
      onPath:@(RPATH_SYSTEM_READINESS)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-
-         Log(@"%@ %@", path, response);
 
          BOOL isSystemReady = [[response valueForKeyPath:@"syscheck.status"] boolValue];
          [belf didAppCheckSystemReadiness:isSystemReady];
@@ -80,8 +77,6 @@
      onPath:@(RPATH_APP_EXPIRED)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         Log(@"%@ %@", path, response);
-         
          BOOL isAppExpired = [[response valueForKeyPath:@"expired.status"] boolValue];
          [belf didAppCheckAppExpiration:isAppExpired];
 
@@ -108,8 +103,6 @@
      onPath:@(RPATH_SYSTEM_IS_FIRST_RUN)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
 
-         Log(@"%@ %@", path, response);
-
          // show agreement
          BOOL isFirstRun = [[response valueForKeyPath:@"firsttime.status"] boolValue];
          [belf didAppCheckIsFirstRun:isFirstRun];
@@ -123,9 +116,10 @@
          } else {
              [belf activeWindowByClassName:@"IntroWC" withResponder:nil];
 
+             NSString *invitation = [[NSUserDefaults standardUserDefaults] stringForKey:kAppCheckInvitationCode];
              [PCRouter
               routeRequestPost:RPATH_USER_AUTHED
-              withRequestBody:@{@"email":@"testemail", @"code":@"testcode"}];
+              withRequestBody:@{@"invitation":invitation}];
          }
      }];
 
@@ -134,8 +128,6 @@
      addPostRequest:self
      onPath:@(RPATH_USER_AUTHED)
      withHandler:^(NSString *method, NSString *path, NSDictionary *response) {
-
-         Log(@"%@ %@", path, response);
 
          BOOL isUserAuthed = [[response valueForKeyPath:@"user-auth.status"] boolValue];
          [belf didAppCheckUserAuthed:isUserAuthed];
@@ -147,8 +139,16 @@
              // set the app ready whenever service gets started
              [[StatusCache SharedStatusCache] setAppReady:YES];
 
+             // if this is the first time run, we should remove old settings, and save invitation code
+             if ([[StatusCache SharedStatusCache] isFirstRun]) {
+                 NSString *invitation = [response valueForKeyPath:@"user-auth.invitation"];
+                 [[NSUserDefaults standardUserDefaults] removePersistentDomainForName:[[NSBundle mainBundle] bundleIdentifier]];
+                 [[NSUserDefaults standardUserDefaults] setObject:invitation forKey:kAppCheckInvitationCode];
+                 [[NSUserDefaults standardUserDefaults] synchronize];
+             }
+
              // start basic service
-             // OpsCmdBaseServiceStart();
+             OpsCmdBaseServiceStart();
 
          } else {
              if ([[StatusCache SharedStatusCache] isFirstRun]) {

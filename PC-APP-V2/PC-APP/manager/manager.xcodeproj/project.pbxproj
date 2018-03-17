@@ -44,7 +44,6 @@
 		046A361D1BD78AB8004E0946 /* NSString+Contain.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A35FE1BD78AB8004E0946 /* NSString+Contain.m */; };
 		046A36201BD78AB8004E0946 /* MSWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36011BD78AB8004E0946 /* MSWeakTimer.m */; };
 		046A36231BD78AB8004E0946 /* timeutil.m in Sources */ = {isa = PBXBuildFile; fileRef = 046A36041BD78AB8004E0946 /* timeutil.m */; };
-		046A36451BD79343004E0946 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36441BD79343004E0946 /* WebKit.framework */; };
 		046A36461BD7934D004E0946 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A363F1BD791F3004E0946 /* Security.framework */; };
 		046A36481BD79359004E0946 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 046A36471BD79359004E0946 /* Cocoa.framework */; };
 		046D31041F3D310C0081CC3E /* PCPrefWC.m in Sources */ = {isa = PBXBuildFile; fileRef = 046D31021F3D310C0081CC3E /* PCPrefWC.m */; };
@@ -59,7 +58,6 @@
 		0486780F1BCF5FE20071594B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0486780E1BCF5FE20071594B /* Assets.xcassets */; };
 		048678121BCF5FE20071594B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 048678101BCF5FE20071594B /* MainMenu.xib */; };
 		048804661FB2EE3100F4EA05 /* AppDelegate+Shutdown.m in Sources */ = {isa = PBXBuildFile; fileRef = 048804651FB2EE3100F4EA05 /* AppDelegate+Shutdown.m */; };
-		0496AAD71FBADF910019F24E /* NSString+EmailForm.m in Sources */ = {isa = PBXBuildFile; fileRef = 0496AAD61FBADF910019F24E /* NSString+EmailForm.m */; };
 		0499E6911BF8DDDD007C6D92 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */; };
 		04A408B41FBFD1E000CBF7B9 /* BFPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 04A408B31FBFD1E000CBF7B9 /* BFPageControl.m */; };
 		04AD71C61E9B749A00DB6AE9 /* VersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD71C41E9B749A00DB6AE9 /* VersionComparison.m */; };
@@ -230,8 +228,6 @@
 		048678291BCF5FE20071594B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		048804641FB2EE3100F4EA05 /* AppDelegate+Shutdown.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+Shutdown.h"; sourceTree = "<group>"; };
 		048804651FB2EE3100F4EA05 /* AppDelegate+Shutdown.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+Shutdown.m"; sourceTree = "<group>"; };
-		0496AAD51FBADF910019F24E /* NSString+EmailForm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+EmailForm.h"; sourceTree = "<group>"; };
-		0496AAD61FBADF910019F24E /* NSString+EmailForm.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+EmailForm.m"; sourceTree = "<group>"; };
 		0499E6901BF8DDDD007C6D92 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		04A408B21FBFD1E000CBF7B9 /* BFPageControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BFPageControl.h; sourceTree = "<group>"; };
 		04A408B31FBFD1E000CBF7B9 /* BFPageControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BFPageControl.m; sourceTree = "<group>"; };
@@ -323,7 +319,6 @@
 				04F705701BD7A9B700829651 /* IOKit.framework in Frameworks */,
 				046A36481BD79359004E0946 /* Cocoa.framework in Frameworks */,
 				046A36461BD7934D004E0946 /* Security.framework in Frameworks */,
-				046A36451BD79343004E0946 /* WebKit.framework in Frameworks */,
 				89580BEF40BDD88F96DECDEE /* Pods_PocketCluster.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -568,7 +563,6 @@
 		046A35F31BD78AB8004E0946 /* String */ = {
 			isa = PBXGroup;
 			children = (
-				0496AAD41FBADF6D0019F24E /* EmailForm */,
 				046A35F41BD78AB8004E0946 /* NullStringCheck */,
 				046A35F61BD78AB8004E0946 /* RandomString */,
 				046A35F91BD78AB8004E0946 /* StringEncoding */,
@@ -747,15 +741,6 @@
 				048678291BCF5FE20071594B /* Info.plist */,
 			);
 			path = managerUITests;
-			sourceTree = "<group>";
-		};
-		0496AAD41FBADF6D0019F24E /* EmailForm */ = {
-			isa = PBXGroup;
-			children = (
-				0496AAD51FBADF910019F24E /* NSString+EmailForm.h */,
-				0496AAD61FBADF910019F24E /* NSString+EmailForm.m */,
-			);
-			path = EmailForm;
 			sourceTree = "<group>";
 		};
 		04A408B11FBFD1E000CBF7B9 /* BFPageControl */ = {
@@ -990,7 +975,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0710;
-				LastUpgradeCheck = 0700;
+				LastUpgradeCheck = 0920;
 				ORGANIZATIONNAME = io.pocketcluster;
 				TargetAttributes = {
 					048678041BCF5FE20071594B = {
@@ -1203,7 +1188,6 @@
 				046D31241F3D346B0081CC3E /* PCSetup1VC.m in Sources */,
 				04BD309E1F3E4B2D00509B21 /* PCSetup2VC.m in Sources */,
 				046D310E1F3D32440081CC3E /* PCPkgInstallWC.m in Sources */,
-				0496AAD71FBADF910019F24E /* NSString+EmailForm.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1256,13 +1240,21 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "Mac Developer: Sung Taek Kim (DL54GSK8VG)";
@@ -1301,13 +1293,21 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "Developer ID Application: Colorful Glue (NWE35T42PK)";
@@ -1336,12 +1336,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 2F1A9A9FFD26979D210B6933 /* Pods-PocketCluster.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Mac Developer: Sung Taek Kim (DL54GSK8VG)";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
-				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				EXCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES = "*.nib *.lproj *.framework *.gch *.xcode* *.xcassets (*) .DS_Store CVS .svn .git .hg *.pbproj *.pbxproj XCODE";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1353,7 +1353,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/manager",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
@@ -1373,12 +1373,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 8528D605609CDB0AD8DA7C48 /* Pods-PocketCluster.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Developer ID Application: Colorful Glue (NWE35T42PK)";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
-				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				EXCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES = "*.nib *.lproj *.framework *.gch *.xcode* *.xcassets (*) .DS_Store CVS .svn .git .hg *.pbproj *.pbxproj XCODE";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1390,7 +1390,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/manager",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",

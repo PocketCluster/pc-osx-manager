@@ -56,6 +56,6 @@
 	<key>SUAutomaticallyUpdate</key>
 	<true/>
 	<key>PCBundleExpirationString</key>
-	<string>2018/01/01 00:00:00 -0000</string>
+	<string>2018/12/31 00:00:00 -0000</string>
 </dict>
 </plist>

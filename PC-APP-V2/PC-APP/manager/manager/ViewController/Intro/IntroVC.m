@@ -9,45 +9,17 @@
 #import "IntroVC.h"
 
 @implementation IntroVC
-@synthesize webView;
+@synthesize versionLabel;
 @synthesize progressLabel;
 @synthesize circularProgress;
-
-- (void)finishConstruction {
-    [super finishConstruction];
-    [self setTitle:@"PocketCluster - v0.1.4 Early Evaulation Version"];
-}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    NSString *str = @"<div style=\"text-align:center;font-family:'Helvetica Neue';font-weight:100;font-size:38px;width:100%;\">PocketCluster</div><div style=\"text-align:center;font-family:Arial;font-size:13px;width:100%;\">Version {VERSION} - Early Evaluation</div>";
-    str = [str stringByReplacingOccurrencesOfString:@"{VERSION}" withString:[[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleShortVersionString"]];
-    str = [str stringByReplacingOccurrencesOfString:@"\n" withString:@"<br>"];
-
-    [self.webView setDrawsBackground:NO];
-    [self.webView.mainFrame loadHTMLString:str baseURL:nil];
+    NSString *vStr = [NSString stringWithFormat:@"Version %@ - Early Evaluation",[[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleShortVersionString"]];
+    [self.versionLabel setStringValue:vStr];
     [self.circularProgress startAnimation:self];
     [self.circularProgress displayIfNeeded];
-}
-
-#pragma mark - WebView Delegate
-- (void)webView:(WebView*)webView decidePolicyForNavigationAction:(NSDictionary*)actionInformation request:(NSURLRequest*)request frame:(WebFrame*)frame decisionListener:(id<WebPolicyDecisionListener>)listener {
-    NSString *host = [[request URL] host];
-    if(host) {
-        [[NSWorkspace sharedWorkspace] openURL:[request URL]];
-    } else {
-        [listener use];
-    }
-}
-
-- (void)use {
-}
-
-- (void)download {
-}
-
-- (void)ignore {
 }
 
 @end

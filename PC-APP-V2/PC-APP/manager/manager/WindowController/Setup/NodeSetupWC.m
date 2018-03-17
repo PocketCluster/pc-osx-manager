@@ -83,7 +83,10 @@
 }
 
 -(void)shouldControlRevertFrom:(NSObject<StageStep> *)aStep withParam:(NSDictionary *)aParam {
-    
+    [self close];
+
+#if 0
+    // whenever cancel is clicked, the setup process should be closed
     NSViewController<StageStep> *prevStep = (NSViewController<StageStep> *)aStep;
     NSUInteger prevIndex = [self.viewControllers indexOfObject:prevStep];
     NSUInteger nextIndex = 0;
@@ -91,7 +94,7 @@
     if (1 <= prevIndex) {
         nextIndex = prevIndex - 1;
     } else {
-        Log(@"end of control");
+        [self close];
         return;
     }
 
@@ -109,6 +112,7 @@
 
     // notify prev viewController
     [[self.viewControllers objectAtIndex:prevIndex] didControl:self revertedFrom:aStep withResult:nil];
+#endif
 }
 
 #pragma mark - Monitoring Package

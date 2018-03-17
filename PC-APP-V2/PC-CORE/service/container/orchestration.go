@@ -99,14 +99,14 @@ func InitOrchstService(appLife service.ServiceSupervisor) error {
         operation.ServiceOrchstServer,
         func() error {
             var (
-                beaconMan beacon.BeaconManger = nil
-                failtimout = time.NewTicker(time.Minute)
+                beaconMan   beacon.BeaconManger = nil
+                failtimeout *time.Ticker        = time.NewTicker(time.Minute)
             )
 
             // wait becon agent
             select {
-                case <- failtimout.C: {
-                    failtimout.Stop()
+                case <- failtimeout.C: {
+                    failtimeout.Stop()
                     return errors.Errorf("[ORCHST] unable to recieve beacon manager")
                 }
                 case be := <- beaconManC: {
@@ -119,7 +119,7 @@ func InitOrchstService(appLife service.ServiceSupervisor) error {
                 }
             }
 
-            failtimout.Stop()
+            failtimeout.Stop()
             log.Info("[ORCHST] beacon manager received...")
 
             ctx := context.SharedHostContext()

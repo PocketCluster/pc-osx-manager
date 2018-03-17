@@ -188,8 +188,8 @@ func (v *goVoxGlue) APIVersion() uint {
 }
 
 func (v *goVoxGlue) CheckVBoxSuitability() error {
-    if v.AppVersion() < 5001022 || v.APIVersion() < 5001 {
-        return errors.Errorf("Please install the latest VirtualBox. v5.1.22 or greater is required.")
+    if v.AppVersion() < 5002006 || v.APIVersion() < 5002 {
+        return errors.Errorf("Please install the latest VirtualBox. v5.2.6 or greater is required.")
     }
     return nil
 }

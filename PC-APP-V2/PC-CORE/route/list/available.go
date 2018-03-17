@@ -2,9 +2,11 @@ package list
 
 import (
     "encoding/json"
+    "fmt"
 
     log "github.com/Sirupsen/logrus"
     "github.com/pkg/errors"
+    "github.com/stkim1/pc-core/defaults"
     "github.com/stkim1/pc-core/model"
     "github.com/stkim1/pc-core/route"
     "github.com/stkim1/pc-core/route/routepath"
@@ -33,10 +35,10 @@ func InitRouthPathListAvailable(appLife route.Router, feeder route.ResponseFeede
                 return errors.WithStack(irr)
             }
 
-            pkgList = []map[string]interface{}{}
-            pkgs    = []*model.Package{}
+            pkgList []map[string]interface{} = nil
+            pkgs    []*model.Package = nil
         )
-        req, err := apireq.NewRequest("https://api.pocketcluster.io/service/v014/package/list", false)
+        req, err := apireq.NewRequest(fmt.Sprintf("%s/service/v014/package/list", defaults.PocketClusterAPIHost), false)
         if err != nil {
             return feedError(errors.WithMessage(err, "Unable to access package list"))
         }

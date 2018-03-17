@@ -34,7 +34,7 @@
     TransitionWC *twc =
         [[TransitionWC alloc]
          initWithPackageExecution:
-         [NSString stringWithFormat:@"Staring %@ ...", pkg.packageDescription]];
+         [NSString stringWithFormat:@"Starting %@", pkg.packageDescription]];
 
     [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
     [twc showWindow:self];

@@ -225,6 +225,6 @@
 }
 
 - (void) openWebConsole:(NSMenuItem *)mPackage {
-    Log(@"openWebConsole : %@", mPackage.representedObject);
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:(NSString *)mPackage.representedObject]];
 }
 @end

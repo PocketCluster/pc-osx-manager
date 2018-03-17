@@ -1,10 +1,10 @@
-/* $Revision: 91752 $ */
+/* $Id: VBoxCAPIGlue.h.in 118839 2017-10-28 15:14:05Z bird $ */
 /** @file VBoxCAPIGlue.h
  * Glue for dynamically linking with VBoxCAPI.
  */
 
 /*
- * Copyright (C) 2008-2014 Oracle Corporation
+ * Copyright (C) 2008-2017 Oracle Corporation
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -21,7 +21,7 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
  * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
@@ -33,7 +33,7 @@
 
 #undef VBOX_WITH_GLUE
 #define VBOX_WITH_GLUE
-#include "VBoxCAPI_v5_1.h"
+#include "VBoxCAPI_v5_2.h"
 
 #ifdef __cplusplus
 extern "C" {

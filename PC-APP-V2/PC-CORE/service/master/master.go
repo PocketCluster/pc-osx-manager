@@ -74,6 +74,7 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
         nodeC   = make(chan service.Event)
         statC   = make(chan service.Event)
         bManC   = make(chan service.Event)
+        cAddrC  = make(chan service.Event)
     )
     appLife.RegisterServiceWithFuncs(
         operation.ServiceBeaconMaster,
@@ -95,19 +96,19 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                     }
                     return true
                 }
-                failtimout        *time.Ticker = time.NewTicker(time.Minute)
-                timer             *time.Ticker = time.NewTicker(time.Second)
-                beaconMan  beacon.BeaconManger = nil
-                vmctrl     masterctrl.VBoxMasterControl
-                err        error               = nil
+                failtimeout *time.Ticker        = time.NewTicker(time.Minute)
+                timer       *time.Ticker        = time.NewTicker(time.Second)
+                beaconMan   beacon.BeaconManger = nil
+                vmctrl      masterctrl.VBoxMasterControl
+                err         error               = nil
             )
 
             // wait pre-requisites to start
             for {
                 select {
                     // fail to start service after one minute
-                    case <- failtimout.C: {
-                        failtimout.Stop()
+                    case <- failtimeout.C: {
+                        failtimeout.Stop()
                         timer.Stop()
                         beaconRoute.terminate()
                         log.Errorf("[AGENT] fail to start agent service")
@@ -144,8 +145,8 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
             }
 
             buildagent:
-            // stop failtimout
-            failtimout.Stop()
+            // stop failtimeout
+            failtimeout.Stop()
             // beacon manager
             beaconMan, err = beacon.NewBeaconManagerWithFunc(
                 clusterID,
@@ -252,6 +253,19 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
                             Name:ivent.IventLiveBeaconManagerRslt,
                             Payload:beaconMan})
                     }
+                    case <- cAddrC: {
+                        if addr, err := beaconMan.AddressForName(model.CoreNodeName); err != nil {
+                            appLife.BroadcastEvent(service.Event{
+                                Name:    ivent.IventReportCoreAddrResult,
+                                Payload: err,
+                            })
+                        } else {
+                            appLife.BroadcastEvent(service.Event{
+                                Name:    ivent.IventReportCoreAddrResult,
+                                Payload: addr,
+                            })
+                        }
+                    }
                 }
             }
             return nil
@@ -268,7 +282,8 @@ func InitMasterBeaconService(appLife service.ServiceSupervisor, clusterID string
 
         // request
         service.BindEventWithService(ivent.IventReportLiveNodesRequest,    nodeC),
-        service.BindEventWithService(ivent.IventLiveBeaconManagerReq,      bManC))
+        service.BindEventWithService(ivent.IventLiveBeaconManagerReq,      bManC),
+        service.BindEventWithService(ivent.IventReportCoreAddrRequest,     cAddrC))
 
     return nil
 }

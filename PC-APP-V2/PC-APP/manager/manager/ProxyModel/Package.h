@@ -6,6 +6,11 @@
 //  Copyright © 2015 io.pocketcluster. All rights reserved.
 //
 
+@interface Console : NSObject
+@property (nonatomic, readonly) NSString *address;
+@property (nonatomic, readonly) NSString *name;
+@end
+
 /*
  * package process status is self-explanatory. -ing state means it's in transition
  * between ui command -> package is starting or stopping
@@ -25,6 +30,7 @@ typedef enum execState {
 @property (nonatomic, readonly) NSString *packageDescription;
 @property (nonatomic, readonly) NSString *packageID;
 @property (nonatomic, readonly) NSString *menuName;
+@property (nonatomic, readonly) NSArray<Console *>* consoles;
 @property (nonatomic, readonly) ExecState execState;
 
 // all three below are in GB

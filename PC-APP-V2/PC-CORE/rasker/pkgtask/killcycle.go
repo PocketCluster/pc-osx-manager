@@ -28,15 +28,6 @@ func InitPackageKillCycle(appLife rasker.RouteTasker, feeder route.ResponseFeede
 
         // broadcast kill signal
         appLife.BroadcastEvent(service.Event{Name:fmt.Sprintf("%s%s", iventPackageKillPrefix, pkgID)})
-        data, err := json.Marshal(route.ReponseMessage{
-            "package-kill": {
-                "status": true,
-                "pkg-id": pkgID,
-            },
-        })
-        if err != nil {
-            return errors.WithStack(err)
-        }
-        return feeder.FeedResponseForPost(rpath, string(data))
+        return nil
     })
 }

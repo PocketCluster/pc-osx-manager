@@ -222,6 +222,9 @@ func (s *srvcSupervisor) getWaiters(eventName string) []*waiter {
 
 func (s *srvcSupervisor) notifyWaiter(w *waiter, evt Event) {
     select {
+        // when the supervisor is stopped, no notification will be made
+        case <- s.stoppedC:
+        // otherwise deliver event
         case w.eventC <- evt:
     }
 }
@@ -238,7 +241,7 @@ func (s *srvcSupervisor) fanOut() {
             case event := <-s.eventsC: {
                 waiters := s.getWaiters(event.Name)
                 for _, waiter := range waiters {
-                    s.notifyWaiter(waiter, event)
+                    go s.notifyWaiter(waiter, event)
                 }
             }
         }

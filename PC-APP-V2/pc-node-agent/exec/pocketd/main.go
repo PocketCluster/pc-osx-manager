@@ -20,7 +20,6 @@ const (
     // modes list
     modeDhcpAgent string = "dhcpagent"
     modeScpAgent  string = "scp"
-    modePartition string = "fdisk"
     modeVerCheck  string = "--version"
 )
 
@@ -42,9 +41,7 @@ func initLogger() {
 }
 
 func main() {
-    // TODO activate syslog hook b4 release
-    //initLogger()
-    log.SetLevel(log.DebugLevel)
+    initLogger()
 
     // pocket agent daemon
     if len(os.Args) == 1 {
@@ -89,12 +86,6 @@ func main() {
                     log.Error(err.Error())
                 }
             }
-
-            // sfdisk
-            case modePartition: {
-
-            }
-
             // and rest of stuff
             default: {
                 os.Exit(2)

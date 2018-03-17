@@ -208,12 +208,14 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
             }                           `yaml:"manifests,omitempty"`
         } {}
 
+        /* (2018/01/14) this is omitted due to distribution downgraded to d22e09a6686c32be8c17b684b639da4b90efe320
         // TODO : Policy configures registry policy options.
         policy = struct {
             Repository struct {
                 Classes []string        `yaml:"classes"`
             }                           `yaml:"repository,omitempty"`
         } {}
+        */
     )
 
     regConfig := &configuration.Configuration {
@@ -231,7 +233,7 @@ func NewPocketRegistryConfig(enableLog bool, rootDir string, tlsCert, tlsKey []b
         Proxy:          configuration.Proxy{},
         Compatibility:  compatibility,
         Validation:     validation,
-        Policy:         policy,
+        // Policy:         policy,
     }
 
 

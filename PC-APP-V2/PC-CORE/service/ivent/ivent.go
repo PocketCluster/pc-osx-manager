@@ -45,9 +45,17 @@ const (
     IventReportLiveNodesResult   string = "ivent.report.live.nodes.result"
 
 
+    // for package webconsole ip address
+    IventReportCoreAddrRequest   string = "ivent.report.core.addr.request"
+    IventReportCoreAddrResult    string = "ivent.report.core.addr.result"
+
     // registration manager ask beacon mananger instance IventLiveBeaconManagerReq -> IventLiveBeaconManagerRlt
     IventLiveBeaconManagerReq    string = "ivent.live.beacon.manager.request"
     IventLiveBeaconManagerRslt   string = "ivent.live.beacon.manager.result"
+
+
+    // setup users and vbox core
+    IventSetupUsersAndVboxCore   string = "ivent.setup.users.and.vboxcore"
 )
 
 // this is to broadcast masterctrl object w/ listener. It's shared with BeaconAgent + VBoxController
